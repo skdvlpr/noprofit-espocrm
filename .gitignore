@@ -1,0 +1,60 @@
+# EspoCRM runtime and instance data
+/data/config.php
+/data/config-internal.php
+/data/config-override.php
+/data/config-override-internal.php
+/data/config-internal-override.php
+/data/state.php
+/data/cache/*
+/data/logs/*
+/data/tmp/*
+/data/upload/*
+/data/preferences/*
+/data/.backup/*
+!/data/.data
+
+# EspoCRM installer state
+/install/config.php
+
+# Build/development artifacts
+/build/
+/node_modules/
+/npm-debug.log
+/composer.phar
+/.phpunit.result.cache
+/test.php
+/main.html
+
+# Local DDEV/generated files
+.ddev/.dbimageBuild/
+.ddev/.homeadditions/
+.ddev/.webimageBuild/
+.ddev/.ddev-docker-compose-base.yaml
+.ddev/.ddev-docker-compose-full.yaml
+.ddev/db_snapshots/
+.ddev/config.local.yaml
+.ddev/config.*.local.yaml
+.ddev/.importdb*
+.ddev/.*downloads
+.ddev/traefik/certs/
+.ddev/traefik/config/
+
+# Local Codex/agent workspace files
+.agents/
+.codex/
+
+# Environment, dumps, logs
+.env
+.env.*
+*.sql
+*.sqlite
+*.bak
+*.backup
+*.log
+*.tmp
+
+# IDEs and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

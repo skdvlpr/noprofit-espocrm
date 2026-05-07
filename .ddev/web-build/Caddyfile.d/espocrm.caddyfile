@@ -1,0 +1,26 @@
+# EspoCRM Caddy configuration
+
+# API v1
+@api {
+    path /api/v1/*
+    not file {path}
+}
+rewrite @api /api/v1/index.php
+
+# Portal
+@portal {
+    path /portal/*
+    not file {path}
+}
+rewrite @portal /portal/index.php
+
+# Portal API
+@portalApi {
+    path /api/v1/portal-access/*
+    not file {path}
+}
+rewrite @portalApi /api/v1/portal-access/index.php
+
+# Deny access to sensitive files
+@forbidden path_regexp forbidden /(\.htaccess|\.git|\.env)
+respond @forbidden 403
