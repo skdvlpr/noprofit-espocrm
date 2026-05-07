@@ -40,6 +40,7 @@
 .ddev/traefik/config/
 
 # Local Codex/agent workspace files
+/AGENTS.md
 .agents/
 .codex/
 
