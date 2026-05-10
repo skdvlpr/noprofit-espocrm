@@ -1,0 +1,18 @@
+{
+    "fields": {
+        "status": "Status",
+        "driveFileId": "Drive File ID"
+    },
+    "options": {
+        "status": {
+            "Bozza": "Draft",
+            "Attivo": "Active",
+            "Inattivo": "Inactive",
+            "Scaduto": "Expired",
+            "Archiviato": "Archived"
+        }
+    },
+    "tooltips": {
+        "driveFileId": "Google Drive file ID. Populated by the Drive integration in Phase 3."
+    }
+}

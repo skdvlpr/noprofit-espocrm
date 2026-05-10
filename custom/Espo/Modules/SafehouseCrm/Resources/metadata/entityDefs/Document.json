@@ -1,4 +1,32 @@
 {
+    "fields": {
+        "status": {
+            "type": "enum",
+            "options": ["Bozza", "Attivo", "Inattivo", "Scaduto", "Archiviato"],
+            "style": {
+                "Bozza": "default",
+                "Attivo": "success",
+                "Inattivo": "warning",
+                "Scaduto": "danger",
+                "Archiviato": "default"
+            },
+            "default": "Bozza",
+            "activeOptions": ["Attivo"]
+        },
+        "driveFileId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true,
+            "trim": true,
+            "tooltip": "Google Drive file ID. Populated by the Drive integration in Phase 3.",
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "layoutFiltersDisabled": true,
+            "importDisabled": true,
+            "exportDisabled": true
+        }
+    },
     "links": {
         "volontariDipendenti": {
             "type": "hasMany",
