@@ -36,8 +36,18 @@ foreach ($setup->provisionRoles() as $name => $status) {
     echo "  - $name: $status\n";
 }
 
+echo "\nProvisioning teams...\n";
+foreach ($setup->provisionTeams() as $name => $status) {
+    echo "  - $name: $status\n";
+}
+
 echo "\nProvisioning test users (password: " . RoleSetup::TEST_PASSWORD . ")...\n";
 foreach ($setup->provisionTestUsers() as $userName => $status) {
+    echo "  - $userName: $status\n";
+}
+
+echo "\nProvisioning team memberships for test users...\n";
+foreach ($setup->provisionTeamMemberships() as $userName => $status) {
     echo "  - $userName: $status\n";
 }
 

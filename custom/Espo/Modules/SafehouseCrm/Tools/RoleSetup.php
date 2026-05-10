@@ -35,6 +35,31 @@ class RoleSetup
     public const ROLE_VOLONTARIO = 'Volontario';
     public const ROLE_ASSOCIATO  = 'Associato';
 
+    public const TEAM_AMMINISTRAZIONE = 'Amministrazione';
+
+    /**
+     * Map team-name => spec.
+     * - `roles`: list of role names whose members should inherit access via this team
+     *   (Espo links roles to teams; the team's effective role set is the union of these)
+     *
+     * @var array<string, array{description: string, roles: string[]}>
+     */
+    public const TEAMS = [
+        self::TEAM_AMMINISTRAZIONE => [
+            'description' => 'Personale amministrativo Safehouse: visibilità condivisa dei record amministrativi.',
+            'roles'       => [self::ROLE_DIPENDENTE],
+        ],
+    ];
+
+    /**
+     * Map test userName => list of team names they should belong to.
+     *
+     * @var array<string, string[]>
+     */
+    public const TEAM_MEMBERSHIPS = [
+        'test_dipendente' => [self::TEAM_AMMINISTRAZIONE],
+    ];
+
     /**
      * Test users created when {@see provisionTestUsers()} is called.
      * Password is the same for all three for convenience in dev.
@@ -65,6 +90,112 @@ class RoleSetup
         private EntityManager $entityManager,
         private PasswordHash $passwordHash
     ) {}
+
+    /**
+     * Create the canonical teams (currently just `Amministrazione`) and ensure
+     * each team is linked to its specified default roles. Idempotent.
+     *
+     * @return array<string, string> map team-name => 'created' | 'updated' | 'unchanged'
+     */
+    public function provisionTeams(): array
+    {
+        $em = $this->entityManager;
+        $report = [];
+
+        foreach (self::TEAMS as $name => $spec) {
+            /** @var ?Team $team */
+            $team = $em->getRDBRepositoryByClass(Team::class)
+                ->where(['name' => $name])
+                ->findOne();
+
+            $isNew = $team === null;
+            $changed = false;
+
+            if ($isNew) {
+                $team = $em->getRDBRepositoryByClass(Team::class)->getNew();
+                $team->set([
+                    'name'        => $name,
+                    'description' => $spec['description'],
+                ]);
+                $em->saveEntity($team);
+                $changed = true;
+            } elseif ($team->get('description') !== $spec['description']) {
+                $team->set('description', $spec['description']);
+                $em->saveEntity($team);
+                $changed = true;
+            }
+
+            $rolesRelation = $em->getRDBRepository('Team')->getRelation($team, 'roles');
+            foreach ($spec['roles'] as $roleName) {
+                /** @var ?Role $role */
+                $role = $em->getRDBRepositoryByClass(Role::class)
+                    ->where(['name' => $roleName])
+                    ->findOne();
+                if (!$role) {
+                    continue;
+                }
+                if (!$rolesRelation->isRelated($role)) {
+                    $rolesRelation->relate($role);
+                    $changed = true;
+                }
+            }
+
+            if ($isNew) {
+                $report[$name] = 'created';
+            } elseif ($changed) {
+                $report[$name] = 'updated';
+            } else {
+                $report[$name] = 'unchanged';
+            }
+        }
+
+        return $report;
+    }
+
+    /**
+     * Add test users to the teams declared in {@see TEAM_MEMBERSHIPS}.
+     * Idempotent.
+     *
+     * @return array<string, string>
+     */
+    public function provisionTeamMemberships(): array
+    {
+        $em = $this->entityManager;
+        $report = [];
+
+        foreach (self::TEAM_MEMBERSHIPS as $userName => $teams) {
+            /** @var ?User $user */
+            $user = $em->getRDBRepositoryByClass(User::class)
+                ->where(['userName' => $userName])
+                ->findOne();
+            if (!$user) {
+                $report[$userName] = 'skipped (user not found)';
+                continue;
+            }
+
+            $userTeams = $em->getRDBRepository('User')->getRelation($user, 'teams');
+            $added = [];
+            foreach ($teams as $teamName) {
+                /** @var ?Team $team */
+                $team = $em->getRDBRepositoryByClass(Team::class)
+                    ->where(['name' => $teamName])
+                    ->findOne();
+                if (!$team) {
+                    continue;
+                }
+                if (!$userTeams->isRelated($team)) {
+                    $userTeams->relate($team);
+                    $added[] = $teamName;
+                }
+            }
+
+            $report[$userName] = $added === []
+                ? 'unchanged'
+                : 'added to: ' . implode(', ', $added);
+        }
+
+        return $report;
+    }
 
     /**
      * Create or update all four canonical roles.
@@ -148,7 +279,10 @@ class RoleSetup
                 ->findOne();
 
             if ($existing) {
-                $report[$userName] = 'unchanged';
+                $linked = $this->ensureTeamMembership($existing, $userName);
+                $report[$userName] = $linked
+                    ? 'updated (team linked)'
+                    : 'unchanged';
                 continue;
             }
 
@@ -157,6 +291,8 @@ class RoleSetup
                 'assignedUserId' => $user->getId(),
             ]));
             $em->saveEntity($entity);
+
+            $this->ensureTeamMembership($entity, $userName);
 
             $report[$userName] = sprintf('created (%s id=%s)', $spec['entityType'], $entity->getId());
         }
@@ -220,6 +356,39 @@ class RoleSetup
         }
 
         return $report;
+    }
+
+    /**
+     * Link the given domain entity (VolontarioDipendente / Associati) to every
+     * team the corresponding test user is a member of, via the entity's
+     * `teams` linkMultiple field. Idempotent.
+     */
+    private function ensureTeamMembership(\Espo\ORM\Entity $entity, string $userName): bool
+    {
+        $teams = self::TEAM_MEMBERSHIPS[$userName] ?? [];
+        if ($teams === []) {
+            return false;
+        }
+
+        $em = $this->entityManager;
+        $relation = $em->getRDBRepository($entity->getEntityType())->getRelation($entity, 'teams');
+
+        $changed = false;
+        foreach ($teams as $teamName) {
+            /** @var ?Team $team */
+            $team = $em->getRDBRepositoryByClass(Team::class)
+                ->where(['name' => $teamName])
+                ->findOne();
+            if (!$team) {
+                continue;
+            }
+            if (!$relation->isRelated($team)) {
+                $relation->relate($team);
+                $changed = true;
+            }
+        }
+
+        return $changed;
     }
 
     /**

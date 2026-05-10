@@ -62,6 +62,7 @@ class AfterInstall
 
         $roleSetup = $injectableFactory->create(RoleSetup::class);
         $roleSetup->provisionRoles();
+        $roleSetup->provisionTeams();
 
         $container->get('dataManager')->rebuild();
     }
