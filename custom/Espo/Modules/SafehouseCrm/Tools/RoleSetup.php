@@ -4,6 +4,7 @@ namespace Espo\Modules\SafehouseCrm\Tools;
 
 use Espo\Core\Utils\PasswordHash;
 use Espo\Entities\Role;
+use Espo\Entities\Team;
 use Espo\Entities\User;
 use Espo\ORM\EntityManager;
 
