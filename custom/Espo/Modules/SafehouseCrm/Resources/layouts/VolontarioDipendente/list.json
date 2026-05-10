@@ -1,0 +1,21 @@
+[
+    {
+        "name": "nome",
+        "link": true
+    },
+    {
+        "name": "cognome"
+    },
+    {
+        "name": "tipo"
+    },
+    {
+        "name": "dataInizio"
+    },
+    {
+        "name": "oreSettimanali"
+    },
+    {
+        "name": "status"
+    }
+]

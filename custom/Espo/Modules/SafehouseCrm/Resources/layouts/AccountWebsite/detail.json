@@ -1,0 +1,19 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "name"},
+                {"name": "urlLabel"}
+            ],
+            [
+                {"name": "account"},
+                {"name": "isPrimary"}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
+            ]
+        ]
+    }
+]

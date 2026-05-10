@@ -1,0 +1,16 @@
+[
+    {
+        "name": "general",
+        "label": "General",
+        "rows": [
+            [
+                {"name": "name"},
+                {"name": "urlLabel"}
+            ],
+            [
+                {"name": "isPrimary"},
+                {"name": "account"}
+            ]
+        ]
+    }
+]

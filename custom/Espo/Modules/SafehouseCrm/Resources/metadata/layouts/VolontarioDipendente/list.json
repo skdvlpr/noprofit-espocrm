@@ -1,0 +1,23 @@
+[
+    {
+        "name": "name",
+        "width": 30,
+        "link": true
+    },
+    {
+        "name": "tipo",
+        "width": 20
+    },
+    {
+        "name": "email",
+        "width": 25
+    },
+    {
+        "name": "cellulare",
+        "width": 20
+    },
+    {
+        "name": "status",
+        "width": 10
+    }
+]

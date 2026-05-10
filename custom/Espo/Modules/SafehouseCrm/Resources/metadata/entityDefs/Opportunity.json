@@ -1,0 +1,32 @@
+{
+    "fields": {
+        "stage": {
+            "options": [
+                "Preparazione",
+                "Proposta",
+                "Negoziazione",
+                "Chiuso Positivamente",
+                "Chiuso Negativamente"
+            ],
+            "default": "Preparazione",
+            "probabilityMap": {
+                "Preparazione": 10,
+                "Proposta": 50,
+                "Negoziazione": 80,
+                "Chiuso Positivamente": 100,
+                "Chiuso Negativamente": 0
+            },
+            "style": {
+                "Preparazione": "default",
+                "Proposta": "primary",
+                "Negoziazione": "warning",
+                "Chiuso Positivamente": "success",
+                "Chiuso Negativamente": "danger"
+            }
+        },
+        "dataPresentazione": {
+            "type": "date",
+            "audited": true
+        }
+    }
+}

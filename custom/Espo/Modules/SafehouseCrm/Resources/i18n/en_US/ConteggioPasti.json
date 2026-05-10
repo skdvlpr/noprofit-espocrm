@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "ConteggioPasti": "Meal Count",
+        "Create ConteggioPasti": "Create Meal Count"
+    },
+    "fields": {
+        "data": "Date",
+        "giornoSettimana": "Day of Week",
+        "adulti": "Adults",
+        "minori": "Minors",
+        "totalePasti": "Total Meals",
+        "foodUnitPrice": "Food Unit Price",
+        "foodCost": "Food Cost"
+    },
+    "links": {
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By",
+        "assignedUser": "Assigned User",
+        "teams": "Teams"
+    },
+    "tooltips": {
+        "giornoSettimana": "Automatically calculated from the date."
+    }
+}

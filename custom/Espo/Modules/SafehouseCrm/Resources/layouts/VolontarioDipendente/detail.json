@@ -1,0 +1,35 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "nome"},
+                {"name": "cognome"}
+            ],
+            [
+                {"name": "tipo"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "dataNascita"},
+                {"name": "email"}
+            ],
+            [
+                {"name": "cellulare"},
+                {"name": "tipoContratto"}
+            ],
+            [
+                {"name": "dataInizio"},
+                {"name": "dataFine"}
+            ],
+            [
+                {"name": "oreSettimanali"},
+                {"name": "oreMensili"}
+            ],
+            [
+                {"name": "extra", "fullWidth": true}
+            ]
+        ]
+    }
+]

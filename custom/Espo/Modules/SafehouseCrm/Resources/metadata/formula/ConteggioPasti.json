@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (isNew && data == null) { data = datetime\\today(); }; if (isNew && foodUnitPrice == null) { foodUnitPrice = 1.5; }; giornoSettimana = datetime\\format(data, 'EEEE', 'it_IT'); totalePasti = adulti + minori; foodCost = totalePasti * foodUnitPrice; name = string\\concatenate('Pasti ', data);"
+}

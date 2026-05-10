@@ -1,0 +1,9 @@
+{
+    "links": {
+        "volontariDipendenti": {
+            "type": "hasMany",
+            "entity": "VolontarioDipendente",
+            "foreign": "documents"
+        }
+    }
+}

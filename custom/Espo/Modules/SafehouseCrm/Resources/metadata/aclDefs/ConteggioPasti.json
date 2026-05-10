@@ -1,0 +1,9 @@
+{
+    "actionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ]
+}

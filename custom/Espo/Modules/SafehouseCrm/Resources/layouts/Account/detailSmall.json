@@ -1,0 +1,30 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "settore", "fullWidth": true}
+            ],
+            [
+                {"name": "emailAddress", "fullWidth": true}
+            ],
+            [
+                {"name": "phoneNumber", "fullWidth": true}
+            ],
+            [
+                {"name": "billingAddressCity"},
+                {"name": "billingAddressCountry"}
+            ],
+            [
+                {"name": "type"},
+                {"name": "industry"}
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ]
+        ]
+    }
+]

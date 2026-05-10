@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "name = string\\trim(string\\concatenate(nome, ' ', cognome));\n\nif (cf != null) {\n    cf = string\\upperCase(string\\trim(cf));\n}\n\nif (provincia != null) {\n    provincia = string\\upperCase(string\\trim(provincia));\n}\n\nif (dataDimissione != null && dataDimissione <= datetime\\today()) {\n    stato = 'Inattivo';\n} else if (stato == null) {\n    stato = 'Attivo';\n}"
+}

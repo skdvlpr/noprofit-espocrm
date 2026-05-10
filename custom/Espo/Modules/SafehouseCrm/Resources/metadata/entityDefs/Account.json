@@ -1,0 +1,27 @@
+{
+    "fields": {
+        "settore": {
+            "type": "enum",
+            "options": [
+                "",
+                "Terzo Settore",
+                "Assistenti Sociali",
+                "Pubblico"
+            ],
+            "style": {
+                "Terzo Settore": "success",
+                "Assistenti Sociali": "primary",
+                "Pubblico": "info"
+            },
+            "audited": true
+        }
+    },
+    "links": {
+        "websites": {
+            "type": "hasMany",
+            "entity": "AccountWebsite",
+            "foreign": "account",
+            "audited": true
+        }
+    }
+}

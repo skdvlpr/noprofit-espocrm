@@ -1,0 +1,28 @@
+{
+  "labels": {
+    "Create Associati": "Create Member",
+    "Associati": "Members"
+  },
+  "fields": {
+    "name": "Full Name",
+    "stato": "Status",
+    "nome": "First Name",
+    "cognome": "Last Name",
+    "luogoNascita": "Birth Place",
+    "dataNascita": "Birth Date",
+    "cf": "Fiscal Code",
+    "indirizzoResidenza": "Residence Address",
+    "citta": "City",
+    "provincia": "Province",
+    "dataIngresso": "Join Date",
+    "dataDimissione": "Resignation Date",
+    "incarichiRicoperti": "Roles Held",
+    "annotazioni": "Notes"
+  },
+  "options": {
+    "stato": {
+      "Attivo": "Active",
+      "Inattivo": "Inactive"
+    }
+  }
+}

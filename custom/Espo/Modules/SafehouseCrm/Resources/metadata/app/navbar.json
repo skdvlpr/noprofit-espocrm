@@ -1,0 +1,12 @@
+{
+    "tabGroups": {
+        "mainSections": [
+            "Account",
+            "Opportunity",
+            "VolontarioDipendente",
+            "Associati",
+            "ConteggioPasti",
+            "AccountWebsite"
+        ]
+    }
+}

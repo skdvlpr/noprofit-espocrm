@@ -1,0 +1,24 @@
+{
+    "VolontarioDipendente": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "Associati": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "ConteggioPasti": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true,
+        "tab": true
+    }
+}

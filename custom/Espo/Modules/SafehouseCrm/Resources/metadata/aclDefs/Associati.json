@@ -1,0 +1,9 @@
+{
+    "Associati": {
+        "read": "all",
+        "edit": "all",
+        "create": "all",
+        "delete": "all",
+        "stream": "all"
+    }
+}

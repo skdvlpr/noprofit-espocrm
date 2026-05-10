@@ -1,0 +1,45 @@
+{
+    "Account": {
+        "detail": {
+            "module": "SafehouseCrm"
+        },
+        "detailConvert": {
+            "module": "SafehouseCrm"
+        },
+        "detailSmall": {
+            "module": "SafehouseCrm"
+        },
+        "list": {
+            "module": "SafehouseCrm"
+        },
+        "filters": {
+            "module": "SafehouseCrm"
+        },
+        "massUpdate": {
+            "module": "SafehouseCrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "SafehouseCrm"
+        }
+    },
+    "Opportunity": {
+        "detail": {
+            "module": "SafehouseCrm"
+        },
+        "detailConvert": {
+            "module": "SafehouseCrm"
+        },
+        "detailSmall": {
+            "module": "SafehouseCrm"
+        },
+        "list": {
+            "module": "SafehouseCrm"
+        },
+        "filters": {
+            "module": "SafehouseCrm"
+        },
+        "massUpdate": {
+            "module": "SafehouseCrm"
+        }
+    }
+}

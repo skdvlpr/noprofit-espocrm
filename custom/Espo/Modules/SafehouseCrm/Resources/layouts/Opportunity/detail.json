@@ -1,0 +1,12 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name"}, {"name": "account"}],
+            [{"name": "stage"}, {"name": "amount"}],
+            [{"name": "dataPresentazione"}, {"name": "closeDate"}],
+            [{"name": "contacts"}, false],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

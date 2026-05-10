@@ -1,0 +1,8 @@
+{
+    "SafehouseCrmDeactivateExpiredVolontarioDipendente": {
+        "name": "Deactivate Expired Volunteers / Employees",
+        "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\DeactivateExpiredVolontarioDipendente",
+        "scheduling": "5 0 * * *",
+        "isSystem": true
+    }
+}
