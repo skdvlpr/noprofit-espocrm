@@ -116,7 +116,6 @@ File: `Resources/metadata/scopes/{EntityName}.json`
   "entity": true,
   "object": true,
   "tab": true,
-  "type": "Base",
   "module": "SafehouseCrm",
   "stream": false,
   "importable": true,
@@ -127,7 +126,9 @@ File: `Resources/metadata/scopes/{EntityName}.json`
 }
 ```
 
-**PROHIBITED**: Omitting `"entity": true` — entity will not appear in UI or API.
+**REQUIRED**: `"entity": true` — without it the entity will not appear in UI or API.
+
+**OPTIONAL**: `"type": "Base"` — verified empirically in 9.3.6 that working entities (`Associati`, `VolontarioDipendente`) omit it and Espo defaults correctly. Add only if explicitly needed (e.g. `Person`, `BasePlus`, `Event`).
 
 ### ENT-004 — Navigation registration
 
@@ -244,38 +245,46 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 
 ### LAY-002 — Layout types
 
-| **File**            | **Purpose**                  |
-| ------------------- | ---------------------------- |
-| `list.json`         | List view columns            |
-| `detail.json`       | Detail view panels           |
-| `edit.json`         | Edit form panels             |
-| `search.json`       | Search/filter fields         |
-| `listSmall.json`    | Relationship panel list      |
-| `detailSmall.json`  | Quick detail in relationship |
-| `massUpdate.json`   | Mass update fields           |
-| `sidePanels.json`   | Right side panels in detail  |
-| `bottomPanels.json` | Bottom relationship panels   |
+| **File**            | **Purpose**                  | **Required?** |
+| ------------------- | ---------------------------- | ------------- |
+| `list.json`         | List view columns            | YES           |
+| `detail.json`       | Detail view panels           | YES           |
+| `edit.json`         | Edit form panels             | NO — Espo derives the edit form from `detail.json` if missing. Only add when the edit form must differ (e.g. exclude read-only/computed fields). |
+| `filters.json`      | Search/filter fields         | YES (modern name) |
+| `search.json`       | Search/filter fields (legacy)| NO — use `filters.json` for new entities |
+| `listSmall.json`    | Relationship panel list      | NO            |
+| `detailSmall.json`  | Quick detail in relationship | NO            |
+| `massUpdate.json`   | Mass update fields           | NO            |
+| `sidePanels.json`   | Right side panels in detail  | NO            |
+| `bottomPanels.json` | Bottom relationship panels   | NO            |
+
+**EMPIRICALLY VERIFIED (9.3.6)**: working entities `Associati` and `VolontarioDipendente` ship without `edit.json` and rely on `detail.json`. Adding a custom `edit.json` is fine, but then **every field name and every cell** must be valid — see LAY-003.
 
 ### LAY-003 — detail.json minimal structure
 
 ```
 [
   {
+    "name": "Overview",
     "label": "Overview",
     "rows": [
       [{ "name": "name" }, { "name": "dataPasto" }],
       [{ "name": "tipoPasto" }, { "name": "numeroPorzioni" }],
-      [{ "name": "costoPasto", "fullWidth": false }, false]
+      [{ "name": "costoPasto" }, false]
     ]
   }
 ]
 ```
 
+**CRITICAL — empty cells**: a missing cell in a row MUST be `false`, never `null`. The frontend layout converter (`s.convertDetailLayout` in `espo-main.js`) crashes with `TypeError: Cannot read properties of null (reading 'view')` on `null` cells. Symptom: clicking Create or Modifica shows the list view instead of the form.
+
+**CRITICAL — unknown fields**: every `{"name": "..."}` cell must reference a field declared in `entityDefs.fields`. Stale references silently break the form.
+
 ### LAY-004 — list.json minimal structure
 
 ```
 [
-  { "name": "name" },
+  { "name": "name", "link": true },
   { "name": "dataPasto" },
   { "name": "tipoPasto" },
   { "name": "numeroPorzioni" },
@@ -283,19 +292,20 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 ]
 ```
 
-### LAY-005 — search.json minimal structure
+**CRITICAL — clickable rows**: at least one column MUST have `"link": true`, otherwise rows in the list cannot be clicked to open the record. Convention: put `"link": true` on the first meaningful column (usually `name`, or `data`/`date` if name is auto-generated and may be empty).
+
+### LAY-005 — filters.json minimal structure
+
+File: `Resources/layouts/{EntityName}/filters.json` (modern). Older entities may still ship `search.json` — both are read but `filters.json` is preferred.
 
 ```
-{
-  "boolFilterList": [],
-  "primaryFilter": null,
-  "presetFilterList": [],
-  "filterList": [
-    { "name": "dataPasto" },
-    { "name": "tipoPasto" }
-  ]
-}
+[
+  { "name": "dataPasto" },
+  { "name": "tipoPasto" }
+]
 ```
+
+Note: in 9.x the modern `filters.json` is a flat array of fields. The older `search.json` envelope (`{"filterList": [...], "boolFilterList": [...], ...}`) is still accepted for backwards compatibility but should not be used for new code.
 
 ### LAY-006 — After layout changes
 
@@ -309,7 +319,7 @@ Always run: **Admin → Repair → Rebuild → Clear Cache** Browser hard-refres
 
 ```
 {
-  "beforeSaveCustomScript": "ifThen(isEmpty(dataPasto), setValue('dataPasto', date\\today())); setValue('totaleImporto', multiply(attribute('numeroPorzioni'), attribute('costoPasto')));"
+  "beforeSaveCustomScript": "if (entity\\isNew() && dataPasto == null) {\n    dataPasto = datetime\\today();\n}\ntotaleImporto = numeroPorzioni * costoPasto;"
 }
 ```
 
@@ -332,19 +342,71 @@ Formula does NOT run on:
 - Field value change (unless dynamicLogic triggers a save)
 - Scheduled background refresh
 
-### FRM-003 — Safe verified functions (EspoCRM 9.x)
+### FRM-003 — Verified syntax (EspoCRM 9.3.6, source: [official docs](https://docs.espocrm.com/administration/formula/) + [function reference](https://docs.espocrm.com/administration/formula-functions/))
 
-- **Math**: `add()`, `subtract()`, `multiply()`, `divide()`, `round()`
-- **String**: `string\test()`, `string\contains()`, `string\length()`
-- **Date**: `date\today()`, `date\now()`, `date\diff()`, `date\addDays()`
-- **Logic**: `ifThen()`, `ifElse()`, `isEmpty()`, `isNotEmpty()`
-- **Entity**: `attribute()`, `setValue()`
+**Operators (use directly, NOT functions):**
 
-**WARNING - TO BE VERIFIED BY EXECUTOR**: `date\dayOfWeek()` — not confirmed in 9.3.6 formula docs. Verification step: check [EspoCRM Formula Docs](https://docs.espocrm.com/administration/formula/) for datetime functions list.
+- Arithmetic: `+`, `-`, `*`, `/`, `%`
+- Comparison: `==`, `!=`, `>`, `<`, `>=`, `<=`
+- Logic: `&&`, `||`, `!`
+- Assignment: `=`
+- Null-coalescing: `??`
+
+Example from docs: `amount = product.listPrice - (product.listPriceConverted * discount / 100.0);`
+
+**There are NO `add()`, `subtract()`, `multiply()`, `divide()` functions** — those are operators. Confirmed by source: `application/Espo/Core/Formula/Functions/NumberGroup/` only contains `format`, `abs`, `power`, `round`, `floor`, `ceil`, `parseInt`, `parseFloat`, `randomInt`.
+
+**Control structures (block syntax, since 7.4):**
+
+```
+if (CONDITION) { ... } else if (CONDITION) { ... } else { ... }
+while (CONDITION) { ... }
+```
+
+**Verified function namespaces (9.3.6):**
+
+- **Logic helpers**: `ifThen(COND, CONSEQUENT)`, `ifThenElse(COND, CONSEQUENT, ALTERNATIVE)`, `isEmpty(VALUE)`, `isNotEmpty(VALUE)`, `list(...)`
+- **String**: `string\concatenate`, `string\substring`, `string\contains`, `string\pos`, `string\pad`, `string\test`, `string\length`, `string\trim`, `string\lowerCase`, `string\upperCase`, `string\match`, `string\matchAll`, `string\matchExtract`, `string\replace`, `string\split`
+- **Datetime** (NOT `date\` — that namespace does not exist): `datetime\today()`, `datetime\now()`, `datetime\format(VALUE)`, `datetime\date(VALUE)`, `datetime\month(VALUE)`, `datetime\year(VALUE)`, `datetime\hour(VALUE)`, `datetime\minute(VALUE)`, `datetime\dayOfWeek(VALUE)`, `datetime\addMinutes`, `datetime\addHours`, `datetime\addDays`, `datetime\addWeeks`, `datetime\addMonths`, `datetime\addYears`, `datetime\diff`, `datetime\closest`
+- **Number**: `number\format`, `number\abs`, `number\power`, `number\round`, `number\floor`, `number\ceil`, `number\parseInt`, `number\parseFloat`, `number\randomInt`
+- **Entity**: `entity\isNew()` (NOT bare `isNew()`), `entity\isAttributeChanged`, `entity\isAttributeNotChanged`, `entity\attribute`, `entity\setAttribute`, `entity\clearAttribute`, `entity\sumRelated`, `entity\countRelated`, `entity\isRelated`, `entity\getLinkColumn`, `entity\addLinkMultipleId`, `entity\removeLinkMultipleId`, `entity\hasLinkMultipleId`, `entity\setLinkMultipleColumn`
+- **Direct attribute access**: `fieldName = value;` and `$var = fieldName;` work — no need to call `entity\setAttribute('fieldName', value)` or `entity\attribute('fieldName')` unless the attribute name is dynamic.
+
+**Verified day-of-week**: `datetime\dayOfWeek(date)` returns **0..6** with **0 = Sunday**, 1 = Monday, ..., 6 = Saturday (confirmed in `application/Espo/Core/Formula/Functions/DatetimeGroup/DayOfWeekType.php` via Carbon `isoFormat('d')`).
+
+**Common pitfalls (learned from ConteggioPasti debug session, 2026-05-10):**
+
+- ❌ `add(adulti, minori)` → ✅ `adulti + minori`
+- ❌ `multiply(a, b)` → ✅ `a * b`
+- ❌ `date\today()` → ✅ `datetime\today()` (`date\` namespace does not exist)
+- ❌ `isNew()` (bare) → ✅ `entity\isNew()`
+- ❌ Empty cell `null` in detail.json → ✅ `false`
+- ❌ Unbalanced parentheses in nested `ifThenElse` chains — count opens vs closes programmatically before saving.
+- ❌ Marking a field `required: true` and relying on formula to fill the default — required validation runs **before** formula. Either drop `required` and let the formula fill it, or expose the field on the edit form so the user provides it.
 
 ### FRM-004 — Time-based automation
 
 For auto-status changes triggered by date (e.g. Associati → Inattivo when `dataDimissione` passes): Use **Scheduled Job** with "Execute Formula" action. Formula alone is insufficient for time-based triggers.
+
+### FRM-005 — Verified working entities (use as templates)
+
+Reference these files when in doubt — they are confirmed to work in 9.3.6:
+
+- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/VolontarioDipendente.json` — uses `if {} else if {}` block syntax, direct assignments, `datetime\today`, `ifThenElse`, `number\round`, `entity\isNew` is NOT needed because it uses null checks.
+- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/ConteggioPasti.json` — uses `if (entity\isNew()) {}` block, arithmetic operators, `datetime\dayOfWeek` + `ifThenElse` chain for localized day-of-week names.
+
+**Debugging workflow (mandatory after every formula change):**
+1. Edit formula JSON.
+2. Validate JSON syntax (`python -m json.tool` or `jq`).
+3. Verify parenthesis balance (count `(` vs `)` programmatically).
+4. Rebuild + Clear Cache (`ddev exec php clear_cache.php && ddev exec php rebuild.php` or Admin UI).
+5. Hard-refresh browser.
+6. Save a record (Modifica → Salva) — formula runs only on save, not on read.
+7. **Check `data/logs/espo-{date}.log` immediately**. Formula failures are logged as `CRITICAL: (500) Before-save formula script failed.` Common errors:
+   - `Unknown function: X` → wrong namespace or non-existent function. Cross-check against the verified list above.
+   - `Incorrect parentheses usage in expression ...` → mismatched `(` and `)`.
+   - `Syntax error` → typo, missing `;`, malformed assignment.
+8. If no error logged but values are still null on screen, the formula succeeded but assignments did not stick. Check that target field is `storable: true` (default) and not blocked by ACL field-level read-only.
 
 ## SECTION 7 — ACL RULES (ACL-\*)
 
@@ -616,11 +678,19 @@ Create `Resources/metadata/entityDefs/{EntityName}.json`. Include all fields, li
 
 ### Step 3: scopes
 
-Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"type": "Base"`, `"module": "SafehouseCrm"`. **Without this file the entity does not exist in EspoCRM.**
+Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"module": "SafehouseCrm"`. **Without this file the entity does not exist in EspoCRM.** `"type": "Base"` is optional — see ENT-003.
 
 ### Step 4: Layouts — MOST COMMON SOURCE OF BUGS
 
-Create directory: `Resources/layouts/{EntityName}/` **NOT** `Resources/metadata/layouts/{EntityName}/` Create minimum required files: `detail.json`, `edit.json`, `list.json`, `search.json`.
+Create directory: `Resources/layouts/{EntityName}/` **NOT** `Resources/metadata/layouts/{EntityName}/`.
+
+Minimum required files: `detail.json`, `list.json`, `filters.json`. `edit.json` is optional (Espo derives the edit form from `detail.json` if absent — see LAY-002).
+
+Sanity-check rules to avoid silent breakage:
+- Empty cells in any layout MUST be `false`, never `null` (LAY-003).
+- Every `{"name": "..."}` cell MUST reference a field that exists in `entityDefs.fields`.
+- `list.json` MUST have at least one column with `"link": true` (LAY-004).
+- Use `filters.json` for new entities, not the legacy `search.json` (LAY-005).
 
 ### Step 5: i18n
 
@@ -653,22 +723,26 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 
 ### Known failure modes:
 
-| **Symptom**                  | **Most likely cause**                                |
-| ---------------------------- | ---------------------------------------------------- |
-| "Create" button does nothing | `scopes` missing OR layout in wrong path             |
-| Layout empty/not loading     | layouts in `metadata/layouts/` instead of `layouts/` |
-| Fields unnamed in UI         | Missing `i18n` entry                                 |
-| 403 on all actions           | `aclDefs` missing                                    |
-| Formula silently fails       | Syntax error in `beforeSaveCustomScript`             |
-| Entity not in nav            | `scopes` `"tab": false` or `AfterInstall` not run    |
+| **Symptom**                                                   | **Most likely cause**                                                                                                                                |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Create" button click shows the list with `Nessun dato` instead of a form | JS error `Cannot read properties of null (reading 'view') at convertDetailLayout` — there is a `null` cell in `detail.json`/`edit.json`. Replace with `false`. Open DevTools → Console to confirm. |
+| List rows are not clickable (cannot open record)              | `list.json` has no column with `"link": true` (LAY-004).                                                                                             |
+| Layout empty/not loading                                      | Layouts placed in `Resources/metadata/layouts/` instead of `Resources/layouts/`.                                                                     |
+| Fields unnamed in UI                                          | Missing `i18n` entry for that field.                                                                                                                 |
+| 403 on all actions                                            | `aclDefs` missing.                                                                                                                                   |
+| `(400) field validation failure ... type: required` on POST   | Required field expected to be auto-filled by formula — but required validation runs **before** formula. Drop `required: true` or expose the field in the edit form (FRM-003 pitfalls). |
+| `(500) Before-save formula script failed. Unknown function: X`| `X` is not a real Espo formula function. Cross-check the verified list in FRM-003 (e.g. `add` → use `+`, `isNew` → `entity\isNew`, `date\today` → `datetime\today`). |
+| `(500) Before-save formula script failed. Incorrect parentheses usage` | Mismatched `(` and `)` in formula — count programmatically before saving.                                                                            |
+| Formula silently does nothing (no log, no values)             | Formula runs but assignments don't stick: target field is `notStorable` without `storable: true` override, or blocked by field-level ACL.            |
+| Entity not in nav                                             | `scopes` `"tab": false` or `AfterInstall` not run.                                                                                                   |
 
 ## QUICK REFERENCE CARD
 
-- **ENT**: `entityDefs` + `scopes` (entity:true) = minimum to exist
+- **ENT**: `entityDefs` + `scopes` (entity:true, module set) = minimum to exist | `type:"Base"` is OPTIONAL
 - **FLD**: `currency` ≠ `float` | `notStorable` for computed | `FieldValidator` for regex
-- **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG
-- **DEF**: static → `"default"` key | dynamic → formula `beforeSaveCustomScript`
-- **FRM**: `Resources/metadata/formula/{E}.json` | key: `beforeSaveCustomScript`
+- **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG | empty cells = `false` not `null` | first list column needs `"link": true` | `edit.json` is OPTIONAL — falls back to `detail.json`
+- **DEF**: static → `"default"` key | dynamic → formula `beforeSaveCustomScript` (don't combine with `required:true` for the same field)
+- **FRM**: `Resources/metadata/formula/{E}.json` | key: `beforeSaveCustomScript` | math via `+ - * /` operators (NOT `add()/multiply()`) | `datetime\today()` (NOT `date\today()`) | `entity\isNew()` (NOT bare `isNew()`) | always check `data/logs/espo-{date}.log` after save
 - **ACL**: `aclDefs` BEFORE testing | `dynamicLogic` ≠ security
 - **DYN**: `clientDefs` `dynamicLogic` = UI only, always duplicate server-side
 - **I18N**: `en_US` mandatory | `it_IT` required | every layout field needs label
@@ -676,3 +750,4 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
+- **REF**: working entities to copy from — `Associati`, `VolontarioDipendente` (modular) and `CFoodCount` (Custom-namespace, simpler)
