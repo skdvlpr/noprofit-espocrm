@@ -5,6 +5,7 @@ namespace Espo\Modules\SafehouseCrm;
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config\ConfigWriter;
+use Espo\Modules\SafehouseCrm\Tools\RoleSetup;
 
 class AfterInstall
 {
@@ -58,6 +59,9 @@ class AfterInstall
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
         $configWriter->save();
+
+        $roleSetup = $injectableFactory->create(RoleSetup::class);
+        $roleSetup->provisionRoles();
 
         $container->get('dataManager')->rebuild();
     }

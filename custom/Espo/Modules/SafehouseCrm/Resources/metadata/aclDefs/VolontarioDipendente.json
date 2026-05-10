@@ -1,9 +1,9 @@
 {
-    "VolontarioDipendente": {
-        "read": "all",
-        "edit": "all",
-        "create": "all",
-        "delete": "all",
-        "stream": "all"
-    }
+    "actionList": ["read", "create", "edit", "delete", "stream"],
+    "levelList": ["all", "team", "own", "no"],
+    "read": "all",
+    "create": "yes",
+    "edit": "all",
+    "delete": "all",
+    "stream": "all"
 }
