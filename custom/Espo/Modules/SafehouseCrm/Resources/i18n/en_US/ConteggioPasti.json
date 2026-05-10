@@ -4,13 +4,15 @@
         "Create ConteggioPasti": "Create Meal Count"
     },
     "fields": {
+        "name": "Name",
         "data": "Date",
         "giornoSettimana": "Day of Week",
         "adulti": "Adults",
         "minori": "Minors",
         "totalePasti": "Total Meals",
         "foodUnitPrice": "Food Unit Price",
-        "foodCost": "Food Cost"
+        "foodCost": "Food Cost",
+        "description": "Description"
     },
     "links": {
         "createdBy": "Created By",

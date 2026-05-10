@@ -13,12 +13,11 @@
         "object": true,
         "acl": true
     },
-    "ConteggioPasti": {
+    "Associati": {
         "module": "SafehouseCrm",
         "type": "base",
         "entity": true,
         "object": true,
-        "acl": true,
-        "tab": true
+        "acl": true
     }
 }

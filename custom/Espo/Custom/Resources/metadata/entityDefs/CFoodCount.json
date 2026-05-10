@@ -2,40 +2,8 @@
     "fields": {
         "name": {
             "type": "varchar",
-            "trim": true,
-            "readOnly": true
-        },
-        "data": {
-            "type": "date",
-            "required": true
-        },
-        "giornoSettimana": {
-            "type": "varchar",
-            "readOnly": true,
-            "storable": true
-        },
-        "adulti": {
-            "type": "int",
-            "min": 0,
-            "default": 0
-        },
-        "minori": {
-            "type": "int",
-            "min": 0,
-            "default": 0
-        },
-        "totalePasti": {
-            "type": "int",
-            "readOnly": true
-        },
-        "foodUnitPrice": {
-            "type": "currency",
-            "default": 1.5,
-            "currency": "EUR"
-        },
-        "foodCost": {
-            "type": "currency",
-            "readOnly": true
+            "required": true,
+            "pattern": "$noBadCharacters"
         },
         "description": {
             "type": "text"
@@ -60,11 +28,22 @@
         },
         "assignedUser": {
             "type": "link",
+            "required": false,
             "view": "views/fields/assigned-user"
         },
         "teams": {
             "type": "linkMultiple",
             "view": "views/fields/teams"
+        },
+        "mealCost": {
+            "type": "currency",
+            "required": true,
+            "default": 1.5,
+            "min": 0,
+            "decimal": true,
+            "audited": true,
+            "tooltip": true,
+            "isCustom": true
         }
     },
     "links": {
@@ -88,14 +67,39 @@
         }
     },
     "collection": {
-        "orderBy": "data",
-        "order": "desc"
+        "orderBy": "createdAt",
+        "order": "desc",
+        "textFilterFields": [
+            "name"
+        ],
+        "fullTextSearch": false,
+        "countDisabled": false
     },
     "indexes": {
-        "data": {
-            "columns": ["data", "deleted"]
+        "name": {
+            "columns": [
+                "name",
+                "deleted"
+            ]
+        },
+        "assignedUser": {
+            "columns": [
+                "assignedUserId",
+                "deleted"
+            ]
+        },
+        "createdAt": {
+            "columns": [
+                "createdAt"
+            ]
+        },
+        "createdAtId": {
+            "unique": true,
+            "columns": [
+                "createdAt",
+                "id"
+            ]
         }
     },
-    "optimisticConcurrencyControl": true,
-    "audited": true
+    "optimisticConcurrencyControl": false
 }

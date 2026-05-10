@@ -1,0 +1,9 @@
+[
+    { "name": "data" },
+    { "name": "adulti" },
+    { "name": "minori" },
+    { "name": "totalePasti" },
+    { "name": "foodUnitPrice" },
+    { "name": "foodCost" },
+    { "name": "assignedUser" }
+]

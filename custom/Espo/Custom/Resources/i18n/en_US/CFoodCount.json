@@ -1,0 +1,14 @@
+{
+    "fields": {
+        "mealCost": "Meal Cost",
+        "mealCostCurrency": "Meal Cost (Valuta)",
+        "mealCostConverted": "Meal Cost (Convertito)"
+    },
+    "links": [],
+    "labels": {
+        "Create CFoodCount": "Crea Pasto"
+    },
+    "tooltips": {
+        "mealCost": "Meal cost (default 1.5 eur)"
+    }
+}

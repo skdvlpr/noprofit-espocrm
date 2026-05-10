@@ -13,8 +13,8 @@
         "stream"
     ],
     "stream": true,
-    "color": "#f1c40f",
-    "iconClass": "fas fa-utensils",
     "importable": true,
-    "customizable": true
+    "customizable": true,
+    "color": "#f1c40f",
+    "iconClass": "fas fa-utensils"
 }

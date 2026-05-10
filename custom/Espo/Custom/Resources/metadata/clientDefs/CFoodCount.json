@@ -1,0 +1,9 @@
+{
+    "controller": "controllers/record",
+    "boolFilterList": [
+        "onlyMy"
+    ],
+    "color": "#78c996",
+    "iconClass": "fas fa-basket-shopping",
+    "kanbanViewMode": false
+}

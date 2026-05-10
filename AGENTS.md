@@ -1,331 +1,678 @@
-# AGENTS.md — SafehouseCrm EspoCRM Extension
+# SafehouseCrm Module Rulebook
 
-> Single source of truth for AI executor agents. Merged from AGENTS.md + AGENTS.addinstruction.md + Research standards.
+**EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
+**Executor:** Antigravity AI | **Last updated:** 2026-05-10
+**Language:** specs/paths/code = English | User communication = Russian
 
-## 1. Project Overview
+## MANDATORY PRE-TASK PROTOCOL
 
-- **Goal:** Installable EspoCRM extension ZIP — custom entities, ACL, Google Calendar/Drive, reporting.
-- **Module path:** `custom/Espo/Modules/SafehouseCrm/`
-- **Target:** EspoCRM >=9.3.6 <10.0.0, PHP 8.1+, DDEV local dev.
-- **Notion Project:** https://www.notion.so/34e8d469d4058027af82f2ce986a6448
-- **Tasks DB:** `collection://34f8d469-d405-813c-b025-000b707ee162`
-- **Projects DB:** `collection://34f8d469-d405-8139-ae4a-000bef108b0e`
+Before implementing ANY task, executor MUST:
 
-## 2. Token Economy & Efficiency Rules
+1. Re-read this file in full.
+2. Fetch current Notion project page and task page.
+3. Read referenced files from the repository (never assume content).
+4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change.
+5. Never overwrite executor logs in Notion. Append only.
 
-> **CRITICAL: Minimize token consumption at every step.**
+## SECTION 1 — PROJECT OVERVIEW
 
-- **User handles rebuild/cache:** After code changes, tell user to run `ddev exec php command.php rebuild` and clear cache. Do NOT run these commands via agent.
-- **User handles testing:** Provide test instructions, user tests manually. Don't run test commands unless explicitly asked.
-- **Batch reads:** Read multiple related files in one turn, not one per turn.
-- **No verbose output:** Don't echo back full file contents in responses. Summarize changes.
-- **Test files → .gitignore:** Any scratch/test files created must be added to `.gitignore`.
-- **Stop before limit:** When token budget is running low, STOP immediately and create a checkpoint (save progress to Notion + local artifact). Don't try to squeeze in one more step.
-- **Notion checkpoint on every significant change:** After each meaningful code change (new file, metadata change, layout update, etc.), immediately log progress to the Notion task page. This ensures another agent can seamlessly continue if this session runs out of tokens.
-- **Compress responses:** Use tables, bullet points, short sentences. No filler text.
-- **Skip obvious:** Don't explain EspoCRM basics or re-summarize what the user already knows.
+**Module path:** `custom/Espo/Modules/SafehouseCrm/`**EspoCRM version:** 9.3.6
+**Repository:** https://github.com/skdvlpr/noprofit-espocrm**Branch:\*\* `feat/custom-entity`
 
-## 3. Notion — Source of Truth
+### Entities in scope:
 
-- Fetch task page **before** any work and **before** any write.
-- Progress notes: **append-only**, dated: `[YYYY-MM-DD] description`.
-- Never delete previous executor logs.
-- Resolve all `WARNING - TO BE VERIFIED` before writing code.
-- Mark acceptance criteria only when verified.
-- Status flow: `Not Started → In Progress → Blocked → Done`
-- Language: Notion in English, user replies in Russian.
+- `Account` — modified core entity
+- `FondiSovvenzioni` — Opportunity renamed/extended
+- `VolontarioDipendente` — new entity (type: Person)
+- `Associati` — new entity (type: Person)
+- `ConteggioPasti` — new entity (type: Base)
+- `Documents` — modified core entity
 
-## 4. Phase Map
-
-| Phase | Goal                             | Tasks         |
-| ----- | -------------------------------- | ------------- |
-| 0     | Research & Setup                 | 0.1–0.3       |
-| 1     | Custom Entities & Layouts        | 1.1–1.7       |
-| 2     | Roles, ACL & Teams               | 2.1–2.2       |
-| 3     | Google Integration               | 3.1–3.5       |
-| 4     | Reporting & Automated Delivery   | 4.1–4.5       |
-| 5     | Extension Packaging & Deployment | 5.1–5.5       |
-| 6     | Time Tracking & Payroll          | 6.1–6.5 (New) |
-
-Execute in order. Phase N+1 only after all Phase N acceptance criteria pass.
-
-## 5. Repository Layout
+## SECTION 2 — DIRECTORY STRUCTURE (CANONICAL)
 
 ```
 custom/Espo/Modules/SafehouseCrm/
-├── manifest.json
+├── Controllers/
+│   └── {EntityName}.php
+├── Hooks/
+│   └── {EntityName}/
+│       ├── BeforeSave.php
+│       └── AfterSave.php
 ├── Resources/
-│   ├── metadata/{entityDefs,clientDefs,layouts,aclDefs,scopes,logicDefs,app,fields,actionDefs}/
-│   ├── i18n/en_US/
-│   └── templates/email/
-├── Services/, Controllers/, Hooks/, Jobs/, Acl/, Classes/
-└── client/modules/safehouse-crm/src/
-scripts/     ← BeforeInstall, AfterInstall, etc.
-bin/build.sh
+│   ├── i18n/
+│   │   ├── en_US/
+│   │   │   └── {EntityName}.json
+│   │   └── it_IT/
+│   │       └── {EntityName}.json
+│   ├── layouts/ ← CORRECT path for all layouts
+│   │   └── {EntityName}/
+│   │       ├── detail.json
+│   │       ├── edit.json
+│   │       ├── list.json
+│   │       ├── search.json
+│   │       └── ...
+│   └── metadata/
+│       ├── entityDefs/
+│       │   └── {EntityName}.json
+│       ├── scopes/
+│       │   └── {EntityName}.json
+│       ├── clientDefs/
+│       │   └── {EntityName}.json
+│       ├── aclDefs/
+│       │   └── {EntityName}.json
+│       └── formula/
+│           └── {EntityName}.json
+├── BeforeInstall.php
+├── AfterInstall.php
+├── BeforeUninstall.php
+├── AfterUninstall.php
+└── manifest.json
 ```
 
-**NEVER edit:** `application/`, `vendor/`, `data/cache/`, `data/logs/`
+**CRITICAL: There is NO `Resources/metadata/layouts/` path.**
+Layouts live ONLY in `Resources/layouts/{EntityName}/`.
+Any file placed in `Resources/metadata/layouts/` will be IGNORED by EspoCRM.
 
-## 6. Executor Role & Validation
+## SECTION 3 — ENTITY DEFINITION RULES (ENT-\*)
 
-You are not a blind executor. You must:
+### ENT-001 — Entity types
 
-1. **Verify** the plan against actual EspoCRM code, docs, runtime.
-2. **Execute** what is valid.
-3. **Propose changes** if plan is incorrect/suboptimal — but always notify user first.
-4. **Log** all progress to Notion.
+Use the correct base type:
 
-Default mode: **verify → execute → test → log**.
+| **Type**   | **Use for**                                          |
+| ---------- | ---------------------------------------------------- |
+| `Base`     | Non-person records: ConteggioPasti, FondiSovvenzioni |
+| `BasePlus` | Base + stream/followers                              |
+| `Person`   | People records: VolontarioDipendente, Associati      |
+| `Company`  | Organisation records                                 |
+| `Event`    | Calendar/time-based records                          |
 
-### Plan Changes
+### ENT-002 — entityDefs minimal structure
 
-- **Minor safe fix:** Notify user, apply, log to Notion.
-- **Meaningful change** (architecture/behavior/deployment): STOP, propose alternative, wait for approval.
-- Never silently replace the plan.
+File: `Resources/metadata/entityDefs/{EntityName}.json`
 
-## 7. Research Before Coding
-
-Verify before implementing:
-
-1. **EspoCRM docs:** https://docs.espocrm.com/ (metadata, hooks, scheduled-jobs, extension-packages, acl)
-2. **Forum:** https://forum.espocrm.com/
-3. **Codebase:** grep `application/Espo/` for class names, interfaces, DI keys.
-4. **Google API docs** (Phase 3 only).
-
-If unverified → write `WARNING - TO BE VERIFIED` in Notion, don't code it.
-
-## 8. Coding & Documentation Standards
-
-### PHP
-
-- Namespace: `Espo\Modules\SafehouseCrm\`
-- PSR-4 via EspoCRM module loader. DI via constructor injection.
-- **Commenting:** Use PHPDoc for all classes and methods. Describe parameters and return types.
-- No direct SQL — use EntityManager/Repository.
-- No static state, no `var_dump`/`error_log`/`print_r`.
-- Never log tokens/secrets.
-
-### Metadata (JSON)
-
-- Validate JSON before commit. Field names: camelCase.
-- **Layouts:** Use `Resources/layouts/` if the project already has them there, but prefer `Resources/metadata/layouts/` for new modules. Check both locations.
-
-### Frontend (JS)
-
-- Custom views only when metadata can't achieve the goal. Extend, don't copy core views.
-- No direct Google API calls from frontend.
-
-### EspoCRM-Native Preference Order
-
-1. Metadata → 2. DI services → 3. Hooks → 4. Controllers → 5. Scheduled jobs → 6. Custom PHP → 7. External services
-
-## 9. Execution Workflow
-
-For each task:
-
-1. FETCH Notion task page (read fully)
-2. RESOLVE all WARNINGs
-3. RESEARCH (docs, forum, grep)
-4. DECOMPOSE into micro-steps, show user table:
-   ```
-   | # | Step | Why | Test method |
-   ```
-5. IMPLEMENT one logical unit at a time
-6. STOP at checkpoints → give test instructions to user
-7. Wait for user confirmation before next step
-8. LOG to Notion (append dated entry)
-9. CHECK acceptance criteria
-
-**Mandatory stop points:** new file created that others depend on; metadata changed; hook/service registered; route/endpoint added; UI changed; fix applied.
-
-**If blocked:** Write `BLOCKED: [reason]` in Notion. Stop. Surface the blocker.
-
-## 10. Solved Cases & Knowledge Base
-
-If a non-obvious problem is solved (e.g. layout file location mismatch, 404 controller issues), **MANDATORY**:
-
-1. Record the case in the Notion Project page under `# Knowledge Base`.
-2. Add a brief note to this section in `AGENTS.md`.
-
-### Known Cases:
-
-- **Layout Priority:** If `Resources/layouts/` exists, it may override `Resources/metadata/layouts/`. Always check both.
-- **Controller 404:** Custom modules require a Controller class even if it's empty, to register the API endpoint.
-- **Formula vs logicDefs:** Formula in `entityDefs` can override `logicDefs`. Prefer `logicDefs` for complex logic.
-- **Before-save Formula Location:** In EspoCRM 9.3.6, working before-save Formula scripts are loaded from `Resources/metadata/formula/{Entity}.json` (`beforeSaveCustomScript`), not from `entityDefs.formula` or `logicDefs`.
-- **Formula Validation Limits:** Regex matching is `string\test(...)`, not `regex(...)`. A general before-save `throwError()` was not verified; `recordService\throwBadRequest` is API-script-only. Use a native `FieldValidator` for UI/API validation failures.
-- **Navbar Visibility:** Custom entity scopes do not automatically appear in the runtime menu. EspoCRM navbar uses `config.tabList`; extension install scripts should update it via `ConfigWriter`. Never edit `data/config.php` directly.
-- **Scope Registration:** New entities must be added to `Resources/metadata/app/scopes.json` with the correct `"module": "SafehouseCrm"` to be properly discovered and associated with the module.
-- **Date-Based Status:** Before-save Formula runs only when a record is saved/API-saved. Future calendar-day flips require an approved scheduled job.
-
-## 11. Security Checklist (verify on every task)
-
-- [ ] No unauthenticated endpoints (all require EspoCRM auth)
-- [ ] ACL checked on every entity action
-- [ ] IDOR prevention (users can't access others' tokens/data)
-- [ ] OAuth tokens never in frontend/logs
-- [ ] Google Drive SSRF: whitelist googleapis.com only
-- [ ] No XSS via rich text (use native sanitizer)
-- [ ] File upload: validate MIME, size, ownership
-- [ ] Scheduled jobs: no secrets in payload/logs
-- [ ] Calendar sync: idempotent via espoId key
-- [ ] Volontario can't read financial ConteggioPasti data
-
-## 12. Performance Rules
-
-- All queries must have `limit`/`maxSize`. No N+1 queries.
-- afterSave hooks <50ms. Heavy work → background job.
-- Scheduled jobs: max 100 records/run, cursor pagination.
-- Verify field indexing before adding query filters.
-
-## 13. Stability & Safety Checklist (For 100% Reliability)
-
-- [ ] **Automated Tests:** PHPUnit for services, Jest/Cypress for UI.
-- [ ] **Error Monitoring:** Integration with Sentry or similar.
-- [ ] **Log Rotation:** Ensure `data/logs/` doesn't grow indefinitely.
-- [ ] **DB Backups:** Scheduled SQL dumps.
-- [ ] **Environment Isolation:** Clear distinction between Local, Staging, Prod.
-- [ ] **Dependency Audit:** Regular `composer audit` and `npm audit`.
-- [ ] **Rate Limiting:** Protect API from brute force/abuse.
-- [ ] **Session Security:** Use `HttpOnly` and `Secure` flags for cookies.
-- [ ] **Encryption at Rest:** For sensitive PII (Personally Identifiable Information).
-
-## 14. Phase 6: Time Tracking & Advanced Payroll
-
-- **Goal:** Full Timesheet system with automated payroll calculations.
-- **Key Entities:**
-  - `TimesheetEntry`: Daily records of hours worked.
-  - `PayrollAdjustment`: Monthly bonuses or deductions.
-  - `WorkingCalendar`: Link to native EspoCRM `Calendari Lavorativi`.
-- **Associations:**
-  - `VolontarioDipendente` ↔ `WorkingCalendar` (Link).
-  - `VolontarioDipendente` ↔ `User` (1-to-1 Link).
-- **Payroll Logic:**
-  - `hourlyRate`: Currency field on `VolontarioDipendente`.
-  - `monthlySalary`: Calculated as `(Total Hours * hourlyRate) + Adjustments`.
-  - Skip detection: Automatic "Skip" flag for missed shifts based on calendar.
-- **Check-in/Out UI:** Custom buttons for easy entry recording.
-- **Reporting:** Monthly PDF salary slips generation.
-- **Current state:** `status` field and auto-deactivation logic implemented. Salary fields deferred to Phase 6.
-
-## 15. Extension Packaging
-
-- No hardcoded URLs/ports/IDs/secrets. No DDEV paths in prod code.
-- Every commit installable on clean EspoCRM without manual steps.
-- Build: `./bin/build.sh` → `dist/safehouse-crm-v{VERSION}.zip`
-
-### After Code Change (USER runs these):
-
-```bash
-ddev exec php command.php rebuild
-# Then: Admin → Clear Cache, Ctrl+Shift+R browser
+```
+{
+  "fields": {
+    "name": { "type": "varchar", "required": true },
+    "createdAt": { "type": "datetime", "readOnly": true },
+    "modifiedAt": { "type": "datetime", "readOnly": true },
+    "createdBy": { "type": "link", "readOnly": true },
+    "assignedUser": { "type": "link" }
+  },
+  "links": {},
+  "indexes": {}
+}
 ```
 
-## 16. Google Integration (Phase 3)
+**PROHIBITED**: Defining entity type inside `entityDefs`. Type is defined in `scopes`.
 
-- OAuth redirect_uri: hardcoded server-side only.
-- Tokens: encrypted storage, auto-refresh before API calls.
-- Scopes: `calendar` (3.3, 3.4), `drive.file` (3.5).
-- Drive: proxy all downloads through CRM endpoint. SSRF whitelist.
+### ENT-003 — scopes registration
 
-## 17. Reporting (Phase 4)
+File: `Resources/metadata/scopes/{EntityName}.json`
 
-- Respect ACL. System-user jobs scoped explicitly.
-- Exports in memory, streamed. Delivery logs: metadata only.
-
-## 18. Definition of Done
-
-- [ ] All WARNINGs resolved and documented
-- [ ] All acceptance criteria checked
-- [ ] Security checklist verified
-- [ ] Performance rules verified
-- [ ] No PHP errors in `data/logs/espo.log`
-- [ ] Rebuild OK
-- [ ] Installable on clean instance
-- [ ] Progress note in Notion
-
-## 19. Forbidden Actions
-
-- Never edit `application/`, `vendor/`, `data/`
-- Never invent class names — grep and verify
-- Never put secrets in source code
-- Never run unbounded DB queries
-- Never skip security checklist
-- Never overwrite executor logs in Notion
-- Never mark Done with unchecked criteria
-- Never log token values
-
-## 20. Executor Workflow & Testing (Incremental)
-
-### Core principle: verify -> execute -> test -> log.
-
-- **One logical unit per step:** One file, one hook, or one metadata change at a time. Never combine multiple independent logical units.
-- **Micro-step breakdown:** Show the user an execution plan before coding (`| # | Micro-step | Why | Test method |`).
-- **Mandatory stop points:** New files, registered hooks/services, metadata changes affecting UI, new API routes. Stop and request a functional test.
-- **Functional Test Request Format:**
-  When stopping, provide exact instructions:
-  ```text
-  🧪 FUNCTIONAL TEST REQUIRED — Step [N]: [Step name]
-  What was implemented: [brief info]
-  How to test: [Exact UI action, API request, or CLI command]
-  Expected result: [precise behavior]
-  ```
-  Wait for user confirmation (`✅ passed` / `❌ failed`) before continuing.
-
-## 21. Plan Change & Notification Protocol
-
-- **Category A (Technical mismatch):** Method doesn't exist, invalid extension point, conflicts with rules.
-- **Category B (Technical degradation):** Slow UI, heavy logic, bypasses native mechanisms.
-- **Rule:** If the plan should change, you must **always notify the user first**. Never silently replace.
-- **Amendment Format:** If approved, append `### Plan Amendment — YYYY-MM-DD` to the Notion Task page.
-
-## 22. Notion Progress Logging
-
-- **Task completed/Step done:** Append to the specific **Task page**.
-- **Broad issues / KB:** Append to **Project page** `# Notes`.
-- **Implementation log format:**
-  ```markdown
-  ### Implementation Log — YYYY-MM-DD
-
-  **Step completed:** [step]
-  **Status:** ✅ Done | ⚠️ Blocked | ❌ Failed
-  **What was done:** [desc]
-  **Problems encountered:** [issues]
-  **Next step:** [name]
-  ```
-
-## 23. Environment Variables & Config
-
-| Variable                          | Where                         | Description                  |
-| --------------------------------- | ----------------------------- | ---------------------------- |
-| `GOOGLE_CLIENT_ID` / `SECRET`     | Admin → Integrations → Google | OAuth app credentials        |
-| `safehousencrm.googleSyncEnabled` | CRM config                    | Toggle Calendar sync         |
-| `safehousencrm.grantAlertDays`    | CRM config                    | Days before deadline alert   |
-| `safehousencrm.reportRecipients`  | CRM config                    | Admin email list for reports |
-
-## 24. Deployment, Documentation & Rollback
-
-### [DEPLOY] Deployment Notes Format
-
-If a change is required outside the `SafehouseCrm` module path, log in Notion:
-
-```markdown
-### [DEPLOY] Deployment Notes — [File/Config Name]
-
-**Production location:** [full path]
-**Why:** [technical reason]
-**Action:** [exact steps/snippets]
+```
+{
+  "entity": true,
+  "object": true,
+  "tab": true,
+  "type": "Base",
+  "module": "SafehouseCrm",
+  "stream": false,
+  "importable": true,
+  "exportable": true,
+  "acl": true,
+  "aclActionList": ["read", "create", "edit", "delete"],
+  "aclLevelList": ["all", "team", "own", "no"]
+}
 ```
 
-### Commenting & Documentation
+**PROHIBITED**: Omitting `"entity": true` — entity will not appear in UI or API.
 
-- **PHP:** Use PHPDoc for ALL classes and methods (`@param`, `@return`, `@throws`).
-- **Metadata:** Keep field names in `camelCase`.
+### ENT-004 — Navigation registration
 
-### Rollback Procedure
+Navigation tabs are managed via `AfterInstall.php` using `ConfigWriter`. **NEVER** edit `navbar.json` or `config.php` directly.
 
-If a task introduces a regression:
+```
+// AfterInstall.php
+$config = $this->getHelper('config');
+$tabList = $config->get('tabList', []);
+$toAdd = ['ConteggioPasti', 'VolontarioDipendente', 'Associati'];
+foreach ($toAdd as $item) {
+    if (!in_array($item, $tabList)) {
+        $tabList[] = $item;
+    }
+}
+$config->set('tabList', $tabList);
+$config->save();
+```
 
-1. Revert changed files in `custom/Espo/Modules/SafehouseCrm/`.
-2. Run `ddev exec php command.php rebuild`.
-3. Document rollback in Notion task page.
+## SECTION 4 — FIELD RULES (FLD-\*)
+
+### FLD-001 — Supported field types
+
+| **Type**           | **JSON key**    | **Notes**                                      |
+| ------------------ | --------------- | ---------------------------------------------- |
+| Text (short)       | `varchar`       | max 255 chars                                  |
+| Text (long)        | `text`          | textarea                                       |
+| Rich text          | `wysiwyg`       | sanitized HTML                                 |
+| Integer            | `int`           |                                                |
+| Decimal            | `float`         |                                                |
+| Money              | `currency`      | NEVER use float for money                      |
+| Date               | `date`          |                                                |
+| Date+time          | `datetime`      |                                                |
+| Boolean            | `bool`          |                                                |
+| Select             | `enum`          | options array required                         |
+| Multi-select       | `multiEnum`     |                                                |
+| Link (N:1)         | `link`          |                                                |
+| Link (1:N panel)   | `linkMultiple`  |                                                |
+| Link (polymorphic) | `linkParent`    |                                                |
+| Auto-increment     | `autoincrement` | read-only, unique                              |
+| Computed           | any type        | + `"notStorable": true`, value set via formula |
+
+### FLD-002 — Currency fields
+
+```
+"costoPasto": {
+  "type": "currency",
+  "required": false,
+  "default": 1.5,
+  "currency": "EUR"
+}
+```
+
+**PROHIBITED**: `"type": "float"` for monetary values.
+
+### FLD-003 — Enum fields
+
+```
+"tipoPasto": {
+  "type": "enum",
+  "options": ["Colazione", "Pranzo", "Cena"],
+  "default": "Pranzo"
+}
+```
+
+Translated options go in i18n, NOT in `entityDefs`:
+
+```
+// Resources/i18n/it_IT/ConteggioPasti.json
+{
+  "options": {
+    "tipoPasto": {
+      "Colazione": "Colazione",
+      "Pranzo": "Pranzo",
+      "Cena": "Cena"
+    }
+  }
+}
+```
+
+### FLD-004 — Computed/Formula fields
+
+```
+"totaleImporto": {
+  "type": "currency",
+  "notStorable": true,
+  "readOnly": true
+}
+```
+
+Value is assigned in `Resources/metadata/formula/{EntityName}.json`. **PROHIBITED**: Storing computed logic in `entityDefs` directly.
+
+### FLD-005 — Default values
+
+- **Static default**: `"default": "value"` in `fieldDefs`.
+- **Dynamic default** (e.g. today's date): use formula `beforeSaveCustomScript`.
+
+### FLD-006 — Validation
+
+- **Required**: `"required": true` in `fieldDefs`
+- **Read-only**: `"readOnly": true` in `fieldDefs`
+- **Regex/custom validation** (e.g. Codice Fiscale): implement as PHP `FieldValidator` class
+
+**PROHIBITED**: Using `throwError()` in `beforeSaveCustomScript` for validation. `throwError()` is available only in API Script context, NOT in beforeSave formula.
+
+## SECTION 5 — LAYOUT RULES (LAY-\*) ← CRITICAL
+
+### LAY-001 — Correct layout path
+
+- **CORRECT**: `Resources/layouts/{EntityName}/{type}.json`
+- **INCORRECT**: `Resources/metadata/layouts/{EntityName}/{type}.json` ← **IGNORED BY ESPOCRM**
+
+EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resources/metadata/layouts/` are NOT loaded.
+
+### LAY-002 — Layout types
+
+| **File**            | **Purpose**                  |
+| ------------------- | ---------------------------- |
+| `list.json`         | List view columns            |
+| `detail.json`       | Detail view panels           |
+| `edit.json`         | Edit form panels             |
+| `search.json`       | Search/filter fields         |
+| `listSmall.json`    | Relationship panel list      |
+| `detailSmall.json`  | Quick detail in relationship |
+| `massUpdate.json`   | Mass update fields           |
+| `sidePanels.json`   | Right side panels in detail  |
+| `bottomPanels.json` | Bottom relationship panels   |
+
+### LAY-003 — detail.json minimal structure
+
+```
+[
+  {
+    "label": "Overview",
+    "rows": [
+      [{ "name": "name" }, { "name": "dataPasto" }],
+      [{ "name": "tipoPasto" }, { "name": "numeroPorzioni" }],
+      [{ "name": "costoPasto", "fullWidth": false }, false]
+    ]
+  }
+]
+```
+
+### LAY-004 — list.json minimal structure
+
+```
+[
+  { "name": "name" },
+  { "name": "dataPasto" },
+  { "name": "tipoPasto" },
+  { "name": "numeroPorzioni" },
+  { "name": "costoPasto" }
+]
+```
+
+### LAY-005 — search.json minimal structure
+
+```
+{
+  "boolFilterList": [],
+  "primaryFilter": null,
+  "presetFilterList": [],
+  "filterList": [
+    { "name": "dataPasto" },
+    { "name": "tipoPasto" }
+  ]
+}
+```
+
+### LAY-006 — After layout changes
+
+Always run: **Admin → Repair → Rebuild → Clear Cache** Browser hard-refresh (Ctrl+Shift+R) required to see frontend changes.
+
+## SECTION 6 — FORMULA ENGINE RULES (FRM-\*)
+
+### FRM-001 — Formula file location
+
+**CORRECT**: `Resources/metadata/formula/{EntityName}.json`
+
+```
+{
+  "beforeSaveCustomScript": "ifThen(isEmpty(dataPasto), setValue('dataPasto', date\\today())); setValue('totaleImporto', multiply(attribute('numeroPorzioni'), attribute('costoPasto')));"
+}
+```
+
+**PROHIBITED**:
+
+- `entityDefs.formula` key — stale, not supported in 9.x
+- `logicDefs` — not a valid EspoCRM metadata key
+
+### FRM-002 — Formula execution context
+
+Formula runs ONLY on:
+
+- Record save (UI form submit)
+- API PUT/POST to entity endpoint
+- Mass update
+
+Formula does NOT run on:
+
+- Page load
+- Field value change (unless dynamicLogic triggers a save)
+- Scheduled background refresh
+
+### FRM-003 — Safe verified functions (EspoCRM 9.x)
+
+- **Math**: `add()`, `subtract()`, `multiply()`, `divide()`, `round()`
+- **String**: `string\test()`, `string\contains()`, `string\length()`
+- **Date**: `date\today()`, `date\now()`, `date\diff()`, `date\addDays()`
+- **Logic**: `ifThen()`, `ifElse()`, `isEmpty()`, `isNotEmpty()`
+- **Entity**: `attribute()`, `setValue()`
+
+**WARNING - TO BE VERIFIED BY EXECUTOR**: `date\dayOfWeek()` — not confirmed in 9.3.6 formula docs. Verification step: check [EspoCRM Formula Docs](https://docs.espocrm.com/administration/formula/) for datetime functions list.
+
+### FRM-004 — Time-based automation
+
+For auto-status changes triggered by date (e.g. Associati → Inattivo when `dataDimissione` passes): Use **Scheduled Job** with "Execute Formula" action. Formula alone is insufficient for time-based triggers.
+
+## SECTION 7 — ACL RULES (ACL-\*)
+
+### ACL-001 — ACL file
+
+File: `Resources/metadata/aclDefs/{EntityName}.json`
+
+```
+{
+  "actionList": ["read", "create", "edit", "delete", "stream"],
+  "levelList": ["all", "team", "own", "no"],
+  "read": "team",
+  "create": "yes",
+  "edit": "own",
+  "delete": "own",
+  "stream": "team"
+}
+```
+
+**RULE**: ACL must be defined BEFORE the entity is tested. Default for new entities without `aclDefs`: admin-only access.
+
+### ACL-002 — Field-level ACL
+
+Sensitive fields (salary, medical) must be restricted at `aclDefs` level. **PROHIBITED**: Using `dynamicLogic` to hide sensitive fields — it is client-side only.
+
+## SECTION 8 — DYNAMIC LOGIC RULES (DYN-\*)
+
+### DYN-001 — clientDefs dynamicLogic
+
+File: `Resources/metadata/clientDefs/{EntityName}.json`
+
+```
+{
+  "dynamicLogic": {
+    "fields": {
+      "tipoContratto": {
+        "visible": {
+          "conditionGroup": [
+            { "type": "equals", "attribute": "tipo", "value": "Dipendente" }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+**CRITICAL**: `dynamicLogic` is CLIENT-SIDE ONLY. Never use it as a security or data-integrity mechanism. All logic must be duplicated server-side in formula or hooks.
+
+## SECTION 9 — LOCALIZATION RULES (I18N-\*)
+
+### I18N-001 — File structure
+
+- `Resources/i18n/en_US/{EntityName}.json` ← MANDATORY
+- `Resources/i18n/it_IT/{EntityName}.json` ← Required for Safehouse project
+
+### I18N-002 — i18n JSON structure
+
+```
+{
+  "fields": {
+    "name": "Name",
+    "dataPasto": "Meal Date",
+    "tipoPasto": "Meal Type",
+    "numeroPorzioni": "Portions",
+    "costoPasto": "Unit Cost",
+    "totaleImporto": "Total Amount"
+  },
+  "labels": {
+    "ConteggioPasti": "Meal Count",
+    "ConteggioPastiPlural": "Meal Counts"
+  },
+  "options": {
+    "tipoPasto": {
+      "Colazione": "Breakfast",
+      "Pranzo": "Lunch",
+      "Cena": "Dinner"
+    }
+  }
+}
+```
+
+**RULE**: Entity label MUST exist in both `en_US` and `it_IT`. Missing label = empty string in UI (silent failure).
+
+## SECTION 10 — HOOKS RULES (HOK-\*)
+
+### HOK-001 — When to use hooks
+
+Use hooks ONLY when formula cannot achieve the goal:
+
+- Cross-entity writes (creating a related record on save)
+- External API calls
+- Complex conditional logic requiring PHP services
+
+### HOK-002 — Hook file path
+
+- `Resources/Hooks/{EntityName}/BeforeSave.php`
+- `Resources/Hooks/{EntityName}/AfterSave.php`
+
+### HOK-003 — Hook class structure
+
+```
+<?php
+namespace Espo\Modules\SafehouseCrm\Hooks\ConteggioPasti;
+
+use Espo\Core\Hook\HookInjection;
+use Espo\ORM\Entity;
+
+class BeforeSave
+{
+    public static int $order = 9;
+
+    public function __construct(
+        private \Espo\Core\ORM\EntityManager $entityManager
+    ) {}
+
+    public function run(Entity $entity, array $options = []): void
+    {
+        // logic here
+    }
+}
+```
+
+**PROHIBITED**: Raw SQL in hooks. Use EntityManager/Repository only. **RULE**: `afterSave` hooks must be idempotent.
+
+## SECTION 11 — EXTENSION PACKAGING RULES (PKG-\*)
+
+### PKG-001 — manifest.json
+
+```
+{
+  "name": "SafehouseCrm",
+  "description": "Nonprofit CRM for Safehouse organization",
+  "author": "SafehouseCrm Team",
+  "version": "1.0.0",
+  "acceptableVersions": [">=9.3.0"],
+  "releaseDate": "2026-05-10",
+  "dependencies": {}
+}
+```
+
+### PKG-002 — AfterInstall.php required actions
+
+```
+<?php
+class AfterInstall
+{
+    public function run(\Espo\Core\Application $app): void
+    {
+        // 1. Add tabs to navigation
+        $config = $app->getContainer()->get('config');
+        $tabList = $config->get('tabList', []);
+        $entitiesToAdd = ['ConteggioPasti', 'VolontarioDipendente', 'Associati', 'FondiSovvenzioni'];
+
+        foreach ($entitiesToAdd as $tab) {
+            if (!in_array($tab, $tabList)) {
+                $tabList[] = $tab;
+            }
+        }
+        $config->set('tabList', $tabList);
+        $config->save();
+
+        // 2. Rebuild metadata
+        $app->getContainer()->get('dataManager')->rebuild();
+    }
+}
+```
+
+### PKG-003 — Prohibited in packaging
+
+- No edits to `application/`, `vendor/`, `data/cache/`, `data/config.php`
+- No hardcoded credentials, API keys, OAuth secrets
+- No symlink hacks
+- No asset versioning workarounds
+
+### PKG-004 — Build and release
+
+```
+# bin/build.sh
+VERSION=$(cat manifest.json | jq -r '.version')
+zip -r dist/safehouse-crm-v${VERSION}.zip \
+  custom/Espo/Modules/SafehouseCrm/ \
+  --exclude "*.git*" --exclude "*.DS_Store"
+```
+
+**MANDATORY before each release**: clean-install test on fresh EspoCRM instance.
+
+## SECTION 12 — SECURITY RULES (SEC-\*)
+
+### SEC-001 — Security baseline
+
+- Every API route requires EspoCRM authentication (no anonymous endpoints)
+- ACL enforced server-side on every entity action
+- `dynamicLogic` is NOT a security mechanism
+- WYSIWYG fields: verify EspoCRM native sanitizer is active in config
+
+### SEC-002 — Security test matrix (required per entity)
+
+- [ ] GET `/api/v1/{Entity}` without auth → 401
+- [ ] GET `/api/v1/{Entity}` with wrong-role user → 403
+- [ ] GET `/api/v1/{Entity}/{otherId}` cross-user IDOR → 403
+- [ ] POST with oversized file upload → reject
+- [ ] XSS payload in wysiwyg field → sanitized on output
+- [ ] Duplicate record submit → idempotent result
+
+## SECTION 13 — PERFORMANCE RULES (PERF-\*)
+
+### PERF-001 — No unbounded queries
+
+All list views must use EspoCRM pagination (`maxSize` parameter). Never load full entity dataset into PHP memory for aggregation.
+
+### PERF-002 — ConteggioPasti aggregations
+
+Weekly/monthly totals must use DB-level GROUP BY via:
+
+- EspoCRM Report module (preferred, no custom code)
+- EntityManager query with aggregate functions
+
+**PROHIBITED**: PHP loop over full `ConteggioPasti` dataset.
+
+### PERF-003 — notStorable fields on list views
+
+Before shipping any `"notStorable": true` field visible in list view: Verify it does not cause N+1 queries by checking query log.
+
+## SECTION 14 — DEVELOPMENT WORKFLOW
+
+### After EVERY metadata change:
+
+1. Admin → Repair → Rebuild
+2. Admin → Repair → Clear Cache
+3. Browser hard-refresh (Ctrl+Shift+R)
+4. Check browser console for JS errors
+5. Check EspoCRM log: `data/logs/espo.log`
+
+### Entity creation checklist:
+
+- [ ] `entityDefs/{EntityName}.json` created
+- [ ] `scopes/{EntityName}.json` created with `"entity": true`
+- [ ] `layouts/{EntityName}/detail.json` in `Resources/layouts/` (NOT metadata/layouts)
+- [ ] `layouts/{EntityName}/edit.json`
+- [ ] `layouts/{EntityName}/list.json`
+- [ ] `layouts/{EntityName}/search.json`
+- [ ] `i18n/en_US/{EntityName}.json` with all field labels
+- [ ] `i18n/it_IT/{EntityName}.json` with all field labels
+- [ ] `aclDefs/{EntityName}.json`
+- [ ] `formula/{EntityName}.json` (if computed fields exist)
+- [ ] `clientDefs/{EntityName}.json` (if dynamicLogic needed)
+- [ ] Rebuild + Clear Cache
+- [ ] Verify "Create" button appears and works
+- [ ] Verify layout renders correctly
+- [ ] Run security test matrix
+
+## SECTION 25 — NO-FAIL ENTITY CREATION RULEBOOK
+
+This section is the authoritative step-by-step guide for creating any new entity.
+
+### Step 1: Plan
+
+- Define entity name (CamelCase, e.g. `ConteggioPasti`)
+- Define entity type (`Base`, `Person`, `BasePlus`, etc.)
+- List all fields with types
+- List all relationships
+- Define source of truth for each computed field
+- Define ACL matrix (who can read/create/edit/delete)
+
+### Step 2: entityDefs
+
+Create `Resources/metadata/entityDefs/{EntityName}.json`. Include all fields, links, indexes. Do NOT define entity type here.
+
+### Step 3: scopes
+
+Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"type": "Base"`, `"module": "SafehouseCrm"`. **Without this file the entity does not exist in EspoCRM.**
+
+### Step 4: Layouts — MOST COMMON SOURCE OF BUGS
+
+Create directory: `Resources/layouts/{EntityName}/` **NOT** `Resources/metadata/layouts/{EntityName}/` Create minimum required files: `detail.json`, `edit.json`, `list.json`, `search.json`.
+
+### Step 5: i18n
+
+Create `Resources/i18n/en_US/{EntityName}.json` and `Resources/i18n/it_IT/{EntityName}.json`. Every field used in any layout MUST have a label entry.
+
+### Step 6: aclDefs
+
+Create `Resources/metadata/aclDefs/{EntityName}.json`. Without this, only admin can access the entity.
+
+### Step 7: Formula (if needed)
+
+Create `Resources/metadata/formula/{EntityName}.json`. Use `beforeSaveCustomScript` key.
+
+### Step 8: clientDefs (if needed)
+
+Create `Resources/metadata/clientDefs/{EntityName}.json`. Use only for UI behavior (dynamicLogic, view overrides). Never for security.
+
+### Step 9: Rebuild
+
+Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
+
+### Step 10: Verify
+
+- Navigation tab appears.
+- List view loads with correct columns.
+- "Create" button opens form.
+- Form fields render correctly.
+- Save works.
+- Security test matrix passes.
+
+### Known failure modes:
+
+| **Symptom**                  | **Most likely cause**                                |
+| ---------------------------- | ---------------------------------------------------- |
+| "Create" button does nothing | `scopes` missing OR layout in wrong path             |
+| Layout empty/not loading     | layouts in `metadata/layouts/` instead of `layouts/` |
+| Fields unnamed in UI         | Missing `i18n` entry                                 |
+| 403 on all actions           | `aclDefs` missing                                    |
+| Formula silently fails       | Syntax error in `beforeSaveCustomScript`             |
+| Entity not in nav            | `scopes` `"tab": false` or `AfterInstall` not run    |
+
+## QUICK REFERENCE CARD
+
+- **ENT**: `entityDefs` + `scopes` (entity:true) = minimum to exist
+- **FLD**: `currency` ≠ `float` | `notStorable` for computed | `FieldValidator` for regex
+- **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG
+- **DEF**: static → `"default"` key | dynamic → formula `beforeSaveCustomScript`
+- **FRM**: `Resources/metadata/formula/{E}.json` | key: `beforeSaveCustomScript`
+- **ACL**: `aclDefs` BEFORE testing | `dynamicLogic` ≠ security
+- **DYN**: `clientDefs` `dynamicLogic` = UI only, always duplicate server-side
+- **I18N**: `en_US` mandatory | `it_IT` required | every layout field needs label
+- **HOK**: hooks only when formula insufficient | `afterSave` = idempotent
+- **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
+- **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
+- **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1

@@ -18,6 +18,7 @@
 
 # Build/development artifacts
 /build/
+/dist/
 /node_modules/
 /npm-debug.log
 /composer.phar
@@ -43,6 +44,11 @@
 /AGENTS.md
 .agents/
 .codex/
+
+# Agent test/scratch files
+/test_*.php
+/scratch_*.php
+/tmp_*.json
 
 # Environment, dumps, logs
 .env
