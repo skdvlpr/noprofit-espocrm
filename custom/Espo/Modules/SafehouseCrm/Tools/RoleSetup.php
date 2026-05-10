@@ -23,7 +23,8 @@ use Espo\ORM\EntityManager;
  *                   isAdmin=true and bypasses roles), but available for
  *                   secondary super-users.
  *   - Dipendente  : create=yes, read=all, edit=team, delete=own, stream=yes.
- *   - Volontario  : read-mostly; FondiSovvenzioni access fully blocked;
+ *   - Volontario  : read-mostly; grants/funding (Espo entity type `Opportunity`,
+ *                   labelled Fondi e Finanziamenti) fully blocked;
  *                   ConteggioPasti.foodCost and ConteggioPasti.foodUnitPrice
  *                   hidden via field-level ACL.
  *   - Associato   : read/edit own only; cannot create or delete.
@@ -445,6 +446,7 @@ class RoleSetup
         foreach ($domainEntities as $e) {
             $volontarioData[$e] = $readOnlyAll();
         }
+        // Business name FondiSovvenzioni — still `Opportunity` as entity type in EspoCRM.
         $volontarioData['Opportunity'] = $blocked();
         $volontarioData['Associati'] = $blocked();
         $volontarioData['VolontarioDipendente'] = [

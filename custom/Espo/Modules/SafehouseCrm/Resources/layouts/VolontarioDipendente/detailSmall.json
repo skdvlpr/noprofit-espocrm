@@ -1,0 +1,29 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "tipo"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "email", "fullWidth": true}
+            ],
+            [
+                {"name": "cellulare"},
+                {"name": "dataNascita"}
+            ],
+            [
+                {"name": "dataInizio"},
+                {"name": "dataFine"}
+            ],
+            [
+                {"name": "oreSettimanali"},
+                {"name": "oreMensili"}
+            ]
+        ]
+    }
+]

@@ -30,7 +30,7 @@ class AfterInstall
             'ConteggioPasti',
         ];
 
-        $otherToEnsure = ['Account', 'FondiSovvenzioni', 'Documents'];
+        $otherToEnsure = ['Account', 'Opportunity', 'Document'];
 
         $entitiesToHide = ['Lead', 'Case'];
 

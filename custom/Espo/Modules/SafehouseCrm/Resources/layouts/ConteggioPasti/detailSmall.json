@@ -18,17 +18,13 @@
                 {
                     "name": "foodUnitPrice"
                 },
-                {
-                    "name": "foodUnitPriceConverted"
-                }
+                false
             ],
             [
                 {
                     "name": "foodCost"
                 },
-                {
-                    "name": "foodCostConverted"
-                }
+                false
             ],
             [
                 {
