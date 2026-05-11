@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "nome"},
+                {"name": "cognome"}
+            ],
+            [
+                {"name": "stato"},
+                {"name": "cf"}
+            ],
+            [
+                {"name": "dataNascita"},
+                {"name": "luogoNascita"}
+            ],
+            [
+                {"name": "indirizzoResidenza"},
+                {"name": "citta"}
+            ],
+            [
+                {"name": "provincia"},
+                {"name": "dataIngresso"}
+            ],
+            [
+                {"name": "dataDimissione"},
+                false
+            ],
+            [
+                {"name": "incarichiRicoperti", "fullWidth": true}
+            ],
+            [
+                {"name": "annotazioni", "fullWidth": true}
+            ]
+        ]
+    }
+]
