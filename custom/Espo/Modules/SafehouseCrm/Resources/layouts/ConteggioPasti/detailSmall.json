@@ -1,0 +1,64 @@
+[
+    {
+        "rows": [
+            [
+                {
+                    "name": "name"
+                }
+            ],
+            [
+                {
+                    "name": "data"
+                },
+                {
+                    "name": "giornoSettimana"
+                }
+            ],
+            [
+                {
+                    "name": "foodUnitPrice"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "foodCost"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "minori"
+                },
+                {
+                    "name": "adulti"
+                }
+            ],
+            [
+                false,
+                {
+                    "name": "totalePasti"
+                }
+            ],
+            [
+                {
+                    "name": "description"
+                }
+            ]
+        ],
+        "style": "default",
+        "label": ""
+    },
+    {
+        "rows": [
+            [
+                {
+                    "name": "streamUpdatedAt"
+                }
+            ]
+        ],
+        "style": "default",
+        "noteStyle": "info",
+        "label": ""
+    }
+]

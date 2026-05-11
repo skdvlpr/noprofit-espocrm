@@ -1,0 +1,20 @@
+{
+    "controller": "controllers/record",
+    "color": "#3498db",
+    "iconClass": "fas fa-users",
+    "dynamicLogic": {
+        "fields": {
+            "tipoContratto": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "tipo",
+                            "value": "Dipendente"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

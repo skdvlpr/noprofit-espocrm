@@ -1,0 +1,36 @@
+{
+    "fields": {
+        "name": "Название",
+        "account": "Организация",
+        "stage": "Стадия",
+        "dataPresentazione": "Дата подачи",
+        "closeDate": "Дата закрытия",
+        "amount": "Сумма",
+        "contacts": "Контакты",
+        "description": "Описание"
+    },
+    "links": {
+        "contacts": "Контакты",
+        "documents": "Документы",
+        "campaign": "Кампания",
+        "originalLead": "Исходный лид"
+    },
+    "options": {
+        "stage": {
+            "Preparazione": "Подготовка",
+            "Proposta": "Предложение",
+            "Negoziazione": "Переговоры",
+            "Chiuso Positivamente": "Закрыто успешно",
+            "Chiuso Negativamente": "Закрыто неудачно"
+        }
+    },
+    "labels": {
+        "Opportunity": "Гранты и Финансирование",
+        "Create Opportunity": "Создать грант"
+    },
+    "presetFilters": {
+        "open": "Открытые",
+        "won": "Выигранные",
+        "lost": "Проигранные"
+    }
+}

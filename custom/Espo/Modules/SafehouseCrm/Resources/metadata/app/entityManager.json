@@ -1,0 +1,11 @@
+{
+    "VolontarioDipendente": {
+        "module": "SafehouseCrm"
+    },
+    "Associati": {
+        "module": "SafehouseCrm"
+    },
+    "ConteggioPasti": {
+        "module": "SafehouseCrm"
+    }
+}

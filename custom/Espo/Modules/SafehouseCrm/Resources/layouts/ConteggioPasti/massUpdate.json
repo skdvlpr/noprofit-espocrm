@@ -1,0 +1,6 @@
+[
+    {"name": "foodUnitPrice"},
+    {"name": "description"},
+    {"name": "assignedUser"},
+    {"name": "teams"}
+]

@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "Create AccountWebsite": "Создать сайт"
+    },
+    "fields": {
+        "name": "URL",
+        "urlLabel": "Метка",
+        "isPrimary": "Основной",
+        "account": "Организация",
+        "assignedUser": "Ответственный",
+        "teams": "Команды",
+        "createdAt": "Создано",
+        "modifiedAt": "Изменено",
+        "createdBy": "Создал",
+        "modifiedBy": "Изменил"
+    },
+    "links": {
+        "account": "Организация",
+        "assignedUser": "Ответственный",
+        "teams": "Команды",
+        "createdBy": "Создал",
+        "modifiedBy": "Изменил"
+    }
+}

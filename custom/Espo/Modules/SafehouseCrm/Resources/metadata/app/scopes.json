@@ -1,0 +1,23 @@
+{
+    "VolontarioDipendente": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "Associati": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "Associati": {
+        "module": "SafehouseCrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    }
+}

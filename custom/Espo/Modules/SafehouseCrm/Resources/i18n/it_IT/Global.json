@@ -1,0 +1,25 @@
+{
+    "scopeNames": {
+        "Opportunity": "Fondi e Finanziamenti",
+        "AccountWebsite": "Sito dell'Organizzazione",
+        "VolontarioDipendente": "Volontari / Dipendenti",
+        "Associati": "Associati",
+        "ConteggioPasti": "Conteggio Pasti"
+    },
+    "scopeNamesPlural": {
+        "Opportunity": "Fondi e Finanziamenti",
+        "AccountWebsite": "Siti delle Organizzazioni",
+        "VolontarioDipendente": "Volontari / Dipendenti",
+        "Associati": "Associati",
+        "ConteggioPasti": "Conteggio Pasti"
+    },
+    "navbarTabs": {
+        "mainSections": "Sezioni Principali",
+        "CRM": "Sezioni Principali"
+    },
+    "labels": {
+        "Create VolontarioDipendente": "Crea Nuovo",
+        "Create Associati": "Crea Nuovo",
+        "Create ConteggioPasti": "Crea Nuovo"
+    }
+}

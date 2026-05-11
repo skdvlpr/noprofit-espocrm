@@ -1,0 +1,25 @@
+{
+    "scopeNames": {
+        "Opportunity": "Grants & Funding",
+        "AccountWebsite": "Account Website",
+        "VolontarioDipendente": "Volunteers / Employees",
+        "Associati": "Associates",
+        "ConteggioPasti": "Meal Count"
+    },
+    "scopeNamesPlural": {
+        "Opportunity": "Grants & Funding",
+        "AccountWebsite": "Account Websites",
+        "VolontarioDipendente": "Volunteers / Employees",
+        "Associati": "Associates",
+        "ConteggioPasti": "Meal Count"
+    },
+    "navbarTabs": {
+        "mainSections": "Main Sections",
+        "CRM": "Main Sections"
+    },
+    "labels": {
+        "Create VolontarioDipendente": "Create New",
+        "Create Associati": "Create New",
+        "Create ConteggioPasti": "Create New"
+    }
+}

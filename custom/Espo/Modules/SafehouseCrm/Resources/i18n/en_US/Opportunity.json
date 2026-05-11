@@ -1,0 +1,36 @@
+{
+    "fields": {
+        "name": "Name",
+        "account": "Account",
+        "stage": "Stage",
+        "dataPresentazione": "Submission Date",
+        "closeDate": "Close Date",
+        "amount": "Amount",
+        "contacts": "Contacts",
+        "description": "Description"
+    },
+    "links": {
+        "contacts": "Contacts",
+        "documents": "Documents",
+        "campaign": "Campaign",
+        "originalLead": "Original Lead"
+    },
+    "options": {
+        "stage": {
+            "Preparazione": "Preparation",
+            "Proposta": "Proposal",
+            "Negoziazione": "Negotiation",
+            "Chiuso Positivamente": "Closed Won",
+            "Chiuso Negativamente": "Closed Lost"
+        }
+    },
+    "labels": {
+        "Opportunity": "Grants & Funding",
+        "Create Opportunity": "Create Grant"
+    },
+    "presetFilters": {
+        "open": "Open",
+        "won": "Won",
+        "lost": "Lost"
+    }
+}

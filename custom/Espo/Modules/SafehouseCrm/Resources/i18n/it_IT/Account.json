@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "settore": "Settore"
+    },
+    "links": {
+        "websites": "Siti Web"
+    },
+    "options": {
+        "settore": {
+            "Terzo Settore": "Terzo Settore",
+            "Assistenti Sociali": "Assistenti Sociali",
+            "Pubblico": "Pubblico"
+        }
+    }
+}

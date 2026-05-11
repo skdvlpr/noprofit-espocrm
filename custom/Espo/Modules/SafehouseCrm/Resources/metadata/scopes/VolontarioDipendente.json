@@ -1,0 +1,20 @@
+{
+    "entity": true,
+    "module": "SafehouseCrm",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "stream": true,
+    "color": "#3498db",
+    "iconClass": "fas fa-users",
+    "importable": true,
+    "customizable": true
+}

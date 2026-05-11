@@ -1,0 +1,7 @@
+{
+    "kanbanStatusIgnoreList": [
+        "Chiuso Negativamente"
+    ],
+    "color": "#c8e6c9",
+    "iconClass": "fas fa-hand-holding-usd"
+}

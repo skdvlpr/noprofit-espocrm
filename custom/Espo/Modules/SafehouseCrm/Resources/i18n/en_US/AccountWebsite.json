@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "Create AccountWebsite": "Create Account Website"
+    },
+    "fields": {
+        "name": "URL",
+        "urlLabel": "Label",
+        "isPrimary": "Primary",
+        "account": "Account",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "createdAt": "Created At",
+        "modifiedAt": "Modified At",
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By"
+    },
+    "links": {
+        "account": "Account",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By"
+    }
+}

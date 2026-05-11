@@ -1,0 +1,6 @@
+[
+    {"name": "name", "link": true},
+    {"name": "settore", "width": 18},
+    {"name": "type", "width": 16},
+    {"name": "billingAddressCountry", "width": 18}
+]

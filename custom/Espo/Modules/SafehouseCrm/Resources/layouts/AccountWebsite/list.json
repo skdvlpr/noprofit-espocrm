@@ -1,0 +1,6 @@
+[
+    {"name": "name", "link": true},
+    {"name": "urlLabel", "width": 25},
+    {"name": "isPrimary", "width": 12},
+    {"name": "account", "width": 25}
+]

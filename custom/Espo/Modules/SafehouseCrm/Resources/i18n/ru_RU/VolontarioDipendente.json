@@ -1,0 +1,42 @@
+{
+  "labels": {
+    "Create VolontarioDipendente": "Создать нового",
+    "VolontarioDipendente": "Сотрудники / Волонтеры"
+  },
+  "fields": {
+    "tipo": "Тип",
+    "nome": "Имя",
+    "cognome": "Фамилия",
+    "dataNascita": "Дата рождения",
+    "email": "Email",
+    "cellulare": "Мобильный",
+    "dataInizio": "Дата начала",
+    "dataFine": "Дата окончания",
+    "tipoContratto": "Тип контракта",
+    "oreSettimanali": "Часов в неделю",
+    "oreMensili": "Часов в месяц (расчет)",
+    "extra": "Доп. примечания",
+    "name": "ФИО",
+    "status": "Статус"
+  },
+  "links": {
+    "documents": "Документы",
+    "meetings": "Встречи"
+  },
+  "options": {
+    "tipo": {
+      "Volontario": "Волонтер",
+      "Dipendente": "Сотрудник"
+    },
+    "tipoContratto": {
+      "Tempo Indeterminato": "Бессрочный",
+      "Tempo Determinato": "Срочный",
+      "Partita IVA": "ИП / Фриланс",
+      "Altro": "Другое"
+    },
+    "status": {
+      "Attivo": "Активен",
+      "Inattivo": "Неактивен"
+    }
+  }
+}

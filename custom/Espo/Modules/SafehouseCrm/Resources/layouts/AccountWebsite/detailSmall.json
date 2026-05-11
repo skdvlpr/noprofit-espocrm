@@ -1,0 +1,17 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "urlLabel"},
+                {"name": "isPrimary"}
+            ],
+            [
+                {"name": "account", "fullWidth": true}
+            ]
+        ]
+    }
+]

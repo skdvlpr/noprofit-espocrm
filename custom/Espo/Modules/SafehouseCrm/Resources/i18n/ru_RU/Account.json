@@ -1,0 +1,15 @@
+{
+    "fields": {
+        "settore": "Сектор"
+    },
+    "links": {
+        "websites": "Сайты"
+    },
+    "options": {
+        "settore": {
+            "Terzo Settore": "Третий сектор",
+            "Assistenti Sociali": "Социальные работники",
+            "Pubblico": "Государственный"
+        }
+    }
+}

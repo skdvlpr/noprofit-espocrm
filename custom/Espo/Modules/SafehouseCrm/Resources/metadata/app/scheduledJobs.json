@@ -1,0 +1,14 @@
+{
+    "SafehouseCrmSyncVolontarioDipendenteStatus": {
+        "name": "Sync Volunteers / Employees Status",
+        "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\SyncVolontarioDipendenteStatus",
+        "scheduling": "5 0 * * *",
+        "isSystem": true
+    },
+    "SafehouseCrmSyncAssociatiStatus": {
+        "name": "Sync Associati Status",
+        "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\SyncAssociatiStatus",
+        "scheduling": "6 0 * * *",
+        "isSystem": true
+    }
+}

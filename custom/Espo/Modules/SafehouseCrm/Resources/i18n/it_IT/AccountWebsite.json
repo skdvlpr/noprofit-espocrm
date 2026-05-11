@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "Create AccountWebsite": "Crea Sito Web"
+    },
+    "fields": {
+        "name": "URL",
+        "urlLabel": "Etichetta",
+        "isPrimary": "Principale",
+        "account": "Account",
+        "assignedUser": "Utente Assegnato",
+        "teams": "Team",
+        "createdAt": "Creato Il",
+        "modifiedAt": "Modificato Il",
+        "createdBy": "Creato Da",
+        "modifiedBy": "Modificato Da"
+    },
+    "links": {
+        "account": "Account",
+        "assignedUser": "Utente Assegnato",
+        "teams": "Team",
+        "createdBy": "Creato Da",
+        "modifiedBy": "Modificato Da"
+    }
+}
