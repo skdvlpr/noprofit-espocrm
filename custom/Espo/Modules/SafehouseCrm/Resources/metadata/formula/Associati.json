@@ -1,3 +1,0 @@
-{
-    "beforeSaveCustomScript": "name = string\\trim(string\\concatenate(nome, ' ', cognome));\n\nif (cf != null) {\n    cf = string\\upperCase(string\\trim(cf));\n}\n\nif (provincia != null) {\n    provincia = string\\upperCase(string\\trim(provincia));\n}\n\n$today = datetime\\today();\n$startOk = ifThenElse(dataIngresso == null, true, dataIngresso <= $today);\n$endOk = ifThenElse(dataDimissione == null, true, dataDimissione >= $today);\nstato = ifThenElse($startOk && $endOk, 'Attivo', 'Inattivo');"
-}

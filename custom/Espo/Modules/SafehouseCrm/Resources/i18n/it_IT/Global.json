@@ -2,24 +2,24 @@
     "scopeNames": {
         "Opportunity": "Fondi e Finanziamenti",
         "AccountWebsite": "Sito dell'Organizzazione",
-        "VolontarioDipendente": "Volontari / Dipendenti",
-        "Associati": "Associati",
-        "ConteggioPasti": "Conteggio Pasti"
+        "VolunteerEmployee": "Volontari / Dipendenti",
+        "Member": "Associati",
+        "MealCount": "Conteggio Pasti"
     },
     "scopeNamesPlural": {
         "Opportunity": "Fondi e Finanziamenti",
         "AccountWebsite": "Siti delle Organizzazioni",
-        "VolontarioDipendente": "Volontari / Dipendenti",
-        "Associati": "Associati",
-        "ConteggioPasti": "Conteggio Pasti"
+        "VolunteerEmployee": "Volontari / Dipendenti",
+        "Member": "Associati",
+        "MealCount": "Conteggio Pasti"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
         "CRM": "Sezioni Principali"
     },
     "labels": {
-        "Create VolontarioDipendente": "Crea Nuovo",
-        "Create Associati": "Crea Nuovo",
-        "Create ConteggioPasti": "Crea Nuovo"
+        "Create VolunteerEmployee": "Crea Nuovo",
+        "Create Member": "Crea Nuovo",
+        "Create MealCount": "Crea Nuovo"
     }
 }

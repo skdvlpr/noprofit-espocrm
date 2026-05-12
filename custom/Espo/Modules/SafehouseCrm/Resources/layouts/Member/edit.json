@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "firstName"},
+                {"name": "lastName"}
+            ],
+            [
+                {"name": "status"},
+                {"name": "taxCode"}
+            ],
+            [
+                {"name": "user"},
+                {"name": "birthDate"}
+            ],
+            [
+                {"name": "emailAddress"},
+                {"name": "phoneNumber"}
+            ],
+            [
+                {"name": "birthPlace"},
+                {"name": "residenceAddress"}
+            ],
+            [
+                {"name": "city"},
+                {"name": "province"}
+            ],
+            [
+                {"name": "joinDate"},
+                {"name": "leaveDate"}
+            ],
+            [
+                {"name": "positionsHeld", "fullWidth": true}
+            ],
+            [
+                {"name": "notes", "fullWidth": true}
+            ]
+        ]
+    }
+]

@@ -7,12 +7,12 @@ use Espo\Core\Utils\Config\ConfigWriter;
 
 class AfterInstall
 {
-    private const TAB_AFTER = 'VolontarioDipendente';
+    private const TAB_AFTER = 'VolunteerEmployee';
     private const TAB_BEFORE_FALLBACK = 'WorkingTimeCalendar';
     private const TAB_LIST = [
-        'VolontarioDipendente',
-        'Associati',
-        'ConteggioPasti',
+        'VolunteerEmployee',
+        'Member',
+        'MealCount',
     ];
 
     /**

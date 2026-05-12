@@ -1,0 +1,39 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "firstName"},
+                {"name": "lastName"}
+            ],
+            [
+                {"name": "type"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "user"},
+                {"name": "birthDate"}
+            ],
+            [
+                {"name": "emailAddress"},
+                {"name": "phoneNumber"}
+            ],
+            [
+                {"name": "contractType"},
+                false
+            ],
+            [
+                {"name": "startDate"},
+                {"name": "endDate"}
+            ],
+            [
+                {"name": "weeklyHours"},
+                {"name": "monthlyHours"}
+            ],
+            [
+                {"name": "extra", "fullWidth": true}
+            ]
+        ]
+    }
+]

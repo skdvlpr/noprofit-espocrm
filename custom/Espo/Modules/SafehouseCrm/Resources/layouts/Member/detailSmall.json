@@ -1,0 +1,29 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "status"},
+                {"name": "taxCode"}
+            ],
+            [
+                {"name": "birthDate"},
+                {"name": "birthPlace"}
+            ],
+            [
+                {"name": "joinDate"},
+                {"name": "leaveDate"}
+            ],
+            [
+                {"name": "city"},
+                {"name": "province"}
+            ],
+            [
+                {"name": "positionsHeld", "fullWidth": true}
+            ]
+        ]
+    }
+]

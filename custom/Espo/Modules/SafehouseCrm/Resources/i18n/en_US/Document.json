@@ -3,13 +3,16 @@
         "status": "Status",
         "driveFileId": "Drive File ID"
     },
+    "links": {
+        "volunteerEmployees": "Volunteers / Employees"
+    },
     "options": {
         "status": {
-            "Bozza": "Draft",
-            "Attivo": "Active",
-            "Inattivo": "Inactive",
-            "Scaduto": "Expired",
-            "Archiviato": "Archived"
+            "Draft": "Draft",
+            "Active": "Active",
+            "Inactive": "Inactive",
+            "Expired": "Expired",
+            "Archived": "Archived"
         }
     },
     "tooltips": {

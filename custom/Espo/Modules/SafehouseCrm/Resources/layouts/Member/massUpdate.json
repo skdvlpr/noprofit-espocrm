@@ -1,0 +1,6 @@
+[
+    {"name": "status"},
+    {"name": "joinDate"},
+    {"name": "leaveDate"},
+    {"name": "province"}
+]

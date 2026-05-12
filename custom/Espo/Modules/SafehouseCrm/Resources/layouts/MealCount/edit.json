@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [{"name": "date"}, {"name": "foodUnitPrice"}],
+            [{"name": "adults"}, {"name": "minors"}]
+        ]
+    },
+    {
+        "name": "Description",
+        "label": "Description",
+        "rows": [
+            [{"name": "description", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "System",
+        "label": "System",
+        "rows": [
+            [{"name": "assignedUser"}, {"name": "teams"}]
+        ]
+    }
+]

@@ -2,16 +2,16 @@
     "fields": {
         "status": {
             "type": "enum",
-            "options": ["Bozza", "Attivo", "Inattivo", "Scaduto", "Archiviato"],
+            "options": ["Draft", "Active", "Inactive", "Expired", "Archived"],
             "style": {
-                "Bozza": "default",
-                "Attivo": "success",
-                "Inattivo": "warning",
-                "Scaduto": "danger",
-                "Archiviato": "default"
+                "Draft": "default",
+                "Active": "success",
+                "Inactive": "warning",
+                "Expired": "danger",
+                "Archived": "default"
             },
-            "default": "Bozza",
-            "activeOptions": ["Attivo"]
+            "default": "Draft",
+            "activeOptions": ["Active"]
         },
         "driveFileId": {
             "type": "varchar",
@@ -28,9 +28,9 @@
         }
     },
     "links": {
-        "volontariDipendenti": {
+        "volunteerEmployees": {
             "type": "hasMany",
-            "entity": "VolontarioDipendente",
+            "entity": "VolunteerEmployee",
             "foreign": "documents"
         }
     }

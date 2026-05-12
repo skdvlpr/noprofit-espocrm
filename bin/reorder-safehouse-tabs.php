@@ -7,9 +7,9 @@
  * Idempotent: re-running has no effect once the order matches.
  *
  * Affected entities (the canonical Safehouse domain set, in this order):
- *   - VolontarioDipendente
- *   - Associati
- *   - ConteggioPasti
+ *   - VolunteerEmployee
+ *   - Member
+ *   - MealCount
  *
  * Usage:
  *   php bin/reorder-safehouse-tabs.php
@@ -25,7 +25,7 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 
-$entitiesToMove = ['VolontarioDipendente', 'Associati', 'ConteggioPasti'];
+$entitiesToMove = ['VolunteerEmployee', 'Member', 'MealCount'];
 
 $app = new Application();
 $container = $app->getContainer();

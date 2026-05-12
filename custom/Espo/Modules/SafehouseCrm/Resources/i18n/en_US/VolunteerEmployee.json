@@ -1,0 +1,43 @@
+{
+  "labels": {
+    "Create VolunteerEmployee": "Create New",
+    "VolunteerEmployee": "Volunteers / Employees"
+  },
+  "fields": {
+    "type": "Type",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "birthDate": "Date of Birth",
+    "emailAddress": "Email",
+    "phoneNumber": "Phone",
+    "user": "Linked User",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "contractType": "Contract Type",
+    "weeklyHours": "Weekly Hours",
+    "monthlyHours": "Monthly Hours (calc)",
+    "extra": "Extra Notes",
+    "name": "Full Name",
+    "status": "Status"
+  },
+  "links": {
+    "documents": "Documents",
+    "meetings": "Meetings"
+  },
+  "options": {
+    "type": {
+      "Volunteer": "Volunteer",
+      "Employee": "Employee"
+    },
+    "contractType": {
+      "Permanent": "Permanent",
+      "FixedTerm": "Fixed-term",
+      "Freelance": "Freelance / VAT",
+      "Other": "Other"
+    },
+    "status": {
+      "Active": "Active",
+      "Inactive": "Inactive"
+    }
+  }
+}

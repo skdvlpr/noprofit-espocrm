@@ -1,0 +1,9 @@
+[
+    {"name": "date", "link": true},
+    {"name": "adults"},
+    {"name": "minors"},
+    {"name": "totalMeals"},
+    {"name": "foodUnitPrice"},
+    {"name": "foodCost"},
+    {"name": "assignedUser"}
+]

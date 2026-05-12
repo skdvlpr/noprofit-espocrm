@@ -1,0 +1,31 @@
+{
+  "labels": {
+    "Create Member": "Создать участника",
+    "Member": "Участники"
+  },
+  "fields": {
+    "name": "Полное имя",
+    "status": "Статус",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "birthPlace": "Место рождения",
+    "birthDate": "Дата рождения",
+    "taxCode": "Налоговый код",
+    "residenceAddress": "Адрес проживания",
+    "city": "Город",
+    "province": "Провинция",
+    "joinDate": "Дата вступления",
+    "leaveDate": "Дата выхода",
+    "positionsHeld": "Занимаемые роли",
+    "notes": "Заметки",
+    "emailAddress": "Email",
+    "phoneNumber": "Телефон",
+    "user": "Связанный пользователь"
+  },
+  "options": {
+    "status": {
+      "Active": "Активный",
+      "Inactive": "Неактивный"
+    }
+  }
+}

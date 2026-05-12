@@ -17,15 +17,15 @@ return function (Container $container) {
     $configWriter = $injectableFactory->create(ConfigWriter::class);
 
     $tabList = $config->get('tabList', []);
-    $entityName = 'ConteggioPasti';
+    $entityName = 'MealCount';
 
     if (in_array($entityName, $tabList, true)) {
         echo "Tab '$entityName' already exists.\n";
         return;
     }
 
-    // Insert after Associati if exists
-    $afterIndex = array_search('Associati', $tabList, true);
+    // Insert after Member if exists
+    $afterIndex = array_search('Member', $tabList, true);
     if ($afterIndex !== false) {
         array_splice($tabList, $afterIndex + 1, 0, [$entityName]);
     } else {

@@ -1,19 +1,19 @@
 {
-    "VolontarioDipendente": {
+    "VolunteerEmployee": {
         "module": "SafehouseCrm",
         "type": "base",
         "entity": true,
         "object": true,
         "acl": true
     },
-    "Associati": {
+    "Member": {
         "module": "SafehouseCrm",
         "type": "base",
         "entity": true,
         "object": true,
         "acl": true
     },
-    "Associati": {
+    "MealCount": {
         "module": "SafehouseCrm",
         "type": "base",
         "entity": true,

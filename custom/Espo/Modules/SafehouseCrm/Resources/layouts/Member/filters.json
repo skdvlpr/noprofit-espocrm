@@ -1,0 +1,15 @@
+[
+    "status",
+    "taxCode",
+    "joinDate",
+    "leaveDate",
+    "user",
+    "emailAddress",
+    "phoneNumber",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy",
+    "modifiedAt",
+    "streamUpdatedAt"
+]

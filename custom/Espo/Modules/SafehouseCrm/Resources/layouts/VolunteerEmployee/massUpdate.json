@@ -1,0 +1,7 @@
+[
+    {"name": "type"},
+    {"name": "contractType"},
+    {"name": "startDate"},
+    {"name": "endDate"},
+    {"name": "weeklyHours"}
+]

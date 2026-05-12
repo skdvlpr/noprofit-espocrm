@@ -1,3 +1,0 @@
-{
-    "beforeSaveCustomScript": "name = string\\trim(string\\concatenate(nome, ' ', cognome));\noreMensili = ifThenElse(oreSettimanali != null, number\\round(oreSettimanali * 4.33, 2), null);\n\n$today = datetime\\today();\n$startOk = ifThenElse(dataInizio == null, true, dataInizio <= $today);\n$endOk = ifThenElse(dataFine == null, true, dataFine >= $today);\nstatus = ifThenElse($startOk && $endOk, 'Attivo', 'Inattivo');"
-}

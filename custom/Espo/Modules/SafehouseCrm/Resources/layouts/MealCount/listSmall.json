@@ -1,0 +1,6 @@
+[
+    {"name": "date", "link": true},
+    {"name": "dayOfWeek"},
+    {"name": "totalMeals"},
+    {"name": "foodCost"}
+]

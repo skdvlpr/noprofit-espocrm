@@ -1,12 +1,12 @@
 <?php
 /**
- * Provision the canonical SafehouseCrm roles (Admin, Dipendente, Manager,
- * Volontario, Associato) and test users (test_dipendente, test_manager,
+ * Provision the canonical SafehouseCrm roles (Admin, Employee, Manager,
+ * Volunteer, Member) and test users (test_dipendente, test_manager,
  * test_volontario, test_associato), all idempotently.
  *
  * - Test password for all test users: Test1234!
- * - Volontario gets field-level ACL hiding ConteggioPasti.foodCost and
- *   ConteggioPasti.foodUnitPrice (Task 2.1 security requirement).
+ * - Volunteer role gets field-level ACL hiding MealCount.foodCost and
+ *   MealCount.foodUnitPrice (Task 2.1 security requirement).
  *
  * Usage:
  *   php bin/setup-roles.php

@@ -27,7 +27,7 @@ $roles = $em->getRDBRepositoryByClass(Role::class)->find();
 
 $domainEntities = [
     'Account', 'AccountWebsite', 'Contact', 'Opportunity',
-    'VolontarioDipendente', 'Associati', 'ConteggioPasti', 'Document', 'Lead', 'Case',
+    'VolunteerEmployee', 'Member', 'MealCount', 'Document', 'Lead', 'Case',
 ];
 
 $count = 0;
