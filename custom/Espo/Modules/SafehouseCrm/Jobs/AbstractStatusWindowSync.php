@@ -82,19 +82,17 @@ abstract class AbstractStatusWindowSync implements JobDataLess
     {
         return $this->entityManager
             ->getRDBRepository($this->entityType())
+            ->where([$this->statusField() => $this->inactiveValue()])
             ->where([
-                $this->statusField() => $this->inactiveValue(),
-                [
-                    'OR' => [
-                        [$this->startField() => null],
-                        [$this->startField() . '<=' => $today],
-                    ],
+                'OR' => [
+                    [$this->startField() => null],
+                    [$this->startField() . '<=' => $today],
                 ],
-                [
-                    'OR' => [
-                        [$this->endField() => null],
-                        [$this->endField() . '>=' => $today],
-                    ],
+            ])
+            ->where([
+                'OR' => [
+                    [$this->endField() => null],
+                    [$this->endField() . '>=' => $today],
                 ],
             ])
             ->limit(0, static::BATCH_SIZE)

@@ -65,6 +65,22 @@
         "annotazioni": {
             "type": "wysiwyg"
         },
+        "emailAddress": {
+            "type": "email",
+            "required": true,
+            "isPersonalData": true
+        },
+        "phoneNumber": {
+            "type": "phone",
+            "typeList": ["Mobile", "Office", "Home", "Other"],
+            "defaultType": "Mobile",
+            "isPersonalData": true
+        },
+        "user": {
+            "type": "link",
+            "required": true,
+            "tooltip": "Linked user account. Primary email/phone are synced from this user."
+        },
         "createdAt": {
             "type": "datetime",
             "readOnly": true
@@ -93,6 +109,10 @@
         }
     },
     "links": {
+        "user": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
         "createdBy": {
             "type": "belongsTo",
             "entity": "User"
@@ -114,7 +134,8 @@
     },
     "collection": {
         "orderBy": "name",
-        "order": "asc"
+        "order": "asc",
+        "textFilterFields": ["name", "nome", "cognome", "cf", "emailAddress"]
     },
     "indexes": {
         "name": {
@@ -125,6 +146,10 @@
         },
         "dataDimissioneStato": {
             "columns": ["dataDimissione", "stato", "deleted"]
+        },
+        "user": {
+            "type": "unique",
+            "columns": ["userId", "deleted"]
         }
     },
     "optimisticConcurrencyControl": true,

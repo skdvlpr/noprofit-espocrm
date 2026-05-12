@@ -1,4 +1,10 @@
 {
+    "DeactivateExpiredVolontarioDipendente": {
+        "name": "Sync Volunteers / Employees Status (legacy name)",
+        "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\DeactivateExpiredVolontarioDipendente",
+        "scheduling": "5 0 * * *",
+        "isSystem": true
+    },
     "SafehouseCrmSyncVolontarioDipendenteStatus": {
         "name": "Sync Volunteers / Employees Status",
         "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\SyncVolontarioDipendenteStatus",

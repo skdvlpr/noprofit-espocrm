@@ -1,10 +1,10 @@
 <?php
 /**
- * Provision the canonical SafehouseCrm roles (Admin, Dipendente, Volontario,
- * Associato) and three test users (test_dipendente, test_volontario,
- * test_associato), all idempotently.
+ * Provision the canonical SafehouseCrm roles (Admin, Dipendente, Manager,
+ * Volontario, Associato) and test users (test_dipendente, test_manager,
+ * test_volontario, test_associato), all idempotently.
  *
- * - Test password for all three users: Test1234!
+ * - Test password for all test users: Test1234!
  * - Volontario gets field-level ACL hiding ConteggioPasti.foodCost and
  *   ConteggioPasti.foodUnitPrice (Task 2.1 security requirement).
  *
@@ -41,19 +41,23 @@ foreach ($setup->provisionTeams() as $name => $status) {
     echo "  - $name: $status\n";
 }
 
-echo "\nProvisioning test users (password: " . RoleSetup::TEST_PASSWORD . ")...\n";
-foreach ($setup->provisionTestUsers() as $userName => $status) {
-    echo "  - $userName: $status\n";
+echo "\nProvisioning test users, team memberships, and linked profiles (password: "
+    . RoleSetup::TEST_PASSWORD . ")...\n";
+$testReport = $setup->provisionTestUsersTeamsAndProfiles();
+
+echo "  Users:\n";
+foreach ($testReport['users'] as $userName => $status) {
+    echo "    - $userName: $status\n";
 }
 
-echo "\nProvisioning team memberships for test users...\n";
-foreach ($setup->provisionTeamMemberships() as $userName => $status) {
-    echo "  - $userName: $status\n";
+echo "  Team memberships:\n";
+foreach ($testReport['teamMemberships'] as $userName => $status) {
+    echo "    - $userName: $status\n";
 }
 
-echo "\nProvisioning linked domain records for test users...\n";
-foreach ($setup->provisionTestProfiles() as $userName => $status) {
-    echo "  - $userName: $status\n";
+echo "  Linked domain records:\n";
+foreach ($testReport['profiles'] as $userName => $status) {
+    echo "    - $userName: $status\n";
 }
 
 echo "\nDone. Admin -> Repair -> Rebuild -> Clear Cache recommended.\n";

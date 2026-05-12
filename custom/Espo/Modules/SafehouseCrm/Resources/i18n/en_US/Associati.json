@@ -17,7 +17,10 @@
     "dataIngresso": "Join Date",
     "dataDimissione": "Resignation Date",
     "incarichiRicoperti": "Roles Held",
-    "annotazioni": "Notes"
+    "annotazioni": "Notes",
+    "emailAddress": "Email",
+    "phoneNumber": "Phone",
+    "user": "Linked User"
   },
   "options": {
     "stato": {

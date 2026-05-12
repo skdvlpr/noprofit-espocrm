@@ -12,12 +12,16 @@
                 {"name": "status"}
             ],
             [
-                {"name": "dataNascita"},
-                {"name": "email"}
+                {"name": "user"},
+                {"name": "dataNascita"}
             ],
             [
-                {"name": "cellulare"},
-                {"name": "tipoContratto"}
+                {"name": "emailAddress"},
+                {"name": "phoneNumber"}
+            ],
+            [
+                {"name": "tipoContratto"},
+                false
             ],
             [
                 {"name": "dataInizio"},

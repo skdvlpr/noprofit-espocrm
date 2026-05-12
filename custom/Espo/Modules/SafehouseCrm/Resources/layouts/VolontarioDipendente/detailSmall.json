@@ -10,11 +10,18 @@
                 {"name": "status"}
             ],
             [
-                {"name": "email", "fullWidth": true}
+                {"name": "user"},
+                false
             ],
             [
-                {"name": "cellulare"},
-                {"name": "dataNascita"}
+                {"name": "emailAddress", "fullWidth": true}
+            ],
+            [
+                {"name": "phoneNumber", "fullWidth": true}
+            ],
+            [
+                {"name": "dataNascita"},
+                false
             ],
             [
                 {"name": "dataInizio"},

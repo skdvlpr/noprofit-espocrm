@@ -12,20 +12,24 @@
                 {"name": "cf"}
             ],
             [
-                {"name": "dataNascita"},
-                {"name": "luogoNascita"}
+                {"name": "user"},
+                {"name": "dataNascita"}
             ],
             [
-                {"name": "indirizzoResidenza"},
-                {"name": "citta"}
+                {"name": "emailAddress"},
+                {"name": "phoneNumber"}
             ],
             [
-                {"name": "provincia"},
-                {"name": "dataIngresso"}
+                {"name": "luogoNascita"},
+                {"name": "indirizzoResidenza"}
             ],
             [
-                {"name": "dataDimissione"},
-                false
+                {"name": "citta"},
+                {"name": "provincia"}
+            ],
+            [
+                {"name": "dataIngresso"},
+                {"name": "dataDimissione"}
             ],
             [
                 {"name": "incarichiRicoperti", "fullWidth": true}
