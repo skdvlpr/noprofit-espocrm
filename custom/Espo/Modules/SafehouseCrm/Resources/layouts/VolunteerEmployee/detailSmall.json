@@ -1,0 +1,36 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "type"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "user"},
+                false
+            ],
+            [
+                {"name": "emailAddress", "fullWidth": true}
+            ],
+            [
+                {"name": "phoneNumber", "fullWidth": true}
+            ],
+            [
+                {"name": "birthDate"},
+                false
+            ],
+            [
+                {"name": "startDate"},
+                {"name": "endDate"}
+            ],
+            [
+                {"name": "weeklyHours"},
+                {"name": "monthlyHours"}
+            ]
+        ]
+    }
+]

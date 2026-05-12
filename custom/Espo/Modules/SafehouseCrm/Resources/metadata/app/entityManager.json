@@ -1,11 +1,11 @@
 {
-    "VolontarioDipendente": {
+    "VolunteerEmployee": {
         "module": "SafehouseCrm"
     },
-    "Associati": {
+    "Member": {
         "module": "SafehouseCrm"
     },
-    "ConteggioPasti": {
+    "MealCount": {
         "module": "SafehouseCrm"
     }
 }

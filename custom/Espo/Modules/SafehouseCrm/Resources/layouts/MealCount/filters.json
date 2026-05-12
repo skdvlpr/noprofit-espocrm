@@ -1,0 +1,10 @@
+[
+    "date",
+    "dayOfWeek",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy",
+    "modifiedAt",
+    "streamUpdatedAt"
+]

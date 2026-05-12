@@ -2,24 +2,24 @@
     "scopeNames": {
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайт организации",
-        "VolontarioDipendente": "Сотрудники / Волонтеры",
-        "Associati": "Ассоциаты",
-        "ConteggioPasti": "Учет питания"
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
+        "Member": "Участники",
+        "MealCount": "Учет питания"
     },
     "scopeNamesPlural": {
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайты организаций",
-        "VolontarioDipendente": "Сотрудники / Волонтеры",
-        "Associati": "Ассоциаты",
-        "ConteggioPasti": "Учет питания"
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
+        "Member": "Участники",
+        "MealCount": "Учет питания"
     },
     "navbarTabs": {
         "mainSections": "Главные разделы",
         "CRM": "Главные разделы"
     },
     "labels": {
-        "Create VolontarioDipendente": "Создать новый",
-        "Create Associati": "Создать новый",
-        "Create ConteggioPasti": "Создать новый"
+        "Create VolunteerEmployee": "Создать новый",
+        "Create Member": "Создать новый",
+        "Create MealCount": "Создать новый"
     }
 }

@@ -1,0 +1,26 @@
+{
+    "labels": {
+        "MealCount": "Meal Count",
+        "Create MealCount": "Create Meal Count"
+    },
+    "fields": {
+        "name": "Name",
+        "date": "Date",
+        "dayOfWeek": "Day of Week",
+        "adults": "Adults",
+        "minors": "Minors",
+        "totalMeals": "Total Meals",
+        "foodUnitPrice": "Food Unit Price",
+        "foodCost": "Food Cost",
+        "description": "Description"
+    },
+    "links": {
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By",
+        "assignedUser": "Assigned User",
+        "teams": "Teams"
+    },
+    "tooltips": {
+        "dayOfWeek": "Automatically calculated from the date."
+    }
+}

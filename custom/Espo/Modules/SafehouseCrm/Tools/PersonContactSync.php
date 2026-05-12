@@ -15,9 +15,9 @@ use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 use stdClass;
 
 /**
- * Keeps {@see VolontarioDipendente} / {@see Associati} email & phone data aligned
- * with the linked {@see User} record and enforces cross-record uniqueness
- * between those two entity types only.
+ * Keeps VolunteerEmployee / Member email & phone data aligned with the linked
+ * {@see User} record and enforces cross-record uniqueness between those two
+ * entity types only.
  *
  * When {@see SaveOption::SKIP_ALL} is set, this class does nothing (same as other
  * hooks) so imports/migrations can bypass checks intentionally.
@@ -25,7 +25,7 @@ use stdClass;
 class PersonContactSync
 {
     /** @var string[] */
-    public const PERSON_ENTITY_TYPES = ['VolontarioDipendente', 'Associati'];
+    public const PERSON_ENTITY_TYPES = ['VolunteerEmployee', 'Member'];
 
     public function __construct(
         private EntityManager $entityManager,

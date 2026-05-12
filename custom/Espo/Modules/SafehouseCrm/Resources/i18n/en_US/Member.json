@@ -1,0 +1,31 @@
+{
+  "labels": {
+    "Create Member": "Create Member",
+    "Member": "Members"
+  },
+  "fields": {
+    "name": "Full Name",
+    "status": "Status",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "birthPlace": "Birth Place",
+    "birthDate": "Birth Date",
+    "taxCode": "Fiscal Code",
+    "residenceAddress": "Residence Address",
+    "city": "City",
+    "province": "Province",
+    "joinDate": "Join Date",
+    "leaveDate": "Resignation Date",
+    "positionsHeld": "Roles Held",
+    "notes": "Notes",
+    "emailAddress": "Email",
+    "phoneNumber": "Phone",
+    "user": "Linked User"
+  },
+  "options": {
+    "status": {
+      "Active": "Active",
+      "Inactive": "Inactive"
+    }
+  }
+}

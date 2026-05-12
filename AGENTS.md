@@ -22,11 +22,15 @@ Before implementing ANY task, executor MUST:
 ### Entities in scope:
 
 - `Account` — modified core entity
-- `FondiSovvenzioni` — Opportunity renamed/extended
-- `VolontarioDipendente` — new entity (type: Person)
-- `Associati` — new entity (type: Person)
-- `ConteggioPasti` — new entity (type: Base)
-- `Documents` — modified core entity
+- `Opportunity` — modified core entity (labelled "Grants & Funding" / "Fondi e Finanziamenti" via i18n)
+- `VolunteerEmployee` — new entity (Volunteers / Employees)
+- `Member` — new entity (Members / Associati)
+- `MealCount` — new entity (Meal Count / Conteggio Pasti)
+- `Document` — modified core entity
+
+> Entity types, field names, enum option values and PHP namespaces use English.
+> Italian wording (e.g. "Volontario", "Associati", "Conteggio Pasti") lives only
+> in `Resources/i18n/it_IT/*.json` so the UI keeps its localised text.
 
 ## SECTION 2 — DIRECTORY STRUCTURE (CANONICAL)
 
@@ -81,9 +85,9 @@ Use the correct base type:
 
 | **Type**   | **Use for**                                          |
 | ---------- | ---------------------------------------------------- |
-| `Base`     | Non-person records: ConteggioPasti, FondiSovvenzioni |
+| `Base`     | Non-person records: MealCount, Opportunity           |
 | `BasePlus` | Base + stream/followers                              |
-| `Person`   | People records: VolontarioDipendente, Associati      |
+| `Person`   | People records: VolunteerEmployee, Member            |
 | `Company`  | Organisation records                                 |
 | `Event`    | Calendar/time-based records                          |
 
@@ -128,7 +132,7 @@ File: `Resources/metadata/scopes/{EntityName}.json`
 
 **REQUIRED**: `"entity": true` — without it the entity will not appear in UI or API.
 
-**OPTIONAL**: `"type": "Base"` — verified empirically in 9.3.6 that working entities (`Associati`, `VolontarioDipendente`) omit it and Espo defaults correctly. Add only if explicitly needed (e.g. `Person`, `BasePlus`, `Event`).
+**OPTIONAL**: `"type": "Base"` — verified empirically in 9.3.6 that working entities (`Member`, `VolunteerEmployee`) omit it and Espo defaults correctly. Add only if explicitly needed (e.g. `Person`, `BasePlus`, `Event`).
 
 ### ENT-004 — Navigation registration
 
@@ -138,7 +142,7 @@ Navigation tabs are managed via `AfterInstall.php` using `ConfigWriter`. **NEVER
 // AfterInstall.php
 $config = $this->getHelper('config');
 $tabList = $config->get('tabList', []);
-$toAdd = ['ConteggioPasti', 'VolontarioDipendente', 'Associati'];
+$toAdd = ['MealCount', 'VolunteerEmployee', 'Member'];
 foreach ($toAdd as $item) {
     if (!in_array($item, $tabList)) {
         $tabList[] = $item;
@@ -174,7 +178,7 @@ $config->save();
 ### FLD-002 — Currency fields
 
 ```
-"costoPasto": {
+"foodUnitPrice": {
   "type": "currency",
   "required": false,
   "default": 1.5,
@@ -187,23 +191,24 @@ $config->save();
 ### FLD-003 — Enum fields
 
 ```
-"tipoPasto": {
+"mealType": {
   "type": "enum",
-  "options": ["Colazione", "Pranzo", "Cena"],
-  "default": "Pranzo"
+  "options": ["Breakfast", "Lunch", "Dinner"],
+  "default": "Lunch"
 }
 ```
 
-Translated options go in i18n, NOT in `entityDefs`:
+Translated options go in i18n, NOT in `entityDefs`. Code uses English keys; the
+Italian-speaking UI gets its strings from `Resources/i18n/it_IT/*.json`:
 
 ```
-// Resources/i18n/it_IT/ConteggioPasti.json
+// Resources/i18n/it_IT/MealCount.json
 {
   "options": {
-    "tipoPasto": {
-      "Colazione": "Colazione",
-      "Pranzo": "Pranzo",
-      "Cena": "Cena"
+    "mealType": {
+      "Breakfast": "Colazione",
+      "Lunch": "Pranzo",
+      "Dinner": "Cena"
     }
   }
 }
@@ -212,7 +217,7 @@ Translated options go in i18n, NOT in `entityDefs`:
 ### FLD-004 — Computed/Formula fields
 
 ```
-"totaleImporto": {
+"totalAmount": {
   "type": "currency",
   "notStorable": true,
   "readOnly": true
@@ -258,7 +263,7 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 | `sidePanels.json`   | Right side panels in detail  | NO            |
 | `bottomPanels.json` | Bottom relationship panels   | NO            |
 
-**EMPIRICALLY VERIFIED (9.3.6)**: working entities `Associati` and `VolontarioDipendente` ship without `edit.json` and rely on `detail.json`. Adding a custom `edit.json` is fine, but then **every field name and every cell** must be valid — see LAY-003.
+**EMPIRICALLY VERIFIED (9.3.6)**: working entities `Member` and `VolunteerEmployee` ship without `edit.json` and rely on `detail.json`. Adding a custom `edit.json` is fine, but then **every field name and every cell** must be valid — see LAY-003.
 
 ### LAY-003 — detail.json minimal structure
 
@@ -268,9 +273,9 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
     "name": "Overview",
     "label": "Overview",
     "rows": [
-      [{ "name": "name" }, { "name": "dataPasto" }],
-      [{ "name": "tipoPasto" }, { "name": "numeroPorzioni" }],
-      [{ "name": "costoPasto" }, false]
+      [{ "name": "name" }, { "name": "mealDate" }],
+      [{ "name": "mealType" }, { "name": "portionCount" }],
+      [{ "name": "foodUnitPrice" }, false]
     ]
   }
 ]
@@ -285,10 +290,10 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 ```
 [
   { "name": "name", "link": true },
-  { "name": "dataPasto" },
-  { "name": "tipoPasto" },
-  { "name": "numeroPorzioni" },
-  { "name": "costoPasto" }
+  { "name": "mealDate" },
+  { "name": "mealType" },
+  { "name": "portionCount" },
+  { "name": "foodUnitPrice" }
 ]
 ```
 
@@ -300,8 +305,8 @@ File: `Resources/layouts/{EntityName}/filters.json` (modern). Older entities may
 
 ```
 [
-  { "name": "dataPasto" },
-  { "name": "tipoPasto" }
+  { "name": "mealDate" },
+  { "name": "mealType" }
 ]
 ```
 
@@ -319,7 +324,7 @@ Always run: **Admin → Repair → Rebuild → Clear Cache** Browser hard-refres
 
 ```
 {
-  "beforeSaveCustomScript": "if (entity\\isNew() && dataPasto == null) {\n    dataPasto = datetime\\today();\n}\ntotaleImporto = numeroPorzioni * costoPasto;"
+  "beforeSaveCustomScript": "if (entity\\isNew() && mealDate == null) {\n    mealDate = datetime\\today();\n}\ntotalAmount = portionCount * foodUnitPrice;"
 }
 ```
 
@@ -374,7 +379,7 @@ while (CONDITION) { ... }
 
 **Verified day-of-week**: `datetime\dayOfWeek(date)` returns **0..6** with **0 = Sunday**, 1 = Monday, ..., 6 = Saturday (confirmed in `application/Espo/Core/Formula/Functions/DatetimeGroup/DayOfWeekType.php` via Carbon `isoFormat('d')`).
 
-**Common pitfalls (learned from ConteggioPasti debug session, 2026-05-10):**
+**Common pitfalls (learned from MealCount debug session, 2026-05-10):**
 
 - ❌ `add(adulti, minori)` → ✅ `adulti + minori`
 - ❌ `multiply(a, b)` → ✅ `a * b`
@@ -386,14 +391,14 @@ while (CONDITION) { ... }
 
 ### FRM-004 — Time-based automation
 
-For auto-status changes triggered by date (e.g. Associati → Inattivo when `dataDimissione` passes): Use **Scheduled Job** with "Execute Formula" action. Formula alone is insufficient for time-based triggers.
+For auto-status changes triggered by date (e.g. Member.status flips to `Inactive` when `leaveDate` passes): Use a **Scheduled Job** with the canonical `SyncMemberStatus` / `SyncVolunteerEmployeeStatus` runner. Formula alone is insufficient for time-based triggers.
 
 ### FRM-005 — Verified working entities (use as templates)
 
 Reference these files when in doubt — they are confirmed to work in 9.3.6:
 
-- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/VolontarioDipendente.json` — uses `if {} else if {}` block syntax, direct assignments, `datetime\today`, `ifThenElse`, `number\round`, `entity\isNew` is NOT needed because it uses null checks.
-- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/ConteggioPasti.json` — uses `if (entity\isNew()) {}` block, arithmetic operators, `datetime\dayOfWeek` + `ifThenElse` chain for localized day-of-week names.
+- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/VolunteerEmployee.json` — uses `if {} else if {}` block syntax, direct assignments, `datetime\today`, `ifThenElse`, `number\round`, `entity\isNew` is NOT needed because it uses null checks.
+- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/MealCount.json` — uses `if (entity\isNew()) {}` block, arithmetic operators, `datetime\dayOfWeek` + `ifThenElse` chain for English day-of-week names (Italian translation lives in `Resources/i18n/it_IT/MealCount.json`).
 
 **Debugging workflow (mandatory after every formula change):**
 1. Edit formula JSON.
@@ -442,10 +447,10 @@ File: `Resources/metadata/clientDefs/{EntityName}.json`
 {
   "dynamicLogic": {
     "fields": {
-      "tipoContratto": {
+      "contractType": {
         "visible": {
           "conditionGroup": [
-            { "type": "equals", "attribute": "tipo", "value": "Dipendente" }
+            { "type": "equals", "attribute": "type", "value": "Employee" }
           ]
         }
       }
@@ -469,18 +474,18 @@ File: `Resources/metadata/clientDefs/{EntityName}.json`
 {
   "fields": {
     "name": "Name",
-    "dataPasto": "Meal Date",
-    "tipoPasto": "Meal Type",
-    "numeroPorzioni": "Portions",
-    "costoPasto": "Unit Cost",
-    "totaleImporto": "Total Amount"
+    "mealDate": "Meal Date",
+    "mealType": "Meal Type",
+    "portionCount": "Portions",
+    "foodUnitPrice": "Unit Cost",
+    "totalAmount": "Total Amount"
   },
   "labels": {
-    "ConteggioPasti": "Meal Count",
-    "ConteggioPastiPlural": "Meal Counts"
+    "MealCount": "Meal Count",
+    "MealCountPlural": "Meal Counts"
   },
   "options": {
-    "tipoPasto": {
+    "mealType": {
       "Colazione": "Breakfast",
       "Pranzo": "Lunch",
       "Cena": "Dinner"
@@ -510,7 +515,7 @@ Use hooks ONLY when formula cannot achieve the goal:
 
 ```
 <?php
-namespace Espo\Modules\SafehouseCrm\Hooks\ConteggioPasti;
+namespace Espo\Modules\SafehouseCrm\Hooks\MealCount;
 
 use Espo\Core\Hook\HookInjection;
 use Espo\ORM\Entity;
@@ -559,7 +564,7 @@ class AfterInstall
         // 1. Add tabs to navigation
         $config = $app->getContainer()->get('config');
         $tabList = $config->get('tabList', []);
-        $entitiesToAdd = ['ConteggioPasti', 'VolontarioDipendente', 'Associati', 'FondiSovvenzioni'];
+        $entitiesToAdd = ['MealCount', 'VolunteerEmployee', 'Member'];
 
         foreach ($entitiesToAdd as $tab) {
             if (!in_array($tab, $tabList)) {
@@ -618,14 +623,14 @@ zip -r dist/safehouse-crm-v${VERSION}.zip \
 
 All list views must use EspoCRM pagination (`maxSize` parameter). Never load full entity dataset into PHP memory for aggregation.
 
-### PERF-002 — ConteggioPasti aggregations
+### PERF-002 — MealCount aggregations
 
 Weekly/monthly totals must use DB-level GROUP BY via:
 
 - EspoCRM Report module (preferred, no custom code)
 - EntityManager query with aggregate functions
 
-**PROHIBITED**: PHP loop over full `ConteggioPasti` dataset.
+**PROHIBITED**: PHP loop over full `MealCount` dataset.
 
 ### PERF-003 — notStorable fields on list views
 
@@ -640,6 +645,19 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 3. Browser hard-refresh (Ctrl+Shift+R)
 4. Check browser console for JS errors
 5. Check EspoCRM log: `data/logs/espo.log`
+
+### Upgrading an existing database (Italian → English schema)
+
+If the database was created **before** the English entity/field rename (tables such as
+`volontario_dipendente`, `associati`, `conteggio_pasti`), run the one-shot migration **once**
+per environment, then rebuild:
+
+1. `ddev exec php bin/migrate-rename-italian.php` (idempotent; renames tables/columns, updates polymorphic `*_type` values, rewrites `role.data` keys, fixes `tabList`, prunes stale scheduled jobs)
+2. `ddev exec php clear_cache.php && ddev exec php rebuild.php`
+3. `ddev exec php bin/setup-roles.php`
+4. Optional: `ddev exec php bin/reorder-safehouse-tabs.php`
+
+Fresh installs from current module metadata do **not** need the migration script.
 
 ### Entity creation checklist:
 
@@ -665,7 +683,7 @@ This section is the authoritative step-by-step guide for creating any new entity
 
 ### Step 1: Plan
 
-- Define entity name (CamelCase, e.g. `ConteggioPasti`)
+- Define entity name (CamelCase, e.g. `MealCount`)
 - Define entity type (`Base`, `Person`, `BasePlus`, etc.)
 - List all fields with types
 - List all relationships
@@ -750,4 +768,4 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
-- **REF**: working entities to copy from — `Associati`, `VolontarioDipendente` (modular) and `CFoodCount` (Custom-namespace, simpler)
+- **REF**: working entities to copy from — `Member`, `VolunteerEmployee`, `MealCount` (all SafehouseCrm-modular, English-named).

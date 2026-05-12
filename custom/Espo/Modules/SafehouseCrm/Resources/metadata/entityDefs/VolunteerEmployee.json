@@ -1,0 +1,164 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true,
+            "readOnly": true
+        },
+        "type": {
+            "type": "enum",
+            "options": [
+                "Volunteer",
+                "Employee"
+            ],
+            "required": true
+        },
+        "firstName": {
+            "type": "varchar",
+            "required": true
+        },
+        "lastName": {
+            "type": "varchar",
+            "required": true
+        },
+        "birthDate": {
+            "type": "date"
+        },
+        "emailAddress": {
+            "type": "email",
+            "required": true,
+            "isPersonalData": true
+        },
+        "phoneNumber": {
+            "type": "phone",
+            "typeList": ["Mobile", "Office", "Home", "Other"],
+            "defaultType": "Mobile",
+            "isPersonalData": true
+        },
+        "user": {
+            "type": "link",
+            "required": true,
+            "tooltip": "Linked user account. Primary email/phone are synced from this user."
+        },
+        "startDate": {
+            "type": "date"
+        },
+        "endDate": {
+            "type": "date"
+        },
+        "contractType": {
+            "type": "enum",
+            "options": [
+                "Permanent",
+                "FixedTerm",
+                "Freelance",
+                "Other"
+            ]
+        },
+        "weeklyHours": {
+            "type": "float"
+        },
+        "monthlyHours": {
+            "type": "float",
+            "readOnly": true,
+            "tooltip": true
+        },
+        "extra": {
+            "type": "text"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "Active",
+                "Inactive"
+            ],
+            "default": "Active",
+            "displayAsLabel": true,
+            "labelType": "state",
+            "style": {
+                "Active": "success",
+                "Inactive": "danger"
+            }
+        }
+    },
+    "links": {
+        "user": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "documents": {
+            "type": "hasMany",
+            "entity": "Document",
+            "foreign": "volunteerEmployees"
+        },
+        "meetings": {
+            "type": "hasMany",
+            "entity": "Meeting",
+            "foreign": "volunteerEmployees"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        }
+    },
+    "collection": {
+        "orderBy": "name",
+        "order": "asc",
+        "textFilterFields": ["name", "firstName", "lastName", "emailAddress"]
+    },
+    "indexes": {
+        "name": {
+            "columns": ["name", "deleted"]
+        },
+        "endDateStatus": {
+            "columns": ["endDate", "status", "deleted"]
+        },
+        "user": {
+            "type": "unique",
+            "columns": ["userId", "deleted"]
+        }
+    },
+    "optimisticConcurrencyControl": true,
+    "audited": true,
+    "statusField": "status"
+}

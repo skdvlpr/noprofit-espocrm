@@ -1,0 +1,43 @@
+{
+  "labels": {
+    "Create VolunteerEmployee": "Создать нового",
+    "VolunteerEmployee": "Сотрудники / Волонтеры"
+  },
+  "fields": {
+    "type": "Тип",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "birthDate": "Дата рождения",
+    "emailAddress": "Email",
+    "phoneNumber": "Телефон",
+    "user": "Связанный пользователь",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания",
+    "contractType": "Тип контракта",
+    "weeklyHours": "Часов в неделю",
+    "monthlyHours": "Часов в месяц (расчет)",
+    "extra": "Доп. примечания",
+    "name": "ФИО",
+    "status": "Статус"
+  },
+  "links": {
+    "documents": "Документы",
+    "meetings": "Встречи"
+  },
+  "options": {
+    "type": {
+      "Volunteer": "Волонтер",
+      "Employee": "Сотрудник"
+    },
+    "contractType": {
+      "Permanent": "Бессрочный",
+      "FixedTerm": "Срочный",
+      "Freelance": "ИП / Фриланс",
+      "Other": "Другое"
+    },
+    "status": {
+      "Active": "Активен",
+      "Inactive": "Неактивен"
+    }
+  }
+}

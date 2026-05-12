@@ -1,0 +1,21 @@
+[
+    {
+        "name": "firstName",
+        "link": true
+    },
+    {
+        "name": "lastName"
+    },
+    {
+        "name": "type"
+    },
+    {
+        "name": "startDate"
+    },
+    {
+        "name": "weeklyHours"
+    },
+    {
+        "name": "status"
+    }
+]

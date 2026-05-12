@@ -1,8 +1,8 @@
 {
     "links": {
-        "volontariDipendenti": {
+        "volunteerEmployees": {
             "type": "hasMany",
-            "entity": "VolontarioDipendente",
+            "entity": "VolunteerEmployee",
             "foreign": "meetings"
         }
     }

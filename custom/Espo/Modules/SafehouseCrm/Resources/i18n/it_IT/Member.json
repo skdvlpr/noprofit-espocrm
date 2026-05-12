@@ -1,0 +1,31 @@
+{
+  "labels": {
+    "Create Member": "Crea Associato",
+    "Member": "Associati"
+  },
+  "fields": {
+    "name": "Nome Completo",
+    "status": "Stato",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "birthPlace": "Luogo di Nascita",
+    "birthDate": "Data di Nascita",
+    "taxCode": "Codice Fiscale",
+    "residenceAddress": "Indirizzo di Residenza",
+    "city": "Città",
+    "province": "Provincia",
+    "joinDate": "Data di Ingresso",
+    "leaveDate": "Data di Dimissione",
+    "positionsHeld": "Incarichi Ricoperti",
+    "notes": "Annotazioni",
+    "emailAddress": "Email",
+    "phoneNumber": "Telefono",
+    "user": "Utente Collegato"
+  },
+  "options": {
+    "status": {
+      "Active": "Attivo",
+      "Inactive": "Inattivo"
+    }
+  }
+}

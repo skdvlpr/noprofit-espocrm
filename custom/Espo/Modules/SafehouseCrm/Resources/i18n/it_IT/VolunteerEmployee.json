@@ -1,0 +1,43 @@
+{
+  "labels": {
+    "Create VolunteerEmployee": "Crea Nuovo",
+    "VolunteerEmployee": "Volontari / Dipendenti"
+  },
+  "fields": {
+    "type": "Tipo",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "birthDate": "Data di Nascita",
+    "emailAddress": "Email",
+    "phoneNumber": "Telefono",
+    "user": "Utente Collegato",
+    "startDate": "Data di Inizio",
+    "endDate": "Data di Fine",
+    "contractType": "Tipo di Contratto",
+    "weeklyHours": "Ore Settimanali",
+    "monthlyHours": "Ore Mensili (calc)",
+    "extra": "Note Extra",
+    "name": "Nome Completo",
+    "status": "Stato"
+  },
+  "links": {
+    "documents": "Documenti",
+    "meetings": "Incontri / Riunioni"
+  },
+  "options": {
+    "type": {
+      "Volunteer": "Volontario",
+      "Employee": "Dipendente"
+    },
+    "contractType": {
+      "Permanent": "Tempo Indeterminato",
+      "FixedTerm": "Tempo Determinato",
+      "Freelance": "Partita IVA",
+      "Other": "Altro"
+    },
+    "status": {
+      "Active": "Attivo",
+      "Inactive": "Inattivo"
+    }
+  }
+}

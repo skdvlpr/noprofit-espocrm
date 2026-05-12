@@ -1,0 +1,44 @@
+[
+    {
+        "rows": [
+            [
+                {"name": "name"}
+            ],
+            [
+                {"name": "date"},
+                {"name": "dayOfWeek"}
+            ],
+            [
+                {"name": "foodUnitPrice"},
+                false
+            ],
+            [
+                {"name": "foodCost"},
+                false
+            ],
+            [
+                {"name": "minors"},
+                {"name": "adults"}
+            ],
+            [
+                false,
+                {"name": "totalMeals"}
+            ],
+            [
+                {"name": "description"}
+            ]
+        ],
+        "style": "default",
+        "label": ""
+    },
+    {
+        "rows": [
+            [
+                {"name": "streamUpdatedAt"}
+            ]
+        ],
+        "style": "default",
+        "noteStyle": "info",
+        "label": ""
+    }
+]

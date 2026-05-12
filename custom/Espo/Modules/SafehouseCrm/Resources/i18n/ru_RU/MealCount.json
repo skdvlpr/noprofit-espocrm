@@ -1,0 +1,26 @@
+{
+    "labels": {
+        "MealCount": "Учет питания",
+        "Create MealCount": "Создать запись"
+    },
+    "fields": {
+        "name": "Название",
+        "date": "Дата",
+        "dayOfWeek": "День недели",
+        "adults": "Взрослые",
+        "minors": "Дети",
+        "totalMeals": "Всего порций",
+        "foodUnitPrice": "Цена за порцию",
+        "foodCost": "Стоимость питания",
+        "description": "Описание"
+    },
+    "links": {
+        "createdBy": "Создано",
+        "modifiedBy": "Изменено",
+        "assignedUser": "Ответственный",
+        "teams": "Команды"
+    },
+    "tooltips": {
+        "dayOfWeek": "Автоматически рассчитывается на основе даты."
+    }
+}

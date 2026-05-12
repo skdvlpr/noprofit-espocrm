@@ -25,9 +25,9 @@ class AfterInstall
         $quickCreateList = $config->get('quickCreateList', []) ?? [];
 
         $domainEntities = [
-            'VolontarioDipendente',
-            'Associati',
-            'ConteggioPasti',
+            'VolunteerEmployee',
+            'Member',
+            'MealCount',
         ];
 
         $otherToEnsure = ['Account', 'Opportunity', 'Document'];
