@@ -1,11 +1,15 @@
 [
-    {
-        "name": "stato"
-    },
-    {
-        "name": "cf"
-    },
-    {
-        "name": "dataIngresso"
-    }
+    "stato",
+    "cf",
+    "dataIngresso",
+    "dataDimissione",
+    "user",
+    "emailAddress",
+    "phoneNumber",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy",
+    "modifiedAt",
+    "streamUpdatedAt"
 ]

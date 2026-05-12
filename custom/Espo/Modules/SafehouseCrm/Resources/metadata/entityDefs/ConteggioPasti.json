@@ -7,7 +7,7 @@
         },
         "data": {
             "type": "date",
-            "required": true
+            "tooltip": "Defaults to today on save when left empty (see formula)."
         },
         "giornoSettimana": {
             "type": "varchar",

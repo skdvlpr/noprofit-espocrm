@@ -1,6 +1,10 @@
 [
-    {"name": "data"},
-    {"name": "giornoSettimana"},
-    {"name": "assignedUser"},
-    {"name": "teams"}
+    "data",
+    "giornoSettimana",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy",
+    "modifiedAt",
+    "streamUpdatedAt"
 ]

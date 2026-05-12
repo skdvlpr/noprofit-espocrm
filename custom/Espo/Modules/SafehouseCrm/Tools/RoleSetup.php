@@ -22,7 +22,12 @@ use Espo\ORM\EntityManager;
  *   - Admin       : full all / not used by the bootstrap admin user (which has
  *                   isAdmin=true and bypasses roles), but available for
  *                   secondary super-users.
- *   - Dipendente  : create=yes, read=all, edit=team, delete=own, stream=yes.
+ *   - Dipendente  : create=yes, read=all, edit=team, delete=own, stream=yes;
+ *                   VolontarioDipendente / Associati: read only, no create/edit/delete
+ *                   (personnel changes go to Manager).
+ *   - Manager     : same operational envelope as Dipendente, plus create/edit
+ *                   team-level on VolontarioDipendente and Associati; delete=no
+ *                   on those entities (lifecycle via status / dates).
  *   - Volontario  : read-mostly; grants/funding (Espo entity type `Opportunity`,
  *                   labelled Fondi e Finanziamenti) fully blocked;
  *                   ConteggioPasti.foodCost and ConteggioPasti.foodUnitPrice
@@ -33,6 +38,8 @@ class RoleSetup
 {
     public const ROLE_ADMIN      = 'Admin';
     public const ROLE_DIPENDENTE = 'Dipendente';
+    /** HR / personnel: create & edit VolontarioDipendente / Associati (no hard delete on those). */
+    public const ROLE_MANAGER    = 'Manager';
     public const ROLE_VOLONTARIO = 'Volontario';
     public const ROLE_ASSOCIATO  = 'Associato';
 
@@ -48,7 +55,7 @@ class RoleSetup
     public const TEAMS = [
         self::TEAM_AMMINISTRAZIONE => [
             'description' => 'Personale amministrativo Safehouse: visibilità condivisa dei record amministrativi.',
-            'roles'       => [self::ROLE_DIPENDENTE],
+            'roles'       => [self::ROLE_DIPENDENTE, self::ROLE_MANAGER],
         ],
     ];
 
@@ -59,6 +66,7 @@ class RoleSetup
      */
     public const TEAM_MEMBERSHIPS = [
         'test_dipendente' => [self::TEAM_AMMINISTRAZIONE],
+        'test_manager'    => [self::TEAM_AMMINISTRAZIONE],
     ];
 
     /**
@@ -72,6 +80,11 @@ class RoleSetup
             'role'      => self::ROLE_DIPENDENTE,
             'firstName' => 'Test',
             'lastName'  => 'Dipendente',
+        ],
+        'test_manager' => [
+            'role'      => self::ROLE_MANAGER,
+            'firstName' => 'Test',
+            'lastName'  => 'Manager',
         ],
         'test_volontario' => [
             'role'      => self::ROLE_VOLONTARIO,
@@ -199,7 +212,7 @@ class RoleSetup
     }
 
     /**
-     * Create or update all four canonical roles.
+     * Create or update all canonical roles (Admin, Dipendente, Manager, Volontario, Associato).
      *
      * @return array<string, string> map role-name => 'created' | 'updated' | 'unchanged'
      */
@@ -215,6 +228,26 @@ class RoleSetup
     }
 
     /**
+     * Runs {@see provisionTestUsers()}, {@see provisionTeamMemberships()}, then
+     * {@see provisionTestProfiles()} in a fixed order so profile creation never
+     * runs against missing test users.
+     *
+     * @return array{
+     *     users: array<string, string>,
+     *     teamMemberships: array<string, string>,
+     *     profiles: array<string, string>
+     * }
+     */
+    public function provisionTestUsersTeamsAndProfiles(): array
+    {
+        return [
+            'users'             => $this->provisionTestUsers(),
+            'teamMemberships'   => $this->provisionTeamMemberships(),
+            'profiles'          => $this->provisionTestProfiles(),
+        ];
+    }
+
+    /**
      * For each test user, ensure there is a linked domain record assigned to
      * them so the `read=own` ACL has at least one row to return.
      *
@@ -222,8 +255,11 @@ class RoleSetup
      *   - test_dipendente  -> VolontarioDipendente (tipo=Dipendente)
      *   - test_associato   -> Associati
      *
-     * Idempotent: skipped if a record already exists with assignedUserId =
-     * the test user's id.
+     * Idempotent: skipped if a record already exists with the same
+     * `assignedUserId` **or** `userId` (unique per linked User on personnel entities).
+     *
+     * Must run after {@see provisionTestUsers()} (use {@see provisionTestUsersTeamsAndProfiles()}
+     * from scripts so order is guaranteed).
      *
      * @return array<string, string>
      */
@@ -236,22 +272,30 @@ class RoleSetup
             'test_volontario' => [
                 'entityType' => 'VolontarioDipendente',
                 'attributes' => [
-                    'tipo'          => 'Volontario',
-                    'nome'          => 'Test',
-                    'cognome'       => 'Volontario',
-                    'email'         => 'test_volontario@example.com',
-                    'oreSettimanali'=> 8,
+                    'tipo'           => 'Volontario',
+                    'nome'           => 'Test',
+                    'cognome'        => 'Volontario',
+                    'oreSettimanali' => 8,
                 ],
             ],
             'test_dipendente' => [
                 'entityType' => 'VolontarioDipendente',
                 'attributes' => [
-                    'tipo'          => 'Dipendente',
-                    'nome'          => 'Test',
-                    'cognome'       => 'Dipendente',
-                    'email'         => 'test_dipendente@example.com',
-                    'tipoContratto' => 'Tempo Determinato',
-                    'oreSettimanali'=> 40,
+                    'tipo'           => 'Dipendente',
+                    'nome'           => 'Test',
+                    'cognome'        => 'Dipendente',
+                    'tipoContratto'  => 'Tempo Determinato',
+                    'oreSettimanali' => 40,
+                ],
+            ],
+            'test_manager' => [
+                'entityType' => 'VolontarioDipendente',
+                'attributes' => [
+                    'tipo'           => 'Dipendente',
+                    'nome'           => 'Test',
+                    'cognome'        => 'Manager',
+                    'tipoContratto'  => 'Tempo Indeterminato',
+                    'oreSettimanali' => 40,
                 ],
             ],
             'test_associato' => [
@@ -276,7 +320,12 @@ class RoleSetup
             }
 
             $existing = $em->getRDBRepository($spec['entityType'])
-                ->where(['assignedUserId' => $user->getId()])
+                ->where([
+                    'OR' => [
+                        ['assignedUserId' => $user->getId()],
+                        ['userId' => $user->getId()],
+                    ],
+                ])
                 ->findOne();
 
             if ($existing) {
@@ -288,9 +337,20 @@ class RoleSetup
             }
 
             $entity = $em->getRDBRepository($spec['entityType'])->getNew();
-            $entity->set(array_merge($spec['attributes'], [
+            $payload = array_merge($spec['attributes'], [
                 'assignedUserId' => $user->getId(),
-            ]));
+                'userId'         => $user->getId(),
+            ]);
+            $email = $user->get('emailAddress');
+            if (!is_string($email) || trim($email) === '') {
+                $email = $userName . '@example.com';
+            } else {
+                $email = trim($email);
+            }
+            if (in_array($spec['entityType'], ['VolontarioDipendente', 'Associati'], true)) {
+                $payload['emailAddress'] = $email;
+            }
+            $entity->set($payload);
             $em->saveEntity($entity);
 
             $this->ensureTeamMembership($entity, $userName);
@@ -321,12 +381,13 @@ class RoleSetup
             if ($isNew) {
                 $user = $em->getRDBRepositoryByClass(User::class)->getNew();
                 $user->set([
-                    'userName'  => $userName,
-                    'firstName' => $spec['firstName'],
-                    'lastName'  => $spec['lastName'],
-                    'type'      => User::TYPE_REGULAR,
-                    'isActive'  => true,
-                    'password'  => $this->passwordHash->hash(self::TEST_PASSWORD),
+                    'userName'     => $userName,
+                    'firstName'    => $spec['firstName'],
+                    'lastName'     => $spec['lastName'],
+                    'type'         => User::TYPE_REGULAR,
+                    'isActive'     => true,
+                    'password'     => $this->passwordHash->hash(self::TEST_PASSWORD),
+                    'emailAddress' => $userName . '@example.com',
                 ]);
                 $em->saveEntity($user);
             }
@@ -350,6 +411,14 @@ class RoleSetup
                     ->getRelation($user, 'roles')
                     ->relate($role);
                 $report[$userName] = $isNew ? 'created' : 'updated (role linked)';
+                continue;
+            }
+
+            $expectedEmail = $userName . '@example.com';
+            if ($user->get('emailAddress') !== $expectedEmail) {
+                $user->set('emailAddress', $expectedEmail);
+                $em->saveEntity($user);
+                $report[$userName] = $isNew ? 'created' : 'updated (email)';
                 continue;
             }
 
@@ -441,6 +510,23 @@ class RoleSetup
         $dipendenteData['ConteggioPasti'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
+        // Personnel: ordinary Dipendente sees directory but does not create/edit/delete rows.
+        $dipendenteData['VolontarioDipendente'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $dipendenteData['Associati'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        ];
+
+        /** @var array<string, array<string, string>> $managerData */
+        $managerData = json_decode(json_encode($dipendenteData), true);
+        // Manager (HR): maintain personnel on team scope; no hard delete.
+        $managerData['VolontarioDipendente'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $managerData['Associati'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
+        ];
 
         $volontarioData = [];
         foreach ($domainEntities as $e) {
@@ -461,12 +547,27 @@ class RoleSetup
             'create' => 'no', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
         ];
 
-        $volontarioFieldData = [
+        $personContactFieldLocks = [
+            'User' => [
+                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
+                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
+            ],
+            'VolontarioDipendente' => [
+                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
+                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
+            ],
+            'Associati' => [
+                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
+                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
+            ],
+        ];
+
+        $volontarioFieldData = array_merge($personContactFieldLocks, [
             'ConteggioPasti' => [
                 'foodCost'      => ['read' => 'no', 'edit' => 'no'],
                 'foodUnitPrice' => ['read' => 'no', 'edit' => 'no'],
             ],
-        ];
+        ]);
 
         $associatoData = [];
         foreach ($domainEntities as $e) {
@@ -495,7 +596,22 @@ class RoleSetup
             ],
             self::ROLE_DIPENDENTE => [
                 'data'      => $dipendenteData,
-                'fieldData' => [],
+                'fieldData' => $personContactFieldLocks,
+                'perms'     => [
+                    'assignmentPermission'        => 'team',
+                    'userPermission'              => 'team',
+                    'messagePermission'           => 'team',
+                    'exportPermission'            => 'yes',
+                    'massUpdatePermission'        => 'no',
+                    'auditPermission'             => 'no',
+                    'mentionPermission'           => 'all',
+                    'userCalendarPermission'      => 'team',
+                    'followerManagementPermission'=> 'team',
+                ],
+            ],
+            self::ROLE_MANAGER => [
+                'data'      => $managerData,
+                'fieldData' => $personContactFieldLocks,
                 'perms'     => [
                     'assignmentPermission'        => 'team',
                     'userPermission'              => 'team',
@@ -525,7 +641,7 @@ class RoleSetup
             ],
             self::ROLE_ASSOCIATO => [
                 'data'      => $associatoData,
-                'fieldData' => [],
+                'fieldData' => $personContactFieldLocks,
                 'perms'     => [
                     'assignmentPermission'        => 'no',
                     'userPermission'              => 'no',
