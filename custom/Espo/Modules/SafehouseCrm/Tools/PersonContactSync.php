@@ -130,15 +130,31 @@ class PersonContactSync
     private function collectEmailRows(Entity $entity): array
     {
         $raw = $entity->get('emailAddressData');
-        if (is_array($raw)) {
+        if (is_array($raw) && $raw !== []) {
             return array_map(fn ($row) => $this->normalizeEmailRow($row), $raw);
         }
 
-        if ($entity->hasId()) {
-            return $this->emailRepository()->getEmailAddressData($entity);
+        $rows = $entity->hasId()
+            ? $this->emailRepository()->getEmailAddressData($entity)
+            : [];
+
+        $singleton = $entity->get('emailAddress');
+        if (is_string($singleton) && trim($singleton) !== '') {
+            $singletonLower = strtolower(trim($singleton));
+            foreach ($rows as $row) {
+                if (strtolower(trim((string) ($row->emailAddress ?? ''))) === $singletonLower) {
+                    return $rows;
+                }
+            }
+            $rows[] = (object) [
+                'emailAddress' => $singleton,
+                'primary'      => true,
+                'optOut'       => false,
+                'invalid'      => false,
+            ];
         }
 
-        return [];
+        return $rows;
     }
 
     private function normalizeEmailRow(mixed $row): stdClass
@@ -191,15 +207,32 @@ class PersonContactSync
     private function collectPhoneRows(Entity $entity): array
     {
         $raw = $entity->get('phoneNumberData');
-        if (is_array($raw)) {
+        if (is_array($raw) && $raw !== []) {
             return array_map(fn ($row) => $this->normalizePhoneRow($row), $raw);
         }
 
-        if ($entity->hasId()) {
-            return $this->phoneRepository()->getPhoneNumberData($entity);
+        $rows = $entity->hasId()
+            ? $this->phoneRepository()->getPhoneNumberData($entity)
+            : [];
+
+        $singleton = $entity->get('phoneNumber');
+        if (is_string($singleton) && trim($singleton) !== '') {
+            $singletonKey = $this->normalizePhoneKey($singleton);
+            foreach ($rows as $row) {
+                if ($this->normalizePhoneKey((string) ($row->phoneNumber ?? '')) === $singletonKey) {
+                    return $rows;
+                }
+            }
+            $rows[] = (object) [
+                'phoneNumber' => $singleton,
+                'type'        => 'Mobile',
+                'primary'     => true,
+                'optOut'       => false,
+                'invalid'      => false,
+            ];
         }
 
-        return [];
+        return $rows;
     }
 
     private function normalizePhoneRow(mixed $row): stdClass
