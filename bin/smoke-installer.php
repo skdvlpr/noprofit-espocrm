@@ -1,0 +1,82 @@
+<?php
+/**
+ * Smoke test that exercises the unified post-install path used by both the
+ * ZIP-install script (`scripts/AfterInstall.php`) and the module class
+ * (`Espo\Modules\SafehouseCrm\AfterInstall`).
+ *
+ * Asserts after the run:
+ *   - `Lead` and `Case` are absent from `tabList` and `quickCreateList`;
+ *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
+ *     `MealCount`) are present in `tabList`;
+ *   - canonical roles + Administration team exist;
+ *   - rerunning is idempotent (counts stable).
+ *
+ * Usage:
+ *   ddev exec php bin/smoke-installer.php
+ */
+
+include __DIR__ . '/../bootstrap.php';
+
+use Espo\Core\Application;
+use Espo\Modules\SafehouseCrm\Tools\Installer;
+
+$app = new Application();
+$app->setupSystemUser();
+$container = $app->getContainer();
+
+$failures = 0;
+$report = function (string $name, bool $pass, string $detail = '') use (&$failures): void {
+    if (!$pass) {
+        $failures++;
+    }
+    $marker = $pass ? '[PASS]' : '[FAIL]';
+    echo "  $marker $name" . ($detail !== '' ? " — $detail" : '') . "\n";
+};
+
+$installer = new Installer();
+
+echo "Run 1: invoke post-install via Installer\n";
+$installer->runPostInstall($container);
+
+$config = $container->get('config');
+$tabList = $config->get('tabList', []) ?? [];
+$quickCreateList = $config->get('quickCreateList', []) ?? [];
+
+$tabStrings = array_filter($tabList, 'is_string');
+$qcStrings = array_filter($quickCreateList, 'is_string');
+
+$report('Lead absent from tabList', !in_array('Lead', $tabStrings, true));
+$report('Case absent from tabList', !in_array('Case', $tabStrings, true));
+$report('Lead absent from quickCreateList', !in_array('Lead', $qcStrings, true));
+$report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true));
+
+foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity', 'Document'] as $must) {
+    $report("$must present in tabList", in_array($must, $tabStrings, true));
+}
+
+$em = $container->get('entityManager');
+$roleNames = [];
+foreach ($em->getRDBRepository('Role')->find() as $r) {
+    $roleNames[] = $r->get('name');
+}
+foreach (['Admin', 'Employee', 'Manager', 'Volunteer', 'Member'] as $expectedRole) {
+    $report("Role `$expectedRole` provisioned", in_array($expectedRole, $roleNames, true));
+}
+
+$adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();
+$report('Team `Administration` provisioned', $adminTeam !== null);
+
+echo "\nRun 2: invoke again — must be idempotent\n";
+$tabListBefore = $config->get('tabList', []) ?? [];
+$installer->runPostInstall($container);
+
+$configAfter = $container->getByClass(\Espo\Core\Utils\Config::class);
+$configAfter->update();
+$tabListAfter = $configAfter->get('tabList', []) ?? [];
+
+$report('tabList unchanged across reruns', count($tabListBefore) === count($tabListAfter));
+
+echo "\n=== ";
+echo $failures === 0 ? 'ALL PASS' : ($failures . ' FAILURE(S)');
+echo " ===\n";
+exit($failures === 0 ? 0 : 1);

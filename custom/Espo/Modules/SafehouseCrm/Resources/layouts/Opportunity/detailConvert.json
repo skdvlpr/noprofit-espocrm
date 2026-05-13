@@ -4,7 +4,7 @@
         "rows": [
             [{"name": "name"}, false],
             [{"name": "stage"}, {"name": "amount"}],
-            [{"name": "dataPresentazione"}, {"name": "closeDate"}],
+            [{"name": "presentationDate"}, {"name": "closeDate"}],
             [{"name": "description", "fullWidth": true}]
         ]
     }

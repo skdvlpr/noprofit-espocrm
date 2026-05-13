@@ -1,10 +1,4 @@
 {
-    "SafehouseCrmDeactivateExpiredVolunteerEmployee": {
-        "name": "Sync Volunteers / Employees Status (legacy alias)",
-        "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\DeactivateExpiredVolunteerEmployee",
-        "scheduling": "5 0 * * *",
-        "isSystem": true
-    },
     "SafehouseCrmSyncVolunteerEmployeeStatus": {
         "name": "Sync Volunteers / Employees Status",
         "jobClassName": "Espo\\Modules\\SafehouseCrm\\Jobs\\SyncVolunteerEmployeeStatus",

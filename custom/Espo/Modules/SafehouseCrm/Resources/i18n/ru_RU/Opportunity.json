@@ -3,7 +3,7 @@
         "name": "Название",
         "account": "Организация",
         "stage": "Стадия",
-        "dataPresentazione": "Дата подачи",
+        "presentationDate": "Дата подачи",
         "closeDate": "Дата закрытия",
         "amount": "Сумма",
         "contacts": "Контакты",
@@ -17,11 +17,11 @@
     },
     "options": {
         "stage": {
-            "Preparazione": "Подготовка",
-            "Proposta": "Предложение",
-            "Negoziazione": "Переговоры",
-            "Chiuso Positivamente": "Закрыто успешно",
-            "Chiuso Negativamente": "Закрыто неудачно"
+            "Preparation": "Подготовка",
+            "Proposal": "Предложение",
+            "Negotiation": "Переговоры",
+            "Closed Won": "Закрыто успешно",
+            "Closed Lost": "Закрыто неудачно"
         }
     },
     "labels": {

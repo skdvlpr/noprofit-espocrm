@@ -1,17 +1,17 @@
 {
     "fields": {
-        "settore": {
+        "sector": {
             "type": "enum",
             "options": [
                 "",
-                "Terzo Settore",
-                "Assistenti Sociali",
-                "Pubblico"
+                "ThirdSector",
+                "SocialWorkers",
+                "Public"
             ],
             "style": {
-                "Terzo Settore": "success",
-                "Assistenti Sociali": "primary",
-                "Pubblico": "info"
+                "ThirdSector": "success",
+                "SocialWorkers": "primary",
+                "Public": "info"
             },
             "audited": true
         }

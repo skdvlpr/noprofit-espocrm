@@ -3,7 +3,7 @@
         "name": "Name",
         "account": "Account",
         "stage": "Stage",
-        "dataPresentazione": "Submission Date",
+        "presentationDate": "Submission Date",
         "closeDate": "Close Date",
         "amount": "Amount",
         "contacts": "Contacts",
@@ -17,11 +17,11 @@
     },
     "options": {
         "stage": {
-            "Preparazione": "Preparation",
-            "Proposta": "Proposal",
-            "Negoziazione": "Negotiation",
-            "Chiuso Positivamente": "Closed Won",
-            "Chiuso Negativamente": "Closed Lost"
+            "Preparation": "Preparation",
+            "Proposal": "Proposal",
+            "Negotiation": "Negotiation",
+            "Closed Won": "Closed Won",
+            "Closed Lost": "Closed Lost"
         }
     },
     "labels": {

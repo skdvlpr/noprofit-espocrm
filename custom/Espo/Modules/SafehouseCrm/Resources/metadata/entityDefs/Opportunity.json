@@ -2,29 +2,29 @@
     "fields": {
         "stage": {
             "options": [
-                "Preparazione",
-                "Proposta",
-                "Negoziazione",
-                "Chiuso Positivamente",
-                "Chiuso Negativamente"
+                "Preparation",
+                "Proposal",
+                "Negotiation",
+                "Closed Won",
+                "Closed Lost"
             ],
-            "default": "Preparazione",
+            "default": "Preparation",
             "probabilityMap": {
-                "Preparazione": 10,
-                "Proposta": 50,
-                "Negoziazione": 80,
-                "Chiuso Positivamente": 100,
-                "Chiuso Negativamente": 0
+                "Preparation": 10,
+                "Proposal": 50,
+                "Negotiation": 80,
+                "Closed Won": 100,
+                "Closed Lost": 0
             },
             "style": {
-                "Preparazione": "default",
-                "Proposta": "primary",
-                "Negoziazione": "warning",
-                "Chiuso Positivamente": "success",
-                "Chiuso Negativamente": "danger"
+                "Preparation": "default",
+                "Proposal": "primary",
+                "Negotiation": "warning",
+                "Closed Won": "success",
+                "Closed Lost": "danger"
             }
         },
-        "dataPresentazione": {
+        "presentationDate": {
             "type": "date",
             "audited": true
         }

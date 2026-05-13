@@ -5,7 +5,7 @@
             [{"name": "name", "fullWidth": true}],
             [{"name": "account", "fullWidth": true}],
             [{"name": "stage"}, {"name": "closeDate"}],
-            [{"name": "dataPresentazione"}, {"name": "amount"}],
+            [{"name": "presentationDate"}, {"name": "amount"}],
             [{"name": "contacts", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]

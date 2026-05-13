@@ -4,7 +4,7 @@
         "rows": [
             [
                 {"name": "name"},
-                {"name": "settore"}
+                {"name": "sector"}
             ],
             [
                 {"name": "emailAddress"},

@@ -6,7 +6,7 @@
                     {
                         "type": "equals",
                         "attribute": "stage",
-                        "value": "Chiuso Negativamente"
+                        "value": "Closed Lost"
                     }
                 ]
             }

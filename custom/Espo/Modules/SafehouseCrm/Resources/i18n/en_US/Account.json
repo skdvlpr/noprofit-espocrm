@@ -1,15 +1,15 @@
 {
     "fields": {
-        "settore": "Sector"
+        "sector": "Sector"
     },
     "links": {
         "websites": "Websites"
     },
     "options": {
-        "settore": {
-            "Terzo Settore": "Third Sector",
-            "Assistenti Sociali": "Social Workers",
-            "Pubblico": "Public"
+        "sector": {
+            "ThirdSector": "Third Sector",
+            "SocialWorkers": "Social Workers",
+            "Public": "Public"
         }
     }
 }

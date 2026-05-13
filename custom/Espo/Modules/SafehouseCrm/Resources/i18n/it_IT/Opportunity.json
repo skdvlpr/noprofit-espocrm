@@ -3,7 +3,7 @@
         "name": "Nome",
         "account": "Account",
         "stage": "Stato",
-        "dataPresentazione": "Data Presentazione",
+        "presentationDate": "Data Presentazione",
         "closeDate": "Data Chiusura",
         "amount": "Importo",
         "contacts": "Contatti",
@@ -17,16 +17,16 @@
     },
     "options": {
         "stage": {
-            "Preparazione": "Preparazione",
-            "Proposta": "Proposta",
-            "Negoziazione": "Negoziazione",
-            "Chiuso Positivamente": "Chiuso Positivamente",
-            "Chiuso Negativamente": "Chiuso Negativamente"
+            "Preparation": "Preparazione",
+            "Proposal": "Proposta",
+            "Negotiation": "Negoziazione",
+            "Closed Won": "Chiuso Positivamente",
+            "Closed Lost": "Chiuso Negativamente"
         }
     },
     "labels": {
-        "Opportunity": "Fondi e Sovvenzioni",
-        "Create Opportunity": "Crea Fondo/Sovvenzione"
+        "Opportunity": "Fondi e Finanziamenti",
+        "Create Opportunity": "Crea Fondo/Finanziamento"
     },
     "presetFilters": {
         "open": "Aperte",

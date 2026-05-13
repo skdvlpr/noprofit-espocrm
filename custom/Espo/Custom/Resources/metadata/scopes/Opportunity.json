@@ -3,7 +3,7 @@
     "disabled": false,
     "statusField": "stage",
     "kanbanStatusIgnoreList": [
-        "Chiuso Negativamente"
+        "Closed Lost"
     ],
     "stars": false,
     "preserveAuditLog": false,

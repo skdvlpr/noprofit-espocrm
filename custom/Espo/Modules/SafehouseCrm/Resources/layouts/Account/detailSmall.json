@@ -6,7 +6,7 @@
                 {"name": "name", "fullWidth": true}
             ],
             [
-                {"name": "settore", "fullWidth": true}
+                {"name": "sector", "fullWidth": true}
             ],
             [
                 {"name": "emailAddress", "fullWidth": true}

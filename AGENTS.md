@@ -555,30 +555,43 @@ class BeforeSave
 
 ### PKG-002 — AfterInstall.php required actions
 
+**CRITICAL — two entrypoints, one source of truth.** Espo Extension Manager
+runs the ZIP-package `scripts/AfterInstall.php` after copying files. The
+in-module `Espo\Modules\SafehouseCrm\AfterInstall` is only invoked for
+direct in-tree installs (dev workflows). Both **must** delegate to the same
+provisioning class so fresh ZIP installs do exactly what dev installs do.
+
 ```
-<?php
-class AfterInstall
-{
-    public function run(\Espo\Core\Application $app): void
-    {
-        // 1. Add tabs to navigation
-        $config = $app->getContainer()->get('config');
-        $tabList = $config->get('tabList', []);
-        $entitiesToAdd = ['MealCount', 'VolunteerEmployee', 'Member'];
+// scripts/AfterInstall.php (package root — invoked by Extension Manager)
+class AfterInstall {
+    public function run(\Espo\Core\Container $container, array $params): void {
+        (new \Espo\Modules\SafehouseCrm\Tools\Installer())->runPostInstall($container);
+    }
+}
 
-        foreach ($entitiesToAdd as $tab) {
-            if (!in_array($tab, $tabList)) {
-                $tabList[] = $tab;
-            }
-        }
-        $config->set('tabList', $tabList);
-        $config->save();
-
-        // 2. Rebuild metadata
-        $app->getContainer()->get('dataManager')->rebuild();
+// custom/Espo/Modules/SafehouseCrm/AfterInstall.php (in-tree)
+class AfterInstall {
+    public function run(\Espo\Core\Application $app): void {
+        (new Tools\Installer())->runPostInstall($app->getContainer());
     }
 }
 ```
+
+`Tools\Installer::runPostInstall(Container)` is the single source of truth
+for post-install provisioning:
+
+1. Ensure Safehouse domain tabs (`VolunteerEmployee`, `Member`, `MealCount`)
+   and supporting tabs (`Account`, `Opportunity`, `Document`) are present
+   in `tabList`.
+2. Remove `Lead` and `Case` from both `tabList` and `quickCreateList`.
+3. Reorder domain entities into the top `$CRM` navbar section after
+   `Contact`.
+4. Provision canonical roles (`Admin`, `Employee`, `Manager`, `Volunteer`,
+   `Member`) and the `Administration` team via `Tools\RoleSetup`.
+5. Rebuild metadata so changes are picked up immediately.
+
+Regression smoke: `ddev exec php bin/smoke-installer.php` — asserts all
+five items above and that re-running is idempotent.
 
 ### PKG-003 — Prohibited in packaging
 
