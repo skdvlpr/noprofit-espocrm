@@ -49,12 +49,26 @@ class PersonContactSync
             return;
         }
 
+        // Cross-entity uniqueness is a data-integrity invariant and must run
+        // even when the linked-user primary enforcement throws (e.g. linked
+        // user deleted, or linked user has no primary email). We attempt the
+        // enforcement first so dedup can see the merged state when possible,
+        // but capture its error and rethrow only after dedup has validated.
+        $enforceError = null;
         if ($entity->get('userId')) {
-            $this->enforceLinkedUserPrimary($entity);
+            try {
+                $this->enforceLinkedUserPrimary($entity);
+            } catch (BadRequest $e) {
+                $enforceError = $e;
+            }
         }
 
         $this->assertUniqueEmails($entity);
         $this->assertUniquePhones($entity);
+
+        if ($enforceError !== null) {
+            throw $enforceError;
+        }
     }
 
     private function enforceLinkedUserPrimary(Entity $entity): void

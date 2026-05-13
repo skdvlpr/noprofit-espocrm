@@ -9,6 +9,10 @@
  *      the inherited primary, and exactly one row is marked primary.
  *   3. Cross-entity dedup: a Member trying to claim an email already used on a
  *      different VolunteerEmployee record must be rejected with BadRequest.
+ *   4. Dedup runs even when enforceLinkedUserPrimary throws: a Member linked
+ *      to a User without a primary email must still get its own dedup
+ *      validated (duplicate email rejected) before the "no linked primary"
+ *      BadRequest surfaces.
  *
  * Idempotent: creates throw-away User + entities under known names and
  * removes them at the end via try/finally.
@@ -124,6 +128,55 @@ try {
         $report('cross-entity email dedup throws BadRequest', false, 'no exception thrown');
     } catch (BadRequest $e) {
         $report('cross-entity email dedup throws BadRequest', true, $e->getMessage());
+    }
+
+    echo "\nScenario 4: dedup runs even when linked user has no primary email\n";
+    $userNoEmail = $em->getNewEntity('User');
+    $userNoEmail->set([
+        'userName' => 'smoke_noemail_' . bin2hex(random_bytes(2)),
+        'firstName' => 'NoEmail',
+        'lastName' => 'User',
+        'isActive' => true,
+        'type' => 'regular',
+    ]);
+    $em->saveEntity($userNoEmail, [SaveOption::SKIP_ALL => true]);
+    $cleanup[] = $userNoEmail;
+
+    $duplicateEmail = (string) $ve->get('emailAddress');
+    $memberLinked = $em->getNewEntity('Member');
+    $memberLinked->set([
+        'firstName' => 'Smoke',
+        'lastName' => 'LinkedNoPrimary',
+        'userId' => $userNoEmail->getId(),
+        'emailAddress' => $duplicateEmail,
+        'joinDate' => date('Y-m-d'),
+    ]);
+    try {
+        $em->saveEntity($memberLinked);
+        $cleanup[] = $memberLinked;
+        $report('dedup wins over enforce-error', false, 'no exception thrown');
+    } catch (BadRequest $e) {
+        $msg = $e->getMessage();
+        $isDedup = str_contains($msg, 'already used on');
+        $report('dedup error surfaces before "no primary email" error', $isDedup, $msg);
+    }
+
+    echo "\nScenario 4b: enforce error still propagates when no dedup conflict\n";
+    $memberClean = $em->getNewEntity('Member');
+    $memberClean->set([
+        'firstName' => 'Smoke',
+        'lastName' => 'LinkedNoPrimaryClean',
+        'userId' => $userNoEmail->getId(),
+        'joinDate' => date('Y-m-d'),
+    ]);
+    try {
+        $em->saveEntity($memberClean);
+        $cleanup[] = $memberClean;
+        $report('enforce error rethrown after clean dedup', false, 'no exception thrown');
+    } catch (BadRequest $e) {
+        $msg = $e->getMessage();
+        $isEnforce = str_contains($msg, 'primary email');
+        $report('enforce BadRequest still propagates after dedup', $isEnforce, $msg);
     }
 
     echo "\n=== ";
