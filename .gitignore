@@ -60,6 +60,9 @@
 *.log
 *.tmp
 
+# Local symlink to Cursor user skills (~/.cursor/skills); absolute path, do not commit
+/cursor-skills
+
 # IDEs and OS
 .idea/
 .vscode/
