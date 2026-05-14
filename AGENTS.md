@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-05-10
+**Executor:** Antigravity AI | **Last updated:** 2026-05-14
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -690,6 +690,75 @@ Fresh installs from current module metadata do **not** need the migration script
 - [ ] Verify layout renders correctly
 - [ ] Run security test matrix
 
+## SECTION 15 — REST API REGRESSION (explore-espo-endpoints skill)
+
+Behavioural contract for **EspoCRM 9.x REST** (`/api/v1/…`) matches the Cursor skill
+**`explore-espo-endpoints`** (authoritative copy: `~/.cursor/skills/explore-espo-endpoints/SKILL.md`;
+in this repo a local symlink may exist at `cursor-skills/` — see `.gitignore`).
+
+### API-TEST-001 — Preconditions
+
+1. **`siteUrl`** must be set in **Administration → Settings** to the public base URL
+   (DDEV: `https://<project>.ddev.site`). The web container must reach this URL for
+   HTTP self-checks.
+2. Canonical roles + test users: `ddev exec php bin/setup-roles.php` (Volunteer role,
+   `test_*` users, etc.).
+3. **Authentication for automated scripts:** `X-Api-Key` on a dedicated **`type=api`**
+   user with `authMethod = ApiKey` (never embed interactive user passwords in repo
+   scripts). HMAC is allowed by Espo but not required for Safehouse smoke scripts.
+
+### API-TEST-002 — Mandatory probe sequence (skill Workflows A + D)
+
+Execute in order when validating API-facing work or regressing completed tasks:
+
+1. **`GET /api/v1/App/user`** with `X-Api-Key` → expect **200**. If **401**, stop: auth
+   or key is wrong.
+2. Read **`acl.table`** from the JSON: confirm each target entity has a row and note
+   `read` / `create` levels (`no`, `own`, `team`, `all`, `yes`). **Never** collapse
+   `team` into `all` when documenting capabilities.
+3. **`GET /api/v1/Metadata?key=scopes`** → confirm `entity: true` for custom entities.
+4. **List smoke:** `GET /api/v1/{EntityType}?select=…&maxSize=…` with **`maxSize` ≤ 200**
+   and an explicit **`select`** list (skill hard rule).
+5. **Metadata slice:** `GET /api/v1/Metadata?key=entityDefs.{EntityType}` after field
+   renames — assert **English** keys in `fields` / enum `options` (Italian only in
+   `it_IT` i18n files, not in stored enum keys).
+6. **Unauthenticated negative:** `GET /api/v1/App/user` **without** `X-Api-Key` → must
+   **not** be 200 (typically **401**).
+7. On failure: capture response header **`X-Status-Reason`** and body
+   `messageTranslation` / `messageData` (Espo **400** enum errors often include
+   `type: valid`).
+
+### API-TEST-003 — ACL / IDOR probes (second API identity)
+
+For **server-side ACL** (not `dynamicLogic` alone), repeat critical reads under a
+**constrained** API user (e.g. role **Volunteer**):
+
+- **`VolunteerEmployee`** with `read=own`: `GET` **own** row → **200**;
+  `GET` a row assigned to **another** user → **403** (IDOR must fail).
+- **`Member`** when role has `read=no`: `GET /api/v1/Member/{id}` → **403**.
+- **`MealCount`** with `read=own`: `GET` a row assigned to someone else → **403**.
+
+The repo script **`bin/smoke-espo-rest-catalog.php`** automates the above for
+**Admin** + **Volunteer** API users (`smoke_api_catalog`, `smoke_api_volunteer`).
+It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
+`PersonContactSync` does not require a full mailbox graph on the API-only user.
+
+### API-TEST-004 — How this fits other smokes
+
+| Script | Layer |
+| ------ | ----- |
+| `bin/smoke-espo-rest-catalog.php` | **HTTP REST** + ACL headers (`X-Api-Key`) |
+| `bin/smoke-safehouse.php` | ORM + formulas + scheduled jobs |
+| `bin/smoke-contact-sync.php` | ORM + `PersonContactSync` invariants |
+| `bin/smoke-installer.php` | Post-install / `tabList` / roles |
+| `bin/smoke-schema-english.php` | ORM + English enum keys after migrations |
+
+Run REST smoke after metadata / ACL / field-key changes that affect the API surface:
+
+```bash
+ddev exec php bin/smoke-espo-rest-catalog.php
+```
+
 ## SECTION 25 — NO-FAIL ENTITY CREATION RULEBOOK
 
 This section is the authoritative step-by-step guide for creating any new entity.
@@ -781,4 +850,5 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
+- **API-REST**: skill `explore-espo-endpoints` | `App/user` + `acl.table` first | `select` + `maxSize`≤200 | `X-Status-Reason` on fail | `bin/smoke-espo-rest-catalog.php`
 - **REF**: working entities to copy from — `Member`, `VolunteerEmployee`, `MealCount` (all SafehouseCrm-modular, English-named).
