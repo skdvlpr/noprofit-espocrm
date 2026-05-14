@@ -7,6 +7,8 @@
  *     `SocialWorkers`, `Public`);
  *   - `opportunity.stage` enum accepts only English keys (`Preparation`,
  *     `Proposal`, `Negotiation`, `Closed Won`, `Closed Lost`);
+ *   - old core/Italian Opportunity stage keys were migrated away from
+ *     `stage` and `lastStage`;
  *   - `opportunity.presentationDate` (DB column `presentation_date`) is
  *     readable/writable via the ORM;
  *   - the legacy column names (`settore`, `data_presentazione`) no longer
@@ -51,11 +53,42 @@ $columnExists = function (string $table, string $column) use ($pdo): bool {
     return (bool) $stmt->fetchColumn();
 };
 
+$countValues = function (string $table, string $column, array $values) use ($pdo, $columnExists): int {
+    if (!$columnExists($table, $column)) {
+        return 0;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($values), '?'));
+    $stmt = $pdo->prepare(sprintf(
+        'SELECT COUNT(*) FROM `%s` WHERE `%s` IN (%s) AND deleted = 0',
+        $table,
+        $column,
+        $placeholders
+    ));
+    $stmt->execute(array_values($values));
+
+    return (int) $stmt->fetchColumn();
+};
+
 echo "Schema layout assertions\n";
 $report('account.sector column exists', $columnExists('account', 'sector'));
 $report('account.settore column does NOT exist', !$columnExists('account', 'settore'));
 $report('opportunity.presentation_date column exists', $columnExists('opportunity', 'presentation_date'));
 $report('opportunity.data_presentazione column does NOT exist', !$columnExists('opportunity', 'data_presentazione'));
+
+$legacyOpportunityStages = [
+    'Prospecting',
+    'Qualification',
+    'Preparazione',
+    'Proposta',
+    'Negoziazione',
+    'Chiuso Positivamente',
+    'Chiuso Negativamente',
+];
+$legacyStageCount = $countValues('opportunity', 'stage', $legacyOpportunityStages);
+$legacyLastStageCount = $countValues('opportunity', 'last_stage', $legacyOpportunityStages);
+$report('opportunity.stage has no legacy/default stage values', $legacyStageCount === 0, "count=$legacyStageCount");
+$report('opportunity.lastStage has no legacy/default stage values', $legacyLastStageCount === 0, "count=$legacyLastStageCount");
 
 echo "\nAccount sector enum (English keys)\n";
 

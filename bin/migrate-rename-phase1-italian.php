@@ -10,7 +10,9 @@
  *        'Assistenti Sociali'         -> 'SocialWorkers'
  *        'Pubblico'                   -> 'Public'
  *   2) `opportunity.data_presentazione` -> `opportunity.presentation_date`
- *      enum text on `opportunity.stage`:
+ *      enum text on `opportunity.stage` / `opportunity.last_stage`:
+ *        'Prospecting'               -> 'Preparation'
+ *        'Qualification'             -> 'Preparation'
  *        'Preparazione'               -> 'Preparation'
  *        'Proposta'                   -> 'Proposal'
  *        'Negoziazione'               -> 'Negotiation'
@@ -107,14 +109,20 @@ $updateColumnText($pdo, 'account', 'sector', [
 echo "\n[3/5] Renaming opportunity.data_presentazione -> opportunity.presentation_date...\n";
 $renameColumn($pdo, 'opportunity', 'data_presentazione', 'presentation_date');
 
-echo "\n[4/5] Translating opportunity.stage enum values...\n";
-$updateColumnText($pdo, 'opportunity', 'stage', [
+echo "\n[4/5] Translating opportunity stage enum values...\n";
+$opportunityStageMap = [
+    // Default EspoCRM stages are no longer valid once the Safehouse grant
+    // pipeline metadata is installed; collapse both opening states safely.
+    'Prospecting'           => 'Preparation',
+    'Qualification'         => 'Preparation',
     'Preparazione'         => 'Preparation',
     'Proposta'             => 'Proposal',
     'Negoziazione'         => 'Negotiation',
     'Chiuso Positivamente' => 'Closed Won',
     'Chiuso Negativamente' => 'Closed Lost',
-]);
+];
+$updateColumnText($pdo, 'opportunity', 'stage', $opportunityStageMap);
+$updateColumnText($pdo, 'opportunity', 'last_stage', $opportunityStageMap);
 
 echo "\n[5/5] Cleaning up legacy `SafehouseCrmDeactivateExpiredVolunteerEmployee` job rows...\n";
 
