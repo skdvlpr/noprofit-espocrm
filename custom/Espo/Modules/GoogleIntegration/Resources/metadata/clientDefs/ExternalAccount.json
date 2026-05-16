@@ -1,0 +1,6 @@
+{
+    "controller": "google-integration:controllers/external-account",
+    "views": {
+        "index": "google-integration:views/external-account/index"
+    }
+}
