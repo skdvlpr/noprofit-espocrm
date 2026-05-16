@@ -1,0 +1,22 @@
+{
+    "Meeting": {
+        "detail": {
+            "module": "GoogleIntegration"
+        }
+    },
+    "Call": {
+        "detail": {
+            "module": "GoogleIntegration"
+        }
+    },
+    "Task": {
+        "detail": {
+            "module": "GoogleIntegration"
+        }
+    },
+    "Opportunity": {
+        "detail": {
+            "module": "GoogleIntegration"
+        }
+    }
+}
