@@ -16,6 +16,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             return {
                 ...super.data(),
                 showCalendarSyncSettings: this.shouldShowCalendarSyncSettings(),
+                showGoogleAccountProfile: this.shouldShowGoogleAccountProfile(),
+                googleAccountEmail: this.model.get('googleAccountEmail'),
+                googleAccountName: this.model.get('googleAccountName') || this.model.get('googleAccountEmail'),
+                googleAccountPicture: this.model.get('googleAccountPicture'),
+                googleAccountProfileMissing: this.isConnected && !this.model.get('googleAccountEmail'),
             };
         }
 
@@ -39,6 +44,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         setNotConnected() {
             super.setNotConnected();
             this.reRender();
+        }
+
+        afterRender() {
+            super.afterRender();
+            this.initCalendarSyncModeField();
         }
 
         /**
@@ -183,6 +193,12 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             return this.isConnected && !!this.model.get('enabled');
         }
 
+        shouldShowGoogleAccountProfile() {
+            return this.integration === 'GoogleCalendarDrive'
+                && this.isConnected
+                && !!this.model.get('googleAccountEmail');
+        }
+
         initCalendarSyncModeField() {
             if (!this.shouldShowCalendarSyncSettings()) {
                 return;
@@ -203,7 +219,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 this.model.set('calendarSyncMode', 'none', {silent: true});
             }
 
-            if (this.getView('calendarSyncMode')) {
+            const existingView = this.getView('calendarSyncMode');
+
+            if (existingView) {
+                existingView.render();
+
                 return;
             }
 
@@ -218,7 +238,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                     },
                 },
                 mode: 'edit',
-            });
+            }, view => view.render());
 
             if (!this.fieldList.includes('calendarSyncMode')) {
                 this.fieldList.push('calendarSyncMode');

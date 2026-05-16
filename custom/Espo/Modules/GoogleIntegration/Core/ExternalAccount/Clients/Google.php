@@ -5,6 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\Clients\Google as BaseGoogle;
 use Espo\Core\Utils\Json;
+use Throwable;
 
 /**
  * Google OAuth client with actionable errors when token exchange fails.
@@ -12,6 +13,8 @@ use Espo\Core\Utils\Json;
 class Google extends BaseGoogle
 {
     private string $lastAuthCodeForLog = '';
+
+    private const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
 
     protected function getPingUrl()
     {
@@ -65,6 +68,46 @@ class Google extends BaseGoogle
         }
 
         return $data;
+    }
+
+    /**
+     * @return array{
+     *     googleAccountId?: string,
+     *     googleAccountEmail?: string,
+     *     googleAccountName?: string,
+     *     googleAccountPicture?: string
+     * }|null
+     */
+    public function getGoogleAccountProfile(): ?array
+    {
+        try {
+            $result = $this->request(self::USERINFO_URL);
+        } catch (Throwable $e) {
+            $this->log->warning('Google OAuth profile fetch failed: ' . $e->getMessage());
+
+            return null;
+        }
+
+        if (!is_array($result)) {
+            return null;
+        }
+
+        $profile = [];
+
+        foreach ([
+            'sub' => 'googleAccountId',
+            'email' => 'googleAccountEmail',
+            'name' => 'googleAccountName',
+            'picture' => 'googleAccountPicture',
+        ] as $source => $target) {
+            $value = $result[$source] ?? null;
+
+            if (is_string($value) && $value !== '') {
+                $profile[$target] = $value;
+            }
+        }
+
+        return $profile !== [] ? $profile : null;
     }
 
     /**

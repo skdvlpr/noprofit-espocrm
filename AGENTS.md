@@ -13,7 +13,7 @@ Before implementing ANY task, executor MUST:
 3. Read referenced files from the repository (never assume content).
 4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change.
 5. Never overwrite executor logs in Notion. Append only.
-6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do not** create local markdown files as a Notion substitute. If MCP is unavailable, skip Notion and inform the user. Mark tasks **Done** only when acceptance criteria are met.
+6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** **Do not** create local markdown files as a Notion substitute. If MCP is unavailable, skip Notion and inform the user. Mark tasks **Done** only when acceptance criteria are met.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
 
 ## SECTION 1 — PROJECT OVERVIEW
@@ -766,6 +766,48 @@ After metadata or client change:
 | Integration “always enabled” | Admin save JS crash → no PUT → `integration.enabled` and `config.integrations.GoogleIntegration` never flip to false |
 | OAuth `Malformed auth code` | `encodeURI` vs `encodeURIComponent`, COOP + `popup.location`, double token exchange, `redirect_uri` slash mismatch |
 | Connect uses `espo-extra.js` | `userView` not loading module view — wrong metadata path |
+
+## SECTION 27 — GOOGLE CALENDAR EXPORT / REMINDERS (GCal-\*)
+
+Authoritative sources: EspoCRM CRM entity metadata (`Meeting`, `Call`, `Task`),
+`Espo\Core\FieldProcessing\Reminder\Saver`, Google Calendar Events API.
+
+### GCal-001 — Applicable entities
+
+Use Google calendar export only for records with meaningful date/time semantics:
+
+- Core CRM: `Meeting` (`dateStart`/`dateEnd`, `reminders`), `Call` (`dateStart`/`dateEnd`, `reminders`), `Task` (`dateStart`/`dateEnd`, `reminders` with `dateField: dateEnd`).
+- Safehouse: `Opportunity` (labelled Funds & Grants / Fondi e Finanziamenti) for `presentationDate` and future deadline/close-date fields once present.
+- Do **not** add calendar export to purely historical/reporting date entities by default (`MealCount`, birth dates, membership dates, document status dates) unless there is a user-facing reminder use case.
+
+### GCal-002 — Per-user ownership
+
+Each user chooses their own Google sync mode in **External Accounts** (`ExternalAccount.data.calendarSyncMode`).
+Admin settings may define global defaults/limits/policies only. Admin settings MUST NOT override an individual user's selected mode except by globally disabling Google integration.
+
+### GCal-003 — Save-to-Google UI
+
+For supported entity edit/detail views, add:
+
+- `saveToGoogleCalendar` bool (label: Save in Google Calendar / Salva in Google Calendar).
+- Optional Google reminder controls shown only when `saveToGoogleCalendar = true`.
+- A highlighted warning/help block when `saveToGoogleCalendar = true`: saving to Google is possible without a reminder; reminder is optional.
+- A "Google" reminder type in UI only when the record is being saved to Google. Do not replace Espo native `Popup`/`Email` reminders.
+
+### GCal-004 — Reminder mapping
+
+Espo native reminders are arrays of `{seconds, type}` where type is `Popup` or `Email`.
+Google Calendar reminders are event-level `reminders.overrides[]` with `method` (`popup` or `email`) and `minutes`.
+The Google-specific reminder should be stored separately from Espo reminders unless reusing native reminders is explicitly intended by the user.
+
+### GCal-005 — Idempotency and ACL
+
+Google export must be idempotent per user and per source record:
+
+- Store Google event IDs by user + entity type + record ID (not a single global field shared by all users).
+- Use `extendedProperties.private` with Espo source keys (`entityType`, `entityId`, `userId`) for deduplication.
+- Enforce Espo ACL before every export/update/delete.
+- Never expose OAuth tokens to frontend; all Google API calls are server-side via the user's `ExternalAccount`.
 
 ## SECTION 12 — SECURITY RULES (SEC-\*)
 

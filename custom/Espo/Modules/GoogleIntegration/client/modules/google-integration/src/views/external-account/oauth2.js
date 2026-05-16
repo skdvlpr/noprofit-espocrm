@@ -5,6 +5,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
     const SYNC_MODE_OPTIONS = ['none', 'bidirectional', 'crmToGoogle', 'googleToCrm'];
+    const OAUTH_MESSAGE_TYPE = 'googleIntegrationOAuthCallback';
 
     class GoogleIntegrationExternalAccountOauth2View extends _parent.default {
         template = 'google-integration:external-account/oauth2';
@@ -15,6 +16,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             return {
                 ...super.data(),
                 showCalendarSyncSettings: this.shouldShowCalendarSyncSettings(),
+                showGoogleAccountProfile: this.shouldShowGoogleAccountProfile(),
+                googleAccountEmail: this.model.get('googleAccountEmail'),
+                googleAccountName: this.model.get('googleAccountName') || this.model.get('googleAccountEmail'),
+                googleAccountPicture: this.model.get('googleAccountPicture'),
+                googleAccountProfileMissing: this.isConnected && !this.model.get('googleAccountEmail'),
             };
         }
 
@@ -40,100 +46,16 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             this.reRender();
         }
 
-        /**
-         * Stock ExternalAccount oauth2 uses encodeURI() for query params. That leaves "?" inside
-         * redirect_uri unescaped, so Google receives redirect_uri=https://host only and token
-         * exchange fails with invalid_grant: Malformed auth code. Espo 9.x OAuth UI uses
-         * encodeURIComponent — mirror that here (see espo-main.js processWithData).
-         */
-        popup(options, callback) {
-            options.windowName = options.windowName || 'ConnectWithOAuth';
-            options.windowOptions = options.windowOptions || 'location=0,status=0,width=800,height=400';
-
-            let path = options.path;
-            const params = options.params || {};
-            const query = Object.keys(params)
-                .filter(name => params[name])
-                .map(name => `${encodeURIComponent(name)}=${encodeURIComponent(params[name])}`)
-                .join('&');
-
-            path += '?' + query;
-
-            const parseUrl = str => {
-                const queryString = str.includes('?') ? str.substring(str.indexOf('?') + 1) : str;
-                let code = null;
-                let error = null;
-
-                queryString.split('&').forEach(part => {
-                    const eq = part.indexOf('=');
-
-                    if (eq < 0) {
-                        return;
-                    }
-
-                    const name = decodeURIComponent(part.substring(0, eq));
-                    const value = decodeURIComponent(part.substring(eq + 1));
-
-                    if (name === 'code') {
-                        code = value;
-                    }
-
-                    if (name === 'error') {
-                        error = value;
-                    }
-                });
-
-                if (code) {
-                    return {code: code};
-                }
-
-                if (error) {
-                    return {error: error};
-                }
-
-                return null;
-            };
-
-            const popupWindow = window.open(path, options.windowName, options.windowOptions);
-
-            if (!popupWindow) {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-
-                return null;
-            }
-
-            let handled = false;
-
-            const interval = window.setInterval(() => {
-                if (popupWindow.closed) {
-                    window.clearInterval(interval);
-
-                    return;
-                }
-
-                let res = null;
-
-                try {
-                    res = parseUrl(popupWindow.location.href.toString());
-                } catch (e) {
-                    return;
-                }
-
-                if (!res || handled) {
-                    return;
-                }
-
-                handled = true;
-                window.clearInterval(interval);
-                popupWindow.close();
-                callback.call(this, res);
-            }, 500);
-
-            return popupWindow;
+        afterRender() {
+            super.afterRender();
+            this.initCalendarSyncModeField();
         }
 
+        /**
+         * COOP blocks popup.location / popup.closed polling. Authorization code is
+         * delivered via postMessage from EntryPoints/OauthCallback (encodeURIComponent
+         * for query params — stock encodeURI breaks redirect_uri).
+         */
         connect() {
             if (this.connectInProgress) {
                 return;
@@ -143,41 +65,36 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
             let exchangeStarted = false;
 
-            const resolvedRedirectUri = this.redirectUri
-                || (String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback');
-
-            this.popup({
-                path: this.getMetadata().get(`integrations.${this.integration}.params.endpoint`),
-                params: {
-                    client_id: this.clientId,
-                    redirect_uri: resolvedRedirectUri,
-                    scope: this.getMetadata().get(`integrations.${this.integration}.params.scope`),
-                    response_type: 'code',
-                    access_type: 'offline',
-                    approval_prompt: 'force',
-                },
-            }, response => {
+            const finishConnect = () => {
                 this.connectInProgress = false;
+            };
 
+            const handleOAuthResponse = response => {
                 if (exchangeStarted) {
                     return;
                 }
 
+                exchangeStarted = true;
+                window.removeEventListener('message', onMessage);
+
                 if (response.error) {
                     Espo.Ui.notify(false);
+                    finishConnect();
 
                     return;
                 }
 
-                if (!response.code) {
+                if (!response.code || response.code.length < 10) {
                     Espo.Ui.error(this.translate('Error occurred'));
+                    finishConnect();
 
                     return;
                 }
 
-                exchangeStarted = true;
                 this.$el.find('[data-action="connect"]').addClass('disabled');
 
+                const resolvedRedirectUri = this.redirectUri
+                    || (String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback');
                 Espo.Ajax.postRequest('ExternalAccount/action/authorizationCode', {
                     id: this.id,
                     code: response.code,
@@ -195,10 +112,71 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                     }
 
                     this.$el.find('[data-action="connect"]').removeClass('disabled');
+                    finishConnect();
                 }).catch(() => {
                     this.$el.find('[data-action="connect"]').removeClass('disabled');
+                    finishConnect();
                 });
-            });
+            };
+
+            const onMessage = event => {
+                if (event.origin !== window.location.origin) {
+                    return;
+                }
+
+                const data = event.data;
+
+                if (!data || data.type !== OAUTH_MESSAGE_TYPE) {
+                    return;
+                }
+
+                handleOAuthResponse(data);
+            };
+
+            window.addEventListener('message', onMessage);
+
+            const endpoint = this.getMetadata().get(`integrations.${this.integration}.params.endpoint`);
+            const resolvedRedirectUri = this.redirectUri
+                || (String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback');
+            const params = {
+                client_id: this.clientId,
+                redirect_uri: resolvedRedirectUri,
+                scope: this.getMetadata().get(`integrations.${this.integration}.params.scope`),
+                response_type: 'code',
+                access_type: 'offline',
+                approval_prompt: 'force',
+            };
+
+            const query = Object.keys(params)
+                .filter(name => params[name])
+                .map(name => `${encodeURIComponent(name)}=${encodeURIComponent(params[name])}`)
+                .join('&');
+
+            const popupWindow = window.open(
+                endpoint + '?' + query,
+                'ConnectWithOAuth',
+                'location=0,status=0,width=800,height=400'
+            );
+
+            if (!popupWindow) {
+                window.removeEventListener('message', onMessage);
+                finishConnect();
+
+                return;
+            }
+
+            const waitCloseInterval = window.setInterval(() => {
+                if (!popupWindow.closed) {
+                    return;
+                }
+
+                window.clearInterval(waitCloseInterval);
+
+                if (!exchangeStarted) {
+                    window.removeEventListener('message', onMessage);
+                    finishConnect();
+                }
+            }, 500);
         }
 
         shouldShowCalendarSyncSettings() {
@@ -213,6 +191,12 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             }
 
             return this.isConnected && !!this.model.get('enabled');
+        }
+
+        shouldShowGoogleAccountProfile() {
+            return this.integration === 'GoogleCalendarDrive'
+                && this.isConnected
+                && !!this.model.get('googleAccountEmail');
         }
 
         initCalendarSyncModeField() {
@@ -235,7 +219,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 this.model.set('calendarSyncMode', 'none', {silent: true});
             }
 
-            if (this.getView('calendarSyncMode')) {
+            const existingView = this.getView('calendarSyncMode');
+
+            if (existingView) {
+                existingView.render();
+
                 return;
             }
 
@@ -250,7 +238,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                     },
                 },
                 mode: 'edit',
-            });
+            }, view => view.render());
 
             if (!this.fieldList.includes('calendarSyncMode')) {
                 this.fieldList.push('calendarSyncMode');
@@ -286,7 +274,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             const fieldsToSave = this.getFieldsForSave();
 
             fieldsToSave.forEach(field => {
-                const view = /** @type {import('views/fields/base').default} */this.getView(field);
+                const view = this.getView(field);
 
                 if (!view || view.readOnly) {
                     return;
@@ -298,7 +286,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             let notValid = false;
 
             fieldsToSave.forEach(field => {
-                const view = /** @type {import('views/fields/base').default} */this.getView(field);
+                const view = this.getView(field);
 
                 if (!view) {
                     return;

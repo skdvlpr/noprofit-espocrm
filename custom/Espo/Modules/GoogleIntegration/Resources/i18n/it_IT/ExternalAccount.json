@@ -11,9 +11,11 @@
         }
     },
     "labels": {
-        "calendarSyncModeHelp": "Impostazione personale, solo per il tuo account Google. I record con **Aggiungi a Google Calendar** vengono comunque esportati al salvataggio, indipendentemente da questa modalità."
+        "calendarSyncModeHelp": "Impostazione personale, solo per il tuo account Google. I record con **Aggiungi a Google Calendar** vengono comunque esportati al salvataggio, indipendentemente da questa modalità.",
+        "googleAccountProfileMissing": "Connesso con un'autorizzazione precedente. Ricollega questo account Google per mostrare email, nome e avatar.",
+        "reconnectGoogleAccount": "Ricollega account Google"
     },
     "help": {
-        "GoogleCalendarDrive": "Collega il tuo account Google per **Calendario** e **Drive** usati da questa istanza Espo (ambito `drive.file`). Disconnetti rimuove i token salvati. Dopo la connessione, scegli la modalità di sincronizzazione (opzionale) e clicca **Salva**."
+        "GoogleCalendarDrive": "Collega il tuo account Google per **Calendario** e **Drive** usati da questa istanza Espo (ambito `drive.file`). Disconnetti rimuove i token salvati. Dopo la connessione, verifica email/nome/avatar mostrati, scegli la modalità di sincronizzazione (opzionale) e clicca **Salva**."
     }
 }

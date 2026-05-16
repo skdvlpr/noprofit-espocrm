@@ -21,7 +21,7 @@
     "params": {
         "endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
         "tokenEndpoint": "https://oauth2.googleapis.com/token",
-        "scope": "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.file"
+        "scope": "openid email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.file"
     },
     "externalAccountSecretAttributeList": [
         "accessToken",

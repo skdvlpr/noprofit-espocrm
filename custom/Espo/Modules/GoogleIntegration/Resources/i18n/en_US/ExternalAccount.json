@@ -11,9 +11,11 @@
         }
     },
     "labels": {
-        "calendarSyncModeHelp": "Personal setting. Applies to your Google account only. Records with **Add to Google Calendar** still export on save regardless of this mode."
+        "calendarSyncModeHelp": "Personal setting. Applies to your Google account only. Records with **Add to Google Calendar** still export on save regardless of this mode.",
+        "googleAccountProfileMissing": "Connected with an older authorization. Reconnect this Google account to show its email, name and avatar.",
+        "reconnectGoogleAccount": "Reconnect Google account"
     },
     "help": {
-        "GoogleCalendarDrive": "Connect your Google account for **Calendar** and **Drive** access used by this Espo instance (`drive.file` scope). Disconnect clears stored tokens on this server. After connecting, choose your optional background sync mode below and click **Save**."
+        "GoogleCalendarDrive": "Connect your Google account for **Calendar** and **Drive** access used by this Espo instance (`drive.file` scope). Disconnect clears stored tokens on this server. After connecting, verify the shown Google email/name/avatar, choose your optional background sync mode below and click **Save**."
     }
 }

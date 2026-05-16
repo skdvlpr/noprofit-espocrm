@@ -244,8 +244,12 @@ $ok(
 );
 $scope = (string) (($metaInt['params'] ?? [])['scope'] ?? '');
 $ok(
-    'integrations.GoogleCalendarDrive scope has calendar + drive.file',
-    str_contains($scope, 'calendar') && str_contains($scope, 'drive.file'),
+    'integrations.GoogleCalendarDrive scope has identity + calendar + drive.file',
+    str_contains($scope, 'openid')
+    && str_contains($scope, 'email')
+    && str_contains($scope, 'profile')
+    && str_contains($scope, 'calendar')
+    && str_contains($scope, 'drive.file'),
     $scope === '' ? '(empty)' : $scope
 );
 

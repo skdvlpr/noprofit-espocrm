@@ -8,6 +8,7 @@ use Espo\Core\ExternalAccount\Clients\OAuth2Abstract;
 use Espo\Core\HookManager;
 use Espo\Core\Utils\Config;
 use Espo\Entities\ExternalAccount as ExternalAccountEntity;
+use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google as GoogleClient;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\ORM\EntityManager;
 
@@ -61,6 +62,18 @@ class AuthorizationCodeHandler
 
         foreach ($result as $name => $value) {
             $entity->set($name, $value);
+        }
+
+        $client->setParams($result);
+
+        if ($client instanceof GoogleClient) {
+            $profile = $client->getGoogleAccountProfile();
+
+            if ($profile !== null) {
+                foreach ($profile as $name => $value) {
+                    $entity->set($name, $value);
+                }
+            }
         }
 
         $this->entityManager->saveEntity($entity);

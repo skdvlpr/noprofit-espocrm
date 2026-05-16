@@ -131,7 +131,14 @@ $ok('no custom redirectUriPath (canonical ?entryPoint=oauthCallback)', empty($me
 $expectedRedirect = (string) ($config->get('siteUrl') ?? '') . '?entryPoint=oauthCallback';
 $ok('canonical redirect URI matches Espo core ClientManager', \Espo\Modules\GoogleIntegration\Tools\OAuth\RedirectUri::build($config) === $expectedRedirect, $expectedRedirect);
 $scope = (string) (($meta['params'] ?? [])['scope'] ?? '');
-$ok('scope lists calendar and drive.file', str_contains($scope, 'calendar') && str_contains($scope, 'drive.file'));
+$ok(
+    'scope lists identity, calendar and drive.file',
+    str_contains($scope, 'openid')
+    && str_contains($scope, 'email')
+    && str_contains($scope, 'profile')
+    && str_contains($scope, 'calendar')
+    && str_contains($scope, 'drive.file')
+);
 $fields = $meta['fields'] ?? null;
 $ok('fields include clientId and clientSecret', is_array($fields) && isset($fields['clientId'], $fields['clientSecret']));
 
