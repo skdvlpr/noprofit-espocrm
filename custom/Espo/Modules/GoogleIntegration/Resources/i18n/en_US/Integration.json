@@ -1,8 +1,8 @@
 {
     "titles": {
-        "GoogleIntegration": "Google (Calendar & Drive)"
+        "GoogleCalendarDrive": "Google calendar & drive"
     },
     "help": {
-        "GoogleIntegration": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret."
+        "GoogleCalendarDrive": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret."
     }
 }

@@ -3,7 +3,7 @@
  * REST smoke aligned with skill `explore-espo-endpoints` (Workflow A + D + ACL probes).
  *
  * 1) Admin API user (`smoke_api_catalog`): catalog, metadata, list routes, schema checks,
- *    `GoogleIntegration` extension metadata (universal Google OAuth2) + ORM DB row check;
+ *    `GoogleCalendarDrive` extension metadata (universal Google OAuth2) + ORM DB row check;
  *    `GET Integration/...` is not asserted for API users (Espo: admin UI only, type=admin).
  * 2) Volunteer API user (`smoke_api_volunteer`): `read=own` IDOR (VolunteerEmployee),
  *    `Member` blocked (`read=no`), `MealCount` foreign assignee → 403.
@@ -222,37 +222,37 @@ $r401 = $bare->get('/api/v1/App/user');
 $ok('GET App/user without X-Api-Key is not 200', $r401->getStatusCode() !== 200,
     'code=' . $r401->getStatusCode());
 
-/* --- Phase 3: GoogleIntegration OAuth2 (Workflow C + Integration read; explore-espo-endpoints) --- */
-echo "\n--- GoogleIntegration (universal Google OAuth2) ---\n";
+/* --- Phase 3: GoogleCalendarDrive OAuth2 (Workflow C + Integration read; explore-espo-endpoints) --- */
+echo "\n--- GoogleCalendarDrive (universal Google OAuth2) ---\n";
 
-$rMetaGh = $client->get('/api/v1/Metadata', ['query' => ['key' => 'integrations.GoogleIntegration']]);
+$rMetaGh = $client->get('/api/v1/Metadata', ['query' => ['key' => 'integrations.GoogleCalendarDrive']]);
 $ok(
-    'GET Metadata?key=integrations.GoogleIntegration → 200',
+    'GET Metadata?key=integrations.GoogleCalendarDrive → 200',
     $rMetaGh->getStatusCode() === 200,
     'code=' . $rMetaGh->getStatusCode()
 );
 $metaInt = json_decode((string) $rMetaGh->getBody(), true);
-$ok('integrations.GoogleIntegration.authMethod === OAuth2', ($metaInt['authMethod'] ?? '') === 'OAuth2');
+$ok('integrations.GoogleCalendarDrive.authMethod === OAuth2', ($metaInt['authMethod'] ?? '') === 'OAuth2');
 $ok(
-    'integrations.GoogleIntegration.clientClassName is Google client',
+    'integrations.GoogleCalendarDrive.clientClassName is Google client',
     str_contains((string) ($metaInt['clientClassName'] ?? ''), 'Google'),
     (string) ($metaInt['clientClassName'] ?? '')
 );
 $ok(
-    'integrations.GoogleIntegration.allowUserAccounts === true',
+    'integrations.GoogleCalendarDrive.allowUserAccounts === true',
     ($metaInt['allowUserAccounts'] ?? false) === true
 );
 $scope = (string) (($metaInt['params'] ?? [])['scope'] ?? '');
 $ok(
-    'integrations.GoogleIntegration scope has calendar + drive.file',
+    'integrations.GoogleCalendarDrive scope has calendar + drive.file',
     str_contains($scope, 'calendar') && str_contains($scope, 'drive.file'),
     $scope === '' ? '(empty)' : $scope
 );
 
 $ghRow = $em->getRDBRepository('Integration')
-    ->where(['id' => 'GoogleIntegration'])
+    ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
     ->findOne();
-$ok('DB row Integration `GoogleIntegration` exists (ORM)', $ghRow !== null);
+$ok('DB row Integration `' . GoogleIntegrationInstaller::INTEGRATION_ID . '` exists (ORM)', $ghRow !== null);
 
 /* ========== Volunteer-role API (IDOR + blocked entity) ========== */
 
@@ -400,9 +400,9 @@ $ok(
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
 );
 
-$rIntVol = $volClient->get('/api/v1/Integration/GoogleIntegration');
+$rIntVol = $volClient->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(
-    'Volunteer GET Integration/GoogleIntegration → 403 (admin user-type only)',
+    'Volunteer GET Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID . ' → 403 (admin user-type only)',
     $rIntVol->getStatusCode() === 403,
     'code=' . $rIntVol->getStatusCode()
 );

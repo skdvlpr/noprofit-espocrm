@@ -14,6 +14,6 @@
         "calendarSyncModeHelp": "Personal setting. Applies to your Google account only. Records with **Add to Google Calendar** still export on save regardless of this mode."
     },
     "help": {
-        "GoogleIntegration": "Connect your Google account for **Calendar** and **Drive** access used by this Espo instance (`drive.file` scope). Disconnect clears stored tokens on this server. After connecting, choose your optional background sync mode below and click **Save**."
+        "GoogleCalendarDrive": "Connect your Google account for **Calendar** and **Drive** access used by this Espo instance (`drive.file` scope). Disconnect clears stored tokens on this server. After connecting, choose your optional background sync mode below and click **Save**."
     }
 }

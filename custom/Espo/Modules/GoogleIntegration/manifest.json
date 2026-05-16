@@ -1,5 +1,5 @@
 {
-    "name": "GoogleIntegration",
+    "name": "GoogleCalendarDrive",
     "version": "0.1.0",
     "acceptableVersions": [
         ">=9.3.6 <10.0.0"

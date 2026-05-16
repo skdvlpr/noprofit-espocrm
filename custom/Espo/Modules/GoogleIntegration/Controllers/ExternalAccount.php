@@ -112,8 +112,8 @@ class ExternalAccount extends BaseExternalAccount
             }
 
             throw new Error(
-                'Could not get access token for GoogleIntegration.'
-                . ' Copy Redirect URI from Administration → Integrations → Google Integration: '
+                'Could not get access token for ' . Installer::INTEGRATION_ID . '.'
+                . ' Copy Redirect URI from Administration → Integrations → Google calendar & drive: '
                 . RedirectUri::build($this->config)
             );
         }

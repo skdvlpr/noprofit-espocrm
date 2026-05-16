@@ -16,6 +16,6 @@
         }
     },
     "tooltips": {
-        "driveFileId": "Google Drive file ID. Set by a Drive extension (e.g. GoogleIntegration) when sync is enabled."
+        "driveFileId": "Google Drive file ID. Set by a Drive extension (e.g. GoogleCalendarDrive) when sync is enabled."
     }
 }

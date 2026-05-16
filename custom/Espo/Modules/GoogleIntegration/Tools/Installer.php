@@ -8,7 +8,7 @@ use Espo\Entities\Integration as IntegrationEntity;
 use Espo\ORM\EntityManager;
 
 /**
- * Post-install for the standalone GoogleIntegration extension.
+ * Post-install for the standalone Google Calendar & Drive extension.
  *
  * - Ensures an {@see Integration} DB row exists for {@see self::INTEGRATION_ID}
  *   (disabled by default) so Admin → Integrations can open the panel.
@@ -18,11 +18,13 @@ use Espo\ORM\EntityManager;
  */
 class Installer
 {
-    /** Must match {@see Resources/metadata/integrations/GoogleIntegration.json} basename. */
-    public const INTEGRATION_ID = 'GoogleIntegration';
+    /** Must match {@see Resources/metadata/integrations/GoogleCalendarDrive.json} basename. */
+    public const INTEGRATION_ID = 'GoogleCalendarDrive';
 
     /** Legacy id from an earlier SafehouseCrm-bundled draft. */
     private const LEGACY_SAFEHOUSE_GOOGLE_ID = 'GoogleSafehouse';
+    /** Previous integration id before rename. */
+    private const LEGACY_GOOGLE_INTEGRATION_ID = 'GoogleIntegration';
 
     public function runPostInstall(Container $container): void
     {
@@ -34,16 +36,23 @@ class Installer
 
     private function removeLegacyIntegrationRow(EntityManager $entityManager): void
     {
-        $legacy = $entityManager
+        $legacyList = $entityManager
             ->getRDBRepository(IntegrationEntity::ENTITY_TYPE)
-            ->where(['id' => self::LEGACY_SAFEHOUSE_GOOGLE_ID])
-            ->findOne();
+            ->where([
+                'OR' => [
+                    ['id' => self::LEGACY_SAFEHOUSE_GOOGLE_ID],
+                    ['id' => self::LEGACY_GOOGLE_INTEGRATION_ID],
+                ],
+            ])
+            ->find();
 
-        if ($legacy === null) {
+        if ($legacyList === []) {
             return;
         }
 
-        $entityManager->removeEntity($legacy);
+        foreach ($legacyList as $legacy) {
+            $entityManager->removeEntity($legacy);
+        }
     }
 
     private function ensureIntegrationRow(EntityManager $entityManager): void

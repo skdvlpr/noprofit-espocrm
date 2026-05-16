@@ -8,7 +8,7 @@ use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\ORM\EntityManager;
 
 /**
- * Whether the GoogleIntegration extension is enabled for this Espo instance.
+ * Whether the GoogleCalendarDrive integration is enabled for this Espo instance.
  */
 class IntegrationState
 {
@@ -17,7 +17,7 @@ class IntegrationState
         private EntityManager $entityManager,
     ) {}
 
-    public function isGoogleIntegrationEnabled(): bool
+    public function isGoogleCalendarDriveEnabled(): bool
     {
         $integrations = $this->config->get('integrations');
         $configFlag = false;
@@ -36,5 +36,10 @@ class IntegrationState
             ->getEntityById(IntegrationEntity::ENTITY_TYPE, Installer::INTEGRATION_ID);
 
         return $integration !== null && $integration->get('enabled');
+    }
+
+    public function isGoogleIntegrationEnabled(): bool
+    {
+        return $this->isGoogleCalendarDriveEnabled();
     }
 }

@@ -202,13 +202,13 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         }
 
         shouldShowCalendarSyncSettings() {
-            if (this.integration !== 'GoogleIntegration') {
+            if (this.integration !== 'GoogleCalendarDrive') {
                 return false;
             }
 
             const integrations = this.getConfig().get('integrations') || {};
 
-            if (!integrations.GoogleIntegration) {
+            if (!integrations.GoogleCalendarDrive) {
                 return false;
             }
 

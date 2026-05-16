@@ -18,7 +18,7 @@
             "maxLength": 255,
             "readOnly": true,
             "trim": true,
-            "tooltip": "Google Drive file ID. Populated by a Drive-capable extension (e.g. GoogleIntegration) when upload sync is implemented.",
+            "tooltip": "Google Drive file ID. Populated by a Drive-capable extension (e.g. GoogleCalendarDrive) when upload sync is implemented.",
             "layoutDetailDisabled": true,
             "layoutListDisabled": true,
             "layoutMassUpdateDisabled": true,

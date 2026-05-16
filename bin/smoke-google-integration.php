@@ -1,12 +1,12 @@
 <?php
 /**
- * REST smoke for the standalone **`GoogleIntegration`** Espo extension (universal
+ * REST smoke for the standalone **`GoogleCalendarDrive`** Espo extension (universal
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
  * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
  *    removes legacy `GoogleSafehouse` integration id, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
- * 3) ORM + expected **403** on `GET Integration/GoogleIntegration` for `type=api` users
+ * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
  *
  * Usage:
@@ -108,10 +108,10 @@ try {
 }
 $ok('GET /api/v1/App/user → 200', $r->getStatusCode() === 200, 'code=' . $r->getStatusCode());
 
-echo "\nWorkflow C: Metadata integrations.GoogleIntegration\n";
+echo "\nWorkflow C: Metadata integrations.GoogleCalendarDrive\n";
 
-$rMeta = $client->get('/api/v1/Metadata', ['query' => ['key' => 'integrations.GoogleIntegration']]);
-$ok('GET Metadata?key=integrations.GoogleIntegration → 200', $rMeta->getStatusCode() === 200,
+$rMeta = $client->get('/api/v1/Metadata', ['query' => ['key' => 'integrations.GoogleCalendarDrive']]);
+$ok('GET Metadata?key=integrations.GoogleCalendarDrive → 200', $rMeta->getStatusCode() === 200,
     'code=' . $rMeta->getStatusCode());
 $meta = json_decode((string) $rMeta->getBody(), true);
 $ok('authMethod OAuth2', ($meta['authMethod'] ?? '') === 'OAuth2');

@@ -16,6 +16,6 @@
         }
     },
     "tooltips": {
-        "driveFileId": "ID del file su Google Drive. Valorizzato da un'estensione Drive (es. GoogleIntegration) quando la sincronizzazione è attiva."
+        "driveFileId": "ID del file su Google Drive. Valorizzato da un'estensione Drive (es. GoogleCalendarDrive) quando la sincronizzazione è attiva."
     }
 }
