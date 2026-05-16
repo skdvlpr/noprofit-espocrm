@@ -1,0 +1,19 @@
+{
+    "fields": {
+        "calendarSyncMode": "Sincronizzazione calendario in background"
+    },
+    "options": {
+        "calendarSyncMode": {
+            "none": "Disattivata (solo export manuale)",
+            "bidirectional": "Bidirezionale (CRM ↔ Google)",
+            "crmToGoogle": "Solo CRM → Google",
+            "googleToCrm": "Solo Google → CRM"
+        }
+    },
+    "labels": {
+        "calendarSyncModeHelp": "Impostazione personale, solo per il tuo account Google. I record con **Aggiungi a Google Calendar** vengono comunque esportati al salvataggio, indipendentemente da questa modalità."
+    },
+    "help": {
+        "GoogleIntegration": "Collega il tuo account Google per **Calendario** e **Drive** usati da questa istanza Espo (ambito `drive.file`). Disconnetti rimuove i token salvati. Dopo la connessione, scegli la modalità di sincronizzazione (opzionale) e clicca **Salva**."
+    }
+}

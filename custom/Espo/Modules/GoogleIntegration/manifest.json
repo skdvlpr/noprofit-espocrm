@@ -1,0 +1,14 @@
+{
+    "name": "GoogleIntegration",
+    "version": "0.1.0",
+    "acceptableVersions": [
+        ">=9.3.6 <10.0.0"
+    ],
+    "php": [
+        ">=8.1"
+    ],
+    "releaseDate": "2026-05-14",
+    "author": "skdvlpr",
+    "description": "Universal EspoCRM extension: per-user Google OAuth2 (Calendar + Drive file scope) via core ExternalAccount transport. Not tied to any vertical CRM.",
+    "skipBackup": false
+}

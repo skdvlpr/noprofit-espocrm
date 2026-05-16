@@ -16,6 +16,6 @@
         }
     },
     "tooltips": {
-        "driveFileId": "ID del file su Google Drive. Popolato dall'integrazione Drive in Fase 3."
+        "driveFileId": "ID del file su Google Drive. Valorizzato da un'estensione Drive (es. GoogleIntegration) quando la sincronizzazione è attiva."
     }
 }

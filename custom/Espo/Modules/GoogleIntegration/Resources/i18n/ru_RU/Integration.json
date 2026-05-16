@@ -1,0 +1,8 @@
+{
+    "titles": {
+        "GoogleIntegration": "Google (Календарь и Drive)"
+    },
+    "help": {
+        "GoogleIntegration": "Сначала включите **Включено** — иначе **Client ID** и **Client Secret** скрыты. Скопируйте поле **Redirect URI** на этой странице в [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (тип **Web application**). URI должен совпадать побайтово (тот же хост, что в **Администрирование → Настройки → Site URL**). OAuth 2.0 для **Google Календаря** и **Drive** (`drive.file`). Включите **Google Calendar API** и **Google Drive API**. Подключение — в **личных внешних аккаунтах**."
+    }
+}

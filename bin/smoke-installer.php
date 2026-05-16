@@ -9,6 +9,7 @@
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
  *     `MealCount`) are present in `tabList`;
  *   - canonical roles + Administration team exist;
+ *   - universal `GoogleIntegration` extension post-install (Integration row, legacy cleanup);
  *   - rerunning is idempotent (counts stable).
  *
  * Usage:
@@ -18,6 +19,7 @@
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
 use Espo\Modules\SafehouseCrm\Tools\Installer;
 
 $app = new Application();
@@ -37,6 +39,8 @@ $installer = new Installer();
 
 echo "Run 1: invoke post-install via Installer\n";
 $installer->runPostInstall($container);
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$container->getByClass(\Espo\Core\Utils\Config::class)->update();
 
 $config = $container->get('config');
 $tabList = $config->get('tabList', []) ?? [];
@@ -66,9 +70,16 @@ foreach (['Admin', 'Employee', 'Manager', 'Volunteer', 'Member'] as $expectedRol
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();
 $report('Team `Administration` provisioned', $adminTeam !== null);
 
+$googleInt = $em->getRDBRepository('Integration')
+    ->where(['id' => 'GoogleIntegration'])
+    ->findOne();
+$report('Integration `GoogleIntegration` row exists (universal extension)', $googleInt !== null);
+
 echo "\nRun 2: invoke again — must be idempotent\n";
 $tabListBefore = $config->get('tabList', []) ?? [];
 $installer->runPostInstall($container);
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$container->getByClass(\Espo\Core\Utils\Config::class)->update();
 
 $configAfter = $container->getByClass(\Espo\Core\Utils\Config::class);
 $configAfter->update();

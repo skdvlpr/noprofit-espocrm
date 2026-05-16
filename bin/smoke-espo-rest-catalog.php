@@ -2,7 +2,9 @@
 /**
  * REST smoke aligned with skill `explore-espo-endpoints` (Workflow A + D + ACL probes).
  *
- * 1) Admin API user (`smoke_api_catalog`): catalog, metadata, list routes, schema checks.
+ * 1) Admin API user (`smoke_api_catalog`): catalog, metadata, list routes, schema checks,
+ *    `GoogleIntegration` extension metadata (universal Google OAuth2) + ORM DB row check;
+ *    `GET Integration/...` is not asserted for API users (Espo: admin UI only, type=admin).
  * 2) Volunteer API user (`smoke_api_volunteer`): `read=own` IDOR (VolunteerEmployee),
  *    `Member` blocked (`read=no`), `MealCount` foreign assignee → 403.
  *
@@ -27,6 +29,7 @@ use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
+use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -42,6 +45,9 @@ $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
 /** @var Config $config */
 $config = $container->getByClass(Config::class);
+
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$config->update();
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');
 if ($siteUrl === '') {
@@ -216,6 +222,38 @@ $r401 = $bare->get('/api/v1/App/user');
 $ok('GET App/user without X-Api-Key is not 200', $r401->getStatusCode() !== 200,
     'code=' . $r401->getStatusCode());
 
+/* --- Phase 3: GoogleIntegration OAuth2 (Workflow C + Integration read; explore-espo-endpoints) --- */
+echo "\n--- GoogleIntegration (universal Google OAuth2) ---\n";
+
+$rMetaGh = $client->get('/api/v1/Metadata', ['query' => ['key' => 'integrations.GoogleIntegration']]);
+$ok(
+    'GET Metadata?key=integrations.GoogleIntegration → 200',
+    $rMetaGh->getStatusCode() === 200,
+    'code=' . $rMetaGh->getStatusCode()
+);
+$metaInt = json_decode((string) $rMetaGh->getBody(), true);
+$ok('integrations.GoogleIntegration.authMethod === OAuth2', ($metaInt['authMethod'] ?? '') === 'OAuth2');
+$ok(
+    'integrations.GoogleIntegration.clientClassName is Google client',
+    str_contains((string) ($metaInt['clientClassName'] ?? ''), 'Google'),
+    (string) ($metaInt['clientClassName'] ?? '')
+);
+$ok(
+    'integrations.GoogleIntegration.allowUserAccounts === true',
+    ($metaInt['allowUserAccounts'] ?? false) === true
+);
+$scope = (string) (($metaInt['params'] ?? [])['scope'] ?? '');
+$ok(
+    'integrations.GoogleIntegration scope has calendar + drive.file',
+    str_contains($scope, 'calendar') && str_contains($scope, 'drive.file'),
+    $scope === '' ? '(empty)' : $scope
+);
+
+$ghRow = $em->getRDBRepository('Integration')
+    ->where(['id' => 'GoogleIntegration'])
+    ->findOne();
+$ok('DB row Integration `GoogleIntegration` exists (ORM)', $ghRow !== null);
+
 /* ========== Volunteer-role API (IDOR + blocked entity) ========== */
 
 echo "\n--- Volunteer API user (" . SMOKE_USER_VOLUNTEER . ", role Volunteer) ---\n";
@@ -360,6 +398,13 @@ $ok(
     'Volunteer App/user shows VolunteerEmployee.read=own',
     is_array($volAcl) && ($volAcl['read'] ?? '') === 'own',
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
+);
+
+$rIntVol = $volClient->get('/api/v1/Integration/GoogleIntegration');
+$ok(
+    'Volunteer GET Integration/GoogleIntegration → 403 (admin user-type only)',
+    $rIntVol->getStatusCode() === 403,
+    'code=' . $rIntVol->getStatusCode()
 );
 
 echo "\n=== " . ($fail === 0 ? 'ALL PASS' : "$fail FAILURE(S)") . " ===\n";

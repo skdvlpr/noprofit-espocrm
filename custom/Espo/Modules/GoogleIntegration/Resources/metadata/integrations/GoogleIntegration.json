@@ -1,0 +1,30 @@
+{
+    "authMethod": "OAuth2",
+    "view": "google-integration:views/admin/integrations/edit",
+    "clientClassName": "Espo\\Modules\\GoogleIntegration\\Core\\ExternalAccount\\Clients\\Google",
+    "allowUserAccounts": true,
+    "userView": "google-integration:views/external-account/oauth2",
+    "tokenType": "Bearer",
+    "authType": "Form",
+    "fields": {
+        "clientId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "required": true
+        },
+        "clientSecret": {
+            "type": "password",
+            "maxLength": 255,
+            "required": true
+        }
+    },
+    "params": {
+        "endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+        "tokenEndpoint": "https://oauth2.googleapis.com/token",
+        "scope": "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.file"
+    },
+    "externalAccountSecretAttributeList": [
+        "accessToken",
+        "refreshToken"
+    ]
+}

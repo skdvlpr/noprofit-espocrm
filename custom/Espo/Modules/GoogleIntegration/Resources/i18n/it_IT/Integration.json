@@ -1,0 +1,8 @@
+{
+    "titles": {
+        "GoogleIntegration": "Google (Calendario e Drive)"
+    },
+    "help": {
+        "GoogleIntegration": "Spunta **Abilitato** per mostrare **Client ID** e **Client Secret** (Espo li nasconde se l’integrazione è disattivata). Copia il campo di sola lettura **Redirect URI** in questa pagina nella [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (credenziali **Applicazione web**). Deve coincidere esattamente (stesso host di **Amministrazione → Impostazioni → Site URL**). OAuth 2.0 per **Google Calendar** e **Google Drive** (`drive.file`). Abilita **Google Calendar API** e **Google Drive API**. Collegamento da **Account esterni personali** dopo Client ID / Secret."
+    }
+}

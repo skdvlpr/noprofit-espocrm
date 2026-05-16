@@ -7501,13 +7501,19 @@ res/templates/admin/integrations/oauth2.tpl
                     >{{translate 'enabled' scope='Integration' category='fields'}}</label>
                     <div class="field" data-name="enabled">{{{enabled}}}</div>
                 </div>
-                {{#each dataFieldList}}
-                    <div class="cell form-group" data-name="{{./this}}">
+                {{#each fieldDataList}}
+                    <div
+                        class="cell form-group"
+                        data-name="{{name}}"
+                    >
                         <label
                             class="control-label"
-                            data-name="{{./this}}"
-                        >{{translate this scope='Integration' category='fields'}}</label>
-                        <div class="field" data-name="{{./this}}">{{{var this ../this}}}</div>
+                            data-name="{{name}}"
+                        >{{label}}</label>
+                        <div
+                            class="field"
+                            data-name="{{name}}"
+                        >{{{var name ../this}}}</div>
                     </div>
                 {{/each}}
                 <div class="cell form-group" data-name="redirectUri">
@@ -7525,7 +7531,7 @@ res/templates/admin/integrations/oauth2.tpl
     <div class="col-sm-6">
         {{#if helpText}}
         <div class="well">
-            {{{helpText}}}
+            {{complexText helpText}}
         </div>
         {{/if}}
     </div>

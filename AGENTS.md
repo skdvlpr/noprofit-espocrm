@@ -13,6 +13,8 @@ Before implementing ANY task, executor MUST:
 3. Read referenced files from the repository (never assume content).
 4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change.
 5. Never overwrite executor logs in Notion. Append only.
+6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do not** create local markdown files as a Notion substitute. If MCP is unavailable, skip Notion and inform the user. Mark tasks **Done** only when acceptance criteria are met.
+7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
 
 ## SECTION 1 — PROJECT OVERVIEW
 
@@ -602,6 +604,8 @@ five items above and that re-running is idempotent.
 
 ### PKG-004 — Build and release
 
+**SafehouseCrm** (vertical CRM):
+
 ```
 # bin/build.sh
 VERSION=$(cat manifest.json | jq -r '.version')
@@ -610,7 +614,158 @@ zip -r dist/safehouse-crm-v${VERSION}.zip \
   --exclude "*.git*" --exclude "*.DS_Store"
 ```
 
+**GoogleIntegration** (universal Google OAuth2 — separate extension, not bundled with Safehouse):
+
+```
+# bin/build-google-integration.sh
+# → dist/google-integration-v$(jq -r .version custom/Espo/Modules/GoogleIntegration/manifest.json).zip
+```
+
 **MANDATORY before each release**: clean-install test on fresh EspoCRM instance.
+
+**GoogleIntegration ZIP must include frontend** (since 2026-05-15): `bin/build-google-integration.sh` copies both
+`custom/Espo/Modules/GoogleIntegration/` and `client/custom/modules/google-integration/` into the package.
+Without the latter, Admin UI views load as 404 after Extension Manager install.
+
+## SECTION 26 — ESPO EXTENSION ARCHITECTURE (EXT-\*)
+
+Authoritative sources: [Modules (dev)](https://docs.espocrm.com/development/modules/),
+[Extensions (admin)](https://docs.espocrm.com/administration/extensions/),
+[ext-template](https://github.com/espocrm/ext-template),
+forum: [espocrm#2334](https://github.com/espocrm/espocrm/issues/2334) (custom modules → `client/custom/modules/`).
+
+Use this section when splitting features into **separate installable extensions** (SafehouseCrm, GoogleIntegration, future packs).
+
+### EXT-001 — Two trees per extension (runtime vs package)
+
+| Layer | Path (canonical at runtime) | Naming |
+| ----- | --------------------------- | ------ |
+| Backend (PHP, metadata, hooks) | `custom/Espo/Modules/{ModuleName}/` | CamelCase (`GoogleIntegration`, `SafehouseCrm`) |
+| Frontend (AMD views, templates) | `client/custom/modules/{module-hyphen}/` | kebab-case (`google-integration`, `safehouse-crm`) |
+
+**NOT loaded at runtime:**
+
+- `custom/Espo/Modules/{Module}/client/modules/...` — may exist as a **mirror** inside the repo for convenience; Espo loader does **not** read it unless files are also under `client/custom/modules/`.
+- `client/custom/src/views/...` without `custom:` AMD prefix — loader resolves bare `views/...` to `client/lib/transpiled/src/` (**404** in dev).
+
+### EXT-002 — AMD / metadata view IDs (Espo 9.3.6)
+
+Loader `_idToPath` (see `client/lib/espo.js`):
+
+| Metadata / `define()` ID | Resolved file |
+| ------------------------ | ------------- |
+| `views/foo/bar` | `client/lib/transpiled/src/views/foo/bar.js` (bundled core only) |
+| `custom:views/foo/bar` | `client/custom/src/views/foo/bar.js` (global override) |
+| `{hyphen}:views/foo/bar` | `client/custom/modules/{hyphen}/src/views/foo/bar.js` |
+| `module/{hyphen}/views/foo/bar` | same as above (modern docs style) |
+
+**RULE:** Integration metadata `view` / `userView` for a custom module MUST use the **module prefix**:
+
+```json
+{
+  "view": "google-integration:views/admin/integrations/edit",
+  "userView": "google-integration:views/external-account/oauth2"
+}
+```
+
+Templates: `google-integration:external-account/oauth2` → `client/custom/modules/google-integration/res/templates/...`.
+
+### EXT-003 — ZIP package layout (Extension Manager)
+
+Minimum structure (matches [ext-template](https://github.com/espocrm/ext-template) output):
+
+```
+extension-package/
+├── manifest.json
+├── scripts/
+│   └── AfterInstall.php          ← delegates to Espo\Modules\{Name}\Tools\Installer
+└── files/
+    ├── custom/Espo/Modules/{ModuleName}/   ← full PHP module tree
+    └── client/custom/modules/{module-hyphen}/   ← REQUIRED if module has UI
+```
+
+Install flow: Administration → Extensions → Upload ZIP → Install → **Rebuild + Clear Cache**.
+
+CLI alternative: `php command.php extension --file="path/to/package.zip"` ([docs](https://docs.espocrm.com/administration/commands/#extension)).
+
+**PROHIBITED in ZIP:** editing `application/`, `vendor/`, shipping secrets in `data/config.php`.
+
+### EXT-004 — manifest.json (extension root, not only in-module)
+
+In-repo module manifest: `custom/Espo/Modules/{Module}/manifest.json`.
+
+ZIP root `manifest.json` is copied from that file by build scripts. Required fields:
+
+```json
+{
+  "name": "GoogleIntegration",
+  "version": "1.0.0",
+  "acceptableVersions": [">=9.3.0"],
+  "releaseDate": "2026-05-15"
+}
+```
+
+Module order (metadata merge precedence): `custom/Espo/Modules/{Module}/Resources/module.json`:
+
+```json
+{ "order": 16 }
+```
+
+Higher `order` wins on conflicting metadata keys.
+
+### EXT-005 — AfterInstall (single source of truth)
+
+Same pattern as PKG-002:
+
+1. `scripts/AfterInstall.php` in ZIP → `Tools\Installer::runPostInstall($container)`.
+2. In-tree `custom/Espo/Modules/{Module}/AfterInstall.php` → same class (dev installs).
+
+Post-install MUST: seed DB rows if needed, fix `tabList` only via `ConfigWriter` (never hand-edit `data/config.php`), then `DataManager::rebuild()`.
+
+### EXT-006 — Optional module capabilities
+
+| Feature | Location |
+| ------- | -------- |
+| API routes | `Resources/routes.json` |
+| Composer deps | `composer.json` + `Resources/autoload.json` (psr-4 paths) |
+| ES modules / bundle | `Resources/module.json`: `"jsTranspiled": true`, `"bundled": true`; `Resources/metadata/app/client.json` scriptList |
+| Init script | `client/custom/modules/{hyphen}/lib/init.js` |
+| 3rd-party JS lib | Rollup in build + `Resources/metadata/app/jsLibs.json` (ext-template README) |
+
+### EXT-007 — Multiple extensions in one repo
+
+This repo ships **independent** extensions:
+
+| Extension | Backend | Frontend | Build |
+| --------- | ------- | -------- | ----- |
+| SafehouseCrm | `custom/Espo/Modules/SafehouseCrm/` | (core overrides only if needed) | `bin/build.sh` |
+| GoogleIntegration | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
+
+**RULE:** Do not bundle GoogleIntegration inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm.
+
+Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`.
+
+### EXT-008 — Frontend verification checklist (per extension with UI)
+
+After metadata or client change:
+
+1. `ddev exec php clear_cache.php && ddev exec php rebuild.php`
+2. Hard refresh (Ctrl+Shift+R)
+3. DevTools → Network: custom view URL must be **200**, e.g.  
+   `/client/custom/modules/google-integration/src/views/admin/integrations/edit.js`
+4. Must **not** 404 on `/client/lib/transpiled/src/views/admin/integrations/google-integration-edit.js`
+5. Console: no `Cannot read properties of null (reading 'val')` on Save
+
+### EXT-009 — Known extension UI failure modes
+
+| Symptom | Cause |
+| ------- | ----- |
+| Admin → Integrations blank + spinner | `view` in metadata without module prefix → AMD 404 |
+| Client ID/Secret never appear | `enabled` unchecked (by design); or `fieldDataList` empty / template mismatch |
+| Save disabled integration crashes | `save()` calls `fetchToModel()` on hidden password fields — call `syncEnabledFromView()` **before** `getFieldsForSave()` (stale `model.enabled` still `true` after user unchecks Abilitato) |
+| Integration “always enabled” | Admin save JS crash → no PUT → `integration.enabled` and `config.integrations.GoogleIntegration` never flip to false |
+| OAuth `Malformed auth code` | `encodeURI` vs `encodeURIComponent`, COOP + `popup.location`, double token exchange, `redirect_uri` slash mismatch |
+| Connect uses `espo-extra.js` | `userView` not loading module view — wrong metadata path |
 
 ## SECTION 12 — SECURITY RULES (SEC-\*)
 
@@ -748,6 +903,7 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | Script | Layer |
 | ------ | ----- |
 | `bin/smoke-espo-rest-catalog.php` | **HTTP REST** + ACL headers (`X-Api-Key`) |
+| `bin/smoke-google-integration.php` | **HTTP REST** + `GoogleIntegration` module metadata / DB row |
 | `bin/smoke-safehouse.php` | ORM + formulas + scheduled jobs |
 | `bin/smoke-contact-sync.php` | ORM + `PersonContactSync` invariants |
 | `bin/smoke-installer.php` | Post-install / `tabList` / roles |
@@ -758,6 +914,12 @@ Run REST smoke after metadata / ACL / field-key changes that affect the API surf
 ```bash
 ddev exec php bin/smoke-espo-rest-catalog.php
 ```
+
+### GIT-001 — Commits and pushes (user consent)
+
+- **`git push`** (and opening/updating a **Pull Request**): only after the user **explicitly** requests it (e.g. «запушь», «push», «открой PR»). Otherwise stop at local changes or a local commit and **ask**.
+- **`git commit`**: if the user did not mention committing, **ask** whether to commit (and with what message). If they said «закоммить» but not «пуш», commit locally and **do not push** until they confirm.
+- **Force-push / destructive git operations**: never without explicit user approval.
 
 ## SECTION 25 — NO-FAIL ENTITY CREATION RULEBOOK
 
@@ -848,7 +1010,9 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **I18N**: `en_US` mandatory | `it_IT` required | every layout field needs label
 - **HOK**: hooks only when formula insufficient | `afterSave` = idempotent
 - **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
+- **EXT**: backend `custom/Espo/Modules/{Camel}/` + frontend `client/custom/modules/{hyphen}/` | metadata views use `{hyphen}:views/...` | ZIP includes both trees | see EXT-001–EXT-009
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
+- **GIT**: no `git push` / PR without explicit user request | ask before commit if unclear
 - **API-REST**: skill `explore-espo-endpoints` | `App/user` + `acl.table` first | `select` + `maxSize`≤200 | `X-Status-Reason` on fail | `bin/smoke-espo-rest-catalog.php`
 - **REF**: working entities to copy from — `Member`, `VolunteerEmployee`, `MealCount` (all SafehouseCrm-modular, English-named).

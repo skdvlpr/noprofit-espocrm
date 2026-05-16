@@ -16,6 +16,6 @@
         }
     },
     "tooltips": {
-        "driveFileId": "Google Drive file ID. Populated by the Drive integration in Phase 3."
+        "driveFileId": "Google Drive file ID. Set by a Drive extension (e.g. GoogleIntegration) when sync is enabled."
     }
 }
