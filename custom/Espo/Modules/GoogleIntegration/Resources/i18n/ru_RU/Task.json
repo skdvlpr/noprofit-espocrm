@@ -1,0 +1,27 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": "Сохранить в Google Calendar",
+        "googleCalendarReminderMinutes": "Напоминание Google",
+        "googleCalendarReminderMethod": "Способ напоминания Google"
+    },
+    "labels": {
+        "googleCalendarReminderNotice": "Можно сохранить эту запись в Google Calendar с напоминанием или без него. Оставьте Напоминание Google пустым, чтобы создать событие без напоминания."
+    },
+    "options": {
+        "googleCalendarReminderMinutes": {
+            "": "Без напоминания",
+            "0": "В момент срока",
+            "5": "За 5 минут",
+            "10": "За 10 минут",
+            "15": "За 15 минут",
+            "30": "За 30 минут",
+            "60": "За 1 час",
+            "120": "За 2 часа",
+            "1440": "За 1 день"
+        },
+        "googleCalendarReminderMethod": {
+            "popup": "Уведомление",
+            "email": "Email"
+        }
+    }
+}

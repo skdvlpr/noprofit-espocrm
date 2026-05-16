@@ -1,0 +1,15 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name"}, {"name": "parent"}],
+            [{"name": "status"}, {"name": "priority"}],
+            [{"name": "dateStart"}, {"name": "dateCompleted"}],
+            [{"name": "dateEnd"}, {"name": "reminders"}],
+            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMinutes"}],
+            [{"name": "googleCalendarReminderMethod"}, false],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "attachments", "fullWidth": true}]
+        ]
+    }
+]

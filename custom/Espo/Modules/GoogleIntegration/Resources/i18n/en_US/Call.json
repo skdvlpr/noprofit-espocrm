@@ -1,0 +1,27 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": "Save in Google Calendar",
+        "googleCalendarReminderMinutes": "Google Reminder",
+        "googleCalendarReminderMethod": "Google Reminder Method"
+    },
+    "labels": {
+        "googleCalendarReminderNotice": "You can save this record to Google Calendar with or without a Google reminder. Leave Google Reminder empty to create the calendar event without a reminder."
+    },
+    "options": {
+        "googleCalendarReminderMinutes": {
+            "": "No reminder",
+            "0": "At event time",
+            "5": "5 minutes before",
+            "10": "10 minutes before",
+            "15": "15 minutes before",
+            "30": "30 minutes before",
+            "60": "1 hour before",
+            "120": "2 hours before",
+            "1440": "1 day before"
+        },
+        "googleCalendarReminderMethod": {
+            "popup": "Notification",
+            "email": "Email"
+        }
+    }
+}

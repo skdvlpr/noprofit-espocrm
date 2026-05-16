@@ -1,0 +1,21 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": {
+            "type": "bool",
+            "default": false,
+            "audited": true
+        },
+        "googleCalendarReminderMinutes": {
+            "type": "enum",
+            "options": ["", "0", "5", "10", "15", "30", "60", "120", "1440"],
+            "default": "",
+            "audited": true
+        },
+        "googleCalendarReminderMethod": {
+            "type": "enum",
+            "options": ["popup", "email"],
+            "default": "popup",
+            "audited": true
+        }
+    }
+}

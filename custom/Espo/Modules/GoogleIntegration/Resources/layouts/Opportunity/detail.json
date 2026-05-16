@@ -1,0 +1,14 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name"}, {"name": "account"}],
+            [{"name": "stage"}, {"name": "amount"}],
+            [{"name": "presentationDate"}, {"name": "closeDate"}],
+            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMinutes"}],
+            [{"name": "googleCalendarReminderMethod"}, false],
+            [{"name": "contacts"}, false],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

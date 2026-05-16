@@ -1,0 +1,27 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": "Salva in Google Calendar",
+        "googleCalendarReminderMinutes": "Promemoria Google",
+        "googleCalendarReminderMethod": "Metodo promemoria Google"
+    },
+    "labels": {
+        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google. Lascia vuoto Promemoria Google per creare l'evento senza promemoria."
+    },
+    "options": {
+        "googleCalendarReminderMinutes": {
+            "": "Nessun promemoria",
+            "0": "Alla scadenza",
+            "5": "5 minuti prima",
+            "10": "10 minuti prima",
+            "15": "15 minuti prima",
+            "30": "30 minuti prima",
+            "60": "1 ora prima",
+            "120": "2 ore prima",
+            "1440": "1 giorno prima"
+        },
+        "googleCalendarReminderMethod": {
+            "popup": "Notifica",
+            "email": "Email"
+        }
+    }
+}

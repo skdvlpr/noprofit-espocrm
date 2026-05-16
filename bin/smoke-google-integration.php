@@ -142,6 +142,30 @@ $ok(
 $fields = $meta['fields'] ?? null;
 $ok('fields include clientId and clientSecret', is_array($fields) && isset($fields['clientId'], $fields['clientSecret']));
 
+echo "\nGoogle Calendar entity metadata\n";
+
+foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
+    $rEntityDefs = $client->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.' . $entityType]]);
+    $ok("GET Metadata?key=entityDefs.$entityType → 200", $rEntityDefs->getStatusCode() === 200,
+        'code=' . $rEntityDefs->getStatusCode());
+
+    $entityDefs = json_decode((string) $rEntityDefs->getBody(), true);
+    $entityFields = $entityDefs['fields'] ?? [];
+
+    $ok(
+        "$entityType has saveToGoogleCalendar",
+        is_array($entityFields) && isset($entityFields['saveToGoogleCalendar'])
+    );
+    $ok(
+        "$entityType has googleCalendarReminderMinutes",
+        is_array($entityFields) && isset($entityFields['googleCalendarReminderMinutes'])
+    );
+    $ok(
+        "$entityType has googleCalendarReminderMethod",
+        is_array($entityFields) && isset($entityFields['googleCalendarReminderMethod'])
+    );
+}
+
 echo "\nORM + Integration REST (API user expected 403)\n";
 
 $gh = $em->getRDBRepository('Integration')->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])->findOne();
