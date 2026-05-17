@@ -9,8 +9,9 @@
             [{"name": "parent"}],
             [{"name": "reminders"}],
             [{"name": "saveToGoogleCalendar"}],
-            [{"name": "googleCalendarReminderMinutes"}],
-            [{"name": "googleCalendarReminderMethod"}],
+            [{"name": "googleCalendarReminderMode"}],
+            [{"name": "googleCalendarReminders"}],
+            [{"name": "googleCalendarDescriptionTemplateOverride"}],
             [{"name": "description"}]
         ]
     }

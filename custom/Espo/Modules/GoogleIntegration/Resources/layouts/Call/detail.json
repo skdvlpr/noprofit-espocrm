@@ -6,8 +6,11 @@
             [{"name": "status"}, {"name": "direction"}],
             [{"name": "dateStart"}, {"name": "dateEnd"}],
             [{"name": "duration"}, {"name": "reminders"}],
-            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMinutes"}],
-            [{"name": "googleCalendarReminderMethod"}, false],
+            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMode"}],
+            [{"name": "googleCalendarReminders", "fullWidth": true}],
+            [{"name": "googleCalendarLocation"}, {"name": "googleCalendarVisibility"}],
+            [{"name": "googleCalendarTransparency"}, {"name": "googleCalendarColorId"}],
+            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]
     }

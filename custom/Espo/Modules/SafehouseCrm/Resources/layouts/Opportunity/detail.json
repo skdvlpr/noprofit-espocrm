@@ -5,8 +5,11 @@
             [{"name": "name"}, {"name": "account"}],
             [{"name": "stage"}, {"name": "amount"}],
             [{"name": "presentationDate"}, {"name": "closeDate"}],
-            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMinutes"}],
-            [{"name": "googleCalendarReminderMethod"}, false],
+            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMode"}],
+            [{"name": "googleCalendarReminders", "fullWidth": true}],
+            [{"name": "googleCalendarLocation"}, {"name": "googleCalendarVisibility"}],
+            [{"name": "googleCalendarTransparency"}, {"name": "googleCalendarColorId"}],
+            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}],
             [{"name": "contacts"}, false],
             [{"name": "description", "fullWidth": true}]
         ]

@@ -7,9 +7,11 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\ClientManager;
+use Espo\Core\Htmlizer\TemplateRendererFactory;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Log;
+use Espo\Core\Utils\Metadata;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google as GoogleClient;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
@@ -20,11 +22,15 @@ class EventPusher
 {
     private const LINK_ENTITY_TYPE = 'GoogleCalendarEventLink';
     private const DEFAULT_CALENDAR_ID = 'primary';
+    private const MAX_REMINDERS = 5;
+    private const MAX_REMINDER_MINUTES = 40320;
 
     public function __construct(
         private EntityManager $entityManager,
         private ClientManager $clientManager,
+        private TemplateRendererFactory $templateRendererFactory,
         private Config $config,
+        private Metadata $metadata,
         private User $user,
         private Log $log
     ) {}
@@ -137,7 +143,7 @@ class EventPusher
             return null;
         }
 
-        return [
+        $event = [
             'summary' => $this->buildSummary($entity),
             'description' => $this->buildDescription($entity),
             'start' => $dateRange['start'],
@@ -151,6 +157,32 @@ class EventPusher
                 ],
             ],
         ];
+
+        $location = trim((string) ($entity->get('googleCalendarLocation') ?? ''));
+
+        if ($location !== '') {
+            $event['location'] = $location;
+        }
+
+        $visibility = $entity->get('googleCalendarVisibility');
+
+        if (in_array($visibility, ['default', 'private', 'public'], true)) {
+            $event['visibility'] = $visibility;
+        }
+
+        $transparency = $entity->get('googleCalendarTransparency');
+
+        if (in_array($transparency, ['opaque', 'transparent'], true)) {
+            $event['transparency'] = $transparency;
+        }
+
+        $colorId = $entity->get('googleCalendarColorId');
+
+        if (is_string($colorId) && preg_match('/^(?:[1-9]|10|11)$/', $colorId)) {
+            $event['colorId'] = $colorId;
+        }
+
+        return $event;
     }
 
     /**
@@ -161,7 +193,7 @@ class EventPusher
         return match ($entity->getEntityType()) {
             'Meeting', 'Call' => $this->buildDateTimeRange($entity->get('dateStart'), $entity->get('dateEnd')),
             'Task' => $this->buildTaskDateRange($entity),
-            'Opportunity' => $this->buildAllDayRange($entity->get('closeDate') ?: $entity->get('presentationDate')),
+            'Opportunity' => $this->buildAllDayRange($entity->get('closeDate')),
             default => null,
         };
     }
@@ -257,15 +289,17 @@ class EventPusher
 
     private function buildDescription(Entity $entity): string
     {
-        $description = trim((string) ($entity->get('description') ?? ''));
-        $siteUrl = rtrim((string) ($this->config->get('siteUrl') ?? ''), '/');
+        $template = $this->getDescriptionTemplate($entity);
 
-        if ($siteUrl !== '') {
-            $description .= ($description !== '' ? "\n\n" : '')
-                . 'EspoCRM: ' . $siteUrl . '/#' . $entity->getEntityType() . '/view/' . $entity->getId();
-        }
-
-        return $description;
+        return trim($this->templateRendererFactory
+            ->create()
+            ->setEntity($entity)
+            ->setUser($this->user)
+            ->setData([
+                'espocrmUrl' => $this->buildRecordUrl($entity),
+            ])
+            ->setTemplate($template)
+            ->render());
     }
 
     /**
@@ -273,29 +307,111 @@ class EventPusher
      */
     private function buildReminders(Entity $entity): array
     {
-        $minutes = $entity->get('googleCalendarReminderMinutes');
+        $mode = $entity->get('googleCalendarReminderMode');
 
-        if ($minutes === null || $minutes === '') {
+        if ($mode === 'default') {
+            return [
+                'useDefault' => true,
+                'overrides' => [],
+            ];
+        }
+
+        if ($mode !== 'custom') {
             return [
                 'useDefault' => false,
                 'overrides' => [],
             ];
         }
 
-        $method = $entity->get('googleCalendarReminderMethod');
-
-        if ($method !== 'email') {
-            $method = 'popup';
-        }
-
         return [
             'useDefault' => false,
-            'overrides' => [
-                [
-                    'method' => $method,
-                    'minutes' => max(0, (int) $minutes),
-                ],
-            ],
+            'overrides' => $this->buildCustomReminderOverrides($entity),
         ];
+    }
+
+    /**
+     * @return array<int, array{method: string, minutes: int}>
+     */
+    private function buildCustomReminderOverrides(Entity $entity): array
+    {
+        $rows = $entity->get('googleCalendarReminders');
+
+        if (!is_array($rows)) {
+            return [];
+        }
+
+        $overrides = [];
+
+        foreach (array_slice($rows, 0, self::MAX_REMINDERS) as $row) {
+            if (is_object($row)) {
+                $row = get_object_vars($row);
+            }
+
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $minutes = $this->reminderRowToMinutes($row);
+
+            if ($minutes < 0 || $minutes > self::MAX_REMINDER_MINUTES) {
+                continue;
+            }
+
+            $method = $row['method'] ?? 'popup';
+
+            $overrides[] = [
+                'method' => $method === 'email' ? 'email' : 'popup',
+                'minutes' => $minutes,
+            ];
+        }
+
+        return $overrides;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function reminderRowToMinutes(array $row): int
+    {
+        $amount = max(0, (int) ($row['amount'] ?? 0));
+
+        return match ($row['unit'] ?? 'days') {
+            'weeks' => $amount * 7 * 24 * 60,
+            'days' => $amount * 24 * 60,
+            'hours' => $amount * 60,
+            default => $amount,
+        };
+    }
+
+    private function getDescriptionTemplate(Entity $entity): string
+    {
+        $override = trim((string) ($entity->get('googleCalendarDescriptionTemplateOverride') ?? ''));
+
+        if ($override !== '') {
+            return $override;
+        }
+
+        $field = 'googleCalendarDescriptionTemplate' . $entity->getEntityType();
+        $integration = $this->entityManager->getEntityById('Integration', Installer::INTEGRATION_ID);
+        $template = $integration?->get($field);
+
+        if (is_string($template) && trim($template) !== '') {
+            return $template;
+        }
+
+        $default = $this->metadata->get(['integrations', Installer::INTEGRATION_ID, 'fields', $field, 'default']);
+
+        return is_string($default) && trim($default) !== '' ? $default : '{{name}}';
+    }
+
+    private function buildRecordUrl(Entity $entity): string
+    {
+        $siteUrl = rtrim((string) ($this->config->get('siteUrl') ?? ''), '/');
+
+        if ($siteUrl === '') {
+            return '';
+        }
+
+        return $siteUrl . '/#' . $entity->getEntityType() . '/view/' . $entity->getId();
     }
 }

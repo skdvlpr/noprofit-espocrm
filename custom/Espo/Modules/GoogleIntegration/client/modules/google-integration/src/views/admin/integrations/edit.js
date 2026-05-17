@@ -19,6 +19,12 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
     };
 
     const CREDENTIAL_FIELD_NAMES = Object.keys(CREDENTIAL_FIELD_DEFS);
+    const TEMPLATE_FIELD_ENTITY_MAP = {
+        googleCalendarDescriptionTemplateMeeting: 'Meeting',
+        googleCalendarDescriptionTemplateCall: 'Call',
+        googleCalendarDescriptionTemplateTask: 'Task',
+        googleCalendarDescriptionTemplateOpportunity: 'Opportunity',
+    };
 
     class GoogleIntegrationAdminEditView extends _parent.default {
         template = 'admin/integrations/oauth2';
@@ -91,7 +97,9 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
         }
 
         afterRender() {
+            super.afterRender();
             this.syncCredentialFieldsVisibility();
+            this.renderTemplateVariableHelpers();
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.syncCredentialFieldsVisibility();
@@ -108,6 +116,100 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                     this.hideField(name);
                 }
             });
+        }
+
+        renderTemplateVariableHelpers() {
+            Object.keys(TEMPLATE_FIELD_ENTITY_MAP).forEach(field => {
+                this.renderTemplateVariableHelper(field, TEMPLATE_FIELD_ENTITY_MAP[field]);
+            });
+        }
+
+        renderTemplateVariableHelper(field, entityType) {
+            const $field = this.$el.find(`.field[data-name="${field}"]`).last();
+
+            if (!$field.length || $field.find('.google-calendar-template-variable-helper').length) {
+                return;
+            }
+
+            const fieldList = this.getInsertableFieldList(entityType);
+
+            if (!fieldList.length) {
+                return;
+            }
+
+            const $select = $('<select>')
+                .addClass('form-control input-sm')
+                .attr('data-role', 'google-calendar-template-variable');
+
+            fieldList.forEach(item => {
+                $('<option>')
+                    .attr('value', item.name)
+                    .text(item.label)
+                    .appendTo($select);
+            });
+
+            const $button = $('<button>')
+                .attr('type', 'button')
+                .addClass('btn btn-default btn-sm')
+                .text(this.translate('Insert'))
+                .on('click', () => this.insertVariable(field, String($select.val() || '')));
+
+            const $helper = $('<div>')
+                .addClass('google-calendar-template-variable-helper input-group input-group-sm margin-top');
+
+            $('<span>')
+                .addClass('input-group-addon')
+                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Integration'))
+                .appendTo($helper);
+
+            $select.appendTo($helper);
+
+            $('<span>')
+                .addClass('input-group-btn')
+                .append($button)
+                .appendTo($helper);
+
+            $field.append($helper);
+        }
+
+        getInsertableFieldList(entityType) {
+            const fields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
+
+            return Object.keys(fields)
+                .filter(name => !name.startsWith('googleCalendar') && !fields[name].utility)
+                .map(name => ({
+                    name,
+                    label: this.translate(name, 'fields', entityType),
+                }))
+                .sort((a, b) => a.label.localeCompare(b.label));
+        }
+
+        insertVariable(field, name) {
+            if (!name) {
+                return;
+            }
+
+            const $input = this.$el
+                .find(`.field[data-name="${field}"] textarea, .field[data-name="${field}"] input`)
+                .first();
+
+            if (!$input.length) {
+                return;
+            }
+
+            const element = $input.get(0);
+            const value = $input.val() || '';
+            const variable = `{{${name}}}`;
+            const start = element.selectionStart ?? String(value).length;
+            const end = element.selectionEnd ?? start;
+            const nextValue = String(value).slice(0, start) + variable + String(value).slice(end);
+
+            $input.val(nextValue).trigger('change');
+
+            if (typeof element.setSelectionRange === 'function') {
+                const cursor = start + variable.length;
+                element.setSelectionRange(cursor, cursor);
+            }
         }
 
         isFieldViewFetchable(view) {

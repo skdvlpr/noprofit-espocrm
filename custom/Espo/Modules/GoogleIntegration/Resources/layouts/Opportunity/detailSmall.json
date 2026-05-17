@@ -7,8 +7,9 @@
             [{"name": "stage"}, {"name": "closeDate"}],
             [{"name": "presentationDate"}, {"name": "amount"}],
             [{"name": "saveToGoogleCalendar", "fullWidth": true}],
-            [{"name": "googleCalendarReminderMinutes", "fullWidth": true}],
-            [{"name": "googleCalendarReminderMethod", "fullWidth": true}],
+            [{"name": "googleCalendarReminderMode", "fullWidth": true}],
+            [{"name": "googleCalendarReminders", "fullWidth": true}],
+            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}],
             [{"name": "contacts", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]

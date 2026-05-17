@@ -1,27 +1,54 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Salva in Google Calendar",
-        "googleCalendarReminderMinutes": "Promemoria Google",
-        "googleCalendarReminderMethod": "Metodo promemoria Google"
+        "googleCalendarReminderMode": "Modalità promemoria Google",
+        "googleCalendarReminders": "Promemoria Google",
+        "googleCalendarDescriptionTemplateOverride": "Template descrizione Google",
+        "googleCalendarLocation": "Luogo Google",
+        "googleCalendarVisibility": "Visibilità Google",
+        "googleCalendarTransparency": "Disponibilità Google",
+        "googleCalendarColorId": "Colore Google"
     },
     "labels": {
-        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google. Lascia vuoto Promemoria Google per creare l'evento senza promemoria."
+        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google. I promemoria personalizzati supportano fino a 5 promemoria e fino a 4 settimane prima dell'evento.",
+        "googleCalendarTemplateVariables": "Inserisci campo del record"
     },
     "options": {
-        "googleCalendarReminderMinutes": {
-            "": "Nessun promemoria",
-            "0": "Alla scadenza",
-            "5": "5 minuti prima",
-            "10": "10 minuti prima",
-            "15": "15 minuti prima",
-            "30": "30 minuti prima",
-            "60": "1 ora prima",
-            "120": "2 ore prima",
-            "1440": "1 giorno prima"
+        "googleCalendarReminderMode": {
+            "none": "Nessun promemoria",
+            "default": "Usa predefiniti del calendario",
+            "custom": "Promemoria personalizzati"
         },
-        "googleCalendarReminderMethod": {
+        "googleCalendarReminders": {
             "popup": "Notifica",
-            "email": "Email"
+            "email": "Email",
+            "minutes": "minuti prima",
+            "hours": "ore prima",
+            "days": "giorni prima",
+            "weeks": "settimane prima"
+        },
+        "googleCalendarVisibility": {
+            "default": "Predefinita",
+            "private": "Privata",
+            "public": "Pubblica"
+        },
+        "googleCalendarTransparency": {
+            "opaque": "Occupato",
+            "transparent": "Disponibile"
+        },
+        "googleCalendarColorId": {
+            "": "Predefinito",
+            "1": "Lavanda",
+            "2": "Salvia",
+            "3": "Uva",
+            "4": "Fenicottero",
+            "5": "Banana",
+            "6": "Mandarino",
+            "7": "Pavone",
+            "8": "Grafite",
+            "9": "Mirtillo",
+            "10": "Basilico",
+            "11": "Pomodoro"
         }
     }
 }

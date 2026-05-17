@@ -186,12 +186,24 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
         is_array($entityFields) && isset($entityFields['saveToGoogleCalendar'])
     );
     $ok(
-        "$entityType has googleCalendarReminderMinutes",
-        is_array($entityFields) && isset($entityFields['googleCalendarReminderMinutes'])
+        "$entityType has googleCalendarReminderMode",
+        is_array($entityFields) && isset($entityFields['googleCalendarReminderMode'])
     );
     $ok(
-        "$entityType has googleCalendarReminderMethod",
-        is_array($entityFields) && isset($entityFields['googleCalendarReminderMethod'])
+        "$entityType has googleCalendarReminders",
+        is_array($entityFields) && isset($entityFields['googleCalendarReminders'])
+    );
+    $ok(
+        "$entityType has googleCalendarDescriptionTemplateOverride",
+        is_array($entityFields) && isset($entityFields['googleCalendarDescriptionTemplateOverride'])
+    );
+    $ok(
+        "$entityType removed legacy googleCalendarReminderMinutes",
+        is_array($entityFields) && !isset($entityFields['googleCalendarReminderMinutes'])
+    );
+    $ok(
+        "$entityType removed legacy googleCalendarReminderMethod",
+        is_array($entityFields) && !isset($entityFields['googleCalendarReminderMethod'])
     );
 }
 
@@ -208,12 +220,24 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
             $layoutHasField($layout, 'saveToGoogleCalendar')
         );
         $ok(
-            "$entityType $layoutType layout has googleCalendarReminderMinutes",
-            $layoutHasField($layout, 'googleCalendarReminderMinutes')
+            "$entityType $layoutType layout has googleCalendarReminderMode",
+            $layoutHasField($layout, 'googleCalendarReminderMode')
         );
         $ok(
-            "$entityType $layoutType layout has googleCalendarReminderMethod",
-            $layoutHasField($layout, 'googleCalendarReminderMethod')
+            "$entityType $layoutType layout has googleCalendarReminders",
+            $layoutHasField($layout, 'googleCalendarReminders')
+        );
+        $ok(
+            "$entityType $layoutType layout has googleCalendarDescriptionTemplateOverride",
+            $layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
+        );
+        $ok(
+            "$entityType $layoutType layout removed legacy googleCalendarReminderMinutes",
+            !$layoutHasField($layout, 'googleCalendarReminderMinutes')
+        );
+        $ok(
+            "$entityType $layoutType layout removed legacy googleCalendarReminderMethod",
+            !$layoutHasField($layout, 'googleCalendarReminderMethod')
         );
     }
 }

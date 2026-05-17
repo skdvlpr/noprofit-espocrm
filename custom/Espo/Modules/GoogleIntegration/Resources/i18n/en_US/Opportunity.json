@@ -1,27 +1,54 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Save in Google Calendar",
-        "googleCalendarReminderMinutes": "Google Reminder",
-        "googleCalendarReminderMethod": "Google Reminder Method"
+        "googleCalendarReminderMode": "Google Reminder Mode",
+        "googleCalendarReminders": "Google Reminders",
+        "googleCalendarDescriptionTemplateOverride": "Google Description Template",
+        "googleCalendarLocation": "Google Location",
+        "googleCalendarVisibility": "Google Visibility",
+        "googleCalendarTransparency": "Google Availability",
+        "googleCalendarColorId": "Google Color"
     },
     "labels": {
-        "googleCalendarReminderNotice": "You can save this grant date to Google Calendar with or without a Google reminder. Leave Google Reminder empty to create the calendar event without a reminder."
+        "googleCalendarReminderNotice": "You can save this grant date to Google Calendar with or without Google reminders. For funding deadlines, use day/week reminders such as 7 days, 14 days, or 4 weeks before.",
+        "googleCalendarTemplateVariables": "Insert record field"
     },
     "options": {
-        "googleCalendarReminderMinutes": {
-            "": "No reminder",
-            "0": "At event time",
-            "5": "5 minutes before",
-            "10": "10 minutes before",
-            "15": "15 minutes before",
-            "30": "30 minutes before",
-            "60": "1 hour before",
-            "120": "2 hours before",
-            "1440": "1 day before"
+        "googleCalendarReminderMode": {
+            "none": "No reminder",
+            "default": "Use calendar defaults",
+            "custom": "Custom reminders"
         },
-        "googleCalendarReminderMethod": {
+        "googleCalendarReminders": {
             "popup": "Notification",
-            "email": "Email"
+            "email": "Email",
+            "minutes": "minutes before",
+            "hours": "hours before",
+            "days": "days before",
+            "weeks": "weeks before"
+        },
+        "googleCalendarVisibility": {
+            "default": "Default",
+            "private": "Private",
+            "public": "Public"
+        },
+        "googleCalendarTransparency": {
+            "opaque": "Busy",
+            "transparent": "Available"
+        },
+        "googleCalendarColorId": {
+            "": "Default",
+            "1": "Lavender",
+            "2": "Sage",
+            "3": "Grape",
+            "4": "Flamingo",
+            "5": "Banana",
+            "6": "Tangerine",
+            "7": "Peacock",
+            "8": "Graphite",
+            "9": "Blueberry",
+            "10": "Basil",
+            "11": "Tomato"
         }
     }
 }

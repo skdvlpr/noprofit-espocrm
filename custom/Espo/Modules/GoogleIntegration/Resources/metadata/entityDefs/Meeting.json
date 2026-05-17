@@ -5,16 +5,42 @@
             "default": false,
             "audited": true
         },
-        "googleCalendarReminderMinutes": {
+        "googleCalendarReminderMode": {
             "type": "enum",
-            "options": ["", "0", "5", "10", "15", "30", "60", "120", "1440"],
-            "default": "",
+            "options": ["none", "default", "custom"],
+            "default": "none",
             "audited": true
         },
-        "googleCalendarReminderMethod": {
+        "googleCalendarReminders": {
+            "type": "jsonArray",
+            "view": "google-integration:views/fields/google-calendar-reminders",
+            "audited": true
+        },
+        "googleCalendarDescriptionTemplateOverride": {
+            "type": "text",
+            "audited": true
+        },
+        "googleCalendarLocation": {
+            "type": "varchar",
+            "maxLength": 255,
+            "audited": true
+        },
+        "googleCalendarVisibility": {
             "type": "enum",
-            "options": ["popup", "email"],
-            "default": "popup",
+            "options": ["default", "private", "public"],
+            "default": "default",
+            "audited": true
+        },
+        "googleCalendarTransparency": {
+            "type": "enum",
+            "options": ["opaque", "transparent"],
+            "default": "opaque",
+            "audited": true
+        },
+        "googleCalendarColorId": {
+            "type": "enum",
+            "options": ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+            "default": "",
             "audited": true
         }
     }

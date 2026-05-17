@@ -1,27 +1,54 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Сохранить в Google Calendar",
-        "googleCalendarReminderMinutes": "Напоминание Google",
-        "googleCalendarReminderMethod": "Способ напоминания Google"
+        "googleCalendarReminderMode": "Режим напоминаний Google",
+        "googleCalendarReminders": "Напоминания Google",
+        "googleCalendarDescriptionTemplateOverride": "Шаблон описания Google",
+        "googleCalendarLocation": "Место Google",
+        "googleCalendarVisibility": "Видимость Google",
+        "googleCalendarTransparency": "Занятость Google",
+        "googleCalendarColorId": "Цвет Google"
     },
     "labels": {
-        "googleCalendarReminderNotice": "Можно сохранить эту запись в Google Calendar с напоминанием или без него. Оставьте Напоминание Google пустым, чтобы создать событие без напоминания."
+        "googleCalendarReminderNotice": "Можно сохранить эту запись в Google Calendar с напоминаниями или без них. Пользовательские напоминания: до 5 штук и максимум за 4 недели до события.",
+        "googleCalendarTemplateVariables": "Вставить поле записи"
     },
     "options": {
-        "googleCalendarReminderMinutes": {
-            "": "Без напоминания",
-            "0": "В момент срока",
-            "5": "За 5 минут",
-            "10": "За 10 минут",
-            "15": "За 15 минут",
-            "30": "За 30 минут",
-            "60": "За 1 час",
-            "120": "За 2 часа",
-            "1440": "За 1 день"
+        "googleCalendarReminderMode": {
+            "none": "Без напоминаний",
+            "default": "Настройки календаря",
+            "custom": "Пользовательские напоминания"
         },
-        "googleCalendarReminderMethod": {
+        "googleCalendarReminders": {
             "popup": "Уведомление",
-            "email": "Email"
+            "email": "Email",
+            "minutes": "минут до",
+            "hours": "часов до",
+            "days": "дней до",
+            "weeks": "недель до"
+        },
+        "googleCalendarVisibility": {
+            "default": "По умолчанию",
+            "private": "Приватное",
+            "public": "Публичное"
+        },
+        "googleCalendarTransparency": {
+            "opaque": "Занят",
+            "transparent": "Свободен"
+        },
+        "googleCalendarColorId": {
+            "": "По умолчанию",
+            "1": "Lavender",
+            "2": "Sage",
+            "3": "Grape",
+            "4": "Flamingo",
+            "5": "Banana",
+            "6": "Tangerine",
+            "7": "Peacock",
+            "8": "Graphite",
+            "9": "Blueberry",
+            "10": "Basil",
+            "11": "Tomato"
         }
     }
 }

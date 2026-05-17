@@ -16,6 +16,22 @@
             "type": "password",
             "maxLength": 255,
             "required": true
+        },
+        "googleCalendarDescriptionTemplateMeeting": {
+            "type": "text",
+            "default": "{{name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
+        },
+        "googleCalendarDescriptionTemplateCall": {
+            "type": "text",
+            "default": "{{name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
+        },
+        "googleCalendarDescriptionTemplateTask": {
+            "type": "text",
+            "default": "{{name}}\nPriority: {{priority}}\nStatus: {{status}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
+        },
+        "googleCalendarDescriptionTemplateOpportunity": {
+            "type": "text",
+            "default": "Fondi e Finanziamenti: {{name}}\nAccount: {{accountName}}\nImporto: {{amount}}\nData presentazione: {{presentationDate}}\nData chiusura: {{closeDate}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
         }
     },
     "params": {
