@@ -1,0 +1,17 @@
+[
+    {
+        "rows": [
+            [{"name": "name"}],
+            [{"name": "status"}, {"name": "direction"}],
+            [{"name": "dateStart"}],
+            [{"name": "duration"}, false],
+            [{"name": "dateEnd"}],
+            [{"name": "parent"}],
+            [{"name": "reminders"}],
+            [{"name": "saveToGoogleCalendar"}],
+            [{"name": "googleCalendarReminderMinutes"}],
+            [{"name": "googleCalendarReminderMethod"}],
+            [{"name": "description"}]
+        ]
+    }
+]

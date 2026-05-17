@@ -1,0 +1,16 @@
+{
+    "labels": {
+        "GoogleCalendarEventLink": "Collegamento evento Google Calendar",
+        "GoogleCalendarEventLinkPlural": "Collegamenti eventi Google Calendar"
+    },
+    "fields": {
+        "name": "Nome",
+        "sourceEntityType": "Tipo entità origine",
+        "sourceEntityId": "ID entità origine",
+        "user": "Utente",
+        "calendarId": "ID calendario",
+        "googleEventId": "ID evento Google",
+        "googleEventHtmlLink": "Link evento Google",
+        "lastSyncedAt": "Ultima sincronizzazione"
+    }
+}

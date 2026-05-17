@@ -4,6 +4,7 @@ namespace Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients;
 
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\Clients\Google as BaseGoogle;
+use Espo\Core\ExternalAccount\OAuth2\Client;
 use Espo\Core\Utils\Json;
 use Throwable;
 
@@ -15,6 +16,7 @@ class Google extends BaseGoogle
     private string $lastAuthCodeForLog = '';
 
     private const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+    private const CALENDAR_EVENT_URL = 'https://www.googleapis.com/calendar/v3/calendars/%s/events';
 
     protected function getPingUrl()
     {
@@ -108,6 +110,43 @@ class Google extends BaseGoogle
         }
 
         return $profile !== [] ? $profile : null;
+    }
+
+    /**
+     * @param array<string, mixed> $event
+     * @return array<string, mixed>
+     */
+    public function createCalendarEvent(array $event, string $calendarId = 'primary'): array
+    {
+        $result = $this->request(
+            $this->buildCalendarEventUrl($calendarId),
+            Json::encode($event),
+            Client::HTTP_METHOD_POST,
+            Client::CONTENT_TYPE_APPLICATION_JSON
+        );
+
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * @param array<string, mixed> $event
+     * @return array<string, mixed>
+     */
+    public function updateCalendarEvent(string $eventId, array $event, string $calendarId = 'primary'): array
+    {
+        $result = $this->request(
+            $this->buildCalendarEventUrl($calendarId) . '/' . rawurlencode($eventId),
+            Json::encode($event),
+            Client::HTTP_METHOD_PUT,
+            Client::CONTENT_TYPE_APPLICATION_JSON
+        );
+
+        return is_array($result) ? $result : [];
+    }
+
+    private function buildCalendarEventUrl(string $calendarId): string
+    {
+        return sprintf(self::CALENDAR_EVENT_URL, rawurlencode($calendarId));
     }
 
     /**

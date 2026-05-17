@@ -20,6 +20,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Metadata;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
@@ -36,6 +37,8 @@ $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
 /** @var Config $config */
 $config = $container->getByClass(Config::class);
+/** @var Metadata $metadata */
+$metadata = $container->getByClass(Metadata::class);
 
 echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
 (new GoogleIntegrationInstaller())->runPostInstall($container);
@@ -54,6 +57,32 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     }
     $m = $pass ? 'PASS' : 'FAIL';
     echo "  [$m] $name" . ($detail !== '' ? " — $detail" : '') . "\n";
+};
+
+$layoutHasField = static function (mixed $layout, string $fieldName) use (&$layoutHasField): bool {
+    if (is_array($layout)) {
+        foreach ($layout as $item) {
+            if ($layoutHasField($item, $fieldName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    if (is_object($layout)) {
+        if (($layout->name ?? null) === $fieldName) {
+            return true;
+        }
+
+        foreach (get_object_vars($layout) as $value) {
+            if ($layoutHasField($value, $fieldName)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 };
 
 $role = $em->getRDBRepository('Role')->where(['name' => 'Admin', 'deleted' => false])->findOne();
@@ -165,6 +194,35 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
         is_array($entityFields) && isset($entityFields['googleCalendarReminderMethod'])
     );
 }
+
+foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
+    foreach (['detail', 'detailSmall'] as $layoutType) {
+        $rLayout = $client->get("/api/v1/$entityType/layout/$layoutType");
+        $ok("GET /api/v1/$entityType/layout/$layoutType → 200", $rLayout->getStatusCode() === 200,
+            'code=' . $rLayout->getStatusCode());
+
+        $layout = json_decode((string) $rLayout->getBody());
+
+        $ok(
+            "$entityType $layoutType layout has saveToGoogleCalendar",
+            $layoutHasField($layout, 'saveToGoogleCalendar')
+        );
+        $ok(
+            "$entityType $layoutType layout has googleCalendarReminderMinutes",
+            $layoutHasField($layout, 'googleCalendarReminderMinutes')
+        );
+        $ok(
+            "$entityType $layoutType layout has googleCalendarReminderMethod",
+            $layoutHasField($layout, 'googleCalendarReminderMethod')
+        );
+    }
+}
+
+$linkEntityDefs = $metadata->get('entityDefs.GoogleCalendarEventLink');
+$linkFields = $linkEntityDefs['fields'] ?? [];
+$ok('GoogleCalendarEventLink has sourceEntityType', is_array($linkFields) && isset($linkFields['sourceEntityType']));
+$ok('GoogleCalendarEventLink has googleEventId', is_array($linkFields) && isset($linkFields['googleEventId']));
+$ok('GoogleCalendarEventLink has user link', is_array($linkFields) && isset($linkFields['user']));
 
 echo "\nORM + Integration REST (API user expected 403)\n";
 

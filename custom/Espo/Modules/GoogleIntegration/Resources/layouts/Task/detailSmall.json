@@ -1,0 +1,18 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name", "fullWidth": true}],
+            [{"name": "status"}, {"name": "priority"}],
+            [{"name": "dateStart", "fullWidth": true}],
+            [{"name": "dateEnd", "fullWidth": true}],
+            [{"name": "parent", "fullWidth": true}],
+            [{"name": "reminders", "fullWidth": true}],
+            [{"name": "saveToGoogleCalendar", "fullWidth": true}],
+            [{"name": "googleCalendarReminderMinutes", "fullWidth": true}],
+            [{"name": "googleCalendarReminderMethod", "fullWidth": true}],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "attachments", "fullWidth": true}]
+        ]
+    }
+]

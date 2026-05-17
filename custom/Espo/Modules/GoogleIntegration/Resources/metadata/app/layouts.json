@@ -2,20 +2,32 @@
     "Meeting": {
         "detail": {
             "module": "GoogleIntegration"
+        },
+        "detailSmall": {
+            "module": "GoogleIntegration"
         }
     },
     "Call": {
         "detail": {
+            "module": "GoogleIntegration"
+        },
+        "detailSmall": {
             "module": "GoogleIntegration"
         }
     },
     "Task": {
         "detail": {
             "module": "GoogleIntegration"
+        },
+        "detailSmall": {
+            "module": "GoogleIntegration"
         }
     },
     "Opportunity": {
         "detail": {
+            "module": "GoogleIntegration"
+        },
+        "detailSmall": {
             "module": "GoogleIntegration"
         }
     }

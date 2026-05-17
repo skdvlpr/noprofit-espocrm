@@ -1,0 +1,16 @@
+{
+    "labels": {
+        "GoogleCalendarEventLink": "Связь события Google Calendar",
+        "GoogleCalendarEventLinkPlural": "Связи событий Google Calendar"
+    },
+    "fields": {
+        "name": "Название",
+        "sourceEntityType": "Тип исходной сущности",
+        "sourceEntityId": "ID исходной сущности",
+        "user": "Пользователь",
+        "calendarId": "ID календаря",
+        "googleEventId": "ID события Google",
+        "googleEventHtmlLink": "Ссылка на событие Google",
+        "lastSyncedAt": "Последняя синхронизация"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "labels": {
+        "GoogleCalendarEventLink": "Google Calendar Event Link",
+        "GoogleCalendarEventLinkPlural": "Google Calendar Event Links"
+    },
+    "fields": {
+        "name": "Name",
+        "sourceEntityType": "Source Entity Type",
+        "sourceEntityId": "Source Entity ID",
+        "user": "User",
+        "calendarId": "Calendar ID",
+        "googleEventId": "Google Event ID",
+        "googleEventHtmlLink": "Google Event Link",
+        "lastSyncedAt": "Last Synced At"
+    }
+}
