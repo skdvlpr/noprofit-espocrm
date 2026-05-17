@@ -4,7 +4,7 @@
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
  * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
- *    removes legacy `GoogleSafehouse` integration id, rebuild).
+ *    legacy id migration, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
  * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
@@ -38,6 +38,19 @@ $em = $container->getByClass(EntityManager::class);
 $config = $container->getByClass(Config::class);
 
 echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
+$googleBefore = $em->getRDBRepository('Integration')
+    ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
+    ->findOne();
+$legacyIntegrationSnapshot = [];
+
+foreach (['GoogleIntegration', 'GoogleSafehouse'] as $legacyId) {
+    $legacy = $em->getRDBRepository('Integration')->where(['id' => $legacyId])->findOne();
+
+    if ($legacy !== null) {
+        $legacyIntegrationSnapshot[$legacyId] = get_object_vars($legacy->getValueMap());
+    }
+}
+
 (new GoogleIntegrationInstaller())->runPostInstall($container);
 $config->update();
 
@@ -140,8 +153,27 @@ echo "\nORM + Integration REST (API user expected 403)\n";
 $gh = $em->getRDBRepository('Integration')->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])->findOne();
 $ok('Integration ' . GoogleIntegrationInstaller::INTEGRATION_ID . ' exists in database', $gh !== null);
 
-$legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'])->findOne();
-$ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
+foreach (['GoogleIntegration', 'GoogleSafehouse'] as $legacyId) {
+    $legacy = $em->getRDBRepository('Integration')->where(['id' => $legacyId])->findOne();
+    $ok('Legacy Integration ' . $legacyId . ' migrated/removed', $legacy === null);
+}
+
+if ($googleBefore === null && $gh !== null && $legacyIntegrationSnapshot !== []) {
+    $source = $legacyIntegrationSnapshot['GoogleIntegration']
+        ?? $legacyIntegrationSnapshot['GoogleSafehouse']
+        ?? null;
+
+    foreach (['enabled', 'clientId', 'clientSecret'] as $field) {
+        if ($source === null || !array_key_exists($field, $source) || $source[$field] === null || $source[$field] === '') {
+            continue;
+        }
+
+        $ok(
+            'Legacy Integration ' . $field . ' preserved during id migration',
+            $gh->get($field) === $source[$field]
+        );
+    }
+}
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(

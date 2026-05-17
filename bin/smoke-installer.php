@@ -9,7 +9,7 @@
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
  *     `MealCount`) are present in `tabList`;
  *   - canonical roles + Administration team exist;
- *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy cleanup);
+ *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy migration);
  *   - rerunning is idempotent (counts stable).
  *
  * Usage:
@@ -74,6 +74,13 @@ $googleInt = $em->getRDBRepository('Integration')
     ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
     ->findOne();
 $report('Integration `' . GoogleIntegrationInstaller::INTEGRATION_ID . '` row exists (universal extension)', $googleInt !== null);
+
+foreach (['GoogleIntegration', 'GoogleSafehouse'] as $legacyId) {
+    $legacyGoogleInt = $em->getRDBRepository('Integration')
+        ->where(['id' => $legacyId])
+        ->findOne();
+    $report('Legacy Integration `' . $legacyId . '` migrated/removed', $legacyGoogleInt === null);
+}
 
 echo "\nRun 2: invoke again — must be idempotent\n";
 $tabListBefore = $config->get('tabList', []) ?? [];
