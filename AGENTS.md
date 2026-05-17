@@ -13,7 +13,7 @@ Before implementing ANY task, executor MUST:
 3. Read referenced files from the repository (never assume content).
 4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change.
 5. Never overwrite executor logs in Notion. Append only.
-6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** **Do not** create local markdown files as a Notion substitute. If MCP is unavailable, skip Notion and inform the user. Mark tasks **Done** only when acceptance criteria are met.
+6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** Logs MUST be **handoff-ready**: include current state, files changed, verification performed, blockers, and exact next steps so another agent can continue after context compaction or token exhaustion. **Do not** create local markdown files as a Notion substitute. If MCP is unavailable, skip Notion and inform the user. Mark tasks **Done** only when acceptance criteria are met.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
 
 ## SECTION 1 — PROJECT OVERVIEW
