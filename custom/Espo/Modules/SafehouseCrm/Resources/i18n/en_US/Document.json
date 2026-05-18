@@ -11,6 +11,7 @@
             "Draft": "Draft",
             "Active": "Active",
             "Inactive": "Inactive",
+            "Canceled": "Canceled",
             "Expired": "Expired",
             "Archived": "Archived"
         }

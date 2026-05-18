@@ -2,11 +2,12 @@
     "fields": {
         "status": {
             "type": "enum",
-            "options": ["Draft", "Active", "Inactive", "Expired", "Archived"],
+            "options": ["Draft", "Active", "Inactive", "Canceled", "Expired", "Archived"],
             "style": {
                 "Draft": "default",
                 "Active": "success",
                 "Inactive": "warning",
+                "Canceled": "info",
                 "Expired": "danger",
                 "Archived": "default"
             },

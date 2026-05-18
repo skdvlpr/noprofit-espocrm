@@ -11,6 +11,7 @@
             "Draft": "Bozza",
             "Active": "Attivo",
             "Inactive": "Inattivo",
+            "Canceled": "Annullato",
             "Expired": "Scaduto",
             "Archived": "Archiviato"
         }

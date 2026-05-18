@@ -9,7 +9,7 @@
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
  *     `MealCount`) are present in `tabList`;
  *   - canonical roles + Administration team exist;
- *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy cleanup);
+ *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy migration);
  *   - rerunning is idempotent (counts stable).
  *
  * Usage:
