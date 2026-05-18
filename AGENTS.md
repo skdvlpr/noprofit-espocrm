@@ -643,9 +643,19 @@ Use this section when splitting features into **separate installable extensions*
 | Backend (PHP, metadata, hooks) | `custom/Espo/Modules/{ModuleName}/` | CamelCase (`GoogleIntegration`, `SafehouseCrm`) |
 | Frontend (AMD views, templates) | `client/custom/modules/{module-hyphen}/` | kebab-case (`google-integration`, `safehouse-crm`) |
 
-**NOT loaded at runtime:**
+**Runtime source of truth:**
 
-- `custom/Espo/Modules/{Module}/client/modules/...` — may exist as a **mirror** inside the repo for convenience; Espo loader does **not** read it unless files are also under `client/custom/modules/`.
+- Backend files are edited under `custom/Espo/Modules/{ModuleName}/`.
+- Frontend files are edited under `client/custom/modules/{module-hyphen}/`.
+- For `GoogleIntegration`, the canonical frontend path is
+  `client/custom/modules/google-integration/`.
+
+**NOT loaded at runtime and NOT a source of truth:**
+
+- `custom/Espo/Modules/{Module}/client/modules/...` — legacy/dead mirror path in
+  this repo. Espo loader does **not** read it. Do not edit it, do not add new files
+  there, and do not rely on it for packaging. If this path exists, treat it as a
+  cleanup candidate after verifying no unique files remain.
 - `client/custom/src/views/...` without `custom:` AMD prefix — loader resolves bare `views/...` to `client/lib/transpiled/src/` (**404** in dev).
 
 ### EXT-002 — AMD / metadata view IDs (Espo 9.3.6)
@@ -683,6 +693,13 @@ extension-package/
     ├── custom/Espo/Modules/{ModuleName}/   ← full PHP module tree
     └── client/custom/modules/{module-hyphen}/   ← REQUIRED if module has UI
 ```
+
+**Important:** The ZIP has two trees because Espo runtime has two trees. This
+does **not** mean frontend files should be duplicated under
+`custom/Espo/Modules/{Module}/client/modules/...`. Build scripts must copy the
+canonical backend tree to `files/custom/Espo/Modules/{ModuleName}/` and the
+canonical frontend tree to `files/client/custom/modules/{module-hyphen}/`.
+They must exclude any legacy backend-embedded frontend mirror.
 
 Install flow: Administration → Extensions → Upload ZIP → Install → **Rebuild + Clear Cache**.
 
@@ -743,6 +760,13 @@ This repo ships **independent** extensions:
 
 **RULE:** Do not bundle GoogleIntegration inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm.
 
+**GoogleIntegration frontend rule:** edit only
+`client/custom/modules/google-integration/`. Do not mirror runtime JS/templates
+into `custom/Espo/Modules/GoogleIntegration/client/modules/google-integration/`.
+If a change touches GoogleIntegration UI, update the canonical frontend tree and
+run `bin/build-google-integration.sh`; the build script is responsible for
+putting frontend files into the extension ZIP.
+
 Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`.
 
 ### EXT-008 — Frontend verification checklist (per extension with UI)
@@ -755,6 +779,10 @@ After metadata or client change:
    `/client/custom/modules/google-integration/src/views/admin/integrations/edit.js`
 4. Must **not** 404 on `/client/lib/transpiled/src/views/admin/integrations/google-integration-edit.js`
 5. Console: no `Cannot read properties of null (reading 'val')` on Save
+
+**Browser automation policy:** Do not run browser automation by default. Provide
+manual browser QA instructions after implementation, and use browser tools only
+when the user explicitly asks for browser testing or visual verification.
 
 ### EXT-009 — Known extension UI failure modes
 
@@ -777,7 +805,7 @@ Authoritative sources: EspoCRM CRM entity metadata (`Meeting`, `Call`, `Task`),
 Use Google calendar export only for records with meaningful date/time semantics:
 
 - Core CRM: `Meeting` (`dateStart`/`dateEnd`, `reminders`), `Call` (`dateStart`/`dateEnd`, `reminders`), `Task` (`dateStart`/`dateEnd`, `reminders` with `dateField: dateEnd`).
-- Safehouse: `Opportunity` (labelled Funds & Grants / Fondi e Finanziamenti) for `presentationDate` and future deadline/close-date fields once present.
+- Safehouse: `Opportunity` (labelled Funds & Grants / Fondi e Finanziamenti) for `presentationDate` and `closeDate`. Users can export either date or both; Google link idempotency must be keyed by `sourceDateType` so the same funding record can own two Google events.
 - Do **not** add calendar export to purely historical/reporting date entities by default (`MealCount`, birth dates, membership dates, document status dates) unless there is a user-facing reminder use case.
 
 ### GCal-002 — Per-user ownership
@@ -808,6 +836,33 @@ Google export must be idempotent per user and per source record:
 - Use `extendedProperties.private` with Espo source keys (`entityType`, `entityId`, `userId`) for deduplication.
 - Enforce Espo ACL before every export/update/delete.
 - Never expose OAuth tokens to frontend; all Google API calls are server-side via the user's `ExternalAccount`.
+
+### GCal-006 — Per-date settings
+
+When a single EspoCRM record can create multiple Google events (currently
+`Opportunity.presentationDate` and `Opportunity.closeDate`), Google event
+settings MUST be scoped per event/date key, not shared globally for the record:
+
+- Store selected dates separately from per-date settings.
+- Key per-date settings by source date type (`presentationDate`, `closeDate`).
+- Each date can have its own reminders, color, location, visibility,
+  transparency, and description template override.
+- Keep Google event links idempotent by `sourceDateType`.
+
+### GCal-007 — Template variables
+
+Template variables used in Google Calendar descriptions must render scalar,
+human-readable values:
+
+- Do not offer raw link variables such as `{{account}}` in pickers if they
+  render as objects.
+- Offer current entity scalar fields first.
+- Offer related entity fields only for links that are actually populated on the
+  current record.
+- Related fields must be labelled by relation and field, e.g. `(Account) Name`,
+  and inserted as path variables such as `{{account.name}}`.
+- Backend rendering must resolve link display names and related scalar fields so
+  Google Calendar never receives `[object Object]` / `[Object object]`.
 
 ## SECTION 12 — SECURITY RULES (SEC-\*)
 

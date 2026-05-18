@@ -42,6 +42,9 @@ mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_
 
 cp "$MANIFEST_PATH" "$PACKAGE_DIR/manifest.json"
 cp -a "$ROOT_DIR/$MODULE_PATH" "$PACKAGE_DIR/files/custom/Espo/Modules/"
+# Frontend runtime files live under client/custom/modules/google-integration.
+# Do not ship the legacy in-module mirror if it exists in the working tree.
+rm -rf "$PACKAGE_DIR/files/$MODULE_PATH/client"
 if [[ -d "$ROOT_DIR/$CLIENT_MODULE_PATH" ]]; then
     mkdir -p "$PACKAGE_DIR/files/client/custom/modules"
     cp -a "$ROOT_DIR/$CLIENT_MODULE_PATH" "$PACKAGE_DIR/files/client/custom/modules/"
