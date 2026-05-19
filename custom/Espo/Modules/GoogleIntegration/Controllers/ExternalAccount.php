@@ -128,6 +128,8 @@ class ExternalAccount extends BaseExternalAccount
         }
 
         $siteHost = parse_url($siteUrl, PHP_URL_HOST);
+        $sitePort = parse_url($siteUrl, PHP_URL_PORT);
+        $siteScheme = parse_url($siteUrl, PHP_URL_SCHEME);
         $requestHost = $request->getServerParam('HTTP_HOST');
 
         if (
@@ -139,11 +141,58 @@ class ExternalAccount extends BaseExternalAccount
             return;
         }
 
-        if (strcasecmp($siteHost, $requestHost) !== 0) {
+        $normalizedSiteHost = $this->normalizeHostWithPort(
+            $siteHost,
+            is_int($sitePort) ? $sitePort : null,
+            is_string($siteScheme) ? $siteScheme : null
+        );
+        $normalizedRequestHost = $this->normalizeRequestHost($requestHost, is_string($siteScheme) ? $siteScheme : null);
+
+        if ($normalizedRequestHost === null) {
+            return;
+        }
+
+        if (strcasecmp($normalizedSiteHost, $normalizedRequestHost) !== 0) {
             throw new BadRequest(
                 'Current URL host (' . $requestHost . ') does not match Administration → Settings → Site URL ('
-                . $siteHost . '). Open Espo at ' . rtrim($siteUrl, '/') . ' and retry Google connect.'
+                . $normalizedSiteHost . '). Open Espo at ' . rtrim($siteUrl, '/') . ' and retry Google connect.'
             );
         }
+    }
+
+    private function normalizeRequestHost(string $requestHost, ?string $siteScheme): ?string
+    {
+        $parts = parse_url('http://' . $requestHost);
+
+        if (!is_array($parts) || !isset($parts['host']) || !is_string($parts['host'])) {
+            return null;
+        }
+
+        $port = $parts['port'] ?? null;
+
+        return $this->normalizeHostWithPort(
+            $parts['host'],
+            is_int($port) ? $port : null,
+            $siteScheme
+        );
+    }
+
+    private function normalizeHostWithPort(string $host, ?int $port, ?string $scheme): string
+    {
+        $host = strtolower(trim($host, '[]'));
+
+        if ($port === null || $this->isDefaultPort($port, $scheme)) {
+            return $host;
+        }
+
+        return $host . ':' . $port;
+    }
+
+    private function isDefaultPort(int $port, ?string $scheme): bool
+    {
+        $scheme = strtolower((string) $scheme);
+
+        return ($scheme === 'http' && $port === 80)
+            || ($scheme === 'https' && $port === 443);
     }
 }
