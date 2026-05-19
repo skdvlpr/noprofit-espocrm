@@ -1,8 +1,12 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Save in Google Calendar",
+        "googleCalendarId": "Google Calendar",
+        "googleCalendarPrimary": "Primary calendar",
+        "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list.",
         "googleCalendarReminderMode": "Google Reminder Mode",
         "googleCalendarReminders": "Google Reminders",
+        "googleCalendarTemplate": "Calendar Template",
         "googleCalendarDescriptionTemplateOverride": "Google Description Template",
         "googleCalendarLocation": "Google Location",
         "googleCalendarVisibility": "Google Visibility",
@@ -11,7 +15,12 @@
     },
     "labels": {
         "googleCalendarReminderNotice": "You can save this record to Google Calendar with or without Google reminders. Custom reminders support up to 5 reminders and up to 4 weeks before the event.",
-        "googleCalendarTemplateVariables": "Insert record field"
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarCurrentRecordFields": "Current record fields",
+        "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarNoVariables": "No fields match the search.",
+        "googleCalendarPanelCloseHint": "Right-click to close · search is remembered"
     },
     "options": {
         "googleCalendarReminderMode": {

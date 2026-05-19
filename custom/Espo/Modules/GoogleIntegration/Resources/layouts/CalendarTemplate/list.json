@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "targetEntityType"},
+    {"name": "isActive"},
+    {"name": "assignedUser"},
+    {"name": "modifiedAt"}
+]

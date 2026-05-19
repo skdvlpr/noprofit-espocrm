@@ -220,7 +220,13 @@ define('google-integration:views/fields/google-calendar-reminders', ['exports', 
         }
 
         translateOption(value) {
-            return this.getLanguage().translateOption(value, this.name, this.model.entityType);
+            const translated = this.getLanguage().translateOption(value, this.name, this.model.entityType);
+
+            if (translated !== value) {
+                return translated;
+            }
+
+            return this.getLanguage().translateOption(value, 'googleCalendarReminders', 'Meeting');
         }
     }
 

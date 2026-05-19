@@ -8,11 +8,12 @@
             [{"name": "dateEnd"}],
             [{"name": "parent"}],
             [{"name": "reminders"}],
+            [{"name": "description"}],
             [{"name": "saveToGoogleCalendar"}],
             [{"name": "googleCalendarReminderMode"}],
+            [{"name": "googleCalendarTemplate"}],
             [{"name": "googleCalendarReminders"}],
-            [{"name": "googleCalendarDescriptionTemplateOverride"}],
-            [{"name": "description"}]
+            [{"name": "googleCalendarDescriptionTemplateOverride"}]
         ]
     }
 ]

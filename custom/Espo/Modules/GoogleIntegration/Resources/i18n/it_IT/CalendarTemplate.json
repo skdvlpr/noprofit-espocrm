@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "name": "Nome",
+        "targetEntityType": "Entita di destinazione",
+        "isActive": "Attivo",
+        "summaryTemplate": "Template riepilogo",
+        "descriptionTemplate": "Template descrizione",
+        "locationTemplate": "Template luogo",
+        "fieldValueTemplateMap": "Template valori campi",
+        "colorId": "Colore Google",
+        "visibility": "Visibilita",
+        "transparency": "Disponibilita",
+        "reminderMode": "Modalita promemoria",
+        "reminders": "Promemoria Google",
+        "defaultGoogleCalendarId": "Calendario Google predefinito",
+        "assignedUser": "Utente assegnato",
+        "teams": "Team",
+        "description": "Descrizione"
+    },
+    "options": {
+        "colorId": {
+            "": "Predefinito",
+            "1": "Lavanda",
+            "2": "Salvia",
+            "3": "Uva",
+            "4": "Fenicottero",
+            "5": "Banana",
+            "6": "Mandarino",
+            "7": "Pavone",
+            "8": "Grafite",
+            "9": "Mirtillo",
+            "10": "Basilico",
+            "11": "Pomodoro"
+        },
+        "visibility": {
+            "default": "Predefinita",
+            "private": "Privata",
+            "public": "Pubblica"
+        },
+        "transparency": {
+            "opaque": "Occupato",
+            "transparent": "Libero"
+        },
+        "reminderMode": {
+            "none": "Nessun promemoria",
+            "default": "Promemoria Google predefiniti",
+            "custom": "Promemoria personalizzati"
+        },
+        "reminders": {
+            "popup": "Notifica",
+            "email": "Email",
+            "minutes": "minuti prima",
+            "hours": "ore prima",
+            "days": "giorni prima",
+            "weeks": "settimane prima"
+        },
+        "targetEntityType": {
+            "Meeting": "Riunioni",
+            "Call": "Chiamate",
+            "Task": "Compiti",
+            "Opportunity": "Fondi e Finanziamenti"
+        }
+    },
+    "labels": {
+        "CalendarTemplate": "Template calendario",
+        "CalendarTemplatePlural": "Template calendario",
+        "Create CalendarTemplate": "Crea template calendario",
+        "googleCalendarTemplateVariables": "Inserisci campo record",
+        "googleCalendarTemplateVariableSearch": "Cerca campi",
+        "googleCalendarClearSearch": "Cancella",
+        "googleCalendarCurrentRecordFields": "Campi record corrente",
+        "googleCalendarRelatedRecordFields": "Campi record collegati",
+        "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca."
+    }
+}

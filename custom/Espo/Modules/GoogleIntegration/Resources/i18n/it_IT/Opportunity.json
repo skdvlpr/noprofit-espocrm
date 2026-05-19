@@ -1,6 +1,12 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Salva in Google Calendar",
+        "googleCalendarId": "Calendario Google",
+        "googleCalendarPrimary": "Calendario principale",
+        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari.",
+        "googleCalendarOpportunityDateList": "Date Google Calendar",
+        "googleCalendarOpportunityEventSettings": "Impostazioni evento Google per data",
+        "googleCalendarTemplate": "Template calendario",
         "googleCalendarReminderMode": "Modalità promemoria Google",
         "googleCalendarReminders": "Promemoria Google",
         "googleCalendarDescriptionTemplateOverride": "Template descrizione Google",
@@ -11,7 +17,15 @@
     },
     "labels": {
         "googleCalendarReminderNotice": "Puoi salvare questa data del finanziamento in Google Calendar con o senza promemoria Google. Per le scadenze usa promemoria in giorni/settimane, ad esempio 7 giorni, 14 giorni o 4 settimane prima.",
-        "googleCalendarTemplateVariables": "Inserisci campo del record"
+        "googleCalendarTemplateVariables": "Inserisci campo del record",
+        "googleCalendarTemplateVariableSearch": "Cerca campi",
+        "googleCalendarCurrentRecordFields": "Campi del record corrente",
+        "googleCalendarRelatedRecordFields": "Campi dei record collegati",
+        "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca.",
+        "googleCalendarDatePresentation": "Data presentazione",
+        "googleCalendarDateClose": "Data chiusura",
+        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata.",
+        "googleCalendarTemplateLoadFailed": "Impossibile caricare i template calendario. Chiedi all'amministratore di eseguire Rebuild o reinstallare Google Integration."
     },
     "options": {
         "googleCalendarReminderMode": {
@@ -26,6 +40,10 @@
             "hours": "ore prima",
             "days": "giorni prima",
             "weeks": "settimane prima"
+        },
+        "googleCalendarOpportunityDateList": {
+            "presentationDate": "Data presentazione",
+            "closeDate": "Data chiusura"
         },
         "googleCalendarVisibility": {
             "default": "Predefinita",

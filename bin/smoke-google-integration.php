@@ -198,6 +198,36 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
         is_array($entityFields) && isset($entityFields['googleCalendarDescriptionTemplateOverride'])
     );
     $ok(
+        "$entityType has googleCalendarTemplate link",
+        is_array($entityFields) && isset($entityFields['googleCalendarTemplate'])
+    );
+    $ok(
+        "$entityType template override uses field view",
+        is_array($entityFields)
+        && ($entityFields['googleCalendarDescriptionTemplateOverride']['view'] ?? null)
+            === 'google-integration:views/fields/google-calendar-description-template'
+    );
+    $ok(
+        "$entityType Google color uses color field view",
+        is_array($entityFields)
+        && ($entityFields['googleCalendarColorId']['view'] ?? null)
+            === 'google-integration:views/fields/google-calendar-color'
+    );
+    $ok(
+        "$entityType Opportunity date selector scope is correct",
+        $entityType === 'Opportunity'
+            ? isset($entityFields['googleCalendarOpportunityDateList'])
+            : !isset($entityFields['googleCalendarOpportunityDateList'])
+    );
+    $ok(
+        "$entityType Opportunity per-date settings scope is correct",
+        $entityType === 'Opportunity'
+            ? isset($entityFields['googleCalendarOpportunityEventSettings'])
+                && ($entityFields['googleCalendarOpportunityEventSettings']['view'] ?? null)
+                    === 'google-integration:views/fields/google-calendar-opportunity-event-settings'
+            : !isset($entityFields['googleCalendarOpportunityEventSettings'])
+    );
+    $ok(
         "$entityType removed legacy googleCalendarReminderMinutes",
         is_array($entityFields) && !isset($entityFields['googleCalendarReminderMinutes'])
     );
@@ -219,18 +249,41 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
             "$entityType $layoutType layout has saveToGoogleCalendar",
             $layoutHasField($layout, 'saveToGoogleCalendar')
         );
-        $ok(
-            "$entityType $layoutType layout has googleCalendarReminderMode",
-            $layoutHasField($layout, 'googleCalendarReminderMode')
-        );
-        $ok(
-            "$entityType $layoutType layout has googleCalendarReminders",
-            $layoutHasField($layout, 'googleCalendarReminders')
-        );
-        $ok(
-            "$entityType $layoutType layout has googleCalendarDescriptionTemplateOverride",
-            $layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
-        );
+        if ($entityType === 'Opportunity') {
+            $ok(
+                "$entityType $layoutType layout has googleCalendarOpportunityDateList",
+                $layoutHasField($layout, 'googleCalendarOpportunityDateList')
+            );
+            $ok(
+                "$entityType $layoutType layout has googleCalendarOpportunityEventSettings",
+                $layoutHasField($layout, 'googleCalendarOpportunityEventSettings')
+            );
+            $ok(
+                "$entityType $layoutType layout does not show shared Google reminder field",
+                !$layoutHasField($layout, 'googleCalendarReminderMode')
+            );
+            $ok(
+                "$entityType $layoutType layout does not show shared Google template field",
+                !$layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
+            );
+        } else {
+            $ok(
+                "$entityType $layoutType layout has googleCalendarReminderMode",
+                $layoutHasField($layout, 'googleCalendarReminderMode')
+            );
+            $ok(
+                "$entityType $layoutType layout has googleCalendarTemplate",
+                $layoutHasField($layout, 'googleCalendarTemplate')
+            );
+            $ok(
+                "$entityType $layoutType layout has googleCalendarReminders",
+                $layoutHasField($layout, 'googleCalendarReminders')
+            );
+            $ok(
+                "$entityType $layoutType layout has googleCalendarDescriptionTemplateOverride",
+                $layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
+            );
+        }
         $ok(
             "$entityType $layoutType layout removed legacy googleCalendarReminderMinutes",
             !$layoutHasField($layout, 'googleCalendarReminderMinutes')
@@ -245,8 +298,131 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity'] as $entityType) {
 $linkEntityDefs = $metadata->get('entityDefs.GoogleCalendarEventLink');
 $linkFields = $linkEntityDefs['fields'] ?? [];
 $ok('GoogleCalendarEventLink has sourceEntityType', is_array($linkFields) && isset($linkFields['sourceEntityType']));
+$ok('GoogleCalendarEventLink has sourceDateType', is_array($linkFields) && isset($linkFields['sourceDateType']));
 $ok('GoogleCalendarEventLink has googleEventId', is_array($linkFields) && isset($linkFields['googleEventId']));
 $ok('GoogleCalendarEventLink has user link', is_array($linkFields) && isset($linkFields['user']));
+$ok('Google Calendar routes file exists', is_file(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/routes.json'));
+$ok('Google Calendar manager frontend exists', is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/calendar/google-calendar-manager.js'));
+$ok('Reusable date export panel frontend exists', is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/calendar-date-export-panel.js'));
+
+$calendarTemplateDefs = $metadata->get('entityDefs.CalendarTemplate');
+$calendarTemplateFields = $calendarTemplateDefs['fields'] ?? [];
+$calendarTemplateScope = $metadata->get('scopes.CalendarTemplate') ?? [];
+$ok('CalendarTemplate metadata exists', is_array($calendarTemplateFields) && isset($calendarTemplateFields['targetEntityType']));
+$ok('CalendarTemplate has template fields', isset($calendarTemplateFields['summaryTemplate'], $calendarTemplateFields['descriptionTemplate'], $calendarTemplateFields['reminders']));
+$ok('CalendarTemplate scope is routable BasePlus entity', ($calendarTemplateScope['entity'] ?? null) === true && ($calendarTemplateScope['type'] ?? null) === 'BasePlus' && ($calendarTemplateScope['tab'] ?? null) === true);
+$ok('CalendarTemplate client icon exists', ($metadata->get(['clientDefs', 'CalendarTemplate', 'iconClass']) ?? null) === 'fas fa-calendar-check');
+$rCalendarTemplateList = $client->get('/api/v1/CalendarTemplate', ['query' => ['select' => 'id,name', 'maxSize' => 1]]);
+$ok('GET /api/v1/CalendarTemplate list is routable', $rCalendarTemplateList->getStatusCode() === 200, 'code=' . $rCalendarTemplateList->getStatusCode());
+$rCalendarTemplateLayout = $client->get('/api/v1/CalendarTemplate/layout/detail');
+$ok('GET /api/v1/CalendarTemplate/layout/detail is routable', $rCalendarTemplateLayout->getStatusCode() === 200, 'code=' . $rCalendarTemplateLayout->getStatusCode());
+
+$calendarDateSourceDefs = $metadata->get('entityDefs.CalendarDateSource');
+$calendarDateSourceFields = $calendarDateSourceDefs['fields'] ?? [];
+$calendarDateSourceScope = $metadata->get('scopes.CalendarDateSource') ?? [];
+$ok('CalendarDateSource metadata exists', is_array($calendarDateSourceFields) && isset($calendarDateSourceFields['targetEntityType']));
+$ok('CalendarDateSource has source fields', isset($calendarDateSourceFields['dateField'], $calendarDateSourceFields['sourceDateType'], $calendarDateSourceFields['calendarViewEnabled']));
+$ok(
+    'CalendarDateSource targetEntityType accepts any date-capable entity (varchar)',
+    ($calendarDateSourceFields['targetEntityType']['type'] ?? null) === 'varchar'
+        && !isset($calendarDateSourceFields['targetEntityType']['options'])
+);
+$ok(
+    'CalendarTemplate targetEntityType accepts any date-capable entity (varchar)',
+    ($calendarTemplateFields['targetEntityType']['type'] ?? null) === 'varchar'
+        && !isset($calendarTemplateFields['targetEntityType']['options'])
+);
+$rDateCapable = $client->get('/api/v1/GoogleIntegration/calendar/date-capable-entity-types');
+$dateCapableBody = json_decode((string) $rDateCapable->getBody(), true) ?: [];
+$dateCapableTypes = array_column(is_array($dateCapableBody['list'] ?? null) ? $dateCapableBody['list'] : [], 'entityType');
+$dateCapableHasLabel = is_array($dateCapableBody['list'] ?? null)
+    && $dateCapableBody['list'] !== []
+    && is_string($dateCapableBody['list'][0]['label'] ?? null)
+    && ($dateCapableBody['list'][0]['label'] ?? '') !== '';
+$ok(
+    'GET date-capable-entity-types returns readable list',
+    $rDateCapable->getStatusCode() === 200 && $dateCapableHasLabel,
+    'code=' . $rDateCapable->getStatusCode()
+);
+$ok(
+    'date-capable-entity-types includes Meeting',
+    in_array('Meeting', $dateCapableTypes, true)
+);
+$ok(
+    'date-capable-entity-types includes more than export defaults',
+    count($dateCapableTypes) > 4,
+    'count=' . count($dateCapableTypes)
+);
+$rGoogleCalendars = $client->get('/api/v1/GoogleIntegration/calendar/google-calendars');
+$googleCalendarsBody = json_decode((string) $rGoogleCalendars->getBody(), true) ?: [];
+$ok(
+    'GET google-calendars is routable',
+    $rGoogleCalendars->getStatusCode() === 200 && is_array($googleCalendarsBody['list'] ?? null),
+    'code=' . $rGoogleCalendars->getStatusCode()
+);
+$ok('CalendarDateSource scope is routable Base entity', ($calendarDateSourceScope['entity'] ?? null) === true && ($calendarDateSourceScope['type'] ?? null) === 'Base' && ($calendarDateSourceScope['tab'] ?? null) === true);
+$ok('CalendarDateSource client icon exists', ($metadata->get(['clientDefs', 'CalendarDateSource', 'iconClass']) ?? null) === 'fas fa-calendar-day');
+$ok('CalendarDateSource ACL allows admin config edits', ($metadata->get(['aclDefs', 'CalendarDateSource', 'edit']) ?? null) === 'all');
+$ok('CalendarTemplate ACL allows read for template picker', ($metadata->get(['aclDefs', 'CalendarTemplate', 'read']) ?? null) === 'all');
+$rTemplateOptions = $client->get('/api/v1/GoogleIntegration/calendar/template-options/Opportunity');
+$templateOptionsBody = json_decode((string) $rTemplateOptions->getBody(), true) ?: [];
+$templateCount = is_array($templateOptionsBody['templates'] ?? null) ? count($templateOptionsBody['templates']) : 0;
+$ok(
+    'GET template-options/Opportunity returns seeded templates',
+    $rTemplateOptions->getStatusCode() === 200 && $templateCount > 0,
+    'code=' . $rTemplateOptions->getStatusCode() . ' count=' . $templateCount
+);
+$templateRows = is_array($templateOptionsBody['templates'] ?? null) ? $templateOptionsBody['templates'] : [];
+$oppTemplatesScoped = $templateRows === [] || array_reduce(
+    $templateRows,
+    static fn (bool $c, array $row): bool => $c && ($row['targetEntityType'] ?? '') === 'Opportunity',
+    true
+);
+$ok('template-options/Opportunity scoped to Opportunity only', $oppTemplatesScoped);
+$rCallTpl = $client->get('/api/v1/GoogleIntegration/calendar/template-options/Call');
+$callTplBody = json_decode((string) $rCallTpl->getBody(), true) ?: [];
+$callTplRows = is_array($callTplBody['templates'] ?? null) ? $callTplBody['templates'] : [];
+$callScoped = $callTplRows === [] || array_reduce(
+    $callTplRows,
+    static fn (bool $c, array $row): bool => $c && ($row['targetEntityType'] ?? '') === 'Call',
+    true
+);
+$ok('template-options/Call scoped to Call only', $rCallTpl->getStatusCode() === 200 && $callScoped);
+$ok(
+    'google-calendar-template-link field view exists',
+    is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-template-link.js')
+);
+$rCalendarDateSourceList = $client->get('/api/v1/CalendarDateSource', ['query' => ['select' => 'id,name', 'maxSize' => 1]]);
+$ok('GET /api/v1/CalendarDateSource list is routable', $rCalendarDateSourceList->getStatusCode() === 200, 'code=' . $rCalendarDateSourceList->getStatusCode());
+$rCalendarDateSourceLayout = $client->get('/api/v1/CalendarDateSource/layout/detail');
+$ok('GET /api/v1/CalendarDateSource/layout/detail is routable', $rCalendarDateSourceLayout->getStatusCode() === 200, 'code=' . $rCalendarDateSourceLayout->getStatusCode());
+$perDateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
+$templateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-description-template.js') ?: '';
+$ok('Opportunity per-date template selector is not raw ID input', !str_contains($perDateView, 'CalendarTemplate ID') && str_contains($perDateView, 'data-role="calendarTemplateId"'));
+$ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel') && str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel'));
+$calendarView = file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/metadata/clientDefs/Calendar.json') ?: '';
+$ok('Calendar view override metadata exists', str_contains($calendarView, 'google-integration:views/calendar/calendar'));
+$routes = json_decode(file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/routes.json') ?: '[]', true) ?: [];
+$routePaths = array_column($routes, 'route');
+$ok('CRM date-source calendar route exists', in_array('/GoogleIntegration/calendar/crm-events', $routePaths, true));
+
+foreach ([
+    'Meeting:main',
+    'Call:main',
+    'Task:main',
+    'Opportunity:presentationDate',
+    'Opportunity:closeDate',
+] as $sourceKey) {
+    [$sourceEntityType, $sourceDateType] = explode(':', $sourceKey);
+    $source = $em->getRDBRepository('CalendarDateSource')
+        ->where([
+            'targetEntityType' => $sourceEntityType,
+            'sourceDateType' => $sourceDateType,
+            'deleted' => false,
+        ])
+        ->findOne();
+    $ok("Default CalendarDateSource $sourceKey exists", $source !== null);
+}
 
 echo "\nORM + Integration REST (API user expected 403)\n";
 

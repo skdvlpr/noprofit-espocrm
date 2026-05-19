@@ -1,6 +1,12 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Save in Google Calendar",
+        "googleCalendarId": "Google Calendar",
+        "googleCalendarPrimary": "Primary calendar",
+        "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list.",
+        "googleCalendarOpportunityDateList": "Google Calendar Dates",
+        "googleCalendarOpportunityEventSettings": "Google Event Settings by Date",
+        "googleCalendarTemplate": "Calendar Template",
         "googleCalendarReminderMode": "Google Reminder Mode",
         "googleCalendarReminders": "Google Reminders",
         "googleCalendarDescriptionTemplateOverride": "Google Description Template",
@@ -11,7 +17,15 @@
     },
     "labels": {
         "googleCalendarReminderNotice": "You can save this grant date to Google Calendar with or without Google reminders. For funding deadlines, use day/week reminders such as 7 days, 14 days, or 4 weeks before.",
-        "googleCalendarTemplateVariables": "Insert record field"
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarCurrentRecordFields": "Current record fields",
+        "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarNoVariables": "No fields match the search.",
+        "googleCalendarDatePresentation": "Presentation date",
+        "googleCalendarDateClose": "Closure date",
+        "googleCalendarPerDateSettingsHelp": "Configure Google Calendar options separately for each selected date.",
+        "googleCalendarTemplateLoadFailed": "Could not load calendar templates. Ask an administrator to run Rebuild or reinstall Google Integration."
     },
     "options": {
         "googleCalendarReminderMode": {
@@ -26,6 +40,10 @@
             "hours": "hours before",
             "days": "days before",
             "weeks": "weeks before"
+        },
+        "googleCalendarOpportunityDateList": {
+            "presentationDate": "Presentation date",
+            "closeDate": "Closure date"
         },
         "googleCalendarVisibility": {
             "default": "Default",

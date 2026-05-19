@@ -1,0 +1,12 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-calendar-day",
+    "viewSetupHandlers": {
+        "record/edit": [
+            "google-integration:handlers/calendar-date-source/record-setup"
+        ],
+        "record/create": [
+            "google-integration:handlers/calendar-date-source/record-setup"
+        ]
+    }
+}

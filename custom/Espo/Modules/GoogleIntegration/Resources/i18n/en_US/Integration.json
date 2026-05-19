@@ -9,7 +9,15 @@
         "googleCalendarDescriptionTemplateOpportunity": "Funding Description Template"
     },
     "labels": {
-        "googleCalendarTemplateVariables": "Insert record field"
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarNoVariables": "No fields match the search.",
+        "googleCalendarPanelCloseHint": "Right-click to close · search is remembered",
+        "googleCalendarAdminTemplatesTitle": "Default description templates",
+        "googleCalendarAdminTemplatesHelp": "Click an entity name to edit the default template used when exporting to Google Calendar.",
+        "googleCalendarAdminTemplateConfigured": "configured",
+        "googleCalendarAdminTemplateEmpty": "empty",
+        "googleCalendarCurrentRecordFields": "Current record fields"
     },
     "help": {
         "GoogleCalendarDrive": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret."

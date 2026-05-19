@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "name": "Name",
+        "targetEntityType": "Target Entity",
+        "isActive": "Active",
+        "summaryTemplate": "Summary Template",
+        "descriptionTemplate": "Description Template",
+        "locationTemplate": "Location Template",
+        "fieldValueTemplateMap": "Field Value Templates",
+        "colorId": "Google Color",
+        "visibility": "Visibility",
+        "transparency": "Transparency",
+        "reminderMode": "Reminder Mode",
+        "reminders": "Google Reminders",
+        "defaultGoogleCalendarId": "Default Google Calendar",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "description": "Description"
+    },
+    "options": {
+        "colorId": {
+            "": "Default",
+            "1": "Lavender",
+            "2": "Sage",
+            "3": "Grape",
+            "4": "Flamingo",
+            "5": "Banana",
+            "6": "Tangerine",
+            "7": "Peacock",
+            "8": "Graphite",
+            "9": "Blueberry",
+            "10": "Basil",
+            "11": "Tomato"
+        },
+        "visibility": {
+            "default": "Default",
+            "private": "Private",
+            "public": "Public"
+        },
+        "transparency": {
+            "opaque": "Busy",
+            "transparent": "Free"
+        },
+        "reminderMode": {
+            "none": "No reminders",
+            "default": "Google default reminders",
+            "custom": "Custom reminders"
+        },
+        "reminders": {
+            "popup": "Notification",
+            "email": "Email",
+            "minutes": "minutes before",
+            "hours": "hours before",
+            "days": "days before",
+            "weeks": "weeks before"
+        },
+        "targetEntityType": {
+            "Meeting": "Meetings",
+            "Call": "Calls",
+            "Task": "Tasks",
+            "Opportunity": "Grants & Funding"
+        }
+    },
+    "labels": {
+        "CalendarTemplate": "Calendar Template",
+        "CalendarTemplatePlural": "Calendar Templates",
+        "Create CalendarTemplate": "Create Calendar Template",
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarClearSearch": "Clear",
+        "googleCalendarCurrentRecordFields": "Current record fields",
+        "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarNoVariables": "No fields match the search."
+    }
+}

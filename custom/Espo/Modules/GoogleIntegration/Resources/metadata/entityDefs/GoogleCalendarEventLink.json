@@ -16,6 +16,13 @@
             "maxLength": 24,
             "readOnly": true
         },
+        "sourceDateType": {
+            "type": "varchar",
+            "required": true,
+            "default": "main",
+            "maxLength": 50,
+            "readOnly": true
+        },
         "user": {
             "type": "link",
             "required": true,
@@ -60,7 +67,7 @@
     "indexes": {
         "sourceUser": {
             "unique": true,
-            "columns": ["sourceEntityType", "sourceEntityId", "userId"]
+            "columns": ["sourceEntityType", "sourceEntityId", "sourceDateType", "userId"]
         },
         "googleEvent": {
             "columns": ["googleEventId"]

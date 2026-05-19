@@ -7,6 +7,7 @@
         "name": "Название",
         "sourceEntityType": "Тип исходной сущности",
         "sourceEntityId": "ID исходной сущности",
+        "sourceDateType": "Тип исходной даты",
         "user": "Пользователь",
         "calendarId": "ID календаря",
         "googleEventId": "ID события Google",

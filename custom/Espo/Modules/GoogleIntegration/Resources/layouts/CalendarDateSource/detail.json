@@ -1,0 +1,20 @@
+[
+    {
+        "label": "Guida",
+        "rows": [
+            [{"name": "setupGuide", "fullWidth": true, "noLabel": true}]
+        ]
+    },
+    {
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "targetEntityType"}],
+            [{"name": "dateField"}, {"name": "endDateField"}],
+            [{"name": "sourceDateType"}, {"name": "label"}],
+            [{"name": "isActive"}, {"name": "calendarViewEnabled"}],
+            [{"name": "allDay"}, {"name": "sortOrder"}],
+            [{"name": "defaultTemplate"}, false],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

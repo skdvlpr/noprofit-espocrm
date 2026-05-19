@@ -6,12 +6,11 @@
             [{"name": "account", "fullWidth": true}],
             [{"name": "stage"}, {"name": "closeDate"}],
             [{"name": "presentationDate"}, {"name": "amount"}],
-            [{"name": "saveToGoogleCalendar", "fullWidth": true}],
-            [{"name": "googleCalendarReminderMode", "fullWidth": true}],
-            [{"name": "googleCalendarReminders", "fullWidth": true}],
-            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}],
             [{"name": "contacts", "fullWidth": true}],
-            [{"name": "description", "fullWidth": true}]
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "saveToGoogleCalendar", "fullWidth": true}],
+            [{"name": "googleCalendarOpportunityDateList", "fullWidth": true}],
+            [{"name": "googleCalendarOpportunityEventSettings", "fullWidth": true}]
         ]
     }
 ]

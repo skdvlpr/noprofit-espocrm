@@ -19,15 +19,10 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
     };
 
     const CREDENTIAL_FIELD_NAMES = Object.keys(CREDENTIAL_FIELD_DEFS);
-    const TEMPLATE_FIELD_ENTITY_MAP = {
-        googleCalendarDescriptionTemplateMeeting: 'Meeting',
-        googleCalendarDescriptionTemplateCall: 'Call',
-        googleCalendarDescriptionTemplateTask: 'Task',
-        googleCalendarDescriptionTemplateOpportunity: 'Opportunity',
-    };
+    const buildTemplateFieldName = entityType => `googleCalendarDescriptionTemplate${entityType}`;
 
     class GoogleIntegrationAdminEditView extends _parent.default {
-        template = 'admin/integrations/oauth2';
+        template = 'google-integration:admin/integrations/edit';
 
         setup() {
             this.addActionHandler('save', () => this.save());
@@ -42,6 +37,8 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             this.fieldList = [];
             this.fieldDataList = [];
+            this.templateButtonList = [];
+            this.templateFieldNameSet = new Set();
 
             this.model = new _model.default({}, {
                 entityType: 'Integration',
@@ -59,9 +56,37 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             const metaFields = this.getMetadata().get(`integrations.${this.integration}.fields`) || {};
             const fields = {...CREDENTIAL_FIELD_DEFS, ...metaFields};
 
+            this.wait(
+                Espo.Ajax.getRequest('GoogleIntegration/calendar/allowed-entity-types')
+                    .then(data => {
+                        const list = Array.isArray(data.list) ? data.list : [];
+
+                        list.forEach(item => {
+                            const fieldName = buildTemplateFieldName(item.entityType);
+
+                            if (!fields[fieldName]) {
+                                return;
+                            }
+
+                            this.templateFieldNameSet.add(fieldName);
+                            this.templateButtonList.push({
+                                entityType: item.entityType,
+                                entityLabel: item.label || item.entityType,
+                                fieldName: fieldName,
+                            });
+                        });
+                    })
+                    .catch(() => {})
+            );
+
             Object.keys(fields).forEach(name => {
                 const defs = {...fields[name]};
                 fieldDefs[name] = defs;
+                this.fieldList.push(name);
+
+                if (name.startsWith('googleCalendarDescriptionTemplate')) {
+                    return;
+                }
 
                 let label = this.translate(name, 'fields', 'Integration');
 
@@ -80,8 +105,13 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             this.wait((async () => {
                 await this.model.fetch();
+                this.refreshTemplateButtonStates();
                 this.createFieldView('bool', 'enabled');
                 Object.keys(fields).forEach(name => {
+                    if (this.templateFieldNameSet.has(name)) {
+                        return;
+                    }
+
                     this.createFieldView(fields[name].type, name, undefined, fields[name]);
                 });
             })());
@@ -91,6 +121,9 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             return {
                 integration: this.integration,
                 fieldDataList: this.fieldDataList,
+                templateButtonList: this.templateButtonList,
+                templatesTitle: this.translate('googleCalendarAdminTemplatesTitle', 'labels', 'Integration'),
+                templatesHelp: this.translate('googleCalendarAdminTemplatesHelp', 'labels', 'Integration'),
                 helpText: this.helpText,
                 redirectUri: String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback',
             };
@@ -99,10 +132,51 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
         afterRender() {
             super.afterRender();
             this.syncCredentialFieldsVisibility();
-            this.renderTemplateVariableHelpers();
+            this.bindTemplateButtons();
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.syncCredentialFieldsVisibility();
+            });
+        }
+
+        refreshTemplateButtonStates() {
+            this.templateButtonList.forEach(item => {
+                const value = this.model.get(item.fieldName);
+                item.statusLabel = value
+                    ? this.translate('googleCalendarAdminTemplateConfigured', 'labels', 'Integration')
+                    : this.translate('googleCalendarAdminTemplateEmpty', 'labels', 'Integration');
+            });
+        }
+
+        bindTemplateButtons() {
+            this.$el.find('[data-action="openTemplateModal"]').on('click', event => {
+                const entityType = event.currentTarget.dataset.entityType;
+                const fieldName = event.currentTarget.dataset.fieldName;
+                const item = this.templateButtonList.find(row => row.entityType === entityType);
+
+                if (!fieldName || !item) {
+                    return;
+                }
+
+                this.openTemplateModal(item);
+            });
+        }
+
+        openTemplateModal(item) {
+            this.createView('templateModal', 'google-integration:views/admin/integrations/template-modal', {
+                entityType: item.entityType,
+                entityLabel: item.entityLabel,
+                fieldName: item.fieldName,
+                value: this.model.get(item.fieldName) || '',
+                templateFieldLabel: this.translate(item.fieldName, 'fields', 'Integration'),
+            }, view => {
+                view.render();
+
+                this.listenToOnce(view, 'apply', data => {
+                    this.model.set(data.fieldName, data.value);
+                    this.refreshTemplateButtonStates();
+                    this.reRender();
+                });
             });
         }
 
@@ -116,100 +190,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                     this.hideField(name);
                 }
             });
-        }
-
-        renderTemplateVariableHelpers() {
-            Object.keys(TEMPLATE_FIELD_ENTITY_MAP).forEach(field => {
-                this.renderTemplateVariableHelper(field, TEMPLATE_FIELD_ENTITY_MAP[field]);
-            });
-        }
-
-        renderTemplateVariableHelper(field, entityType) {
-            const $field = this.$el.find(`.field[data-name="${field}"]`).last();
-
-            if (!$field.length || $field.find('.google-calendar-template-variable-helper').length) {
-                return;
-            }
-
-            const fieldList = this.getInsertableFieldList(entityType);
-
-            if (!fieldList.length) {
-                return;
-            }
-
-            const $select = $('<select>')
-                .addClass('form-control input-sm')
-                .attr('data-role', 'google-calendar-template-variable');
-
-            fieldList.forEach(item => {
-                $('<option>')
-                    .attr('value', item.name)
-                    .text(item.label)
-                    .appendTo($select);
-            });
-
-            const $button = $('<button>')
-                .attr('type', 'button')
-                .addClass('btn btn-default btn-sm')
-                .text(this.translate('Insert'))
-                .on('click', () => this.insertVariable(field, String($select.val() || '')));
-
-            const $helper = $('<div>')
-                .addClass('google-calendar-template-variable-helper input-group input-group-sm margin-top');
-
-            $('<span>')
-                .addClass('input-group-addon')
-                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Integration'))
-                .appendTo($helper);
-
-            $select.appendTo($helper);
-
-            $('<span>')
-                .addClass('input-group-btn')
-                .append($button)
-                .appendTo($helper);
-
-            $field.append($helper);
-        }
-
-        getInsertableFieldList(entityType) {
-            const fields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
-
-            return Object.keys(fields)
-                .filter(name => !name.startsWith('googleCalendar') && !fields[name].utility)
-                .map(name => ({
-                    name,
-                    label: this.translate(name, 'fields', entityType),
-                }))
-                .sort((a, b) => a.label.localeCompare(b.label));
-        }
-
-        insertVariable(field, name) {
-            if (!name) {
-                return;
-            }
-
-            const $input = this.$el
-                .find(`.field[data-name="${field}"] textarea, .field[data-name="${field}"] input`)
-                .first();
-
-            if (!$input.length) {
-                return;
-            }
-
-            const element = $input.get(0);
-            const value = $input.val() || '';
-            const variable = `{{${name}}}`;
-            const start = element.selectionStart ?? String(value).length;
-            const end = element.selectionEnd ?? start;
-            const nextValue = String(value).slice(0, start) + variable + String(value).slice(end);
-
-            $input.val(nextValue).trigger('change');
-
-            if (typeof element.setSelectionRange === 'function') {
-                const cursor = start + variable.length;
-                element.setSelectionRange(cursor, cursor);
-            }
         }
 
         isFieldViewFetchable(view) {

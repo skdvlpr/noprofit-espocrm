@@ -1,0 +1,12 @@
+{
+    "scopeNames": {
+        "CalendarTemplate": "Calendar Template",
+        "CalendarTemplatePlural": "Calendar Templates",
+        "CalendarDateSource": "Calendar Date Source",
+        "CalendarDateSourcePlural": "Calendar Date Sources"
+    },
+    "scopeNamesPlural": {
+        "CalendarTemplate": "Calendar Templates",
+        "CalendarDateSource": "Calendar Date Sources"
+    }
+}

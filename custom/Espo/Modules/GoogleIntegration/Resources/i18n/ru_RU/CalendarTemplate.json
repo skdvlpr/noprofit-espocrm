@@ -1,0 +1,55 @@
+{
+    "fields": {
+        "name": "Название",
+        "targetEntityType": "Целевая сущность",
+        "isActive": "Активен",
+        "summaryTemplate": "Шаблон заголовка",
+        "descriptionTemplate": "Шаблон описания",
+        "locationTemplate": "Шаблон места",
+        "fieldValueTemplateMap": "Шаблоны значений полей",
+        "colorId": "Цвет Google",
+        "visibility": "Видимость",
+        "transparency": "Занятость",
+        "reminderMode": "Режим напоминаний",
+        "reminders": "Напоминания Google",
+        "defaultGoogleCalendarId": "Календарь Google по умолчанию",
+        "assignedUser": "Ответственный",
+        "teams": "Команды",
+        "description": "Описание"
+    },
+    "labels": {
+        "CalendarTemplate": "Шаблон календаря",
+        "CalendarTemplatePlural": "Шаблоны календаря",
+        "Create CalendarTemplate": "Создать шаблон календаря"
+    },
+    "options": {
+        "colorId": {
+            "": "По умолчанию",
+            "1": "Лаванда",
+            "2": "Шалфей",
+            "3": "Виноград",
+            "4": "Фламинго",
+            "5": "Банан",
+            "6": "Мандарин",
+            "7": "Павлин",
+            "8": "Графит",
+            "9": "Черника",
+            "10": "Базилик",
+            "11": "Томат"
+        },
+        "visibility": {
+            "default": "По умолчанию",
+            "private": "Приватное",
+            "public": "Публичное"
+        },
+        "transparency": {
+            "opaque": "Занято",
+            "transparent": "Свободно"
+        },
+        "reminderMode": {
+            "none": "Без напоминаний",
+            "default": "Напоминания Google по умолчанию",
+            "custom": "Свои напоминания"
+        }
+    }
+}

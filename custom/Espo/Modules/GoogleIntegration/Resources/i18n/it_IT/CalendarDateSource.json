@@ -1,0 +1,30 @@
+{
+    "fields": {
+        "name": "Nome",
+        "targetEntityType": "Entita di destinazione",
+        "dateField": "Campo data inizio",
+        "endDateField": "Campo data fine",
+        "sourceDateType": "Chiave data",
+        "label": "Etichetta",
+        "isActive": "Attivo",
+        "calendarViewEnabled": "Mostra nel calendario",
+        "allDay": "Tutto il giorno",
+        "defaultTemplate": "Template predefinito",
+        "sortOrder": "Ordine",
+        "description": "Descrizione",
+        "setupGuide": "Guida configurazione"
+    },
+    "labels": {
+        "CalendarDateSource": "Origine data calendario",
+        "CalendarDateSourcePlural": "Origini date calendario",
+        "Create CalendarDateSource": "Crea origine data calendario",
+        "calendarDateSourceHelp": "Definisce quali campi data di un'entita CRM compaiono nel Calendario e nell'esportazione Google. Non modificare manualmente i nomi tecnici: usa i menu a tendina.",
+        "calendarDateSourceSetupGuide": "### Guida rapida\n\n| Campo | Significato |\n| --- | --- |\n| **Nome** | Titolo interno (es. *Fondi · data presentazione*). Visibile in elenco e ricerca. |\n| **Chiave data** | ID tecnico univoco per entità + campo. Di solito **uguale al campo data** (`presentationDate`, `closeDate`) oppure `main` per Riunioni/Chiamate/Compiti. Si aggiorna automaticamente quando cambi *Campo data inizio*. |\n| **Etichetta** | Suffisso nel titolo evento in Calendario (es. *Data presentazione*). Se vuota → etichetta del campo data. |\n| **Ordine** | **Priorità di visualizzazione** nell'elenco Origini date e nell'ordine eventi in Calendario (non priorità del record CRM). Numero più basso = più in alto. Esempio: **10** Meeting, **20** Call, **30** Task, **40–50** Fondi. |\n\n**Checklist**\n\n1. **Mostra nel calendario** attivo.\n2. Ricaricare Calendario (**Ctrl+Shift+R**).\n3. Le schede CRM devono avere un valore nel campo data nel mese visibile (`createdAt` = solo giorno di creazione).",
+        "googleCalendarSelectTargetEntityFirst": "Seleziona prima l'entità di destinazione."
+    },
+    "tooltips": {
+        "sourceDateType": "Chiave tecnica univoca per entita + campo data. Esempi: main, presentationDate, closeDate.",
+        "label": "Suffisso nel titolo evento in Calendario, dopo il nome record.",
+        "sortOrder": "Priorità di ordinamento in elenco Origini date e in Calendario (non priorità CRM). Valori più bassi compaiono prima."
+    }
+}

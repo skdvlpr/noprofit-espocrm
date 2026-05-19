@@ -4,7 +4,10 @@ namespace Espo\Modules\GoogleIntegration\Tools;
 
 use Espo\Core\Container;
 use Espo\Core\DataManager;
+use Espo\Core\InjectableFactory;
+use Espo\Core\Utils\Metadata;
 use Espo\Entities\Integration as IntegrationEntity;
+use Espo\Entities\Role;
 use Espo\ORM\EntityManager;
 
 /**
@@ -26,12 +29,113 @@ class Installer
     /** Previous integration id before rename. */
     private const LEGACY_GOOGLE_INTEGRATION_ID = 'GoogleIntegration';
 
+    /** @var array<int, array<string, mixed>> */
+    private const DEFAULT_DATE_SOURCES = [
+        [
+            'name' => 'Meeting start date',
+            'targetEntityType' => 'Meeting',
+            'dateField' => 'dateStart',
+            'endDateField' => 'dateEnd',
+            'sourceDateType' => 'main',
+            'label' => 'Meeting date',
+            'allDay' => false,
+            'sortOrder' => 10,
+        ],
+        [
+            'name' => 'Call start date',
+            'targetEntityType' => 'Call',
+            'dateField' => 'dateStart',
+            'endDateField' => 'dateEnd',
+            'sourceDateType' => 'main',
+            'label' => 'Call date',
+            'allDay' => false,
+            'sortOrder' => 20,
+        ],
+        [
+            'name' => 'Task due date',
+            'targetEntityType' => 'Task',
+            'dateField' => 'dateEnd',
+            'endDateField' => null,
+            'sourceDateType' => 'main',
+            'label' => 'Due date',
+            'allDay' => true,
+            'sortOrder' => 30,
+        ],
+        [
+            'name' => 'Opportunity presentation date',
+            'targetEntityType' => 'Opportunity',
+            'dateField' => 'presentationDate',
+            'endDateField' => null,
+            'sourceDateType' => 'presentationDate',
+            'label' => 'Presentation date',
+            'allDay' => true,
+            'sortOrder' => 40,
+        ],
+        [
+            'name' => 'Opportunity close date',
+            'targetEntityType' => 'Opportunity',
+            'dateField' => 'closeDate',
+            'endDateField' => null,
+            'sourceDateType' => 'closeDate',
+            'label' => 'Close date',
+            'allDay' => true,
+            'sortOrder' => 50,
+        ],
+    ];
+
+    /** @var array<int, array<string, mixed>> */
+    private const DEFAULT_CALENDAR_TEMPLATES = [
+        [
+            'name' => 'Meeting — default',
+            'targetEntityType' => 'Meeting',
+            'summaryTemplate' => '{{name}}',
+            'descriptionTemplate' => "{{name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
+            'reminderMode' => 'none',
+            'transparency' => 'opaque',
+        ],
+        [
+            'name' => 'Call — default',
+            'targetEntityType' => 'Call',
+            'summaryTemplate' => '{{name}}',
+            'descriptionTemplate' => "{{name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
+            'reminderMode' => 'none',
+            'transparency' => 'opaque',
+        ],
+        [
+            'name' => 'Task — default',
+            'targetEntityType' => 'Task',
+            'summaryTemplate' => '{{name}}',
+            'descriptionTemplate' => "{{name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
+            'reminderMode' => 'none',
+            'transparency' => 'opaque',
+        ],
+        [
+            'name' => 'Opportunity — default',
+            'targetEntityType' => 'Opportunity',
+            'summaryTemplate' => '{{name}}',
+            'descriptionTemplate' => "{{name}} | {{account.name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
+            'reminderMode' => 'none',
+            'transparency' => 'opaque',
+            'colorId' => '10',
+        ],
+    ];
+
     public function runPostInstall(Container $container): void
     {
         $em = $container->getByClass(EntityManager::class);
         $this->removeLegacyIntegrationRow($em);
         $this->ensureIntegrationRow($em);
-        $container->getByClass(DataManager::class)->rebuild();
+
+        $dataManager = $container->getByClass(DataManager::class);
+        $dataManager->rebuild();
+
+        $this->ensureDefaultDateSources($em);
+        $this->ensureDefaultCalendarTemplates($em);
+        $metadata = $container->getByClass(Metadata::class);
+        $this->ensureAdminRoleAccess($em, $metadata);
+        $this->ensureNavigationTabs($container);
+
+        $dataManager->rebuild();
     }
 
     private function removeLegacyIntegrationRow(EntityManager $entityManager): void
@@ -72,5 +176,112 @@ class Installer
             'enabled' => false,
         ]);
         $entityManager->saveEntity($entity);
+    }
+
+    private function ensureDefaultDateSources(EntityManager $entityManager): void
+    {
+        $repo = $entityManager->getRDBRepository('CalendarDateSource');
+
+        foreach (self::DEFAULT_DATE_SOURCES as $source) {
+            $existing = $repo
+                ->where([
+                    'targetEntityType' => $source['targetEntityType'],
+                    'sourceDateType' => $source['sourceDateType'],
+                    'deleted' => false,
+                ])
+                ->findOne();
+
+            if ($existing !== null) {
+                continue;
+            }
+
+            $entityManager->saveEntity($entityManager->createEntity('CalendarDateSource', array_merge([
+                'isActive' => true,
+                'calendarViewEnabled' => true,
+            ], $source)));
+        }
+    }
+
+    private function ensureDefaultCalendarTemplates(EntityManager $entityManager): void
+    {
+        $repo = $entityManager->getRDBRepository('CalendarTemplate');
+
+        foreach (self::DEFAULT_CALENDAR_TEMPLATES as $template) {
+            $existing = $repo
+                ->where([
+                    'targetEntityType' => $template['targetEntityType'],
+                    'name' => $template['name'],
+                    'deleted' => false,
+                ])
+                ->findOne();
+
+            if ($existing !== null) {
+                continue;
+            }
+
+            $entityManager->saveEntity($entityManager->createEntity('CalendarTemplate', array_merge([
+                'isActive' => true,
+            ], $template)));
+        }
+    }
+
+    private function ensureNavigationTabs(Container $container): void
+    {
+        $config = $container->get('config');
+        $configWriter = $container->getByClass(InjectableFactory::class)
+            ->create(\Espo\Core\Utils\Config\ConfigWriter::class);
+
+        $tabList = $config->get('tabList', []) ?? [];
+
+        foreach (['CalendarTemplate', 'CalendarDateSource'] as $tab) {
+            if (!in_array($tab, $tabList, true)) {
+                $tabList[] = $tab;
+            }
+        }
+
+        $configWriter->set('tabList', $tabList);
+        $configWriter->save();
+    }
+
+    private function ensureAdminRoleAccess(EntityManager $entityManager, Metadata $metadata): void
+    {
+        $role = $entityManager
+            ->getRDBRepositoryByClass(Role::class)
+            ->where(['name' => 'Admin', 'deleted' => false])
+            ->findOne();
+
+        if ($role === null) {
+            return;
+        }
+
+        $data = json_decode(json_encode($role->get('data') ?? new \stdClass()), true) ?? [];
+        $changed = false;
+
+        foreach (['CalendarTemplate', 'CalendarDateSource'] as $entityType) {
+            $expected = [];
+            foreach (['read', 'create', 'edit', 'delete', 'stream'] as $action) {
+                $value = $metadata->get(['aclDefs', $entityType, $action]);
+
+                if (is_string($value) && $value !== '') {
+                    $expected[$action] = $value;
+                }
+            }
+
+            if ($expected === []) {
+                continue;
+            }
+
+            if (($data[$entityType] ?? null) !== $expected) {
+                $data[$entityType] = $expected;
+                $changed = true;
+            }
+        }
+
+        if (!$changed) {
+            return;
+        }
+
+        $role->set('data', (object) $data);
+        $entityManager->saveEntity($role);
     }
 }

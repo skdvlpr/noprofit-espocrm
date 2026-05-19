@@ -1,0 +1,57 @@
+[
+    {
+        "route": "/GoogleIntegration/calendar/date-options/:entityType/:id",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateOptions"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/template-options/:entityType",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetTemplateOptions"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/allowed-entity-types",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetAllowedEntityTypes"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/date-capable-entity-types",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateCapableEntityTypes"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/google-calendars",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetGoogleCalendars"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/google-events",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetGoogleEvents"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/google-events",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PostGoogleEvent"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/google-events/:calendarId/:eventId",
+        "method": "put",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PutGoogleEvent"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/google-events/:calendarId/:eventId",
+        "method": "delete",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\DeleteGoogleEvent"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/apply-template/:entityType/:id",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PostApplyTemplate"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/crm-events",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetCrmDateSourceEvents"
+    }
+]

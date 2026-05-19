@@ -1,0 +1,113 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "targetEntityType": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100,
+            "view": "google-integration:views/fields/calendar-config-entity-type"
+        },
+        "dateField": {
+            "type": "enum",
+            "required": true,
+            "view": "google-integration:views/fields/calendar-config-date-field"
+        },
+        "endDateField": {
+            "type": "enum",
+            "view": "google-integration:views/fields/calendar-config-date-field"
+        },
+        "sourceDateType": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100,
+            "default": "main",
+            "tooltip": true
+        },
+        "label": {
+            "type": "varchar",
+            "maxLength": 255,
+            "tooltip": true
+        },
+        "setupGuide": {
+            "type": "text",
+            "notStorable": true,
+            "readOnly": true,
+            "view": "google-integration:views/fields/calendar-date-source-guide"
+        },
+        "isActive": {
+            "type": "bool",
+            "default": true
+        },
+        "calendarViewEnabled": {
+            "type": "bool",
+            "default": true
+        },
+        "allDay": {
+            "type": "bool",
+            "default": false
+        },
+        "defaultTemplate": {
+            "type": "link",
+            "view": "google-integration:views/fields/google-calendar-template-link"
+        },
+        "sortOrder": {
+            "type": "int",
+            "default": 0,
+            "tooltip": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "defaultTemplate": {
+            "type": "belongsTo",
+            "entity": "CalendarTemplate"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "indexes": {
+        "sourceKey": {
+            "unique": true,
+            "columns": ["targetEntityType", "sourceDateType"]
+        },
+        "entityDate": {
+            "columns": ["targetEntityType", "dateField"]
+        },
+        "activeCalendar": {
+            "columns": ["isActive", "calendarViewEnabled"]
+        }
+    },
+    "collection": {
+        "orderBy": "sortOrder",
+        "order": "asc",
+        "textFilterFields": ["name", "targetEntityType", "dateField", "label"]
+    }
+}

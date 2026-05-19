@@ -7,6 +7,7 @@
         "name": "Nome",
         "sourceEntityType": "Tipo entità origine",
         "sourceEntityId": "ID entità origine",
+        "sourceDateType": "Tipo data origine",
         "user": "Utente",
         "calendarId": "ID calendario",
         "googleEventId": "ID evento Google",

@@ -42,6 +42,32 @@
                 </div>
             </div>
         </div>
+
+        {{#if templateButtonList.length}}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">{{templatesTitle}}</h4>
+            </div>
+            <div class="panel-body">
+                <p class="text-muted small">{{templatesHelp}}</p>
+                <div class="btn-group-vertical" style="width: 100%;">
+                    {{#each templateButtonList}}
+                        <button
+                            type="button"
+                            class="btn btn-default text-left"
+                            style="margin-bottom: 6px; white-space: normal;"
+                            data-action="openTemplateModal"
+                            data-entity-type="{{entityType}}"
+                            data-field-name="{{fieldName}}"
+                        >
+                            <strong>{{entityLabel}}</strong>
+                            <span class="text-muted small"> — {{statusLabel}}</span>
+                        </button>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+        {{/if}}
     </div>
     <div class="col-sm-6">
         {{#if helpText}}

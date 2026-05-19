@@ -42,6 +42,7 @@
 
 # Local Codex/agent workspace files
 /AGENTS.md
+.cursor/
 .agents/
 .codex/
 

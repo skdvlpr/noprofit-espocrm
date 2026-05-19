@@ -1,0 +1,17 @@
+{
+    "entity": true,
+    "type": "BasePlus",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "module": "GoogleIntegration",
+    "stream": true,
+    "importable": true,
+    "exportable": true,
+    "customizable": true,
+    "color": "#4285f4",
+    "iconClass": "fas fa-calendar-check",
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete", "stream"],
+    "aclLevelList": ["all", "team", "own", "no"]
+}

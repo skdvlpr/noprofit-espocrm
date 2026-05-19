@@ -1,8 +1,12 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Сохранить в Google Calendar",
+        "googleCalendarId": "Календарь Google",
+        "googleCalendarPrimary": "Основной календарь",
+        "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей.",
         "googleCalendarReminderMode": "Режим напоминаний Google",
         "googleCalendarReminders": "Напоминания Google",
+        "googleCalendarTemplate": "Шаблон календаря",
         "googleCalendarDescriptionTemplateOverride": "Шаблон описания Google",
         "googleCalendarLocation": "Место Google",
         "googleCalendarVisibility": "Видимость Google",
@@ -11,7 +15,12 @@
     },
     "labels": {
         "googleCalendarReminderNotice": "Можно сохранить эту запись в Google Calendar с напоминаниями или без них. Пользовательские напоминания: до 5 штук и максимум за 4 недели до события.",
-        "googleCalendarTemplateVariables": "Вставить поле записи"
+        "googleCalendarTemplateVariables": "Вставить поле записи",
+        "googleCalendarTemplateVariableSearch": "Поиск полей",
+        "googleCalendarCurrentRecordFields": "Поля текущей записи",
+        "googleCalendarRelatedRecordFields": "Поля связанных записей",
+        "googleCalendarNoVariables": "Нет полей по этому запросу.",
+        "googleCalendarPanelCloseHint": "ПКМ — закрыть · поиск сохраняется"
     },
     "options": {
         "googleCalendarReminderMode": {

@@ -16,6 +16,7 @@ class Google extends BaseGoogle
     private string $lastAuthCodeForLog = '';
 
     private const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+    private const CALENDAR_LIST_URL = 'https://www.googleapis.com/calendar/v3/users/me/calendarList';
     private const CALENDAR_EVENT_URL = 'https://www.googleapis.com/calendar/v3/calendars/%s/events';
 
     protected function getPingUrl()
@@ -129,6 +130,50 @@ class Google extends BaseGoogle
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function listCalendars(int $maxResults = 250): array
+    {
+        $result = $this->request(self::CALENDAR_LIST_URL . '?' . http_build_query([
+            'maxResults' => max(1, min(250, $maxResults)),
+            'minAccessRole' => 'reader',
+            'showDeleted' => 'false',
+        ]));
+
+        return is_array($result['items'] ?? null) ? $result['items'] : [];
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, nextPageToken?: string}
+     */
+    public function listCalendarEvents(
+        string $calendarId,
+        string $timeMin,
+        string $timeMax,
+        int $maxResults = 250,
+        ?string $pageToken = null
+    ): array {
+        $query = [
+            'timeMin' => $timeMin,
+            'timeMax' => $timeMax,
+            'singleEvents' => 'true',
+            'orderBy' => 'startTime',
+            'maxResults' => max(1, min(250, $maxResults)),
+        ];
+
+        if ($pageToken !== null && $pageToken !== '') {
+            $query['pageToken'] = $pageToken;
+        }
+
+        $result = $this->request($this->buildCalendarEventUrl($calendarId) . '?' . http_build_query($query));
+
+        return [
+            'items' => is_array($result['items'] ?? null) ? $result['items'] : [],
+            'nextPageToken' => is_string($result['nextPageToken'] ?? null) ? $result['nextPageToken'] : null,
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $event
      * @return array<string, mixed>
      */
@@ -142,6 +187,15 @@ class Google extends BaseGoogle
         );
 
         return is_array($result) ? $result : [];
+    }
+
+    public function deleteCalendarEvent(string $eventId, string $calendarId = 'primary'): void
+    {
+        $this->request(
+            $this->buildCalendarEventUrl($calendarId) . '/' . rawurlencode($eventId),
+            null,
+            Client::HTTP_METHOD_DELETE
+        );
     }
 
     private function buildCalendarEventUrl(string $calendarId): string

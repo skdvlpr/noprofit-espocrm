@@ -1,0 +1,12 @@
+{
+    "scopeNames": {
+        "CalendarTemplate": "Шаблон календаря",
+        "CalendarTemplatePlural": "Шаблоны календаря",
+        "CalendarDateSource": "Источник дат календаря",
+        "CalendarDateSourcePlural": "Источники дат календаря"
+    },
+    "scopeNamesPlural": {
+        "CalendarTemplate": "Шаблоны календаря",
+        "CalendarDateSource": "Источники дат календаря"
+    }
+}

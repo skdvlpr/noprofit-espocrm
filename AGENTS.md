@@ -780,6 +780,10 @@ After metadata or client change:
 4. Must **not** 404 on `/client/lib/transpiled/src/views/admin/integrations/google-integration-edit.js`
 5. Console: no `Cannot read properties of null (reading 'val')` on Save
 
+**Responsive UI rule:** For all frontend work, always implement adaptive/responsive layouts that remain readable and usable across light/dark themes, desktop/laptop/tablet/mobile widths, and high zoom levels. Avoid hardcoded light-only colors unless there is a strict design requirement.
+
+**UI labeling rule:** User-visible UI text must use translated labels, not code identifiers (camelCase/snake_case). Exceptions are only template placeholders (e.g., `{{dateEnd}}`) and other technically required raw tokens.
+
 **Browser automation policy:** Do not run browser automation by default. Provide
 manual browser QA instructions after implementation, and use browser tools only
 when the user explicitly asks for browser testing or visual verification.
