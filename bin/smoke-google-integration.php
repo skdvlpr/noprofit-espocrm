@@ -3,8 +3,8 @@
  * REST smoke for the standalone **`GoogleCalendarDrive`** Espo extension (universal
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
- * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
- *    removes legacy `GoogleSafehouse` integration id, rebuild).
+ * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent:
+ *    DB row, legacy id migration, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
  * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
@@ -19,7 +19,9 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
+use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
@@ -85,6 +87,89 @@ if (!is_string($apiKey) || $apiKey === '') {
     $user->set('apiKey', $apiKey);
     $em->saveEntity($user);
 }
+
+echo "\nLegacy id migration regression\n";
+$legacyIntegrationIds = ['GoogleIntegration', 'GoogleSafehouse'];
+$externalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $user->getId();
+$legacyExternalAccountId = 'GoogleIntegration__' . $user->getId();
+$existingTargetExternalAccount = $em->getEntityById('ExternalAccount', $externalAccountId);
+if ($existingTargetExternalAccount !== null) {
+    $em->removeEntity($existingTargetExternalAccount);
+}
+$existingLegacyExternalAccount = $em->getEntityById('ExternalAccount', $legacyExternalAccountId);
+if ($existingLegacyExternalAccount !== null) {
+    $em->removeEntity($existingLegacyExternalAccount);
+}
+$legacyExternalAccount = $em->getNewEntity('ExternalAccount');
+$legacyExternalAccount->set('id', $legacyExternalAccountId);
+$legacyExternalAccount->set('enabled', true);
+$legacyExternalAccount->set('accessToken', 'smoke-legacy-access-token');
+$legacyExternalAccount->set('refreshToken', 'smoke-legacy-refresh-token');
+$legacyExternalAccount->set('tokenType', 'Bearer');
+$legacyExternalAccount->set('calendarSyncMode', 'crmToGoogle');
+$em->saveEntity($legacyExternalAccount);
+
+$normalizeIntegrations = static function (mixed $integrations): stdClass {
+    if ($integrations instanceof stdClass) {
+        return (object) get_object_vars($integrations);
+    }
+    if (is_array($integrations)) {
+        return (object) $integrations;
+    }
+
+    return (object) [];
+};
+$originalIntegrations = $normalizeIntegrations($config->get('integrations'));
+$testIntegrations = (object) get_object_vars($originalIntegrations);
+unset($testIntegrations->{GoogleIntegrationInstaller::INTEGRATION_ID});
+$testIntegrations->GoogleIntegration = true;
+/** @var ConfigWriter $configWriter */
+$configWriter = $container->getByClass(InjectableFactory::class)->create(ConfigWriter::class);
+$configWriter->set('integrations', $testIntegrations);
+$configWriter->save();
+$config->update();
+
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$config->update();
+
+$migratedExternalAccount = $em->getEntityById('ExternalAccount', $externalAccountId);
+$ok('legacy ExternalAccount id removed', $em->getEntityById('ExternalAccount', $legacyExternalAccountId) === null);
+$ok('ExternalAccount migrated to GoogleCalendarDrive id', $migratedExternalAccount !== null);
+$ok(
+    'ExternalAccount token data preserved',
+    $migratedExternalAccount !== null
+    && $migratedExternalAccount->get('accessToken') === 'smoke-legacy-access-token'
+    && $migratedExternalAccount->get('refreshToken') === 'smoke-legacy-refresh-token'
+);
+$ok(
+    'ExternalAccount calendarSyncMode preserved',
+    $migratedExternalAccount !== null && $migratedExternalAccount->get('calendarSyncMode') === 'crmToGoogle',
+    'mode=' . (string) ($migratedExternalAccount?->get('calendarSyncMode') ?? 'null')
+);
+$integrationsAfter = $normalizeIntegrations($config->get('integrations'));
+$ok('legacy integration config key removed', !property_exists($integrationsAfter, 'GoogleIntegration'));
+$ok(
+    'legacy integration config migrated to GoogleCalendarDrive',
+    ($integrationsAfter->{GoogleIntegrationInstaller::INTEGRATION_ID} ?? null) === true
+);
+
+$restoredIntegrations = (object) get_object_vars($originalIntegrations);
+$originalLegacyEnabled = null;
+foreach ($legacyIntegrationIds as $legacyIntegrationId) {
+    if ($originalLegacyEnabled === null && property_exists($originalIntegrations, $legacyIntegrationId)) {
+        $originalLegacyEnabled = (bool) $originalIntegrations->$legacyIntegrationId;
+    }
+
+    unset($restoredIntegrations->$legacyIntegrationId);
+}
+if (!property_exists($originalIntegrations, GoogleIntegrationInstaller::INTEGRATION_ID) && $originalLegacyEnabled !== null) {
+    $restoredIntegrations->{GoogleIntegrationInstaller::INTEGRATION_ID} = $originalLegacyEnabled;
+} elseif (!property_exists($originalIntegrations, GoogleIntegrationInstaller::INTEGRATION_ID)) {
+    unset($restoredIntegrations->{GoogleIntegrationInstaller::INTEGRATION_ID});
+}
+$configWriter->set('integrations', $restoredIntegrations);
+$configWriter->save();
+$config->update();
 
 $client = new Client([
     'base_uri'    => $siteUrl,
