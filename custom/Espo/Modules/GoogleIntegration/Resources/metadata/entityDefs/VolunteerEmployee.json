@@ -1,0 +1,25 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": {
+            "type": "bool",
+            "default": false,
+            "audited": true
+        },
+        "googleCalendarDateSourceList": {
+            "type": "multiEnum",
+            "view": "google-integration:views/fields/google-calendar-date-source-list",
+            "audited": true
+        },
+        "googleCalendarEventSettings": {
+            "type": "jsonArray",
+            "view": "google-integration:views/fields/google-calendar-opportunity-event-settings",
+            "audited": true
+        },
+        "googleCalendarId": {
+            "type": "enum",
+            "options": ["primary"],
+            "default": "primary",
+            "view": "google-integration:views/fields/google-calendar-id"
+        }
+    }
+}

@@ -6,7 +6,8 @@
         "googleCalendarDescriptionTemplateMeeting": "Meeting Description Template",
         "googleCalendarDescriptionTemplateCall": "Call Description Template",
         "googleCalendarDescriptionTemplateTask": "Task Description Template",
-        "googleCalendarDescriptionTemplateOpportunity": "Funding Description Template"
+        "googleCalendarDescriptionTemplateOpportunity": "Funding Description Template",
+        "googleCalendarDescriptionTemplateVolunteerEmployee": "Volunteer / Employee Description Template"
     },
     "labels": {
         "googleCalendarTemplateVariables": "Insert record field",

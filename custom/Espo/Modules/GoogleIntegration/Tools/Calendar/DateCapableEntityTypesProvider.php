@@ -3,7 +3,6 @@
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 use Espo\Core\Acl;
-use Espo\Core\Utils\Language;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
 
@@ -12,11 +11,18 @@ use Espo\ORM\EntityManager;
  */
 class DateCapableEntityTypesProvider
 {
+    /** @var list<string> */
+    private const AUDIT_DATE_FIELDS = [
+        'createdAt',
+        'modifiedAt',
+        'deletedAt',
+    ];
+
     public function __construct(
         private Metadata $metadata,
         private EntityManager $entityManager,
         private Acl $acl,
-        private Language $language
+        private EntityScopeNameTranslator $entityScopeNameTranslator
     ) {}
 
     /**
@@ -89,7 +95,10 @@ class DateCapableEntityTypesProvider
         $list = array_keys($entityTypes);
 
         usort($list, function (string $a, string $b): int {
-            return strcasecmp($this->translateScopeName($a), $this->translateScopeName($b));
+            return strcasecmp(
+                $this->entityScopeNameTranslator->translate($a) ?? $a,
+                $this->entityScopeNameTranslator->translate($b) ?? $b
+            );
         });
 
         return $list;
@@ -103,9 +112,15 @@ class DateCapableEntityTypesProvider
         $list = [];
 
         foreach ($this->getEntityTypeList() as $entityType) {
+            $label = $this->entityScopeNameTranslator->translate($entityType);
+
+            if ($label === null) {
+                continue;
+            }
+
             $list[] = [
                 'entityType' => $entityType,
-                'label' => $this->translateScopeName($entityType),
+                'label' => $label,
             ];
         }
 
@@ -125,43 +140,82 @@ class DateCapableEntityTypesProvider
             return false;
         }
 
-        return $this->hasDateOrDatetimeField($defs);
+        if (!$this->hasSelectableDateField($defs)) {
+            return false;
+        }
+
+        if (isset($defs['fields']['saveToGoogleCalendar'])) {
+            return true;
+        }
+
+        if ($this->metadata->get(['scopes', $entityType, 'calendar'])) {
+            return true;
+        }
+
+        return $this->isUserFacingObjectScope($entityType);
+    }
+
+    private function isUserFacingObjectScope(string $entityType): bool
+    {
+        $scopes = $this->metadata->get(['scopes', $entityType]);
+
+        if (!is_array($scopes)) {
+            return false;
+        }
+
+        return ($scopes['tab'] ?? false) === true
+            && ($scopes['layouts'] ?? false) === true
+            && ($scopes['object'] ?? false) === true;
     }
 
     /**
      * @param array<string, mixed> $defs
      */
-    private function hasDateOrDatetimeField(array $defs): bool
+    private function hasSelectableDateField(array $defs): bool
+    {
+        return $this->getSelectableDateFieldList($defs) !== [];
+    }
+
+    /**
+     * @param array<string, mixed> $defs
+     * @return list<string>
+     */
+    private function getSelectableDateFieldList(array $defs): array
     {
         $fields = $defs['fields'] ?? [];
 
         if (!is_array($fields)) {
-            return false;
+            return [];
         }
 
-        foreach ($fields as $fieldDef) {
-            if (!is_array($fieldDef)) {
+        $business = [];
+        $fallback = [];
+
+        foreach ($fields as $name => $fieldDef) {
+            if (!is_string($name) || $name === '' || !is_array($fieldDef)) {
                 continue;
             }
 
             $type = $fieldDef['type'] ?? null;
 
-            if ($type === 'date' || $type === 'datetime') {
-                return true;
+            if ($type !== 'date' && $type !== 'datetime') {
+                continue;
             }
+
+            if (in_array($name, self::AUDIT_DATE_FIELDS, true)) {
+                $fallback[] = $name;
+
+                continue;
+            }
+
+            $business[] = $name;
         }
 
-        return false;
+        $list = $business !== [] ? $business : $fallback;
+
+        sort($list);
+
+        return $list;
     }
 
-    private function translateScopeName(string $entityType): string
-    {
-        $translated = $this->language->translate($entityType, 'scopeNames');
-
-        if ($translated !== $entityType) {
-            return $translated;
-        }
-
-        return $this->language->translate($entityType, 'scopeNames', 'Global') ?: $entityType;
-    }
 }

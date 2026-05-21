@@ -222,9 +222,12 @@ $ok('SyncMode::CRM_TO_GOOGLE allowed', in_array(SyncMode::CRM_TO_GOOGLE, SyncMod
 $ok('SyncMode::GOOGLE_TO_CRM allowed', in_array(SyncMode::GOOGLE_TO_CRM, SyncMode::ALL, true));
 
 $jobClass = 'Espo\\Modules\\GoogleIntegration\\Jobs\\SyncCalendar';
-echo '  [INFO] Background job ' . $jobClass . ': '
-    . (class_exists($jobClass) ? 'implemented' : 'not in codebase — UI calendarSyncMode only; manual OAuth E2E for push')
-    . "\n";
+$ok('SyncCalendar job class exists', class_exists($jobClass));
+$syncMeta = $metadata->get(['app', 'scheduledJobs', 'GoogleIntegrationSyncCalendar']) ?? [];
+$ok(
+    'scheduledJobs GoogleIntegrationSyncCalendar metadata',
+    is_array($syncMeta) && str_contains((string) ($syncMeta['jobClassName'] ?? ''), 'SyncCalendar')
+);
 
 echo "\n";
 

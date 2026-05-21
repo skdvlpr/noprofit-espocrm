@@ -1,0 +1,8 @@
+{
+    "GoogleIntegrationSyncCalendar": {
+        "name": "Google Calendar Sync",
+        "jobClassName": "Espo\\Modules\\GoogleIntegration\\Jobs\\SyncCalendar",
+        "scheduling": "*/5 * * * *",
+        "isSystem": true
+    }
+}

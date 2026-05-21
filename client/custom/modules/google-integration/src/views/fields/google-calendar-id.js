@@ -12,11 +12,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
         }
 
         translateLabelKey(key) {
-            return this.translate(key, 'fields', this.entityType)
-                || this.translate(key, 'fields', 'Meeting')
-                || this.translate(key, 'fields', 'Call')
-                || this.translate(key, 'fields', 'Task')
-                || this.translate(key, 'fields', 'Opportunity');
+            return this.translate(key, 'labels', 'Global');
         }
 
         setup() {
@@ -36,7 +32,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             if (!this.calendarLoaded) {
                 this.params.options = current ? [String(current)] : ['primary'];
                 this.translatedOptions = {
-                    primary: this.translateLabelKey('googleCalendarPrimary') || 'primary',
+                    primary: this.translateLabelKey('googleCalendarPrimary'),
                 };
 
                 if (current && current !== 'primary') {
@@ -70,7 +66,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                     const list = Array.isArray(data.list) ? data.list : [];
                     this.calendarOptionList = list.length
                         ? list
-                        : [{id: 'primary', summary: this.translateLabelKey('googleCalendarPrimary') || 'primary'}];
+                        : [{id: 'primary', summary: this.translateLabelKey('googleCalendarPrimary')}];
                     this.calendarLoaded = true;
 
                     if (data.connected === false && !this.connectHintShown) {
@@ -86,7 +82,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .catch(() => {
                     this.calendarOptionList = [{
                         id: 'primary',
-                        summary: this.translateLabelKey('googleCalendarPrimary') || 'primary',
+                        summary: this.translateLabelKey('googleCalendarPrimary'),
                     }];
                     this.calendarLoaded = true;
                     this.reRender();

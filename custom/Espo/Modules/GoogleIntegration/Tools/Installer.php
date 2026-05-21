@@ -81,6 +81,26 @@ class Installer
             'allDay' => true,
             'sortOrder' => 50,
         ],
+        [
+            'name' => 'Volunteer / Employee start date',
+            'targetEntityType' => 'VolunteerEmployee',
+            'dateField' => 'startDate',
+            'endDateField' => null,
+            'sourceDateType' => 'main',
+            'label' => 'Start date',
+            'allDay' => true,
+            'sortOrder' => 60,
+        ],
+        [
+            'name' => 'Volunteer / Employee end date',
+            'targetEntityType' => 'VolunteerEmployee',
+            'dateField' => 'endDate',
+            'endDateField' => null,
+            'sourceDateType' => 'endDate',
+            'label' => 'End date',
+            'allDay' => true,
+            'sortOrder' => 61,
+        ],
     ];
 
     /** @var array<int, array<string, mixed>> */
@@ -117,6 +137,14 @@ class Installer
             'reminderMode' => 'none',
             'transparency' => 'opaque',
             'colorId' => '10',
+        ],
+        [
+            'name' => 'Volunteer / Employee — default',
+            'targetEntityType' => 'VolunteerEmployee',
+            'summaryTemplate' => '{{name}}',
+            'descriptionTemplate' => "{{name}}\nStart: {{startDate}}\nEnd: {{endDate}}\n\n{{extra}}\n\nEspoCRM: {{espocrmUrl}}",
+            'reminderMode' => 'none',
+            'transparency' => 'opaque',
         ],
     ];
 

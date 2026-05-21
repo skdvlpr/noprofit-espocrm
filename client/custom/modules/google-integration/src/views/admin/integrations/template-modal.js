@@ -64,15 +64,16 @@ define('google-integration:views/admin/integrations/template-modal', ['views/mod
             const $btn = $('<button>')
                 .attr('type', 'button')
                 .addClass('btn btn-default btn-sm margin-top-sm')
-                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Integration'))
+                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Global'))
                 .on('click', () => {
                     VariablePanel.open({
                         stateKey: `integration-template-${this.entityType}`,
                         anchorEl: $textarea,
                         fieldList: fieldList,
+                        ownerView: this,
                         onSelect: name => this.insertVariable($textarea, name),
-                        translate: (key, category) => this.translate(key, category, 'Integration'),
-                        title: this.translate('googleCalendarTemplateVariables', 'labels', 'Integration'),
+                        translate: (key, category, scope) => this.translate(key, category, scope || 'Global'),
+                        title: this.translate('googleCalendarTemplateVariables', 'labels', 'Global'),
                     });
                 });
 
@@ -92,12 +93,21 @@ define('google-integration:views/admin/integrations/template-modal', ['views/mod
 
                     return !['link', 'linkMultiple', 'linkParent', 'file', 'image'].includes(field.type);
                 })
-                .map(name => ({
-                    name,
-                    label: this.translate(name, 'fields', entityType),
-                    group: 'current',
-                    groupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', 'Integration'),
-                }))
+                .map(name => {
+                    const label = this.translate(name, 'fields', entityType);
+
+                    if (!label || label === name) {
+                        return null;
+                    }
+
+                    return {
+                        name,
+                        label,
+                        group: 'current',
+                        groupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', 'Global'),
+                    };
+                })
+                .filter(Boolean)
                 .sort((a, b) => a.label.localeCompare(b.label));
         },
 

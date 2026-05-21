@@ -3,8 +3,11 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
 
     const stateMap = {};
     let isFocusTrackingInitialized = false;
+    let isNavigationAutoCloseInitialized = false;
     let lastFocusedEditable = null;
     let bodyShiftState = null;
+    let activeClose = null;
+    let activeLifecycleTeardown = null;
 
     function initFocusTracking() {
         if (isFocusTrackingInitialized) {
@@ -201,7 +204,100 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
         bodyShiftState = null;
     }
 
+    function clearActiveLifecycleBindings() {
+        if (typeof activeLifecycleTeardown === 'function') {
+            activeLifecycleTeardown();
+        }
+
+        activeLifecycleTeardown = null;
+    }
+
+    function closeActive() {
+        if (typeof activeClose === 'function') {
+            const close = activeClose;
+            activeClose = null;
+            close();
+            return;
+        }
+
+        clearActiveLifecycleBindings();
+        $('.google-calendar-variable-panel-backdrop').remove();
+        restoreBodyShift();
+    }
+
+    function initNavigationAutoClose() {
+        if (isNavigationAutoCloseInitialized) {
+            return;
+        }
+
+        isNavigationAutoCloseInitialized = true;
+
+        $(window).on('hashchange.google-calendar-variable-panel', () => closeActive());
+
+        const attachRouter = () => {
+            try {
+                const router = Espo.Ui && Espo.Ui.getRouter && Espo.Ui.getRouter();
+
+                if (router && typeof router.on === 'function') {
+                    router.on('routed', () => closeActive());
+                }
+            } catch (error) {
+                // Router may be unavailable during early bootstrap.
+            }
+        };
+
+        attachRouter();
+    }
+
+    /**
+     * @param {import('view').default} ownerView
+     * @param {function():void} closeFn
+     */
+    function bindOwnerLifecycle(ownerView, closeFn) {
+        if (!ownerView || typeof ownerView.listenTo !== 'function') {
+            return () => {};
+        }
+
+        const bindings = [];
+
+        const add = (target, events, handler) => {
+            ownerView.listenTo(target, events, handler);
+            bindings.push([target, events, handler]);
+        };
+
+        add(ownerView, 'remove', closeFn);
+
+        add(ownerView, 'mode-changed', () => {
+            if (typeof ownerView.isEditMode === 'function' && !ownerView.isEditMode()) {
+                closeFn();
+            }
+        });
+
+        let parent = typeof ownerView.getParentView === 'function' ? ownerView.getParentView() : null;
+
+        while (parent) {
+            add(parent, 'after:mode-change', mode => {
+                const editMode = parent.MODE_EDIT || 'edit';
+
+                if (mode !== editMode) {
+                    closeFn();
+                }
+            });
+            add(parent, 'after:save', closeFn);
+            parent = typeof parent.getParentView === 'function' ? parent.getParentView() : null;
+        }
+
+        return () => {
+            bindings.forEach(([target, events, handler]) => {
+                ownerView.stopListening(target, events, handler);
+            });
+        };
+    }
+
     return {
+        close() {
+            closeActive();
+        },
         /**
          * @param {object} options
          * @param {string} options.stateKey
@@ -210,13 +306,19 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
          * @param {function(string):void} options.onSelect
          * @param {function(string,string):string} options.translate
          * @param {function():void} [options.onClose]
+         * @param {object} [options.ownerView] Espo view that opened the panel (field or modal).
          */
         open(options) {
             initFocusTracking();
+            initNavigationAutoClose();
+            closeActive();
 
             const stateKey = options.stateKey || 'default';
             const state = stateMap[stateKey] || {search: '', scrollTop: 0};
             const anchorNode = toAnchorNode(options.anchorEl);
+            const tr = key => {
+                return options.translate(key, 'labels', 'Global');
+            };
 
             restoreBodyShift();
             $('.google-calendar-variable-panel-backdrop').remove();
@@ -280,15 +382,26 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
             }
 
             const close = () => {
+                if (activeClose !== close) {
+                    return;
+                }
+
+                activeClose = null;
+                clearActiveLifecycleBindings();
+
                 const $list = $panel.find('[data-role="google-calendar-variable-list"]');
                 state.scrollTop = $list.length ? $list.scrollTop() : 0;
                 stateMap[stateKey] = state;
                 $backdrop.remove();
                 restoreBodyShift();
+
                 if (typeof options.onClose === 'function') {
                     options.onClose();
                 }
             };
+
+            activeClose = close;
+            activeLifecycleTeardown = bindOwnerLifecycle(options.ownerView, close);
 
             const closeOnContextMenu = event => {
                 event.preventDefault();
@@ -316,12 +429,12 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
 
             $('<strong>')
                 .css({fontSize: '15px'})
-                .text(options.title || options.translate('googleCalendarTemplateVariables', 'labels'))
+                .text(options.title || tr('googleCalendarTemplateVariables'))
                 .appendTo($titleWrap);
 
-            const closeHint = options.translate('googleCalendarPanelCloseHint', 'labels');
+            const closeHint = tr('googleCalendarPanelCloseHint');
 
-            if (closeHint && closeHint !== 'googleCalendarPanelCloseHint') {
+            if (closeHint) {
                 $('<span>')
                     .addClass('text-muted')
                     .css({fontSize: '12px'})
@@ -353,7 +466,7 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
 
             const $search = $('<input>')
                 .attr('type', 'search')
-                .attr('placeholder', options.translate('googleCalendarTemplateVariableSearch', 'labels'))
+                .attr('placeholder', tr('googleCalendarTemplateVariableSearch'))
                 .addClass('form-control')
                 .val(state.search || '')
                 .css({flex: '1 1 auto'})
@@ -362,7 +475,7 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
             $('<button>')
                 .attr('type', 'button')
                 .addClass('btn btn-default btn-sm')
-                .text(options.translate('googleCalendarClearSearch', 'labels'))
+                .text(tr('googleCalendarClearSearch'))
                 .on('click', () => {
                     $search.val('').trigger('input').trigger('focus');
                 })
@@ -397,7 +510,7 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
                 if (!visibleList.length) {
                     $('<div>')
                         .addClass('text-muted small')
-                        .text(options.translate('googleCalendarNoVariables', 'labels'))
+                        .text(tr('googleCalendarNoVariables'))
                         .appendTo($list);
                     return;
                 }

@@ -6,7 +6,8 @@
         "googleCalendarDescriptionTemplateMeeting": "Template descrizione riunione",
         "googleCalendarDescriptionTemplateCall": "Template descrizione chiamata",
         "googleCalendarDescriptionTemplateTask": "Template descrizione compito",
-        "googleCalendarDescriptionTemplateOpportunity": "Template descrizione finanziamento"
+        "googleCalendarDescriptionTemplateOpportunity": "Template descrizione finanziamento",
+        "googleCalendarDescriptionTemplateVolunteerEmployee": "Template descrizione volontario / dipendente"
     },
     "labels": {
         "googleCalendarTemplateVariables": "Inserisci campo del record",

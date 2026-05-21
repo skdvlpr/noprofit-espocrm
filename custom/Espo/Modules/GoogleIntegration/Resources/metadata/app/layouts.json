@@ -30,5 +30,13 @@
         "detailSmall": {
             "module": "GoogleIntegration"
         }
+    },
+    "VolunteerEmployee": {
+        "detail": {
+            "module": "GoogleIntegration"
+        },
+        "detailSmall": {
+            "module": "GoogleIntegration"
+        }
     }
 }

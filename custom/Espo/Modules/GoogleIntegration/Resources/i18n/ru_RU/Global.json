@@ -1,11 +1,28 @@
 {
+    "labels": {
+        "googleCalendarTemplateVariables": "Вставка поля записи",
+        "googleCalendarTemplateVariableSearch": "Поиск полей",
+        "googleCalendarCurrentRecordFields": "Поля текущей записи",
+        "googleCalendarRelatedRecordFields": "Поля связанных записей",
+        "googleCalendarClearSearch": "Очистить",
+        "googleCalendarNoVariables": "Переменные не найдены",
+        "googleCalendarPanelCloseHint": "Правый клик - закрыть, поиск сохраняется",
+        "googleCalendarPrimary": "Основной календарь",
+        "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей."
+    },
     "scopeNames": {
+        "Account": "Account",
+        "Opportunity": "Grants & Funding",
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
         "CalendarTemplate": "Шаблон календаря",
         "CalendarTemplatePlural": "Шаблоны календаря",
         "CalendarDateSource": "Источник дат календаря",
         "CalendarDateSourcePlural": "Источники дат календаря"
     },
     "scopeNamesPlural": {
+        "Account": "Account",
+        "Opportunity": "Grants & Funding",
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
         "CalendarTemplate": "Шаблоны календаря",
         "CalendarDateSource": "Источники дат календаря"
     }

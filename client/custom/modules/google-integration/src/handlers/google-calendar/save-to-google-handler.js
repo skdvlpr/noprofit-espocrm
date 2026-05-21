@@ -14,26 +14,21 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             this.listenTo(this.view, 'after:render', () => this.control());
 
             this.listenTo(this.model, 'change:saveToGoogleCalendar', () => {
-                if (!this.model.get('saveToGoogleCalendar')) {
-                    this.model.set({
-                        googleCalendarReminderMode: 'none',
-                        googleCalendarReminders: [],
-                    });
-                }
-
                 this.control();
             });
 
             this.listenTo(this.model, 'change:googleCalendarReminderMode', () => this.control());
         }
 
+        usesSharedGoogleReminderFields() {
+            return !this.hasField('googleCalendarEventSettings')
+                && !this.hasField('googleCalendarOpportunityEventSettings');
+        }
+
         control() {
             const enabled = !!this.model.get('saveToGoogleCalendar');
-            const customReminders = enabled && this.model.get('googleCalendarReminderMode') === 'custom';
-
-            this.toggleField('googleCalendarReminderMode', enabled);
-            this.toggleField('googleCalendarReminders', customReminders);
-            this.toggleField('googleCalendarTemplate', enabled);
+            this.toggleField('googleCalendarDateSourceList', enabled);
+            this.toggleField('googleCalendarEventSettings', enabled);
             this.toggleField('googleCalendarOpportunityDateList', enabled);
             this.toggleField('googleCalendarOpportunityEventSettings', enabled);
             this.toggleField('googleCalendarDescriptionTemplateOverride', enabled);
@@ -41,6 +36,14 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             this.toggleField('googleCalendarVisibility', enabled);
             this.toggleField('googleCalendarTransparency', enabled);
             this.toggleField('googleCalendarColorId', enabled);
+            this.toggleField('googleCalendarReminderMode', enabled && this.usesSharedGoogleReminderFields());
+            this.toggleField(
+                'googleCalendarReminders',
+                enabled
+                    && this.usesSharedGoogleReminderFields()
+                    && this.model.get('googleCalendarReminderMode') === 'custom'
+            );
+            this.toggleField('googleCalendarTemplate', enabled && this.usesSharedGoogleReminderFields());
             this.toggleNotice(enabled);
         }
 

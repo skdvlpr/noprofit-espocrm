@@ -10,7 +10,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     _base = _interopRequireDefault(_base);
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
-    const DATE_TYPE_LIST = ['presentationDate', 'closeDate'];
+    const OPPORTUNITY_DATE_TYPE_LIST = ['presentationDate', 'closeDate'];
     const METHOD_LIST = ['popup', 'email'];
     const UNIT_LIST = ['minutes', 'hours', 'days', 'weeks'];
     const REMINDER_MODE_LIST = ['none', 'default', 'custom'];
@@ -164,13 +164,25 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         setup() {
             super.setup();
             this.templateList = [];
+            this.dateSourceOptionList = [];
 
-            this.listenTo(this.model, 'change:googleCalendarOpportunityDateList', () => {
+            const dateListField = this.getDateListFieldName();
+
+            this.listenTo(this.model, `change:${dateListField}`, () => {
                 this.model.set(this.name, this.getSettingsList(), {ui: true});
                 this.reRender();
             });
 
             this.loadTemplateList();
+            this.loadDateSourceOptions();
+        }
+
+        getDateListFieldName() {
+            if (this.getMetadata().get(`entityDefs.${this.model.entityType}.fields.googleCalendarDateSourceList`)) {
+                return 'googleCalendarDateSourceList';
+            }
+
+            return 'googleCalendarOpportunityDateList';
         }
 
         data() {
@@ -220,8 +232,14 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 return true;
             }
 
+            const allowed = this.getAllowedDateTypeList();
+
+            if (!allowed.length && this.model.entityType !== 'Opportunity') {
+                return false;
+            }
+
             for (const item of this.readSettings()) {
-                if (!DATE_TYPE_LIST.includes(item.sourceDateType)) {
+                if (!allowed.includes(item.sourceDateType)) {
                     this.showValidationMessage('Invalid Google Calendar date settings.');
                     return true;
                 }
@@ -262,19 +280,55 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         getSelectedDateList() {
-            const selected = this.model.get('googleCalendarOpportunityDateList');
+            const selected = this.model.get(this.getDateListFieldName());
+            const allowed = this.getAllowedDateTypeList();
 
             if (!Array.isArray(selected) || !selected.length) {
-                return ['closeDate'];
+                return allowed.length ? [allowed[0]] : [];
             }
 
-            return selected.filter(item => DATE_TYPE_LIST.includes(item));
+            const filtered = selected.filter(item => allowed.includes(item));
+
+            return filtered.length ? filtered : (allowed.length ? [allowed[0]] : []);
+        }
+
+        getAllowedDateTypeList() {
+            if (this.dateSourceOptionList.length) {
+                return this.dateSourceOptionList.map(item => item.sourceDateType);
+            }
+
+            if (this.model.entityType === 'Opportunity') {
+                return OPPORTUNITY_DATE_TYPE_LIST;
+            }
+
+            return [];
+        }
+
+        loadDateSourceOptions() {
+            Espo.Ajax.getRequest(`GoogleIntegration/calendar/date-source-options/${this.model.entityType}`)
+                .then(data => {
+                    this.dateSourceOptionList = Array.isArray(data.sources) ? data.sources : [];
+
+                    if (this.isRendered()) {
+                        this.reRender();
+                    }
+                })
+                .catch(() => {
+                    this.dateSourceOptionList = [];
+                });
         }
 
         normalizeItem(item) {
+            const allowed = this.getAllowedDateTypeList();
+            const fallback = allowed[0] || 'closeDate';
+
             return {
-                sourceDateType: DATE_TYPE_LIST.includes(item.sourceDateType) ? item.sourceDateType : 'closeDate',
-                reminderMode: REMINDER_MODE_LIST.includes(item.reminderMode) ? item.reminderMode : this.model.get('googleCalendarReminderMode') || 'none',
+                sourceDateType: allowed.includes(item.sourceDateType) ? item.sourceDateType : fallback,
+                reminderMode: REMINDER_MODE_LIST.includes(item.reminderMode)
+                    ? item.reminderMode
+                    : (this.model.entityType === 'VolunteerEmployee'
+                        ? 'none'
+                        : (this.model.get('googleCalendarReminderMode') || 'none')),
                 reminders: this.normalizeReminders(item.reminders || this.model.get('googleCalendarReminders')),
                 location: String(item.location ?? this.model.get('googleCalendarLocation') ?? ''),
                 visibility: VISIBILITY_LIST.includes(item.visibility) ? item.visibility : this.model.get('googleCalendarVisibility') || 'default',
@@ -421,15 +475,16 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                     paddingLeft: '14px',
                     paddingRight: '14px',
                 })
-                .text(this.translate('googleCalendarTemplateVariables', 'labels', this.model.entityType))
+                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Global'))
                 .on('click', () => {
                     VariablePanel.open({
-                        stateKey: `Opportunity:${this.name}`,
+                        stateKey: `${this.model.entityType}:${this.name}`,
                         anchorEl: $textarea,
                         fieldList,
+                        ownerView: this,
                         onSelect: name => this.insertVariable($textarea, name),
-                        translate: (key, category) => this.translate(key, category, this.model.entityType),
-                        title: this.translate('googleCalendarTemplateVariables', 'labels', this.model.entityType),
+                        translate: (key, category, scope) => this.translate(key, category, scope || this.model.entityType),
+                        title: this.translate('googleCalendarTemplateVariables', 'labels', 'Global'),
                     });
                 })
                 .appendTo($helper);
@@ -443,12 +498,21 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
             const currentFields = Object.keys(fields)
                 .filter(name => this.isInsertableField(fields[name], name))
-                .map(name => ({
-                    name,
-                    label: this.getFieldLabel(this.model.entityType, name),
-                    group: 'current',
-                    groupLabel: currentGroupLabel,
-                }))
+                .map(name => {
+                    const label = this.getFieldLabel(this.model.entityType, name);
+
+                    if (!label) {
+                        return null;
+                    }
+
+                    return {
+                        name,
+                        label,
+                        group: 'current',
+                        groupLabel: currentGroupLabel,
+                    };
+                })
+                .filter(Boolean)
                 .sort((a, b) => a.label.localeCompare(b.label));
 
             return [...currentFields, ...this.getRelatedFieldList(relatedGroupLabel)];
@@ -475,14 +539,27 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 const relatedFields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
                 const linkLabel = this.translate(linkName, 'fields', this.model.entityType);
 
+                if (!linkLabel || linkLabel === linkName) {
+                    return;
+                }
+
                 Object.keys(relatedFields)
                     .filter(name => this.isInsertableField(relatedFields[name], name))
-                    .map(name => ({
-                        name: `${linkName}.${name}`,
-                        label: `(${linkLabel}) ${this.getFieldLabel(entityType, name)}`,
-                        group: `related-${linkName}`,
-                        groupLabel,
-                    }))
+                    .map(name => {
+                        const label = this.getFieldLabel(entityType, name);
+
+                        if (!label) {
+                            return null;
+                        }
+
+                        return {
+                            name: `${linkName}.${name}`,
+                            label: `(${linkLabel}) ${label}`,
+                            group: `related-${linkName}`,
+                            groupLabel,
+                        };
+                    })
+                    .filter(Boolean)
                     .sort((a, b) => a.label.localeCompare(b.label))
                     .forEach(item => list.push(item));
             });
@@ -572,11 +649,29 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         translateDateType(value) {
+            const fromSource = (this.dateSourceOptionList || []).find(item => item.sourceDateType === value);
+
+            if (fromSource && fromSource.label) {
+                return fromSource.label;
+            }
+
             if (value === 'presentationDate') {
                 return this.translate('googleCalendarDatePresentation', 'labels', this.model.entityType);
             }
 
-            return this.translate('googleCalendarDateClose', 'labels', this.model.entityType);
+            if (value === 'closeDate') {
+                return this.translate('googleCalendarDateClose', 'labels', this.model.entityType);
+            }
+
+            if (value === 'main') {
+                return this.translate('googleCalendarDateMain', 'labels', this.model.entityType);
+            }
+
+            if (value === 'endDate') {
+                return this.translate('googleCalendarDateEnd', 'labels', this.model.entityType);
+            }
+
+            return value;
         }
 
         toMinutes(row) {
@@ -599,14 +694,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
         getFieldLabel(entityType, fieldName) {
             const translated = this.translate(fieldName, 'fields', entityType);
-
-            if (translated && translated !== fieldName) {
-                return translated;
-            }
-
-            return fieldName
-                .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-                .replace(/^./, letter => letter.toUpperCase());
+            return translated && translated !== fieldName ? translated : '';
         }
 
         decorateColorSelects() {

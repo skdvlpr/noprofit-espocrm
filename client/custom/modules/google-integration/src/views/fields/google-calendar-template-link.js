@@ -50,7 +50,8 @@ define('google-integration:views/fields/google-calendar-template-link', ['export
                 return translated;
             }
 
-            return this.getLanguage().translate(entityType, 'scopeNames', 'Global') || entityType;
+            const globalTranslated = this.getLanguage().translate(entityType, 'scopeNames', 'Global');
+            return globalTranslated && globalTranslated !== entityType ? globalTranslated : '';
         }
 
         formatTemplateDisplayName(item) {

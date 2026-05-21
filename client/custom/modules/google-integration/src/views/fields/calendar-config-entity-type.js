@@ -25,11 +25,15 @@ define('google-integration:views/fields/calendar-config-entity-type', ['exports'
                 Espo.Ajax.getRequest('GoogleIntegration/calendar/date-capable-entity-types')
                     .then(data => {
                         const list = Array.isArray(data.list) ? data.list : [];
-                        this.allowedEntityList = list.map(item => item.entityType).filter(Boolean);
+                        this.allowedEntityList = [];
 
                         list.forEach(item => {
-                            if (item.entityType) {
-                                this.labelByEntityType[item.entityType] = item.label || item.entityType;
+                            const entityType = typeof item.entityType === 'string' ? item.entityType : '';
+                            const label = typeof item.label === 'string' ? item.label.trim() : '';
+
+                            if (entityType && label) {
+                                this.allowedEntityList.push(entityType);
+                                this.labelByEntityType[entityType] = label;
                             }
                         });
 
@@ -59,7 +63,7 @@ define('google-integration:views/fields/calendar-config-entity-type', ['exports'
 
             const current = this.model.get(this.name);
 
-            if (current && !options.includes(current)) {
+            if (current && this.labelByEntityType[current] && !options.includes(current)) {
                 options = [current, ...options];
             }
 
@@ -71,17 +75,9 @@ define('google-integration:views/fields/calendar-config-entity-type', ['exports'
         }
 
         translateOption(value) {
-            if (this.labelByEntityType && this.labelByEntityType[value]) {
-                return this.labelByEntityType[value];
-            }
-
-            const translated = this.getLanguage().translate(value, 'scopeNames');
-
-            if (translated && translated !== value) {
-                return translated;
-            }
-
-            return this.getLanguage().translate(value, 'scopeNames', 'Global') || value;
+            return this.labelByEntityType && this.labelByEntityType[value]
+                ? this.labelByEntityType[value]
+                : '';
         }
 
         getDisplayValue() {
@@ -102,7 +98,17 @@ define('google-integration:views/fields/calendar-config-entity-type', ['exports'
             }
 
             this.$el.find('select').on('change', e => {
-                this.model.set(this.name, e.currentTarget.value || null, {ui: true});
+                const value = e.currentTarget.value || null;
+                const previous = this.model.get(this.name);
+
+                this.model.set(this.name, value, {ui: true});
+
+                if (value !== previous) {
+                    this.model.set({
+                        dateField: null,
+                        endDateField: null,
+                    }, {ui: true});
+                }
             });
         }
 

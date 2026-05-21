@@ -843,15 +843,27 @@ Google export must be idempotent per user and per source record:
 
 ### GCal-006 — Per-date settings
 
-When a single EspoCRM record can create multiple Google events (currently
-`Opportunity.presentationDate` and `Opportunity.closeDate`), Google event
+When a single EspoCRM record can create multiple Google events (via
+`CalendarDateSource` and/or entity-specific date selectors), Google event
 settings MUST be scoped per event/date key, not shared globally for the record:
 
+- **Opportunity:** `googleCalendarOpportunityDateList` +
+  `googleCalendarOpportunityEventSettings` (legacy field names; keep until unified).
+- **VolunteerEmployee:** `googleCalendarDateSourceList` +
+  `googleCalendarEventSettings` (same per-date settings field view as Opportunity).
+- **Meeting / Call / Task:** shared record-level Google fields in metadata/layout
+  unless migrated to per-date settings later.
+
+Rules:
+
 - Store selected dates separately from per-date settings.
-- Key per-date settings by source date type (`presentationDate`, `closeDate`).
+- Key per-date settings by `sourceDateType` from `CalendarDateSource`
+  (e.g. `main`, `endDate`, `presentationDate`, `closeDate`).
 - Each date can have its own reminders, color, location, visibility,
   transparency, and description template override.
 - Keep Google event links idempotent by `sourceDateType`.
+- **Clean-install policy:** do not keep unused shared Google fields on entities
+  that use per-date UI only (no legacy fallback reads in PHP for removed fields).
 
 ### GCal-007 — Template variables
 

@@ -10,6 +10,11 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetTemplateOptions"
     },
     {
+        "route": "/GoogleIntegration/calendar/date-source-options/:entityType",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateSourceTypeOptions"
+    },
+    {
         "route": "/GoogleIntegration/calendar/allowed-entity-types",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetAllowedEntityTypes"

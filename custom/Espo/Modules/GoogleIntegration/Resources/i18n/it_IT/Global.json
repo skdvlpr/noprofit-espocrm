@@ -1,11 +1,28 @@
 {
+    "labels": {
+        "googleCalendarTemplateVariables": "Inserisci campo del record",
+        "googleCalendarTemplateVariableSearch": "Cerca campi",
+        "googleCalendarCurrentRecordFields": "Campi del record corrente",
+        "googleCalendarRelatedRecordFields": "Campi dei record collegati",
+        "googleCalendarClearSearch": "Cancella",
+        "googleCalendarNoVariables": "Nessuna variabile trovata",
+        "googleCalendarPanelCloseHint": "Tasto destro per chiudere - ricerca salvata",
+        "googleCalendarPrimary": "Calendario principale",
+        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari."
+    },
     "scopeNames": {
+        "Account": "Account",
+        "Opportunity": "Fondi e Finanziamenti",
+        "VolunteerEmployee": "Volontari / Dipendenti",
         "CalendarTemplate": "Template calendario",
         "CalendarTemplatePlural": "Template calendario",
         "CalendarDateSource": "Origine data calendario",
         "CalendarDateSourcePlural": "Origini date calendario"
     },
     "scopeNamesPlural": {
+        "Account": "Account",
+        "Opportunity": "Fondi e Finanziamenti",
+        "VolunteerEmployee": "Volontari / Dipendenti",
         "CalendarTemplate": "Template calendario",
         "CalendarDateSource": "Origini date calendario"
     }

@@ -6,7 +6,8 @@
         "googleCalendarDescriptionTemplateMeeting": "Шаблон описания встречи",
         "googleCalendarDescriptionTemplateCall": "Шаблон описания звонка",
         "googleCalendarDescriptionTemplateTask": "Шаблон описания задачи",
-        "googleCalendarDescriptionTemplateOpportunity": "Шаблон описания финансирования"
+        "googleCalendarDescriptionTemplateOpportunity": "Шаблон описания финансирования",
+        "googleCalendarDescriptionTemplateVolunteerEmployee": "Шаблон описания волонтёра / сотрудника"
     },
     "labels": {
         "googleCalendarTemplateVariables": "Вставить поле записи",

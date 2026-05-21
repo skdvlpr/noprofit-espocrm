@@ -6,37 +6,71 @@ define('google-integration:views/fields/calendar-config-date-field', ['exports',
     _enum = _interopRequireDefault(_enum);
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
+    const AUDIT_DATE_FIELDS = ['createdAt', 'modifiedAt', 'deletedAt'];
+
     class CalendarConfigDateField extends _enum.default {
         setup() {
-            super.setup();
-
             this.listenTo(this.model, 'change:targetEntityType', () => {
+                this.setupOptions();
+
                 if (this.name === 'dateField') {
-                    const options = this.getDateFieldOptions(this.model.get('targetEntityType'));
+                    const options = this.params.options || [];
                     const current = this.model.get('dateField');
 
-                    if (current && !options.includes(current)) {
+                    if (!current || !options.includes(current)) {
                         this.model.set({
                             dateField: options[0] || null,
                             endDateField: null,
                         }, {ui: true});
                     }
                 }
+
+                if (this.isRendered()) {
+                    this.reRender();
+                }
             });
+
+            super.setup();
+        }
+
+        getSelectableDateFieldNames(entityType) {
+            if (!entityType) {
+                return [];
+            }
+
+            const fields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
+            const business = [];
+            const fallback = [];
+
+            Object.keys(fields).forEach(name => {
+                const type = fields[name]?.type;
+
+                if (type !== 'date' && type !== 'datetime') {
+                    return;
+                }
+
+                if (AUDIT_DATE_FIELDS.includes(name)) {
+                    fallback.push(name);
+
+                    return;
+                }
+
+                business.push(name);
+            });
+
+            return (business.length ? business : fallback).sort();
         }
 
         setupOptions() {
             const entityType = this.model.get('targetEntityType');
-            const fields = entityType
-                ? this.getMetadata().get(`entityDefs.${entityType}.fields`) || {}
-                : {};
+            const optionDataList = this.getSelectableDateFieldNames(entityType)
+                .map(name => ({
+                    value: name,
+                    label: this.translateOption(name, entityType),
+                }))
+                .filter(item => item.label);
 
-            this.params.options = Object.keys(fields)
-                .filter(name => {
-                    const type = fields[name]?.type;
-                    return type === 'date' || type === 'datetime';
-                })
-                .sort();
+            this.params.options = optionDataList.map(item => item.value);
 
             if (this.name === 'endDateField') {
                 this.params.options = ['', ...this.params.options];
@@ -44,33 +78,28 @@ define('google-integration:views/fields/calendar-config-date-field', ['exports',
 
             this.translatedOptions = {};
 
-            this.params.options.forEach(value => {
-                this.translatedOptions[value] = this.translateOption(value);
+            if (this.name === 'endDateField') {
+                this.translatedOptions[''] = this.translate('None');
+            }
+
+            optionDataList.forEach(item => {
+                this.translatedOptions[item.value] = item.label;
             });
 
             super.setupOptions();
         }
 
-        translateOption(value) {
+        translateOption(value, entityType = null) {
             if (!value) {
                 return this.translate('None');
             }
 
-            const entityType = this.model.get('targetEntityType');
-
             if (!entityType) {
-                return value;
+                return '';
             }
 
             const translated = this.getLanguage().translate(value, 'fields', entityType);
-
-            if (translated && translated !== value) {
-                return translated;
-            }
-
-            return value
-                .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-                .replace(/^./, letter => letter.toUpperCase());
+            return translated && translated !== value ? translated : '';
         }
     }
 

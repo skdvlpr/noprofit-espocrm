@@ -1,11 +1,28 @@
 {
+    "labels": {
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarCurrentRecordFields": "Current record fields",
+        "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarClearSearch": "Clear",
+        "googleCalendarNoVariables": "No variables found",
+        "googleCalendarPanelCloseHint": "Right-click to close - search is remembered",
+        "googleCalendarPrimary": "Primary calendar",
+        "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list."
+    },
     "scopeNames": {
+        "Account": "Account",
+        "Opportunity": "Grants & Funding",
+        "VolunteerEmployee": "Volunteers / Employees",
         "CalendarTemplate": "Calendar Template",
         "CalendarTemplatePlural": "Calendar Templates",
         "CalendarDateSource": "Calendar Date Source",
         "CalendarDateSourcePlural": "Calendar Date Sources"
     },
     "scopeNamesPlural": {
+        "Account": "Account",
+        "Opportunity": "Grants & Funding",
+        "VolunteerEmployee": "Volunteers / Employees",
         "CalendarTemplate": "Calendar Templates",
         "CalendarDateSource": "Calendar Date Sources"
     }

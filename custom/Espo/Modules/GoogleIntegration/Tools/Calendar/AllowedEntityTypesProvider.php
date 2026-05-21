@@ -3,7 +3,6 @@
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 use Espo\Core\Acl;
-use Espo\Core\Utils\Language;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
 
@@ -16,7 +15,7 @@ class AllowedEntityTypesProvider
         private Metadata $metadata,
         private EntityManager $entityManager,
         private Acl $acl,
-        private Language $language
+        private EntityScopeNameTranslator $entityScopeNameTranslator
     ) {}
 
     /**
@@ -70,23 +69,19 @@ class AllowedEntityTypesProvider
         $list = [];
 
         foreach ($this->getEntityTypeList() as $entityType) {
+            $label = $this->entityScopeNameTranslator->translate($entityType);
+
+            if ($label === null) {
+                continue;
+            }
+
             $list[] = [
                 'entityType' => $entityType,
-                'label' => $this->translateScopeName($entityType),
+                'label' => $label,
             ];
         }
 
         return $list;
     }
 
-    private function translateScopeName(string $entityType): string
-    {
-        $translated = $this->language->translate($entityType, 'scopeNames');
-
-        if ($translated !== $entityType) {
-            return $translated;
-        }
-
-        return $this->language->translate($entityType, 'scopeNames', 'Global') ?: $entityType;
-    }
 }

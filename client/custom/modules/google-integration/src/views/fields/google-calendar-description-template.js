@@ -58,7 +58,7 @@ define('google-integration:views/fields/google-calendar-description-template', [
                 .attr('type', 'button')
                 .addClass('btn btn-default btn-sm')
                 .css({borderRadius: '999px', paddingLeft: '14px', paddingRight: '14px'})
-                .text(this.translateLabel('googleCalendarTemplateVariables'))
+                .text(this.translateLabel('googleCalendarTemplateVariables', 'labels', 'Global'))
                 .appendTo($helper);
 
             $toggle.on('click', () => {
@@ -79,23 +79,19 @@ define('google-integration:views/fields/google-calendar-description-template', [
                     stateKey: `${this.model.entityType}:${this.name}:${currentTemplateEntityType}`,
                     anchorEl: $input.length ? $input : this.$el,
                     fieldList,
+                    ownerView: this,
                     onSelect: name => this.insertVariable(name),
-                    translate: (key, category) => this.translateLabel(key, category),
-                    title: this.translateLabel('googleCalendarTemplateVariables'),
+                    translate: (key, category, scope) => this.translateLabel(key, category, scope),
+                    title: this.translateLabel('googleCalendarTemplateVariables', 'labels', 'Global'),
                 });
             });
 
             this.$el.append($helper);
         }
 
-        translateLabel(key, category) {
-            const entityType = this.getTemplateEntityType() || this.model.entityType;
-
-            if (category === 'labels') {
-                return this.translate(key, 'labels', entityType);
-            }
-
-            return this.translate(key, 'labels', this.model.entityType);
+        translateLabel(key, category = 'labels', scope = null) {
+            const entityType = scope || this.getTemplateEntityType() || this.model.entityType;
+            return this.translate(key, category, entityType);
         }
 
         getInsertableFieldList(entityType) {
@@ -105,12 +101,21 @@ define('google-integration:views/fields/google-calendar-description-template', [
 
             const currentFields = Object.keys(fields)
                 .filter(name => this.isInsertableField(fields[name], name))
-                .map(name => ({
-                    name,
-                    label: this.getFieldLabel(entityType, name),
-                    group: 'current',
-                    groupLabel: currentGroupLabel,
-                }));
+                .map(name => {
+                    const label = this.getFieldLabel(entityType, name);
+
+                    if (!label) {
+                        return null;
+                    }
+
+                    return {
+                        name,
+                        label,
+                        group: 'current',
+                        groupLabel: currentGroupLabel,
+                    };
+                })
+                .filter(Boolean);
 
             return [
                 ...currentFields.sort((a, b) => a.label.localeCompare(b.label)),
@@ -139,14 +144,27 @@ define('google-integration:views/fields/google-calendar-description-template', [
                 const relatedFields = this.getMetadata().get(`entityDefs.${relatedEntityType}.fields`) || {};
                 const linkLabel = this.translate(linkName, 'fields', entityType);
 
+                if (!linkLabel || linkLabel === linkName) {
+                    return;
+                }
+
                 Object.keys(relatedFields)
                     .filter(name => this.isInsertableField(relatedFields[name], name))
-                    .map(name => ({
-                        name: `${linkName}.${name}`,
-                        label: `(${linkLabel}) ${this.getFieldLabel(relatedEntityType, name)}`,
-                        group: `related-${linkName}`,
-                        groupLabel,
-                    }))
+                    .map(name => {
+                        const label = this.getFieldLabel(relatedEntityType, name);
+
+                        if (!label) {
+                            return null;
+                        }
+
+                        return {
+                            name: `${linkName}.${name}`,
+                            label: `(${linkLabel}) ${label}`,
+                            group: `related-${linkName}`,
+                            groupLabel,
+                        };
+                    })
+                    .filter(Boolean)
                     .sort((a, b) => a.label.localeCompare(b.label))
                     .forEach(item => list.push(item));
             });
@@ -156,14 +174,7 @@ define('google-integration:views/fields/google-calendar-description-template', [
 
         getFieldLabel(entityType, fieldName) {
             const translated = this.translate(fieldName, 'fields', entityType);
-
-            if (translated && translated !== fieldName) {
-                return translated;
-            }
-
-            return fieldName
-                .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-                .replace(/^./, letter => letter.toUpperCase());
+            return translated && translated !== fieldName ? translated : '';
         }
 
         hasActualRelatedRecord(linkName, type) {

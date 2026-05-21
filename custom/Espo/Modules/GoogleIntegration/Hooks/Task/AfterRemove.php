@@ -2,15 +2,15 @@
 
 namespace Espo\Modules\GoogleIntegration\Hooks\Task;
 
-use Espo\Core\Hook\Hook\AfterSave as AfterSaveHook;
+use Espo\Core\Hook\Hook\AfterRemove as AfterRemoveHook;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarEntityLifecycle;
 use Espo\ORM\Entity;
-use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\ORM\Repository\Option\RemoveOptions;
 
 /**
- * @implements AfterSaveHook<Entity>
+ * @implements AfterRemoveHook<Entity>
  */
-class AfterSave implements AfterSaveHook
+class AfterRemove implements AfterRemoveHook
 {
     public static int $order = 20;
 
@@ -18,8 +18,8 @@ class AfterSave implements AfterSaveHook
         private GoogleCalendarEntityLifecycle $googleCalendarEntityLifecycle
     ) {}
 
-    public function afterSave(Entity $entity, SaveOptions $options): void
+    public function afterRemove(Entity $entity, RemoveOptions $options): void
     {
-        $this->googleCalendarEntityLifecycle->handleAfterSave($entity);
+        $this->googleCalendarEntityLifecycle->handleAfterRemove($entity);
     }
 }
