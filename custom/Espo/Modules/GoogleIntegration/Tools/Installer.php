@@ -145,13 +145,17 @@ class Installer
         $changed = is_array($rawIntegrations) || $rawIntegrations === null;
 
         if (!property_exists($integrations, self::INTEGRATION_ID)) {
+            $legacyConfigValue = null;
+
             foreach ($this->getLegacyIntegrationIdList() as $legacyId) {
                 if (property_exists($integrations, $legacyId)) {
-                    $integrations->{self::INTEGRATION_ID} = (bool) $integrations->{$legacyId};
-                    $changed = true;
-
-                    break;
+                    $legacyConfigValue = (bool) $legacyConfigValue || (bool) $integrations->{$legacyId};
                 }
+            }
+
+            if ($legacyConfigValue !== null) {
+                $integrations->{self::INTEGRATION_ID} = $legacyConfigValue;
+                $changed = true;
             }
         }
 

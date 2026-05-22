@@ -93,9 +93,11 @@ echo "\nMigration: legacy GoogleIntegration id → GoogleCalendarDrive\n";
 $configWriter = $container->getByClass(ConfigWriter::class);
 $userId = $user->getId();
 $migrationMarker = 'smoke-' . $userId;
+$targetIntegrationId = GoogleIntegrationInstaller::INTEGRATION_ID;
 $legacyIntegrationId = 'GoogleIntegration';
+$legacySafehouseIntegrationId = 'GoogleSafehouse';
 $legacyExternalAccountId = $legacyIntegrationId . '__' . $userId;
-$targetExternalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $userId;
+$targetExternalAccountId = $targetIntegrationId . '__' . $userId;
 
 $originalIntegrationConfig = $config->get('integrations');
 if ($originalIntegrationConfig instanceof stdClass) {
@@ -107,7 +109,7 @@ if ($originalIntegrationConfig instanceof stdClass) {
 }
 $originalTargetIntegrationEnabled = null;
 
-$existingTargetIntegration = $em->getEntityById('Integration', GoogleIntegrationInstaller::INTEGRATION_ID);
+$existingTargetIntegration = $em->getEntityById('Integration', $targetIntegrationId);
 if ($existingTargetIntegration !== null) {
     $originalTargetIntegrationEnabled = (bool) $existingTargetIntegration->get('enabled');
     $existingTargetIntegration->clear('smokeMigrationMarker');
@@ -133,12 +135,12 @@ if ($staleLegacyExternalAccount !== null) {
 $em->createEntity('Integration', [
     'id' => $legacyIntegrationId,
     'enabled' => true,
-    'smokeMigrationMarker' => $migrationMarker,
+    'data' => (object) ['smokeMigrationMarker' => $migrationMarker],
 ]);
 $em->createEntity('ExternalAccount', [
     'id' => $legacyExternalAccountId,
     'enabled' => true,
-    'smokeMigrationMarker' => $migrationMarker,
+    'data' => (object) ['smokeMigrationMarker' => $migrationMarker],
 ]);
 
 $integrationConfig = $config->get('integrations');
@@ -149,7 +151,9 @@ if ($integrationConfig instanceof stdClass) {
 } else {
     $integrationConfig = (object) [];
 }
-$integrationConfig->{$legacyIntegrationId} = true;
+unset($integrationConfig->{$targetIntegrationId});
+$integrationConfig->{$legacyIntegrationId} = false;
+$integrationConfig->{$legacySafehouseIntegrationId} = true;
 $configWriter->set('integrations', $integrationConfig);
 $configWriter->save();
 
@@ -183,9 +187,14 @@ $ok(
     $integrationConfigAfter instanceof stdClass && !property_exists($integrationConfigAfter, $legacyIntegrationId)
 );
 $ok(
-    'integrations.GoogleCalendarDrive config key present',
+    'legacy integrations.GoogleSafehouse config key removed',
+    $integrationConfigAfter instanceof stdClass && !property_exists($integrationConfigAfter, $legacySafehouseIntegrationId)
+);
+$ok(
+    'integrations.GoogleCalendarDrive config flag migrated from enabled legacy key',
     $integrationConfigAfter instanceof stdClass
-    && property_exists($integrationConfigAfter, GoogleIntegrationInstaller::INTEGRATION_ID)
+    && property_exists($integrationConfigAfter, $targetIntegrationId)
+    && $integrationConfigAfter->{$targetIntegrationId} === true
 );
 
 if ($migratedIntegration !== null) {
