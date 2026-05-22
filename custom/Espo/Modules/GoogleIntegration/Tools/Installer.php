@@ -211,6 +211,12 @@ class Installer
                 continue;
             }
 
+            if ($attribute === 'enabled' && $value === true && $target->get($attribute) !== true) {
+                $target->set($attribute, true);
+
+                continue;
+            }
+
             if ($target->has($attribute) && $target->get($attribute) !== null && $target->get($attribute) !== '') {
                 continue;
             }

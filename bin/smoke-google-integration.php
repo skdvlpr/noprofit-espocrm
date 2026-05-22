@@ -97,8 +97,19 @@ $legacyIntegrationId = 'GoogleIntegration';
 $legacyExternalAccountId = $legacyIntegrationId . '__' . $userId;
 $targetExternalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $userId;
 
+$originalIntegrationConfig = $config->get('integrations');
+if ($originalIntegrationConfig instanceof stdClass) {
+    $originalIntegrationConfig = clone $originalIntegrationConfig;
+} elseif (is_array($originalIntegrationConfig)) {
+    $originalIntegrationConfig = (object) $originalIntegrationConfig;
+} else {
+    $originalIntegrationConfig = (object) [];
+}
+$originalTargetIntegrationEnabled = null;
+
 $existingTargetIntegration = $em->getEntityById('Integration', GoogleIntegrationInstaller::INTEGRATION_ID);
 if ($existingTargetIntegration !== null) {
+    $originalTargetIntegrationEnabled = (bool) $existingTargetIntegration->get('enabled');
     $existingTargetIntegration->clear('smokeMigrationMarker');
     $em->saveEntity($existingTargetIntegration);
 }
@@ -150,6 +161,10 @@ $ok(
     'legacy Integration GoogleIntegration custom data migrated',
     $migratedIntegration !== null && $migratedIntegration->get('smokeMigrationMarker') === $migrationMarker
 );
+$ok(
+    'legacy Integration GoogleIntegration enabled flag migrated',
+    $migratedIntegration !== null && $migratedIntegration->get('enabled') === true
+);
 $ok('legacy Integration GoogleIntegration removed', $em->getEntityById('Integration', $legacyIntegrationId) === null);
 
 $migratedExternalAccount = $em->getEntityById('ExternalAccount', $targetExternalAccountId);
@@ -175,12 +190,18 @@ $ok(
 
 if ($migratedIntegration !== null) {
     $migratedIntegration->clear('smokeMigrationMarker');
+    if ($originalTargetIntegrationEnabled !== null) {
+        $migratedIntegration->set('enabled', $originalTargetIntegrationEnabled);
+    }
     $em->saveEntity($migratedIntegration);
 }
 if ($migratedExternalAccount !== null) {
     $migratedExternalAccount->clear('smokeMigrationMarker');
     $em->saveEntity($migratedExternalAccount);
 }
+$configWriter->set('integrations', $originalIntegrationConfig);
+$configWriter->save();
+$config->update();
 
 $client = new Client([
     'base_uri'    => $siteUrl,
