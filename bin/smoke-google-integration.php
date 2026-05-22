@@ -151,7 +151,7 @@ if ($integrationConfig instanceof stdClass) {
 } else {
     $integrationConfig = (object) [];
 }
-unset($integrationConfig->{$targetIntegrationId});
+$integrationConfig->{$targetIntegrationId} = false;
 $integrationConfig->{$legacyIntegrationId} = false;
 $integrationConfig->{$legacySafehouseIntegrationId} = true;
 $configWriter->set('integrations', $integrationConfig);

@@ -144,19 +144,22 @@ class Installer
         $integrations = $this->normalizeConfigIntegrations($rawIntegrations);
         $changed = is_array($rawIntegrations) || $rawIntegrations === null;
 
-        if (!property_exists($integrations, self::INTEGRATION_ID)) {
-            $legacyConfigValue = null;
-
-            foreach ($this->getLegacyIntegrationIdList() as $legacyId) {
-                if (property_exists($integrations, $legacyId)) {
-                    $legacyConfigValue = (bool) $legacyConfigValue || (bool) $integrations->{$legacyId};
-                }
+        $legacyConfigValue = null;
+        foreach ($this->getLegacyIntegrationIdList() as $legacyId) {
+            if (property_exists($integrations, $legacyId)) {
+                $legacyConfigValue = (bool) $legacyConfigValue || (bool) $integrations->{$legacyId};
             }
+        }
 
-            if ($legacyConfigValue !== null) {
-                $integrations->{self::INTEGRATION_ID} = $legacyConfigValue;
-                $changed = true;
-            }
+        if (
+            $legacyConfigValue === true &&
+            (!property_exists($integrations, self::INTEGRATION_ID) || $integrations->{self::INTEGRATION_ID} !== true)
+        ) {
+            $integrations->{self::INTEGRATION_ID} = true;
+            $changed = true;
+        } elseif (!property_exists($integrations, self::INTEGRATION_ID) && $legacyConfigValue !== null) {
+            $integrations->{self::INTEGRATION_ID} = $legacyConfigValue;
+            $changed = true;
         }
 
         if (!property_exists($integrations, self::INTEGRATION_ID)) {
