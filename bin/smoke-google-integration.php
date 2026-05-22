@@ -20,6 +20,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
@@ -84,6 +85,101 @@ if (!is_string($apiKey) || $apiKey === '') {
     $apiKey = Util::generateApiKey();
     $user->set('apiKey', $apiKey);
     $em->saveEntity($user);
+}
+
+echo "\nMigration: legacy GoogleIntegration id → GoogleCalendarDrive\n";
+
+/** @var ConfigWriter $configWriter */
+$configWriter = $container->getByClass(ConfigWriter::class);
+$userId = $user->getId();
+$migrationMarker = 'smoke-' . $userId;
+$legacyIntegrationId = 'GoogleIntegration';
+$legacyExternalAccountId = $legacyIntegrationId . '__' . $userId;
+$targetExternalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $userId;
+
+$existingTargetIntegration = $em->getEntityById('Integration', GoogleIntegrationInstaller::INTEGRATION_ID);
+if ($existingTargetIntegration !== null) {
+    $existingTargetIntegration->clear('smokeMigrationMarker');
+    $em->saveEntity($existingTargetIntegration);
+}
+
+$existingTargetExternalAccount = $em->getEntityById('ExternalAccount', $targetExternalAccountId);
+if ($existingTargetExternalAccount !== null) {
+    $existingTargetExternalAccount->clear('smokeMigrationMarker');
+    $em->saveEntity($existingTargetExternalAccount);
+}
+
+$staleLegacyIntegration = $em->getEntityById('Integration', $legacyIntegrationId);
+if ($staleLegacyIntegration !== null) {
+    $em->removeEntity($staleLegacyIntegration);
+}
+
+$staleLegacyExternalAccount = $em->getEntityById('ExternalAccount', $legacyExternalAccountId);
+if ($staleLegacyExternalAccount !== null) {
+    $em->removeEntity($staleLegacyExternalAccount);
+}
+
+$em->createEntity('Integration', [
+    'id' => $legacyIntegrationId,
+    'enabled' => true,
+    'smokeMigrationMarker' => $migrationMarker,
+]);
+$em->createEntity('ExternalAccount', [
+    'id' => $legacyExternalAccountId,
+    'enabled' => true,
+    'smokeMigrationMarker' => $migrationMarker,
+]);
+
+$integrationConfig = $config->get('integrations');
+if ($integrationConfig instanceof stdClass) {
+    $integrationConfig = clone $integrationConfig;
+} elseif (is_array($integrationConfig)) {
+    $integrationConfig = (object) $integrationConfig;
+} else {
+    $integrationConfig = (object) [];
+}
+$integrationConfig->{$legacyIntegrationId} = true;
+$configWriter->set('integrations', $integrationConfig);
+$configWriter->save();
+
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$config->update();
+
+$migratedIntegration = $em->getEntityById('Integration', GoogleIntegrationInstaller::INTEGRATION_ID);
+$ok(
+    'legacy Integration GoogleIntegration custom data migrated',
+    $migratedIntegration !== null && $migratedIntegration->get('smokeMigrationMarker') === $migrationMarker
+);
+$ok('legacy Integration GoogleIntegration removed', $em->getEntityById('Integration', $legacyIntegrationId) === null);
+
+$migratedExternalAccount = $em->getEntityById('ExternalAccount', $targetExternalAccountId);
+$ok(
+    'legacy ExternalAccount id migrated to ' . GoogleIntegrationInstaller::INTEGRATION_ID,
+    $migratedExternalAccount !== null && $migratedExternalAccount->get('smokeMigrationMarker') === $migrationMarker
+);
+$ok('legacy ExternalAccount GoogleIntegration__user removed', $em->getEntityById('ExternalAccount', $legacyExternalAccountId) === null);
+
+$integrationConfigAfter = $config->get('integrations');
+if (is_array($integrationConfigAfter)) {
+    $integrationConfigAfter = (object) $integrationConfigAfter;
+}
+$ok(
+    'legacy integrations.GoogleIntegration config key removed',
+    $integrationConfigAfter instanceof stdClass && !property_exists($integrationConfigAfter, $legacyIntegrationId)
+);
+$ok(
+    'integrations.GoogleCalendarDrive config key present',
+    $integrationConfigAfter instanceof stdClass
+    && property_exists($integrationConfigAfter, GoogleIntegrationInstaller::INTEGRATION_ID)
+);
+
+if ($migratedIntegration !== null) {
+    $migratedIntegration->clear('smokeMigrationMarker');
+    $em->saveEntity($migratedIntegration);
+}
+if ($migratedExternalAccount !== null) {
+    $migratedExternalAccount->clear('smokeMigrationMarker');
+    $em->saveEntity($migratedExternalAccount);
 }
 
 $client = new Client([
@@ -152,7 +248,6 @@ $ok(
 
 echo "\nExternalAccount calendarSyncMode hook\n";
 
-$userId = $user->getId();
 $externalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $userId;
 $externalAccount = $em->getEntityById('ExternalAccount', $externalAccountId);
 
