@@ -4,7 +4,7 @@
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
  * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
- *    removes legacy `GoogleSafehouse` integration id, rebuild).
+ *    migrates/removes legacy integration ids, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
  * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
@@ -140,8 +140,10 @@ echo "\nORM + Integration REST (API user expected 403)\n";
 $gh = $em->getRDBRepository('Integration')->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])->findOne();
 $ok('Integration ' . GoogleIntegrationInstaller::INTEGRATION_ID . ' exists in database', $gh !== null);
 
-$legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'])->findOne();
-$ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
+foreach (['GoogleSafehouse', 'GoogleIntegration'] as $legacyId) {
+    $legacy = $em->getRDBRepository('Integration')->where(['id' => $legacyId])->findOne();
+    $ok("Legacy Integration $legacyId removed", $legacy === null);
+}
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(

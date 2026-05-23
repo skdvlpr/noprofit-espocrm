@@ -36,6 +36,7 @@ use GuzzleHttp\Exception\RequestException;
 
 const SMOKE_USER_ADMIN      = 'smoke_api_catalog';
 const SMOKE_USER_VOLUNTEER = 'smoke_api_volunteer';
+const SMOKE_USER_FOREIGN_LINK = 'smoke_api_foreign_link';
 
 $app = new Application();
 $app->setupSystemUser();
@@ -303,6 +304,42 @@ if (!is_string($ownVeId) || $ownVeId === '') {
     exit(1);
 }
 
+$foreignLinkedUser = $em->getRDBRepository('User')
+    ->where(['userName' => SMOKE_USER_FOREIGN_LINK, 'deleted' => false])
+    ->findOne();
+if ($foreignLinkedUser === null) {
+    $foreignLinkedUser = $em->createEntity(User::ENTITY_TYPE, [
+        'userName' => SMOKE_USER_FOREIGN_LINK,
+        'type' => User::TYPE_REGULAR,
+        'firstName' => 'Smoke',
+        'lastName' => 'ForeignLink',
+        'isActive' => true,
+    ]);
+    $em->saveEntity($foreignLinkedUser, [SaveOption::SKIP_ALL => true]);
+}
+$foreignLinkedUserId = $foreignLinkedUser->getId();
+if (!is_string($foreignLinkedUserId) || $foreignLinkedUserId === '') {
+    fwrite(STDERR, "FAIL: foreign linked user has no id.\n");
+    exit(1);
+}
+
+$assignedButNotLinkedVe = $em->getRDBRepository('VolunteerEmployee')
+    ->where(['userId' => $foreignLinkedUserId])
+    ->findOne();
+if ($assignedButNotLinkedVe === null) {
+    $assignedButNotLinkedVe = $em->getRDBRepository('VolunteerEmployee')->getNew();
+}
+$assignedButNotLinkedVe->set([
+    'type' => 'Volunteer',
+    'firstName' => 'Smoke',
+    'lastName' => 'AssignedNotLinked',
+    'weeklyHours' => 1,
+    'assignedUserId' => $volId,
+    'userId' => $foreignLinkedUserId,
+    'emailAddress' => SMOKE_USER_FOREIGN_LINK . '@example.com',
+]);
+$em->saveEntity($assignedButNotLinkedVe, [SaveOption::SKIP_ALL => true]);
+
 $foreignVe = null;
 foreach ($em->getRDBRepository('VolunteerEmployee')->limit(0, 80)->find() as $cand) {
     $aid = $cand->get('assignedUserId');
@@ -335,6 +372,18 @@ $ok(
     $rOwnVe->getStatusCode() === 200,
     'code=' . $rOwnVe->getStatusCode()
 );
+
+$assignedButNotLinkedVeId = $assignedButNotLinkedVe->getId();
+if (is_string($assignedButNotLinkedVeId) && $assignedButNotLinkedVeId !== '') {
+    $rAssignedButNotLinked = $volClient->get('/api/v1/VolunteerEmployee/' . $assignedButNotLinkedVeId, [
+        'query' => ['select' => 'id,firstName,assignedUserId,userId'],
+    ]);
+    $ok(
+        'Volunteer GET assigned-but-not-linked VolunteerEmployee → 403 (own=userId)',
+        $rAssignedButNotLinked->getStatusCode() === 403,
+        'code=' . $rAssignedButNotLinked->getStatusCode()
+    );
+}
 
 if ($foreignVe !== null) {
     $foreignVeId = $foreignVe->getId();

@@ -25,12 +25,14 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\AclManager;
 use Espo\ORM\Repository\Option\SaveOption;
 
 $app = new Application();
 $app->setupSystemUser();
 $container = $app->getContainer();
 $em = $container->get('entityManager');
+$aclManager = $container->getByClass(AclManager::class);
 
 $cleanup = [];
 $failures = 0;
@@ -61,6 +63,18 @@ try {
     $userPrimaryPhone = (string) $user->get('phoneNumber');
     echo "  user: {$user->get('userName')}, email=$userPrimaryEmail, phone=$userPrimaryPhone\n";
 
+    $assignee = $em->getNewEntity('User');
+    $assignee->set([
+        'userName' => 'smoke_assignee_' . bin2hex(random_bytes(2)),
+        'firstName' => 'SmokeAssignee',
+        'lastName' => 'ContactSync',
+        'emailAddress' => 'smoke-assignee-' . bin2hex(random_bytes(3)) . '@example.com',
+        'isActive' => true,
+        'type' => 'regular',
+    ]);
+    $em->saveEntity($assignee);
+    $cleanup[] = $assignee;
+
     echo "\nScenario 1: default-from-user on VolunteerEmployee\n";
     $ve = $em->getNewEntity('VolunteerEmployee');
     $ve->set([
@@ -77,6 +91,18 @@ try {
     $vePhone = (string) $ve->get('phoneNumber');
     $report('inherits primary email from user', $veEmail === $userPrimaryEmail, "got=$veEmail");
     $report('inherits primary phone from user', $vePhone === $userPrimaryPhone, "got=$vePhone");
+
+    echo "\nScenario 1b: own ACL follows linked user, not assignee\n";
+    $ve->set('assignedUserId', $assignee->getId());
+    $em->saveEntity($ve);
+    $report(
+        'linked user owns VolunteerEmployee even when assigned elsewhere',
+        $aclManager->checkOwnershipOwn($user, $ve)
+    );
+    $report(
+        'assigned non-linked user does not own VolunteerEmployee',
+        !$aclManager->checkOwnershipOwn($assignee, $ve)
+    );
 
     echo "\nScenario 2: multi-value add (extra email + phone alongside inherited primary)\n";
     $ve->set('emailAddressData', [

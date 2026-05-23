@@ -1,4 +1,5 @@
 {
+    "ownershipCheckerClassName": "Espo\\Modules\\SafehouseCrm\\Classes\\Acl\\LinkedUserOwnershipChecker",
     "actionList": ["read", "create", "edit", "delete", "stream"],
     "levelList": ["all", "team", "own", "no"],
     "read": "all",
