@@ -399,6 +399,14 @@ $ok(
     is_array($volAcl) && ($volAcl['read'] ?? '') === 'own',
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
 );
+$volVeUserFieldAcl = is_array($volBody)
+    ? ($volBody['acl']['fieldTable']['VolunteerEmployee']['user'] ?? null)
+    : null;
+$ok(
+    'Volunteer App/user blocks VolunteerEmployee.user edit',
+    is_array($volVeUserFieldAcl) && ($volVeUserFieldAcl['edit'] ?? '') === 'no',
+    is_array($volVeUserFieldAcl) ? 'edit=' . ($volVeUserFieldAcl['edit'] ?? '') : 'missing field ACL'
+);
 
 $rIntVol = $volClient->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(

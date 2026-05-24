@@ -4,7 +4,7 @@
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
  * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
- *    removes legacy `GoogleSafehouse` integration id, rebuild).
+ *    migrates legacy integration ids, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
  * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
@@ -38,6 +38,20 @@ $em = $container->getByClass(EntityManager::class);
 $config = $container->getByClass(Config::class);
 
 echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
+$targetIntegrationBefore = $em->getRDBRepository('Integration')
+    ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
+    ->findOne();
+$legacyGoogleIntegrationBefore = $em->getRDBRepository('Integration')
+    ->where(['id' => 'GoogleIntegration'])
+    ->findOne();
+$legacyExternalAccountIdsBefore = [];
+foreach ($em->getRDBRepository('ExternalAccount')->where(['id*' => 'GoogleIntegration__%'])->find() as $legacyAccount) {
+    $legacyAccountId = $legacyAccount->getId();
+
+    if (is_string($legacyAccountId)) {
+        $legacyExternalAccountIdsBefore[] = $legacyAccountId;
+    }
+}
 (new GoogleIntegrationInstaller())->runPostInstall($container);
 $config->update();
 
@@ -142,6 +156,30 @@ $ok('Integration ' . GoogleIntegrationInstaller::INTEGRATION_ID . ' exists in da
 
 $legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'])->findOne();
 $ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
+
+$legacyGoogle = $em->getRDBRepository('Integration')->where(['id' => 'GoogleIntegration'])->findOne();
+$ok('Legacy Integration GoogleIntegration removed', $legacyGoogle === null);
+
+if ($targetIntegrationBefore === null && $legacyGoogleIntegrationBefore !== null) {
+    $ok(
+        'Legacy Integration GoogleIntegration migrated before cleanup',
+        $gh !== null
+        && $gh->get('clientId') === $legacyGoogleIntegrationBefore->get('clientId')
+        && $gh->get('clientSecret') === $legacyGoogleIntegrationBefore->get('clientSecret')
+        && $gh->get('enabled') === $legacyGoogleIntegrationBefore->get('enabled')
+    );
+}
+
+foreach ($legacyExternalAccountIdsBefore as $legacyAccountId) {
+    $newAccountId = GoogleIntegrationInstaller::INTEGRATION_ID
+        . '__'
+        . substr($legacyAccountId, strlen('GoogleIntegration__'));
+    $ok(
+        "Legacy ExternalAccount $legacyAccountId migrated",
+        $em->getEntityById('ExternalAccount', $legacyAccountId) === null
+        && $em->getEntityById('ExternalAccount', $newAccountId) !== null
+    );
+}
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(

@@ -561,7 +561,11 @@ class RoleSetup
             ],
         ];
 
-        $volunteerFieldData = array_merge($personContactFieldLocks, [
+        $selfServicePersonFieldLocks = $personContactFieldLocks;
+        $selfServicePersonFieldLocks['VolunteerEmployee']['user'] = ['read' => 'yes', 'edit' => 'no'];
+        $selfServicePersonFieldLocks['Member']['user'] = ['read' => 'yes', 'edit' => 'no'];
+
+        $volunteerFieldData = array_merge($selfServicePersonFieldLocks, [
             'MealCount' => [
                 'foodCost'      => ['read' => 'no', 'edit' => 'no'],
                 'foodUnitPrice' => ['read' => 'no', 'edit' => 'no'],
@@ -640,7 +644,7 @@ class RoleSetup
             ],
             self::ROLE_MEMBER => [
                 'data'      => $memberData,
-                'fieldData' => $personContactFieldLocks,
+                'fieldData' => $selfServicePersonFieldLocks,
                 'perms'     => [
                     'assignmentPermission'        => 'no',
                     'userPermission'              => 'no',
