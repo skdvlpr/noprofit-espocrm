@@ -19,7 +19,9 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
+use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
@@ -36,10 +38,6 @@ $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
 /** @var Config $config */
 $config = $container->getByClass(Config::class);
-
-echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
-(new GoogleIntegrationInstaller())->runPostInstall($container);
-$config->update();
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');
 if ($siteUrl === '') {
@@ -85,6 +83,56 @@ if (!is_string($apiKey) || $apiKey === '') {
     $user->set('apiKey', $apiKey);
     $em->saveEntity($user);
 }
+
+echo "Seeding legacy GoogleIntegration migration fixture\n";
+$targetBefore = $em->getEntityById('Integration', GoogleIntegrationInstaller::INTEGRATION_ID);
+$targetClientIdBefore = $targetBefore?->get('clientId');
+
+$legacyIntegration = $em->getEntityById('Integration', 'GoogleIntegration');
+if ($legacyIntegration === null) {
+    $legacyIntegration = $em->createEntity('Integration', [
+        'id'           => 'GoogleIntegration',
+        'enabled'      => false,
+        'clientId'     => 'smoke-legacy-client-id',
+        'clientSecret' => 'smoke-legacy-client-secret',
+    ]);
+}
+$legacyClientId = (string) ($legacyIntegration->get('clientId') ?? '');
+
+$legacyExternalAccountId = 'GoogleIntegration__' . $user->getId();
+$targetExternalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $user->getId();
+$targetExternalBefore = $em->getEntityById('ExternalAccount', $targetExternalAccountId);
+$targetAccessTokenBefore = $targetExternalBefore?->get('accessToken');
+
+$legacyExternalAccount = $em->getEntityById('ExternalAccount', $legacyExternalAccountId);
+if ($legacyExternalAccount === null) {
+    $legacyExternalAccount = $em->createEntity('ExternalAccount', [
+        'id'               => $legacyExternalAccountId,
+        'enabled'          => true,
+        'accessToken'      => 'smoke-legacy-access-token',
+        'refreshToken'     => 'smoke-legacy-refresh-token',
+        'calendarSyncMode' => 'googleToCrm',
+    ]);
+}
+$legacyAccessToken = (string) ($legacyExternalAccount->get('accessToken') ?? '');
+
+/** @var ConfigWriter $configWriter */
+$configWriter = $container->getByClass(InjectableFactory::class)->create(ConfigWriter::class);
+$integrationConfig = $config->get('integrations') ?? [];
+$integrationConfigMap = is_object($integrationConfig) ? get_object_vars($integrationConfig) :
+    (is_array($integrationConfig) ? $integrationConfig : []);
+if (
+    !array_key_exists('GoogleIntegration', $integrationConfigMap)
+    && !array_key_exists(GoogleIntegrationInstaller::INTEGRATION_ID, $integrationConfigMap)
+) {
+    $integrationConfigMap['GoogleIntegration'] = false;
+    $configWriter->set('integrations', (object) $integrationConfigMap);
+    $configWriter->save();
+}
+
+echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
+(new GoogleIntegrationInstaller())->runPostInstall($container);
+$config->update();
 
 $client = new Client([
     'base_uri'    => $siteUrl,
@@ -140,8 +188,41 @@ echo "\nORM + Integration REST (API user expected 403)\n";
 $gh = $em->getRDBRepository('Integration')->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])->findOne();
 $ok('Integration ' . GoogleIntegrationInstaller::INTEGRATION_ID . ' exists in database', $gh !== null);
 
+$expectedClientId = ($targetBefore === null || $targetClientIdBefore === null || $targetClientIdBefore === '')
+    ? $legacyClientId
+    : (string) $targetClientIdBefore;
+$ok(
+    'legacy Integration GoogleIntegration credentials migrated without overwriting current data',
+    $gh !== null && (string) ($gh->get('clientId') ?? '') === $expectedClientId,
+    'clientId=' . (string) ($gh?->get('clientId') ?? 'null')
+);
+
+$legacyGoogleIntegration = $em->getRDBRepository('Integration')->where(['id' => 'GoogleIntegration'])->findOne();
+$ok('Legacy Integration GoogleIntegration removed after migration', $legacyGoogleIntegration === null);
+
 $legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'])->findOne();
 $ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
+
+$integrationConfig = $config->get('integrations') ?? [];
+$integrationConfigMap = is_object($integrationConfig) ? get_object_vars($integrationConfig) :
+    (is_array($integrationConfig) ? $integrationConfig : []);
+$ok('Legacy config key GoogleIntegration removed', !array_key_exists('GoogleIntegration', $integrationConfigMap));
+$ok(
+    'Integration config has GoogleCalendarDrive key after legacy migration',
+    array_key_exists(GoogleIntegrationInstaller::INTEGRATION_ID, $integrationConfigMap)
+);
+
+$migratedExternal = $em->getEntityById('ExternalAccount', $targetExternalAccountId);
+$legacyExternal = $em->getEntityById('ExternalAccount', $legacyExternalAccountId);
+$expectedAccessToken = ($targetExternalBefore === null || $targetAccessTokenBefore === null || $targetAccessTokenBefore === '')
+    ? $legacyAccessToken
+    : (string) $targetAccessTokenBefore;
+$ok('Legacy ExternalAccount GoogleIntegration__user removed after migration', $legacyExternal === null);
+$ok(
+    'legacy ExternalAccount tokens migrated without overwriting current data',
+    $migratedExternal !== null && (string) ($migratedExternal->get('accessToken') ?? '') === $expectedAccessToken,
+    'token=' . (string) ($migratedExternal?->get('accessToken') ?? 'null')
+);
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(
