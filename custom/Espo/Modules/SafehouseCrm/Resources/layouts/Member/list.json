@@ -4,7 +4,8 @@
         "link": true
     },
     {
-        "name": "lastName"
+        "name": "lastName",
+        "link": true
     },
     {
         "name": "status"

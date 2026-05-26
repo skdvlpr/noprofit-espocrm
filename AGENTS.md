@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-05-14
+**Executor:** Antigravity AI | **Last updated:** 2026-05-26
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -960,6 +960,39 @@ Fresh installs from current module metadata do **not** need the migration script
 
 ## SECTION 15 — REST API REGRESSION (explore-espo-endpoints skill)
 
+### REST-FIRST PRINCIPLE
+
+**The `explore-espo-endpoints` skill is the preferred tool for ALL EspoCRM data
+operations** — not only for testing, but also for data seeding, fixture setup,
+ad-hoc record manipulation, and debugging. This skill serves as the **prototype
+for the future EspoCRM MCP server**.
+
+**When to use REST API (via skill) instead of raw PHP / ORM / SQL:**
+
+| Scenario | Use REST API (skill) | Use PHP ORM only if… |
+| -------- | -------------------- | -------------------- |
+| Create / update / delete records in tests | **YES** — goes through hooks, ACL, validation | Hook-level unit test that must bypass API |
+| Seed test fixtures (users, roles, records) | **YES** — `POST /api/v1/{Entity}` | Bulk import of thousands of rows |
+| Read entity data for assertions | **YES** — `GET /api/v1/{Entity}/{id}?select=…` | Need internal ORM-only fields |
+| Check metadata / field defs | **YES** — `GET /api/v1/Metadata?key=…` | Never; metadata is always available via REST |
+| Verify ACL / IDOR | **YES** — switch `X-Api-Key` between users | Never |
+| Provisioning (roles, teams, scheduled jobs) | REST when possible; PHP only for `ConfigWriter` | Direct config changes not exposed via API |
+
+**Rules:**
+
+1. **Read the skill first** (`~/.cursor/skills/explore-espo-endpoints/SKILL.md`)
+   before writing any test or data script. It documents auth, query semantics,
+   pagination, error handling, and all known entity quirks.
+2. **Prefer `curl` / HTTP calls** in smoke and test scripts over
+   `$entityManager->saveEntity()`. REST calls exercise the full stack (routing →
+   ACL → hooks → formula → validation → ORM → DB).
+3. **Raw SQL is prohibited** for record CRUD. Use only for schema inspection or
+   one-shot migrations where no API equivalent exists.
+4. **Improve the skill** when you discover new endpoints, undocumented behaviors,
+   or error patterns. The skill is a living document and the foundation for the
+   MCP server.
+5. **`X-Api-Key` auth** for all automated scripts; never embed user passwords.
+
 Behavioural contract for **EspoCRM 9.x REST** (`/api/v1/…`) matches the Cursor skill
 **`explore-espo-endpoints`** (authoritative copy: `~/.cursor/skills/explore-espo-endpoints/SKILL.md`;
 in this repo a local symlink may exist at `cursor-skills/` — see `.gitignore`).
@@ -1127,5 +1160,5 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
 - **GIT**: no `git push` / PR without explicit user request | ask before commit if unclear
-- **API-REST**: skill `explore-espo-endpoints` | `App/user` + `acl.table` first | `select` + `maxSize`≤200 | `X-Status-Reason` on fail | `bin/smoke-espo-rest-catalog.php`
+- **API-REST**: **REST-first** — use skill `explore-espo-endpoints` for ALL record CRUD, test fixtures, assertions, and debugging (not raw SQL/ORM) | `App/user` + `acl.table` first | `select` + `maxSize`≤200 | `X-Status-Reason` on fail | improve skill when gaps found | skill = MCP prototype
 - **REF**: working entities to copy from — `Member`, `VolunteerEmployee`, `MealCount` (all SafehouseCrm-modular, English-named).

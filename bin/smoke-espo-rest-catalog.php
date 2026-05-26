@@ -277,12 +277,7 @@ if (!is_string($volId) || $volId === '') {
 }
 
 $ownVe = $em->getRDBRepository('VolunteerEmployee')
-    ->where([
-        'OR' => [
-            ['assignedUserId' => $volId],
-            ['userId' => $volId],
-        ],
-    ])
+    ->where(['assignedUserId' => $volId])
     ->findOne();
 
 if ($ownVe === null) {
@@ -293,11 +288,8 @@ if ($ownVe === null) {
         'lastName'        => 'ApiVolunteer',
         'weeklyHours'     => 4,
         'assignedUserId'  => $volId,
-        'userId'          => $volId,
         'emailAddress'    => SMOKE_USER_VOLUNTEER . '@example.com',
     ]);
-    // Skip hooks: linked API User often has no primary email row in email_address_entity;
-    // PersonContactSync would throw BadRequest during dev smoke runs.
     $em->saveEntity($ownVe, [SaveOption::SKIP_ALL => true]);
 }
 
