@@ -70,6 +70,34 @@ class DateSourceProvider
     }
 
     /**
+     * Canonical sourceDateType for link lookup and persistence.
+     * Maps legacy empty/main keys to the first active source when they are not in the allowed list.
+     */
+    public function canonicalSourceDateType(string $entityType, string $sourceDateType): string
+    {
+        $sources = $this->getActiveSourcesForEntityType($entityType);
+
+        if ($sources === []) {
+            return $sourceDateType !== '' ? $sourceDateType : 'main';
+        }
+
+        $allowed = array_values(array_filter(array_map(
+            static fn (array $source): string => (string) ($source['sourceDateType'] ?? 'main'),
+            $sources
+        )));
+
+        if (in_array($sourceDateType, $allowed, true)) {
+            return $sourceDateType;
+        }
+
+        if ($sourceDateType === '' || $sourceDateType === 'main') {
+            return $allowed[0];
+        }
+
+        return $sourceDateType;
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function getReadableTemplates(string $entityType): array

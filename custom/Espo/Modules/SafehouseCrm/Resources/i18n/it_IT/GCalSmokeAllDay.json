@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "name": "Nome",
+        "eventDate": "Data evento",
+        "description": "Descrizione"
+    },
+    "labels": {
+        "GCalSmokeAllDay": "Test GCal (tutto il giorno)",
+        "GCalSmokeAllDayPlural": "Test GCal (tutto il giorno)"
+    }
+}

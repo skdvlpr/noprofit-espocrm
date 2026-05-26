@@ -19,6 +19,7 @@ use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\Modules\GoogleIntegration\Tools\IntegrationState;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
+use Throwable;
 
 class EventPusher
 {
@@ -87,9 +88,7 @@ class EventPusher
                     . $entity->getEntityType() . ' ' . $entity->getId()
                 );
 
-                if ($entity->getEntityType() !== 'Opportunity') {
-                    return;
-                }
+                return;
             }
 
             $client = $this->clientManager->create(Installer::INTEGRATION_ID, $actor->getId());
@@ -133,16 +132,27 @@ class EventPusher
         array $event,
         string $calendarId
     ): void {
+        $canonicalSourceDateType = $this->dateSourceProvider->canonicalSourceDateType(
+            $entity->getEntityType(),
+            $sourceDateType
+        );
+
         $link = $this->findLink($entity, $sourceDateType);
 
         if ($link !== null && is_string($link->get('googleEventId')) && $link->get('googleEventId') !== '') {
+            $oldGoogleEventId = $link->get('googleEventId');
+            $oldCalendarId = is_string($link->get('calendarId')) && $link->get('calendarId') !== ''
+                ? $link->get('calendarId')
+                : $calendarId;
+
             try {
-                $result = $client->updateCalendarEvent($link->get('googleEventId'), $event, $calendarId);
+                $result = $client->updateCalendarEvent($oldGoogleEventId, $event, $calendarId);
             } catch (Error $e) {
                 if ($e->getCode() !== 404) {
                     throw $e;
                 }
 
+                $this->deleteOrphanGoogleEvent($client, $oldGoogleEventId, $oldCalendarId);
                 $result = $client->createCalendarEvent($event, $calendarId);
             }
         } else {
@@ -155,23 +165,54 @@ class EventPusher
             throw new Error('Google Calendar sync failed: missing Google event id.');
         }
 
-        $this->saveLink($entity, $sourceDateType, $calendarId, $googleEventId, $result['htmlLink'] ?? null);
+        $this->saveLink($entity, $canonicalSourceDateType, $calendarId, $googleEventId, $result['htmlLink'] ?? null);
     }
 
     private function findLink(Entity $entity, string $sourceDateType): ?Entity
     {
-        $link = $this->entityManager
-            ->getRDBRepository(self::LINK_ENTITY_TYPE)
-            ->where([
-                'sourceEntityType' => $entity->getEntityType(),
-                'sourceEntityId' => $entity->getId(),
-                'sourceDateType' => $sourceDateType,
-                'userId' => $this->pushUser()->getId(),
-                'deleted' => false,
-            ])
-            ->findOne();
+        $entityType = $entity->getEntityType();
+        $canonical = $this->dateSourceProvider->canonicalSourceDateType($entityType, $sourceDateType);
+        $userId = $this->pushUser()->getId();
 
-        return $link;
+        if ($entity->getId() === null || $entity->getId() === '' || !is_string($userId) || $userId === '') {
+            return null;
+        }
+
+        $matched = null;
+
+        foreach (
+            $this->entityManager
+                ->getRDBRepository(self::LINK_ENTITY_TYPE)
+                ->where([
+                    'sourceEntityType' => $entityType,
+                    'sourceEntityId' => $entity->getId(),
+                    'userId' => $userId,
+                    'deleted' => false,
+                ])
+                ->find() as $link
+        ) {
+            $linkCanonical = $this->dateSourceProvider->canonicalSourceDateType(
+                $entityType,
+                (string) ($link->get('sourceDateType') ?? '')
+            );
+
+            if ($linkCanonical !== $canonical) {
+                continue;
+            }
+
+            if ($matched !== null) {
+                $this->entityManager->removeEntity($link, [
+                    SaveOption::SKIP_HOOKS => true,
+                    SaveOption::SILENT => true,
+                ]);
+
+                continue;
+            }
+
+            $matched = $link;
+        }
+
+        return $matched;
     }
 
     private function saveLink(
@@ -181,21 +222,37 @@ class EventPusher
         string $googleEventId,
         mixed $htmlLink
     ): void {
+        $entityType = $entity->getEntityType();
+        $canonical = $this->dateSourceProvider->canonicalSourceDateType($entityType, $sourceDateType);
+        $userId = $this->pushUser()->getId();
+
         $link = $this->findLink($entity, $sourceDateType);
+
+        if ($link === null) {
+            $link = $this->findSoftDeletedLink($entity, $canonical, $userId);
+
+            if ($link !== null) {
+                $this->entityManager
+                    ->getRDBRepository(self::LINK_ENTITY_TYPE)
+                    ->restoreDeleted($link->getId());
+
+                $this->entityManager->refreshEntity($link);
+            }
+        }
 
         if ($link === null) {
             $link = $this->entityManager->getNewEntity(self::LINK_ENTITY_TYPE);
             $link->set([
-                'sourceEntityType' => $entity->getEntityType(),
+                'sourceEntityType' => $entityType,
                 'sourceEntityId' => $entity->getId(),
-                'sourceDateType' => $sourceDateType,
-                'userId' => $this->pushUser()->getId(),
+                'sourceDateType' => $canonical,
+                'userId' => $userId,
             ]);
         }
 
         $link->set([
-            'name' => $entity->getEntityType() . ':' . $entity->getId() . ':' . $sourceDateType . ':' . $this->pushUser()->getId(),
-            'sourceDateType' => $sourceDateType,
+            'name' => $entityType . ':' . $entity->getId() . ':' . $canonical . ':' . $userId,
+            'sourceDateType' => $canonical,
             'calendarId' => $calendarId,
             'googleEventId' => $googleEventId,
             'googleEventHtmlLink' => is_string($htmlLink) ? $htmlLink : null,
@@ -206,6 +263,44 @@ class EventPusher
             SaveOption::SKIP_HOOKS => true,
             SaveOption::SILENT => true,
         ]);
+    }
+
+    private function findSoftDeletedLink(Entity $entity, string $canonical, string $userId): ?Entity
+    {
+        $query = $this->entityManager->getQueryBuilder()
+            ->select()
+            ->from(self::LINK_ENTITY_TYPE)
+            ->where([
+                'sourceEntityType' => $entity->getEntityType(),
+                'sourceEntityId' => $entity->getId(),
+                'sourceDateType' => $canonical,
+                'userId' => $userId,
+                'deleted' => true,
+            ])
+            ->withDeleted()
+            ->build();
+
+        return $this->entityManager
+            ->getRDBRepository(self::LINK_ENTITY_TYPE)
+            ->clone($query)
+            ->findOne();
+    }
+
+    private function deleteOrphanGoogleEvent(
+        GoogleClient $client,
+        string $googleEventId,
+        string $calendarId
+    ): void {
+        try {
+            $client->deleteCalendarEvent($googleEventId, $calendarId);
+        } catch (Throwable $e) {
+            $this->log->warning(
+                'Google Calendar orphan delete skipped for event '
+                . $googleEventId
+                . ': '
+                . $e->getMessage()
+            );
+        }
     }
 
     private function hasCalendarDateSources(string $entityType): bool
@@ -220,28 +315,11 @@ class EventPusher
     {
         $sources = $this->dateSourceProvider->getActiveSourcesForEntityType($entity->getEntityType());
 
-        if ($sources !== []) {
-            return $this->buildCalendarDateSourceGoogleEvents($entity, $sources);
-        }
-
-        $dateRange = $this->buildDateRange($entity);
-
-        if ($dateRange === null) {
+        if ($sources === []) {
             return [];
         }
 
-        $settings = $this->buildTemplateSettings(
-            $entity,
-            self::MAIN_DATE_TYPE,
-            $this->getEntityCalendarTemplateId($entity),
-            $this->getEntityLevelGoogleSettings($entity, self::MAIN_DATE_TYPE)
-        );
-
-        return [[
-            'sourceDateType' => self::MAIN_DATE_TYPE,
-            'event' => $this->buildGoogleEvent($entity, $dateRange, self::MAIN_DATE_TYPE, $settings, null),
-            'calendarId' => $this->resolveCalendarId($entity, $settings),
-        ]];
+        return $this->buildCalendarDateSourceGoogleEvents($entity, $sources);
     }
 
     /**
@@ -293,16 +371,8 @@ class EventPusher
 
         $selected = $entity->get('googleCalendarDateSourceList');
 
-        if ($entity->getEntityType() === 'Opportunity' && (!is_array($selected) || $selected === [])) {
-            $selected = $entity->get('googleCalendarOpportunityDateList');
-        }
-
         if (!is_array($selected) || $selected === []) {
-            if ($this->hasExplicitDateSourceListField($entity->getEntityType())) {
-                return [];
-            }
-
-            return $allowed;
+            return [];
         }
 
         return array_values(array_unique(array_filter(
@@ -320,17 +390,6 @@ class EventPusher
             static fn (array $source): string => (string) ($source['sourceDateType'] ?? self::MAIN_DATE_TYPE),
             $this->dateSourceProvider->getActiveSourcesForEntityType($entityType)
         )));
-    }
-
-    private function normalizeLinkSourceDateType(string $entityType, string $sourceDateType): string
-    {
-        if ($sourceDateType === '' || $sourceDateType === self::MAIN_DATE_TYPE) {
-            $sources = $this->dateSourceProvider->getActiveSourcesForEntityType($entityType);
-
-            return (string) ($sources[0]['sourceDateType'] ?? self::MAIN_DATE_TYPE);
-        }
-
-        return $sourceDateType;
     }
 
     /**
@@ -384,19 +443,19 @@ class EventPusher
             ],
         ];
 
-        $location = trim((string) ($settings['location'] ?? $entity->get('googleCalendarLocation') ?? ''));
+        $location = $this->buildLocation($entity, $sourceDateType, $settings);
 
         if ($location !== '') {
             $event['location'] = $location;
         }
 
-        $visibility = $settings['visibility'] ?? $entity->get('googleCalendarVisibility');
+        $visibility = $settings['visibility'] ?? 'default';
 
         if (in_array($visibility, ['default', 'private', 'public'], true)) {
             $event['visibility'] = $visibility;
         }
 
-        $transparency = $settings['transparency'] ?? $entity->get('googleCalendarTransparency');
+        $transparency = $settings['transparency'] ?? 'opaque';
 
         if (in_array($transparency, ['opaque', 'transparent'], true)) {
             $event['transparency'] = $transparency;
@@ -404,7 +463,7 @@ class EventPusher
 
         $colorId = is_string($settings['colorId'] ?? null)
             ? trim($settings['colorId'])
-            : trim((string) ($entity->get('googleCalendarColorId') ?? ''));
+            : '';
 
         if ($colorId === '') {
             // Empty is the UI value for Google default color; the API represents it by omitting colorId.
@@ -423,10 +482,6 @@ class EventPusher
     {
         $rows = $entity->get('googleCalendarEventSettings');
 
-        if ($entity->getEntityType() === 'Opportunity' && (!is_array($rows) || $rows === [])) {
-            $rows = $entity->get('googleCalendarOpportunityEventSettings');
-        }
-
         if (!is_array($rows)) {
             $rows = [];
         }
@@ -444,73 +499,16 @@ class EventPusher
             }
         }
 
-        return $this->buildTemplateSettings(
-            $entity,
-            $sourceDateType,
-            $this->getEntityCalendarTemplateId($entity),
-            $this->getEntityLevelGoogleSettings($entity, $sourceDateType)
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getEntityLevelGoogleSettings(Entity $entity, string $sourceDateType): array
-    {
-        if (!$this->hasSharedGoogleSettingsFields($entity->getEntityType())) {
-            return [
-                'sourceDateType' => $sourceDateType,
-                'reminderMode' => 'none',
-                'reminders' => [],
-                'location' => '',
-                'visibility' => 'default',
-                'transparency' => 'opaque',
-                'colorId' => '',
-                'descriptionTemplateOverride' => '',
-            ];
-        }
-
-        return [
+        return $this->buildTemplateSettings($entity, $sourceDateType, null, [
             'sourceDateType' => $sourceDateType,
-            'reminderMode' => $entity->get('googleCalendarReminderMode') ?: 'none',
-            'reminders' => $entity->get('googleCalendarReminders') ?: [],
-            'location' => $entity->get('googleCalendarLocation') ?: '',
-            'visibility' => $entity->get('googleCalendarVisibility') ?: 'default',
-            'transparency' => $entity->get('googleCalendarTransparency') ?: 'opaque',
-            'colorId' => $entity->get('googleCalendarColorId') ?: '',
-            'descriptionTemplateOverride' => $entity->get('googleCalendarDescriptionTemplateOverride') ?: '',
-        ];
-    }
-
-    private function hasExplicitDateSourceListField(string $entityType): bool
-    {
-        $fields = $this->metadata->get(['entityDefs', $entityType, 'fields']);
-
-        if (!is_array($fields)) {
-            return false;
-        }
-
-        return isset($fields['googleCalendarDateSourceList'])
-            || isset($fields['googleCalendarOpportunityDateList']);
-    }
-
-    private function hasSharedGoogleSettingsFields(string $entityType): bool
-    {
-        $fields = $this->metadata->get(['entityDefs', $entityType, 'fields']);
-
-        if (!is_array($fields)) {
-            return false;
-        }
-
-        return isset(
-            $fields['googleCalendarReminderMode'],
-            $fields['googleCalendarReminders'],
-            $fields['googleCalendarDescriptionTemplateOverride'],
-            $fields['googleCalendarLocation'],
-            $fields['googleCalendarVisibility'],
-            $fields['googleCalendarTransparency'],
-            $fields['googleCalendarColorId']
-        );
+            'reminderMode' => 'none',
+            'reminders' => [],
+            'location' => '',
+            'visibility' => 'default',
+            'transparency' => 'opaque',
+            'colorId' => '',
+            'descriptionTemplateOverride' => '',
+        ]);
     }
 
     /**
@@ -523,18 +521,6 @@ class EventPusher
         }
 
         return is_array($row) ? $row : [];
-    }
-
-    /**
-     * @return array{start: array<string, string>, end: array<string, string>}|null
-     */
-    private function buildDateRange(Entity $entity): ?array
-    {
-        return match ($entity->getEntityType()) {
-            'Meeting', 'Call' => $this->buildDateTimeRange($entity->get('dateStart'), $entity->get('dateEnd')),
-            'Task' => $this->buildTaskDateRange($entity),
-            default => null,
-        };
     }
 
     /**
@@ -556,7 +542,7 @@ class EventPusher
         }
 
         if (!empty($source['allDay'])) {
-            return $this->buildAllDayRange($startValue);
+            return $this->buildAllDayRange($this->toDateOnlyValue($startValue));
         }
 
         $endDateField = (string) ($source['endDateField'] ?? '');
@@ -588,20 +574,6 @@ class EventPusher
         }
 
         return $value;
-    }
-
-    /**
-     * @return array{start: array<string, string>, end: array<string, string>}|null
-     */
-    private function buildTaskDateRange(Entity $entity): ?array
-    {
-        $end = $entity->get('dateEnd');
-
-        if (!$end) {
-            return null;
-        }
-
-        return $this->buildDateTimeRange($entity->get('dateStart') ?: $end, $end);
     }
 
     /**
@@ -669,6 +641,28 @@ class EventPusher
     }
 
     /**
+     * CalendarDateSource all-day events need Y-m-d even when the CRM field is datetimeOptional.
+     */
+    private function toDateOnlyValue(?string $value): ?string
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($this->isDateOnly($value)) {
+            return $value;
+        }
+
+        if (preg_match('/^(\d{4}-\d{2}-\d{2})/', $value, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    /**
      * @param ?array<string, mixed> $source
      */
     private function buildSummary(Entity $entity, string $sourceDateType, ?array $source = null): string
@@ -712,10 +706,34 @@ class EventPusher
             return trim($settings['description']);
         }
 
-        $template = $this->resolveRelatedTemplateVariables(
+        return $this->renderTemplateString(
             $entity,
+            $sourceDateType,
             $this->getDescriptionTemplate($entity, $settings)
         );
+    }
+
+    /**
+     * @param ?array<string, mixed> $settings
+     */
+    private function buildLocation(Entity $entity, string $sourceDateType, ?array $settings): string
+    {
+        $location = trim((string) ($settings['location'] ?? ''));
+
+        if ($location === '') {
+            return '';
+        }
+
+        if (!str_contains($location, '{{')) {
+            return $location;
+        }
+
+        return $this->renderTemplateString($entity, $sourceDateType, $location);
+    }
+
+    private function renderTemplateString(Entity $entity, string $sourceDateType, string $template): string
+    {
+        $template = $this->resolveRelatedTemplateVariables($entity, $template);
 
         return trim($this->templateRendererFactory
             ->create()
@@ -735,11 +753,7 @@ class EventPusher
      */
     private function buildReminders(Entity $entity, ?array $settings): array
     {
-        $mode = $settings['reminderMode'] ?? null;
-
-        if ((!is_string($mode) || $mode === '') && $this->hasSharedGoogleSettingsFields($entity->getEntityType())) {
-            $mode = $entity->get('googleCalendarReminderMode');
-        }
+        $mode = $settings['reminderMode'] ?? 'none';
 
         if (!is_string($mode) || $mode === '') {
             $mode = 'none';
@@ -774,10 +788,6 @@ class EventPusher
     private function buildCustomReminderOverrides(Entity $entity, ?array $settings): array
     {
         $rows = $settings['reminders'] ?? null;
-
-        if (!is_array($rows) && $this->hasSharedGoogleSettingsFields($entity->getEntityType())) {
-            $rows = $entity->get('googleCalendarReminders');
-        }
 
         if (!is_array($rows)) {
             return [];
@@ -835,12 +845,6 @@ class EventPusher
             return $override;
         }
 
-        $override = trim((string) ($entity->get('googleCalendarDescriptionTemplateOverride') ?? ''));
-
-        if ($override !== '') {
-            return $override;
-        }
-
         $field = 'googleCalendarDescriptionTemplate' . $entity->getEntityType();
         $integration = $this->entityManager->getEntityById('Integration', Installer::INTEGRATION_ID);
         $template = $integration?->get($field);
@@ -852,13 +856,6 @@ class EventPusher
         $default = $this->metadata->get(['integrations', Installer::INTEGRATION_ID, 'fields', $field, 'default']);
 
         return is_string($default) && trim($default) !== '' ? $default : '{{name}}';
-    }
-
-    private function getEntityCalendarTemplateId(Entity $entity): ?string
-    {
-        $id = $entity->get('googleCalendarTemplateId');
-
-        return is_string($id) && $id !== '' ? $id : null;
     }
 
     /**
@@ -873,26 +870,19 @@ class EventPusher
     ): array {
         $templateSettings = $this->calendarTemplateApplier->apply($templateId, $entity, $sourceDateType);
 
-        if (!$this->hasSharedGoogleSettingsFields($entity->getEntityType())) {
-            unset($templateSettings['reminderMode'], $templateSettings['reminders']);
+        unset($templateSettings['reminderMode'], $templateSettings['reminders']);
 
-            $merged = array_merge($templateSettings, array_filter(
-                $recordSettings,
-                static fn (mixed $value): bool => $value !== null && $value !== ''
-            ));
-
-            $mode = $recordSettings['reminderMode'] ?? null;
-            $merged['reminderMode'] = is_string($mode) && in_array($mode, ['none', 'default', 'custom'], true)
-                ? $mode
-                : 'none';
-
-            return $merged;
-        }
-
-        return array_merge($templateSettings, array_filter(
+        $merged = array_merge($templateSettings, array_filter(
             $recordSettings,
             static fn (mixed $value): bool => $value !== null && $value !== ''
         ));
+
+        $mode = $recordSettings['reminderMode'] ?? null;
+        $merged['reminderMode'] = is_string($mode) && in_array($mode, ['none', 'default', 'custom'], true)
+            ? $mode
+            : 'none';
+
+        return $merged;
     }
 
     private function resolveRelatedTemplateVariables(Entity $entity, string $template): string

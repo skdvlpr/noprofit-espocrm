@@ -495,6 +495,7 @@ class RoleSetup
             'Account', 'AccountWebsite', 'Contact', 'Opportunity',
             'VolunteerEmployee', 'Member', 'MealCount', 'Document',
             'Meeting', 'Call', 'Task', 'Email',
+            'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
 
         $adminData = [];

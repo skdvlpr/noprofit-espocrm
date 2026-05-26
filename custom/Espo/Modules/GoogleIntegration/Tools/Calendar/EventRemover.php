@@ -102,7 +102,7 @@ class EventRemover
 
         foreach ($links as $link) {
             $sourceDateType = (string) ($link->get('sourceDateType') ?? '');
-            $effectiveDateType = $this->normalizeLinkSourceDateType(
+            $effectiveDateType = $this->dateSourceProvider->canonicalSourceDateType(
                 $entity->getEntityType(),
                 $sourceDateType
             );
@@ -166,7 +166,12 @@ class EventRemover
             try {
                 $client->deleteCalendarEvent($googleEventId, $calendarId);
             } catch (Error $e) {
-                if ($e->getCode() !== 404) {
+                $isGone = $e->getCode() === 404
+                    || $e->getCode() === 410
+                    || stripos($e->getMessage(), 'has been deleted') !== false
+                    || stripos($e->getMessage(), 'not found') !== false;
+
+                if (!$isGone) {
                     throw $e;
                 }
             }
@@ -206,14 +211,4 @@ class EventRemover
         )));
     }
 
-    private function normalizeLinkSourceDateType(string $entityType, string $sourceDateType): string
-    {
-        if ($sourceDateType === '' || $sourceDateType === 'main') {
-            $sources = $this->dateSourceProvider->getActiveSourcesForEntityType($entityType);
-
-            return (string) ($sources[0]['sourceDateType'] ?? 'main');
-        }
-
-        return $sourceDateType;
-    }
 }

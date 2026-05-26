@@ -1,0 +1,12 @@
+{
+    "fields": {
+        "name": "Name",
+        "dateStart": "Start",
+        "dateEnd": "End",
+        "description": "Description"
+    },
+    "labels": {
+        "GCalSmokeDateTime": "GCal Smoke (Date/Time)",
+        "GCalSmokeDateTimePlural": "GCal Smoke (Date/Time)"
+    }
+}

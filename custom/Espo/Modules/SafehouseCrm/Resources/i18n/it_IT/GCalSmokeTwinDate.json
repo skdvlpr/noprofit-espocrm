@@ -1,0 +1,12 @@
+{
+    "fields": {
+        "name": "Nome",
+        "primaryDate": "Data principale",
+        "reviewDate": "Data revisione",
+        "description": "Descrizione"
+    },
+    "labels": {
+        "GCalSmokeTwinDate": "Test GCal (due date)",
+        "GCalSmokeTwinDatePlural": "Test GCal (due date)"
+    }
+}

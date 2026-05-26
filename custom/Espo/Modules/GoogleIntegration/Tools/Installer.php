@@ -6,6 +6,7 @@ use Espo\Core\Container;
 use Espo\Core\DataManager;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
 use Espo\Entities\Integration as IntegrationEntity;
 use Espo\Entities\Role;
 use Espo\ORM\EntityManager;
@@ -159,6 +160,11 @@ class Installer
 
         $this->ensureDefaultDateSources($em);
         $this->ensureDefaultCalendarTemplates($em);
+
+        $container->getByClass(InjectableFactory::class)
+            ->create(GoogleCalendarLayoutProvisioner::class)
+            ->provisionAll();
+
         $metadata = $container->getByClass(Metadata::class);
         $this->ensureAdminRoleAccess($em, $metadata);
         $this->ensureNavigationTabs($container);

@@ -8,13 +8,5 @@
             [{"name": "contacts"}, false],
             [{"name": "description", "fullWidth": true}]
         ]
-    },
-    {
-        "label": "Google Calendar",
-        "rows": [
-            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarId"}],
-            [{"name": "googleCalendarOpportunityDateList", "fullWidth": true}],
-            [{"name": "googleCalendarOpportunityEventSettings", "fullWidth": true}]
-        ]
     }
 ]

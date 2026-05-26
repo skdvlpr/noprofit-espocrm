@@ -2,20 +2,22 @@
 
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
+use DateInterval;
 use Espo\Core\ApplicationState;
+use Espo\Core\Job\JobSchedulerFactory;
+use Espo\Core\Job\QueueName;
 use Espo\Core\Utils\Log;
+use Espo\Modules\GoogleIntegration\Jobs\PushGoogleCalendarEntity;
 use Espo\ORM\Entity;
 use Throwable;
 
-/**
- * Shared afterSave / afterRemove handling for calendar-capable CRM entities.
- */
 class GoogleCalendarEntityLifecycle
 {
     public function __construct(
         private EventPusher $eventPusher,
         private EventRemover $eventRemover,
         private ApplicationState $applicationState,
+        private JobSchedulerFactory $jobSchedulerFactory,
         private Log $log
     ) {}
 
@@ -53,6 +55,8 @@ class GoogleCalendarEntityLifecycle
                 . ': '
                 . $e->getMessage()
             );
+
+            $this->scheduleRetryJob($entity);
         }
     }
 
@@ -63,6 +67,36 @@ class GoogleCalendarEntityLifecycle
         } catch (Throwable $e) {
             $this->log->error(
                 'Google Calendar delete on remove failed for '
+                . $entity->getEntityType()
+                . ': '
+                . $e->getMessage()
+            );
+        }
+    }
+
+    private function scheduleRetryJob(Entity $entity): void
+    {
+        try {
+            $user = $this->applicationState->getUser();
+
+            if (!$user->getId() || $user->isSystem() || $user->isApi()) {
+                return;
+            }
+
+            $this->jobSchedulerFactory
+                ->create()
+                ->setClassName(PushGoogleCalendarEntity::class)
+                ->setQueue(QueueName::E0)
+                ->setDelay(new DateInterval('PT30S'))
+                ->setData([
+                    'entityType' => $entity->getEntityType(),
+                    'entityId' => $entity->getId(),
+                    'userId' => $user->getId(),
+                ])
+                ->schedule();
+        } catch (Throwable $e) {
+            $this->log->error(
+                'Google Calendar push job schedule failed for '
                 . $entity->getEntityType()
                 . ': '
                 . $e->getMessage()

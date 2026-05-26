@@ -64,7 +64,7 @@ When checkbox is **true**, show per-date settings (not shared reminder/template 
 
 **Delete / unlink:** Unchecking `saveToGoogleCalendar` or removing the CRM record deletes linked Google events for the acting user (or all users on record delete). Stale per-date links use each link’s stored `calendarId` (never guessed as `primary`).
 
-**Meeting / Call / Task / Opportunity:** Meeting/Call/Task still use shared Google fields on the record; Opportunity uses `googleCalendarOpportunityDateList` + `googleCalendarOpportunityEventSettings`.
+**All calendar-capable entities:** UI is provisioned dynamically from active `CalendarDateSource` rows (`saveToGoogleCalendar`, `googleCalendarDateSourceList`, `googleCalendarEventSettings`). No per-entity static metadata or legacy field names.
 
 **Safehouse compatibility:** English field keys in metadata; Italian UI labels in `SafehouseCrm` + `GoogleIntegration` i18n.
 

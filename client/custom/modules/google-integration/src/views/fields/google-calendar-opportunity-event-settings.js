@@ -132,6 +132,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                                 <div class="col-sm-6">
                                     <label class="control-label small">{{locationFieldLabel}}</label>
                                     <input class="form-control input-sm" data-role="location" value="{{location}}">
+                                    <div class="google-calendar-template-variable-helper" data-role="variable-helper-location"></div>
                                 </div>
                                 <div class="col-sm-3">
                                     <label class="control-label small">{{visibilityFieldLabel}}</label>
@@ -458,6 +459,14 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                     .find('[data-role="descriptionTemplateOverride"]');
 
                 this.renderVariablePicker($helper, $textarea, fieldList);
+            });
+
+            this.$el.find('[data-role="variable-helper-location"]').each((i, element) => {
+                const $helper = $(element);
+                const $input = $helper.closest('.google-calendar-opportunity-date-settings-card')
+                    .find('[data-role="location"]');
+
+                this.renderVariablePicker($helper, $input, fieldList);
             });
         }
 

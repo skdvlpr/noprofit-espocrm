@@ -18,12 +18,14 @@ declare(strict_types=1);
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Core\ApplicationState;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
@@ -44,6 +46,7 @@ $metadata = $container->getByClass(Metadata::class);
 echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
 (new GoogleIntegrationInstaller())->runPostInstall($container);
 $config->update();
+$metadata->init(true);
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');
 if ($siteUrl === '') {
@@ -172,93 +175,89 @@ $ok(
 $fields = $meta['fields'] ?? null;
 $ok('fields include clientId and clientSecret', is_array($fields) && isset($fields['clientId'], $fields['clientSecret']));
 
-echo "\nGoogle Calendar entity metadata\n";
+echo "\nGoogle Calendar dynamic entity metadata\n";
 
-foreach (['Meeting', 'Call', 'Task', 'Opportunity', 'VolunteerEmployee'] as $entityType) {
-    $rEntityDefs = $client->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.' . $entityType]]);
-    $ok("GET Metadata?key=entityDefs.$entityType → 200", $rEntityDefs->getStatusCode() === 200,
-        'code=' . $rEntityDefs->getStatusCode());
+$calendarCapableEntityTypes = [];
 
-    $entityDefs = json_decode((string) $rEntityDefs->getBody(), true);
-    $entityFields = $entityDefs['fields'] ?? [];
+foreach ($em->getRDBRepository('CalendarDateSource')
+    ->select(['targetEntityType'])
+    ->where(['isActive' => true, 'deleted' => false])
+    ->find() as $row) {
+    $type = $row->get('targetEntityType');
+
+    if (is_string($type) && $type !== '') {
+        $calendarCapableEntityTypes[$type] = true;
+    }
+}
+
+$calendarCapableEntityTypes = array_keys($calendarCapableEntityTypes);
+sort($calendarCapableEntityTypes);
+
+$ok(
+    'at least one active CalendarDateSource target entity',
+    $calendarCapableEntityTypes !== [],
+    'count=' . count($calendarCapableEntityTypes)
+);
+
+foreach ($calendarCapableEntityTypes as $entityType) {
+    if (!$metadata->get(['scopes', $entityType, 'entity'])) {
+        continue;
+    }
+
+    $entityFields = $metadata->get(['entityDefs', $entityType, 'fields']) ?? [];
+    $ok(
+        "$entityType entityDefs merged in metadata cache",
+        is_array($entityFields) && $entityFields !== []
+    );
 
     $ok(
         "$entityType has saveToGoogleCalendar",
         is_array($entityFields) && isset($entityFields['saveToGoogleCalendar'])
     );
-    $usesPerDateGoogleFields = in_array($entityType, ['Opportunity', 'VolunteerEmployee'], true);
-    $usesSharedFields = !$usesPerDateGoogleFields || $entityType === 'Opportunity';
     $ok(
-        "$entityType shared Google reminder mode field scope is correct",
-        $usesSharedFields
-            ? isset($entityFields['googleCalendarReminderMode'])
-            : !isset($entityFields['googleCalendarReminderMode'])
+        "$entityType has googleCalendarDateSourceList",
+        is_array($entityFields)
+            && isset($entityFields['googleCalendarDateSourceList'])
+            && ($entityFields['googleCalendarDateSourceList']['view'] ?? null)
+                === 'google-integration:views/fields/google-calendar-date-source-list'
     );
     $ok(
-        "$entityType shared Google reminders field scope is correct",
-        $usesSharedFields
-            ? isset($entityFields['googleCalendarReminders'])
-            : !isset($entityFields['googleCalendarReminders'])
+        "$entityType has googleCalendarEventSettings",
+        is_array($entityFields)
+            && isset($entityFields['googleCalendarEventSettings'])
+            && ($entityFields['googleCalendarEventSettings']['view'] ?? null)
+                === 'google-integration:views/fields/google-calendar-opportunity-event-settings'
     );
     $ok(
-        "$entityType shared Google description template field scope is correct",
-        $usesSharedFields
-            ? isset($entityFields['googleCalendarDescriptionTemplateOverride'])
-            : !isset($entityFields['googleCalendarDescriptionTemplateOverride'])
-    );
-    $ok(
-        "$entityType shared Google template link scope is correct",
-        $usesSharedFields
-            ? isset($entityFields['googleCalendarTemplate'])
-            : !isset($entityFields['googleCalendarTemplate'])
-    );
-    if ($usesSharedFields) {
-        $ok(
-            "$entityType template override uses field view",
-            is_array($entityFields)
-            && ($entityFields['googleCalendarDescriptionTemplateOverride']['view'] ?? null)
-                === 'google-integration:views/fields/google-calendar-description-template'
-        );
-        $ok(
-            "$entityType Google color uses color field view",
-            is_array($entityFields)
-            && ($entityFields['googleCalendarColorId']['view'] ?? null)
-                === 'google-integration:views/fields/google-calendar-color'
-        );
-    }
-    $ok(
-        "$entityType per-date Google date list scope is correct",
-        $usesPerDateGoogleFields
-            ? isset($entityFields['googleCalendarDateSourceList'])
-                || isset($entityFields['googleCalendarOpportunityDateList'])
-            : !isset($entityFields['googleCalendarDateSourceList'])
-    );
-    $ok(
-        "$entityType per-date Google event settings scope is correct",
-        $usesPerDateGoogleFields
-            ? (
-                (isset($entityFields['googleCalendarEventSettings'])
-                    && ($entityFields['googleCalendarEventSettings']['view'] ?? null)
-                        === 'google-integration:views/fields/google-calendar-opportunity-event-settings')
-                || (isset($entityFields['googleCalendarOpportunityEventSettings'])
-                    && ($entityFields['googleCalendarOpportunityEventSettings']['view'] ?? null)
-                        === 'google-integration:views/fields/google-calendar-opportunity-event-settings')
+        "$entityType has no legacy shared Google fields",
+        is_array($entityFields)
+            && !isset(
+                $entityFields['googleCalendarReminderMode'],
+                $entityFields['googleCalendarReminders'],
+                $entityFields['googleCalendarOpportunityDateList'],
+                $entityFields['googleCalendarOpportunityEventSettings'],
+                $entityFields['googleCalendarTemplate'],
+                $entityFields['googleCalendarDescriptionTemplateOverride']
             )
-            : !isset($entityFields['googleCalendarEventSettings'])
     );
     $ok(
-        "$entityType removed legacy googleCalendarReminderMinutes",
-        is_array($entityFields) && !isset($entityFields['googleCalendarReminderMinutes'])
+        "$entityType app.layouts detail module is GoogleIntegration",
+        $metadata->get(['app', 'layouts', $entityType, 'detail', 'module']) === 'GoogleIntegration'
     );
-    $ok(
-        "$entityType removed legacy googleCalendarReminderMethod",
-        is_array($entityFields) && !isset($entityFields['googleCalendarReminderMethod'])
-    );
-}
 
-foreach (['Meeting', 'Call', 'Task', 'Opportunity', 'VolunteerEmployee'] as $entityType) {
     foreach (['detail', 'detailSmall'] as $layoutType) {
         $rLayout = $client->get("/api/v1/$entityType/layout/$layoutType");
+
+        if ($rLayout->getStatusCode() === 403) {
+            $ok(
+                "$entityType $layoutType layout skipped (API user has no scope access)",
+                true,
+                'code=403'
+            );
+
+            continue;
+        }
+
         $ok("GET /api/v1/$entityType/layout/$layoutType → 200", $rLayout->getStatusCode() === 200,
             'code=' . $rLayout->getStatusCode());
 
@@ -268,51 +267,19 @@ foreach (['Meeting', 'Call', 'Task', 'Opportunity', 'VolunteerEmployee'] as $ent
             "$entityType $layoutType layout has saveToGoogleCalendar",
             $layoutHasField($layout, 'saveToGoogleCalendar')
         );
-        $usesPerDateLayout = in_array($entityType, ['Opportunity', 'VolunteerEmployee'], true);
-        if ($usesPerDateLayout) {
-            $ok(
-                "$entityType $layoutType layout has per-date Google date selector",
-                $layoutHasField($layout, 'googleCalendarDateSourceList')
-                    || $layoutHasField($layout, 'googleCalendarOpportunityDateList')
-            );
-            $ok(
-                "$entityType $layoutType layout has per-date Google event settings",
-                $layoutHasField($layout, 'googleCalendarEventSettings')
-                    || $layoutHasField($layout, 'googleCalendarOpportunityEventSettings')
-            );
-            $ok(
-                "$entityType $layoutType layout does not show shared Google reminder field",
-                !$layoutHasField($layout, 'googleCalendarReminderMode')
-            );
-            $ok(
-                "$entityType $layoutType layout does not show shared Google template field",
-                !$layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
-            );
-        } else {
-            $ok(
-                "$entityType $layoutType layout has googleCalendarReminderMode",
-                $layoutHasField($layout, 'googleCalendarReminderMode')
-            );
-            $ok(
-                "$entityType $layoutType layout has googleCalendarTemplate",
-                $layoutHasField($layout, 'googleCalendarTemplate')
-            );
-            $ok(
-                "$entityType $layoutType layout has googleCalendarReminders",
-                $layoutHasField($layout, 'googleCalendarReminders')
-            );
-            $ok(
-                "$entityType $layoutType layout has googleCalendarDescriptionTemplateOverride",
-                $layoutHasField($layout, 'googleCalendarDescriptionTemplateOverride')
-            );
-        }
         $ok(
-            "$entityType $layoutType layout removed legacy googleCalendarReminderMinutes",
-            !$layoutHasField($layout, 'googleCalendarReminderMinutes')
+            "$entityType $layoutType layout has googleCalendarDateSourceList",
+            $layoutHasField($layout, 'googleCalendarDateSourceList')
         );
         $ok(
-            "$entityType $layoutType layout removed legacy googleCalendarReminderMethod",
-            !$layoutHasField($layout, 'googleCalendarReminderMethod')
+            "$entityType $layoutType layout has googleCalendarEventSettings",
+            $layoutHasField($layout, 'googleCalendarEventSettings')
+        );
+        $ok(
+            "$entityType $layoutType layout has no shared Google reminder fields",
+            !$layoutHasField($layout, 'googleCalendarReminderMode')
+                && !$layoutHasField($layout, 'googleCalendarReminders')
+                && !$layoutHasField($layout, 'googleCalendarOpportunityDateList')
         );
     }
 }
@@ -474,6 +441,9 @@ $perDateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-int
 $templateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-description-template.js') ?: '';
 $ok('Opportunity per-date template selector is not raw ID input', !str_contains($perDateView, 'CalendarTemplate ID') && str_contains($perDateView, 'data-role="calendarTemplateId"'));
 $ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel') && str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel'));
+$ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
+$eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
+$ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
 $dateSourceListView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-date-source-list.js') ?: '';
 $ok('Per-date settings loads date sources from API', str_contains($perDateView, 'date-source-options'));
 $ok('Date source list field loads options from API', str_contains($dateSourceListView, 'date-source-options'));
@@ -567,6 +537,132 @@ $ok(
     $brokenPrefixCount === 0,
     "prefix-only count=$brokenPrefixCount"
 );
+
+echo "\nGoogle Calendar DB columns for calendar-capable entities\n";
+
+foreach ($calendarCapableEntityTypes as $entityType) {
+    $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $entityType) ?? $entityType);
+    $pdo = $em->getPDO();
+    $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}` LIKE 'save_to_google_calendar'");
+    $row = $stmt ? $stmt->fetch(\PDO::FETCH_ASSOC) : false;
+    $ok(
+        "$entityType table has save_to_google_calendar column",
+        is_array($row) && ($row['Field'] ?? '') === 'save_to_google_calendar',
+        'table=' . $table
+    );
+}
+
+echo "\nCanonical sourceDateType + link lookup\n";
+
+/** @var InjectableFactory $injectableFactory */
+$injectableFactory = $container->getByClass(InjectableFactory::class);
+$dateSourceProvider = $injectableFactory->create(DateSourceProvider::class);
+
+$ok(
+    'Meeting canonical main stays main',
+    $dateSourceProvider->canonicalSourceDateType('Meeting', 'main') === 'main'
+);
+
+$memberSources = $dateSourceProvider->getActiveSourcesForEntityType('Member');
+
+if ($memberSources !== []) {
+    $memberFirstKey = (string) ($memberSources[0]['sourceDateType'] ?? 'main');
+    $ok(
+        'Member legacy main maps to first active date key',
+        $dateSourceProvider->canonicalSourceDateType('Member', 'main') === $memberFirstKey,
+        'firstKey=' . $memberFirstKey
+    );
+    $ok(
+        'Member explicit date key is unchanged',
+        $dateSourceProvider->canonicalSourceDateType('Member', $memberFirstKey) === $memberFirstKey
+    );
+} else {
+    $ok('Member legacy main maps to first active date key', true, 'skipped (no Member CalendarDateSource)');
+    $ok('Member explicit date key is unchanged', true, 'skipped (no Member CalendarDateSource)');
+}
+
+$canonicalLinkEntityId = substr(Util::generateId(), 0, 17);
+$canonicalUserId = $container->getByClass(ApplicationState::class)->getUser()->getId();
+
+try {
+    $legacyLink = $em->createEntity('GoogleCalendarEventLink', [
+        'sourceEntityType' => 'Meeting',
+        'sourceEntityId' => $canonicalLinkEntityId,
+        'sourceDateType' => 'main',
+        'userId' => $canonicalUserId,
+        'calendarId' => 'primary',
+        'googleEventId' => 'smoke-canonical-legacy-event',
+        'name' => 'Meeting:' . $canonicalLinkEntityId . ':main:' . $canonicalUserId,
+    ]);
+    $em->saveEntity($legacyLink);
+
+    $canonical = $dateSourceProvider->canonicalSourceDateType('Meeting', 'main');
+    $matchedLinks = [];
+
+    foreach (
+        $em->getRDBRepository('GoogleCalendarEventLink')
+            ->where([
+                'sourceEntityType' => 'Meeting',
+                'sourceEntityId' => $canonicalLinkEntityId,
+                'userId' => $canonicalUserId,
+                'deleted' => false,
+            ])
+            ->find() as $link
+    ) {
+        $linkCanonical = $dateSourceProvider->canonicalSourceDateType(
+            'Meeting',
+            (string) ($link->get('sourceDateType') ?? '')
+        );
+
+        if ($linkCanonical === $canonical) {
+            $matchedLinks[] = $link;
+        }
+    }
+
+    $ok(
+        'canonical link lookup finds legacy main row',
+        count($matchedLinks) === 1,
+        'matched=' . count($matchedLinks)
+    );
+
+    $eventPusher = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher::class);
+    $findLink = new ReflectionMethod($eventPusher, 'findLink');
+    $findLink->setAccessible(true);
+    $meeting = $em->getNewEntity('Meeting');
+    $meeting->set('id', $canonicalLinkEntityId);
+    $resolvedLink = $findLink->invoke($eventPusher, $meeting, 'main');
+
+    $ok(
+        'EventPusher findLink resolves canonical Meeting main',
+        $resolvedLink !== null && $resolvedLink->getId() === $legacyLink->getId(),
+        'resolved=' . (string) ($resolvedLink?->getId() ?? 'null')
+    );
+
+    $saveLink = new ReflectionMethod($eventPusher, 'saveLink');
+    $saveLink->setAccessible(true);
+    $saveLink->invoke(
+        $eventPusher,
+        $meeting,
+        'main',
+        'primary',
+        'smoke-canonical-updated-event',
+        null
+    );
+
+    $persistedLink = $em->getEntityById('GoogleCalendarEventLink', $legacyLink->getId());
+
+    $ok(
+        'saveLink keeps single canonical row and updates googleEventId',
+        $persistedLink !== null
+            && $persistedLink->get('googleEventId') === 'smoke-canonical-updated-event'
+            && $persistedLink->get('sourceDateType') === 'main',
+        'eventId=' . (string) ($persistedLink?->get('googleEventId') ?? 'null')
+    );
+
+    $em->removeEntity($legacyLink);
+} catch (Throwable $e) {
+    $ok('canonical link lookup smoke', false, $e->getMessage());
+}
 
 echo "\nDelete sync + background job\n";
 

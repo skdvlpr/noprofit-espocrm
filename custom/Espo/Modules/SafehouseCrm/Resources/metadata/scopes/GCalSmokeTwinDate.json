@@ -1,0 +1,14 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "SafehouseCrm",
+    "object": true,
+    "layouts": true,
+    "tab": false,
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete"],
+    "importable": false,
+    "customizable": true,
+    "color": "#e67e22",
+    "iconClass": "fas fa-vial"
+}
