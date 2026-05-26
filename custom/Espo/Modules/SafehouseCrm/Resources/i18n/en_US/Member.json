@@ -19,8 +19,7 @@
     "positionsHeld": "Roles Held",
     "notes": "Notes",
     "emailAddress": "Email",
-    "phoneNumber": "Phone",
-    "user": "Linked User"
+    "phoneNumber": "Phone"
   },
   "options": {
     "status": {

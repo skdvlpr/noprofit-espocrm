@@ -26,7 +26,6 @@
         },
         "emailAddress": {
             "type": "email",
-            "required": true,
             "isPersonalData": true
         },
         "phoneNumber": {
@@ -34,11 +33,6 @@
             "typeList": ["Mobile", "Office", "Home", "Other"],
             "defaultType": "Mobile",
             "isPersonalData": true
-        },
-        "user": {
-            "type": "link",
-            "required": true,
-            "tooltip": "Linked user account. Primary email/phone are synced from this user."
         },
         "startDate": {
             "type": "date"
@@ -86,7 +80,9 @@
         },
         "assignedUser": {
             "type": "link",
-            "view": "views/fields/assigned-user"
+            "required": true,
+            "view": "views/fields/assigned-user",
+            "tooltip": "Primary email/phone are synced from this user."
         },
         "teams": {
             "type": "linkMultiple",
@@ -108,10 +104,6 @@
         }
     },
     "links": {
-        "user": {
-            "type": "belongsTo",
-            "entity": "User"
-        },
         "documents": {
             "type": "hasMany",
             "entity": "Document",
@@ -153,9 +145,9 @@
         "endDateStatus": {
             "columns": ["endDate", "status", "deleted"]
         },
-        "user": {
+        "assignedUser": {
             "type": "unique",
-            "columns": ["userId", "deleted"]
+            "columns": ["assignedUserId", "deleted"]
         }
     },
     "optimisticConcurrencyControl": true,

@@ -15,9 +15,9 @@ use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 use stdClass;
 
 /**
- * Keeps VolunteerEmployee / Member email & phone data aligned with the linked
- * {@see User} record and enforces cross-record uniqueness between those two
- * entity types only.
+ * Keeps VolunteerEmployee / Member email & phone data aligned with the
+ * {@see User} record referenced by the standard `assignedUser` link and
+ * enforces cross-record uniqueness between those two entity types only.
  *
  * When {@see SaveOption::SKIP_ALL} is set, this class does nothing (same as other
  * hooks) so imports/migrations can bypass checks intentionally.
@@ -49,53 +49,46 @@ class PersonContactSync
             return;
         }
 
-        // Cross-entity uniqueness is a data-integrity invariant and must run
-        // even when the linked-user primary enforcement throws (e.g. linked
-        // user deleted, or linked user has no primary email). We attempt the
-        // enforcement first so dedup can see the merged state when possible,
-        // but capture its error and rethrow only after dedup has validated.
-        $enforceError = null;
-        if ($entity->get('userId')) {
-            try {
-                $this->enforceLinkedUserPrimary($entity);
-            } catch (BadRequest $e) {
-                $enforceError = $e;
-            }
+        $assignedUserId = $entity->get('assignedUserId');
+
+        if ($assignedUserId) {
+            $this->enforceAssignedUserPrimary($entity, $assignedUserId);
         }
 
         $this->assertUniqueEmails($entity);
         $this->assertUniquePhones($entity);
-
-        if ($enforceError !== null) {
-            throw $enforceError;
-        }
     }
 
-    private function enforceLinkedUserPrimary(Entity $entity): void
+    /**
+     * Syncs email/phone from the assigned user:
+     * - If assigned user has no email: skip email enforcement entirely.
+     * - If entity has no email: copy user's email as primary.
+     * - If entity has a different email: user's email becomes primary,
+     *   entity's original email becomes secondary.
+     * - If entity has the same email: keep as-is.
+     *
+     * Same logic for phone numbers (silently skip if user has no phone).
+     */
+    private function enforceAssignedUserPrimary(Entity $entity, string $assignedUserId): void
     {
-        $linkedUserId = $entity->get('userId');
-        if (!$linkedUserId) {
-            return;
+        /** @var ?User $assignedUser */
+        $assignedUser = $this->entityManager->getEntityById(User::ENTITY_TYPE, $assignedUserId);
+
+        if (!$assignedUser) {
+            throw new BadRequest('Assigned user not found.');
         }
 
-        /** @var ?User $linkedUser */
-        $linkedUser = $this->entityManager->getEntityById(User::ENTITY_TYPE, $linkedUserId);
-        if (!$linkedUser) {
-            throw new BadRequest('Linked user not found.');
+        $primaryEmail = $this->primaryEmailFromUser($assignedUser);
+
+        if ($primaryEmail !== '') {
+            $mergedEmails = $this->mergeEmailRows(
+                $this->collectEmailRows($entity),
+                $primaryEmail
+            );
+            $entity->set('emailAddressData', $mergedEmails);
         }
 
-        $primaryEmailDisplay = $this->primaryEmailFromUser($linkedUser);
-        if ($primaryEmailDisplay === '') {
-            throw new BadRequest('Linked user has no primary email address.');
-        }
-
-        $primaryPhone = $this->primaryPhoneFromUser($linkedUser);
-
-        $mergedEmails = $this->mergeEmailRows(
-            $this->collectEmailRows($entity),
-            $primaryEmailDisplay
-        );
-        $entity->set('emailAddressData', $mergedEmails);
+        $primaryPhone = $this->primaryPhoneFromUser($assignedUser);
 
         $mergedPhones = $this->mergePhoneRows(
             $this->collectPhoneRows($entity),

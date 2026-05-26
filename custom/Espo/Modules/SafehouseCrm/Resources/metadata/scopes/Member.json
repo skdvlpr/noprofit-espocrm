@@ -16,5 +16,6 @@
     "color": "#2ecc71",
     "iconClass": "fas fa-id-card",
     "importable": true,
-    "customizable": true
+    "customizable": true,
+    "duplicateCheckFieldList": ["taxCode", "name", "emailAddress"]
 }

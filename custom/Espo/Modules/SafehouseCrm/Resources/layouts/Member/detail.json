@@ -12,7 +12,7 @@
                 {"name": "taxCode"}
             ],
             [
-                {"name": "user"},
+                {"name": "assignedUser"},
                 {"name": "birthDate"}
             ],
             [

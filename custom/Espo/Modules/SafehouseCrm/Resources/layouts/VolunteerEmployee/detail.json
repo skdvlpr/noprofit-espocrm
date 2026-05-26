@@ -12,7 +12,7 @@
                 {"name": "status"}
             ],
             [
-                {"name": "user"},
+                {"name": "assignedUser"},
                 {"name": "birthDate"}
             ],
             [
