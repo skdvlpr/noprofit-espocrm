@@ -1,5 +1,8 @@
 {
     "controller": "controllers/record",
+    "recordViews": {
+        "list": "custom:views/record/list-inline-edit"
+    },
     "color": "#f1c40f",
     "iconClass": "fas fa-utensils"
 }
