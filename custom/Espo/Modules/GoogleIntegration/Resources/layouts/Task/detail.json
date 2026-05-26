@@ -1,24 +1,22 @@
 [
     {
-        "label": "Overview",
-        "rows": [
-            [{"name": "name"}, {"name": "parent"}],
-            [{"name": "status"}, {"name": "priority"}],
-            [{"name": "dateStart"}, {"name": "dateCompleted"}],
-            [{"name": "dateEnd"}, {"name": "reminders"}],
-            [{"name": "description", "fullWidth": true}],
-            [{"name": "attachments", "fullWidth": true}]
-        ]
-    },
-    {
+        "name": "GoogleCalendar",
         "label": "Google Calendar",
         "rows": [
-            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarReminderMode"}],
-            [{"name": "googleCalendarId"}, {"name": "googleCalendarTemplate"}],
-            [{"name": "googleCalendarReminders", "fullWidth": true}],
-            [{"name": "googleCalendarLocation"}, {"name": "googleCalendarVisibility"}],
-            [{"name": "googleCalendarTransparency"}, {"name": "googleCalendarColorId"}],
-            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}]
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
+            ]
         ]
     }
 ]

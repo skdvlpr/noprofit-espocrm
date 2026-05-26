@@ -10,30 +10,36 @@
             ],
             [
                 {
-                    "name": "account",
+                    "name": "sector",
                     "fullWidth": true
                 }
             ],
             [
                 {
-                    "name": "stage"
-                },
-                {
-                    "name": "closeDate"
-                }
-            ],
-            [
-                {
-                    "name": "presentationDate"
-                },
-                {
-                    "name": "amount"
-                }
-            ],
-            [
-                {
-                    "name": "contacts",
+                    "name": "emailAddress",
                     "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "phoneNumber",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "billingAddressCity"
+                },
+                {
+                    "name": "billingAddressCountry"
+                }
+            ],
+            [
+                {
+                    "name": "type"
+                },
+                {
+                    "name": "industry"
                 }
             ],
             [

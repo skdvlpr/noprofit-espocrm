@@ -1,48 +1,55 @@
 [
     {
-        "label": "",
         "rows": [
             [
                 {
-                    "name": "name",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "account",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "stage"
+                    "name": "name"
                 },
                 {
-                    "name": "closeDate"
-                }
-            ],
-            [
-                {
-                    "name": "presentationDate"
+                    "name": "cDataFirmaContratto"
                 },
                 {
-                    "name": "amount"
+                    "name": "sector"
                 }
             ],
             [
                 {
-                    "name": "contacts",
-                    "fullWidth": true
+                    "name": "emailAddress"
+                },
+                {
+                    "name": "phoneNumber"
                 }
             ],
             [
                 {
-                    "name": "description",
-                    "fullWidth": true
+                    "name": "billingAddress"
+                },
+                {
+                    "name": "shippingAddress"
                 }
             ]
-        ]
+        ],
+        "style": "default",
+        "label": "Overview"
+    },
+    {
+        "rows": [
+            [
+                {
+                    "name": "type"
+                },
+                {
+                    "name": "industry"
+                }
+            ],
+            [
+                {
+                    "name": "description"
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Details"
     },
     {
         "name": "GoogleCalendar",

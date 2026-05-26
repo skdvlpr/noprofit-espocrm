@@ -1,45 +1,56 @@
 [
     {
-        "label": "",
+        "name": "Overview",
+        "label": "Overview",
         "rows": [
             [
                 {
-                    "name": "name",
-                    "fullWidth": true
-                }
+                    "name": "name"
+                },
+                false
             ],
             [
                 {
-                    "name": "account",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "stage"
+                    "name": "primaryDate"
                 },
                 {
-                    "name": "closeDate"
-                }
-            ],
-            [
-                {
-                    "name": "presentationDate"
-                },
-                {
-                    "name": "amount"
-                }
-            ],
-            [
-                {
-                    "name": "contacts",
-                    "fullWidth": true
+                    "name": "reviewDate"
                 }
             ],
             [
                 {
                     "name": "description",
                     "fullWidth": true
+                }
+            ]
+        ]
+    },
+    {
+        "name": "System",
+        "label": "System",
+        "rows": [
+            [
+                {
+                    "name": "assignedUser"
+                },
+                {
+                    "name": "teams"
+                }
+            ],
+            [
+                {
+                    "name": "createdBy"
+                },
+                {
+                    "name": "createdAt"
+                }
+            ],
+            [
+                {
+                    "name": "modifiedBy"
+                },
+                {
+                    "name": "modifiedAt"
                 }
             ]
         ]

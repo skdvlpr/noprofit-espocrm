@@ -13,10 +13,10 @@
             ],
             [
                 {
-                    "name": "type"
+                    "name": "status"
                 },
                 {
-                    "name": "status"
+                    "name": "taxCode"
                 }
             ],
             [
@@ -37,29 +37,37 @@
             ],
             [
                 {
-                    "name": "contractType"
-                },
-                false
-            ],
-            [
-                {
-                    "name": "startDate"
+                    "name": "birthPlace"
                 },
                 {
-                    "name": "endDate"
+                    "name": "residenceAddress"
                 }
             ],
             [
                 {
-                    "name": "weeklyHours"
+                    "name": "city"
                 },
                 {
-                    "name": "monthlyHours"
+                    "name": "province"
                 }
             ],
             [
                 {
-                    "name": "extra",
+                    "name": "joinDate"
+                },
+                {
+                    "name": "leaveDate"
+                }
+            ],
+            [
+                {
+                    "name": "positionsHeld",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "notes",
                     "fullWidth": true
                 }
             ]

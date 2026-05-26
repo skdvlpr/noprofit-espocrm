@@ -10,35 +10,39 @@
             ],
             [
                 {
-                    "name": "account",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "stage"
+                    "name": "status"
                 },
                 {
-                    "name": "closeDate"
+                    "name": "taxCode"
                 }
             ],
             [
                 {
-                    "name": "presentationDate"
+                    "name": "birthDate"
                 },
                 {
-                    "name": "amount"
+                    "name": "birthPlace"
                 }
             ],
             [
                 {
-                    "name": "contacts",
-                    "fullWidth": true
+                    "name": "joinDate"
+                },
+                {
+                    "name": "leaveDate"
                 }
             ],
             [
                 {
-                    "name": "description",
+                    "name": "city"
+                },
+                {
+                    "name": "province"
+                }
+            ],
+            [
+                {
+                    "name": "positionsHeld",
                     "fullWidth": true
                 }
             ]

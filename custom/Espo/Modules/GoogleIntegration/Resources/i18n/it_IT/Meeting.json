@@ -1,26 +1,32 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Salva in Google Calendar",
+        "googleCalendarDateSourceList": "Date Google Calendar",
+        "googleCalendarEventSettings": "Impostazioni evento Google per data",
+        "googleCalendarId": "Calendario Google",
+        "googleCalendarTemplate": "Template calendario",
         "googleCalendarReminderMode": "Modalità promemoria Google",
         "googleCalendarReminders": "Promemoria Google",
-        "googleCalendarId": "Calendario Google",
-        "googleCalendarPrimary": "Calendario principale",
-        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari.",
-        "googleCalendarTemplate": "Template calendario",
-        "googleCalendarDescriptionTemplateOverride": "Template descrizione Google",
-        "googleCalendarLocation": "Luogo Google",
-        "googleCalendarVisibility": "Visibilità Google",
-        "googleCalendarTransparency": "Disponibilità Google",
-        "googleCalendarColorId": "Colore Google"
+        "googleCalendarDescriptionTemplateOverride": "Template descrizione",
+        "googleCalendarLocation": "Luogo",
+        "googleCalendarVisibility": "Visibilità",
+        "googleCalendarTransparency": "Disponibilità",
+        "googleCalendarColorId": "Colore"
     },
     "labels": {
-        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google. I promemoria personalizzati supportano fino a 5 promemoria e fino a 4 settimane prima dell'evento.",
+        "Google Calendar": "Google Calendar",
+        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata.",
+        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google.",
         "googleCalendarTemplateVariables": "Inserisci campo del record",
         "googleCalendarTemplateVariableSearch": "Cerca campi",
         "googleCalendarCurrentRecordFields": "Campi del record corrente",
         "googleCalendarRelatedRecordFields": "Campi dei record collegati",
         "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca.",
-        "googleCalendarPanelCloseHint": "Tasto destro del mouse per chiudere · la ricerca resta salvata"
+        "googleCalendarDateMain": "Data inizio",
+        "googleCalendarDateEnd": "Data fine",
+        "googleCalendarDatePresentation": "Data presentazione",
+        "googleCalendarDateClose": "Data chiusura",
+        "googleCalendarTemplateLoadFailed": "Impossibile caricare i template calendario. Esegui Rebuild o reinstalla Google Integration."
     },
     "options": {
         "googleCalendarReminderMode": {

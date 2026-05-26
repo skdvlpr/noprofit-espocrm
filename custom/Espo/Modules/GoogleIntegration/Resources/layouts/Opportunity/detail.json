@@ -2,18 +2,62 @@
     {
         "label": "Overview",
         "rows": [
-            [{"name": "name"}, {"name": "account"}],
-            [{"name": "stage"}, {"name": "amount"}],
-            [{"name": "presentationDate"}, {"name": "closeDate"}],
-            [{"name": "contacts"}, false],
-            [{"name": "description", "fullWidth": true}]
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "account"
+                }
+            ],
+            [
+                {
+                    "name": "stage"
+                },
+                {
+                    "name": "amount"
+                }
+            ],
+            [
+                {
+                    "name": "presentationDate"
+                },
+                {
+                    "name": "closeDate"
+                }
+            ],
+            [
+                {
+                    "name": "contacts"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
+            ]
         ]
     },
     {
+        "name": "GoogleCalendar",
         "label": "Google Calendar",
         "rows": [
-            [{"name": "saveToGoogleCalendar"}, {"name": "googleCalendarOpportunityDateList"}],
-            [{"name": "googleCalendarOpportunityEventSettings", "fullWidth": true}]
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
+            ]
         ]
     }
 ]

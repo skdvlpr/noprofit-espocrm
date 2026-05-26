@@ -1,31 +1,32 @@
 {
     "fields": {
         "saveToGoogleCalendar": "Salva in Google Calendar",
+        "googleCalendarDateSourceList": "Date Google Calendar",
+        "googleCalendarEventSettings": "Impostazioni evento Google per data",
         "googleCalendarId": "Calendario Google",
-        "googleCalendarPrimary": "Calendario principale",
-        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari.",
-        "googleCalendarOpportunityDateList": "Date Google Calendar",
-        "googleCalendarOpportunityEventSettings": "Impostazioni evento Google per data",
         "googleCalendarTemplate": "Template calendario",
         "googleCalendarReminderMode": "Modalità promemoria Google",
         "googleCalendarReminders": "Promemoria Google",
-        "googleCalendarDescriptionTemplateOverride": "Template descrizione Google",
-        "googleCalendarLocation": "Luogo Google",
-        "googleCalendarVisibility": "Visibilità Google",
-        "googleCalendarTransparency": "Disponibilità Google",
-        "googleCalendarColorId": "Colore Google"
+        "googleCalendarDescriptionTemplateOverride": "Template descrizione",
+        "googleCalendarLocation": "Luogo",
+        "googleCalendarVisibility": "Visibilità",
+        "googleCalendarTransparency": "Disponibilità",
+        "googleCalendarColorId": "Colore"
     },
     "labels": {
-        "googleCalendarReminderNotice": "Puoi salvare questa data del finanziamento in Google Calendar con o senza promemoria Google. Per le scadenze usa promemoria in giorni/settimane, ad esempio 7 giorni, 14 giorni o 4 settimane prima.",
+        "Google Calendar": "Google Calendar",
+        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata.",
+        "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google.",
         "googleCalendarTemplateVariables": "Inserisci campo del record",
         "googleCalendarTemplateVariableSearch": "Cerca campi",
         "googleCalendarCurrentRecordFields": "Campi del record corrente",
         "googleCalendarRelatedRecordFields": "Campi dei record collegati",
         "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca.",
+        "googleCalendarDateMain": "Data inizio",
+        "googleCalendarDateEnd": "Data fine",
         "googleCalendarDatePresentation": "Data presentazione",
         "googleCalendarDateClose": "Data chiusura",
-        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata.",
-        "googleCalendarTemplateLoadFailed": "Impossibile caricare i template calendario. Chiedi all'amministratore di eseguire Rebuild o reinstallare Google Integration."
+        "googleCalendarTemplateLoadFailed": "Impossibile caricare i template calendario. Esegui Rebuild o reinstalla Google Integration."
     },
     "options": {
         "googleCalendarReminderMode": {
@@ -40,10 +41,6 @@
             "hours": "ore prima",
             "days": "giorni prima",
             "weeks": "settimane prima"
-        },
-        "googleCalendarOpportunityDateList": {
-            "presentationDate": "Data presentazione",
-            "closeDate": "Data chiusura"
         },
         "googleCalendarVisibility": {
             "default": "Predefinita",

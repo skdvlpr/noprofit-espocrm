@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "cDataFirmaContratto": {
+            "notNull": false,
+            "type": "date",
+            "isPersonalData": true,
+            "inlineEditDisabled": true,
+            "isCustom": true
+        }
+    }
+}

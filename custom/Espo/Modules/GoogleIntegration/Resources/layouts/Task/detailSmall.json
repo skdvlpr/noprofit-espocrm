@@ -1,20 +1,22 @@
 [
     {
-        "label": "",
+        "name": "GoogleCalendar",
+        "label": "Google Calendar",
         "rows": [
-            [{"name": "name", "fullWidth": true}],
-            [{"name": "status"}, {"name": "priority"}],
-            [{"name": "dateStart", "fullWidth": true}],
-            [{"name": "dateEnd", "fullWidth": true}],
-            [{"name": "parent", "fullWidth": true}],
-            [{"name": "reminders", "fullWidth": true}],
-            [{"name": "description", "fullWidth": true}],
-            [{"name": "attachments", "fullWidth": true}],
-            [{"name": "saveToGoogleCalendar", "fullWidth": true}],
-            [{"name": "googleCalendarReminderMode", "fullWidth": true}],
-            [{"name": "googleCalendarTemplate", "fullWidth": true}],
-            [{"name": "googleCalendarReminders", "fullWidth": true}],
-            [{"name": "googleCalendarDescriptionTemplateOverride", "fullWidth": true}]
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
+            ]
         ]
     }
 ]

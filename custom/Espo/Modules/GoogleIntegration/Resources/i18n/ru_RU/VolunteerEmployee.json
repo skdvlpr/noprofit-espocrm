@@ -4,35 +4,35 @@
         "googleCalendarDateSourceList": "Даты Google Calendar",
         "googleCalendarEventSettings": "Настройки событий Google по датам",
         "googleCalendarId": "Календарь Google",
-        "googleCalendarPrimary": "Основной календарь",
-        "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей.",
+        "googleCalendarTemplate": "Шаблон календаря",
         "googleCalendarReminderMode": "Режим напоминаний Google",
         "googleCalendarReminders": "Напоминания Google",
-        "googleCalendarTemplate": "Шаблон календаря",
-        "googleCalendarDescriptionTemplateOverride": "Шаблон описания Google",
-        "googleCalendarLocation": "Место Google",
-        "googleCalendarVisibility": "Видимость Google",
-        "googleCalendarTransparency": "Занятость Google",
-        "googleCalendarColorId": "Цвет Google"
+        "googleCalendarDescriptionTemplateOverride": "Шаблон описания",
+        "googleCalendarLocation": "Место",
+        "googleCalendarVisibility": "Видимость",
+        "googleCalendarTransparency": "Занятость",
+        "googleCalendarColorId": "Цвет"
     },
     "labels": {
-        "googleCalendarReminderNotice": "Можно сохранить эту запись в Google Calendar с напоминаниями или без них. Пользовательские напоминания: до 5 штук и максимум за 4 недели до события.",
+        "Google Calendar": "Google Calendar",
+        "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты.",
+        "googleCalendarReminderNotice": "Можно сохранить запись в Google Calendar с напоминаниями или без них.",
         "googleCalendarTemplateVariables": "Вставить поле записи",
         "googleCalendarTemplateVariableSearch": "Поиск полей",
         "googleCalendarCurrentRecordFields": "Поля текущей записи",
         "googleCalendarRelatedRecordFields": "Поля связанных записей",
-        "googleCalendarNoVariables": "Нет полей по этому запросу.",
-        "googleCalendarPanelCloseHint": "ПКМ — закрыть · поиск сохраняется",
+        "googleCalendarNoVariables": "Переменные не найдены",
         "googleCalendarDateMain": "Дата начала",
         "googleCalendarDateEnd": "Дата окончания",
-        "googleCalendarPerDateSettingsHelp": "Настройки Google Calendar отдельно для каждой выбранной даты.",
-        "googleCalendarTemplateLoadFailed": "Не удалось загрузить шаблоны календаря. Выполните Rebuild или переустановите Google Integration."
+        "googleCalendarDatePresentation": "Дата подачи",
+        "googleCalendarDateClose": "Дата закрытия",
+        "googleCalendarTemplateLoadFailed": "Не удалось загрузить шаблоны календаря. Выполните Rebuild."
     },
     "options": {
         "googleCalendarReminderMode": {
-            "none": "Без напоминаний",
-            "default": "Настройки календаря",
-            "custom": "Пользовательские напоминания"
+            "none": "Без напоминания",
+            "default": "По умолчанию календаря",
+            "custom": "Свои напоминания"
         },
         "googleCalendarReminders": {
             "popup": "Уведомление",
@@ -44,8 +44,8 @@
         },
         "googleCalendarVisibility": {
             "default": "По умолчанию",
-            "private": "Приватное",
-            "public": "Публичное"
+            "private": "Приватная",
+            "public": "Публичная"
         },
         "googleCalendarTransparency": {
             "opaque": "Занят",
@@ -53,17 +53,17 @@
         },
         "googleCalendarColorId": {
             "": "По умолчанию",
-            "1": "Lavender",
-            "2": "Sage",
-            "3": "Grape",
-            "4": "Flamingo",
-            "5": "Banana",
-            "6": "Tangerine",
-            "7": "Peacock",
-            "8": "Graphite",
-            "9": "Blueberry",
-            "10": "Basil",
-            "11": "Tomato"
+            "1": "Лаванда",
+            "2": "Шалфей",
+            "3": "Виноград",
+            "4": "Фламинго",
+            "5": "Банан",
+            "6": "Мандарин",
+            "7": "Павлин",
+            "8": "Графит",
+            "9": "Черника",
+            "10": "Базилик",
+            "11": "Томат"
         }
     }
 }
