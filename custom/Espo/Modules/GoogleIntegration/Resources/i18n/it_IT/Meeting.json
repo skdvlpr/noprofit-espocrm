@@ -7,7 +7,7 @@
         "googleCalendarTemplate": "Template calendario",
         "googleCalendarReminderMode": "Modalità promemoria Google",
         "googleCalendarReminders": "Promemoria Google",
-        "googleCalendarDescriptionTemplateOverride": "Template descrizione",
+        "googleCalendarDescriptionTemplateOverride": "Descrizione evento",
         "googleCalendarLocation": "Luogo",
         "googleCalendarVisibility": "Visibilità",
         "googleCalendarTransparency": "Disponibilità",
@@ -16,6 +16,7 @@
     "labels": {
         "Google Calendar": "Google Calendar",
         "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata.",
+        "googleCalendarTemplateSelectHelp": "Scegli un template per compilare i campi sotto. Puoi modificarli prima di salvare.",
         "googleCalendarReminderNotice": "Puoi salvare questo record in Google Calendar con o senza promemoria Google.",
         "googleCalendarTemplateVariables": "Inserisci campo del record",
         "googleCalendarTemplateVariableSearch": "Cerca campi",

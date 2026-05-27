@@ -457,6 +457,7 @@ $ok('Date source list field loads options from API', str_contains($dateSourceLis
 $routes = json_decode(file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/routes.json') ?: '[]', true) ?: [];
 $routePaths = array_column($routes, 'route');
 $ok('date-source-options route exists', in_array('/GoogleIntegration/calendar/date-source-options/:entityType', $routePaths, true));
+$ok('template-form route exists', in_array('/GoogleIntegration/calendar/template-form/:templateId', $routePaths, true));
 $calendarView = file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/metadata/clientDefs/Calendar.json') ?: '';
 $ok('Calendar view override metadata exists', str_contains($calendarView, 'google-integration:views/calendar/calendar'));
 $ok('CRM date-source calendar route exists', in_array('/GoogleIntegration/calendar/crm-events', $routePaths, true));

@@ -7,7 +7,7 @@
         "googleCalendarTemplate": "Calendar template",
         "googleCalendarReminderMode": "Google reminder mode",
         "googleCalendarReminders": "Google reminders",
-        "googleCalendarDescriptionTemplateOverride": "Description template",
+        "googleCalendarDescriptionTemplateOverride": "Event description",
         "googleCalendarLocation": "Location",
         "googleCalendarVisibility": "Visibility",
         "googleCalendarTransparency": "Availability",
@@ -16,6 +16,7 @@
     "labels": {
         "Google Calendar": "Google Calendar",
         "googleCalendarPerDateSettingsHelp": "Configure Google Calendar options separately for each selected date.",
+        "googleCalendarTemplateSelectHelp": "Choose a template to fill the fields below. You can edit any value before saving.",
         "googleCalendarReminderNotice": "You can save this record to Google Calendar with or without Google reminders.",
         "googleCalendarTemplateVariables": "Insert record field",
         "googleCalendarTemplateVariableSearch": "Search fields",

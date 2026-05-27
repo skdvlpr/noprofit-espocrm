@@ -72,11 +72,12 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                                 <div class="col-sm-12 margin-bottom-sm">
                                     <label class="control-label small">{{calendarTemplateFieldLabel}}</label>
                                     <select class="form-control input-sm" data-role="calendarTemplateId">
-                                        <option value=""></option>
+                                        <option value="">{{translate 'None'}}</option>
                                         {{#each templateOptionList}}
                                             <option value="{{id}}"{{#if selected}} selected{{/if}}>{{name}}</option>
                                         {{/each}}
                                     </select>
+                                    <p class="help-block small text-muted margin-top-sm">{{templateSelectHelp}}</p>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="control-label small">{{reminderModeFieldLabel}}</label>
@@ -204,6 +205,25 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
             this.$el.find('[data-role="google-calendar-opportunity-event-settings"]').on('change input', () => {
                 this.model.set(this.name, this.readSettings(), {ui: true});
+            });
+
+            this.$el.find('[data-role="calendarTemplateId"]').on('change', e => {
+                const $select = $(e.currentTarget);
+                const $card = $select.closest('.google-calendar-opportunity-date-settings-card');
+                const sourceDateType = String($card.attr('data-date-type') || '');
+                const templateId = String($select.val() || '');
+
+                if (!sourceDateType) {
+                    return;
+                }
+
+                if (!templateId) {
+                    this.clearTemplateSelection(sourceDateType);
+
+                    return;
+                }
+
+                this.applyTemplateToCard(sourceDateType, templateId);
             });
 
             this.$el.find('[data-role="reminderMode"]').on('change', e => {
@@ -366,6 +386,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 visibilityFieldLabel: this.translate('googleCalendarVisibility', 'fields', this.model.entityType),
                 transparencyFieldLabel: this.translate('googleCalendarTransparency', 'fields', this.model.entityType),
                 calendarTemplateFieldLabel: this.translate('googleCalendarTemplate', 'fields', this.model.entityType),
+                templateSelectHelp: this.translate('googleCalendarTemplateSelectHelp', 'labels', this.model.entityType),
                 templateFieldLabel: this.translate('googleCalendarDescriptionTemplateOverride', 'fields', this.model.entityType),
                 reminderModeLabel: this.translateOption(item.reminderMode, 'googleCalendarReminderMode'),
                 visibilityLabel: this.translateOption(item.visibility, 'googleCalendarVisibility'),
@@ -448,6 +469,74 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
             item.reminders.splice(index, 1);
             this.model.set(this.name, list, {ui: true});
             this.reRender();
+        }
+
+        clearTemplateSelection(sourceDateType) {
+            const list = this.readSettings().map(item => {
+                if (item.sourceDateType !== sourceDateType) {
+                    return item;
+                }
+
+                return this.normalizeItem({
+                    ...item,
+                    calendarTemplateId: '',
+                });
+            });
+
+            this.model.set(this.name, list, {ui: true});
+            this.reRender();
+        }
+
+        applyTemplateToCard(sourceDateType, templateId) {
+            const params = {
+                entityType: this.model.entityType,
+                sourceDateType,
+            };
+
+            if (this.model.id) {
+                params.entityId = this.model.id;
+            }
+
+            Espo.Ui.notify(' ...');
+
+            Espo.Ajax.getRequest(`GoogleIntegration/calendar/template-form/${templateId}`, params)
+                .then(data => {
+                    Espo.Ui.notify(false);
+
+                    if (!data || typeof data !== 'object') {
+                        return;
+                    }
+
+                    const list = this.readSettings();
+                    const updated = list.map(item => {
+                        if (item.sourceDateType !== sourceDateType) {
+                            return item;
+                        }
+
+                        return this.normalizeItem({
+                            ...item,
+                            calendarTemplateId: templateId,
+                            descriptionTemplateOverride: String(data.description ?? ''),
+                            location: String(data.location ?? ''),
+                            colorId: String(data.colorId ?? ''),
+                            visibility: data.visibility ?? 'default',
+                            transparency: data.transparency ?? 'opaque',
+                            reminderMode: data.reminderMode ?? 'none',
+                            reminders: this.normalizeReminders(data.reminders),
+                        });
+                    });
+
+                    this.model.set(this.name, updated, {ui: true});
+                    this.reRender();
+                })
+                .catch(xhr => {
+                    Espo.Ui.notify(false);
+
+                    Espo.Ui.error(
+                        xhr?.responseJSON?.message
+                        || this.translate('googleCalendarTemplateLoadFailed', 'labels', this.model.entityType)
+                    );
+                });
         }
 
         renderVariablePickers() {

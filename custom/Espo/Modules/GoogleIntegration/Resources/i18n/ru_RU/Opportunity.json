@@ -7,7 +7,7 @@
         "googleCalendarTemplate": "Шаблон календаря",
         "googleCalendarReminderMode": "Режим напоминаний Google",
         "googleCalendarReminders": "Напоминания Google",
-        "googleCalendarDescriptionTemplateOverride": "Шаблон описания",
+        "googleCalendarDescriptionTemplateOverride": "Описание события",
         "googleCalendarLocation": "Место",
         "googleCalendarVisibility": "Видимость",
         "googleCalendarTransparency": "Занятость",
@@ -16,6 +16,7 @@
     "labels": {
         "Google Calendar": "Google Calendar",
         "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты.",
+        "googleCalendarTemplateSelectHelp": "Выберите шаблон — поля ниже заполнятся автоматически. Перед сохранением их можно изменить.",
         "googleCalendarReminderNotice": "Можно сохранить запись в Google Calendar с напоминаниями или без них.",
         "googleCalendarTemplateVariables": "Вставить поле записи",
         "googleCalendarTemplateVariableSearch": "Поиск полей",
