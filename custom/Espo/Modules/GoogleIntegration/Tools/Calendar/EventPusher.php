@@ -372,7 +372,7 @@ class EventPusher
         $selected = $entity->get('googleCalendarDateSourceList');
 
         if (!is_array($selected) || $selected === []) {
-            return [];
+            return $allowed;
         }
 
         return array_values(array_unique(array_filter(

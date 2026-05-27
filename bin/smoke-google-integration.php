@@ -558,6 +558,80 @@ echo "\nCanonical sourceDateType + link lookup\n";
 $injectableFactory = $container->getByClass(InjectableFactory::class);
 $dateSourceProvider = $injectableFactory->create(DateSourceProvider::class);
 
+echo "\nEventPusher date source defaulting\n";
+
+try {
+    $eventPusherForDates = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher::class);
+    $getSelected = new ReflectionMethod($eventPusherForDates, 'getSelectedDateSourceTypes');
+    $getSelected->setAccessible(true);
+
+    $sources = [
+        ['sourceDateType' => 'main', 'dateField' => 'startDate', 'allDay' => true],
+        ['sourceDateType' => 'endDate', 'dateField' => 'endDate', 'allDay' => true],
+    ];
+
+    $emptyListEntity = $em->getNewEntity('VolunteerEmployee');
+    $emptyListEntity->set([
+        'id' => Util::generateId(),
+        'name' => 'Smoke GCal date default',
+        'saveToGoogleCalendar' => true,
+        'googleCalendarDateSourceList' => [],
+        'startDate' => '2026-06-01',
+        'endDate' => '2026-12-31',
+    ]);
+
+    $defaulted = $getSelected->invoke($eventPusherForDates, $emptyListEntity, $sources);
+
+    $ok(
+        'getSelectedDateSourceTypes defaults to all allowed when list empty',
+        $defaulted === ['main', 'endDate'],
+        'got=' . implode(',', $defaulted)
+    );
+
+    $unsetListEntity = $em->getNewEntity('VolunteerEmployee');
+    $unsetListEntity->set([
+        'saveToGoogleCalendar' => true,
+        'startDate' => '2026-06-01',
+        'endDate' => '2026-12-31',
+    ]);
+
+    $defaultedUnset = $getSelected->invoke($eventPusherForDates, $unsetListEntity, $sources);
+
+    $ok(
+        'getSelectedDateSourceTypes defaults when list unset',
+        $defaultedUnset === ['main', 'endDate'],
+        'got=' . implode(',', $defaultedUnset)
+    );
+
+    $explicitEntity = $em->getNewEntity('VolunteerEmployee');
+    $explicitEntity->set([
+        'saveToGoogleCalendar' => true,
+        'googleCalendarDateSourceList' => ['main'],
+        'startDate' => '2026-06-01',
+        'endDate' => '2026-12-31',
+    ]);
+
+    $explicit = $getSelected->invoke($eventPusherForDates, $explicitEntity, $sources);
+
+    $ok(
+        'getSelectedDateSourceTypes respects explicit subset',
+        $explicit === ['main'],
+        'got=' . implode(',', $explicit)
+    );
+
+    $buildEvents = new ReflectionMethod($eventPusherForDates, 'buildCalendarDateSourceGoogleEvents');
+    $buildEvents->setAccessible(true);
+    $built = $buildEvents->invoke($eventPusherForDates, $emptyListEntity, $sources);
+
+    $ok(
+        'buildCalendarDateSourceGoogleEvents builds events when date list empty',
+        count($built) === 2,
+        'count=' . count($built)
+    );
+} catch (Throwable $e) {
+    $ok('EventPusher date source defaulting smoke', false, $e->getMessage());
+}
+
 $ok(
     'Meeting canonical main stays main',
     $dateSourceProvider->canonicalSourceDateType('Meeting', 'main') === 'main'
