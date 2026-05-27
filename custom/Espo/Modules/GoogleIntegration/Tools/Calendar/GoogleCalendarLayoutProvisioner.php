@@ -104,10 +104,10 @@ class GoogleCalendarLayoutProvisioner
         $module = $this->metadata->get(['scopes', $entityType, 'module']);
 
         if (is_string($module) && $module !== '' && $module !== self::MODULE) {
-            $path = $this->moduleLayoutPath($module, $entityType, $layoutName);
+            $layout = $this->readLayoutFromModule($module, $entityType, $layoutName);
 
-            if (is_readable($path)) {
-                return $this->normalizeLayout($this->decodeLayoutFile($path));
+            if ($layout !== null) {
+                return $layout;
             }
         }
 
@@ -116,8 +116,25 @@ class GoogleCalendarLayoutProvisioner
                 continue;
             }
 
-            $path = $this->moduleLayoutPath($moduleName, $entityType, $layoutName);
+            $layout = $this->readLayoutFromModule($moduleName, $entityType, $layoutName);
 
+            if ($layout !== null) {
+                return $layout;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @return array<int, mixed>|null
+     */
+    private function readLayoutFromModule(string $module, string $entityType, string $layoutName): ?array
+    {
+        foreach ([
+            $this->moduleLayoutPath($module, $entityType, $layoutName),
+            $this->applicationModuleLayoutPath($module, $entityType, $layoutName),
+        ] as $path) {
             if (!is_readable($path)) {
                 continue;
             }
@@ -125,7 +142,7 @@ class GoogleCalendarLayoutProvisioner
             return $this->normalizeLayout($this->decodeLayoutFile($path));
         }
 
-        return [];
+        return null;
     }
 
     /**
@@ -296,6 +313,12 @@ class GoogleCalendarLayoutProvisioner
     private function moduleLayoutPath(string $module, string $entityType, string $layoutName): string
     {
         return 'custom/Espo/Modules/' . $module
+            . '/Resources/layouts/' . $entityType . '/' . $layoutName . '.json';
+    }
+
+    private function applicationModuleLayoutPath(string $module, string $entityType, string $layoutName): string
+    {
+        return 'application/Espo/Modules/' . $module
             . '/Resources/layouts/' . $entityType . '/' . $layoutName . '.json';
     }
 }

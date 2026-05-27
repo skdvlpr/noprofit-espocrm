@@ -444,6 +444,13 @@ $ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'g
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
+$callDetailLayout = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
+) ?: '';
+$ok(
+    'Call detail layout includes core fields (name, dateStart)',
+    str_contains($callDetailLayout, '"name"') && str_contains($callDetailLayout, '"dateStart"')
+);
 $dateSourceListView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-date-source-list.js') ?: '';
 $ok('Per-date settings loads date sources from API', str_contains($perDateView, 'date-source-options'));
 $ok('Date source list field loads options from API', str_contains($dateSourceListView, 'date-source-options'));

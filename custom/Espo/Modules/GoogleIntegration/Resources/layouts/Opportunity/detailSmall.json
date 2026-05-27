@@ -24,10 +24,8 @@
             ],
             [
                 {
-                    "name": "presentationDate"
-                },
-                {
-                    "name": "amount"
+                    "name": "amount",
+                    "fullWidth": true
                 }
             ],
             [
