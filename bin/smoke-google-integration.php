@@ -4,7 +4,7 @@
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
  *
  * 1) Runs {@see \Espo\Modules\GoogleIntegration\Tools\Installer} (idempotent: DB row,
- *    removes legacy `GoogleSafehouse` integration id, rebuild).
+ *    migrates/removes legacy `GoogleIntegration` / `GoogleSafehouse` integration ids, rebuild).
  * 2) Follows `explore-espo-endpoints` Workflow A (`App/user`) + Workflow C (Metadata slice).
  * 3) ORM + expected **403** on `GET Integration/GoogleCalendarDrive` for `type=api` users
  *    (human admin UI uses `type=admin`).
@@ -36,6 +36,54 @@ $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
 /** @var Config $config */
 $config = $container->getByClass(Config::class);
+
+$integrationsConfigBefore = $config->get('integrations') ?? (object) [];
+if (is_array($integrationsConfigBefore)) {
+    $integrationsConfigBefore = (object) $integrationsConfigBefore;
+}
+$canonicalConfigExisted = is_object($integrationsConfigBefore)
+    && property_exists($integrationsConfigBefore, GoogleIntegrationInstaller::INTEGRATION_ID);
+$legacyConfigSnapshot = is_object($integrationsConfigBefore)
+    && property_exists($integrationsConfigBefore, 'GoogleIntegration')
+    ? (bool) $integrationsConfigBefore->GoogleIntegration
+    : null;
+
+$canonicalIntegrationBefore = $em
+    ->getRDBRepository('Integration')
+    ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
+    ->findOne();
+$legacyIntegrationBefore = $em->getRDBRepository('Integration')->where(['id' => 'GoogleIntegration'])->findOne();
+$legacyIntegrationSnapshot = $legacyIntegrationBefore === null ? null : [
+    'enabled' => (bool) $legacyIntegrationBefore->get('enabled'),
+    'clientId' => $legacyIntegrationBefore->get('clientId'),
+    'clientSecret' => $legacyIntegrationBefore->get('clientSecret'),
+];
+$legacyExternalAccountBefore = $em
+    ->getRDBRepository('ExternalAccount')
+    ->where(['id*' => 'GoogleIntegration__%'])
+    ->findOne();
+$legacyExternalAccountSnapshot = null;
+
+if ($legacyExternalAccountBefore !== null) {
+    $legacyExternalAccountId = $legacyExternalAccountBefore->getId();
+
+    if (is_string($legacyExternalAccountId) && str_starts_with($legacyExternalAccountId, 'GoogleIntegration__')) {
+        $legacyExternalAccountSnapshot = [
+            'id' => $legacyExternalAccountId,
+            'newId' => GoogleIntegrationInstaller::INTEGRATION_ID . '__'
+                . substr($legacyExternalAccountId, strlen('GoogleIntegration__')),
+            'canonicalExisted' => $em->getEntityById(
+                'ExternalAccount',
+                GoogleIntegrationInstaller::INTEGRATION_ID . '__'
+                    . substr($legacyExternalAccountId, strlen('GoogleIntegration__'))
+            ) !== null,
+            'enabled' => (bool) $legacyExternalAccountBefore->get('enabled'),
+            'accessToken' => $legacyExternalAccountBefore->get('accessToken'),
+            'refreshToken' => $legacyExternalAccountBefore->get('refreshToken'),
+            'calendarSyncMode' => $legacyExternalAccountBefore->get('calendarSyncMode'),
+        ];
+    }
+}
 
 echo "Provisioning: Espo\\Modules\\GoogleIntegration\\Tools\\Installer\n";
 (new GoogleIntegrationInstaller())->runPostInstall($container);
@@ -142,6 +190,73 @@ $ok('Integration ' . GoogleIntegrationInstaller::INTEGRATION_ID . ' exists in da
 
 $legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'])->findOne();
 $ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
+
+$legacyGoogle = $em->getRDBRepository('Integration')->where(['id' => 'GoogleIntegration'])->findOne();
+$ok('Legacy Integration GoogleIntegration removed after migration', $legacyGoogle === null);
+
+if ($legacyIntegrationSnapshot !== null && $canonicalIntegrationBefore === null && $gh !== null) {
+    $ok(
+        'legacy GoogleIntegration enabled flag migrated',
+        (bool) $gh->get('enabled') === $legacyIntegrationSnapshot['enabled']
+    );
+    $ok(
+        'legacy GoogleIntegration clientId migrated',
+        $gh->get('clientId') === $legacyIntegrationSnapshot['clientId']
+    );
+    $ok(
+        'legacy GoogleIntegration clientSecret migrated',
+        $gh->get('clientSecret') === $legacyIntegrationSnapshot['clientSecret']
+    );
+}
+
+if ($legacyConfigSnapshot !== null) {
+    $integrationsConfigAfter = $config->get('integrations') ?? (object) [];
+    if (is_array($integrationsConfigAfter)) {
+        $integrationsConfigAfter = (object) $integrationsConfigAfter;
+    }
+
+    $ok(
+        'legacy config integrations.GoogleIntegration removed',
+        is_object($integrationsConfigAfter) && !property_exists($integrationsConfigAfter, 'GoogleIntegration')
+    );
+
+    if (!$canonicalConfigExisted) {
+        $ok(
+            'legacy config flag migrated to GoogleCalendarDrive',
+            is_object($integrationsConfigAfter)
+                && property_exists($integrationsConfigAfter, GoogleIntegrationInstaller::INTEGRATION_ID)
+                && (bool) $integrationsConfigAfter->{GoogleIntegrationInstaller::INTEGRATION_ID}
+                    === $legacyConfigSnapshot
+        );
+    }
+}
+
+if ($legacyExternalAccountSnapshot !== null) {
+    $migratedExternalAccount = $em->getEntityById('ExternalAccount', $legacyExternalAccountSnapshot['newId']);
+    $legacyExternalAccount = $em->getEntityById('ExternalAccount', $legacyExternalAccountSnapshot['id']);
+
+    $ok('legacy GoogleIntegration ExternalAccount removed', $legacyExternalAccount === null);
+    $ok('legacy GoogleIntegration ExternalAccount migrated to GoogleCalendarDrive id', $migratedExternalAccount !== null);
+
+    if ($migratedExternalAccount !== null && !$legacyExternalAccountSnapshot['canonicalExisted']) {
+        $ok(
+            'legacy ExternalAccount enabled flag migrated',
+            (bool) $migratedExternalAccount->get('enabled') === $legacyExternalAccountSnapshot['enabled']
+        );
+        $ok(
+            'legacy ExternalAccount accessToken migrated',
+            $migratedExternalAccount->get('accessToken') === $legacyExternalAccountSnapshot['accessToken']
+        );
+        $ok(
+            'legacy ExternalAccount refreshToken migrated',
+            $migratedExternalAccount->get('refreshToken') === $legacyExternalAccountSnapshot['refreshToken']
+        );
+        $ok(
+            'legacy ExternalAccount calendarSyncMode migrated',
+            $migratedExternalAccount->get('calendarSyncMode') === $legacyExternalAccountSnapshot['calendarSyncMode']
+        );
+    }
+}
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
 $ok(
