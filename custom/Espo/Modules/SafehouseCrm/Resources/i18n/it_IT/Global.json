@@ -21,5 +21,8 @@
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
         "Create MealCount": "Crea Nuovo"
+    },
+    "themes": {
+        "SafehouseAurora": "Safehouse Aurora"
     }
 }

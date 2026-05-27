@@ -1,0 +1,36 @@
+{
+    "stylesheet": "client/custom/css/safehouse-aurora/safehouse-aurora.css",
+    "stylesheetIframe": "client/css/espo/glass-iframe.css",
+    "stylesheetIframeFallback": "client/css/espo/hazyblue-iframe.css",
+    "logo": "client/img/logo.svg",
+    "textColor": "#e5e5e5",
+    "chartGridColor": "#404040",
+    "chartTickColor": "#737373",
+    "chartSuccessColor": "#65a30d",
+    "chartColorList": [
+        "#dc2626",
+        "#ef4444",
+        "#525252",
+        "#b91c1c",
+        "#a3a3a3",
+        "#991b1b",
+        "#737373",
+        "#f87171",
+        "#404040"
+    ],
+    "chartColorAlternativeList": [
+        "#dc2626",
+        "#ef4444",
+        "#525252",
+        "#b91c1c",
+        "#737373"
+    ],
+    "calendarColors": {
+        "": "rgba(220, 38, 38, 0.45)",
+        "bg": "rgba(18, 18, 18, 0.75)",
+        "Meeting": "rgba(220, 38, 38, 0.65)",
+        "Call": "rgba(239, 68, 68, 0.55)",
+        "Task": "rgba(101, 163, 13, 0.55)"
+    },
+    "isDark": true
+}

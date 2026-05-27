@@ -8,23 +8,20 @@ use Espo\Core\FieldValidation\Validator\Failure;
 use Espo\ORM\Entity;
 
 /**
- * Validates the Italian fiscal code format for Member records.
+ * Validates Italian tax identifier: either a 16-char Codice Fiscale (alphanumeric)
+ * or an 11-digit Partita IVA (numeric only).
  *
  * @implements Validator<Entity>
  */
 class ItalianFiscalCode implements Validator
 {
-    private const PATTERN =
+    /** 16-char Codice Fiscale (persons). */
+    private const CF_PATTERN =
         '/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/';
 
-    /**
-     * Validate an optional Italian fiscal code.
-     *
-     * @param Entity $entity Entity being validated.
-     * @param string $field Field name.
-     * @param Data $data Field validation data.
-     * @return Failure|null
-     */
+    /** 11-digit Partita IVA (companies / associations). */
+    private const PIVA_PATTERN = '/^\d{11}$/';
+
     public function validate(Entity $entity, string $field, Data $data): ?Failure
     {
         $value = $entity->get($field);
@@ -39,10 +36,14 @@ class ItalianFiscalCode implements Validator
 
         $value = strtoupper(trim($value));
 
-        if (preg_match(self::PATTERN, $value) !== 1) {
-            return Failure::create();
+        if (preg_match(self::PIVA_PATTERN, $value) === 1) {
+            return null;
         }
 
-        return null;
+        if (preg_match(self::CF_PATTERN, $value) === 1) {
+            return null;
+        }
+
+        return Failure::create();
     }
 }

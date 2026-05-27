@@ -1,0 +1,360 @@
+/**
+ * Safehouse Aurora — dark canvas + frosted light navbar + ultra-light glass panels.
+ */
+@import url('../../../css/espo/glass.css');
+
+:root {
+  /* Slightly lighter charcoal canvas (separates from navbar) */
+  --body-bg: #2a2a30;
+  --body-bg-2: #32323a;
+
+  --text-color: #e8e8ec;
+  --text-muted-color: #a1a1aa;
+  --text-gray-color: #71717a;
+  --link-color: #f87171;
+  --link-hover-color: #ef4444;
+
+  --brand-primary: #dc2626;
+  --brand-danger: #ef4444;
+  --brand-success: #65a30d;
+  --brand-warning: #d97706;
+  --brand-info: #71717a;
+
+  /* Frosted light navbar — color barely visible, glass carries the look */
+  --navbar-inverse-bg: rgba(255, 255, 255, 0.04);
+  --navbar-inverse-bg-7: rgba(255, 255, 255, 0.06);
+  --navbar-inverse-border: rgba(255, 255, 255, 0.14);
+  --navbar-inverse-link-color: #e4e4e7;
+  --navbar-inverse-link-hover-color: #fafafa;
+  --navbar-inverse-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --navbar-inverse-link-active-bg: rgba(220, 38, 38, 0.28);
+  --navbar-inverse-link-icon-color: #d4d4d8;
+  --navbar-inverse-link-icon-hover-color: #fafafa;
+  --navbar-box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.35);
+
+  /* Ultra-light glass panels (lower opacity = more see-through) */
+  --panel-bg: rgba(255, 255, 255, 0.03);
+  --panel-default-bg: rgba(255, 255, 255, 0.028);
+  --panel-primary-bg: rgba(255, 255, 255, 0.034);
+  --panel-success-bg: rgba(255, 255, 255, 0.026);
+  --panel-danger-bg: rgba(255, 255, 255, 0.026);
+  --panel-warning-bg: rgba(255, 255, 255, 0.026);
+  --panel-info-bg: rgba(255, 255, 255, 0.026);
+
+  --panel-default-text: #ececef;
+  --panel-default-border: rgba(255, 255, 255, 0.1);
+  --panel-primary-border: rgba(255, 255, 255, 0.12);
+
+  --default-heading-bg-color: rgba(255, 255, 255, 0.028);
+  --default-border-color: rgba(255, 255, 255, 0.09);
+
+  --table-bg: transparent;
+  --table-bg-accent: rgba(255, 255, 255, 0.028);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-color: #ececef;
+
+  --dropdown-bg: rgba(255, 255, 255, 0.052);
+  --dropdown-link-color: #ececef;
+  --dropdown-link-hover-bg: rgba(220, 38, 38, 0.18);
+  --dropdown-border: rgba(255, 255, 255, 0.12);
+  --popover-bg: rgba(255, 255, 255, 0.055);
+
+  --modal-content-bg: rgba(255, 255, 255, 0.045);
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.45);
+  --modal-backdrop-filter: blur(10px);
+  --modal-header-bg: transparent;
+  --modal-footer-bg: transparent;
+  --modal-border-color: rgba(255, 255, 255, 0.12);
+
+  --well-bg: rgba(255, 255, 255, 0.028);
+  --well-border: rgba(255, 255, 255, 0.08);
+
+  /* Soft neutral shadow — long spread, no red bleed */
+  --default-box-shadow: 0 28px 72px -24px rgba(0, 0, 0, 0.5), 0 12px 32px -16px rgba(0, 0, 0, 0.28);
+  --top-bar-box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.35);
+  --panel-border-radius: 14px;
+}
+
+body {
+  --theme-name: SafehouseAurora !important;
+  color: var(--text-color);
+
+  background-color: var(--body-bg) !important;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(48, 48, 56, 0.55) 0%,
+      rgba(42, 42, 48, 0.35) 120px,
+      rgba(36, 36, 42, 0.2) 280px,
+      rgba(42, 42, 48, 0.85) 100%
+    ),
+    url('safehouse-aurora-bg.svg') !important;
+  background-size: cover, cover !important;
+  background-position: top center, center !important;
+  background-attachment: fixed, fixed !important;
+  background-repeat: no-repeat, no-repeat !important;
+}
+
+/* ── Frosted light navbar (floats above dark canvas) ── */
+body #navbar {
+  position: relative;
+  z-index: 1200;
+}
+
+body #navbar > .navbar {
+  background: rgba(255, 255, 255, 0.038) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.2) brightness(1.12);
+  backdrop-filter: blur(26px) saturate(1.2) brightness(1.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 48px -12px rgba(0, 0, 0, 0.4) !important;
+}
+
+body #navbar > .navbar .navbar-body,
+body[data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body {
+  background: transparent !important;
+}
+
+body[data-navbar='side'] #navbar > .navbar {
+  border-bottom: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Nav labels — light text on frosted strip (icons keep scope colors via inline style) */
+body .navbar-inverse .nav > li > a,
+body .navbar-inverse .nav > li > a .full-label,
+body .navbar-inverse .nav > li > a .short-label-text {
+  color: #e4e4e7 !important;
+}
+
+body .navbar-inverse .nav > li > a:hover,
+body .navbar-inverse .nav > li > a:focus,
+body .navbar-inverse .nav > li > a:hover .full-label {
+  color: #fafafa !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body .navbar-inverse .nav > li.active > a,
+body .navbar-inverse .nav > li.active > a:hover,
+body .list-group-side li.selected a.side-link {
+  color: #ffffff !important;
+  background-color: rgba(220, 38, 38, 0.28) !important;
+  font-weight: 600;
+}
+
+body .navbar-inverse .nav > li.active > a .full-label,
+body .navbar-inverse .nav > li.active > a .short-label-text {
+  color: #ffffff !important;
+}
+
+/* Entity tab icons: inherit scope color from .short-label inline style */
+body .navbar-inverse .nav > li > a .short-label[style*='color'] span {
+  color: inherit;
+}
+
+/* Only grey-out icons that have no scope color assigned */
+body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .fas,
+body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .far,
+body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .fab {
+  color: #a1a1aa !important;
+}
+
+/* Slightly boost scope icon saturation on dark navbar */
+body .navbar-inverse .nav > li > a .short-label[style*='color'] {
+  filter: saturate(1.15) brightness(1.08);
+}
+
+/* Navbar search & icons */
+body #navbar .form-control,
+body #navbar input.form-control {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #f4f4f5 !important;
+}
+
+body #navbar .navbar-right > li > a,
+body #navbar .navbar-right .btn-link {
+  color: #d4d4d8 !important;
+}
+
+body #navbar .navbar-right > li > a:hover {
+  color: #fafafa !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Frosted dropdowns (user menu, etc.) */
+body .dropdown-menu,
+body #navbar .dropdown-menu {
+  background: rgba(255, 255, 255, 0.05) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) brightness(1.1);
+  backdrop-filter: blur(22px) saturate(1.15) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28) !important;
+}
+
+body .dropdown-menu > li > a {
+  color: #ececef !important;
+}
+
+body .dropdown-menu > li > a:hover,
+body .dropdown-menu > li > a:focus {
+  background: rgba(220, 38, 38, 0.16) !important;
+  color: #fff !important;
+}
+
+body .dropdown-menu .divider {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Content area (visually below navbar) ── */
+body #content,
+body .content {
+  position: relative;
+  z-index: 1;
+}
+
+body .page-header,
+body .page-header a,
+body .header-breadcrumbs,
+body .header-breadcrumbs a {
+  color: var(--text-color);
+}
+
+body .header-breadcrumbs a.active {
+  color: #ef4444;
+}
+
+/* ── Ultra-light glass panels ── */
+body .panel.panel-default,
+body .panel.headered,
+body .panel.panel-primary,
+body .panel.panel-success,
+body .panel.panel-danger,
+body .panel.panel-warning,
+body .panel.panel-info,
+body .list-container-panel.panel,
+body #global-search-panel > .panel,
+body #notifications-panel > .panel,
+body .modal-dialog > .modal-content,
+body .popup-notification {
+  background-color: var(--panel-default-bg) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.02);
+  backdrop-filter: blur(28px) saturate(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--default-box-shadow) !important;
+  color: var(--panel-default-text);
+}
+
+/* Kill accidental red glow from glass / borders */
+body .panel.panel-default,
+body .panel.headered,
+body .list-container-panel.panel {
+  outline: none !important;
+}
+
+body .panel.panel-default > .panel-heading,
+body .panel.headered > .panel-heading,
+body .list-container-panel > .panel-heading,
+body #global-search-panel > .panel > .panel-heading,
+body #notifications-panel > .panel > .panel-heading {
+  background-color: rgba(255, 255, 255, 0.022) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* List search / filter bar */
+body .search-row,
+body .list-buttons-container {
+  background: transparent;
+}
+
+body .btn-default {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+body .btn-default:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fafafa;
+}
+
+body .btn-primary {
+  background-color: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+body .btn-primary:hover {
+  background-color: #b91c1c;
+}
+
+body .form-control,
+body select.form-control,
+body .selectize-input {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #ececef;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+body .form-control:focus,
+body .selectize-input.focus {
+  border-color: rgba(220, 38, 38, 0.45);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* Page scope icon in header — keep entity color */
+body .page-header .icon,
+body .page-header [class*='fa-'] {
+  color: inherit;
+}
+
+body .stick-sub,
+body .sticked-bar {
+  background: rgba(255, 255, 255, 0.034) !important;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body .table,
+body .table > thead > tr > th,
+body .table > tbody > tr > td {
+  color: var(--text-color);
+  border-color: rgba(255, 255, 255, 0.06);
+  background-color: transparent;
+}
+
+#login.panel {
+  background: rgba(255, 255, 255, 0.045);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ececef;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body #navbar > .navbar,
+  body .panel.panel-default,
+  body .dropdown-menu {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  :root {
+    --panel-default-bg: #32323a;
+    --navbar-inverse-bg: #3f3f46;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll, scroll !important;
+  }
+}

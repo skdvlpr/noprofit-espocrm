@@ -47,12 +47,27 @@ class EnforceTaxCodeUnique implements BeforeSave
             return;
         }
 
+        $firstName = trim((string) ($duplicate->get('firstName') ?? ''));
+        $lastName = trim((string) ($duplicate->get('lastName') ?? ''));
+        $displayName = trim($firstName . ' ' . $lastName);
+
+        if ($displayName === '') {
+            $displayName = trim((string) ($duplicate->get('name') ?? ''));
+        }
+
+        if ($displayName === '') {
+            $displayName = '(no name)';
+        }
+
+        $email = trim((string) ($duplicate->get('emailAddress') ?? ''));
+        $emailSuffix = $email !== '' ? ' — email: ' . $email : '';
+
         throw new Conflict(sprintf(
-            'A Member with Codice Fiscale "%s" already exists: %s (ID: %s). '
+            'A Member with Codice Fiscale "%s" already exists: %s%s. '
             . 'Please open the existing record or use a different fiscal code.',
             $taxCode,
-            $duplicate->get('name') ?? '(no name)',
-            $duplicate->getId()
+            $displayName,
+            $emailSuffix
         ));
     }
 }
