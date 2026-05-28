@@ -144,7 +144,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 scope: this.getMetadata().get(`integrations.${this.integration}.params.scope`),
                 response_type: 'code',
                 access_type: 'offline',
-                approval_prompt: 'force',
+                prompt: 'consent',
             };
 
             const query = Object.keys(params)

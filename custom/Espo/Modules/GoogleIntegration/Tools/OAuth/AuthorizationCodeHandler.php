@@ -55,8 +55,20 @@ class AuthorizationCodeHandler
             throw new Error("Could not get access token for $integration.");
         }
 
+        $hasNewRefreshToken = array_key_exists('refreshToken', $result)
+            && is_string($result['refreshToken'])
+            && $result['refreshToken'] !== '';
+
+        if (!$hasNewRefreshToken) {
+            unset($result['refreshToken']);
+        }
+
         $entity->clear('accessToken');
-        $entity->clear('refreshToken');
+
+        if ($hasNewRefreshToken) {
+            $entity->clear('refreshToken');
+        }
+
         $entity->clear('tokenType');
         $entity->clear('expiresAt');
 

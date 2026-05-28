@@ -175,6 +175,64 @@ $ok(
 $fields = $meta['fields'] ?? null;
 $ok('fields include clientId and clientSecret', is_array($fields) && isset($fields['clientId'], $fields['clientSecret']));
 
+echo "\nOAuth reconnect token preservation\n";
+
+$oauthClientWithoutRefresh = new class extends \Espo\Core\ExternalAccount\OAuth2\Client {
+    public function __construct()
+    {
+    }
+
+    public function getAccessToken($url, $grantType, array $params)
+    {
+        return [
+            'code' => 200,
+            'result' => [
+                'access_token' => 'smoke-access-token',
+                'token_type' => 'Bearer',
+                'expires_in' => 3600,
+            ],
+            'contentType' => false,
+            'header' => '',
+        ];
+    }
+};
+
+$googleOauthClient = new \Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google(
+    $oauthClientWithoutRefresh,
+    [
+        'tokenEndpoint' => 'https://oauth2.googleapis.com/token',
+        'redirectUri' => $expectedRedirect,
+        'refreshToken' => 'existing-refresh-token',
+    ],
+    null,
+    $container->getByClass(\Espo\Core\Utils\Log::class)
+);
+$tokenDataWithoutRefresh = $googleOauthClient->getAccessTokenFromAuthorizationCode('smoke-auth-code-12345');
+$tokenDataKeys = is_array($tokenDataWithoutRefresh) ? implode(',', array_keys($tokenDataWithoutRefresh)) : 'not-array';
+$ok(
+    'Google client omits refreshToken when token response has no refresh_token',
+    is_array($tokenDataWithoutRefresh) && !array_key_exists('refreshToken', $tokenDataWithoutRefresh),
+    'keys=' . $tokenDataKeys
+);
+
+$authorizationCodeHandlerSource = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php'
+) ?: '';
+$ok(
+    'AuthorizationCodeHandler preserves existing refreshToken unless a new one is returned',
+    str_contains($authorizationCodeHandlerSource, '$hasNewRefreshToken')
+        && str_contains($authorizationCodeHandlerSource, "unset(\$result['refreshToken'])")
+        && str_contains($authorizationCodeHandlerSource, 'if ($hasNewRefreshToken) {')
+);
+$oauthViewSource = file_get_contents(
+    __DIR__ . '/../client/custom/modules/google-integration/src/views/external-account/oauth2.js'
+) ?: '';
+$ok(
+    'OAuth authorize request uses prompt=consent for reconnect',
+    str_contains($oauthViewSource, "prompt: 'consent'")
+        && !str_contains($oauthViewSource, 'approval_prompt')
+);
+
 echo "\nGoogle Calendar dynamic entity metadata\n";
 
 $calendarCapableEntityTypes = [];

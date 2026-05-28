@@ -29,7 +29,7 @@ class Google extends BaseGoogle
      *   accessToken: ?string,
      *   tokenType: ?string,
      *   expiresAt: ?string,
-     *   refreshToken: ?string,
+     *   refreshToken?: string,
      * }
      */
     public function getAccessTokenFromAuthorizationCode(string $code)
@@ -62,7 +62,6 @@ class Google extends BaseGoogle
         $result = $response['result'];
 
         $data = $this->getAccessTokenDataFromResponseResult($result);
-        $data['refreshToken'] = $result['refresh_token'] ?? null;
 
         if (empty($data['accessToken'])) {
             $this->logTokenExchangeFailure($response);
