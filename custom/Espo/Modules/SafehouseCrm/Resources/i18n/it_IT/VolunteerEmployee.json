@@ -17,7 +17,8 @@
     "monthlyHours": "Ore Mensili (calc)",
     "extra": "Note Extra",
     "name": "Nome Completo",
-    "status": "Stato"
+    "status": "Stato",
+    "assignedUser": "Utente collegato"
   },
   "links": {
     "documents": "Documenti",

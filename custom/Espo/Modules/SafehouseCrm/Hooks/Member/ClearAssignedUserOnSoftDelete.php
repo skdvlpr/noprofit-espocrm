@@ -20,6 +20,8 @@ class ClearAssignedUserOnSoftDelete implements BeforeSave
             return;
         }
 
+        $entity->set('deletedAssignedUserId', $entity->get('assignedUserId'));
+        $entity->set('deletedAssignedUserName', $entity->get('assignedUserName'));
         $entity->set('assignedUserId', null);
         $entity->set('assignedUserName', null);
     }

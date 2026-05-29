@@ -99,6 +99,11 @@
             "view": "views/fields/assigned-user",
             "tooltip": "Primary email/phone are synced from this user."
         },
+        "deletedAssignedUser": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
         "teams": {
             "type": "linkMultiple",
             "view": "views/fields/teams"
@@ -114,6 +119,10 @@
             "entity": "User"
         },
         "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "deletedAssignedUser": {
             "type": "belongsTo",
             "entity": "User"
         },

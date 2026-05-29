@@ -19,7 +19,8 @@
     "positionsHeld": "Incarichi Ricoperti",
     "notes": "Annotazioni",
     "emailAddress": "Email",
-    "phoneNumber": "Telefono"
+    "phoneNumber": "Telefono",
+    "assignedUser": "Utente collegato"
   },
   "options": {
     "status": {

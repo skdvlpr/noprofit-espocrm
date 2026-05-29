@@ -259,7 +259,7 @@ class RoleSetup
      *   - test_associato   -> Member
      *
      * Idempotent: skipped if a record already exists with the same
-     * `assignedUserId` **or** `userId` (unique per linked User on personnel entities).
+     * `assignedUserId` (unique per linked User on personnel entities).
      *
      * Must run after {@see provisionTestUsers()} (use {@see provisionTestUsersTeamsAndProfiles()}
      * from scripts so order is guaranteed).
@@ -323,12 +323,7 @@ class RoleSetup
             }
 
             $existing = $em->getRDBRepository($spec['entityType'])
-                ->where([
-                    'OR' => [
-                        ['assignedUserId' => $user->getId()],
-                        ['userId' => $user->getId()],
-                    ],
-                ])
+                ->where(['assignedUserId' => $user->getId()])
                 ->findOne();
 
             if ($existing) {
@@ -342,7 +337,6 @@ class RoleSetup
             $entity = $em->getRDBRepository($spec['entityType'])->getNew();
             $payload = array_merge($spec['attributes'], [
                 'assignedUserId' => $user->getId(),
-                'userId'         => $user->getId(),
             ]);
             $email = $user->get('emailAddress');
             if (!is_string($email) || trim($email) === '') {

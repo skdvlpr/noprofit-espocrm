@@ -17,7 +17,8 @@
     "monthlyHours": "Monthly Hours (calc)",
     "extra": "Extra Notes",
     "name": "Full Name",
-    "status": "Status"
+    "status": "Status",
+    "assignedUser": "Linked User"
   },
   "links": {
     "documents": "Documents",
