@@ -141,9 +141,10 @@
         },
         "assignedUser": {
             "type": "unique",
-            "columns": ["assignedUserId", "deleted"]
+            "columns": ["assignedUserId", "deleted", "deleteId"]
         }
     },
+    "deleteId": true,
     "optimisticConcurrencyControl": true,
     "audited": true,
     "statusField": "status"

@@ -193,6 +193,29 @@ foreach ($em->getRDBRepository('CalendarDateSource')
 $calendarCapableEntityTypes = array_keys($calendarCapableEntityTypes);
 sort($calendarCapableEntityTypes);
 
+$requiredBaseLayoutFields = [
+    'Call' => [
+        'detail' => ['name', 'dateStart', 'dateEnd'],
+        'detailSmall' => ['name', 'dateStart'],
+    ],
+    'Campaign' => [
+        'detail' => ['name', 'status', 'startDate'],
+        'detailSmall' => ['name', 'status'],
+    ],
+    'Meeting' => [
+        'detail' => ['name', 'dateStart', 'dateEnd'],
+        'detailSmall' => ['name', 'dateStart'],
+    ],
+    'Task' => [
+        'detail' => ['name', 'dateEnd', 'status'],
+        'detailSmall' => ['name', 'dateEnd'],
+    ],
+    'VolunteerEmployee' => [
+        'detail' => ['assignedUser', 'startDate'],
+        'detailSmall' => ['assignedUser'],
+    ],
+];
+
 $ok(
     'at least one active CalendarDateSource target entity',
     $calendarCapableEntityTypes !== [],
@@ -281,7 +304,28 @@ foreach ($calendarCapableEntityTypes as $entityType) {
                 && !$layoutHasField($layout, 'googleCalendarReminders')
                 && !$layoutHasField($layout, 'googleCalendarOpportunityDateList')
         );
+
+        foreach ($requiredBaseLayoutFields[$entityType][$layoutType] ?? [] as $fieldName) {
+            $ok(
+                "$entityType $layoutType layout preserves base field $fieldName",
+                $layoutHasField($layout, $fieldName)
+            );
+        }
     }
+}
+
+echo "\nSafehouse personnel layout regression checks\n";
+
+foreach ([
+    'Member/edit' => __DIR__ . '/../custom/Espo/Modules/SafehouseCrm/Resources/layouts/Member/edit.json',
+    'VolunteerEmployee/edit' => __DIR__ . '/../custom/Espo/Modules/SafehouseCrm/Resources/layouts/VolunteerEmployee/edit.json',
+    'VolunteerEmployee/detailSmall' => __DIR__ . '/../custom/Espo/Modules/SafehouseCrm/Resources/layouts/VolunteerEmployee/detailSmall.json',
+    'GoogleIntegration VolunteerEmployee/detailSmall' => __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/VolunteerEmployee/detailSmall.json',
+] as $name => $path) {
+    $layout = json_decode(file_get_contents($path) ?: '[]');
+
+    $ok("$name layout has assignedUser", $layoutHasField($layout, 'assignedUser'));
+    $ok("$name layout has no stale user field", !$layoutHasField($layout, 'user'));
 }
 
 $linkEntityDefs = $metadata->get('entityDefs.GoogleCalendarEventLink');
