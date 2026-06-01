@@ -13,13 +13,18 @@ define('google-integration:views/fields/google-calendar-description-template', [
 
     class GoogleCalendarDescriptionTemplateField extends _text.default {
         setup() {
+            if (this.model.getFieldType(this.name) === 'varchar') {
+                this.editTemplate = 'fields/varchar/edit';
+                this.detailTemplate = 'fields/varchar/detail';
+                this.listTemplate = 'fields/varchar/list';
+                this.searchTemplate = 'fields/varchar/search';
+            }
+
             super.setup();
 
             if (this.model.entityType === 'CalendarTemplate') {
                 this.listenTo(this.model, 'change:targetEntityType', () => {
-                    if (this.isRendered() && this.mode === this.MODE_EDIT) {
-                        this.renderVariablePicker();
-                    }
+                    this.scheduleVariablePickerRender();
                 });
             }
         }
@@ -27,16 +32,67 @@ define('google-integration:views/fields/google-calendar-description-template', [
         afterRender() {
             super.afterRender();
 
-            if (this.mode !== 'edit') {
+            if (!this.isEditMode()) {
                 return;
             }
 
             this.renderVariablePicker();
+
+            if (this.model.entityType !== 'CalendarTemplate') {
+                return;
+            }
+
+            const targetField = this.getTargetEntityTypeFieldView();
+
+            if (targetField) {
+                this.listenTo(targetField, 'after:render', () => this.renderVariablePicker());
+            }
+
+            // targetEntityType loads its option list asynchronously on first paint
+            setTimeout(() => this.renderVariablePicker(), 0);
+        }
+
+        scheduleVariablePickerRender() {
+            if (!this.isEditMode()) {
+                return;
+            }
+
+            if (this.isRendered()) {
+                this.renderVariablePicker();
+
+                return;
+            }
+
+            this.once('after:render', () => this.renderVariablePicker());
+        }
+
+        getTargetEntityTypeFieldView() {
+            const recordView = this.recordHelper?.recordView;
+
+            if (!recordView || typeof recordView.getFieldView !== 'function') {
+                return null;
+            }
+
+            return recordView.getFieldView('targetEntityType');
+        }
+
+        readTargetEntityTypeFromField() {
+            const targetField = this.getTargetEntityTypeFieldView();
+
+            if (!targetField || !targetField.isRendered()) {
+                return null;
+            }
+
+            const value = targetField.$el.find('select').val();
+
+            return value || null;
         }
 
         getTemplateEntityType() {
             if (this.model.entityType === 'CalendarTemplate') {
-                return this.model.get('targetEntityType') || null;
+                return this.model.get('targetEntityType')
+                    || this.readTargetEntityTypeFromField()
+                    || null;
             }
 
             return this.model.entityType;
@@ -45,15 +101,24 @@ define('google-integration:views/fields/google-calendar-description-template', [
         renderVariablePicker() {
             this.$el.find('.google-calendar-template-variable-helper').remove();
 
-            const templateEntityType = this.getTemplateEntityType();
-
-            if (!templateEntityType) {
+            if (!this.isEditMode()) {
                 return;
             }
 
+            const templateEntityType = this.getTemplateEntityType();
             const $helper = $('<div>')
                 .addClass('google-calendar-template-variable-helper')
                 .css({marginTop: '8px'});
+
+            if (!templateEntityType) {
+                $('<span>')
+                    .addClass('text-muted small')
+                    .text(this.translate('googleCalendarSelectTargetEntityFirst', 'labels', 'CalendarDateSource'))
+                    .appendTo($helper);
+                this.$el.append($helper);
+
+                return;
+            }
 
             const $toggle = $('<button>')
                 .attr('type', 'button')

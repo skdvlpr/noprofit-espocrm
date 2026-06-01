@@ -93,22 +93,37 @@ define('google-integration:views/fields/calendar-config-entity-type', ['exports'
         afterRender() {
             super.afterRender();
 
-            if (this.mode !== this.MODE_EDIT) {
+            if (!this.isEditMode()) {
                 return;
             }
 
-            this.$el.find('select').on('change', e => {
-                const value = e.currentTarget.value || null;
+            const $select = this.$el.find('select');
+
+            const applySelectValue = value => {
+                const normalized = value || null;
                 const previous = this.model.get(this.name);
 
-                this.model.set(this.name, value, {ui: true});
+                this.model.set(this.name, normalized, {ui: true});
 
-                if (value !== previous) {
+                if (normalized !== previous) {
                     this.model.set({
                         dateField: null,
                         endDateField: null,
                     }, {ui: true});
                 }
+            };
+
+            // Browser may show the first option while model value is still empty on create.
+            if (!this.model.get(this.name)) {
+                const initialValue = $select.val() || null;
+
+                if (initialValue) {
+                    applySelectValue(initialValue);
+                }
+            }
+
+            $select.on('change', e => {
+                applySelectValue(e.currentTarget.value || null);
             });
         }
 

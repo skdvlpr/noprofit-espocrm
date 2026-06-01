@@ -439,8 +439,11 @@ $rCalendarDateSourceLayout = $client->get('/api/v1/CalendarDateSource/layout/det
 $ok('GET /api/v1/CalendarDateSource/layout/detail is routable', $rCalendarDateSourceLayout->getStatusCode() === 200, 'code=' . $rCalendarDateSourceLayout->getStatusCode());
 $perDateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
 $templateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-description-template.js') ?: '';
+$entityTypeView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/calendar-config-entity-type.js') ?: '';
 $ok('Opportunity per-date template selector is not raw ID input', !str_contains($perDateView, 'CalendarTemplate ID') && str_contains($perDateView, 'data-role="calendarTemplateId"'));
 $ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel') && str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel'));
+$ok('CalendarTemplate template field resolves target entity from select', str_contains($templateView, 'readTargetEntityTypeFromField'));
+$ok('CalendarTemplate entity type select syncs initial value to model', str_contains($entityTypeView, 'syncInitialValue') || str_contains($entityTypeView, 'initialValue'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
