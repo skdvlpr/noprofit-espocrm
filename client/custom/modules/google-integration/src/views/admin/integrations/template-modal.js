@@ -1,4 +1,8 @@
-define('google-integration:views/admin/integrations/template-modal', ['views/modal', 'google-integration:lib/google-calendar-variable-panel'], function (Dep, VariablePanel) {
+define('google-integration:views/admin/integrations/template-modal', [
+    'views/modal',
+    'google-integration:lib/google-calendar-variable-panel',
+    'google-integration:lib/google-calendar-template-variables',
+], function (Dep, VariablePanel, TemplateVariables) {
     'use strict';
 
     return Dep.extend({
@@ -81,34 +85,13 @@ define('google-integration:views/admin/integrations/template-modal', ['views/mod
         },
 
         getInsertableFieldList(entityType) {
-            const fields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
-
-            return Object.keys(fields)
-                .filter(name => {
-                    const field = fields[name];
-
-                    if (!field || field.utility || name.startsWith('googleCalendar')) {
-                        return false;
-                    }
-
-                    return !['link', 'linkMultiple', 'linkParent', 'file', 'image'].includes(field.type);
-                })
-                .map(name => {
-                    const label = this.translate(name, 'fields', entityType);
-
-                    if (!label || label === name) {
-                        return null;
-                    }
-
-                    return {
-                        name,
-                        label,
-                        group: 'current',
-                        groupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', 'Global'),
-                    };
-                })
-                .filter(Boolean)
-                .sort((a, b) => a.label.localeCompare(b.label));
+            return TemplateVariables.buildInsertableFieldList({
+                metadata: this.getMetadata(),
+                entityType,
+                translate: (key, category, scope) => this.translate(key, category, scope || 'Global'),
+                currentGroupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', 'Global'),
+                relatedGroupLabel: this.translate('googleCalendarRelatedRecordFields', 'labels', 'Global'),
+            });
         },
 
         insertVariable($textarea, name) {

@@ -2,7 +2,8 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     'exports',
     'views/fields/base',
     'google-integration:lib/google-calendar-variable-panel',
-], function (_exports, _base, VariablePanel) {
+    'google-integration:lib/google-calendar-template-variables',
+], function (_exports, _base, VariablePanel, TemplateVariables) {
     'use strict';
 
     Object.defineProperty(_exports, '__esModule', {value: true});
@@ -603,79 +604,14 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
 
         getInsertableFieldList() {
-            const fields = this.getMetadata().get(`entityDefs.${this.model.entityType}.fields`) || {};
-            const currentGroupLabel = this.translate('googleCalendarCurrentRecordFields', 'labels', this.model.entityType);
-            const relatedGroupLabel = this.translate('googleCalendarRelatedRecordFields', 'labels', this.model.entityType);
-
-            const currentFields = Object.keys(fields)
-                .filter(name => this.isInsertableField(fields[name], name))
-                .map(name => {
-                    const label = this.getFieldLabel(this.model.entityType, name);
-
-                    if (!label) {
-                        return null;
-                    }
-
-                    return {
-                        name,
-                        label,
-                        group: 'current',
-                        groupLabel: currentGroupLabel,
-                    };
-                })
-                .filter(Boolean)
-                .sort((a, b) => a.label.localeCompare(b.label));
-
-            return [...currentFields, ...this.getRelatedFieldList(relatedGroupLabel)];
-        }
-
-        getRelatedFieldList(groupLabel) {
-            const fields = this.getMetadata().get(`entityDefs.${this.model.entityType}.fields`) || {};
-            const links = this.getMetadata().get(`entityDefs.${this.model.entityType}.links`) || {};
-            const list = [];
-
-            Object.keys(fields).forEach(linkName => {
-                const field = fields[linkName] || {};
-
-                if (!['link', 'linkMultiple'].includes(field.type) || !this.hasActualRelatedRecord(linkName, field.type)) {
-                    return;
-                }
-
-                const entityType = links[linkName] && links[linkName].entity;
-
-                if (!entityType) {
-                    return;
-                }
-
-                const relatedFields = this.getMetadata().get(`entityDefs.${entityType}.fields`) || {};
-                const linkLabel = this.translate(linkName, 'fields', this.model.entityType);
-
-                if (!linkLabel || linkLabel === linkName) {
-                    return;
-                }
-
-                Object.keys(relatedFields)
-                    .filter(name => this.isInsertableField(relatedFields[name], name))
-                    .map(name => {
-                        const label = this.getFieldLabel(entityType, name);
-
-                        if (!label) {
-                            return null;
-                        }
-
-                        return {
-                            name: `${linkName}.${name}`,
-                            label: `(${linkLabel}) ${label}`,
-                            group: `related-${linkName}`,
-                            groupLabel,
-                        };
-                    })
-                    .filter(Boolean)
-                    .sort((a, b) => a.label.localeCompare(b.label))
-                    .forEach(item => list.push(item));
+            return TemplateVariables.buildInsertableFieldList({
+                metadata: this.getMetadata(),
+                entityType: this.model.entityType,
+                translate: (key, category, scope) => this.translate(key, category, scope),
+                currentGroupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', this.model.entityType),
+                relatedGroupLabel: this.translate('googleCalendarRelatedRecordFields', 'labels', this.model.entityType),
+                hasRelatedLink: (linkName, type) => this.hasActualRelatedRecord(linkName, type),
             });
-
-            return list;
         }
 
         hasActualRelatedRecord(linkName, type) {
@@ -685,14 +621,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
             }
 
             return !!this.model.get(`${linkName}Id`);
-        }
-
-        isInsertableField(field, name) {
-            if (!field || field.utility || name.startsWith('googleCalendar')) {
-                return false;
-            }
-
-            return !['link', 'linkMultiple', 'linkParent', 'file', 'image'].includes(field.type);
         }
 
         insertVariable($input, name) {
@@ -801,11 +729,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
             }
 
             return amount;
-        }
-
-        getFieldLabel(entityType, fieldName) {
-            const translated = this.translate(fieldName, 'fields', entityType);
-            return translated && translated !== fieldName ? translated : '';
         }
 
         decorateColorSelects() {
