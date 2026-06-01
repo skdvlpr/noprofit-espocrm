@@ -14,15 +14,17 @@
         "googleCalendarTemplateVariableSearch": "Search fields",
         "googleCalendarNoVariables": "No fields match the search.",
         "googleCalendarPanelCloseHint": "Right-click to close · search is remembered",
+        "googleCalendarAdminConfigTitle": "Calendar configuration",
+        "googleCalendarAdminConfigHelp": "Open the list to create or edit records.",
         "googleCalendarAdminTemplatesTitle": "Default description templates",
         "googleCalendarAdminTemplatesHelp": "Click an entity name to edit the default template used when exporting to Google Calendar.",
         "googleCalendarAdminTemplateConfigured": "configured",
         "googleCalendarAdminTemplateEmpty": "empty",
         "googleCalendarCurrentRecordFields": "Current record fields",
         "googleCalendarAdminDateSourcesTitle": "Calendar date sources",
-        "googleCalendarAdminDateSourcesHelp": "Define which CRM date fields appear in the Espo calendar and Google export. Managed here instead of the main navigation.",
+        "googleCalendarAdminDateSourcesHelp": "CRM date fields for the Espo calendar and Google export.",
         "googleCalendarAdminCalendarTemplatesTitle": "Calendar templates",
-        "googleCalendarAdminCalendarTemplatesHelp": "Reusable templates for event description, reminders, and colors per entity type."
+        "googleCalendarAdminCalendarTemplatesHelp": "Event description, reminders, and colors per entity type."
     },
     "help": {
         "GoogleCalendarDrive": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret."

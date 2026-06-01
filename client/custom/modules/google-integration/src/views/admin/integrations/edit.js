@@ -19,12 +19,15 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
     };
 
     const CREDENTIAL_FIELD_NAMES = Object.keys(CREDENTIAL_FIELD_DEFS);
-    const buildTemplateFieldName = entityType => `googleCalendarDescriptionTemplate${entityType}`;
+    const STYLESHEET_ID = 'google-integration-admin-integrations-edit-css';
+    const STYLESHEET_PATH = 'client/custom/modules/google-integration/res/css/admin-integrations-edit.css';
 
     class GoogleIntegrationAdminEditView extends _parent.default {
         template = 'google-integration:admin/integrations/edit';
 
         setup() {
+            this.ensureStylesheet();
+
             this.addActionHandler('save', () => this.save());
             this.addActionHandler('cancel', () => this.actionCancel());
 
@@ -37,8 +40,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             this.fieldList = [];
             this.fieldDataList = [];
-            this.templateButtonList = [];
-            this.templateFieldNameSet = new Set();
 
             this.model = new _model.default({}, {
                 entityType: 'Integration',
@@ -55,30 +56,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             const metaFields = this.getMetadata().get(`integrations.${this.integration}.fields`) || {};
             const fields = {...CREDENTIAL_FIELD_DEFS, ...metaFields};
-
-            this.wait(
-                Espo.Ajax.getRequest('GoogleIntegration/calendar/allowed-entity-types')
-                    .then(data => {
-                        const list = Array.isArray(data.list) ? data.list : [];
-
-                        list.forEach(item => {
-                            const fieldName = buildTemplateFieldName(item.entityType);
-
-                            this.templateFieldNameSet.add(fieldName);
-
-                            if (!fieldDefs[fieldName]) {
-                                fieldDefs[fieldName] = {type: 'text'};
-                            }
-
-                            this.templateButtonList.push({
-                                entityType: item.entityType,
-                                entityLabel: item.label || item.entityType,
-                                fieldName: fieldName,
-                            });
-                        });
-                    })
-                    .catch(() => {})
-            );
 
             Object.keys(fields).forEach(name => {
                 const defs = {...fields[name]};
@@ -106,10 +83,9 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             this.wait((async () => {
                 await this.model.fetch();
-                this.refreshTemplateButtonStates();
                 this.createFieldView('bool', 'enabled');
                 Object.keys(fields).forEach(name => {
-                    if (this.templateFieldNameSet.has(name)) {
+                    if (name.startsWith('googleCalendarDescriptionTemplate')) {
                         return;
                     }
 
@@ -118,61 +94,66 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             })());
         }
 
+        ensureStylesheet() {
+            if (document.getElementById(STYLESHEET_ID)) {
+                return;
+            }
+
+            const link = document.createElement('link');
+
+            link.id = STYLESHEET_ID;
+            link.rel = 'stylesheet';
+            link.href = this.getBasePath() + STYLESHEET_PATH;
+            document.head.appendChild(link);
+        }
+
+        getCalendarNavItems() {
+            const items = [
+                {
+                    href: '#CalendarDateSource',
+                    scope: 'CalendarDateSource',
+                    modifier: 'date-sources',
+                    iconClass: this.getMetadata().get('scopes.CalendarDateSource.iconClass') || 'fas fa-calendar-day',
+                    descriptionKey: 'googleCalendarAdminDateSourcesHelp',
+                },
+                {
+                    href: '#CalendarTemplate',
+                    scope: 'CalendarTemplate',
+                    modifier: 'templates',
+                    iconClass: this.getMetadata().get('scopes.CalendarTemplate.iconClass') || 'fas fa-calendar-check',
+                    descriptionKey: 'googleCalendarAdminCalendarTemplatesHelp',
+                },
+            ];
+
+            return items.map(item => ({
+                href: item.href,
+                modifier: item.modifier,
+                iconClass: item.iconClass,
+                title: this.translate(item.scope, 'scopeNamesPlural'),
+                description: this.translate(item.descriptionKey, 'labels', 'Integration'),
+            }));
+        }
+
         data() {
             return {
                 integration: this.integration,
                 fieldDataList: this.fieldDataList,
-                templateButtonList: this.templateButtonList,
-                templatesTitle: this.translate('googleCalendarAdminTemplatesTitle', 'labels', 'Integration'),
-                templatesHelp: this.translate('googleCalendarAdminTemplatesHelp', 'labels', 'Integration'),
                 helpText: this.helpText,
                 redirectUri: String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback',
-                dateSourcesTitle: this.translate('googleCalendarAdminDateSourcesTitle', 'labels', 'Integration'),
-                dateSourcesHelp: this.translate('googleCalendarAdminDateSourcesHelp', 'labels', 'Integration'),
-                calendarTemplatesTitle: this.translate('googleCalendarAdminCalendarTemplatesTitle', 'labels', 'Integration'),
-                calendarTemplatesHelp: this.translate('googleCalendarAdminCalendarTemplatesHelp', 'labels', 'Integration'),
+                calendarConfigTitle: this.translate('googleCalendarAdminConfigTitle', 'labels', 'Integration'),
+                calendarConfigHelp: this.translate('googleCalendarAdminConfigHelp', 'labels', 'Integration'),
+                calendarNavItems: this.getCalendarNavItems(),
             };
         }
 
         afterRender() {
             super.afterRender();
             this.syncCredentialFieldsVisibility();
-            this.bindTemplateButtons();
-            this.setupEmbeddedCalendarConfigLists();
             this.syncCalendarConfigPanelsVisibility();
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.syncCredentialFieldsVisibility();
                 this.syncCalendarConfigPanelsVisibility();
-            });
-        }
-
-        setupEmbeddedCalendarConfigLists() {
-            if (this.getView('dateSourcesList')) {
-                return;
-            }
-
-            const listOptions = {
-                headerDisabled: true,
-                searchPanel: false,
-                checkbox: false,
-                massActionsDisabled: true,
-            };
-
-            this.createView('dateSourcesList', 'google-integration:views/admin/integrations/embedded-record-list', {
-                ...listOptions,
-                scope: 'CalendarDateSource',
-                el: this.$el.find('[data-role="date-sources-list"]'),
-            }, view => {
-                view.render();
-            });
-
-            this.createView('templatesList', 'google-integration:views/admin/integrations/embedded-record-list', {
-                ...listOptions,
-                scope: 'CalendarTemplate',
-                el: this.$el.find('[data-role="calendar-templates-list"]'),
-            }, view => {
-                view.render();
             });
         }
 
@@ -185,47 +166,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             } else {
                 $panels.addClass('hide');
             }
-        }
-
-        refreshTemplateButtonStates() {
-            this.templateButtonList.forEach(item => {
-                const value = this.model.get(item.fieldName);
-                item.statusLabel = value
-                    ? this.translate('googleCalendarAdminTemplateConfigured', 'labels', 'Integration')
-                    : this.translate('googleCalendarAdminTemplateEmpty', 'labels', 'Integration');
-            });
-        }
-
-        bindTemplateButtons() {
-            this.$el.find('[data-action="openTemplateModal"]').on('click', event => {
-                const entityType = event.currentTarget.dataset.entityType;
-                const fieldName = event.currentTarget.dataset.fieldName;
-                const item = this.templateButtonList.find(row => row.entityType === entityType);
-
-                if (!fieldName || !item) {
-                    return;
-                }
-
-                this.openTemplateModal(item);
-            });
-        }
-
-        openTemplateModal(item) {
-            this.createView('templateModal', 'google-integration:views/admin/integrations/template-modal', {
-                entityType: item.entityType,
-                entityLabel: item.entityLabel,
-                fieldName: item.fieldName,
-                value: this.model.get(item.fieldName) || '',
-                templateFieldLabel: this.translate(item.fieldName, 'fields', 'Integration'),
-            }, view => {
-                view.render();
-
-                this.listenToOnce(view, 'apply', data => {
-                    this.model.set(data.fieldName, data.value);
-                    this.refreshTemplateButtonStates();
-                    this.reRender();
-                });
-            });
         }
 
         syncCredentialFieldsVisibility() {

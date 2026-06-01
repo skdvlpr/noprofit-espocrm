@@ -80,8 +80,8 @@ class CrmDateSourceEventFetcher
             return [];
         }
 
-        $fromValue = $fieldType === 'date' ? substr($from, 0, 10) : $from;
-        $toValue = $fieldType === 'date' ? substr($to, 0, 10) : $to;
+        $fromValue = $fieldType === FieldType::DATE ? substr($from, 0, 10) : $from;
+        $toValue = $fieldType === FieldType::DATE ? substr($to, 0, 10) : $to;
 
         $select = ['id', 'name', $dateField];
 
