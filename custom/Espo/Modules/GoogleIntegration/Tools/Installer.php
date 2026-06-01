@@ -170,7 +170,7 @@ class Installer
 
         $metadata = $container->getByClass(Metadata::class);
         $this->ensureAdminRoleAccess($em, $metadata);
-        $this->ensureNavigationTabs($container);
+        $this->pruneGoogleCalendarConfigFromNavigation($container);
 
         $dataManager->rebuild();
     }
@@ -276,22 +276,52 @@ class Installer
         (new DateSourceEntityTypesReader())->writeCacheFromDatabase();
     }
 
-    private function ensureNavigationTabs(Container $container): void
+    /** @var list<string> */
+    private const GOOGLE_CALENDAR_CONFIG_TABS = ['CalendarTemplate', 'CalendarDateSource'];
+
+    public function pruneGoogleCalendarConfigFromNavigation(Container $container): void
     {
         $config = $container->get('config');
         $configWriter = $container->getByClass(InjectableFactory::class)
             ->create(\Espo\Core\Utils\Config\ConfigWriter::class);
 
-        $tabList = $config->get('tabList', []) ?? [];
-
-        foreach (['CalendarTemplate', 'CalendarDateSource'] as $tab) {
-            if (!in_array($tab, $tabList, true)) {
-                $tabList[] = $tab;
-            }
-        }
+        $tabList = $this->pruneTabList($config->get('tabList', []) ?? []);
+        $quickCreateList = array_values(array_filter(
+            $config->get('quickCreateList', []) ?? [],
+            static fn (mixed $item): bool => !is_string($item)
+                || !in_array($item, self::GOOGLE_CALENDAR_CONFIG_TABS, true)
+        ));
 
         $configWriter->set('tabList', $tabList);
+        $configWriter->set('quickCreateList', $quickCreateList);
         $configWriter->save();
+    }
+
+    /**
+     * @param list<mixed> $tabList
+     * @return list<mixed>
+     */
+    private function pruneTabList(array $tabList): array
+    {
+        $result = [];
+
+        foreach ($tabList as $item) {
+            if (is_string($item)) {
+                if (!in_array($item, self::GOOGLE_CALENDAR_CONFIG_TABS, true)) {
+                    $result[] = $item;
+                }
+
+                continue;
+            }
+
+            if (is_array($item) && isset($item['itemList']) && is_array($item['itemList'])) {
+                $item['itemList'] = $this->pruneTabList($item['itemList']);
+            }
+
+            $result[] = $item;
+        }
+
+        return $result;
     }
 
     private function ensureAdminRoleAccess(EntityManager $entityManager, Metadata $metadata): void

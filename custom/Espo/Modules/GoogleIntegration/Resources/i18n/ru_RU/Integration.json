@@ -12,7 +12,15 @@
     "labels": {
         "googleCalendarTemplateVariables": "Вставить поле записи",
         "googleCalendarTemplateVariableSearch": "Поиск полей",
-        "googleCalendarNoVariables": "Нет полей по этому запросу."
+        "googleCalendarNoVariables": "Нет полей по этому запросу.",
+        "googleCalendarAdminTemplatesTitle": "Шаблоны описания по умолчанию",
+        "googleCalendarAdminTemplatesHelp": "Нажмите на сущность, чтобы изменить шаблон экспорта в Google Calendar.",
+        "googleCalendarAdminTemplateConfigured": "настроен",
+        "googleCalendarAdminTemplateEmpty": "пусто",
+        "googleCalendarAdminDateSourcesTitle": "Источники дат календаря",
+        "googleCalendarAdminDateSourcesHelp": "Какие поля даты CRM показывать в календаре Espo и при экспорте в Google. Только здесь, не в главном меню.",
+        "googleCalendarAdminCalendarTemplatesTitle": "Шаблоны календаря",
+        "googleCalendarAdminCalendarTemplatesHelp": "Шаблоны описания, напоминаний и цвета для типов сущностей."
     },
     "help": {
         "GoogleCalendarDrive": "Сначала включите **Включено** — иначе **Client ID** и **Client Secret** скрыты. Скопируйте поле **Redirect URI** на этой странице в [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (тип **Web application**). URI должен совпадать побайтово (тот же хост, что в **Администрирование → Настройки → Site URL**). OAuth 2.0 для **Google Календаря** и **Drive** (`drive.file`). Включите **Google Calendar API** и **Google Drive API**. Подключение — в **личных внешних аккаунтах**."

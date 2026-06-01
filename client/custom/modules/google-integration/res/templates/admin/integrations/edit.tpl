@@ -77,3 +77,26 @@
         {{/if}}
     </div>
 </div>
+
+<div class="row google-calendar-admin-config-panels">
+    <div class="col-sm-12">
+        <div class="panel panel-default" data-role="calendar-config-panel">
+            <div class="panel-heading">
+                <h4 class="panel-title">{{dateSourcesTitle}}</h4>
+            </div>
+            <div class="panel-body">
+                <p class="text-muted small">{{dateSourcesHelp}}</p>
+                <div data-role="date-sources-list"></div>
+            </div>
+        </div>
+        <div class="panel panel-default" data-role="calendar-config-panel">
+            <div class="panel-heading">
+                <h4 class="panel-title">{{calendarTemplatesTitle}}</h4>
+            </div>
+            <div class="panel-body">
+                <p class="text-muted small">{{calendarTemplatesHelp}}</p>
+                <div data-role="calendar-templates-list"></div>
+            </div>
+        </div>
+    </div>
+</div>

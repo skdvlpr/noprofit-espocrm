@@ -127,6 +127,10 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                 templatesHelp: this.translate('googleCalendarAdminTemplatesHelp', 'labels', 'Integration'),
                 helpText: this.helpText,
                 redirectUri: String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback',
+                dateSourcesTitle: this.translate('googleCalendarAdminDateSourcesTitle', 'labels', 'Integration'),
+                dateSourcesHelp: this.translate('googleCalendarAdminDateSourcesHelp', 'labels', 'Integration'),
+                calendarTemplatesTitle: this.translate('googleCalendarAdminCalendarTemplatesTitle', 'labels', 'Integration'),
+                calendarTemplatesHelp: this.translate('googleCalendarAdminCalendarTemplatesHelp', 'labels', 'Integration'),
             };
         }
 
@@ -134,10 +138,53 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             super.afterRender();
             this.syncCredentialFieldsVisibility();
             this.bindTemplateButtons();
+            this.setupEmbeddedCalendarConfigLists();
+            this.syncCalendarConfigPanelsVisibility();
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.syncCredentialFieldsVisibility();
+                this.syncCalendarConfigPanelsVisibility();
             });
+        }
+
+        setupEmbeddedCalendarConfigLists() {
+            if (this.getView('dateSourcesList')) {
+                return;
+            }
+
+            const listOptions = {
+                headerDisabled: true,
+                searchPanel: false,
+                checkbox: false,
+                massActionsDisabled: true,
+            };
+
+            this.createView('dateSourcesList', 'google-integration:views/admin/integrations/embedded-record-list', {
+                ...listOptions,
+                scope: 'CalendarDateSource',
+                el: this.$el.find('[data-role="date-sources-list"]'),
+            }, view => {
+                view.render();
+            });
+
+            this.createView('templatesList', 'google-integration:views/admin/integrations/embedded-record-list', {
+                ...listOptions,
+                scope: 'CalendarTemplate',
+                el: this.$el.find('[data-role="calendar-templates-list"]'),
+            }, view => {
+                view.render();
+            });
+        }
+
+        syncCalendarConfigPanelsVisibility() {
+            const show = !!this.model.get('enabled');
+            const $panels = this.$el.find('.google-calendar-admin-config-panels');
+
+            if (show) {
+                $panels.removeClass('hide');
+            } else {
+                $panels.addClass('hide');
+            }
         }
 
         refreshTemplateButtonStates() {

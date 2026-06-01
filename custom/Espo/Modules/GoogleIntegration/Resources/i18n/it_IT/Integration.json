@@ -18,7 +18,11 @@
         "googleCalendarAdminTemplatesHelp": "Clicca il nome dell'entità per modificare il template predefinito usato all'esportazione in Google Calendar.",
         "googleCalendarAdminTemplateConfigured": "configurato",
         "googleCalendarAdminTemplateEmpty": "vuoto",
-        "googleCalendarCurrentRecordFields": "Campi del record corrente"
+        "googleCalendarCurrentRecordFields": "Campi del record corrente",
+        "googleCalendarAdminDateSourcesTitle": "Origini date calendario",
+        "googleCalendarAdminDateSourcesHelp": "Definisce quali campi data CRM compaiono nel calendario Espo e nell'esportazione Google. Gestione solo da questa pagina integrazione.",
+        "googleCalendarAdminCalendarTemplatesTitle": "Template calendario",
+        "googleCalendarAdminCalendarTemplatesHelp": "Template riutilizzabili per descrizione evento, promemoria e colori per tipo entità."
     },
     "help": {
         "GoogleCalendarDrive": "Spunta **Abilitato** per mostrare **Client ID** e **Client Secret** (Espo li nasconde se l’integrazione è disattivata). Copia il campo di sola lettura **Redirect URI** in questa pagina nella [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (credenziali **Applicazione web**). Deve coincidere esattamente (stesso host di **Amministrazione → Impostazioni → Site URL**). OAuth 2.0 per **Google Calendar** e **Google Drive** (`drive.file`). Abilita **Google Calendar API** e **Google Drive API**. Collegamento da **Account esterni personali** dopo Client ID / Secret."

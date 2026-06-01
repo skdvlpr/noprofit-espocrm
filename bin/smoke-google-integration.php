@@ -299,7 +299,7 @@ $calendarTemplateFields = $calendarTemplateDefs['fields'] ?? [];
 $calendarTemplateScope = $metadata->get('scopes.CalendarTemplate') ?? [];
 $ok('CalendarTemplate metadata exists', is_array($calendarTemplateFields) && isset($calendarTemplateFields['targetEntityType']));
 $ok('CalendarTemplate has template fields', isset($calendarTemplateFields['summaryTemplate'], $calendarTemplateFields['descriptionTemplate'], $calendarTemplateFields['reminders']));
-$ok('CalendarTemplate scope is routable BasePlus entity', ($calendarTemplateScope['entity'] ?? null) === true && ($calendarTemplateScope['type'] ?? null) === 'BasePlus' && ($calendarTemplateScope['tab'] ?? null) === true);
+$ok('CalendarTemplate scope is routable BasePlus entity (no navbar tab)', ($calendarTemplateScope['entity'] ?? null) === true && ($calendarTemplateScope['type'] ?? null) === 'BasePlus' && ($calendarTemplateScope['tab'] ?? null) === false);
 $ok('CalendarTemplate client icon exists', ($metadata->get(['clientDefs', 'CalendarTemplate', 'iconClass']) ?? null) === 'fas fa-calendar-check');
 $rCalendarTemplateList = $client->get('/api/v1/CalendarTemplate', ['query' => ['select' => 'id,name', 'maxSize' => 1]]);
 $ok('GET /api/v1/CalendarTemplate list is routable', $rCalendarTemplateList->getStatusCode() === 200, 'code=' . $rCalendarTemplateList->getStatusCode());
@@ -401,7 +401,7 @@ $ok(
     $rGoogleCalendars->getStatusCode() === 200 && is_array($googleCalendarsBody['list'] ?? null),
     'code=' . $rGoogleCalendars->getStatusCode()
 );
-$ok('CalendarDateSource scope is routable Base entity', ($calendarDateSourceScope['entity'] ?? null) === true && ($calendarDateSourceScope['type'] ?? null) === 'Base' && ($calendarDateSourceScope['tab'] ?? null) === true);
+$ok('CalendarDateSource scope is routable Base entity (no navbar tab)', ($calendarDateSourceScope['entity'] ?? null) === true && ($calendarDateSourceScope['type'] ?? null) === 'Base' && ($calendarDateSourceScope['tab'] ?? null) === false);
 $ok('CalendarDateSource client icon exists', ($metadata->get(['clientDefs', 'CalendarDateSource', 'iconClass']) ?? null) === 'fas fa-calendar-day');
 $ok('CalendarDateSource ACL allows admin config edits', ($metadata->get(['aclDefs', 'CalendarDateSource', 'edit']) ?? null) === 'all');
 $ok('CalendarTemplate ACL allows read for template picker', ($metadata->get(['aclDefs', 'CalendarTemplate', 'read']) ?? null) === 'all');

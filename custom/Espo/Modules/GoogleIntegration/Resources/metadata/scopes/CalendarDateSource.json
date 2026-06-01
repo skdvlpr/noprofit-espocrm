@@ -3,7 +3,7 @@
     "type": "Base",
     "object": true,
     "layouts": true,
-    "tab": true,
+    "tab": false,
     "module": "GoogleIntegration",
     "stream": false,
     "importable": true,
