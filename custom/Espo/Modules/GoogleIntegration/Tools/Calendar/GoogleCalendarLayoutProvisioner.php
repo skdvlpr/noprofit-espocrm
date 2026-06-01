@@ -101,6 +101,14 @@ class GoogleCalendarLayoutProvisioner
         }
 
         // Never read GoogleIntegration layouts — they are output-only.
+        foreach ($this->preferredBaseLayoutModules($entityType) as $moduleName) {
+            $layout = $this->readLayoutFromModule($moduleName, $entityType, $layoutName);
+
+            if ($layout !== null) {
+                return $layout;
+            }
+        }
+
         $module = $this->metadata->get(['scopes', $entityType, 'module']);
 
         if (is_string($module) && $module !== '' && $module !== self::MODULE) {
@@ -112,7 +120,11 @@ class GoogleCalendarLayoutProvisioner
         }
 
         foreach (array_reverse($this->metadata->getModuleList()) as $moduleName) {
-            if ($moduleName === self::MODULE || $moduleName === 'Custom') {
+            if (
+                $moduleName === self::MODULE
+                || $moduleName === 'Custom'
+                || in_array($moduleName, $this->preferredBaseLayoutModules($entityType), true)
+            ) {
                 continue;
             }
 
@@ -320,5 +332,27 @@ class GoogleCalendarLayoutProvisioner
     {
         return 'application/Espo/Modules/' . $module
             . '/Resources/layouts/' . $entityType . '/' . $layoutName . '.json';
+    }
+
+    /**
+     * Vertical modules (e.g. SafehouseCrm) patch core entities before Crm layouts are merged.
+     *
+     * @return list<string>
+     */
+    private function preferredBaseLayoutModules(string $entityType): array
+    {
+        $preferred = ['SafehouseCrm'];
+        $fromMetadata = $this->metadata->get("app.layouts.{$entityType}.detail.module");
+
+        if (
+            is_string($fromMetadata)
+            && $fromMetadata !== ''
+            && $fromMetadata !== self::MODULE
+            && !in_array($fromMetadata, $preferred, true)
+        ) {
+            $preferred[] = $fromMetadata;
+        }
+
+        return $preferred;
     }
 }

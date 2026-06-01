@@ -245,7 +245,20 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         fetch() {
-            return {[this.name]: this.readSettings()};
+            const selected = this.getSelectedDateList();
+            const fromDom = this.readSettings();
+            const domByType = {};
+
+            fromDom.forEach(row => {
+                domByType[row.sourceDateType] = row;
+            });
+
+            const list = selected.map(sourceDateType => {
+                return domByType[sourceDateType]
+                    || this.normalizeItem({sourceDateType});
+            });
+
+            return {[this.name]: list};
         }
 
         validate() {

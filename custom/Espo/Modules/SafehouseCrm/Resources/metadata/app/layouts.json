@@ -35,10 +35,94 @@
         "list": {
             "module": "SafehouseCrm"
         },
+        "listSmall": {
+            "module": "SafehouseCrm"
+        },
+        "kanban": {
+            "module": "SafehouseCrm"
+        },
         "filters": {
             "module": "SafehouseCrm"
         },
         "massUpdate": {
+            "module": "SafehouseCrm"
+        }
+    },
+    "Member": {
+        "detail": {
+            "module": "SafehouseCrm"
+        },
+        "detailSmall": {
+            "module": "SafehouseCrm"
+        },
+        "list": {
+            "module": "SafehouseCrm"
+        },
+        "listSmall": {
+            "module": "SafehouseCrm"
+        },
+        "filters": {
+            "module": "SafehouseCrm"
+        },
+        "massUpdate": {
+            "module": "SafehouseCrm"
+        },
+        "edit": {
+            "module": "SafehouseCrm"
+        },
+        "sidePanels": {
+            "module": "SafehouseCrm"
+        }
+    },
+    "VolunteerEmployee": {
+        "detail": {
+            "module": "SafehouseCrm"
+        },
+        "detailSmall": {
+            "module": "SafehouseCrm"
+        },
+        "list": {
+            "module": "SafehouseCrm"
+        },
+        "listSmall": {
+            "module": "SafehouseCrm"
+        },
+        "filters": {
+            "module": "SafehouseCrm"
+        },
+        "massUpdate": {
+            "module": "SafehouseCrm"
+        },
+        "edit": {
+            "module": "SafehouseCrm"
+        },
+        "sidePanels": {
+            "module": "SafehouseCrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "SafehouseCrm"
+        }
+    },
+    "MealCount": {
+        "detail": {
+            "module": "SafehouseCrm"
+        },
+        "detailSmall": {
+            "module": "SafehouseCrm"
+        },
+        "list": {
+            "module": "SafehouseCrm"
+        },
+        "listSmall": {
+            "module": "SafehouseCrm"
+        },
+        "filters": {
+            "module": "SafehouseCrm"
+        },
+        "massUpdate": {
+            "module": "SafehouseCrm"
+        },
+        "edit": {
             "module": "SafehouseCrm"
         }
     }

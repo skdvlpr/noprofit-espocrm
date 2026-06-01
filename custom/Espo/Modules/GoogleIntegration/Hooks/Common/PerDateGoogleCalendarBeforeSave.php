@@ -21,15 +21,25 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if (
-            $entity->get('saveToGoogleCalendar')
-            || $entity->isAttributeChanged('googleCalendarDateSourceList')
-            || $entity->isAttributeChanged('saveToGoogleCalendar')
-        ) {
+        if ($this->shouldNormalizeDateSourceList($entity)) {
             $this->normalizeDateSourceList($entity);
         }
 
+        if ($entity->get('saveToGoogleCalendar')) {
+            $this->syncEventSettingsWithDateList($entity);
+        }
+
         $this->assertDateSourcesWhenExportEnabled($entity);
+    }
+
+    private function shouldNormalizeDateSourceList(Entity $entity): bool
+    {
+        return $entity->get('saveToGoogleCalendar')
+            || $entity->isAttributeChanged('googleCalendarDateSourceList')
+            || $entity->isAttributeChanged('saveToGoogleCalendar')
+            || $entity->isAttributeChanged('googleCalendarEventSettings')
+            || $entity->isAttributeChanged('presentationDate')
+            || $entity->isAttributeChanged('closeDate');
     }
 
     private function normalizeDateSourceList(Entity $entity): void
@@ -70,6 +80,59 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
         }
 
         $entity->set('googleCalendarDateSourceList', $filtered);
+    }
+
+    /**
+     * Ensure a settings row exists for every selected date (e.g. user adds closeDate on edit).
+     */
+    private function syncEventSettingsWithDateList(Entity $entity): void
+    {
+        $selected = $entity->get('googleCalendarDateSourceList');
+
+        if (!is_array($selected) || $selected === []) {
+            return;
+        }
+
+        $rows = $entity->get('googleCalendarEventSettings');
+        $byType = [];
+
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                if (is_object($row)) {
+                    $row = get_object_vars($row);
+                }
+
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $type = (string) ($row['sourceDateType'] ?? '');
+
+                if ($type !== '') {
+                    $byType[$type] = $row;
+                }
+            }
+        }
+
+        $merged = [];
+
+        foreach ($selected as $sourceDateType) {
+            $sourceDateType = (string) $sourceDateType;
+
+            $merged[] = $byType[$sourceDateType] ?? [
+                'sourceDateType' => $sourceDateType,
+                'reminderMode' => 'none',
+                'reminders' => [],
+                'location' => '',
+                'visibility' => 'default',
+                'transparency' => 'opaque',
+                'colorId' => '',
+                'calendarTemplateId' => '',
+                'descriptionTemplateOverride' => '',
+            ];
+        }
+
+        $entity->set('googleCalendarEventSettings', $merged);
     }
 
     private function assertDateSourcesWhenExportEnabled(Entity $entity): void

@@ -1,6 +1,6 @@
 [
     {
-        "label": "",
+        "label": "Overview",
         "rows": [
             [
                 {
@@ -20,7 +20,7 @@
             ],
             [
                 {
-                    "name": "probability"
+                    "name": "presentationDate"
                 },
                 {
                     "name": "closeDate"
@@ -30,9 +30,7 @@
                 {
                     "name": "contacts"
                 },
-                {
-                    "name": "leadSource"
-                }
+                false
             ],
             [
                 {

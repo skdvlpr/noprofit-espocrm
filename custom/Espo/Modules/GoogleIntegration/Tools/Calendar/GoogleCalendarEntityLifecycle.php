@@ -9,6 +9,7 @@ use Espo\Core\Job\QueueName;
 use Espo\Core\Utils\Log;
 use Espo\Modules\GoogleIntegration\Jobs\PushGoogleCalendarEntity;
 use Espo\ORM\Entity;
+use Espo\ORM\EntityManager;
 use Throwable;
 
 class GoogleCalendarEntityLifecycle
@@ -16,6 +17,7 @@ class GoogleCalendarEntityLifecycle
     public function __construct(
         private EventPusher $eventPusher,
         private EventRemover $eventRemover,
+        private EntityManager $entityManager,
         private ApplicationState $applicationState,
         private JobSchedulerFactory $jobSchedulerFactory,
         private Log $log
@@ -47,7 +49,8 @@ class GoogleCalendarEntityLifecycle
         }
 
         try {
-            $this->eventPusher->pushIfRequested($entity);
+            $entityForPush = $this->reloadEntityForPush($entity) ?? $entity;
+            $this->eventPusher->pushIfRequested($entityForPush);
         } catch (Throwable $e) {
             $this->log->error(
                 'Google Calendar push failed on '
@@ -72,6 +75,17 @@ class GoogleCalendarEntityLifecycle
                 . $e->getMessage()
             );
         }
+    }
+
+    private function reloadEntityForPush(Entity $entity): ?Entity
+    {
+        $id = $entity->getId();
+
+        if ($id === null || $id === '') {
+            return null;
+        }
+
+        return $this->entityManager->getEntityById($entity->getEntityType(), $id);
     }
 
     private function scheduleRetryJob(Entity $entity): void

@@ -18,12 +18,14 @@
         "CalendarDateSource": "Calendar Date Source",
         "CalendarDateSourcePlural": "Calendar Date Sources",
         "Create CalendarDateSource": "Create Calendar Date Source",
-        "calendarDateSourceSetupGuide": "### Quick guide\n\n| Field | Meaning |\n| --- | --- |\n| **Name** | Internal title (e.g. *Funds · presentation date*). Shown in list and search. |\n| **Date key** | Unique technical id per entity + field. Usually **matches the date field** (`presentationDate`, `closeDate`) or `main` for Meeting/Call/Task. Auto-filled when you change *Start date field*. |\n| **Display label** | Suffix in calendar event title. If empty → date field label. |\n| **Sort order** | **Display priority** in the date-source list and Calendar view (not CRM record priority). Lower number = higher in the list. Example: **10** Meeting, **20** Call, **30** Task, **40–50** Funds. |\n\n**Checklist**\n\n1. **Show in Calendar View** checked.\n2. Hard-refresh Calendar (**Ctrl+Shift+R**).\n3. CRM records need a date value in the visible month (`createdAt` = creation day only).",
+        "calendarDateSourceSetupGuide": "### Quick guide\n\n| Field | Meaning |\n| --- | --- |\n| **Name** | Internal title (e.g. *Funds · presentation date*). Shown in list and search. |\n| **Start date field** | Which CRM field holds the date. Pick **`dateStart`** / **`dateEnd`** (with time), not companion fields labelled “(all day)” — those are Espo internals and are hidden from this list. |\n| **All day** | Export as a **Google all-day** event. **Auto ON** for `date` fields; shown only for `datetime` fields (e.g. Meeting `dateStart`). Do not duplicate “all day” by picking a separate “(all day)” field in the dropdown. |\n| **Date key** | Unique technical id per entity + field. Usually **matches the date field** (`presentationDate`, `closeDate`) or `main` for Meeting/Call/Task. Auto-filled when you change *Start date field*. |\n| **Display label** | Suffix in Google/event title: `{record name} - {this label}`. If empty → date field label. |\n| **Sort order** | **Display priority** in the date-source list and Calendar view (not CRM record priority). Lower number = higher in the list. |\n\n**Checklist**\n\n1. **Show in Calendar View** checked.\n2. Hard-refresh Calendar (**Ctrl+Shift+R**).\n3. CRM records need a date value in the visible month.",
         "googleCalendarSelectTargetEntityFirst": "Select the target entity first."
     },
     "tooltips": {
         "sourceDateType": "Unique technical key per entity + date field. Examples: main, presentationDate, closeDate.",
         "label": "Suffix in the calendar event title after the record name.",
-        "sortOrder": "Display order in date-source list and Calendar (not CRM priority). Lower numbers appear first."
+        "sortOrder": "Display order in date-source list and Calendar (not CRM priority). Lower numbers appear first.",
+        "dateField": "CRM field to read. Use datetime fields for timed events; use date fields for all-day-only data.",
+        "allDay": "When checked, Google Calendar gets an all-day event. For date-type fields this is automatic and the checkbox is hidden."
     }
 }

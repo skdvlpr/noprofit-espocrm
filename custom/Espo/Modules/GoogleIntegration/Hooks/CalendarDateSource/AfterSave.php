@@ -2,8 +2,10 @@
 
 namespace Espo\Modules\GoogleIntegration\Hooks\CalendarDateSource;
 
+use Espo\Core\DataManager;
 use Espo\Core\Hook\Hook\AfterSave as AfterSaveHook;
 use Espo\Core\InjectableFactory;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\DefaultCalendarTemplateProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarSchemaProvisioner;
 use Espo\ORM\Entity;
@@ -20,7 +22,8 @@ class AfterSave implements AfterSaveHook
     public static int $order = 100;
 
     public function __construct(
-        private InjectableFactory $injectableFactory
+        private InjectableFactory $injectableFactory,
+        private DataManager $dataManager
     ) {}
 
     public function afterSave(Entity $entity, SaveOptions $options): void
@@ -54,5 +57,11 @@ class AfterSave implements AfterSaveHook
         $this->injectableFactory
             ->create(GoogleCalendarLayoutProvisioner::class)
             ->provisionEntityType($targetEntityType);
+
+        $this->injectableFactory
+            ->create(DefaultCalendarTemplateProvisioner::class)
+            ->ensureForEntityType($targetEntityType);
+
+        $this->dataManager->rebuild();
     }
 }

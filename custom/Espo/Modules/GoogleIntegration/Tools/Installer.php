@@ -6,6 +6,8 @@ use Espo\Core\Container;
 use Espo\Core\DataManager;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceEntityTypesReader;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\DefaultCalendarTemplateProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
 use Espo\Entities\Integration as IntegrationEntity;
 use Espo\Entities\Role;
@@ -160,6 +162,7 @@ class Installer
 
         $this->ensureDefaultDateSources($em);
         $this->ensureDefaultCalendarTemplates($em);
+        $this->ensureCalendarTemplatesForActiveDateSources($container, $em);
 
         $container->getByClass(InjectableFactory::class)
             ->create(GoogleCalendarLayoutProvisioner::class)
@@ -257,6 +260,20 @@ class Installer
                 'isActive' => true,
             ], $template)));
         }
+    }
+
+    private function ensureCalendarTemplatesForActiveDateSources(
+        Container $container,
+        EntityManager $entityManager
+    ): void {
+        $provisioner = $container->getByClass(InjectableFactory::class)
+            ->create(DefaultCalendarTemplateProvisioner::class);
+
+        foreach ((new DateSourceEntityTypesReader())->readActiveTargetEntityTypes() as $entityType) {
+            $provisioner->ensureForEntityType($entityType);
+        }
+
+        (new DateSourceEntityTypesReader())->writeCacheFromDatabase();
     }
 
     private function ensureNavigationTabs(Container $container): void

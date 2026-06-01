@@ -1,5 +1,6 @@
 {
     "additionalBuilderClassNameList": [
-        "Espo\\Modules\\GoogleIntegration\\Core\\Utils\\Metadata\\AdditionalBuilder\\GoogleCalendarCapableFields"
+        "Espo\\Modules\\GoogleIntegration\\Core\\Utils\\Metadata\\AdditionalBuilder\\GoogleCalendarCapableFields",
+        "Espo\\Modules\\GoogleIntegration\\Core\\Utils\\Metadata\\AdditionalBuilder\\GoogleCalendarIntegrationTemplateFields"
     ]
 }

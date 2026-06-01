@@ -4,6 +4,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 use Espo\Core\Acl;
 use Espo\Core\Field\DateTime;
+use Espo\Core\ORM\Type\FieldType;
 use Espo\Core\Select\SelectBuilderFactory;
 use Espo\Modules\Crm\Tools\Calendar\Items\Event;
 use Espo\ORM\EntityManager;
@@ -14,7 +15,8 @@ class CrmDateSourceEventFetcher
         private DateSourceProvider $dateSourceProvider,
         private EntityManager $entityManager,
         private SelectBuilderFactory $selectBuilderFactory,
-        private Acl $acl
+        private Acl $acl,
+        private CalendarDisplayDateResolver $calendarDisplayDateResolver
     ) {}
 
     /**
@@ -70,7 +72,11 @@ class CrmDateSourceEventFetcher
         $seed = $this->entityManager->getNewEntity($entityType);
         $fieldType = $seed->getAttributeType($dateField);
 
-        if ($fieldType !== 'date' && $fieldType !== 'datetime') {
+        if (
+            $fieldType !== FieldType::DATE
+            && $fieldType !== FieldType::DATETIME
+            && $fieldType !== FieldType::DATETIME_OPTIONAL
+        ) {
             return [];
         }
 
@@ -125,12 +131,25 @@ class CrmDateSourceEventFetcher
 
             $status = $entity->get('status') ?? $entity->get('stage');
 
-            if ($fieldType === 'date' || $allDay) {
-                $dateString = substr((string) $dateValue, 0, 10);
+            $presentAsAllDay = $fieldType === FieldType::DATE
+                || $allDay
+                || $this->calendarDisplayDateResolver->isDateTimeOptionalAllDay($entity, $dateField);
+
+            if ($presentAsAllDay) {
+                $dateString = $this->calendarDisplayDateResolver->resolveDateOnly($entity, $dateField);
+
+                if ($dateString === null) {
+                    continue;
+                }
+
                 $endDateString = $dateString;
 
-                if ($endDateField !== '' && $entity->get($endDateField)) {
-                    $endDateString = substr((string) $entity->get($endDateField), 0, 10);
+                if ($endDateField !== '') {
+                    $resolvedEnd = $this->calendarDisplayDateResolver->resolveDateOnly($entity, $endDateField);
+
+                    if ($resolvedEnd !== null) {
+                        $endDateString = $resolvedEnd;
+                    }
                 }
 
                 $event = new Event(null, null, $entityType, [

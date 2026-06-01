@@ -64,11 +64,12 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                         list.forEach(item => {
                             const fieldName = buildTemplateFieldName(item.entityType);
 
-                            if (!fields[fieldName]) {
-                                return;
+                            this.templateFieldNameSet.add(fieldName);
+
+                            if (!fieldDefs[fieldName]) {
+                                fieldDefs[fieldName] = {type: 'text'};
                             }
 
-                            this.templateFieldNameSet.add(fieldName);
                             this.templateButtonList.push({
                                 entityType: item.entityType,
                                 entityLabel: item.label || item.entityType,

@@ -56,7 +56,7 @@ class CalendarTemplateApplier
 
         $template = $this->resolveRelatedTemplateVariables($record, $template);
 
-        return trim($this->templateRendererFactory
+        $rendered = trim($this->templateRendererFactory
             ->create()
             ->setEntity($record)
             ->setUser($this->user)
@@ -66,6 +66,8 @@ class CalendarTemplateApplier
             ])
             ->setTemplate($template)
             ->render());
+
+        return GoogleCalendarPlainText::normalize($rendered);
     }
 
     private function resolveRelatedTemplateVariables(Entity $record, string $template): string
@@ -147,7 +149,7 @@ class CalendarTemplateApplier
 
     private function escapeTemplateValue(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return $value;
     }
 
     private function buildRecordUrl(Entity $record): string

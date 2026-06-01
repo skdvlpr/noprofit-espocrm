@@ -51,10 +51,25 @@ class GoogleCalendarCapableFields implements AdditionalBuilder
     {
         $data->app ??= (object) [];
         $data->app->layouts ??= (object) [];
-        $data->app->layouts->$entityType = (object) [
-            'detail' => (object) ['module' => 'GoogleIntegration'],
-            'detailSmall' => (object) ['module' => 'GoogleIntegration'],
-        ];
+
+        if (!isset($data->app->layouts->$entityType)) {
+            $data->app->layouts->$entityType = (object) [];
+        }
+
+        $entityLayouts = $data->app->layouts->$entityType;
+
+        // Merge only detail views — preserve SafehouseCrm list/filters/kanban routing.
+        if (!isset($entityLayouts->detail)) {
+            $entityLayouts->detail = (object) [];
+        }
+
+        $entityLayouts->detail->module = 'GoogleIntegration';
+
+        if (!isset($entityLayouts->detailSmall)) {
+            $entityLayouts->detailSmall = (object) [];
+        }
+
+        $entityLayouts->detailSmall->module = 'GoogleIntegration';
     }
 
     private function applyRecordDefsHooks(stdClass $data, string $entityType): void

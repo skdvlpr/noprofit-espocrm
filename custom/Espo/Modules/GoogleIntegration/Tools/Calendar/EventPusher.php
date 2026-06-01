@@ -44,7 +44,8 @@ class EventPusher
         private CalendarTemplateApplier $calendarTemplateApplier,
         private IntegrationState $integrationState,
         private Acl $acl,
-        private EventRemover $eventRemover
+        private EventRemover $eventRemover,
+        private CalendarDisplayDateResolver $calendarDisplayDateResolver
     ) {}
 
     public function pushIfRequested(Entity $entity, ?User $pushUserOverride = null): void
@@ -427,9 +428,14 @@ class EventPusher
         ?array $source = null
     ): array {
         $event = [
-            'summary' => trim((string) ($settings['summary'] ?? ''))
-                ?: $this->buildSummary($entity, $sourceDateType, $source),
-            'description' => $this->buildDescription($entity, $sourceDateType, $settings),
+            // Title is always "{record name} - {date source label}"; CalendarTemplate summaryTemplate
+            // applies to description/location only (see buildDescription / buildLocation).
+            'summary' => GoogleCalendarPlainText::normalize(
+                $this->buildSummary($entity, $sourceDateType, $source)
+            ),
+            'description' => GoogleCalendarPlainText::normalize(
+                $this->buildDescription($entity, $sourceDateType, $settings)
+            ),
             'start' => $dateRange['start'],
             'end' => $dateRange['end'],
             'reminders' => $this->buildReminders($entity, $settings),
@@ -446,7 +452,7 @@ class EventPusher
         $location = $this->buildLocation($entity, $sourceDateType, $settings);
 
         if ($location !== '') {
-            $event['location'] = $location;
+            $event['location'] = GoogleCalendarPlainText::normalize($location);
         }
 
         $visibility = $settings['visibility'] ?? 'default';
@@ -535,14 +541,20 @@ class EventPusher
             return null;
         }
 
+        $allDay = !empty($source['allDay'])
+            || $entity->getAttributeType($dateField) === 'date'
+            || $this->calendarDisplayDateResolver->isDateTimeOptionalAllDay($entity, $dateField);
+
+        if ($allDay) {
+            $dateOnly = $this->calendarDisplayDateResolver->resolveDateOnly($entity, $dateField);
+
+            return $dateOnly !== null ? $this->buildAllDayRange($dateOnly) : null;
+        }
+
         $startValue = $this->normalizeCalendarDateValue($entity, $dateField, $entity->get($dateField));
 
         if ($startValue === null) {
             return null;
-        }
-
-        if (!empty($source['allDay'])) {
-            return $this->buildAllDayRange($this->toDateOnlyValue($startValue));
         }
 
         $endDateField = (string) ($source['endDateField'] ?? '');
@@ -735,7 +747,7 @@ class EventPusher
     {
         $template = $this->resolveRelatedTemplateVariables($entity, $template);
 
-        return trim($this->templateRendererFactory
+        $rendered = trim($this->templateRendererFactory
             ->create()
             ->setEntity($entity)
             ->setUser($this->pushUser())
@@ -745,6 +757,8 @@ class EventPusher
             ])
             ->setTemplate($template)
             ->render());
+
+        return GoogleCalendarPlainText::normalize($rendered);
     }
 
     /**
@@ -981,7 +995,7 @@ class EventPusher
 
     private function escapeTemplateValue(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return $value;
     }
 
     private function buildRecordUrl(Entity $entity): string

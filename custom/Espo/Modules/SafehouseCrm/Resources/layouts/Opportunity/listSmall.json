@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "account", "width": 22},
+    {"name": "stage", "width": 18},
+    {"name": "presentationDate", "width": 14},
+    {"name": "amount", "width": 16, "align": "right"}
+]

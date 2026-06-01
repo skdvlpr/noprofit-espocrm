@@ -17,12 +17,18 @@ define('google-integration:handlers/calendar-date-source/record-setup', ['export
         controlRecordSetup() {
             this.listenTo(this.model, 'change:dateField', () => {
                 this.syncSourceDateTypeFromDateField();
+                this.syncAllDayFromDateField();
             });
 
             this.listenTo(this.model, 'change:targetEntityType', () => {
                 this.syncSourceDateTypeFromDateField();
+                this.syncAllDayFromDateField();
                 this.model.set('defaultTemplateId', null, {ui: true});
                 this.model.set('defaultTemplateName', null, {ui: true});
+            });
+
+            this.listenTo(this.view, 'after:render', () => {
+                this.syncAllDayFromDateField();
             });
         }
 
@@ -53,6 +59,35 @@ define('google-integration:handlers/calendar-date-source/record-setup', ['export
                         .replace(/^./, letter => letter.toUpperCase());
 
                 this.model.set('label', fieldLabel, {ui: true});
+            }
+        }
+
+        syncAllDayFromDateField() {
+            const entityType = this.model.get('targetEntityType');
+            const dateField = this.model.get('dateField');
+
+            if (!entityType || !dateField) {
+                return;
+            }
+
+            const fieldDef = this.view.getMetadata().get(`entityDefs.${entityType}.fields.${dateField}`) || {};
+            const fieldType = fieldDef.type;
+            const isDateOnly = fieldType === 'date';
+
+            if (isDateOnly) {
+                this.model.set('allDay', true, {ui: true});
+            }
+
+            const $cell = this.view.$el.find('.cell.form-group[data-name="allDay"]');
+
+            if (!$cell.length) {
+                return;
+            }
+
+            if (isDateOnly) {
+                $cell.addClass('hidden');
+            } else {
+                $cell.removeClass('hidden');
             }
         }
 
