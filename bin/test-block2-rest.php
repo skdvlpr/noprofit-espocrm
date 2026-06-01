@@ -3,9 +3,9 @@
  * UI Block 2 — REST tests (explore-espo-endpoints skill, Workflows A+C+D+H).
  *
  * Covers:
- *   2.1 VolunteerEmployee: create via REST, formula auto-fields (monthlyHours, status)
+ *   2.1 VolunteerEmployee: create via REST, formula auto-fields (monthlyHours, status), repeated soft-delete
  *   2.2 MealCount: create via REST, formula auto-fields (totalMeals, foodCost, dayOfWeek)
- *   2.3 Member: create via REST, taxCode dedup (Conflict 409), email auto-copy from assignedUser
+ *   2.3 Member: create via REST, taxCode dedup (Conflict 409), email auto-copy from assignedUser, repeated soft-delete
  *
  * Uses X-Api-Key auth (Admin API user) against siteUrl; pure HTTP — no ORM shortcuts
  * for the main test flow. ORM only for provisioning API user + cleanup.
@@ -138,7 +138,7 @@ echo "Base: $siteUrl | Auth: X-Api-Key ($apiUserName)\n\n";
 
 /* --- Pre-cleanup: HARD delete stale test records (incl. soft-deleted) --- */
 $pdo = $em->getPDO();
-$testTaxCodes = ['RSSMRA85M01H501Z', 'VRDLGU80A01F205X'];
+$testTaxCodes = ['RSSMRA85M01H501Z', 'VRDLGU80A01F205X', 'BNCLGI90A01H501Y'];
 foreach ($testTaxCodes as $tc) {
     $pdo->prepare("DELETE FROM member WHERE tax_code = ?")->execute([$tc]);
 }
@@ -200,6 +200,33 @@ if (is_string($veId)) {
     $ok('VE status → Inactive after endDate in past',
         ($ve2['status'] ?? '') === 'Inactive',
         'status=' . ($ve2['status'] ?? ''));
+
+    /* --- 2.1b VolunteerEmployee: repeated soft-delete with same assignedUser --- */
+    echo "\n--- 2.1b VolunteerEmployee: repeated soft-delete releases assignedUser ---\n";
+
+    $rDelete = $http->delete('/api/v1/VolunteerEmployee/' . $veId);
+    $ok('DELETE first VolunteerEmployee → 200', $rDelete->getStatusCode() === 200,
+        'code=' . $rDelete->getStatusCode());
+
+    $veReplacementPayload = $vePayload;
+    $veReplacementPayload['lastName'] = 'VE_Delete_' . $veSuffix;
+    $veReplacementPayload['emailAddress'] = 'resttest-ve-delete-' . $veSuffix . '@test.local';
+
+    $rReplacement = $http->post('/api/v1/VolunteerEmployee', ['json' => $veReplacementPayload]);
+    $replacementBody = json_decode((string)$rReplacement->getBody(), true);
+    $replacementVeId = $replacementBody['id'] ?? null;
+    $ok('POST replacement VolunteerEmployee with same assignedUser → 200',
+        $rReplacement->getStatusCode() === 200 && is_string($replacementVeId),
+        'code=' . $rReplacement->getStatusCode());
+
+    if (is_string($replacementVeId)) {
+        $cleanupIds['VolunteerEmployee'][] = $replacementVeId;
+
+        $rReplacementDelete = $http->delete('/api/v1/VolunteerEmployee/' . $replacementVeId);
+        $ok('DELETE replacement VolunteerEmployee with same assignedUser → 200',
+            $rReplacementDelete->getStatusCode() === 200,
+            'code=' . $rReplacementDelete->getStatusCode());
+    }
 } else {
     $ok('VE created with id', false, 'no id in response');
 }
@@ -375,12 +402,47 @@ if (is_string($mId)) {
         ($m2['status'] ?? '') === 'Inactive',
         'status=' . ($m2['status'] ?? ''));
 
+    /* --- 2.3e Member: repeated soft-delete with same assignedUser --- */
+    echo "\n--- 2.3e Member: repeated soft-delete releases assignedUser ---\n";
+
+    $rDelete = $http->delete('/api/v1/Member/' . $mId);
+    $ok('DELETE first Member → 200', $rDelete->getStatusCode() === 200,
+        'code=' . $rDelete->getStatusCode());
+
+    $replacementMember = $em->getRDBRepository('Member')->getNew();
+    $replacementMember->set([
+        'firstName'      => 'RestTest',
+        'lastName'       => 'Member_Delete_' . $mSuffix,
+        'taxCode'        => 'BNCLGI90A01H501Y',
+        'status'         => 'Active',
+        'joinDate'       => '2026-01-01',
+        'assignedUserId' => $user2Id,
+    ]);
+    $memberReplacementCreated = false;
+
+    try {
+        $em->saveEntity($replacementMember);
+        $memberReplacementCreated = true;
+        $cleanupIds['Member'][] = $replacementMember->getId();
+    } catch (\Throwable $e) {
+        echo "  [DEBUG] Replacement Member create error: " . $e->getMessage() . "\n";
+    }
+
+    $ok('Create replacement Member with same assignedUser succeeded', $memberReplacementCreated);
+
+    if ($memberReplacementCreated) {
+        $rReplacementDelete = $http->delete('/api/v1/Member/' . $replacementMember->getId());
+        $ok('DELETE replacement Member with same assignedUser → 200',
+            $rReplacementDelete->getStatusCode() === 200,
+            'code=' . $rReplacementDelete->getStatusCode());
+    }
+
 } else {
     $ok('Member created with id', false, 'no id in response');
 }
 
-/* --- 2.3e Metadata: verify Member entityDefs has correct fields (Workflow C) --- */
-echo "\n--- 2.3e Metadata: Member entityDefs ---\n";
+/* --- 2.3f Metadata: verify Member entityDefs has correct fields (Workflow C) --- */
+echo "\n--- 2.3f Metadata: Member entityDefs ---\n";
 
 $rMeta = $http->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.Member']]);
 $memberDefs = json_decode((string)$rMeta->getBody(), true);
@@ -396,7 +458,7 @@ $mLinks = $memberDefs['links'] ?? [];
 $ok('Member has no "user" link (removed)', !isset($mLinks['user']));
 $ok('Member has assignedUser link', isset($mLinks['assignedUser']));
 
-/* --- 2.3f Metadata: verify duplicate check config --- */
+/* --- 2.3g Metadata: verify duplicate check config --- */
 $mScopes = json_decode(
     (string)$http->get('/api/v1/Metadata', ['query' => ['key' => 'scopes.Member']])->getBody(),
     true
