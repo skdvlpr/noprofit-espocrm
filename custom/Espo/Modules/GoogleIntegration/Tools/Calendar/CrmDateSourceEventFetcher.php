@@ -123,11 +123,7 @@ class CrmDateSourceEventFetcher
             }
 
             $name = (string) ($entity->get('name') ?? '');
-            $title = $name !== '' ? $name : $sourceLabel;
-
-            if ($sourceDateType !== 'main') {
-                $title = $title . ' · ' . $sourceLabel;
-            }
+            $title = GoogleCalendarEventTitle::format($name, $sourceLabel);
 
             $status = $entity->get('status') ?? $entity->get('stage');
 

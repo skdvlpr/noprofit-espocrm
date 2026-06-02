@@ -444,6 +444,15 @@ $ok('Opportunity per-date template selector is not raw ID input', !str_contains(
 $ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel') && str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel'));
 $ok('CalendarTemplate template field resolves target entity from select', str_contains($templateView, 'readTargetEntityTypeFromField'));
 $ok('CalendarTemplate entity type select syncs initial value to model', str_contains($entityTypeView, 'syncInitialValue') || str_contains($entityTypeView, 'initialValue'));
+$titleHelper = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEventTitle.php') ?: '';
+$crmFetcher = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CrmDateSourceEventFetcher.php') ?: '';
+$ok('Google event titles use canonical separator', str_contains($titleHelper, "SEPARATOR = ' - '") && !str_contains($crmFetcher, ' · '));
+$dateSourceBeforeSave = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Hooks/CalendarDateSource/BeforeSave.php') ?: '';
+$dateFieldView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/calendar-config-date-field.js') ?: '';
+$adminEditView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/edit.js') ?: '';
+$ok('CalendarDateSource blocks datetime companion date fields', str_contains($dateSourceBeforeSave, 'dateStartDate') && str_contains($dateFieldView, 'BLOCKED_DATE_FIELD_NAMES'));
+$ok('Admin integration links to CalendarDateSource and CalendarTemplate', str_contains($adminEditView, '#CalendarDateSource') && str_contains($adminEditView, '#CalendarTemplate'));
+$ok('Dead admin template-modal view removed', !is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/template-modal.js'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));

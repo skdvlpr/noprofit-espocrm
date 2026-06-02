@@ -687,7 +687,7 @@ class EventPusher
             $label = $this->resolveSourceLabel($entity->getEntityType(), $sourceDateType);
         }
 
-        return $label === '' ? $base : $base . ' - ' . $label;
+        return GoogleCalendarEventTitle::format($base, $label);
     }
 
     private function resolveSourceLabel(string $entityType, string $sourceDateType): string

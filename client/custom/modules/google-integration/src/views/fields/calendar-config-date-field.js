@@ -14,6 +14,8 @@ define('google-integration:views/fields/calendar-config-date-field', ['exports',
         dateEndDate: 'dateEnd',
     };
 
+    const BLOCKED_DATE_FIELD_NAMES = new Set(Object.keys(DATETIME_COMPANION_FIELD));
+
     class CalendarConfigDateField extends _enum.default {
         setup() {
             this.listenTo(this.model, 'change:targetEntityType', () => {
@@ -51,6 +53,10 @@ define('google-integration:views/fields/calendar-config-date-field', ['exports',
             Object.keys(fields).forEach(name => {
                 const fieldDef = fields[name];
                 const type = fieldDef?.type;
+
+                if (BLOCKED_DATE_FIELD_NAMES.has(name)) {
+                    return;
+                }
 
                 if (type !== 'date' && type !== 'datetime' && type !== 'datetimeOptional') {
                     return;

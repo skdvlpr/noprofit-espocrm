@@ -15,6 +15,14 @@ Spec: [CALENDAR.md](./CALENDAR.md)
 | 6 | Scheduled job `GoogleIntegrationSyncCalendar` per `calendarSyncMode` | **Done** |
 | 7 | Smokes: `bin/smoke-google-integration.php`, `bin/smoke-google-calendar-deep.php` | **Done** |
 
+## Notion 3.4 UX tails (2026-05-27)
+
+| ID | Item | Status |
+|----|------|--------|
+| 3.4a | Admin → Integrations card links to `#CalendarDateSource` / `#CalendarTemplate` | **Done** |
+| 3.4d | Canonical title `{name} - {label}` via `GoogleCalendarEventTitle` | **Done** |
+| 3.4e | All-day: hide `dateStartDate`/`dateEndDate` in picker; server rejects companions | **Done** |
+
 ## Backlog (not blocking one-way export)
 
 | ID | Item |
