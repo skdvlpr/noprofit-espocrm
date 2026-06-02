@@ -5,6 +5,8 @@ namespace Espo\Modules\GoogleIntegration\Tools;
 use Espo\Core\Container;
 use Espo\Core\DataManager;
 use Espo\Core\InjectableFactory;
+use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Core\Utils\Metadata;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
 use Espo\Entities\Integration as IntegrationEntity;
@@ -152,6 +154,7 @@ class Installer
     public function runPostInstall(Container $container): void
     {
         $em = $container->getByClass(EntityManager::class);
+        $this->migrateLegacyIntegrationState($container, $em);
         $this->removeLegacyIntegrationRow($em);
         $this->ensureIntegrationRow($em);
 
@@ -170,6 +173,197 @@ class Installer
         $this->ensureNavigationTabs($container);
 
         $dataManager->rebuild();
+    }
+
+    private function migrateLegacyIntegrationState(Container $container, EntityManager $entityManager): void
+    {
+        $legacyIntegration = $this->findLegacyIntegrationWithState($entityManager);
+
+        if ($legacyIntegration !== null) {
+            $this->migrateIntegrationRow($entityManager, $legacyIntegration);
+        }
+
+        $this->migrateIntegrationConfigFlag($container, $legacyIntegration);
+        $this->migrateLegacyExternalAccounts($entityManager);
+    }
+
+    private function findLegacyIntegrationWithState(EntityManager $entityManager): ?IntegrationEntity
+    {
+        $selected = null;
+
+        foreach ([self::LEGACY_GOOGLE_INTEGRATION_ID, self::LEGACY_SAFEHOUSE_GOOGLE_ID] as $id) {
+            $legacy = $entityManager->getEntityById(IntegrationEntity::ENTITY_TYPE, $id);
+
+            if (!$legacy instanceof IntegrationEntity) {
+                continue;
+            }
+
+            if ($selected === null) {
+                $selected = $legacy;
+
+                continue;
+            }
+
+            if ($legacy->get('enabled') && !$selected->get('enabled')) {
+                $selected = $legacy;
+
+                continue;
+            }
+
+            if (
+                !$this->isDataEmpty($legacy->get('data'))
+                && $this->isDataEmpty($selected->get('data'))
+            ) {
+                $selected = $legacy;
+            }
+        }
+
+        return $selected;
+    }
+
+    private function migrateIntegrationRow(EntityManager $entityManager, IntegrationEntity $legacy): void
+    {
+        $target = $entityManager->getEntityById(IntegrationEntity::ENTITY_TYPE, self::INTEGRATION_ID);
+        $isNew = false;
+
+        if (!$target instanceof IntegrationEntity) {
+            $target = $entityManager->createEntity(IntegrationEntity::ENTITY_TYPE, [
+                'id' => self::INTEGRATION_ID,
+                'enabled' => false,
+            ]);
+            $isNew = true;
+        }
+
+        $changed = $isNew;
+
+        if ($this->isDataEmpty($target->get('data')) && !$this->isDataEmpty($legacy->get('data'))) {
+            $target->set('data', $this->cloneData($legacy->get('data')));
+            $changed = true;
+        }
+
+        if ($legacy->get('enabled') && !$target->get('enabled')) {
+            $target->set('enabled', true);
+            $changed = true;
+        }
+
+        if ($changed) {
+            $entityManager->saveEntity($target);
+        }
+    }
+
+    private function migrateIntegrationConfigFlag(Container $container, ?IntegrationEntity $legacyIntegration): void
+    {
+        $config = $container->getByClass(Config::class);
+        $raw = $config->get('integrations');
+        $wasObject = is_object($raw);
+        $integrations = $wasObject ? get_object_vars($raw) : (is_array($raw) ? $raw : []);
+        $changed = false;
+
+        $legacyEnabled = $legacyIntegration !== null && (bool) $legacyIntegration->get('enabled');
+
+        foreach ([self::LEGACY_GOOGLE_INTEGRATION_ID, self::LEGACY_SAFEHOUSE_GOOGLE_ID] as $id) {
+            if (!empty($integrations[$id])) {
+                $legacyEnabled = true;
+            }
+
+            if (array_key_exists($id, $integrations)) {
+                unset($integrations[$id]);
+                $changed = true;
+            }
+        }
+
+        if ($legacyEnabled && empty($integrations[self::INTEGRATION_ID])) {
+            $integrations[self::INTEGRATION_ID] = true;
+            $changed = true;
+        }
+
+        if (!$changed) {
+            return;
+        }
+
+        $configWriter = $container->getByClass(InjectableFactory::class)
+            ->create(ConfigWriter::class);
+        $configWriter->set('integrations', $wasObject ? (object) $integrations : $integrations);
+        $configWriter->save();
+    }
+
+    private function migrateLegacyExternalAccounts(EntityManager $entityManager): void
+    {
+        $repo = $entityManager->getRDBRepository('ExternalAccount');
+
+        foreach ([self::LEGACY_GOOGLE_INTEGRATION_ID, self::LEGACY_SAFEHOUSE_GOOGLE_ID] as $legacyId) {
+            $prefix = $legacyId . '__';
+
+            foreach ($repo->where(['id*' => $prefix . '%', 'deleted' => false])->find() as $legacy) {
+                $legacyExternalAccountId = (string) $legacy->getId();
+                $userId = substr($legacyExternalAccountId, strlen($prefix));
+
+                if ($userId === '') {
+                    continue;
+                }
+
+                $targetId = self::INTEGRATION_ID . '__' . $userId;
+                $target = $entityManager->getEntityById('ExternalAccount', $targetId);
+                $isNew = false;
+
+                if ($target === null) {
+                    $target = $entityManager->createEntity('ExternalAccount', [
+                        'id' => $targetId,
+                        'enabled' => false,
+                    ]);
+                    $isNew = true;
+                }
+
+                $changed = $isNew;
+
+                if ($this->isDataEmpty($target->get('data')) && !$this->isDataEmpty($legacy->get('data'))) {
+                    $target->set('data', $this->cloneData($legacy->get('data')));
+                    $changed = true;
+                }
+
+                if ($legacy->get('enabled') && !$target->get('enabled')) {
+                    $target->set('enabled', true);
+                    $changed = true;
+                }
+
+                if ($legacy->get('isLocked') && !$target->get('isLocked')) {
+                    $target->set('isLocked', true);
+                    $changed = true;
+                }
+
+                if ($changed) {
+                    $entityManager->saveEntity($target);
+                }
+            }
+        }
+    }
+
+    private function isDataEmpty(mixed $data): bool
+    {
+        if ($data === null) {
+            return true;
+        }
+
+        if (is_array($data)) {
+            return $data === [];
+        }
+
+        if (is_object($data)) {
+            return get_object_vars($data) === [];
+        }
+
+        return false;
+    }
+
+    private function cloneData(mixed $data): mixed
+    {
+        $encoded = json_encode($data);
+
+        if ($encoded === false) {
+            return $data;
+        }
+
+        return json_decode($encoded);
     }
 
     private function removeLegacyIntegrationRow(EntityManager $entityManager): void

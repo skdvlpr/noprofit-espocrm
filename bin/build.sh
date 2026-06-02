@@ -4,6 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODULE_PATH="custom/Espo/Modules/SafehouseCrm"
 MANIFEST_PATH="$ROOT_DIR/$MODULE_PATH/manifest.json"
+CLIENT_ASSET_PATHS=(
+    "client/custom/src/views/record/list-inline-edit.js"
+    "client/custom/css/safehouse-aurora"
+)
 
 if [[ ! -f "$MANIFEST_PATH" ]]; then
     echo "Missing manifest: $MANIFEST_PATH" >&2
@@ -37,6 +41,17 @@ mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_
 
 cp "$MANIFEST_PATH" "$PACKAGE_DIR/manifest.json"
 cp -a "$ROOT_DIR/$MODULE_PATH" "$PACKAGE_DIR/files/custom/Espo/Modules/"
+for asset_path in "${CLIENT_ASSET_PATHS[@]}"; do
+    source_path="$ROOT_DIR/$asset_path"
+
+    if [[ ! -e "$source_path" ]]; then
+        echo "Missing client asset required by SafehouseCrm metadata: $asset_path" >&2
+        exit 1
+    fi
+
+    mkdir -p "$PACKAGE_DIR/files/$(dirname "$asset_path")"
+    cp -a "$source_path" "$PACKAGE_DIR/files/$asset_path"
+done
 cp -a "$ROOT_DIR/scripts/." "$PACKAGE_DIR/scripts/"
 
 OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"
