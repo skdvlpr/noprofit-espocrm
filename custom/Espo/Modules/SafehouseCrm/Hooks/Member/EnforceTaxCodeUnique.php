@@ -41,7 +41,7 @@ class EnforceTaxCodeUnique implements BeforeSave
             $builder = $builder->where(['id!=' => $entity->getId()]);
         }
 
-        $duplicate = $builder->findOne();
+        $duplicate = $builder->findOne(['withDeleted' => true]);
 
         if ($duplicate === null) {
             return;

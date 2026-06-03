@@ -5,7 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
-use Espo\Core\Acl;
+use Espo\Core\AclManager;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Htmlizer\TemplateRendererFactory;
@@ -43,7 +43,7 @@ class EventPusher
         private DateSourceProvider $dateSourceProvider,
         private CalendarTemplateApplier $calendarTemplateApplier,
         private IntegrationState $integrationState,
-        private Acl $acl,
+        private AclManager $aclManager,
         private EventRemover $eventRemover
     ) {}
 
@@ -67,7 +67,7 @@ class EventPusher
                 return;
             }
 
-            if (!$this->acl->checkEntityEdit($entity, $actor)) {
+            if (!$this->aclManager->checkEntityEdit($actor, $entity)) {
                 $this->log->warning(
                     'Google Calendar sync skipped: no edit ACL for '
                     . $entity->getEntityType()
@@ -201,10 +201,7 @@ class EventPusher
             }
 
             if ($matched !== null) {
-                $this->entityManager->removeEntity($link, [
-                    SaveOption::SKIP_HOOKS => true,
-                    SaveOption::SILENT => true,
-                ]);
+                $this->eventRemover->removeLink($link);
 
                 continue;
             }

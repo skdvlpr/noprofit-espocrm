@@ -4,7 +4,6 @@
     "startDate",
     "endDate",
     "status",
-    "user",
     "emailAddress",
     "phoneNumber",
     "assignedUser",
