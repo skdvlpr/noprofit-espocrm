@@ -55,6 +55,67 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     echo "  [$m] $name" . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
+$collectLayoutFields = static function (mixed $node) use (&$collectLayoutFields): array {
+    if (!is_array($node)) {
+        return [];
+    }
+
+    $fields = [];
+
+    if (isset($node['rows'])) {
+        return $collectLayoutFields($node['rows']);
+    }
+
+    if (isset($node['name']) && is_string($node['name'])) {
+        $fields[] = $node['name'];
+    }
+
+    foreach ($node as $key => $value) {
+        if ($key === 'name') {
+            continue;
+        }
+
+        foreach ($collectLayoutFields($value) as $field) {
+            $fields[] = $field;
+        }
+    }
+
+    return array_values(array_unique($fields));
+};
+
+$assertLayoutFieldsExist = static function (
+    Client $http,
+    string $entityType,
+    array $layoutTypes,
+    array $fields
+) use ($ok, $collectLayoutFields): void {
+    foreach ($layoutTypes as $layoutType) {
+        $rLayout = $http->get("/api/v1/$entityType/layout/$layoutType");
+        $layout = json_decode((string) $rLayout->getBody(), true);
+        $fieldList = $collectLayoutFields($layout);
+        $unknown = array_values(array_diff($fieldList, array_keys($fields)));
+
+        $ok(
+            "$entityType $layoutType layout is routable",
+            $rLayout->getStatusCode() === 200,
+            'code=' . $rLayout->getStatusCode()
+        );
+        $ok(
+            "$entityType $layoutType layout has no stale fields",
+            $unknown === [],
+            $unknown !== [] ? implode(',', $unknown) : ''
+        );
+        $ok(
+            "$entityType $layoutType layout uses assignedUser",
+            in_array('assignedUser', $fieldList, true)
+        );
+        $ok(
+            "$entityType $layoutType layout has no legacy user field",
+            !in_array('user', $fieldList, true)
+        );
+    }
+};
+
 /* --- Provision admin API user --- */
 $apiUserName = 'smoke_block2_admin';
 $role = $em->getRDBRepository('Role')
@@ -395,6 +456,16 @@ $ok('Member has no "user" field (removed)', !isset($mFields['user']));
 $mLinks = $memberDefs['links'] ?? [];
 $ok('Member has no "user" link (removed)', !isset($mLinks['user']));
 $ok('Member has assignedUser link', isset($mLinks['assignedUser']));
+
+$assertLayoutFieldsExist($http, 'Member', ['edit'], $mFields);
+
+$rVeMeta = $http->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.VolunteerEmployee']]);
+$volunteerEmployeeDefs = json_decode((string)$rVeMeta->getBody(), true);
+$veFields = $volunteerEmployeeDefs['fields'] ?? [];
+
+$ok('VolunteerEmployee has assignedUser field', isset($veFields['assignedUser']));
+$ok('VolunteerEmployee has no "user" field (removed)', !isset($veFields['user']));
+$assertLayoutFieldsExist($http, 'VolunteerEmployee', ['edit', 'detailSmall'], $veFields);
 
 /* --- 2.3f Metadata: verify duplicate check config --- */
 $mScopes = json_decode(

@@ -10,6 +10,7 @@
     "birthDate": "Date of Birth",
     "emailAddress": "Email",
     "phoneNumber": "Phone",
+    "assignedUser": "Linked User",
     "startDate": "Start Date",
     "endDate": "End Date",
     "contractType": "Contract Type",

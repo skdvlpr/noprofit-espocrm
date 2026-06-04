@@ -174,6 +174,19 @@ $ok(
 );
 $fields = $meta['fields'] ?? null;
 $ok('fields include clientId and clientSecret', is_array($fields) && isset($fields['clientId'], $fields['clientSecret']));
+$googleClientSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Core/ExternalAccount/Clients/Google.php') ?: '';
+$authCodeHandlerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php') ?: '';
+$ok(
+    'OAuth client omits refreshToken when Google response has none',
+    str_contains($googleClientSource, "is_string(\$result['refresh_token'] ?? null)")
+        && !str_contains($googleClientSource, "\$data['refreshToken'] = \$result['refresh_token'] ?? null")
+);
+$ok(
+    'OAuth reconnect preserves existing refreshToken only for the same Google account',
+    str_contains($authCodeHandlerSource, '$previousRefreshToken')
+        && str_contains($authCodeHandlerSource, '$previousGoogleAccountId')
+        && str_contains($authCodeHandlerSource, '$newGoogleAccountId !== $previousGoogleAccountId')
+);
 
 echo "\nGoogle Calendar dynamic entity metadata\n";
 

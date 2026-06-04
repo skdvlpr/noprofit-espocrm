@@ -55,16 +55,25 @@ class AuthorizationCodeHandler
             throw new Error("Could not get access token for $integration.");
         }
 
+        $previousRefreshToken = $entity->get('refreshToken');
+        $previousGoogleAccountId = $entity->get('googleAccountId');
+        $hasNewRefreshToken = is_string($result['refreshToken'] ?? null) && $result['refreshToken'] !== '';
+
         $entity->clear('accessToken');
-        $entity->clear('refreshToken');
         $entity->clear('tokenType');
         $entity->clear('expiresAt');
 
         foreach ($result as $name => $value) {
+            if ($name === 'refreshToken' && (!is_string($value) || $value === '')) {
+                continue;
+            }
+
             $entity->set($name, $value);
         }
 
         $client->setParams($result);
+
+        $profile = null;
 
         if ($client instanceof GoogleClient) {
             $profile = $client->getGoogleAccountProfile();
@@ -73,6 +82,22 @@ class AuthorizationCodeHandler
                 foreach ($profile as $name => $value) {
                     $entity->set($name, $value);
                 }
+            }
+        }
+
+        if (!$hasNewRefreshToken && is_string($previousRefreshToken) && $previousRefreshToken !== '') {
+            $newGoogleAccountId = $profile['googleAccountId'] ?? null;
+
+            if (
+                is_string($previousGoogleAccountId)
+                && $previousGoogleAccountId !== ''
+                && is_string($newGoogleAccountId)
+                && $newGoogleAccountId !== ''
+                && $newGoogleAccountId !== $previousGoogleAccountId
+            ) {
+                $entity->clear('refreshToken');
+            } else {
+                $entity->set('refreshToken', $previousRefreshToken);
             }
         }
 

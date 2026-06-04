@@ -20,7 +20,7 @@
     "notes": "Заметки",
     "emailAddress": "Email",
     "phoneNumber": "Телефон",
-    "user": "Связанный пользователь"
+    "assignedUser": "Связанный пользователь"
   },
   "options": {
     "status": {
