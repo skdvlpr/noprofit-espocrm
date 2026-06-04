@@ -6,16 +6,6 @@
         "presentationDate": "Data Presentazione",
         "closeDate": "Data Chiusura",
         "amount": "Importo",
-        "saveToGoogleCalendar": "Salva in Google Calendar",
-        "googleCalendarOpportunityDateList": "Date Google Calendar",
-        "googleCalendarOpportunityEventSettings": "Impostazioni evento Google per data",
-        "googleCalendarReminderMode": "Modalità promemoria Google",
-        "googleCalendarReminders": "Promemoria Google",
-        "googleCalendarDescriptionTemplateOverride": "Template descrizione Google",
-        "googleCalendarLocation": "Luogo Google",
-        "googleCalendarVisibility": "Visibilità Google",
-        "googleCalendarTransparency": "Disponibilità Google",
-        "googleCalendarColorId": "Colore Google",
         "contacts": "Contatti",
         "description": "Descrizione"
     },
@@ -32,60 +22,13 @@
             "Negotiation": "Negoziazione",
             "Closed Won": "Chiuso Positivamente",
             "Closed Lost": "Chiuso Negativamente"
-        },
-        "googleCalendarReminderMode": {
-            "none": "Nessun promemoria",
-            "default": "Usa predefiniti del calendario",
-            "custom": "Promemoria personalizzati"
-        },
-        "googleCalendarReminders": {
-            "popup": "Notifica",
-            "email": "Email",
-            "minutes": "minuti prima",
-            "hours": "ore prima",
-            "days": "giorni prima",
-            "weeks": "settimane prima"
-        },
-        "googleCalendarOpportunityDateList": {
-            "presentationDate": "Data presentazione",
-            "closeDate": "Data chiusura"
-        },
-        "googleCalendarVisibility": {
-            "default": "Predefinita",
-            "private": "Privata",
-            "public": "Pubblica"
-        },
-        "googleCalendarTransparency": {
-            "opaque": "Occupato",
-            "transparent": "Disponibile"
-        },
-        "googleCalendarColorId": {
-            "": "Predefinito",
-            "1": "Lavanda",
-            "2": "Salvia",
-            "3": "Uva",
-            "4": "Fenicottero",
-            "5": "Banana",
-            "6": "Mandarino",
-            "7": "Pavone",
-            "8": "Grafite",
-            "9": "Mirtillo",
-            "10": "Basilico",
-            "11": "Pomodoro"
         }
     },
     "labels": {
         "Opportunity": "Fondi e Finanziamenti",
         "Create Opportunity": "Crea Fondo/Finanziamento",
         "googleCalendarReminderNotice": "Puoi salvare questa data del finanziamento in Google Calendar con o senza promemoria Google. Per le scadenze usa promemoria in giorni/settimane, ad esempio 7 giorni, 14 giorni o 4 settimane prima.",
-        "googleCalendarTemplateVariables": "Inserisci campo del record",
-        "googleCalendarTemplateVariableSearch": "Cerca campi",
-        "googleCalendarCurrentRecordFields": "Campi del record corrente",
-        "googleCalendarRelatedRecordFields": "Campi dei record collegati",
-        "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca.",
-        "googleCalendarDatePresentation": "Data presentazione",
-        "googleCalendarDateClose": "Data chiusura",
-        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata."
+        "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata su questo finanziamento."
     },
     "presetFilters": {
         "open": "Aperte",

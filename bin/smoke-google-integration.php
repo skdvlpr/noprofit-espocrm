@@ -453,6 +453,10 @@ $adminEditView = file_get_contents(__DIR__ . '/../client/custom/modules/google-i
 $ok('CalendarDateSource blocks datetime companion date fields', str_contains($dateSourceBeforeSave, 'dateStartDate') && str_contains($dateFieldView, 'BLOCKED_DATE_FIELD_NAMES'));
 $ok('Admin integration links to CalendarDateSource and CalendarTemplate', str_contains($adminEditView, '#CalendarDateSource') && str_contains($adminEditView, '#CalendarTemplate'));
 $ok('Dead admin template-modal view removed', !is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/template-modal.js'));
+$eventSettingsView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
+$templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-template-link.js') ?: '';
+$ok('Per-date UI uses unified date list field only', !str_contains($eventSettingsView, 'googleCalendarOpportunityDateList') && str_contains($templateLinkView, 'googleCalendarDateSourceList'));
+$ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migrate-opportunity-google-calendar-fields.php'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));

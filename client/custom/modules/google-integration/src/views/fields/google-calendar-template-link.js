@@ -105,12 +105,10 @@ define('google-integration:views/fields/google-calendar-template-link', ['export
         }
 
         getCurrentSourceDateType() {
-            if (this.model.entityType === 'Opportunity') {
-                const selectedDateList = this.model.get('googleCalendarOpportunityDateList');
+            const selectedDateList = this.model.get('googleCalendarDateSourceList');
 
-                if (Array.isArray(selectedDateList) && selectedDateList.length === 1) {
-                    return selectedDateList[0];
-                }
+            if (Array.isArray(selectedDateList) && selectedDateList.length === 1) {
+                return selectedDateList[0];
             }
 
             return 'main';

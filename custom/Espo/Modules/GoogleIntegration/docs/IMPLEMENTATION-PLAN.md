@@ -22,17 +22,17 @@ Spec: [CALENDAR.md](./CALENDAR.md)
 | 3.4a | Admin → Integrations card links to `#CalendarDateSource` / `#CalendarTemplate` | **Done** |
 | 3.4d | Canonical title `{name} - {label}` via `GoogleCalendarEventTitle` | **Done** |
 | 3.4e | All-day: hide `dateStartDate`/`dateEndDate` in picker; server rejects companions | **Done** |
+| U6 | Opportunity uses `googleCalendarDateSourceList` / `googleCalendarEventSettings` only | **Done** |
 
 ## Backlog (not blocking one-way export)
 
 | ID | Item |
 |----|------|
-| U6 | Unify Opportunity field names to `googleCalendarDateSourceList` / `googleCalendarEventSettings` |
 | U7 | Explicit date-source UI for Meeting/Call/Task |
 | FR-1–3 | Attendees, external guests, Google Meet on Call |
 
 ## Entity list
 
 - `Meeting`, `Call`, `Task` — shared Google fields + `CalendarDateSource:main`
-- `Opportunity` — per-date list + per-date settings (`googleCalendarOpportunity*`)
+- `Opportunity` — per-date list + per-date settings (`googleCalendarDateSourceList`, `googleCalendarEventSettings`)
 - `VolunteerEmployee` — per-date only (`googleCalendarDateSourceList`, `googleCalendarEventSettings`); no shared reminder fields

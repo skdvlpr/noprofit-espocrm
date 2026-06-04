@@ -1,6 +1,6 @@
 <?php
 /**
- * One-shot cleanup: remove invalid values from googleCalendarOpportunityDateList (e.g. "crea").
+ * One-shot cleanup: remove invalid values from googleCalendarDateSourceList (e.g. "crea").
  *
  * Usage:
  *   ddev exec php bin/sanitize-opportunity-google-calendar-dates.php
@@ -23,7 +23,7 @@ $em = $app->getContainer()->getByClass(EntityManager::class);
 $updated = 0;
 
 foreach ($em->getRDBRepository('Opportunity')->find() as $opportunity) {
-    $selected = $opportunity->get('googleCalendarOpportunityDateList');
+    $selected = $opportunity->get('googleCalendarDateSourceList');
 
     if (!is_array($selected)) {
         continue;
@@ -42,9 +42,9 @@ foreach ($em->getRDBRepository('Opportunity')->find() as $opportunity) {
         $filtered = ['closeDate'];
     }
 
-    $opportunity->set('googleCalendarOpportunityDateList', $filtered);
+    $opportunity->set('googleCalendarDateSourceList', $filtered);
     $em->saveEntity($opportunity);
     $updated++;
 }
 
-echo "Sanitized Opportunity googleCalendarOpportunityDateList on {$updated} record(s).\n";
+echo "Sanitized Opportunity googleCalendarDateSourceList on {$updated} record(s).\n";

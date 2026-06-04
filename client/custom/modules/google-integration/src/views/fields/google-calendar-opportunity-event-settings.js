@@ -181,11 +181,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         getDateListFieldName() {
-            if (this.getMetadata().get(`entityDefs.${this.model.entityType}.fields.googleCalendarDateSourceList`)) {
-                return 'googleCalendarDateSourceList';
-            }
-
-            return 'googleCalendarOpportunityDateList';
+            return 'googleCalendarDateSourceList';
         }
 
         data() {

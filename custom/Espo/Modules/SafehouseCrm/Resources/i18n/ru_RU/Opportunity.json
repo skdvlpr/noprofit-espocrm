@@ -6,16 +6,6 @@
         "presentationDate": "Дата подачи",
         "closeDate": "Дата закрытия",
         "amount": "Сумма",
-        "saveToGoogleCalendar": "Сохранить в Google Calendar",
-        "googleCalendarOpportunityDateList": "Даты Google Calendar",
-        "googleCalendarOpportunityEventSettings": "Настройки событий Google по датам",
-        "googleCalendarReminderMode": "Режим напоминаний Google",
-        "googleCalendarReminders": "Напоминания Google",
-        "googleCalendarDescriptionTemplateOverride": "Шаблон описания Google",
-        "googleCalendarLocation": "Место Google",
-        "googleCalendarVisibility": "Видимость Google",
-        "googleCalendarTransparency": "Занятость Google",
-        "googleCalendarColorId": "Цвет Google",
         "contacts": "Контакты",
         "description": "Описание"
     },
@@ -32,60 +22,13 @@
             "Negotiation": "Переговоры",
             "Closed Won": "Закрыто успешно",
             "Closed Lost": "Закрыто неудачно"
-        },
-        "googleCalendarReminderMode": {
-            "none": "Без напоминаний",
-            "default": "Настройки календаря",
-            "custom": "Пользовательские напоминания"
-        },
-        "googleCalendarReminders": {
-            "popup": "Уведомление",
-            "email": "Email",
-            "minutes": "минут до",
-            "hours": "часов до",
-            "days": "дней до",
-            "weeks": "недель до"
-        },
-        "googleCalendarOpportunityDateList": {
-            "presentationDate": "Дата подачи",
-            "closeDate": "Дата закрытия"
-        },
-        "googleCalendarVisibility": {
-            "default": "По умолчанию",
-            "private": "Приватное",
-            "public": "Публичное"
-        },
-        "googleCalendarTransparency": {
-            "opaque": "Занят",
-            "transparent": "Свободен"
-        },
-        "googleCalendarColorId": {
-            "": "По умолчанию",
-            "1": "Lavender",
-            "2": "Sage",
-            "3": "Grape",
-            "4": "Flamingo",
-            "5": "Banana",
-            "6": "Tangerine",
-            "7": "Peacock",
-            "8": "Graphite",
-            "9": "Blueberry",
-            "10": "Basil",
-            "11": "Tomato"
         }
     },
     "labels": {
         "Opportunity": "Гранты и Финансирование",
         "Create Opportunity": "Создать грант",
         "googleCalendarReminderNotice": "Можно сохранить дату гранта в Google Calendar с напоминаниями или без них. Для дедлайнов используйте дни/недели: например за 7 дней, 14 дней или 4 недели.",
-        "googleCalendarTemplateVariables": "Вставить поле записи",
-        "googleCalendarTemplateVariableSearch": "Поиск полей",
-        "googleCalendarCurrentRecordFields": "Поля текущей записи",
-        "googleCalendarRelatedRecordFields": "Поля связанных записей",
-        "googleCalendarNoVariables": "Нет полей по этому запросу.",
-        "googleCalendarDatePresentation": "Дата подачи",
-        "googleCalendarDateClose": "Дата закрытия",
-        "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты."
+        "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты по этому гранту."
     },
     "presetFilters": {
         "open": "Открытые",
