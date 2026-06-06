@@ -33,11 +33,25 @@ PY
 PACKAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/safehouse-crm-package.XXXXXX")"
 trap 'rm -rf "$PACKAGE_DIR"' EXIT
 
+THEME_CSS_PATH="client/custom/css/safehouse-aurora"
+THEME_FONT_PATH="client/fonts/jet-brains-sans"
+
 mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_DIR/dist"
 
 cp "$MANIFEST_PATH" "$PACKAGE_DIR/manifest.json"
 cp -a "$ROOT_DIR/$MODULE_PATH" "$PACKAGE_DIR/files/custom/Espo/Modules/"
 cp -a "$ROOT_DIR/scripts/." "$PACKAGE_DIR/scripts/"
+
+# Safehouse Aurora themes: metadata lives in the module; runtime assets live under client/.
+if [[ -d "$ROOT_DIR/$THEME_CSS_PATH" ]]; then
+    mkdir -p "$PACKAGE_DIR/files/client/custom/css"
+    cp -a "$ROOT_DIR/$THEME_CSS_PATH" "$PACKAGE_DIR/files/client/custom/css/"
+fi
+
+if [[ -d "$ROOT_DIR/$THEME_FONT_PATH" ]]; then
+    mkdir -p "$PACKAGE_DIR/files/client/fonts"
+    cp -a "$ROOT_DIR/$THEME_FONT_PATH" "$PACKAGE_DIR/files/client/fonts/"
+fi
 
 OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"
 rm -f "$OUTPUT"

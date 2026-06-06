@@ -1,0 +1,12 @@
+JetBrains Sans
+Copyright (c) JetBrains s.r.o.
+
+Font files in this directory are distributed by JetBrains for use on
+jetbrains.com and related web properties. Self-hosted copy for the
+Safehouse Aurora EspoCRM theme (UI typography only).
+
+Source (public CDN):
+https://resources.jetbrains.com/storage/jetbrains-sans/
+
+For redistribution outside this project, verify current JetBrains brand
+and font usage terms at https://www.jetbrains.com/company/brand/

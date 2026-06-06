@@ -23,6 +23,7 @@
         "Create MealCount": "Создать новый"
     },
     "themes": {
-        "SafehouseAurora": "Safehouse Aurora"
+        "SafehouseAurora": "Safehouse Aurora",
+        "SafehouseAuroraLight": "Safehouse Aurora Light"
     }
 }
