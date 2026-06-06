@@ -160,6 +160,7 @@ class Installer
         $dataManager = $container->getByClass(DataManager::class);
         $dataManager->rebuild();
 
+        $this->migrateOpportunityGoogleCalendarFields($em);
         $this->ensureDefaultDateSources($em);
         $this->ensureDefaultCalendarTemplates($em);
         $this->ensureCalendarTemplatesForActiveDateSources($container, $em);
@@ -173,6 +174,69 @@ class Installer
         $this->pruneGoogleCalendarConfigFromNavigation($container);
 
         $dataManager->rebuild();
+    }
+
+    /**
+     * @return array{dateList: int, eventSettings: int}
+     */
+    public function migrateOpportunityGoogleCalendarFields(EntityManager $entityManager): array
+    {
+        $pdo = $entityManager->getPDO();
+        $requiredColumns = [
+            'google_calendar_date_source_list',
+            'google_calendar_event_settings',
+            'google_calendar_opportunity_date_list',
+            'google_calendar_opportunity_event_settings',
+        ];
+
+        if (!$this->tableHasColumns($pdo, 'opportunity', $requiredColumns)) {
+            return ['dateList' => 0, 'eventSettings' => 0];
+        }
+
+        $emptyList = "google_calendar_date_source_list IS NULL OR google_calendar_date_source_list = '' OR google_calendar_date_source_list = '[]'";
+        $hasLegacyList = "google_calendar_opportunity_date_list IS NOT NULL AND google_calendar_opportunity_date_list != '' AND google_calendar_opportunity_date_list != '[]'";
+        $sqlList = "UPDATE opportunity SET google_calendar_date_source_list = google_calendar_opportunity_date_list WHERE ({$emptyList}) AND ({$hasLegacyList})";
+
+        $emptySettings = "google_calendar_event_settings IS NULL OR google_calendar_event_settings = '' OR google_calendar_event_settings = '[]'";
+        $hasLegacySettings = "google_calendar_opportunity_event_settings IS NOT NULL AND google_calendar_opportunity_event_settings != '' AND google_calendar_opportunity_event_settings != '[]'";
+        $sqlSettings = "UPDATE opportunity SET google_calendar_event_settings = google_calendar_opportunity_event_settings WHERE ({$emptySettings}) AND ({$hasLegacySettings})";
+
+        return [
+            'dateList' => (int) $pdo->exec($sqlList),
+            'eventSettings' => (int) $pdo->exec($sqlSettings),
+        ];
+    }
+
+    /**
+     * @param array<int, string> $columns
+     */
+    private function tableHasColumns(\PDO $pdo, string $table, array $columns): bool
+    {
+        try {
+            $statement = $pdo->query("SHOW COLUMNS FROM `{$table}`");
+        } catch (\Throwable) {
+            return false;
+        }
+
+        if ($statement === false) {
+            return false;
+        }
+
+        $existing = [];
+
+        foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            if (is_string($row['Field'] ?? null)) {
+                $existing[$row['Field']] = true;
+            }
+        }
+
+        foreach ($columns as $column) {
+            if (!isset($existing[$column])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function removeLegacyIntegrationRow(EntityManager $entityManager): void

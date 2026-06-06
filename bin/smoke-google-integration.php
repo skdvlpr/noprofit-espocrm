@@ -457,6 +457,13 @@ $eventSettingsView = file_get_contents(__DIR__ . '/../client/custom/modules/goog
 $templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-template-link.js') ?: '';
 $ok('Per-date UI uses unified date list field only', !str_contains($eventSettingsView, 'googleCalendarOpportunityDateList') && str_contains($templateLinkView, 'googleCalendarDateSourceList'));
 $ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migrate-opportunity-google-calendar-fields.php'));
+$installerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Installer.php') ?: '';
+$ok(
+    'Installer runs Opportunity Google field migration during post-install',
+    str_contains($installerSource, '$this->migrateOpportunityGoogleCalendarFields($em);')
+        && str_contains($installerSource, 'google_calendar_opportunity_date_list')
+        && str_contains($installerSource, 'google_calendar_opportunity_event_settings')
+);
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
@@ -477,6 +484,28 @@ $ok('template-form route exists', in_array('/GoogleIntegration/calendar/template
 $calendarView = file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/metadata/clientDefs/Calendar.json') ?: '';
 $ok('Calendar view override metadata exists', str_contains($calendarView, 'google-integration:views/calendar/calendar'));
 $ok('CRM date-source calendar route exists', in_array('/GoogleIntegration/calendar/crm-events', $routePaths, true));
+$emptyEventsBranchPos = strpos($eventPusherSource, 'if ($events === [])');
+$emptyEventsCleanupPos = strpos(
+    $eventPusherSource,
+    '$this->eventRemover->removeStaleDateSourceLinks($entity, $actor, []);'
+);
+$ok(
+    'EventPusher removes stale Google links when selected date values are empty',
+    $emptyEventsBranchPos !== false
+        && $emptyEventsCleanupPos !== false
+        && $emptyEventsCleanupPos > $emptyEventsBranchPos
+);
+$ok(
+    'EventPusher checks edit ACL for the Google sync actor',
+    str_contains($eventPusherSource, 'private AclManager $aclManager')
+        && str_contains($eventPusherSource, '$this->aclManager->checkEntityEdit($actor, $entity)')
+);
+$eventRemoverSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php') ?: '';
+$ok(
+    'EventRemover checks edit ACL for the link owner',
+    str_contains($eventRemoverSource, 'private AclManager $aclManager')
+        && str_contains($eventRemoverSource, '$this->aclManager->checkEntityEdit($user, $entity)')
+);
 
 foreach ([
     'Meeting:main',
