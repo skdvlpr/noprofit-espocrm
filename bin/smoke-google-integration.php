@@ -458,6 +458,27 @@ $templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/googl
 $ok('Per-date UI uses unified date list field only', !str_contains($eventSettingsView, 'googleCalendarOpportunityDateList') && str_contains($templateLinkView, 'googleCalendarDateSourceList'));
 $ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migrate-opportunity-google-calendar-fields.php'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
+$perDateBeforeSaveHook = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Hooks/Common/PerDateGoogleCalendarBeforeSave.php'
+) ?: '';
+$ok(
+    'Per-date before-save hook defaults empty date list to all allowed sources',
+    str_contains($perDateBeforeSaveHook, '$filtered = $allowed;')
+        && !str_contains($perDateBeforeSaveHook, '$filtered = [$allowed[0]]')
+);
+$ok(
+    'Per-date settings UI defaults empty date list to all allowed sources',
+    str_contains($eventSettingsView, 'return allowed;')
+        && !str_contains($eventSettingsView, '[allowed[0]]')
+);
+$dateSourceEntityTypesReader = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/DateSourceEntityTypesReader.php'
+) ?: '';
+$ok(
+    'Date source entity-type reader tolerates missing DB table during rebuild',
+    str_contains($dateSourceEntityTypesReader, 'catch (PDOException)')
+        && str_contains($dateSourceEntityTypesReader, '$statement = $pdo->query($sql);')
+);
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
 $callDetailLayout = file_get_contents(

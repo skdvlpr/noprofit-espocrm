@@ -53,31 +53,31 @@ class DateSourceEntityTypesReader
 
         try {
             $pdo = $this->createPdo($config, $platform);
+
+            $table = $this->resolveTableName($config, $platform, 'calendar_date_source');
+
+            $sql = "SELECT DISTINCT target_entity_type AS targetEntityType
+                FROM {$table}
+                WHERE deleted = 0 AND is_active = 1
+                    AND target_entity_type IS NOT NULL AND target_entity_type != ''";
+
+            $statement = $pdo->query($sql);
+
+            if ($statement === false) {
+                return null;
+            }
+
+            $entityTypes = [];
+
+            while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                $type = $row['targetEntityType'] ?? $row['target_entity_type'] ?? null;
+
+                if (is_string($type) && $type !== '') {
+                    $entityTypes[$type] = true;
+                }
+            }
         } catch (PDOException) {
             return null;
-        }
-
-        $table = $this->resolveTableName($config, $platform, 'calendar_date_source');
-
-        $sql = "SELECT DISTINCT target_entity_type AS targetEntityType
-            FROM {$table}
-            WHERE deleted = 0 AND is_active = 1
-                AND target_entity_type IS NOT NULL AND target_entity_type != ''";
-
-        $statement = $pdo->query($sql);
-
-        if ($statement === false) {
-            return null;
-        }
-
-        $entityTypes = [];
-
-        while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-            $type = $row['targetEntityType'] ?? $row['target_entity_type'] ?? null;
-
-            if (is_string($type) && $type !== '') {
-                $entityTypes[$type] = true;
-            }
         }
 
         $list = array_keys($entityTypes);

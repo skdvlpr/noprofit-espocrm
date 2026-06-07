@@ -12,6 +12,7 @@
  *   - MealCount foodCost = totalMeals * foodUnitPrice (default 1.5 EUR)
  *   - MealCount dayOfWeek translated to English weekday
  *   - Scheduled jobs renamed (English Safehouse* jobClassName, Active)
+ *   - Member / VolunteerEmployee assignedUser uniqueness uses deleteId for repeat soft-deletes
  *
  * Creates 4 temporary records and deletes them at the end.
  *
@@ -32,6 +33,18 @@ $results = [];
 $created = [];
 
 try {
+    foreach (['Member', 'VolunteerEmployee'] as $entityType) {
+        $path = __DIR__ . '/../custom/Espo/Modules/SafehouseCrm/Resources/metadata/entityDefs/' . $entityType . '.json';
+        $defs = json_decode(file_get_contents($path) ?: '{}', true);
+        $assignedUserIndex = $defs['indexes']['assignedUser']['columns'] ?? null;
+
+        if (($defs['deleteId'] ?? false) !== true || $assignedUserIndex !== ['assignedUserId', 'deleteId']) {
+            throw new RuntimeException($entityType . ' assignedUser unique index must use deleteId.');
+        }
+
+        $results[] = [$entityType . ' assignedUser deleteId index', 'OK'];
+    }
+
     $ve = $em->getNewEntity('VolunteerEmployee');
     $ve->set([
         'firstName' => 'Smoke',

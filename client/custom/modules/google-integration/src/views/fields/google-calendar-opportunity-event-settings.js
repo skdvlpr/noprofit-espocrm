@@ -315,12 +315,12 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
             const allowed = this.getAllowedDateTypeList();
 
             if (!Array.isArray(selected) || !selected.length) {
-                return allowed.length ? [allowed[0]] : [];
+                return allowed;
             }
 
             const filtered = selected.filter(item => allowed.includes(item));
 
-            return filtered.length ? filtered : (allowed.length ? [allowed[0]] : []);
+            return filtered.length ? filtered : allowed;
         }
 
         getAllowedDateTypeList() {

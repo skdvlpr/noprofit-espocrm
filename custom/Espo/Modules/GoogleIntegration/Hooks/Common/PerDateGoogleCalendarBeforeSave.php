@@ -56,9 +56,8 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
         }
 
         $selected = $entity->get('googleCalendarDateSourceList');
-        $legacyUnset = !is_array($selected);
 
-        if ($legacyUnset) {
+        if (!is_array($selected)) {
             $selected = [];
         }
 
@@ -68,15 +67,7 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
         )));
 
         if ($filtered === [] && $entity->get('saveToGoogleCalendar')) {
-            $userExplicitlyClearedList = !$legacyUnset
-                && $entity->isAttributeChanged('googleCalendarDateSourceList');
-
-            $enablingExportOnly = $entity->isAttributeChanged('saveToGoogleCalendar')
-                && $entity->get('saveToGoogleCalendar');
-
-            if (!$userExplicitlyClearedList || $enablingExportOnly) {
-                $filtered = [$allowed[0]];
-            }
+            $filtered = $allowed;
         }
 
         $entity->set('googleCalendarDateSourceList', $filtered);
