@@ -1,14 +1,17 @@
 define('google-integration:views/fields/google-calendar-opportunity-event-settings', [
     'exports',
     'views/fields/base',
+    'ui/select',
     'google-integration:lib/google-calendar-variable-panel',
     'google-integration:lib/google-calendar-template-variables',
-], function (_exports, _base, VariablePanel, TemplateVariables) {
+    'google-integration:lib/google-calendar-color-swatch',
+], function (_exports, _base, _select, VariablePanel, TemplateVariables, ColorSwatch) {
     'use strict';
 
     Object.defineProperty(_exports, '__esModule', {value: true});
     _exports.default = void 0;
     _base = _interopRequireDefault(_base);
+    _select = _interopRequireDefault(_select);
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
     const OPPORTUNITY_DATE_TYPE_LIST = ['presentationDate', 'closeDate'];
@@ -18,20 +21,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     const VISIBILITY_LIST = ['default', 'private', 'public'];
     const TRANSPARENCY_LIST = ['opaque', 'transparent'];
     const COLOR_LIST = ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-    const COLOR_MAP = {
-        '': '#9aa0a6',
-        '1': '#7986cb',
-        '2': '#33b679',
-        '3': '#8e24aa',
-        '4': '#e67c73',
-        '5': '#f6c026',
-        '6': '#f4511e',
-        '7': '#039be5',
-        '8': '#616161',
-        '9': '#3f51b5',
-        '10': '#0b8043',
-        '11': '#d50000',
-    };
     const MAX_REMINDERS = 5;
     const MAX_MINUTES = 40320;
 
@@ -728,14 +717,39 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         decorateColorSelects() {
-            this.$el.find('[data-role="colorId"] option').each((i, option) => {
-                const $option = $(option);
-                const value = String($option.attr('value') || '');
+            this.$el.find('[data-role="colorId"]').each((i, element) => {
+                const $select = $(element);
+                const getValue = () => {
+                    if (element.selectize) {
+                        return element.selectize.getValue();
+                    }
 
-                $option.css({
-                    backgroundColor: COLOR_MAP[value] || COLOR_MAP[''],
-                    color: ['3', '6', '8', '9', '10', '11'].includes(value) ? '#fff' : '#111',
-                });
+                    return $select.val();
+                };
+                const paint = () => {
+                    const $control = $(element).closest('.selectize-control');
+
+                    ColorSwatch.decorateSelectize(
+                        $control.length ? $control : $select.parent(),
+                        getValue
+                    );
+                };
+
+                if (!element.selectize) {
+                    ColorSwatch.markSelectOptions($select);
+                    _select.default.init(element);
+                }
+
+                window.setTimeout(() => {
+                    paint();
+
+                    if (element.selectize && !element.selectize.googleCalendarColorDecorated) {
+                        element.selectize.googleCalendarColorDecorated = true;
+                        element.selectize.on('dropdown_open', paint);
+                    }
+                }, 0);
+
+                $select.off('change.googleCalendarColor').on('change.googleCalendarColor', paint);
             });
         }
     }

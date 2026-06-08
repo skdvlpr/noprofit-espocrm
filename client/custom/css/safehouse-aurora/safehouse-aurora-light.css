@@ -1,9 +1,10 @@
 /**
- * Safehouse Aurora Light — same bg.svg (CSS-inverted) + light glass + red accents.
+ * Safehouse Aurora Light
+ *
+ * Espo theme pattern: import light.css (not glass.css), override variables, minimal rules.
  */
-@import url('../../../css/espo/glass.css');
+@import url('../../../css/espo/light.css');
 
-/* UI: JetBrains Sans (theme-only). Monospace stays JetBrains Mono via glass.css. */
 @font-face {
   font-family: 'JetBrains Sans';
   font-style: normal;
@@ -17,9 +18,8 @@
 
 :root {
   --font-family: 'JetBrains Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --body-bg: transparent;
-  --body-bg-2: #e4e4e7;
 
+  --body-bg: transparent;
   --text-color: #18181b;
   --text-muted-color: #52525b;
   --text-gray-color: #71717a;
@@ -30,11 +30,8 @@
   --brand-danger: #f87171;
   --brand-success: #65a30d;
   --brand-warning: #d97706;
-  --brand-info: #71717a;
 
-  /* Light navbar — frosted white glass */
-  --navbar-inverse-bg: rgba(255, 255, 255, 0.62);
-  --navbar-inverse-bg-7: rgba(255, 255, 255, 0.72);
+  --navbar-inverse-bg: rgba(255, 255, 255, 0.88);
   --navbar-inverse-border: rgba(0, 0, 0, 0.09);
   --navbar-inverse-link-color: #3f3f46;
   --navbar-inverse-link-hover-color: #18181b;
@@ -42,68 +39,45 @@
   --navbar-inverse-link-active-bg: rgba(239, 68, 68, 0.16);
   --navbar-inverse-link-icon-color: #71717a;
   --navbar-inverse-link-icon-hover-color: #18181b;
-  --navbar-box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.12);
 
-  /* Aurora glass — light frosted panels */
-  --aurora-glass-bg: rgba(255, 255, 255, 0.58);
-  --aurora-glass-blur: blur(14px) saturate(1.05);
-  --aurora-glass-border: rgba(0, 0, 0, 0.1);
-  --aurora-glass-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.14);
-
-  --panel-bg: transparent;
-  --panel-default-bg: var(--aurora-glass-bg);
-  --panel-primary-bg: rgba(255, 255, 255, 0.5);
-  --panel-success-bg: rgba(255, 255, 255, 0.5);
-  --panel-danger-bg: rgba(255, 255, 255, 0.5);
-  --panel-warning-bg: rgba(255, 255, 255, 0.5);
-  --panel-info-bg: rgba(255, 255, 255, 0.5);
-
+  --panel-bg: rgba(255, 255, 255, 0.78);
+  --panel-default-bg: rgba(255, 255, 255, 0.82);
   --panel-default-text: #27272a;
   --panel-default-border: rgba(0, 0, 0, 0.09);
-  --panel-primary-border: rgba(0, 0, 0, 0.1);
-
   --default-heading-bg-color: rgba(0, 0, 0, 0.03);
   --default-border-color: rgba(0, 0, 0, 0.08);
 
-  --table-bg: transparent;
-  --table-bg-accent: rgba(0, 0, 0, 0.03);
-  --input-bg: rgba(255, 255, 255, 0.82);
-  --input-border: rgba(0, 0, 0, 0.12);
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.14);
   --input-color: #18181b;
 
-  /* Dropdowns: opaque light surfaces */
   --dropdown-bg: #ffffff;
   --dropdown-link-color: #27272a;
   --dropdown-link-hover-color: #18181b;
   --dropdown-link-hover-bg: rgba(239, 68, 68, 0.12);
   --dropdown-link-active-bg: rgba(220, 38, 38, 0.18);
   --dropdown-border: rgba(0, 0, 0, 0.1);
-  --dropdown-divider-bg: rgba(0, 0, 0, 0.06);
 
   --select-item-text-color: #27272a;
-  --select-item-bg: #ffffff;
   --select-item-active-text-color: #18181b;
   --select-item-active-bg: rgba(239, 68, 68, 0.14);
-  --select-item-border: rgba(0, 0, 0, 0.1);
 
   --popover-bg: #ffffff;
 
-  --modal-content-bg: transparent;
-  --modal-backdrop-bg: rgba(0, 0, 0, 0.28);
-  --modal-backdrop-filter: blur(4px);
-  --modal-header-bg: transparent;
-  --modal-footer-bg: transparent;
+  --modal-content-bg: #ffffff;
+  --modal-header-bg: #ffffff;
+  --modal-footer-bg: #ffffff;
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.35);
+  --modal-backdrop-filter: blur(3px);
   --modal-border-color: rgba(0, 0, 0, 0.1);
 
-  --well-bg: transparent;
-  --well-border: rgba(0, 0, 0, 0.08);
+  --state-warning-bg: #fffbeb;
+  --state-warning-border: #fcd34d;
+  --state-warning-text: #92400e;
+  --warning-bg: #fffbeb;
 
-  --default-box-shadow: var(--aurora-glass-shadow);
-
-  /* Calendar */
   --fc-page-bg-color: transparent;
-  --fc-today-bg-color: rgba(239, 68, 68, 0.1);
-  --top-bar-box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.12);
+  --fc-today-bg-color: rgba(239, 68, 68, 0.08);
   --panel-border-radius: 14px;
 }
 
@@ -111,227 +85,63 @@ html {
   background-color: #f4f4f6;
 }
 
-/* Same bg.svg as dark theme — inverted via CSS filter (no second asset). */
 html::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.52)),
+    url('bg-light.svg') center / cover no-repeat;
   background-color: #f4f4f6;
-  background-image:
-    linear-gradient(
-      rgba(255, 255, 255, 0.58),
-      rgba(255, 255, 255, 0.66)
-    ),
-    url('bg.svg');
-  background-size: cover, cover;
-  background-position: center, center;
-  background-repeat: no-repeat, no-repeat;
-  -webkit-filter: invert(1) hue-rotate(180deg);
-  filter: invert(1) hue-rotate(180deg);
 }
 
 body {
   --theme-name: SafehouseAuroraLight !important;
-  /* Re-declare on body so imported Glass :root tokens cannot win in inheritance. */
   --font-family: 'JetBrains Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-family-monospace: JetBrainsMono, ui-monospace, monospace;
-  --body-bg: transparent;
-  --panel-bg: transparent;
-  --panel-default-bg: var(--aurora-glass-bg);
-  --panel-primary-bg: var(--aurora-glass-bg);
-  --panel-success-bg: var(--aurora-glass-bg);
-  --panel-danger-bg: var(--aurora-glass-bg);
-  --panel-warning-bg: var(--aurora-glass-bg);
-  --panel-info-bg: var(--aurora-glass-bg);
-  --default-heading-bg-color: rgba(0, 0, 0, 0.03);
   color: var(--text-color);
   background: transparent !important;
 }
 
-/* ── Frosted light navbar (floats above dark canvas) ── */
-body #navbar {
-  position: relative;
-  z-index: 1200;
-}
-
-body #navbar > .navbar {
-  background: var(--aurora-glass-bg) !important;
-  -webkit-backdrop-filter: var(--aurora-glass-blur);
-  backdrop-filter: var(--aurora-glass-blur);
-  border-bottom: 1px solid var(--aurora-glass-border) !important;
-  box-shadow: var(--aurora-glass-shadow) !important;
-}
-
-body #navbar > .navbar .navbar-body,
-body[data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body {
+body #content,
+body #content #main {
   background: transparent !important;
 }
 
-body[data-navbar='side'] #navbar > .navbar {
-  border-bottom: none !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+body #navbar > .navbar {
+  -webkit-backdrop-filter: blur(8px) saturate(1.03);
+  backdrop-filter: blur(8px) saturate(1.03);
+  box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.1);
 }
 
-/* Nav labels — light text on frosted strip (icons keep scope colors via inline style) */
-body .navbar-inverse .nav > li > a,
-body .navbar-inverse .nav > li > a .full-label,
-body .navbar-inverse .nav > li > a .short-label-text {
-  color: #3f3f46 !important;
+body .header-breadcrumbs a.active {
+  color: #dc2626;
 }
 
-body .navbar-inverse .nav > li > a:hover,
-body .navbar-inverse .nav > li > a:focus,
-body .navbar-inverse .nav > li > a:hover .full-label {
-  color: #18181b !important;
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-body .navbar-inverse .nav > li.active > a,
-body .navbar-inverse .nav > li.active > a:hover,
-body .list-group-side li.selected a.side-link {
-  color: #991b1b !important;
-  background-color: rgba(239, 68, 68, 0.16) !important;
-  font-weight: 600;
-}
-
-body .navbar-inverse .nav > li.active > a .full-label,
-body .navbar-inverse .nav > li.active > a .short-label-text {
-  color: #991b1b !important;
-}
-
-/* Entity tab icons: inherit scope color from .short-label inline style */
-body .navbar-inverse .nav > li > a .short-label[style*='color'] span {
-  color: inherit;
-}
-
-/* Only grey-out icons that have no scope color assigned */
-body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .fas,
-body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .far,
-body .navbar-inverse .nav > li:not(.active) > a .short-label:not([style*='color']) .fab {
-  color: #71717a !important;
-}
-
-/* Slightly boost scope icon saturation on dark navbar */
-body .navbar-inverse .nav > li > a .short-label[style*='color'] {
-  filter: saturate(1.15) brightness(1.08);
-}
-
-/* Navbar search & icons */
-body #navbar .form-control,
-body #navbar input.form-control {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  color: #18181b !important;
-}
-
-body #navbar .navbar-right > li > a,
-body #navbar .navbar-right .btn-link {
-  color: #52525b !important;
-}
-
-body #navbar .navbar-right > li > a:hover {
-  color: #18181b !important;
-  background: rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Dropdowns & selectize — opaque dark, always on top (no glass blur) */
-body .dropdown-menu,
-body #navbar .dropdown-menu,
-body .navbar-right .dropdown-menu {
-  background-color: var(--dropdown-bg) !important;
-  border: 1px solid var(--dropdown-border) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65) !important;
-  z-index: 2500 !important;
+/* Modals */
+body .modal-content,
+body .modal-content .modal-header,
+body .modal-content .modal-body,
+body .modal-content .modal-footer {
+  color: var(--text-color) !important;
+  background-color: var(--modal-content-bg) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
-body .dropdown-menu .dropdown-header,
-body .dropdown-menu .dropdown-profile,
-body .dropdown-menu .dropdown-profile .profile-name {
+/* Dropdowns opaque */
+body .selectize-dropdown,
+body .dropdown-menu {
   background-color: var(--dropdown-bg) !important;
-  color: var(--dropdown-link-color) !important;
-}
-
-body .dropdown-menu > li > a {
-  color: var(--dropdown-link-color) !important;
-}
-
-body .dropdown-menu > li > a:hover,
-body .dropdown-menu > li > a:focus {
-  background: var(--dropdown-link-hover-bg) !important;
-  color: var(--dropdown-link-hover-color) !important;
-}
-
-body .dropdown-menu > li.active > a,
-body .dropdown-menu > li.active > a:hover {
-  background: var(--dropdown-link-active-bg) !important;
-  color: #fff !important;
-}
-
-body .dropdown-menu .divider {
-  background-color: var(--dropdown-divider-bg);
-}
-
-/* Selectize (enum / link fields) */
-body .selectize-dropdown {
-  background-color: var(--dropdown-bg) !important;
-  border: 1px solid var(--dropdown-border) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55) !important;
-  z-index: 3000 !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
 body .selectize-dropdown .option,
-body .selectize-dropdown .optgroup-header,
 body .selectize-dropdown [data-selectable] {
   color: var(--select-item-text-color) !important;
   background-color: var(--dropdown-bg) !important;
-}
-
-body .selectize-dropdown .option.active,
-body .selectize-dropdown .option.selected,
-body .selectize-dropdown [data-selectable].active {
-  background-color: var(--select-item-active-bg) !important;
-  color: var(--select-item-active-text-color) !important;
-}
-
-body .selectize-dropdown .option:hover,
-body .selectize-dropdown [data-selectable]:hover {
-  background-color: var(--dropdown-link-hover-bg) !important;
-  color: #fff !important;
-}
-
-body .selectize-dropdown .selectize-dropdown-emptyoptionlabel {
-  color: var(--text-muted-color) !important;
-}
-
-body select.form-control option,
-body select.form-control optgroup {
-  background-color: var(--dropdown-bg) !important;
-  color: var(--select-item-text-color) !important;
-}
-
-/* Glass base-select picker — opaque like Glass, no blur bleed into form */
-body select.form-control.native-select::picker(select) {
-  background-color: var(--dropdown-bg) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-/*
- * Selectize (Admin → Tema, filters, etc.): Espo uses z-index ~1031 on .selectize-dropdown.
- * Aurora panels used isolation:isolate — dropdown could not paint over the NEXT panel/row.
- * Lift the whole panel + field while open (same stacking model as core Glass, no isolation trap).
- */
-body .selectize-control .selectize-dropdown,
-body .selectize-dropdown,
-body .selectize-dropdown.form-control {
-  position: absolute !important;
-  z-index: 1100 !important;
 }
 
 body .panel:has(.selectize-input.dropdown-active),
@@ -340,522 +150,134 @@ body .panel:has(.selectize-input.input-active) {
   z-index: 1100 !important;
 }
 
-body .form-group:has(.selectize-input.dropdown-active),
-body .form-group:has(.selectize-input.input-active) {
-  position: relative;
+body .selectize-control .selectize-dropdown {
   z-index: 1101 !important;
 }
 
-body .selectize-control:has(.selectize-input.dropdown-active),
-body .selectize-control:has(.selectize-input.input-active) {
-  position: relative;
-  z-index: 1102 !important;
+/* Readability: stream, admin, recent views */
+body .text-muted,
+body .cell .loading-value,
+body .cell .none-value,
+body .stream-date-container {
+  color: #52525b !important;
 }
 
-/*
- * Stream/dashlet glass recipe for every shell: transparent host + ::before blur.
- * Never isolation:isolate (breaks selectize over sibling panels).
- */
-body .panel,
-body .well,
-body .list-container-panel > div,
-body #content #main > .list-container > .list,
-body #content #main .list-main-column > .list-container > .list,
-body #content #main .nested-categories-container + .list-container > .list,
-body #content #main > .row > .left-container + .list-container > .list,
-body #content #main .list-container.list-container-panel > .list,
-body #content #main > .calendar-container > .calendar,
-body #content #main > .calendar-container > .timeline,
-body #content #main .calendar-container > .calendar,
-body #content #main .calendar-container > .timeline,
-body #content #main .admin-content .table.table-admin-panel,
-body #content #main .admin-content table.table-panel,
-body #content #main table.table-panel,
-body #content #main .list-group.list-group-panel,
-body #content #main .admin-search-container,
-body .modal-dialog > .modal-content,
-body #global-search-panel > .panel,
-body #notifications-panel > .panel,
-body .popup-notification,
-#login.panel,
-body .stick-sub,
-body .sticked-bar {
-  position: relative;
-  overflow: visible !important;
-  border-radius: var(--panel-border-radius);
-  background: transparent !important;
+body .stream-head-text-container [data-key='user'] > a,
+body .stream-head-text-container .message a[data-scope='User'] {
+  color: #27272a !important;
+}
+
+body .admin-content .table.table-admin-panel,
+body .admin-content table.table-panel,
+body table.table-panel {
+  color: #3f3f46 !important;
+}
+
+body .modal-dialog .list-group-item.list-row,
+body .modal-dialog .list .list-row,
+body .modal-dialog .list .cell a {
+  color: #27272a !important;
+}
+
+/* Google Calendar reminder */
+body .google-calendar-reminder-notice.alert-warning {
+  background-color: var(--state-warning-bg) !important;
+  border: 1px solid var(--state-warning-border) !important;
+  border-left: 3px solid #f59e0b !important;
+  border-radius: 10px;
+  padding: 11px 14px;
+}
+
+body .google-calendar-reminder-notice-text {
+  display: block;
+  color: var(--state-warning-text) !important;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* System requirements */
+body #content #main > .panel.panel-default:has(> .table),
+body #content #main > .panel.panel-default:has(> table.table) {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+}
+
+/* Status labels — pastels */
+body .label-default {
+  background-color: #e4e4e7 !important;
+  color: #52525b !important;
+}
+
+body .label-primary {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #b91c1b !important;
+}
+
+body .label-success {
+  background-color: rgba(101, 163, 13, 0.16) !important;
+  color: #4d7c0f !important;
+}
+
+body .label-warning {
+  background-color: rgba(217, 119, 6, 0.16) !important;
+  color: #b45309 !important;
+}
+
+body .label-danger {
+  background-color: rgba(220, 38, 38, 0.14) !important;
+  color: #dc2626 !important;
+}
+
+/* Kanban headers — solid pastels */
+body .list-kanban th.group-header > div {
+  opacity: 1 !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
-/* Glass headered gradients from core Glass — must be cleared on all variants. */
-body .panel.headered,
-body .panel.panel-default.headered,
-body .panel.panel-primary.headered,
-body .panel.panel-success.headered,
-body .panel.panel-danger.headered,
-body .panel.panel-warning.headered,
-body .panel.panel-info.headered,
-body .panel.headered.dashlet {
-  background: transparent !important;
+body .list-kanban th.group-header:not([class*='group-header-']) > div,
+body .list-kanban th.group-header.group-header-default > div {
+  background-color: #d4d4d8 !important;
+  color: #3f3f46 !important;
 }
 
-body .panel::before,
-body .well::before,
-body .list-container-panel > div::before,
-body #content #main > .list-container > .list::before,
-body #content #main .list-main-column > .list-container > .list::before,
-body #content #main .nested-categories-container + .list-container > .list::before,
-body #content #main > .row > .left-container + .list-container > .list::before,
-body #content #main .list-container.list-container-panel > .list::before,
-body #content #main > .calendar-container > .calendar::before,
-body #content #main > .calendar-container > .timeline::before,
-body #content #main .calendar-container > .calendar::before,
-body #content #main .calendar-container > .timeline::before,
-body #content #main .admin-content .table.table-admin-panel::before,
-body #content #main .admin-content table.table-panel::before,
-body #content #main table.table-panel::before,
-body #content #main .list-group.list-group-panel::before,
-body #content #main .admin-search-container::before,
-body .modal-dialog > .modal-content::before,
-body #global-search-panel > .panel::before,
-body #notifications-panel > .panel::before,
-body .popup-notification::before,
-#login.panel::before,
-body .stick-sub::before,
-body .sticked-bar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background-color: var(--aurora-glass-bg);
-  -webkit-backdrop-filter: var(--aurora-glass-blur);
-  backdrop-filter: var(--aurora-glass-blur);
-  border: 1px solid var(--aurora-glass-border);
-  box-shadow: var(--aurora-glass-shadow);
+body .list-kanban th.group-header.group-header-primary > div {
+  background-color: #fecaca !important;
+  color: #b91c1b !important;
 }
 
-body .modal-body .record-container.no-side-margin .left > .bottom > .panel.first::before,
-body .modal-body .record-container.no-side-margin .left > .middle > .panel.first::before,
-body .modal-body .record.no-side-margin .left > .bottom > .panel.first::before,
-body .modal-body .record.no-side-margin .left > .middle > .panel.first::before {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+body .list-kanban th.group-header.group-header-warning > div {
+  background-color: #fed7aa !important;
+  color: #c2410c !important;
 }
 
-body .panel > .panel-heading,
-body .panel > .panel-body,
-body .panel > .dashlet-body,
-body .panel > .panel-footer,
-body .well > * {
-  position: relative;
-  z-index: 1;
-  background: transparent !important;
+body .list-kanban th.group-header.group-header-success > div {
+  background-color: #bbf7d0 !important;
+  color: #15803d !important;
 }
 
-body .panel > .panel-body,
-body .panel > .dashlet-body,
-body .panel > .panel-body.panel-body-form {
-  overflow: visible !important;
-  max-height: none !important;
+body .list-kanban th.group-header.group-header-danger > div {
+  background-color: #fca5a5 !important;
+  color: #dc2626 !important;
 }
 
-body .list-container-panel > div > *,
-body #content #main > .list-container > .list > *,
-body #content #main .list-main-column > .list-container > .list > *,
-body #content #main .nested-categories-container + .list-container > .list > *,
-body #content #main > .row > .left-container + .list-container > .list > *,
-body #content #main .list-container.list-container-panel > .list > *,
-body #content #main .calendar-container > .calendar > *,
-body #content #main .calendar-container > .timeline > *,
-body #content #main .admin-content .table.table-admin-panel > *,
-body #content #main .admin-content table.table-panel > *,
-body #content #main table.table-panel > *,
-body #content #main .list-group.list-group-panel > *,
-body #content #main .admin-search-container > *,
-body .modal-dialog > .modal-content > *,
-body #global-search-panel > .panel > *,
-body #notifications-panel > .panel > *,
-body .popup-notification > *,
-#login.panel > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Dashboard grid — keep shell transparent so dashlet ::before can blur the canvas. */
-body .dashlets.grid-stack .grid-stack-item > .grid-stack-item-content,
-body .dashlets.grid-stack .grid-stack-item > .dashlet-container {
-  background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-body .record .panel .form-group .field,
-body .record .panel .selectize-control,
-body .admin-content .panel .form-group .field,
-body .admin-content .panel .selectize-control,
-body .tab-content,
-body #content #main .record,
-body #content #main .admin-content {
-  overflow: visible !important;
-}
-
-body .page-header,
-body .page-header a,
-body .header-breadcrumbs,
-body .header-breadcrumbs a {
-  color: var(--text-color);
-}
-
-body .header-breadcrumbs a.active {
-  color: #dc2626;
-}
-
-/* ── Aurora glass surfaces — text color only (blur lives on ::before above) ── */
-body .panel,
-body .well,
-body .list-container-panel > div,
-body #global-search-panel > .panel,
-body #notifications-panel > .panel,
-body .modal-dialog > .modal-content,
-#login.panel,
-body .popup-notification,
-body #content #main > .list-container > .list,
-body #content #main .list-main-column > .list-container > .list,
-body #content #main .nested-categories-container + .list-container > .list,
-body #content #main > .row > .left-container + .list-container > .list,
-body #content #main .list-container.list-container-panel > .list,
-body #content #main > .calendar-container > .calendar,
-body #content #main > .calendar-container > .timeline,
-body #content #main .calendar-container > .calendar,
-body #content #main .calendar-container > .timeline,
-body .stick-sub,
-body .sticked-bar,
-body #content #main .admin-content .table.table-admin-panel,
-body #content #main .admin-content table.table-panel,
-body #content #main .admin-content .list-group.list-group-panel,
-body #content #main table.table-panel,
-body #content #main .list-group.list-group-panel,
-body #content #main .admin-search-container {
-  color: var(--panel-default-text);
-}
-
-body #content #main .admin-search-container {
-  padding: var(--10px, 10px);
-  margin-bottom: var(--20px, 20px);
-}
-
-/*
- * List view: unified glass card, always inside #main inset (no Espo bleed).
- * Negative margins from core CSS are disabled — horizontal gutter survives zoom.
- */
-body #content #main > .page-header {
-  margin-bottom: var(--8px, 8px) !important;
-}
-
-body #content #main > .list-container > .list,
-body #content #main .list-main-column > .list-container > .list,
-body #content #main .nested-categories-container + .list-container > .list,
-body #content #main > .row > .left-container + .list-container > .list,
-body #content #main .list-container.list-container-panel > .list {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-body #content #main > .search-container:has(+ .list-container),
-body #content #main > .search-container.margin-bottom:has(+ .list-container) {
-  position: relative;
-  overflow: visible !important;
-  box-sizing: border-box;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-bottom: 0 !important;
-  padding: var(--8px, 8px) var(--14px, 14px) var(--4px, 4px);
-  background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0 !important;
-  box-shadow: none !important;
-}
-
-body #content #main > .search-container:has(+ .list-container)::before,
-body #content #main > .search-container.margin-bottom:has(+ .list-container)::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background-color: var(--aurora-glass-bg);
-  -webkit-backdrop-filter: var(--aurora-glass-blur);
-  backdrop-filter: var(--aurora-glass-blur);
-  border: 1px solid var(--aurora-glass-border);
-  border-bottom: none;
-  box-shadow: none;
-}
-
-body #content #main > .search-container:has(+ .list-container) > *,
-body #content #main > .search-container.margin-bottom:has(+ .list-container) > * {
-  position: relative;
-  z-index: 1;
-}
-
-body #content #main > .search-container:has(+ .list-container) + .list-container,
-body #content #main > .search-container.margin-bottom:has(+ .list-container) + .list-container {
-  box-sizing: border-box;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-body #content #main > .search-container:has(+ .list-container) + .list-container > .list,
-body #content #main > .search-container.margin-bottom:has(+ .list-container) + .list-container > .list {
-  box-sizing: border-box;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  margin-top: 0 !important;
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-  border-bottom-left-radius: var(--panel-border-radius) !important;
-  border-bottom-right-radius: var(--panel-border-radius) !important;
-}
-
-body #content #main > .search-container:has(+ .list-container) + .list-container > .list::before,
-body #content #main > .search-container.margin-bottom:has(+ .list-container) + .list-container > .list::before {
-  border-top: none;
-  box-shadow: var(--aurora-glass-shadow);
-}
-
-body #content #main > .search-container:has(+ .list-container) .search-row {
-  margin-bottom: 0 !important;
-}
-
-body #content #main > .search-container:has(+ .list-container) .search-row > .form-group {
-  margin-bottom: 0 !important;
-}
-
-body #content #main > .search-container:has(+ .list-container) + .list-container > .list > .list-buttons-container:first-child,
-body #content #main > .search-container.margin-bottom:has(+ .list-container) + .list-container > .list > .list-buttons-container:first-child {
-  margin-top: 0 !important;
-  margin-bottom: var(--4px, 4px) !important;
-  min-height: 0 !important;
-  padding: var(--2px, 2px) var(--14px, 14px) 0;
-}
-
-/* Search not paired with a list (detail panels, etc.) — no extra shell */
-body #content #main > .search-container:not(:has(+ .list-container)):not(:has(+ .row .list-container)),
-body #content #main > .search-container.margin-bottom:not(:has(+ .list-container)):not(:has(+ .row .list-container)) {
-  background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0;
-}
-
-/* Nested lists inside detail panels inherit panel glass — no second frosted shell */
-body #content #main .panel .list-container > .list {
-  background-color: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  border-radius: 0;
-  box-shadow: none !important;
-}
-
-/* Dashboard dashlets (Stream, My Activities, etc.) — never paint an inner opaque card */
-body .panel.dashlet .dashlet-body .list-container,
-body .panel.dashlet .dashlet-body .list-container > .list,
-body .panel.dashlet .dashlet-body .list,
-body .panel.dashlet .dashlet-body .list > table,
-body .panel.dashlet .dashlet-body .list .table,
-body .panel.dashlet .dashlet-body .list .table tr,
-body .panel.dashlet .dashlet-body .list .table td,
-body .panel.dashlet .dashlet-body .list .list-group-item {
-  background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  box-shadow: none !important;
-}
-
-/* One rounded frame: inner table must not draw a second “window” */
-body #content #main .list-container > .list > table {
-  border-radius: 0 !important;
-  background-color: transparent !important;
-}
-
-/* Table rows stay transparent so blur reads on the .list wrapper */
-body #content #main .list-container > .list .table,
-body #content #main .list-container > .list .table tr,
-body #content #main .list-container > .list .table tr td,
-body #content #main .list-container > .list .list-group-item {
-  background-color: transparent !important;
-}
-
-/* Kill accidental red glow from glass / borders */
-body .panel.panel-default,
-body .panel.headered,
-body .list-container-panel.panel {
-  outline: none !important;
-}
-
-body .panel > .panel-heading,
-body .list-container-panel > .panel-heading,
-body #global-search-panel > .panel > .panel-heading,
-body #notifications-panel > .panel > .panel-heading {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Admin tables — blur on shell, rows stay clear */
-body #content #main .admin-content .table.table-admin-panel tr,
-body #content #main .admin-content .table.table-admin-panel td,
-body #content #main .admin-content table.table-panel tr,
-body #content #main .admin-content table.table-panel td,
-body #content #main table.table-panel tr,
-body #content #main table.table-panel td,
-body #content #main .list-group.list-group-panel .list-group-item {
-  background-color: transparent !important;
-}
-
-/* Calendar / timeline innards — blur lives on .calendar / .timeline shell only */
-body .calendar-container > .calendar .fc,
-body .calendar-container > .calendar .fc-scrollgrid,
-body .calendar-container > .calendar .fc-scrollgrid-section,
-body .calendar-container > .calendar .fc-scrollgrid-sync-table,
-body .calendar-container > .calendar .fc-daygrid-day,
-body .calendar-container > .calendar .fc-daygrid-day-frame,
-body .calendar-container > .calendar .fc-col-header-cell,
-body .calendar-container > .calendar .fc-timegrid-col,
-body .calendar-container > .calendar .fc-timegrid-slot,
-body .calendar-container > .calendar .fc-timegrid-axis,
-body .calendar-container > .timeline .vis-timeline,
-body .calendar-container > .timeline .vis-panel,
-body .calendar-container > .timeline .vis-content {
-  background-color: transparent !important;
-}
-
-/* Flat controls inside list search cap — no inner frame */
-body #content #main > .search-container .search-row,
-body #content #main > .search-container .search-row .input-group,
-body #content #main > .search-container .view-mode-switcher-buttons-group,
-body .list-buttons-container {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-body .btn-default {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #3f3f46;
-}
-
-body .btn-default:hover {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.16);
-  color: #18181b;
-}
-
-body .btn-primary {
-  background-color: #ef4444;
-  border-color: #dc2626;
-  color: #fff;
-}
-
-body .btn-primary:hover {
-  background-color: #dc2626;
-}
-
-body .form-control,
-body select.form-control,
-body .selectize-input {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #18181b;
-}
-
-body .form-control:focus,
-body .selectize-input.focus {
-  border-color: rgba(220, 38, 38, 0.45);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
-}
-
-/* Page scope icon in header — keep entity color */
-body .page-header .icon,
-body .page-header [class*='fa-'] {
-  color: inherit;
-}
-
-
-body .table,
-body .table > thead > tr > th,
-body .table > tbody > tr > td {
-  color: var(--text-color);
-  border-color: rgba(0, 0, 0, 0.08);
-  background-color: transparent;
-}
-
-/* Autocomplete & timepicker popups */
-body .ui-autocomplete,
-body .ui-timepicker-wrapper {
-  background-color: var(--dropdown-bg) !important;
-  border: 1px solid var(--dropdown-border) !important;
-  color: var(--select-item-text-color) !important;
-  z-index: 2500 !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-body .ui-autocomplete .ui-menu-item-wrapper.ui-state-active,
-body .ui-timepicker-list li.active {
-  background-color: var(--select-item-active-bg) !important;
-  color: var(--select-item-active-text-color) !important;
-}
-
-body .popover {
-  background-color: var(--popover-bg) !important;
-  border-color: var(--dropdown-border) !important;
-  z-index: 2500 !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+body .list-kanban th.group-header.group-header-info > div {
+  background-color: #e4e4e7 !important;
+  color: #52525b !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
-    --aurora-glass-bg: rgba(250, 250, 252, 0.96);
-    --aurora-glass-blur: none;
-    --panel-default-bg: var(--aurora-glass-bg);
+    --panel-default-bg: #ffffff;
+    --modal-content-bg: #ffffff;
     --navbar-inverse-bg: #f4f4f5;
-    --dropdown-bg: #ffffff;
   }
 
   html::before {
-    -webkit-filter: none;
-    filter: none;
+    background-image: none;
   }
 
-  body #navbar > .navbar,
-  body .panel::before,
-  body .well::before,
-  body .list-container-panel > div::before,
-  body #content #main > .list-container > .list::before,
-  body #content #main .calendar-container > .calendar::before,
-  body #content #main .calendar-container > .timeline::before,
-  body #content #main .admin-content .table.table-admin-panel::before,
-  body #content #main table.table-panel::before,
-  body .modal-dialog > .modal-content::before,
-  body #content #main > .search-container:has(+ .list-container)::before {
+  body #navbar > .navbar {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-body #content,
-body #content #main {
-  background: transparent !important;
 }

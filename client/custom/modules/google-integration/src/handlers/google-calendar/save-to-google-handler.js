@@ -65,7 +65,11 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
 
             const $notice = $('<div>')
                 .addClass('alert alert-warning google-calendar-reminder-notice margin-top')
-                .text(text);
+                .append(
+                    $('<span>')
+                        .addClass('google-calendar-reminder-notice-text')
+                        .text(text)
+                );
 
             const $container = $target.closest('.cell, .field');
 
