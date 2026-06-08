@@ -6,6 +6,7 @@
         "presentationDate": "Data Presentazione",
         "closeDate": "Data Chiusura",
         "amount": "Importo",
+        "probability": "Probabilità",
         "contacts": "Contatti",
         "description": "Descrizione"
     },
@@ -27,6 +28,10 @@
     "labels": {
         "Opportunity": "Fondi e Finanziamenti",
         "Create Opportunity": "Crea Fondo/Finanziamento",
+        "kanbanShortPresentationDate": "Presentazione",
+        "kanbanShortCloseDate": "Chiusura",
+        "kanbanShortCreatedAt": "Creato il",
+        "kanbanShortProbability": "Prob. %",
         "googleCalendarReminderNotice": "Puoi salvare questa data del finanziamento in Google Calendar con o senza promemoria Google. Per le scadenze usa promemoria in giorni/settimane, ad esempio 7 giorni, 14 giorni o 4 settimane prima.",
         "googleCalendarPerDateSettingsHelp": "Configura separatamente le opzioni Google Calendar per ogni data selezionata su questo finanziamento."
     },

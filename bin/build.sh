@@ -35,6 +35,7 @@ trap 'rm -rf "$PACKAGE_DIR"' EXIT
 
 THEME_CSS_PATH="client/custom/css/safehouse-aurora"
 THEME_FONT_PATH="client/fonts/jet-brains-sans"
+FRONTEND_MODULE_PATH="client/custom/modules/safehouse-crm"
 
 mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_DIR/dist"
 
@@ -51,6 +52,11 @@ fi
 if [[ -d "$ROOT_DIR/$THEME_FONT_PATH" ]]; then
     mkdir -p "$PACKAGE_DIR/files/client/fonts"
     cp -a "$ROOT_DIR/$THEME_FONT_PATH" "$PACKAGE_DIR/files/client/fonts/"
+fi
+
+if [[ -d "$ROOT_DIR/$FRONTEND_MODULE_PATH" ]]; then
+    mkdir -p "$PACKAGE_DIR/files/client/custom/modules"
+    cp -a "$ROOT_DIR/$FRONTEND_MODULE_PATH" "$PACKAGE_DIR/files/client/custom/modules/"
 fi
 
 OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"

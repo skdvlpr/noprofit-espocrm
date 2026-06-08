@@ -1,6 +1,7 @@
 {
     "recordViews": {
-        "list": "custom:views/record/list-inline-edit"
+        "list": "custom:views/record/list-inline-edit",
+        "kanban": "safehouse-crm:views/opportunity/record/kanban"
     },
     "color": "#dcedc8",
     "iconClass": "fas fa-hand-holding-usd"

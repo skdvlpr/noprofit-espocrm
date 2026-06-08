@@ -6,6 +6,7 @@
         "presentationDate": "Submission Date",
         "closeDate": "Close Date",
         "amount": "Amount",
+        "probability": "Probability",
         "contacts": "Contacts",
         "description": "Description"
     },
@@ -27,6 +28,10 @@
     "labels": {
         "Opportunity": "Grants & Funding",
         "Create Opportunity": "Create Grant",
+        "kanbanShortPresentationDate": "Submission",
+        "kanbanShortCloseDate": "Close date",
+        "kanbanShortCreatedAt": "Created",
+        "kanbanShortProbability": "Prob. %",
         "googleCalendarReminderNotice": "You can save this grant date to Google Calendar with or without Google reminders. For funding deadlines, use day/week reminders such as 7 days, 14 days, or 4 weeks before.",
         "googleCalendarPerDateSettingsHelp": "Configure Google Calendar options separately for each selected date on this grant."
     },

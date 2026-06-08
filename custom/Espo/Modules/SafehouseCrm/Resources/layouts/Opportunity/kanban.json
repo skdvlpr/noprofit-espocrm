@@ -1,11 +1,9 @@
 [
-    {"name": "name", "link": true},
-    {"name": "amount", "align": "right", "isLarge": true},
+    {"name": "name", "link": true, "noLabel": true},
+    {"name": "amount", "align": "right", "isLarge": true, "noLabel": true},
     {"name": "account"},
     {"name": "probability", "align": "right"},
     {"name": "presentationDate", "align": "right", "isMuted": true},
     {"name": "closeDate", "align": "right", "isMuted": true},
-    {"name": "assignedUser", "isMuted": true},
-    {"name": "leadSource", "isMuted": true},
     {"name": "createdAt", "align": "right", "isMuted": true}
 ]

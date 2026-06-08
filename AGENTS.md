@@ -767,14 +767,17 @@ If a change touches GoogleIntegration UI, update the canonical frontend tree and
 run `bin/build-google-integration.sh`; the build script is responsible for
 putting frontend files into the extension ZIP.
 
-Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`.
+Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`, `bin/smoke-kanban-assets.php`.
 
 ### EXT-008 — Frontend verification checklist (per extension with UI)
 
 After metadata or client change:
 
-1. `ddev exec php clear_cache.php && ddev exec php rebuild.php`
-2. Hard refresh (Ctrl+Shift+R)
+1. `ddev exec php command.php rebuild` (or `bin/dev-rebuild.sh`) — clears cache **and**
+   bumps `appTimestamp` via SafehouseCrm `BumpAppTimestamp` rebuild action. Do **not**
+   rely on `clear_cache.php` / `rebuild.php` alone for frontend: they update
+   `cacheTimestamp` but browsers bust JS/TPL/CSS via `?r={appTimestamp}` only.
+2. Normal refresh (F5) is enough once `appTimestamp` changed; hard refresh only if needed.
 3. DevTools → Network: custom view URL must be **200**, e.g.  
    `/client/custom/modules/google-integration/src/views/admin/integrations/edit.js`
 4. Must **not** 404 on `/client/lib/transpiled/src/views/admin/integrations/google-integration-edit.js`

@@ -337,6 +337,16 @@ body .label-danger {
   color: #fecaca !important;
 }
 
+/* Kanban card title — neutral text, not global accent link color */
+body .list-kanban .safehouse-kanban-card .kanban-title-value a {
+  color: var(--text-color) !important;
+}
+
+body .list-kanban .safehouse-kanban-card .kanban-title-value a:hover,
+body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
+  color: var(--link-hover-color) !important;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --panel-default-bg: #1c1c21;
