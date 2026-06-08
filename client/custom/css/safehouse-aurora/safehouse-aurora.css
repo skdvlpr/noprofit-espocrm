@@ -28,9 +28,31 @@
   --link-hover-color: #ef4444;
 
   --brand-primary: #dc2626;
+  --brand-primary-10: #b91c1c;
+  --brand-primary-5: #c53030;
+  --brand-primary-lighten-10: #ef4444;
+  --brand-primary-lighten-30: #fca5a5;
+  --brand-primary-lighten-50: #ffffff;
+  --brand-primary-text: #ffffff;
   --brand-danger: #ef4444;
   --brand-success: #65a30d;
   --brand-warning: #d97706;
+  --brand-info: #71717a;
+
+  --btn-primary-bg: #dc2626;
+  --btn-primary-border: #b91c1c;
+  --btn-primary-color: #ffffff;
+  --btn-primary-hover-bg: #b91c1c;
+  --btn-primary-hover-border: #991b1b;
+  --btn-primary-active-bg: #991b1b;
+  --btn-primary-active-border: #7f1d1d;
+
+  --state-primary-bg: rgba(220, 38, 38, 0.22);
+  --state-primary-border: rgba(239, 68, 68, 0.35);
+  --state-primary-text: #fecaca;
+
+  --input-border-focus: #ef4444;
+  --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
 
   --navbar-inverse-bg: rgba(24, 24, 28, 0.82);
   --navbar-inverse-border: rgba(255, 255, 255, 0.12);
@@ -104,6 +126,23 @@ html::before {
 body {
   --theme-name: SafehouseAurora !important;
   --font-family: 'JetBrains Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --link-color: #f87171;
+  --link-hover-color: #ef4444;
+  --brand-primary: #dc2626;
+  --brand-primary-10: #b91c1c;
+  --brand-primary-5: #c53030;
+  --btn-primary-bg: #dc2626;
+  --btn-primary-border: #b91c1c;
+  --btn-primary-color: #ffffff;
+  --btn-primary-hover-bg: #b91c1c;
+  --btn-primary-hover-border: #991b1b;
+  --btn-primary-active-bg: #991b1b;
+  --btn-primary-active-border: #7f1d1d;
+  --state-primary-bg: rgba(220, 38, 38, 0.22);
+  --state-primary-border: rgba(239, 68, 68, 0.35);
+  --state-primary-text: #fecaca;
+  --input-border-focus: #ef4444;
+  --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
   color: var(--text-color);
   background: transparent !important;
 }
@@ -133,6 +172,71 @@ body .navbar-inverse .nav > li.active > a .full-label {
 
 body .header-breadcrumbs a.active {
   color: #ef4444;
+}
+
+/* Safehouse red accent — buttons, links, tabs, focus rings */
+body a:not(.btn):not(.nav > li > a),
+body .link {
+  color: var(--link-color);
+}
+
+body a:not(.btn):not(.nav > li > a):hover,
+body a:not(.btn):not(.nav > li > a):focus,
+body .link:hover {
+  color: var(--link-hover-color);
+}
+
+body #navbar .navbar-right > li > a,
+body #navbar .navbar-right .btn-link {
+  color: #d4d4d8 !important;
+}
+
+body #navbar .navbar-right > li > a:hover {
+  color: #fafafa !important;
+}
+
+body .btn-default {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+}
+
+body .btn-default:hover,
+body .btn-default:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fafafa;
+}
+
+body .btn-primary,
+body .btn-primary:focus {
+  background-color: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #fff !important;
+}
+
+body .btn-primary:hover,
+body .btn-primary:active,
+body .btn-primary.active,
+body .open > .dropdown-toggle.btn-primary {
+  background-color: #b91c1c !important;
+  border-color: #991b1b !important;
+  color: #fff !important;
+}
+
+body .nav-tabs > li.active > a,
+body .nav-tabs > li.active > a:focus,
+body .nav-tabs > li.active > a:hover {
+  color: #fafafa !important;
+  border-bottom: 2px solid #ef4444 !important;
+}
+
+body .pagination > .active > a,
+body .pagination > .active > a:focus,
+body .pagination > .active > a:hover,
+body .pagination > .active > span {
+  background-color: #dc2626 !important;
+  border-color: #b91c1c !important;
 }
 
 /* Modals / confirms — readable text, no transparent shell */
