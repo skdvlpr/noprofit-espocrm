@@ -111,18 +111,27 @@
   --state-warning-text: #92400e;
   --warning-bg: #fffbeb;
 
-  --enum-text-default: #b91c1b;
+  /* Enum text — default is neutral gray (not brand red); matches kanban column headers */
+  --enum-text-default: #52525b;
   --enum-text-primary: #b91c1b;
-  --enum-text-success: #4d7c0f;
-  --enum-text-warning: #b45309;
+  --enum-text-success: #15803d;
+  --enum-text-warning: #c2410c;
   --enum-text-danger: #dc2626;
   --enum-text-info: #52525b;
-  --enum-active-default-bg: rgba(239, 68, 68, 0.18);
-  --enum-active-default-text: #b91c1b;
+  --enum-active-default-bg: #e4e4e7;
+  --enum-active-default-text: #3f3f46;
 
-  --state-default-bg: rgba(239, 68, 68, 0.18);
-  --state-default-text: #b91c1b;
-  --state-default-border: rgba(239, 68, 68, 0.28);
+  /* Left stripe on styled enum selectize — aligned with kanban group-header pastels */
+  --sh-enum-stripe-default: #a1a1aa;
+  --sh-enum-stripe-primary: #f87171;
+  --sh-enum-stripe-warning: #fb923c;
+  --sh-enum-stripe-success: #4ade80;
+  --sh-enum-stripe-danger: #f87171;
+  --sh-enum-stripe-info: #a1a1aa;
+
+  --state-default-bg: #e4e4e7;
+  --state-default-text: #3f3f46;
+  --state-default-border: #d4d4d8;
   --state-primary-bg: rgba(239, 68, 68, 0.18);
   --state-primary-text: #b91c1b;
   --state-primary-border: rgba(239, 68, 68, 0.28);
@@ -286,6 +295,47 @@ body .modal-content .modal-footer {
   background-color: var(--modal-content-bg) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+
+body .modal.dialog-confirm {
+  z-index: 1300 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 16px !important;
+}
+
+body .modal.dialog-confirm .modal-dialog {
+  margin: 0 auto !important;
+  width: min(550px, 92vw);
+}
+
+body .modal.dialog-confirm .modal-content {
+  border-radius: 12px !important;
+  border: 1px solid var(--modal-border-color) !important;
+  border-top-width: 1px !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14) !important;
+  width: 100%;
+}
+
+body .modal.dialog-confirm .modal-body {
+  padding: 20px 24px 12px !important;
+}
+
+body .modal.dialog-confirm .modal-body .confirm-message {
+  color: var(--text-color) !important;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  display: block;
+}
+
+body .modal.dialog-confirm .modal-footer {
+  border-top: 1px solid var(--modal-border-color) !important;
+  padding: 12px 16px 14px !important;
+}
+
+body .modal-backdrop.backdrop-confirm {
+  z-index: 1295 !important;
 }
 
 /* Dropdowns opaque */

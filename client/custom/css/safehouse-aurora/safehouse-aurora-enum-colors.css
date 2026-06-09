@@ -59,29 +59,73 @@ body .selectize-dropdown [data-selectable].text-info {
   color: var(--enum-text-info) !important;
 }
 
-/* Selectize closed input — Espo uses bare style name on .item (primary, success, …) */
+/* Selectize closed input — Espo copies option classes (text-primary, text-warning, …) onto .item */
+body .selectize-input .item.text-default span,
 body .selectize-input .item.default span {
   color: var(--enum-text-default) !important;
 }
 
+body .selectize-input .item.text-primary span,
 body .selectize-input .item.primary span {
   color: var(--enum-text-primary) !important;
 }
 
+body .selectize-input .item.text-success span,
 body .selectize-input .item.success span {
   color: var(--enum-text-success) !important;
 }
 
+body .selectize-input .item.text-warning span,
 body .selectize-input .item.warning span {
   color: var(--enum-text-warning) !important;
 }
 
+body .selectize-input .item.text-danger span,
 body .selectize-input .item.danger span {
   color: var(--enum-text-danger) !important;
 }
 
+body .selectize-input .item.text-info span,
 body .selectize-input .item.info span {
   color: var(--enum-text-info) !important;
+}
+
+/*
+ * Left accent stripe on single-value enum fields.
+ * :has(> .item.text-*) tracks live selectize re-renders — no JS / no page refresh.
+ */
+body .selectize-control.single > .selectize-input:has(> .item) {
+  border-left: 3px solid var(--sh-enum-stripe-default) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-default),
+body .selectize-control.single > .selectize-input:has(> .item.default) {
+  border-left-color: var(--sh-enum-stripe-default) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-primary),
+body .selectize-control.single > .selectize-input:has(> .item.primary) {
+  border-left: 3px solid var(--sh-enum-stripe-primary) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-warning),
+body .selectize-control.single > .selectize-input:has(> .item.warning) {
+  border-left: 3px solid var(--sh-enum-stripe-warning) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-success),
+body .selectize-control.single > .selectize-input:has(> .item.success) {
+  border-left: 3px solid var(--sh-enum-stripe-success) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-danger),
+body .selectize-control.single > .selectize-input:has(> .item.danger) {
+  border-left: 3px solid var(--sh-enum-stripe-danger) !important;
+}
+
+body .selectize-control.single > .selectize-input:has(> .item.text-info),
+body .selectize-control.single > .selectize-input:has(> .item.info) {
+  border-left: 3px solid var(--sh-enum-stripe-info) !important;
 }
 
 /* Native select options (inline edit fallback) */

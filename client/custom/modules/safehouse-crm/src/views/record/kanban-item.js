@@ -37,6 +37,9 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
         'Closed Lost': '📉',
     };
 
+    const STAGE_CLASS_PREFIX = 'kanban-stage-';
+    const PROB_CLASS_PREFIX = 'kanban-prob-';
+
     return Dep.extend({
 
         template: 'safehouse-crm:record/kanban-item',
@@ -131,6 +134,10 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                     scope: this.scope,
                 });
             }
+
+            // Kanban drag/menu updates stage on the model but does not re-render the card.
+            this.listenTo(this.model, 'change:stage', () => this.applyStageVisuals());
+            this.listenTo(this.model, 'change:probability', () => this.applyProbabilityVisuals());
         },
 
         getKanbanLabel(name) {
@@ -198,6 +205,54 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
             }
 
             return 'default';
+        },
+
+        applyStageVisuals() {
+            this.stageInfo = this.getStageInfo();
+
+            const $card = this.$el.find('.safehouse-kanban-card').first();
+
+            if (!$card.length) {
+                return;
+            }
+
+            this.stripPrefixedClasses($card, STAGE_CLASS_PREFIX);
+
+            if (this.stageInfo && this.stageInfo.style) {
+                $card.addClass(STAGE_CLASS_PREFIX + this.stageInfo.style);
+            }
+
+            const $chip = $card.find('.kanban-stage-chip').first();
+
+            if (!$chip.length || !this.stageInfo) {
+                return;
+            }
+
+            $chip.attr('title', this.stageInfo.label);
+            $chip.attr('aria-label', this.stageInfo.label);
+            $chip.find('.kanban-stage-chip-emoji').first().text(this.stageInfo.emoji);
+        },
+
+        applyProbabilityVisuals() {
+            const tier = this.getProbabilityTier(this.model.get('probability'));
+            const $cell = this.$el.find('.kanban-prop-value-probability').first();
+
+            if (!$cell.length) {
+                return;
+            }
+
+            this.stripPrefixedClasses($cell, PROB_CLASS_PREFIX);
+            $cell.addClass('kanban-prob-pill ' + PROB_CLASS_PREFIX + tier);
+        },
+
+        stripPrefixedClasses($element, prefix) {
+            const className = $element.attr('class') || '';
+            const stripped = className
+                .split(/\s+/)
+                .filter(name => name && !name.startsWith(prefix))
+                .join(' ');
+
+            $element.attr('class', stripped);
         },
 
         afterRender() {

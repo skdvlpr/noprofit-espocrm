@@ -115,18 +115,27 @@
   --state-warning-text: #fef3c7;
   --warning-bg: rgba(69, 45, 10, 0.88);
 
-  --enum-text-default: #fecaca;
-  --enum-text-primary: #fecaca;
+  /* Enum text — default is neutral; primary/danger keep warm accents */
+  --enum-text-default: #a1a1aa;
+  --enum-text-primary: #fca5a5;
   --enum-text-success: #d9f99d;
   --enum-text-warning: #fde68a;
   --enum-text-danger: #fca5a5;
   --enum-text-info: #d4d4d8;
-  --enum-active-default-bg: rgba(220, 38, 38, 0.28);
-  --enum-active-default-text: #fecaca;
+  --enum-active-default-bg: rgba(113, 113, 122, 0.35);
+  --enum-active-default-text: #e4e4e7;
 
-  --state-default-bg: rgba(220, 38, 38, 0.28);
-  --state-default-text: #fecaca;
-  --state-default-border: rgba(239, 68, 68, 0.35);
+  /* Left stripe on styled enum selectize — stage tints (kanban-card parity) */
+  --sh-enum-stripe-default: rgba(161, 161, 170, 0.72);
+  --sh-enum-stripe-primary: rgba(239, 68, 68, 0.72);
+  --sh-enum-stripe-warning: rgba(217, 119, 6, 0.72);
+  --sh-enum-stripe-success: rgba(101, 163, 13, 0.72);
+  --sh-enum-stripe-danger: rgba(220, 38, 38, 0.72);
+  --sh-enum-stripe-info: rgba(161, 161, 170, 0.72);
+
+  --state-default-bg: rgba(113, 113, 122, 0.35);
+  --state-default-text: #e4e4e7;
+  --state-default-border: rgba(161, 161, 170, 0.35);
   --state-primary-bg: rgba(220, 38, 38, 0.28);
   --state-primary-text: #fecaca;
   --state-primary-border: rgba(239, 68, 68, 0.35);
@@ -293,6 +302,48 @@ body .modal-content .modal-footer {
 body .modal-content .close {
   color: var(--text-color);
   opacity: 0.75;
+}
+
+/* Confirm dialogs — above frosted navbar (z-index 1200), centered, readable text */
+body .modal.dialog-confirm {
+  z-index: 1300 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 16px !important;
+}
+
+body .modal.dialog-confirm .modal-dialog {
+  margin: 0 auto !important;
+  width: min(550px, 92vw);
+}
+
+body .modal.dialog-confirm .modal-content {
+  border-radius: 12px !important;
+  border: 1px solid var(--modal-border-color) !important;
+  border-top-width: 1px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42) !important;
+  width: 100%;
+}
+
+body .modal.dialog-confirm .modal-body {
+  padding: 20px 24px 12px !important;
+}
+
+body .modal.dialog-confirm .modal-body .confirm-message {
+  color: var(--text-color) !important;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  display: block;
+}
+
+body .modal.dialog-confirm .modal-footer {
+  border-top: 1px solid var(--modal-border-color) !important;
+  padding: 12px 16px 14px !important;
+}
+
+body .modal-backdrop.backdrop-confirm {
+  z-index: 1295 !important;
 }
 
 /* Dropdowns — always opaque (never inherit panel glass) */

@@ -7,6 +7,7 @@ body .list-kanban .item .safehouse-kanban-card.panel.panel-default {
   --sh-card-radius: 14px;
   --sh-card-accent: var(--link-color, #dc2626);
   --sh-card-stage-accent: var(--sh-card-accent);
+  --sh-card-stripe-color: color-mix(in srgb, var(--sh-card-stage-accent) 88%, transparent);
   --sh-card-text: var(--text-color, #18181b);
   --sh-card-muted: var(--text-muted-color, #71717a);
   --sh-card-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
@@ -29,19 +30,19 @@ body .list-kanban .item .safehouse-kanban-card.panel.panel-default {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-body.theme-SafehouseAuroraLight .list-kanban .item .safehouse-kanban-card.panel.panel-default {
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.panel.panel-default {
   --sh-card-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015));
   --sh-card-glass-hover: linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.035));
   --sh-card-border: rgba(255, 255, 255, 0.34);
 }
 
-body.theme-SafehouseAurora .list-kanban .item .safehouse-kanban-card.panel.panel-default {
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.panel.panel-default {
   --sh-card-glass: linear-gradient(145deg, rgba(24, 24, 28, 0.26), rgba(24, 24, 28, 0.12));
   --sh-card-glass-hover: linear-gradient(145deg, rgba(24, 24, 28, 0.34), rgba(24, 24, 28, 0.16));
   --sh-card-border: rgba(255, 255, 255, 0.1);
   --sh-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  /* Dark theme: neutral left stripe (enum default is pink/red) */
-  --sh-card-stage-accent: rgba(161, 161, 170, 0.72);
+  /* Dark: neutral left stripe — stage tint lives in emoji chip / column header */
+  --sh-card-stripe-color: rgba(161, 161, 170, 0.38);
 }
 
 body .list-kanban .item .safehouse-kanban-card.panel:hover {
@@ -49,25 +50,59 @@ body .list-kanban .item .safehouse-kanban-card.panel:hover {
   box-shadow: var(--sh-card-shadow-hover);
 }
 
-/* Stage accent stripe + semantic tints */
+/*
+ * Stage accents for chip / amount tint.
+ * Left stripe uses --sh-card-stripe-color (below) — NOT --enum-text-* (brand red in both themes).
+ */
 body .list-kanban .item .safehouse-kanban-card.kanban-stage-default {
-  --sh-card-stage-accent: var(--enum-text-default, #a1a1aa);
+  --sh-card-stage-accent: #71717a;
+  --sh-card-stripe-color: rgba(161, 161, 170, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card.kanban-stage-primary {
-  --sh-card-stage-accent: var(--enum-text-primary, #ef4444);
+  --sh-card-stage-accent: #dc2626;
+  --sh-card-stripe-color: rgba(239, 68, 68, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card.kanban-stage-warning {
-  --sh-card-stage-accent: var(--enum-text-warning, #d97706);
+  --sh-card-stage-accent: #d97706;
+  --sh-card-stripe-color: rgba(217, 119, 6, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card.kanban-stage-success {
-  --sh-card-stage-accent: var(--enum-text-success, #65a30d);
+  --sh-card-stage-accent: #65a30d;
+  --sh-card-stripe-color: rgba(101, 163, 13, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card.kanban-stage-danger {
-  --sh-card-stage-accent: var(--enum-text-danger, #ef4444);
+  --sh-card-stage-accent: #dc2626;
+  --sh-card-stripe-color: rgba(220, 38, 38, 0.72);
+}
+
+/* Light theme stripes — match kanban group-header pastels (safehouse-aurora-light.css) */
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-default {
+  --sh-card-stage-accent: #52525b;
+  --sh-card-stripe-color: #a1a1aa;
+}
+
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-primary {
+  --sh-card-stage-accent: #b91c1b;
+  --sh-card-stripe-color: #f87171;
+}
+
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-warning {
+  --sh-card-stage-accent: #c2410c;
+  --sh-card-stripe-color: #fb923c;
+}
+
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-success {
+  --sh-card-stage-accent: #15803d;
+  --sh-card-stripe-color: #4ade80;
+}
+
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-danger {
+  --sh-card-stage-accent: #b91c1b;
+  --sh-card-stripe-color: #f87171;
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
@@ -77,14 +112,13 @@ body .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
   bottom: 0;
   width: 4px;
   border-radius: var(--sh-card-radius) 0 0 var(--sh-card-radius);
-  background: color-mix(in srgb, var(--sh-card-stage-accent) 88%, transparent);
+  background: var(--sh-card-stripe-color);
   box-shadow: 0 0 14px color-mix(in srgb, var(--sh-card-stage-accent) 35%, transparent);
   pointer-events: none;
   z-index: 2;
 }
 
-body.theme-SafehouseAurora .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
-  background: rgba(161, 161, 170, 0.38);
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
   box-shadow: none;
 }
 
@@ -430,7 +464,7 @@ body .list-kanban .dropdown-menu.list-row-dropdown-menu {
   z-index: 1400;
 }
 
-body.theme-SafehouseAuroraLight .list-kanban .dropdown-menu.list-row-dropdown-menu {
+body[data-theme-name='SafehouseAuroraLight'] .list-kanban .dropdown-menu.list-row-dropdown-menu {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.06) !important;
 }
 
