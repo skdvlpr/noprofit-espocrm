@@ -41,8 +41,6 @@ body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.panel.panel-
   --sh-card-glass-hover: linear-gradient(145deg, rgba(24, 24, 28, 0.34), rgba(24, 24, 28, 0.16));
   --sh-card-border: rgba(255, 255, 255, 0.1);
   --sh-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  /* Dark: neutral left stripe — stage tint lives in emoji chip / column header */
-  --sh-card-stripe-color: rgba(161, 161, 170, 0.38);
 }
 
 body .list-kanban .item .safehouse-kanban-card.panel:hover {
@@ -103,6 +101,35 @@ body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanba
 body[data-theme-name='SafehouseAuroraLight'] .list-kanban .item .safehouse-kanban-card.kanban-stage-danger {
   --sh-card-stage-accent: #b91c1b;
   --sh-card-stripe-color: #f87171;
+}
+
+/*
+ * Dark theme stage stripes — must beat body[data-is-dark] .panel.panel-default specificity
+ * so drag-and-drop class swaps (kanban-stage-*) update the accent immediately.
+ */
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.kanban-stage-default {
+  --sh-card-stage-accent: #a1a1aa;
+  --sh-card-stripe-color: rgba(161, 161, 170, 0.72);
+}
+
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.kanban-stage-primary {
+  --sh-card-stage-accent: #fca5a5;
+  --sh-card-stripe-color: rgba(239, 68, 68, 0.72);
+}
+
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.kanban-stage-warning {
+  --sh-card-stage-accent: #fde68a;
+  --sh-card-stripe-color: rgba(217, 119, 6, 0.72);
+}
+
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.kanban-stage-success {
+  --sh-card-stage-accent: #d9f99d;
+  --sh-card-stripe-color: rgba(101, 163, 13, 0.72);
+}
+
+body[data-is-dark='true'] .list-kanban .item .safehouse-kanban-card.kanban-stage-danger {
+  --sh-card-stage-accent: #fca5a5;
+  --sh-card-stripe-color: rgba(220, 38, 38, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
