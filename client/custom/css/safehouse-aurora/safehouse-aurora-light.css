@@ -54,7 +54,7 @@
   --input-border-focus: #ef4444;
   --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
 
-  --navbar-inverse-bg: rgba(255, 255, 255, 0.62);
+  --navbar-inverse-bg: rgba(255, 255, 255, 0.2);
   --navbar-inverse-border: rgba(0, 0, 0, 0.09);
   --navbar-inverse-link-color: #3f3f46;
   --navbar-inverse-link-hover-color: #18181b;
@@ -64,18 +64,20 @@
   --navbar-inverse-link-icon-color: #71717a;
   --navbar-inverse-link-icon-hover-color: #18181b;
 
-  --aurora-glass-bg: rgba(255, 255, 255, 0.58);
-  --aurora-glass-blur: blur(14px) saturate(1.05);
+  --aurora-glass-bg: rgba(255, 255, 255, 0.2);
+  --aurora-glass-blur: blur(20px) saturate(1.12);
   --aurora-glass-border: rgba(0, 0, 0, 0.1);
   --aurora-glass-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.14);
   --aurora-list-gutter: clamp(10px, 1.15vw, 16px);
-  --aurora-list-bg: rgba(255, 255, 255, 0.58);
+  --aurora-list-bg: rgba(255, 255, 255, 0.18);
   --aurora-list-border: rgba(0, 0, 0, 0.1);
   --aurora-list-blur: blur(22px) saturate(1.04);
   --aurora-list-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.14);
 
-  --panel-bg: rgba(255, 255, 255, 0.78);
-  --panel-default-bg: rgba(255, 255, 255, 0.82);
+  --panel-bg: rgba(255, 255, 255, 0.2);
+  --panel-default-bg: rgba(255, 255, 255, 0.22);
+  --table-bg: transparent;
+  --table-bg-accent: rgba(0, 0, 0, 0.035);
   --panel-default-text: #27272a;
   --panel-default-border: rgba(0, 0, 0, 0.09);
   --default-heading-bg-color: rgba(0, 0, 0, 0.03);
@@ -164,7 +166,7 @@
 }
 
 html {
-  background-color: #f4f4f6;
+  background-color: #dfe1e6;
 }
 
 html::before {
@@ -173,10 +175,9 @@ html::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.52)),
-    url('bg-light.svg') center / cover no-repeat;
-  background-color: #f4f4f6;
+  background: url('bg-light.svg') center / cover no-repeat;
+  background-color: #dfe1e6;
+  filter: contrast(1.08) saturate(1.06);
 }
 
 body {
@@ -494,9 +495,88 @@ body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
   color: var(--link-hover-color) !important;
 }
 
+/* ── Light theme: frosted glass (low alpha — parity with kanban cards) ── */
+body #navbar {
+  background: transparent !important;
+}
+
+body #navbar > .navbar {
+  background: var(--aurora-glass-bg) !important;
+  -webkit-backdrop-filter: var(--aurora-glass-blur) !important;
+  backdrop-filter: var(--aurora-glass-blur) !important;
+}
+
+body #navbar > .navbar .navbar-body {
+  background: transparent !important;
+}
+
+/* Core light.css paints list + table solid white — force transparent hosts */
+body .list-container > .list,
+body .list-container > .list > table,
+body #content #main table.table,
+body #content #main .list-container > .list .table,
+body #content #main .list-container > .list .table > thead > tr > th,
+body #content #main .list-container > .list .table > tbody > tr > td,
+body #content #main .list-container > .list .table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: transparent !important;
+}
+
+body .panel-default.headered {
+  background: transparent !important;
+}
+
+body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) {
+  position: relative;
+  overflow: visible !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body #content #main .list-kanban .panel.panel-default::before {
+  content: none !important;
+  display: none !important;
+}
+
+body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table))::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: var(--panel-bg);
+  border: var(--panel-border-width) solid var(--panel-default-border);
+  box-shadow: var(--aurora-glass-shadow);
+  -webkit-backdrop-filter: var(--aurora-glass-blur);
+  backdrop-filter: var(--aurora-glass-blur);
+}
+
+body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) > * {
+  position: relative;
+  z-index: 1;
+}
+
+body #content #main .panel.panel-default.headered:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) {
+  background: transparent !important;
+}
+
+body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) > .panel-heading {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+body #content #main .panel.panel-default:not(.safehouse-kanban-card) .panel-body {
+  background-color: transparent !important;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --aurora-glass-bg: rgba(255, 255, 255, 0.96);
+    --panel-bg: #ffffff;
     --panel-default-bg: #ffffff;
     --modal-content-bg: #ffffff;
     --navbar-inverse-bg: #f4f4f5;
@@ -509,5 +589,21 @@ body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
   body #navbar > .navbar {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table))::before,
+  body #content #main .list-group.list-group-panel::before,
+  body #content #main .admin-content .table.table-admin-panel::before,
+  body #content #main .admin-content table.table-panel::before,
+  body #content #main > .list-container > .list::before,
+  body #content #main > .list-container:not(:has(.list-kanban))::before,
+  body #content #main .list-main-column > .list-container > .list::before,
+  body #content #main .list-main-column > .list-container:not(:has(.list-kanban))::before,
+  body #content #main .nested-categories-container + .list-container > .list::before,
+  body #content #main > .row > .left-container + .list-container > .list::before,
+  body #content #main .list-container.list-container-panel > .list::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--panel-default-bg);
   }
 }

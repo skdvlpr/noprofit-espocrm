@@ -90,7 +90,11 @@ body #content #main > .list-container > .list,
 body #content #main .list-main-column > .list-container > .list,
 body #content #main .nested-categories-container + .list-container > .list,
 body #content #main > .row > .left-container + .list-container > .list,
-body #content #main .list-container.list-container-panel > .list {
+body #content #main .list-container.list-container-panel > .list,
+body #content #main > .list-container:not(:has(.list-kanban)),
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) {
   position: relative;
   overflow: visible !important;
   box-sizing: border-box;
@@ -111,16 +115,22 @@ body #content #main > .list-container > .list::before,
 body #content #main .list-main-column > .list-container > .list::before,
 body #content #main .nested-categories-container + .list-container > .list::before,
 body #content #main > .row > .left-container + .list-container > .list::before,
-body #content #main .list-container.list-container-panel > .list::before {
+body #content #main .list-container.list-container-panel > .list::before,
+body #content #main > .list-container:not(:has(.list-kanban))::before,
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban))::before,
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban))::before,
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban))::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   border-radius: inherit;
-  background-color: var(--panel-bg);
+  background-color: var(--aurora-list-bg, var(--panel-bg));
   border: var(--panel-border-width) solid var(--panel-default-border);
   box-shadow: var(--aurora-glass-shadow);
+  -webkit-backdrop-filter: var(--aurora-list-blur, var(--aurora-glass-blur, none));
+  backdrop-filter: var(--aurora-list-blur, var(--aurora-glass-blur, none));
 }
 
 body #content #main .list-group.list-group-panel > *,
@@ -130,9 +140,22 @@ body #content #main .list-container > .list > *,
 body #content #main .list-main-column > .list-container > .list > *,
 body #content #main .nested-categories-container + .list-container > .list > *,
 body #content #main > .row > .left-container + .list-container > .list > *,
-body #content #main .list-container.list-container-panel > .list > * {
+body #content #main .list-container.list-container-panel > .list > *,
+body #content #main > .list-container:not(:has(.list-kanban)) > *,
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > *,
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > *,
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > * {
   position: relative;
   z-index: 1;
+}
+
+/* Table lists: outer list-container owns the shell — no double glass on inner .list */
+body #content #main > .list-container:not(:has(.list-kanban)) > .list::before,
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list::before,
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list::before,
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list::before {
+  content: none !important;
+  display: none !important;
 }
 
 /* Core paints panel bg/border on host — shell lives on ::before only */
