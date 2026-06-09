@@ -72,7 +72,7 @@
   --aurora-list-gutter: clamp(10px, 1.15vw, 16px);
   --aurora-list-bg: rgba(20, 20, 26, 0.42);
   --aurora-list-border: rgba(255, 255, 255, 0.12);
-  --aurora-list-blur: blur(22px) saturate(1.06);
+  --aurora-list-blur: none;
   --aurora-list-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.38);
 
   --panel-bg: rgba(24, 24, 28, 0.78);
@@ -400,6 +400,26 @@ body .list-kanban .safehouse-kanban-card .kanban-title-value a {
 body .list-kanban .safehouse-kanban-card .kanban-title-value a:hover,
 body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
   color: var(--link-hover-color) !important;
+}
+
+/*
+ * Step 1 (dark): entity lists — no backdrop blur on shell or sticky list bars.
+ * Navbar blur unchanged. Admin list-group uses layout.css panel-bg only.
+ */
+body.theme-SafehouseAurora #content #main > .list-container > .list::before,
+body.theme-SafehouseAurora #content #main .list-main-column > .list-container > .list::before,
+body.theme-SafehouseAurora #content #main .nested-categories-container + .list-container > .list::before,
+body.theme-SafehouseAurora #content #main > .row > .left-container + .list-container > .list::before,
+body.theme-SafehouseAurora #content #main .list-container.list-container-panel > .list::before {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.theme-SafehouseAurora #content #main .list-container > .list .list-buttons-container.stick-sub,
+body.theme-SafehouseAurora #content #main .list-container > .list .sticked-bar,
+body.theme-SafehouseAurora #content #main .list-container > .list > .stick-sub {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
