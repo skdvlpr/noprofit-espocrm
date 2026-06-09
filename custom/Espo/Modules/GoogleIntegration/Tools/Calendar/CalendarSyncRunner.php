@@ -6,6 +6,7 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Espo\Core\ApplicationUser;
+use Espo\Core\AclManager;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
 use Espo\Entities\User;
@@ -39,6 +40,7 @@ class CalendarSyncRunner
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private EventPusher $eventPusher,
         private ApplicationUser $applicationUser,
+        private AclManager $aclManager,
         private Log $log
     ) {}
 
@@ -214,6 +216,19 @@ class CalendarSyncRunner
         $entity = $this->entityManager->getEntityById($entityType, $entityId);
 
         if ($entity === null || !$entity->get('saveToGoogleCalendar')) {
+            return false;
+        }
+
+        if (!$this->aclManager->checkEntityEdit($user, $entity)) {
+            $this->log->warning(
+                'Google Calendar pull skipped: no edit ACL for '
+                . $entityType
+                . ' '
+                . $entityId
+                . ' user '
+                . $user->getId()
+            );
+
             return false;
         }
 

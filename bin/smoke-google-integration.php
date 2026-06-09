@@ -459,7 +459,23 @@ $ok('Per-date UI uses unified date list field only', !str_contains($eventSetting
 $ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migrate-opportunity-google-calendar-fields.php'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
+$eventRemoverSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php') ?: '';
+$calendarSyncRunnerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
+$ok(
+    'Google Calendar user-scoped push/remove use AclManager',
+    str_contains($eventPusherSource, 'AclManager')
+        && str_contains($eventPusherSource, '$this->aclManager->checkEntityEdit($actor, $entity)')
+        && str_contains($eventRemoverSource, 'AclManager')
+        && str_contains($eventRemoverSource, '$this->aclManager->checkEntityEdit($user, $entity)')
+);
+$ok(
+    'Google Calendar pull checks CRM edit ACL before saving',
+    str_contains($calendarSyncRunnerSource, 'AclManager')
+        && str_contains($calendarSyncRunnerSource, '$this->aclManager->checkEntityEdit($user, $entity)')
+        && strpos($calendarSyncRunnerSource, '$this->aclManager->checkEntityEdit($user, $entity)')
+            < strpos($calendarSyncRunnerSource, '$this->entityManager->saveEntity($entity)')
+);
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
 ) ?: '';
