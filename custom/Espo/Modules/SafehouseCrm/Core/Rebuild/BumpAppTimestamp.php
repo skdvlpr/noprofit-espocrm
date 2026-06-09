@@ -6,8 +6,9 @@ use Espo\Core\DataManager;
 use Espo\Core\Rebuild\RebuildAction;
 
 /**
- * Bumps config appTimestamp on every rebuild so browser cache bust (?r=) picks up
- * custom JS/TPL/CSS without disabling nginx expires or developer mode.
+ * Bumps client asset cache-bust timestamps on every rebuild:
+ * - appTimestamp → cssList / AMD templates & JS (?r= in ClientManager)
+ * - cacheTimestamp → theme stylesheet in main.html (?r= on #main-stylesheet)
  *
  * @noinspection PhpUnused
  */
@@ -20,5 +21,6 @@ class BumpAppTimestamp implements RebuildAction
     public function process(): void
     {
         $this->dataManager->updateAppTimestamp();
+        $this->dataManager->updateCacheTimestamp();
     }
 }

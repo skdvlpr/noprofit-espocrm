@@ -1,6 +1,8 @@
 {
     "cssList": [
         "__APPEND__",
+        "client/custom/css/safehouse-aurora/safehouse-aurora-enum-colors.css",
+        "client/custom/css/safehouse-aurora/safehouse-aurora-layout.css",
         "client/custom/modules/safehouse-crm/res/css/kanban-card.css"
     ]
 }

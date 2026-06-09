@@ -5,8 +5,7 @@
  * add only small targeted rules. No custom ::before glass shell on modals/alerts.
  */
 @import url('../../../css/espo/glass.css');
-@import url('safehouse-aurora-enum-colors.css');
-@import url('safehouse-aurora-layout.css');
+/* enum-colors + layout load via app/client.json cssList (?r=appTimestamp) — not @import (no cache bust). */
 
 @font-face {
   font-family: 'JetBrains Sans';
@@ -61,7 +60,8 @@
   --navbar-inverse-link-color: #e4e4e7;
   --navbar-inverse-link-hover-color: #fafafa;
   --navbar-inverse-link-hover-bg: rgba(255, 255, 255, 0.08);
-  --navbar-inverse-link-active-bg: rgba(220, 38, 38, 0.28);
+  --navbar-inverse-link-active-bg: rgba(255, 255, 255, 0.09);
+  --navbar-tab-accent-default: rgba(252, 165, 165, 0.78);
   --navbar-inverse-link-icon-color: #d4d4d8;
   --navbar-inverse-link-icon-hover-color: #fafafa;
 
@@ -208,17 +208,6 @@ body #navbar input.form-control {
   background: rgba(255, 255, 255, 0.06) !important;
   border-color: rgba(255, 255, 255, 0.18) !important;
   color: #f4f4f5 !important;
-}
-
-body .navbar-inverse .nav > li > a,
-body .navbar-inverse .nav > li > a .full-label {
-  color: #e4e4e7 !important;
-}
-
-body .navbar-inverse .nav > li.active > a,
-body .navbar-inverse .nav > li.active > a .full-label {
-  color: #fafafa !important;
-  background-color: rgba(220, 38, 38, 0.28) !important;
 }
 
 body .header-breadcrumbs a.active {

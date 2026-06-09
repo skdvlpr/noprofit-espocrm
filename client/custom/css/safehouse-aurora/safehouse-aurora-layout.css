@@ -27,6 +27,61 @@ body[data-navbar='side'] #navbar > .navbar {
   border-right: 1px solid var(--aurora-glass-border) !important;
 }
 
+/* ── Navbar entity tabs: neutral pill + scope-colored accent (not brand red) ── */
+body #navbar > .navbar ul.tabs > li > a,
+body #navbar > .navbar ul.tabs > li > a .full-label,
+body #navbar > .navbar ul.tabs > li > a .short-label-text {
+  color: var(--navbar-inverse-link-color);
+}
+
+body #navbar > .navbar ul.tabs > li > a:hover,
+body #navbar > .navbar ul.tabs > li > a:focus,
+body #navbar > .navbar ul.tabs > li > a:hover .full-label {
+  color: var(--navbar-inverse-link-hover-color);
+  background-color: var(--navbar-inverse-link-hover-bg);
+}
+
+body #navbar > .navbar ul.tabs > li.active > a,
+body #navbar > .navbar ul.tabs > li.active > a .full-label,
+body #navbar > .navbar ul.tabs > li.active > a .short-label-text {
+  color: var(--navbar-inverse-link-hover-color);
+  font-weight: 600;
+}
+
+/* Espo sets inline border-color on <a> from scope color — use as a subtle underline */
+body #navbar > .navbar ul.tabs > li.active > a[style*='border-color'] {
+  border-bottom: 2px solid;
+}
+
+/* Activity / utility tabs without scope color — soft pastel red underline */
+body #navbar > .navbar ul.tabs > li.active > a:not([style*='border-color']) {
+  border-bottom: 2px solid var(--navbar-tab-accent-default);
+}
+
+/* Entity tab icons: keep scope color from inline styles (override glass active white icon) */
+body #navbar > .navbar ul.tabs > li > a .short-label[style*='color'] span {
+  color: inherit;
+}
+
+body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fas,
+body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .far,
+body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fab {
+  color: var(--navbar-inverse-link-icon-color) !important;
+}
+
+body #navbar > .navbar ul.tabs > li > a .short-label[style*='color'] {
+  filter: saturate(1.12) brightness(1.06);
+}
+
+body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'] {
+  filter: saturate(1.15) brightness(1.08);
+}
+
+body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'] span[style*='color'] {
+  color: inherit;
+}
+
 /* ── Shared admin + entity list shell (same as .list-group-panel / .table-admin-panel) ── */
 body #content #main .list-group.list-group-panel,
 body #content #main .admin-content .table.table-admin-panel,

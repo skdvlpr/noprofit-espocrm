@@ -4,8 +4,7 @@
  * Espo theme pattern: import light.css (not glass.css), override variables, minimal rules.
  */
 @import url('../../../css/espo/light.css');
-@import url('safehouse-aurora-enum-colors.css');
-@import url('safehouse-aurora-layout.css');
+/* enum-colors + layout load via app/client.json cssList (?r=appTimestamp) — not @import (no cache bust). */
 
 @font-face {
   font-family: 'JetBrains Sans';
@@ -60,7 +59,8 @@
   --navbar-inverse-link-color: #3f3f46;
   --navbar-inverse-link-hover-color: #18181b;
   --navbar-inverse-link-hover-bg: rgba(0, 0, 0, 0.05);
-  --navbar-inverse-link-active-bg: rgba(239, 68, 68, 0.16);
+  --navbar-inverse-link-active-bg: rgba(0, 0, 0, 0.05);
+  --navbar-tab-accent-default: rgba(220, 38, 38, 0.34);
   --navbar-inverse-link-icon-color: #71717a;
   --navbar-inverse-link-icon-hover-color: #18181b;
 
