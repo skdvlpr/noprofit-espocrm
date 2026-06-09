@@ -68,15 +68,15 @@ $client = new Client([
 $assets = [
     'kanban-item.tpl' => [
         'path' => '/client/custom/modules/safehouse-crm/res/templates/record/kanban-item.tpl',
-        'needles' => ['kanban-props-grid', 'kanban-dates-grid', 'hasStatItems'],
+        'needles' => ['kanban-props-grid', 'kanban-dates-grid', 'kanban-stage-chip', 'hasStatItems'],
     ],
     'kanban-item.js' => [
         'path' => '/client/custom/modules/safehouse-crm/src/views/record/kanban-item.js',
-        'needles' => ['hasStatItems', 'statItems'],
+        'needles' => ['hasStatItems', 'statItems', 'STAGE_EMOJI', 'getStageInfo'],
     ],
     'kanban-card.css' => [
         'path' => '/client/custom/modules/safehouse-crm/res/css/kanban-card.css',
-        'needles' => ['kanban-props-grid', 'safehouse-kanban-card'],
+        'needles' => ['kanban-props-grid', 'safehouse-kanban-card', 'kanban-stage-chip', 'kanban-prob-pill'],
     ],
 ];
 

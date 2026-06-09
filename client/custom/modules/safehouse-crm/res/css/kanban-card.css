@@ -6,6 +6,7 @@
 body .list-kanban .item .safehouse-kanban-card.panel.panel-default {
   --sh-card-radius: 14px;
   --sh-card-accent: var(--link-color, #dc2626);
+  --sh-card-stage-accent: var(--sh-card-accent);
   --sh-card-text: var(--text-color, #18181b);
   --sh-card-muted: var(--text-muted-color, #71717a);
   --sh-card-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
@@ -39,11 +40,52 @@ body.theme-SafehouseAurora .list-kanban .item .safehouse-kanban-card.panel.panel
   --sh-card-glass-hover: linear-gradient(145deg, rgba(24, 24, 28, 0.34), rgba(24, 24, 28, 0.16));
   --sh-card-border: rgba(255, 255, 255, 0.1);
   --sh-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  /* Dark theme: neutral left stripe (enum default is pink/red) */
+  --sh-card-stage-accent: rgba(161, 161, 170, 0.72);
 }
 
 body .list-kanban .item .safehouse-kanban-card.panel:hover {
   border-color: var(--sh-card-border-hover) !important;
   box-shadow: var(--sh-card-shadow-hover);
+}
+
+/* Stage accent stripe + semantic tints */
+body .list-kanban .item .safehouse-kanban-card.kanban-stage-default {
+  --sh-card-stage-accent: var(--enum-text-default, #a1a1aa);
+}
+
+body .list-kanban .item .safehouse-kanban-card.kanban-stage-primary {
+  --sh-card-stage-accent: var(--enum-text-primary, #ef4444);
+}
+
+body .list-kanban .item .safehouse-kanban-card.kanban-stage-warning {
+  --sh-card-stage-accent: var(--enum-text-warning, #d97706);
+}
+
+body .list-kanban .item .safehouse-kanban-card.kanban-stage-success {
+  --sh-card-stage-accent: var(--enum-text-success, #65a30d);
+}
+
+body .list-kanban .item .safehouse-kanban-card.kanban-stage-danger {
+  --sh-card-stage-accent: var(--enum-text-danger, #ef4444);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: var(--sh-card-radius) 0 0 var(--sh-card-radius);
+  background: color-mix(in srgb, var(--sh-card-stage-accent) 88%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--sh-card-stage-accent) 35%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+body.theme-SafehouseAurora .list-kanban .item .safehouse-kanban-card .kanban-card-accent {
+  background: rgba(161, 161, 170, 0.38);
+  box-shadow: none;
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-glass {
@@ -66,9 +108,32 @@ body .list-kanban .item .safehouse-kanban-card.panel:hover .kanban-card-glass {
 body .list-kanban .item .safehouse-kanban-card .panel-body {
   position: relative;
   z-index: 1;
-  padding: 11px 12px 10px !important;
+  padding: 11px 12px 10px 14px !important;
   background: transparent !important;
   background-color: transparent !important;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-stage-chip {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  background: color-mix(in srgb, var(--sh-card-stage-accent) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sh-card-stage-accent) 38%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--sh-card-stage-accent) 18%, transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-stage-chip-emoji {
+  transform: translateY(0.5px);
 }
 
 /* Row menu — stock Espo position (top-right) */
@@ -111,6 +176,10 @@ body .list-kanban .item .safehouse-kanban-card .kanban-card-title {
   margin-bottom: 6px;
 }
 
+body .list-kanban .item .safehouse-kanban-card .kanban-card-title.has-stage-chip {
+  padding-left: 34px;
+}
+
 body .list-kanban .item .safehouse-kanban-card .kanban-title-value {
   font-size: 0.875rem;
   font-weight: 650;
@@ -136,18 +205,31 @@ body .list-kanban .item .safehouse-kanban-card .kanban-title-value a:hover {
 /* ── Hero amount ── */
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid color-mix(in srgb, var(--sh-card-border) 75%, transparent);
 }
 
+body .list-kanban .item .safehouse-kanban-card .kanban-hero-emoji {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.92;
+  filter: saturate(1.1);
+}
+
 body .list-kanban .item .safehouse-kanban-card .kanban-hero-amount {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
-  color: var(--sh-card-text) !important;
+  color: color-mix(in srgb, var(--sh-card-stage-accent) 28%, var(--sh-card-text) 72%) !important;
 }
 
 /* ── Property grid: label | value (avoids Espo tbody{display:block} table breakage) ── */
@@ -161,12 +243,34 @@ body .list-kanban .item .safehouse-kanban-card .kanban-props-grid {
   margin: 0 0 8px;
 }
 
+body .list-kanban .item .safehouse-kanban-card .kanban-emoji {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 0.78rem;
+  line-height: 1;
+  vertical-align: -0.05em;
+  opacity: 0.95;
+  filter: saturate(1.15);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-label-text {
+  vertical-align: middle;
+}
+
 body .list-kanban .item .safehouse-kanban-card .kanban-prop-label {
+  display: flex;
+  align-items: center;
+  min-width: 0;
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.25;
   color: var(--sh-card-muted) !important;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prop-label .kanban-label-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -210,6 +314,51 @@ body .list-kanban .item .safehouse-kanban-card .kanban-prop-label.is-muted {
   opacity: 0.88;
 }
 
+/* Probability pill */
+body .list-kanban .item .safehouse-kanban-card .kanban-prop-value-probability.kanban-prob-pill {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prop-value-probability.kanban-prob-pill .field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prob-default .field {
+  color: var(--enum-text-default, #a1a1aa) !important;
+  background: color-mix(in srgb, var(--enum-active-default-bg, rgba(161, 161, 170, 0.2)) 100%, transparent);
+  border-color: color-mix(in srgb, var(--enum-text-default, #a1a1aa) 28%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prob-primary .field {
+  color: var(--enum-text-primary, #ef4444) !important;
+  background: var(--enum-active-primary-bg, rgba(220, 38, 38, 0.2));
+  border-color: color-mix(in srgb, var(--enum-text-primary, #ef4444) 30%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prob-warning .field {
+  color: var(--enum-text-warning, #d97706) !important;
+  background: var(--enum-active-warning-bg, rgba(217, 119, 6, 0.2));
+  border-color: color-mix(in srgb, var(--enum-text-warning, #d97706) 30%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-prob-success .field {
+  color: var(--enum-text-success, #65a30d) !important;
+  background: var(--enum-active-success-bg, rgba(101, 163, 13, 0.2));
+  border-color: color-mix(in srgb, var(--enum-text-success, #65a30d) 30%, transparent);
+}
+
 /* ── Date rows (same grid rhythm as property rows) ── */
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-dates {
@@ -227,11 +376,19 @@ body .list-kanban .item .safehouse-kanban-card .kanban-dates-grid {
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-date-label {
+  display: flex;
+  align-items: center;
+  min-width: 0;
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.25;
   color: var(--sh-card-muted) !important;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-date-label .kanban-label-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -261,15 +418,59 @@ body .list-kanban .item .safehouse-kanban-card .kanban-date-label.is-muted {
   opacity: 0.9;
 }
 
-/* Row menu dropdown */
-body .list-kanban .safehouse-kanban-card .list-row-dropdown-menu > li > a.action {
-  color: var(--dropdown-link-color, #27272a) !important;
+/* Kanban row action menu (dropdown is outside card glass layer) */
+body .list-kanban .dropdown-menu.list-row-dropdown-menu {
+  background-color: var(--dropdown-bg, #1c1c21) !important;
+  border: 1px solid var(--dropdown-border, rgba(255, 255, 255, 0.12)) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  padding: 6px 0 !important;
+  min-width: 148px;
+  overflow: hidden;
+  z-index: 1400;
 }
 
-body .list-kanban .safehouse-kanban-card .list-row-dropdown-menu > li > a.action:hover,
-body .list-kanban .safehouse-kanban-card .list-row-dropdown-menu > li > a.action:focus {
-  color: var(--dropdown-link-hover-color, #18181b) !important;
-  background-color: var(--dropdown-link-hover-bg, rgba(0, 0, 0, 0.05)) !important;
+body.theme-SafehouseAuroraLight .list-kanban .dropdown-menu.list-row-dropdown-menu {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.06) !important;
+}
+
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a.action,
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a[role='button'] {
+  display: block;
+  padding: 7px 14px;
+  color: var(--dropdown-link-color, #ececef) !important;
+  background: transparent !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a.action:hover,
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a.action:focus,
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a[role='button']:hover,
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li > a[role='button']:focus {
+  color: var(--dropdown-link-hover-color, #ffffff) !important;
+  background-color: var(--dropdown-link-hover-bg, rgba(220, 38, 38, 0.32)) !important;
+}
+
+body .list-kanban .dropdown-menu.list-row-dropdown-menu > li.divider {
+  background-color: var(--dropdown-divider-bg, rgba(255, 255, 255, 0.08)) !important;
+  margin: 5px 0 !important;
+  height: 1px;
+}
+
+body .list-kanban .list-row-buttons .btn-link.dropdown-toggle {
+  color: var(--text-muted-color, #a1a1aa) !important;
+  opacity: 0.9;
+}
+
+body .list-kanban .list-row-buttons .btn-link.dropdown-toggle:hover,
+body .list-kanban .list-row-buttons .btn-link.dropdown-toggle:focus,
+body .list-kanban .list-row-buttons.open .btn-link.dropdown-toggle {
+  color: var(--text-color, #e8e8ec) !important;
+  opacity: 1;
 }
 
 @media (prefers-reduced-transparency: reduce) {

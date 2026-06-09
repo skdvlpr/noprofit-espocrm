@@ -19,6 +19,24 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
         probability: 'kanbanShortProbability',
     };
 
+    const FIELD_EMOJI = {
+        account: '🏢',
+        probability: '📊',
+        presentationDate: '📅',
+        closeDate: '⏳',
+        createdAt: '🕐',
+        modifiedAt: '✏️',
+        amount: '💰',
+    };
+
+    const STAGE_EMOJI = {
+        Preparation: '📝',
+        Proposal: '📤',
+        Negotiation: '🤝',
+        'Closed Won': '🎉',
+        'Closed Lost': '📉',
+    };
+
     return Dep.extend({
 
         template: 'safehouse-crm:record/kanban-item',
@@ -36,6 +54,7 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
             this.statItems = [];
             this.dateItems = [];
             this.layoutDataList = [];
+            this.stageInfo = this.getStageInfo();
 
             this.itemLayout.forEach((item, i) => {
                 const name = item.name;
@@ -46,12 +65,16 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                 const row = {
                     name: name,
                     label: this.getKanbanLabel(name),
+                    emoji: this.getFieldEmoji(name),
                     isAlignRight: item.align === 'right',
                     isLarge: item.isLarge,
                     isMuted: item.isMuted,
                     isFirst: i === 0,
                     key: key,
                     fieldKind: fieldKind,
+                    probabilityTier: fieldKind === 'probability'
+                        ? this.getProbabilityTier(this.model.get(name))
+                        : null,
                     isTitle: this.isTitleField(name, item),
                     isHero: this.isHeroField(name),
                     isDate: this.isDateField(name, fieldType, item),
@@ -122,6 +145,59 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
             }
 
             return this.translate(name, 'fields', this.scope);
+        },
+
+        getFieldEmoji(name) {
+            return FIELD_EMOJI[name] || null;
+        },
+
+        getStageInfo() {
+            const stage = this.model.get('stage');
+
+            if (!stage) {
+                return null;
+            }
+
+            const styleMap = this.getMetadata()
+                .get(['entityDefs', this.scope, 'fields', 'stage', 'style']) || {};
+
+            const style = styleMap[stage] || 'default';
+            const emoji = STAGE_EMOJI[stage] || '💼';
+
+            const label = this.getLanguage().translateOption(stage, 'stage', this.scope) || stage;
+
+            return {
+                stage: stage,
+                style: style,
+                emoji: emoji,
+                label: label,
+            };
+        },
+
+        getProbabilityTier(value) {
+            if (value === null || value === undefined || value === '') {
+                return 'default';
+            }
+
+            const numeric = Number(value);
+
+            if (Number.isNaN(numeric)) {
+                return 'default';
+            }
+
+            if (numeric >= 80) {
+                return 'success';
+            }
+
+            if (numeric >= 50) {
+                return 'warning';
+            }
+
+            if (numeric >= 20) {
+                return 'primary';
+            }
+
+            return 'default';
         },
 
         afterRender() {
@@ -201,6 +277,11 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                 dateItems: this.dateItems,
                 hasStatItems: this.statItems.length > 0,
                 hasDateItems: this.dateItems.length > 0,
+                stageInfo: this.stageInfo,
+                stageStyle: this.stageInfo ? this.stageInfo.style : null,
+                stageEmoji: this.stageInfo ? this.stageInfo.emoji : null,
+                stageLabel: this.stageInfo ? this.stageInfo.label : null,
+                heroEmoji: this.getFieldEmoji('amount'),
             };
         },
     });
