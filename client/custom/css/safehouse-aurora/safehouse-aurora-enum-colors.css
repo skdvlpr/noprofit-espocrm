@@ -1,0 +1,184 @@
+/**
+ * Safehouse Aurora — semantic enum colors for selectize, list cells, native selects.
+ * Theme files define --enum-text-* and --enum-active-* tokens in :root.
+ */
+
+/* List/detail read mode */
+body .text-default {
+  color: var(--enum-text-default) !important;
+}
+
+body .text-primary {
+  color: var(--enum-text-primary) !important;
+}
+
+body .text-success {
+  color: var(--enum-text-success) !important;
+}
+
+body .text-warning {
+  color: var(--enum-text-warning) !important;
+}
+
+body .text-danger {
+  color: var(--enum-text-danger) !important;
+}
+
+body .text-info {
+  color: var(--enum-text-info) !important;
+}
+
+/* Selectize dropdown options */
+body .selectize-dropdown .option.text-default,
+body .selectize-dropdown [data-selectable].text-default {
+  color: var(--enum-text-default) !important;
+}
+
+body .selectize-dropdown .option.text-primary,
+body .selectize-dropdown [data-selectable].text-primary {
+  color: var(--enum-text-primary) !important;
+}
+
+body .selectize-dropdown .option.text-success,
+body .selectize-dropdown [data-selectable].text-success {
+  color: var(--enum-text-success) !important;
+}
+
+body .selectize-dropdown .option.text-warning,
+body .selectize-dropdown [data-selectable].text-warning {
+  color: var(--enum-text-warning) !important;
+}
+
+body .selectize-dropdown .option.text-danger,
+body .selectize-dropdown [data-selectable].text-danger {
+  color: var(--enum-text-danger) !important;
+}
+
+body .selectize-dropdown .option.text-info,
+body .selectize-dropdown [data-selectable].text-info {
+  color: var(--enum-text-info) !important;
+}
+
+/* Selectize closed input — Espo uses bare style name on .item (primary, success, …) */
+body .selectize-input .item.default span {
+  color: var(--enum-text-default) !important;
+}
+
+body .selectize-input .item.primary span {
+  color: var(--enum-text-primary) !important;
+}
+
+body .selectize-input .item.success span {
+  color: var(--enum-text-success) !important;
+}
+
+body .selectize-input .item.warning span {
+  color: var(--enum-text-warning) !important;
+}
+
+body .selectize-input .item.danger span {
+  color: var(--enum-text-danger) !important;
+}
+
+body .selectize-input .item.info span {
+  color: var(--enum-text-info) !important;
+}
+
+/* Native select options (inline edit fallback) */
+body select.form-control option.text-default {
+  color: var(--enum-text-default);
+}
+
+body select.form-control option.text-primary {
+  color: var(--enum-text-primary);
+}
+
+body select.form-control option.text-success {
+  color: var(--enum-text-success);
+}
+
+body select.form-control option.text-warning {
+  color: var(--enum-text-warning);
+}
+
+body select.form-control option.text-danger {
+  color: var(--enum-text-danger);
+}
+
+body select.form-control option.text-info {
+  color: var(--enum-text-info);
+}
+
+/* Active/hover — tinted by enum style, not uniform accent */
+body .selectize-dropdown .option.text-default.active,
+body .selectize-dropdown .option.text-default.selected,
+body .selectize-dropdown [data-selectable].text-default.active {
+  background-color: var(--enum-active-default-bg) !important;
+  color: var(--enum-active-default-text) !important;
+}
+
+body .selectize-dropdown .option.text-primary.active,
+body .selectize-dropdown .option.text-primary.selected,
+body .selectize-dropdown [data-selectable].text-primary.active {
+  background-color: var(--enum-active-primary-bg) !important;
+  color: var(--enum-active-primary-text) !important;
+}
+
+body .selectize-dropdown .option.text-success.active,
+body .selectize-dropdown .option.text-success.selected,
+body .selectize-dropdown [data-selectable].text-success.active {
+  background-color: var(--enum-active-success-bg) !important;
+  color: var(--enum-active-success-text) !important;
+}
+
+body .selectize-dropdown .option.text-warning.active,
+body .selectize-dropdown .option.text-warning.selected,
+body .selectize-dropdown [data-selectable].text-warning.active {
+  background-color: var(--enum-active-warning-bg) !important;
+  color: var(--enum-active-warning-text) !important;
+}
+
+body .selectize-dropdown .option.text-danger.active,
+body .selectize-dropdown .option.text-danger.selected,
+body .selectize-dropdown [data-selectable].text-danger.active {
+  background-color: var(--enum-active-danger-bg) !important;
+  color: var(--enum-active-danger-text) !important;
+}
+
+body .selectize-dropdown .option.text-info.active,
+body .selectize-dropdown .option.text-info.selected,
+body .selectize-dropdown [data-selectable].text-info.active {
+  background-color: var(--enum-active-info-bg) !important;
+  color: var(--enum-active-info-text) !important;
+}
+
+/* Status pills in list/detail — label-state reads --state-* tokens from glass.css */
+body .label-state.label-default {
+  background-color: var(--state-default-bg) !important;
+  color: var(--state-default-text) !important;
+}
+
+body .label-state.label-primary {
+  background-color: var(--state-primary-bg) !important;
+  color: var(--state-primary-text) !important;
+}
+
+body .label-state.label-success {
+  background-color: var(--state-success-bg) !important;
+  color: var(--state-success-text) !important;
+}
+
+body .label-state.label-warning {
+  background-color: var(--state-warning-bg) !important;
+  color: var(--state-warning-text) !important;
+}
+
+body .label-state.label-danger {
+  background-color: var(--state-danger-bg) !important;
+  color: var(--state-danger-text) !important;
+}
+
+body .label-state.label-info {
+  background-color: var(--state-info-bg) !important;
+  color: var(--state-info-text) !important;
+}

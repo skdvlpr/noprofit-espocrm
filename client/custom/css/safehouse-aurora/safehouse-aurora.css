@@ -5,6 +5,8 @@
  * add only small targeted rules. No custom ::before glass shell on modals/alerts.
  */
 @import url('../../../css/espo/glass.css');
+@import url('safehouse-aurora-enum-colors.css');
+@import url('safehouse-aurora-layout.css');
 
 @font-face {
   font-family: 'JetBrains Sans';
@@ -54,14 +56,24 @@
   --input-border-focus: #ef4444;
   --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
 
-  --navbar-inverse-bg: rgba(24, 24, 28, 0.82);
-  --navbar-inverse-border: rgba(255, 255, 255, 0.12);
+  --navbar-inverse-bg: rgba(255, 255, 255, 0.04);
+  --navbar-inverse-border: rgba(255, 255, 255, 0.14);
   --navbar-inverse-link-color: #e4e4e7;
   --navbar-inverse-link-hover-color: #fafafa;
   --navbar-inverse-link-hover-bg: rgba(255, 255, 255, 0.08);
   --navbar-inverse-link-active-bg: rgba(220, 38, 38, 0.28);
   --navbar-inverse-link-icon-color: #d4d4d8;
   --navbar-inverse-link-icon-hover-color: #fafafa;
+
+  --aurora-glass-bg: rgba(20, 20, 26, 0.42);
+  --aurora-glass-blur: blur(14px) saturate(1.08);
+  --aurora-glass-border: rgba(255, 255, 255, 0.12);
+  --aurora-glass-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.38);
+  --aurora-list-gutter: clamp(10px, 1.15vw, 16px);
+  --aurora-list-bg: rgba(20, 20, 26, 0.42);
+  --aurora-list-border: rgba(255, 255, 255, 0.12);
+  --aurora-list-blur: blur(22px) saturate(1.06);
+  --aurora-list-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.38);
 
   --panel-bg: rgba(24, 24, 28, 0.78);
   --panel-default-bg: rgba(28, 28, 32, 0.82);
@@ -81,6 +93,7 @@
   --dropdown-link-hover-bg: rgba(220, 38, 38, 0.32);
   --dropdown-link-active-bg: rgba(220, 38, 38, 0.42);
   --dropdown-border: rgba(255, 255, 255, 0.1);
+  --dropdown-divider-bg: rgba(255, 255, 255, 0.08);
 
   --select-item-text-color: #e8e8ec;
   --select-item-active-text-color: #ffffff;
@@ -101,6 +114,44 @@
   --state-warning-border: rgba(251, 191, 36, 0.45);
   --state-warning-text: #fef3c7;
   --warning-bg: rgba(69, 45, 10, 0.88);
+
+  --enum-text-default: #fecaca;
+  --enum-text-primary: #fecaca;
+  --enum-text-success: #d9f99d;
+  --enum-text-warning: #fde68a;
+  --enum-text-danger: #fca5a5;
+  --enum-text-info: #d4d4d8;
+  --enum-active-default-bg: rgba(220, 38, 38, 0.28);
+  --enum-active-default-text: #fecaca;
+
+  --state-default-bg: rgba(220, 38, 38, 0.28);
+  --state-default-text: #fecaca;
+  --state-default-border: rgba(239, 68, 68, 0.35);
+  --state-primary-bg: rgba(220, 38, 38, 0.28);
+  --state-primary-text: #fecaca;
+  --state-primary-border: rgba(239, 68, 68, 0.35);
+  --state-danger-bg: rgba(239, 68, 68, 0.28);
+  --state-danger-text: #fecaca;
+  --state-danger-border: rgba(248, 113, 113, 0.35);
+  --state-success-bg: rgba(101, 163, 13, 0.28);
+  --state-success-text: #d9f99d;
+  --state-success-border: rgba(132, 204, 22, 0.35);
+  --state-warning-bg: rgba(217, 119, 6, 0.28);
+  --state-warning-text: #fde68a;
+  --state-warning-border: rgba(251, 191, 36, 0.35);
+  --state-info-bg: rgba(113, 113, 122, 0.35);
+  --state-info-text: #d4d4d8;
+  --state-info-border: rgba(161, 161, 170, 0.35);
+  --enum-active-primary-bg: rgba(220, 38, 38, 0.28);
+  --enum-active-primary-text: #fecaca;
+  --enum-active-success-bg: rgba(101, 163, 13, 0.28);
+  --enum-active-success-text: #d9f99d;
+  --enum-active-warning-bg: rgba(217, 119, 6, 0.28);
+  --enum-active-warning-text: #fde68a;
+  --enum-active-danger-bg: rgba(239, 68, 68, 0.28);
+  --enum-active-danger-text: #fecaca;
+  --enum-active-info-bg: rgba(113, 113, 122, 0.35);
+  --enum-active-info-text: #f4f4f5;
 
   --fc-page-bg-color: transparent;
   --fc-today-bg-color: rgba(255, 255, 255, 0.05);
@@ -152,11 +203,11 @@ body #content #main {
   background: transparent !important;
 }
 
-/* Navbar — light frosted strip (only here, not on dialogs) */
-body #navbar > .navbar {
-  -webkit-backdrop-filter: blur(8px) saturate(1.05);
-  backdrop-filter: blur(8px) saturate(1.05);
-  box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.35);
+body #navbar .form-control,
+body #navbar input.form-control {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #f4f4f5 !important;
 }
 
 body .navbar-inverse .nav > li > a,
@@ -265,13 +316,17 @@ body .dropdown-menu {
 
 body .selectize-dropdown .option,
 body .selectize-dropdown [data-selectable] {
-  color: var(--select-item-text-color) !important;
-  background-color: var(--dropdown-bg) !important;
+  background-color: var(--dropdown-bg);
 }
 
-body .selectize-dropdown .option.active,
-body .selectize-dropdown .option.selected,
-body .selectize-dropdown [data-selectable].active {
+body .selectize-dropdown .option:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown [data-selectable]:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default) {
+  color: var(--enum-text-default);
+}
+
+body .selectize-dropdown .option.active:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown .option.selected:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown [data-selectable].active:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default) {
   background-color: var(--select-item-active-bg) !important;
   color: var(--select-item-active-text-color) !important;
 }
@@ -313,8 +368,8 @@ body #content #main > .panel.panel-default:has(> table.table) {
 
 /* Status labels — soft pastels */
 body .label-default {
-  background-color: rgba(113, 113, 122, 0.35) !important;
-  color: #e4e4e7 !important;
+  background-color: rgba(220, 38, 38, 0.28) !important;
+  color: #fecaca !important;
 }
 
 body .label-primary {
@@ -349,9 +404,10 @@ body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
+    --aurora-glass-bg: rgba(40, 40, 46, 0.92);
     --panel-default-bg: #1c1c21;
     --modal-content-bg: #1c1c21;
-    --navbar-inverse-bg: #27272a;
+    --navbar-inverse-bg: #3f3f46;
     --dropdown-bg: #141418;
   }
 

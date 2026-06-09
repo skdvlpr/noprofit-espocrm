@@ -1,6 +1,9 @@
 /**
  * Google Calendar color picker — theme-agnostic swatches for selectize enum fields.
  * Loaded via GoogleIntegration app client.cssList (not Safehouse themes).
+ *
+ * Dots are CSS-only (::before) on google-calendar-color-opt-* classes set by JS.
+ * Detail/read mode still uses .google-calendar-color-swatch spans.
  */
 
 .google-calendar-color-swatch {
@@ -10,15 +13,14 @@
   flex-shrink: 0;
 }
 
-.selectize-input .google-calendar-color-swatch,
-.selectize-dropdown [data-value] .google-calendar-color-swatch,
-.selectize-dropdown .option .google-calendar-color-swatch {
+.selectize-input .google-calendar-color-swatch {
   vertical-align: middle;
 }
 
-/* CSS dot fallback when JS swatch span is stripped by selectize re-render */
 .selectize-dropdown .option[class*='google-calendar-color-opt-']::before,
-.selectize-input .item[class*='google-calendar-color-opt-']::before {
+.selectize-dropdown [data-selectable][class*='google-calendar-color-opt-']::before,
+.selectize-input .item[class*='google-calendar-color-opt-']::before,
+.selectize-input[class*='google-calendar-color-opt-']::before {
   content: '';
   display: inline-block;
   width: 12px;
@@ -30,32 +32,20 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
 
-.google-calendar-color-opt-default::before,
-.option.google-calendar-color-opt-default::before { background-color: #9aa0a6; }
-.google-calendar-color-opt-1::before,
-.option.google-calendar-color-opt-1::before { background-color: #7986cb; }
-.google-calendar-color-opt-2::before,
-.option.google-calendar-color-opt-2::before { background-color: #33b679; }
-.google-calendar-color-opt-3::before,
-.option.google-calendar-color-opt-3::before { background-color: #8e24aa; }
-.google-calendar-color-opt-4::before,
-.option.google-calendar-color-opt-4::before { background-color: #e67c73; }
-.google-calendar-color-opt-5::before,
-.option.google-calendar-color-opt-5::before { background-color: #f6c026; }
-.google-calendar-color-opt-6::before,
-.option.google-calendar-color-opt-6::before { background-color: #f4511e; }
-.google-calendar-color-opt-7::before,
-.option.google-calendar-color-opt-7::before { background-color: #039be5; }
-.google-calendar-color-opt-8::before,
-.option.google-calendar-color-opt-8::before { background-color: #616161; }
-.google-calendar-color-opt-9::before,
-.option.google-calendar-color-opt-9::before { background-color: #3f51b5; }
-.google-calendar-color-opt-10::before,
-.option.google-calendar-color-opt-10::before { background-color: #0b8043; }
-.google-calendar-color-opt-11::before,
-.option.google-calendar-color-opt-11::before { background-color: #d50000; }
+.google-calendar-color-opt-default::before { background-color: #9aa0a6; }
+.google-calendar-color-opt-1::before { background-color: #7986cb; }
+.google-calendar-color-opt-2::before { background-color: #33b679; }
+.google-calendar-color-opt-3::before { background-color: #8e24aa; }
+.google-calendar-color-opt-4::before { background-color: #e67c73; }
+.google-calendar-color-opt-5::before { background-color: #f6c026; }
+.google-calendar-color-opt-6::before { background-color: #f4511e; }
+.google-calendar-color-opt-7::before { background-color: #039be5; }
+.google-calendar-color-opt-8::before { background-color: #616161; }
+.google-calendar-color-opt-9::before { background-color: #3f51b5; }
+.google-calendar-color-opt-10::before { background-color: #0b8043; }
+.google-calendar-color-opt-11::before { background-color: #d50000; }
 
-/* Dropdown rows stay neutral — color only in the dot, like core themes */
+/* Dropdown rows stay neutral — color only in the dot */
 .selectize-dropdown .option[class*='google-calendar-color-opt-'],
 .selectize-dropdown [data-selectable][class*='google-calendar-color-opt-'] {
   background-color: inherit !important;

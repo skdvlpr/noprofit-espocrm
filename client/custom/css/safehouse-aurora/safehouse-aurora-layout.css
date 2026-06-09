@@ -1,0 +1,205 @@
+/**
+ * Safehouse Aurora — navbar glass + entity list panels matching admin (list-group-panel).
+ * Admin reference: frosted panel-bg shell, flat search above, row separators inside.
+ */
+
+/* ── Frosted transparent navbar ── */
+body #navbar {
+  position: relative;
+  z-index: 1200;
+}
+
+body #navbar > .navbar {
+  background: var(--aurora-glass-bg) !important;
+  -webkit-backdrop-filter: var(--aurora-glass-blur);
+  backdrop-filter: var(--aurora-glass-blur);
+  border-bottom: 1px solid var(--aurora-glass-border) !important;
+  box-shadow: var(--aurora-glass-shadow) !important;
+}
+
+body #navbar > .navbar .navbar-body,
+body[data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body {
+  background: transparent !important;
+}
+
+body[data-navbar='side'] #navbar > .navbar {
+  border-bottom: none !important;
+  border-right: 1px solid var(--aurora-glass-border) !important;
+}
+
+/* ── Shared admin + entity list shell (same as .list-group-panel / .table-admin-panel) ── */
+body #content #main .list-group.list-group-panel,
+body #content #main .admin-content .table.table-admin-panel,
+body #content #main .admin-content table.table-panel,
+body #content #main > .list-container > .list,
+body #content #main .list-main-column > .list-container > .list,
+body #content #main .nested-categories-container + .list-container > .list,
+body #content #main > .row > .left-container + .list-container > .list,
+body #content #main .list-container.list-container-panel > .list {
+  position: relative;
+  overflow: visible !important;
+  box-sizing: border-box;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: var(--panel-border-radius) !important;
+  background: transparent !important;
+  border: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+body #content #main .list-group.list-group-panel::before,
+body #content #main .admin-content .table.table-admin-panel::before,
+body #content #main .admin-content table.table-panel::before,
+body #content #main > .list-container > .list::before,
+body #content #main .list-main-column > .list-container > .list::before,
+body #content #main .nested-categories-container + .list-container > .list::before,
+body #content #main > .row > .left-container + .list-container > .list::before,
+body #content #main .list-container.list-container-panel > .list::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: var(--panel-bg);
+  border: var(--panel-border-width) solid var(--panel-default-border);
+  box-shadow: var(--aurora-glass-shadow);
+}
+
+body #content #main .list-group.list-group-panel > *,
+body #content #main .admin-content .table.table-admin-panel > *,
+body #content #main .admin-content table.table-panel > *,
+body #content #main .list-container > .list > *,
+body #content #main .list-main-column > .list-container > .list > *,
+body #content #main .nested-categories-container + .list-container > .list > *,
+body #content #main > .row > .left-container + .list-container > .list > *,
+body #content #main .list-container.list-container-panel > .list > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Core paints panel bg/border on host — shell lives on ::before only */
+body #content #main .list-group.list-group-panel,
+body #content #main .admin-content .table.table-admin-panel,
+body #content #main .admin-content table.table-panel {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+body #content #main > .page-header {
+  margin-bottom: var(--8px, 8px) !important;
+}
+
+/* Search above list — flat, like admin (glass only on list panel below) */
+body #content #main > .search-container,
+body #content #main > .search-container.margin-bottom {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  margin-bottom: var(--8px, 8px) !important;
+}
+
+body #content #main > .search-container::before,
+body #content #main > .search-container.margin-bottom::before {
+  content: none !important;
+  display: none !important;
+}
+
+body #content #main > .search-container .search-row,
+body #content #main > .search-container .search-row .input-group,
+body #content #main > .search-container .view-mode-switcher-buttons-group {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body #content #main .admin-search-container {
+  padding: var(--10px, 10px);
+  margin-bottom: var(--20px, 20px);
+}
+
+/* Nested lists inside detail panels — inherit parent panel, no second shell */
+body #content #main .panel .list-container > .list {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
+body #content #main .panel .list-container > .list::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Dashlets — no inner opaque list card */
+body .panel.dashlet .dashlet-body .list-container,
+body .panel.dashlet .dashlet-body .list-container > .list,
+body .panel.dashlet .dashlet-body .list,
+body .panel.dashlet .dashlet-body .list > table,
+body .panel.dashlet .dashlet-body .list .table,
+body .panel.dashlet .dashlet-body .list .table tr,
+body .panel.dashlet .dashlet-body .list .table td,
+body .panel.dashlet .dashlet-body .list .list-group-item {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+body #content #main .list-container > .list > table {
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Rows stay clear — shell carries the panel tint (admin + entity lists) */
+body #content #main .list-container > .list .table,
+body #content #main .list-container > .list .table > thead > tr > th,
+body #content #main .list-container > .list .table > tbody > tr > td,
+body #content #main .list-container > .list .table tr,
+body #content #main .list-container > .list .list-group-item,
+body #content #main .list-container > .list .list-buttons-container,
+body #content #main .admin-content .table.table-admin-panel tr,
+body #content #main .admin-content .table.table-admin-panel td,
+body #content #main .admin-content table.table-panel tr,
+body #content #main .admin-content table.table-panel td,
+body #content #main .list-group.list-group-panel .list-group-item {
+  background-color: transparent !important;
+}
+
+body #content #main .list-container > .list .table,
+body #content #main .list-container > .list .table > thead > tr > th,
+body #content #main .list-container > .list .table > tbody > tr > td,
+body #content #main .admin-content .table.table-admin-panel,
+body #content #main .admin-content table.table-panel {
+  border-color: var(--default-border-color);
+}
+
+body #content #main .list-group.list-group-panel .list-group-item {
+  border-left: 0;
+  border-right: 0;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body #navbar > .navbar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body #content #main .list-group.list-group-panel::before,
+  body #content #main .admin-content .table.table-admin-panel::before,
+  body #content #main .admin-content table.table-panel::before,
+  body #content #main > .list-container > .list::before,
+  body #content #main .list-main-column > .list-container > .list::before,
+  body #content #main .nested-categories-container + .list-container > .list::before,
+  body #content #main > .row > .left-container + .list-container > .list::before,
+  body #content #main .list-container.list-container-panel > .list::before {
+    background-color: var(--panel-default-bg);
+  }
+}

@@ -42,6 +42,21 @@ define('google-integration:lib/google-calendar-color-swatch', [], function () {
             });
     }
 
+    function stripColorOptionClasses($element) {
+        const className = $element.attr('class') || '';
+        const stripped = className
+            .split(/\s+/)
+            .filter(name => name && !name.startsWith('google-calendar-color-opt-'))
+            .join(' ');
+
+        $element.attr('class', stripped);
+    }
+
+    function applyColorOptionClass($element, value) {
+        stripColorOptionClasses($element);
+        $element.addClass(optionClassName(value));
+    }
+
     function decorateSelectize($root, getValue) {
         const select = $root.find('select').get(0) || ($root.is('select') ? $root.get(0) : null);
         const selectize = select ? select.selectize : null;
@@ -56,20 +71,23 @@ define('google-integration:lib/google-calendar-color-swatch', [], function () {
 
             if ($input.length) {
                 $input.find('.google-calendar-color-swatch').remove();
-                createSwatch(value)
-                    .css({marginRight: '6px', verticalAlign: 'middle'})
-                    .prependTo($input);
+                stripColorOptionClasses($input);
+
+                const $item = $input.find('.item').first();
+
+                if ($item.length) {
+                    applyColorOptionClass($item, String($item.attr('data-value') ?? value));
+                } else {
+                    applyColorOptionClass($input, value);
+                }
             }
 
             $root.find('.selectize-dropdown-content [data-selectable], .selectize-dropdown-content .option').each((i, element) => {
                 const $option = $(element);
                 const optionValue = String($option.attr('data-value') ?? '');
 
-                $option.addClass(optionClassName(optionValue));
                 $option.find('.google-calendar-color-swatch').remove();
-                createSwatch(optionValue)
-                    .css({marginRight: '8px', verticalAlign: 'middle'})
-                    .prependTo($option);
+                applyColorOptionClass($option, optionValue);
             });
         };
 

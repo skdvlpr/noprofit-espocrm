@@ -4,6 +4,8 @@
  * Espo theme pattern: import light.css (not glass.css), override variables, minimal rules.
  */
 @import url('../../../css/espo/light.css');
+@import url('safehouse-aurora-enum-colors.css');
+@import url('safehouse-aurora-layout.css');
 
 @font-face {
   font-family: 'JetBrains Sans';
@@ -53,7 +55,7 @@
   --input-border-focus: #ef4444;
   --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
 
-  --navbar-inverse-bg: rgba(255, 255, 255, 0.88);
+  --navbar-inverse-bg: rgba(255, 255, 255, 0.62);
   --navbar-inverse-border: rgba(0, 0, 0, 0.09);
   --navbar-inverse-link-color: #3f3f46;
   --navbar-inverse-link-hover-color: #18181b;
@@ -61,6 +63,16 @@
   --navbar-inverse-link-active-bg: rgba(239, 68, 68, 0.16);
   --navbar-inverse-link-icon-color: #71717a;
   --navbar-inverse-link-icon-hover-color: #18181b;
+
+  --aurora-glass-bg: rgba(255, 255, 255, 0.58);
+  --aurora-glass-blur: blur(14px) saturate(1.05);
+  --aurora-glass-border: rgba(0, 0, 0, 0.1);
+  --aurora-glass-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.14);
+  --aurora-list-gutter: clamp(10px, 1.15vw, 16px);
+  --aurora-list-bg: rgba(255, 255, 255, 0.58);
+  --aurora-list-border: rgba(0, 0, 0, 0.1);
+  --aurora-list-blur: blur(22px) saturate(1.04);
+  --aurora-list-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.14);
 
   --panel-bg: rgba(255, 255, 255, 0.78);
   --panel-default-bg: rgba(255, 255, 255, 0.82);
@@ -79,6 +91,7 @@
   --dropdown-link-hover-bg: rgba(239, 68, 68, 0.12);
   --dropdown-link-active-bg: rgba(220, 38, 38, 0.18);
   --dropdown-border: rgba(0, 0, 0, 0.1);
+  --dropdown-divider-bg: rgba(0, 0, 0, 0.08);
 
   --select-item-text-color: #27272a;
   --select-item-active-text-color: #18181b;
@@ -97,6 +110,44 @@
   --state-warning-border: #fcd34d;
   --state-warning-text: #92400e;
   --warning-bg: #fffbeb;
+
+  --enum-text-default: #b91c1b;
+  --enum-text-primary: #b91c1b;
+  --enum-text-success: #4d7c0f;
+  --enum-text-warning: #b45309;
+  --enum-text-danger: #dc2626;
+  --enum-text-info: #52525b;
+  --enum-active-default-bg: rgba(239, 68, 68, 0.18);
+  --enum-active-default-text: #b91c1b;
+
+  --state-default-bg: rgba(239, 68, 68, 0.18);
+  --state-default-text: #b91c1b;
+  --state-default-border: rgba(239, 68, 68, 0.28);
+  --state-primary-bg: rgba(239, 68, 68, 0.18);
+  --state-primary-text: #b91c1b;
+  --state-primary-border: rgba(239, 68, 68, 0.28);
+  --state-danger-bg: rgba(220, 38, 38, 0.14);
+  --state-danger-text: #dc2626;
+  --state-danger-border: rgba(220, 38, 38, 0.28);
+  --state-success-bg: rgba(101, 163, 13, 0.16);
+  --state-success-text: #4d7c0f;
+  --state-success-border: rgba(101, 163, 13, 0.28);
+  --state-warning-bg: rgba(217, 119, 6, 0.16);
+  --state-warning-text: #b45309;
+  --state-warning-border: rgba(217, 119, 6, 0.28);
+  --state-info-bg: #e4e4e7;
+  --state-info-text: #52525b;
+  --state-info-border: #d4d4d8;
+  --enum-active-primary-bg: rgba(239, 68, 68, 0.18);
+  --enum-active-primary-text: #b91c1b;
+  --enum-active-success-bg: rgba(101, 163, 13, 0.16);
+  --enum-active-success-text: #4d7c0f;
+  --enum-active-warning-bg: rgba(217, 119, 6, 0.16);
+  --enum-active-warning-text: #b45309;
+  --enum-active-danger-bg: rgba(220, 38, 38, 0.14);
+  --enum-active-danger-text: #dc2626;
+  --enum-active-info-bg: #e4e4e7;
+  --enum-active-info-text: #3f3f46;
 
   --fc-page-bg-color: transparent;
   --fc-today-bg-color: rgba(239, 68, 68, 0.08);
@@ -148,10 +199,11 @@ body #content #main {
   background: transparent !important;
 }
 
-body #navbar > .navbar {
-  -webkit-backdrop-filter: blur(8px) saturate(1.03);
-  backdrop-filter: blur(8px) saturate(1.03);
-  box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.1);
+body #navbar .form-control,
+body #navbar input.form-control {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #18181b !important;
 }
 
 body .header-breadcrumbs a.active {
@@ -246,8 +298,19 @@ body .dropdown-menu {
 
 body .selectize-dropdown .option,
 body .selectize-dropdown [data-selectable] {
-  color: var(--select-item-text-color) !important;
-  background-color: var(--dropdown-bg) !important;
+  background-color: var(--dropdown-bg);
+}
+
+body .selectize-dropdown .option:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown [data-selectable]:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default) {
+  color: var(--enum-text-default);
+}
+
+body .selectize-dropdown .option.active:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown .option.selected:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default),
+body .selectize-dropdown [data-selectable].active:not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-default) {
+  background-color: var(--select-item-active-bg) !important;
+  color: var(--select-item-active-text-color) !important;
 }
 
 body .panel:has(.selectize-input.dropdown-active),
@@ -309,8 +372,8 @@ body #content #main > .panel.panel-default:has(> table.table) {
 
 /* Status labels — pastels */
 body .label-default {
-  background-color: #e4e4e7 !important;
-  color: #52525b !important;
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #b91c1b !important;
 }
 
 body .label-primary {
@@ -383,6 +446,7 @@ body .list-kanban .safehouse-kanban-card .kanban-title-value a:focus {
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
+    --aurora-glass-bg: rgba(255, 255, 255, 0.96);
     --panel-default-bg: #ffffff;
     --modal-content-bg: #ffffff;
     --navbar-inverse-bg: #f4f4f5;
