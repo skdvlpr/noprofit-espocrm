@@ -1,4 +1,4 @@
-define('safehouse-crm:views/opportunity/record/kanban', ['crm:views/opportunity/record/kanban'], function (Dep) {
+define('safehouse-crm:views/opportunity/record/kanban', ['safehouse-crm:views/record/kanban'], function (Dep) {
 
     const EXTRA_SELECT_ATTRIBUTES = [
         'assignedUserId',
@@ -10,34 +10,17 @@ define('safehouse-crm:views/opportunity/record/kanban', ['crm:views/opportunity/
     ];
 
     return Dep.extend({
-        itemViewName: 'safehouse-crm:views/record/kanban-item',
 
-        setup() {
-            Dep.prototype.setup.apply(this, arguments);
+        handleAttributesOnGroupChange(model, attributes, group) {
+            if (this.statusField !== 'stage') {
+                return;
+            }
 
-            this.on('after:save', model => {
-                const collectionModel = this.collection.get(model.id);
+            let probability = this.getMetadata()
+                .get(['entityDefs', 'Opportunity', 'fields', 'stage', 'probabilityMap', group]);
 
-                if (collectionModel && collectionModel !== model) {
-                    collectionModel.set(model.getClonedAttributes(), {
-                        sync: true,
-                    });
-                }
-
-                const view = this.getView(model.id);
-
-                if (!view) {
-                    return;
-                }
-
-                if (typeof view.refreshAfterExternalSave === 'function') {
-                    view.refreshAfterExternalSave();
-
-                    return;
-                }
-
-                view.reRender();
-            });
+            probability = parseInt(probability);
+            attributes.probability = probability;
         },
 
         async getSelectAttributeList(callback) {

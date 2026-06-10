@@ -58,6 +58,35 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
 
         template: 'safehouse-crm:record/kanban-item',
 
+        events: {
+            'click .kanban-title-value a.link': function (e) {
+                this.actionOpenQuickView(e);
+            },
+        },
+
+        actionOpenQuickView(e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            let listView = this.getParentView();
+
+            while (listView && typeof listView.actionQuickView !== 'function') {
+                listView = listView.getParentView();
+            }
+
+            if (!listView || listView.quickDetailDisabled) {
+                return;
+            }
+
+            listView.actionQuickView({
+                id: this.model.id,
+            });
+        },
+
         setup() {
             this.itemLayout = this.options.itemLayout;
             this.rowActionsView = this.options.rowActionsView;

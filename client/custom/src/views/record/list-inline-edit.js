@@ -19,13 +19,29 @@ define('custom:views/record/list-inline-edit', ['views/record/list'], function (
 
     return Dep.extend({
 
+        quickDetailDisabled: false,
+        quickEditDisabled: false,
+
         /** @private Currently active inline edit state, or null. */
         _ilEdit: null,
+
+        setup: function () {
+            Dep.prototype.setup.apply(this, arguments);
+
+            this.on('after:save', function (model) {
+                const view = this.getView(model.id);
+
+                if (view) {
+                    view.reRender();
+                }
+            });
+        },
 
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
             this._injectInlineEditStyles();
             this._bindInlineEditEvents();
+            this._bindQuickViewLinks();
             this._markEditableCells();
         },
 
@@ -53,6 +69,36 @@ define('custom:views/record/list-inline-edit', ['views/record/list'], function (
             ].join('\n');
 
             document.head.appendChild(style);
+        },
+
+        _bindQuickViewLinks: function () {
+            this.$el.off('click.sh-quick-view');
+
+            const nameAttribute = this.getMetadata()
+                .get(['clientDefs', this.scope, 'nameAttribute']) || 'name';
+
+            this.$el.on(
+                'click.sh-quick-view',
+                'td.cell[data-name="' + nameAttribute + '"] a.link',
+                function (e) {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey) {
+                        return;
+                    }
+
+                    const id = $(e.currentTarget).data('id');
+
+                    if (!id || this.quickDetailDisabled) {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    this.actionQuickView({
+                        id: id,
+                    });
+                }.bind(this)
+            );
         },
 
         _bindInlineEditEvents: function () {
