@@ -1,4 +1,5 @@
 {
+    "quickViewDefaultNavigation": true,
     "kanbanStatusIgnoreList": [
         "Closed Lost"
     ],

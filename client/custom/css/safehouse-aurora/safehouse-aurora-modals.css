@@ -1,0 +1,268 @@
+/**
+ * Safehouse Aurora — Quick view / Quick edit (.dialog-record).
+ * One cohesive frosted drawer; inner record panels stay flat (no nested glass boxes).
+ */
+
+/* ── Light drawer tokens ── */
+body[data-is-dark='false'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(248, 250, 252, 0.86) 52%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  --aurora-modal-drawer-blur: blur(26px) saturate(1.06);
+  --aurora-modal-drawer-border: rgba(255, 255, 255, 0.72);
+  --aurora-modal-drawer-shadow: -18px 0 52px rgba(15, 23, 42, 0.11), inset 1px 0 0 rgba(255, 255, 255, 0.85);
+  --aurora-modal-toolbar-bg: rgba(255, 255, 255, 0.55);
+  --aurora-modal-divider: rgba(0, 0, 0, 0.07);
+  --aurora-modal-side-bg: rgba(0, 0, 0, 0.018);
+}
+
+/* ── Dark drawer tokens ── */
+body[data-is-dark='true'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(30, 30, 36, 0.98) 0%,
+    rgba(24, 24, 28, 0.96) 100%
+  );
+  --aurora-modal-drawer-blur: none;
+  --aurora-modal-drawer-border: rgba(255, 255, 255, 0.1);
+  --aurora-modal-drawer-shadow: -22px 0 56px rgba(0, 0, 0, 0.48), inset 1px 0 0 rgba(255, 255, 255, 0.06);
+  --aurora-modal-toolbar-bg: rgba(255, 255, 255, 0.03);
+  --aurora-modal-divider: rgba(255, 255, 255, 0.08);
+  --aurora-modal-side-bg: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Backdrop ── */
+body:has(.modal.dialog-record.in) .modal-backdrop.in {
+  background-color: rgba(15, 23, 42, 0.28) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.04) !important;
+  backdrop-filter: blur(8px) saturate(1.04) !important;
+}
+
+body[data-is-dark='true']:has(.modal.dialog-record.in) .modal-backdrop.in {
+  background-color: rgba(0, 0, 0, 0.52) !important;
+}
+
+/* ── Drawer shell ── */
+body .modal.dialog-record .modal-content,
+body .modal.dialog-record .modal-content .modal-header,
+body .modal.dialog-record .modal-content header.modal-header,
+body .modal.dialog-record .modal-content .modal-body,
+body .modal.dialog-record .modal-content .modal-footer {
+  background-color: transparent !important;
+}
+
+body .modal.dialog-record > .modal-dialog > .modal-content {
+  color: var(--text-color) !important;
+  background: var(--aurora-modal-drawer-bg) !important;
+  -webkit-backdrop-filter: var(--aurora-modal-drawer-blur);
+  backdrop-filter: var(--aurora-modal-drawer-blur);
+  border: none !important;
+  border-left: 1px solid var(--aurora-modal-drawer-border) !important;
+  border-top-left-radius: 16px !important;
+  border-bottom-left-radius: 16px !important;
+  box-shadow: var(--aurora-modal-drawer-shadow) !important;
+  overflow: hidden;
+}
+
+body .modal.dialog-record > .modal-dialog > .modal-content > header.modal-header,
+body .modal.dialog-record > .modal-dialog > .modal-content > .modal-body,
+body .modal.dialog-record > .modal-dialog > .modal-content > .modal-footer {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ── Header + top action bar (footerAtTheTop) ── */
+body .modal.dialog-record .modal-header {
+  border-bottom: 1px solid var(--aurora-modal-divider) !important;
+  background: var(--aurora-modal-toolbar-bg) !important;
+  padding: 12px 18px !important;
+}
+
+body .modal.dialog-record .modal-header .modal-title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+body .modal.dialog-record .modal-header .modal-title-text {
+  font-size: 1.02rem;
+}
+
+body .modal.dialog-record .modal-footer {
+  border-top: none !important;
+  border-bottom: 1px solid var(--aurora-modal-divider) !important;
+  background: var(--aurora-modal-toolbar-bg) !important;
+  padding: 10px 14px !important;
+  text-align: left !important;
+}
+
+body .modal.dialog-record .modal-footer .btn {
+  border-radius: 10px !important;
+  font-weight: 500;
+}
+
+body .modal.dialog-record .modal-footer .btn + .btn {
+  margin-left: 8px !important;
+}
+
+/* ── Body layout ── */
+body .modal.dialog-record > .modal-dialog > .modal-content > .modal-body {
+  padding: 16px 18px 20px !important;
+}
+
+body .modal.dialog-record .modal-body .record-container.no-side-margin,
+body .modal.dialog-record .modal-body .record.no-side-margin {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Flat inner panels — single surface, no nested glass boxes */
+body .modal.dialog-record .modal-body .panel.panel-default {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body .modal.dialog-record .modal-body .panel.panel-default::before {
+  content: none !important;
+  display: none !important;
+}
+
+body .modal.dialog-record .modal-body .panel.panel-default > .panel-heading {
+  background: transparent !important;
+  border: none !important;
+  padding-top: 0;
+  padding-bottom: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted-color) !important;
+}
+
+body .modal.dialog-record .modal-body .panel.panel-default .panel-body,
+body .modal.dialog-record .modal-body .panel.panel-default .panel-body-form {
+  background: transparent !important;
+  padding-top: 0;
+}
+
+/* Side column — soft inset strip, not a second card */
+body .modal.dialog-record .modal-body .record-grid-wide .side {
+  background: var(--aurora-modal-side-bg) !important;
+  border-left: 1px solid var(--aurora-modal-divider) !important;
+  border-radius: 0 12px 12px 0 !important;
+  padding-left: 14px !important;
+  margin-left: 4px;
+}
+
+body .modal.dialog-record .modal-body .record-grid-wide .side > .panel {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Main column panels regain subtle rounding inside drawer */
+@media (min-width: 768px) {
+  body .modal.dialog-record .modal-body .record-container.no-side-margin .left > .middle > .panel,
+  body .modal.dialog-record .modal-body .record-container.no-side-margin .left > .bottom > .panel {
+    border-radius: 12px !important;
+  }
+}
+
+/* Field typography */
+body .modal.dialog-record .cell label,
+body .modal.dialog-record .cell .field-label,
+body .modal.dialog-record label.control-label {
+  color: var(--text-muted-color) !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+body .modal.dialog-record .cell .field {
+  font-size: 0.9375rem;
+}
+
+body .modal.dialog-record .text-muted,
+body .modal.dialog-record .cell .loading-value,
+body .modal.dialog-record .cell .none-value {
+  color: var(--text-muted-color) !important;
+}
+
+body .modal.dialog-record .modal-body a:not(.btn) {
+  color: var(--link-color) !important;
+  font-weight: 500;
+}
+
+body .modal.dialog-record .modal-body a:not(.btn):hover,
+body .modal.dialog-record .modal-body a:not(.btn):focus {
+  color: var(--link-hover-color) !important;
+}
+
+/* Lists / tables inside drawer */
+body .modal.dialog-record .modal-body .list-container > .list,
+body .modal.dialog-record .modal-body .list-container > .list > table,
+body .modal.dialog-record .modal-body table.table,
+body .modal.dialog-record .modal-body .list-container > .list .table,
+body .modal.dialog-record .modal-body .list-container > .list .table > thead > tr > th,
+body .modal.dialog-record .modal-body .list-container > .list .table > tbody > tr > td,
+body .modal.dialog-record .modal-body .list-container > .list .table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: transparent !important;
+}
+
+/* Google Calendar block inside drawer */
+body .modal.dialog-record .google-calendar-reminder-notice.alert-warning {
+  border-radius: 12px !important;
+  margin-top: 12px;
+}
+
+body .modal.dialog-record .panel .google-calendar-event-settings,
+body .modal.dialog-record .panel [data-name='googleCalendarEventSettings'] {
+  border-radius: 12px;
+}
+
+/* Status chip in header area */
+body .modal.dialog-record .modal-header .label,
+body .modal.dialog-record .modal-header .badge {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body[data-is-dark='false'] {
+    --aurora-modal-drawer-bg: #ffffff;
+    --aurora-modal-drawer-blur: none;
+  }
+
+  body[data-is-dark='true'] {
+    --aurora-modal-drawer-bg: linear-gradient(168deg, #1e1e24 0%, #18181c 100%);
+  }
+
+  body .modal.dialog-record > .modal-dialog > .modal-content {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body .modal.dialog-record > .modal-dialog > .modal-content {
+    border-top-left-radius: 14px !important;
+    border-top-right-radius: 14px !important;
+    border-bottom-left-radius: 0 !important;
+  }
+
+  body .modal.dialog-record .modal-body .record-grid-wide .side {
+    border-left: none !important;
+    border-top: 1px solid var(--aurora-modal-divider) !important;
+    border-radius: 0 !important;
+    margin-left: 0;
+    padding-left: 0 !important;
+    padding-top: 14px;
+    margin-top: 8px;
+  }
+}

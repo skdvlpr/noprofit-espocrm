@@ -1,5 +1,6 @@
 {
     "entity": true,
+    "quickViewDefaultNavigation": false,
     "type": "Base",
     "module": "SafehouseCrm",
     "object": true,
