@@ -5,6 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
+use Espo\Core\AclManager;
 use Espo\Core\ApplicationUser;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
@@ -39,6 +40,7 @@ class CalendarSyncRunner
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private EventPusher $eventPusher,
         private ApplicationUser $applicationUser,
+        private AclManager $aclManager,
         private Log $log
     ) {}
 
@@ -217,6 +219,19 @@ class CalendarSyncRunner
             return false;
         }
 
+        if (!$this->aclManager->checkEntityEdit($user, $entity)) {
+            $this->log->warning(
+                'Google Calendar pull skipped: no edit ACL for '
+                . $entityType
+                . ' '
+                . $entityId
+                . ' user '
+                . $user->getId()
+            );
+
+            return false;
+        }
+
         $start = $this->googleEventInstantToCrm($googleEvent['start'] ?? null);
         $end = $this->googleEventInstantToCrm($googleEvent['end'] ?? null);
 
@@ -225,11 +240,8 @@ class CalendarSyncRunner
         }
 
         if ($entityType === 'Task') {
+            $entity->set('dateStart', $start);
             $entity->set('dateEnd', $end);
-
-            if ($entity->get('dateStart') === null || $entity->get('dateStart') === '') {
-                $entity->set('dateStart', $start);
-            }
         } else {
             $entity->set('dateStart', $start);
             $entity->set('dateEnd', $end);

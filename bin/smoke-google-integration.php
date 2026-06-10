@@ -460,6 +460,51 @@ $ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migr
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
+$emptyEventsPos = strpos($eventPusherSource, 'if ($events === [])');
+$emptyEventsCleanupPos = strpos(
+    $eventPusherSource,
+    '$this->eventRemover->removeStaleDateSourceLinks($entity, $actor, []);'
+);
+$emptyEventsReturnPos = $emptyEventsPos === false ? false : strpos($eventPusherSource, 'return;', $emptyEventsPos);
+$ok(
+    'EventPusher clears stale Google links when selected date fields are empty',
+    $emptyEventsPos !== false
+        && $emptyEventsCleanupPos !== false
+        && $emptyEventsReturnPos !== false
+        && $emptyEventsCleanupPos > $emptyEventsPos
+        && $emptyEventsCleanupPos < $emptyEventsReturnPos
+);
+$ok(
+    'EventPusher ACL check uses explicit Google account owner',
+    str_contains($eventPusherSource, 'use Espo\Core\AclManager;')
+        && str_contains($eventPusherSource, '$this->aclManager->checkEntityEdit($actor, $entity)')
+        && !str_contains($eventPusherSource, 'checkEntityEdit($entity, $actor)')
+);
+$eventRemoverSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php') ?: '';
+$ok(
+    'EventRemover ACL check uses explicit Google account owner',
+    str_contains($eventRemoverSource, 'use Espo\Core\AclManager;')
+        && str_contains($eventRemoverSource, '$this->aclManager->checkEntityEdit($user, $entity)')
+        && !str_contains($eventRemoverSource, 'checkEntityEdit($entity, $user)')
+);
+$calendarSyncRunnerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php') ?: '';
+$aclCheckPos = strpos($calendarSyncRunnerSource, '$this->aclManager->checkEntityEdit($user, $entity)');
+$saveEntityPos = strpos($calendarSyncRunnerSource, '$this->entityManager->saveEntity($entity)');
+$ok(
+    'CalendarSyncRunner checks edit ACL before Google-to-CRM writes',
+    str_contains($calendarSyncRunnerSource, 'use Espo\Core\AclManager;')
+        && $aclCheckPos !== false
+        && $saveEntityPos !== false
+        && $aclCheckPos < $saveEntityPos
+);
+$ok(
+    'CalendarSyncRunner updates Task dateStart on every Google pull',
+    str_contains(
+        $calendarSyncRunnerSource,
+        "if (\$entityType === 'Task') {\n            \$entity->set('dateStart', \$start);\n            \$entity->set('dateEnd', \$end);"
+    )
+        && !str_contains($calendarSyncRunnerSource, "\$entity->get('dateStart') === null")
+);
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
 ) ?: '';
