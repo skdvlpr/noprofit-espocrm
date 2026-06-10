@@ -19,6 +19,20 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
         probability: 'kanbanShortProbability',
     };
 
+    const GOOGLE_DATE_SOURCE_TO_FIELD = {
+        presentationDate: 'presentationDate',
+        closeDate: 'closeDate',
+        main: 'dateStart',
+        endDate: 'dateEnd',
+    };
+
+    const GOOGLE_DATE_LABEL_KEYS = {
+        presentationDate: 'kanbanShortPresentationDate',
+        closeDate: 'kanbanShortCloseDate',
+        main: 'googleCalendarDateMain',
+        endDate: 'googleCalendarDateEnd',
+    };
+
     const FIELD_EMOJI = {
         account: '🏢',
         probability: '📊',
@@ -57,6 +71,10 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
             this.statItems = [];
             this.dateItems = [];
             this.layoutDataList = [];
+            this.googleCalendarItems = [];
+            this.googleEventLinkMap = {};
+            this.hasDateItems = false;
+            this.hasGoogleCalendarSection = false;
             this.stageInfo = this.getStageInfo();
 
             this.itemLayout.forEach((item, i) => {
@@ -117,6 +135,17 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                 });
             });
 
+            this.hasDateItems = this.dateItems.length > 0;
+
+            this.setupDynamicRefresh();
+
+            if (this.shouldLoadGoogleCalendarSection()) {
+                this.wait(true);
+
+                this.refreshGoogleCalendarSection()
+                    .finally(() => this.wait(false));
+            }
+
             if (!this.rowActionsDisabled) {
                 const acl = {
                     edit: this.getAcl().checkModel(this.model, 'edit'),
@@ -140,6 +169,105 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
             this.listenTo(this.model, 'change:probability', () => this.applyProbabilityVisuals());
         },
 
+        setupDynamicRefresh() {
+            const googleSourceKeys = [
+                'change:googleCalendarDateSourceList',
+                'change:saveToGoogleCalendar',
+            ].join(' ');
+
+            const googleDateKeys = [
+                'change:presentationDate',
+                'change:closeDate',
+                'change:dateStart',
+                'change:dateEnd',
+            ].join(' ');
+
+            const assignmentKeys = [
+                'change:assignedUserId',
+                'change:assignedUserName',
+                'change:teamsIds',
+                'change:teamsNames',
+            ].join(' ');
+
+            this.listenTo(this.model, googleSourceKeys, () => {
+                this.scheduleGoogleCalendarRefresh(true);
+            });
+
+            this.listenTo(this.model, googleDateKeys, () => {
+                this.scheduleGoogleCalendarRefresh(false);
+            });
+
+            this.listenTo(this.model, assignmentKeys, () => {
+                this.scheduleCardRefresh();
+            });
+        },
+
+        scheduleGoogleCalendarRefresh(refetchLinks) {
+            this._googleRefreshRefetchLinks = this._googleRefreshRefetchLinks || refetchLinks;
+
+            if (this._googleRefreshTimer) {
+                clearTimeout(this._googleRefreshTimer);
+            }
+
+            this._googleRefreshTimer = setTimeout(() => {
+                this._googleRefreshTimer = null;
+
+                const shouldRefetch = !!this._googleRefreshRefetchLinks;
+                this._googleRefreshRefetchLinks = false;
+
+                this.refreshGoogleCalendarSection({
+                    refetchLinks: shouldRefetch,
+                });
+            }, 50);
+        },
+
+        scheduleCardRefresh() {
+            if (!this.isRendered()) {
+                return;
+            }
+
+            this.reRender();
+        },
+
+        refreshGoogleCalendarSection(options) {
+            options = options || {};
+
+            const refetchLinks = options.refetchLinks !== false;
+            const shouldShow = this.shouldLoadGoogleCalendarSection();
+
+            if (!shouldShow) {
+                this.googleCalendarItems = [];
+                this.hasGoogleCalendarSection = false;
+                this.googleEventLinkMap = {};
+
+                if (options.render !== false && this.isRendered()) {
+                    this.reRender();
+                }
+
+                return Promise.resolve();
+            }
+
+            const rebuild = () => {
+                this.buildGoogleCalendarSection();
+
+                if (options.render !== false && this.isRendered()) {
+                    this.reRender();
+                }
+            };
+
+            if (refetchLinks) {
+                return this.fetchGoogleEventLinks().then(rebuild);
+            }
+
+            rebuild();
+
+            return Promise.resolve();
+        },
+
+        refreshAfterExternalSave() {
+            return this.refreshGoogleCalendarSection();
+        },
+
         getKanbanLabel(name) {
             const shortKey = SHORT_LABEL_KEYS[name];
 
@@ -156,6 +284,191 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
 
         getFieldEmoji(name) {
             return FIELD_EMOJI[name] || null;
+        },
+
+        hasGoogleCalendarFields() {
+            return !!this.getMetadata()
+                .get(['entityDefs', this.scope, 'fields', 'saveToGoogleCalendar']);
+        },
+
+        shouldLoadGoogleCalendarSection() {
+            if (!this.hasGoogleCalendarFields() || !this.model.get('saveToGoogleCalendar')) {
+                return false;
+            }
+
+            const selected = this.model.get('googleCalendarDateSourceList') || [];
+
+            return selected.length > 0;
+        },
+
+        fetchGoogleEventLinks() {
+            this.googleEventLinkMap = {};
+
+            return Espo.Ajax.getRequest(
+                'GoogleIntegration/calendar/entity-event-links/' + this.scope + '/' + this.model.id
+            ).then(response => {
+                (response.list || []).forEach(row => {
+                    if (row && row.sourceDateType && row.htmlLink) {
+                        this.googleEventLinkMap[row.sourceDateType] = row.htmlLink;
+                    }
+                });
+            }).catch(() => {
+                this.googleEventLinkMap = {};
+            });
+        },
+
+        buildGoogleCalendarSection() {
+            this.googleCalendarItems = [];
+            this.hasGoogleCalendarSection = false;
+
+            const selected = this.model.get('googleCalendarDateSourceList') || [];
+
+            if (!selected.length) {
+                return;
+            }
+
+            selected.forEach(sourceDateType => {
+                const fieldName = GOOGLE_DATE_SOURCE_TO_FIELD[sourceDateType] || sourceDateType;
+
+                this.googleCalendarItems.push({
+                    sourceDateType: sourceDateType,
+                    name: fieldName,
+                    label: this.getGoogleDateSourceLabel(sourceDateType, fieldName),
+                    emoji: this.getFieldEmoji(fieldName) || '📅',
+                    htmlLink: this.googleEventLinkMap[sourceDateType] || null,
+                    dateTooltip: this.formatGoogleDateTooltip(fieldName),
+                });
+            });
+
+            this.hasGoogleCalendarSection = this.googleCalendarItems.length > 0;
+        },
+
+        getGoogleDateSourceLabel(sourceDateType, fieldName) {
+            const labelKey = GOOGLE_DATE_LABEL_KEYS[sourceDateType];
+
+            if (labelKey) {
+                const shortLabel = this.translate(labelKey, 'labels', this.scope);
+
+                if (shortLabel && shortLabel !== labelKey) {
+                    return shortLabel;
+                }
+            }
+
+            const fieldLabel = this.translate(fieldName, 'fields', this.scope);
+
+            if (fieldLabel && fieldLabel !== fieldName) {
+                return fieldLabel;
+            }
+
+            return sourceDateType;
+        },
+
+        formatGoogleDateTooltip(fieldName) {
+            const value = this.model.get(fieldName);
+
+            if (!value) {
+                return '';
+            }
+
+            const fieldType = this.model.getFieldType(fieldName) || 'date';
+            const dateTime = this.getDateTime();
+
+            if (fieldType === 'datetime') {
+                const momentValue = dateTime.toMoment(value);
+                const momentNow = dateTime.toMoment(dateTime.getToday()).startOf('day');
+                const ranges = {
+                    today: [momentNow.unix(), momentNow.clone().add(1, 'days').unix()],
+                    tomorrow: [momentNow.clone().add(1, 'days').unix(), momentNow.clone().add(2, 'days').unix()],
+                    yesterday: [momentNow.clone().add(-1, 'days').unix(), momentNow.unix()],
+                };
+                const unix = momentValue.unix();
+                const timeFormat = dateTime.timeFormat;
+
+                if (unix >= ranges.today[0] && unix < ranges.today[1]) {
+                    return this.translate('Today') + ' ' + momentValue.format(timeFormat);
+                }
+
+                if (unix >= ranges.tomorrow[0] && unix < ranges.tomorrow[1]) {
+                    return this.translate('Tomorrow') + ' ' + momentValue.format(timeFormat);
+                }
+
+                if (unix >= ranges.yesterday[0] && unix < ranges.yesterday[1]) {
+                    return this.translate('Yesterday') + ' ' + momentValue.format(timeFormat);
+                }
+
+                const readableFormat = dateTime.getReadableDateFormat();
+
+                if (momentValue.format('YYYY') === momentNow.format('YYYY')) {
+                    return momentValue.format(readableFormat) + ' ' + momentValue.format(timeFormat);
+                }
+
+                return momentValue.format(readableFormat + ', YYYY') + ' ' + momentValue.format(timeFormat);
+            }
+
+            const momentValue = dateTime.toMoment(value).startOf('day');
+            const momentToday = dateTime.toMoment(dateTime.getToday()).startOf('day');
+            const diffDays = momentValue.diff(momentToday, 'days');
+
+            if (diffDays === 0) {
+                return this.translate('Today');
+            }
+
+            if (diffDays === 1) {
+                return this.translate('Tomorrow');
+            }
+
+            if (diffDays === -1) {
+                return this.translate('Yesterday');
+            }
+
+            const readableFormat = dateTime.getReadableDateFormat();
+
+            if (momentValue.format('YYYY') === momentToday.format('YYYY')) {
+                return momentValue.format(readableFormat);
+            }
+
+            return momentValue.format(readableFormat + ', YYYY');
+        },
+
+        getAssignedUserHtml() {
+            let id = this.model.get('assignedUserId');
+            let name = this.model.get('assignedUserName');
+            const assignedUser = this.model.get('assignedUser');
+
+            if (assignedUser && typeof assignedUser === 'object') {
+                id = id || assignedUser.id;
+                name = name || assignedUser.name;
+            }
+
+            if (!id && !name) {
+                return '';
+            }
+
+            const text = this.escapeString(name || id || '');
+
+            if (!id) {
+                return text;
+            }
+
+            const safeId = this.escapeString(id);
+
+            return '<a href="#User/view/' + safeId + '" data-id="' + safeId + '" data-scope="User">' + text + '</a>';
+        },
+
+        getTeamsHtml() {
+            const ids = this.model.get('teamsIds');
+
+            if (!Array.isArray(ids) || !ids.length) {
+                return '';
+            }
+
+            const names = this.model.get('teamsNames') || {};
+
+            return ids.map(id => {
+                const name = this.escapeString(names[id] || id);
+
+                return '<span class="label team-label">' + name + '</span>';
+            }).join('');
         },
 
         getStageInfo() {
@@ -258,12 +571,12 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
         afterRender() {
             Dep.prototype.afterRender.call(this);
 
-            this.dateItems.forEach(item => {
-                if (this.model.getFieldType(item.name) !== 'datetime') {
+            const shortenDatetime = name => {
+                if (this.model.getFieldType(name) !== 'datetime') {
                     return;
                 }
 
-                const value = this.model.get(item.name);
+                const value = this.model.get(name);
 
                 if (!value) {
                     return;
@@ -275,9 +588,11 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                     .format(dateTime.getReadableShortDateFormat());
 
                 this.$el
-                    .find('.kanban-date-value[data-name="' + item.name + '"]')
+                    .find('.kanban-date-value[data-name="' + name + '"]')
                     .text(dateOnly);
-            });
+            };
+
+            this.dateItems.forEach(item => shortenDatetime(item.name));
         },
 
         isTitleField(name, layoutItem) {
@@ -320,6 +635,9 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
         },
 
         data() {
+            const assignedUserHtml = this.getAssignedUserHtml();
+            const teamsHtml = this.getTeamsHtml();
+
             return {
                 layoutDataList: this.layoutDataList,
                 rowActionsDisabled: this.rowActionsDisabled,
@@ -331,12 +649,22 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                 statItems: this.statItems,
                 dateItems: this.dateItems,
                 hasStatItems: this.statItems.length > 0,
-                hasDateItems: this.dateItems.length > 0,
+                hasDateItems: this.hasDateItems,
+                googleCalendarItems: this.googleCalendarItems,
                 stageInfo: this.stageInfo,
                 stageStyle: this.stageInfo ? this.stageInfo.style : null,
                 stageEmoji: this.stageInfo ? this.stageInfo.emoji : null,
                 stageLabel: this.stageInfo ? this.stageInfo.label : null,
                 heroEmoji: this.getFieldEmoji('amount'),
+                hasGoogleCalendarSection: this.hasGoogleCalendarSection,
+                googleCalendarSectionLabel: this.translate('kanbanGoogleCalendar', 'labels', this.scope),
+                hasAssignmentSection: !!(assignedUserHtml || teamsHtml),
+                hasAssignedUser: !!assignedUserHtml,
+                hasTeams: !!teamsHtml,
+                assignedUserHtml: assignedUserHtml,
+                teamsHtml: teamsHtml,
+                assignedUserLabel: this.translate('assignedUser', 'fields', this.scope),
+                teamsLabel: this.translate('teams', 'fields', this.scope),
             };
         },
     });

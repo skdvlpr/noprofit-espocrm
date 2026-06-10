@@ -63,5 +63,10 @@
         "route": "/GoogleIntegration/calendar/crm-events",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetCrmDateSourceEvents"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/entity-event-links/:entityType/:id",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetEntityEventLinks"
     }
 ]

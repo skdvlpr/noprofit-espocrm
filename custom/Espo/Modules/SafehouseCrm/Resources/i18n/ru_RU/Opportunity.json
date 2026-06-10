@@ -27,6 +27,12 @@
     "labels": {
         "Opportunity": "Гранты и Финансирование",
         "Create Opportunity": "Создать грант",
+        "kanbanShortPresentationDate": "Подача",
+        "kanbanShortCloseDate": "Закрытие",
+        "kanbanShortCreatedAt": "Создано",
+        "kanbanShortModifiedAt": "Изменено",
+        "kanbanShortProbability": "Вер. %",
+        "kanbanGoogleCalendar": "Google Calendar",
         "googleCalendarReminderNotice": "Можно сохранить дату гранта в Google Calendar с напоминаниями или без них. Для дедлайнов используйте дни/недели: например за 7 дней, 14 дней или 4 недели.",
         "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты по этому гранту."
     },

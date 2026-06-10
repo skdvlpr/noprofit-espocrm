@@ -267,11 +267,20 @@ body .list-kanban .item .safehouse-kanban-card .kanban-title-value a:hover {
 
 body .list-kanban .item .safehouse-kanban-card .kanban-card-hero {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  justify-content: flex-end;
+  width: 100%;
   margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid color-mix(in srgb, var(--sh-card-border) 75%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-hero-group {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-hero-emoji {
@@ -283,8 +292,9 @@ body .list-kanban .item .safehouse-kanban-card .kanban-hero-emoji {
 }
 
 body .list-kanban .item .safehouse-kanban-card .kanban-hero-amount {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+  text-align: right;
   font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -477,6 +487,145 @@ body .list-kanban .item .safehouse-kanban-card .kanban-date-value {
 body .list-kanban .item .safehouse-kanban-card .kanban-date-value-cell.is-muted,
 body .list-kanban .item .safehouse-kanban-card .kanban-date-label.is-muted {
   opacity: 0.9;
+}
+
+/* ── Google Calendar section (expands with row count) ── */
+
+body .list-kanban .item .safehouse-kanban-card .kanban-card-google {
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--sh-card-border) 70%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-section-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  min-height: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--sh-card-muted) !important;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-section-icon {
+  flex: 0 0 auto;
+  font-size: 0.625rem;
+  color: color-mix(in srgb, var(--sh-card-stage-accent) 50%, #34a853 50%);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  width: 100%;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chips > .kanban-google-chip:only-child {
+  grid-column: 1 / -1;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--sh-card-stage-accent) 30%, var(--sh-card-border) 70%);
+  background: color-mix(in srgb, var(--sh-card-stage-accent) 12%, transparent);
+  font-size: 0.6875rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--sh-card-text) !important;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chip:hover {
+  color: var(--sh-card-accent) !important;
+  border-color: color-mix(in srgb, var(--sh-card-accent) 45%, var(--sh-card-border) 55%);
+  background: color-mix(in srgb, var(--sh-card-stage-accent) 18%, transparent);
+  text-decoration: none;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chip.is-static {
+  cursor: default;
+  opacity: 0.88;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chip-emoji {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-google-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Assigned user / team (same grid rhythm as dates) ── */
+
+body .list-kanban .item .safehouse-kanban-card .kanban-card-assignment {
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--sh-card-border) 70%, transparent);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-grid {
+  width: 100%;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-icon {
+  flex: 0 0 auto;
+  width: 11px;
+  margin-right: 1px;
+  font-size: 0.5625rem;
+  line-height: 1;
+  text-align: center;
+  opacity: 0.78;
+  color: var(--sh-card-muted);
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-value {
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--sh-card-text) 88%, var(--sh-card-muted) 12%) !important;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-value a {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-value a:hover {
+  color: var(--sh-card-accent) !important;
+  text-decoration: underline;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-value .label.team-label {
+  display: inline-block;
+  margin: 0 0 0 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sh-card-border) 55%, transparent);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--sh-card-text) !important;
+}
+
+body .list-kanban .item .safehouse-kanban-card .kanban-assignment-value .label.team-label:first-child {
+  margin-left: 0;
 }
 
 /* Kanban row action menu (dropdown is outside card glass layer) */

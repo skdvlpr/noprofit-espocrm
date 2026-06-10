@@ -20,10 +20,12 @@
 
         {{#with amountItem}}
         <div class="kanban-card-hero">
-            {{#if ../heroEmoji}}
-            <span class="kanban-hero-emoji" aria-hidden="true">{{../heroEmoji}}</span>
-            {{/if}}
-            <div class="field kanban-hero-amount" data-name="{{name}}">{{{var key ../this}}}</div>
+            <div class="kanban-hero-group">
+                {{#if ../heroEmoji}}
+                <span class="kanban-hero-emoji" aria-hidden="true">{{../heroEmoji}}</span>
+                {{/if}}
+                <div class="field kanban-hero-amount" data-name="{{name}}">{{{var key ../this}}}</div>
+            </div>
         </div>
         {{/with}}
 
@@ -55,6 +57,66 @@
                 {{/each}}
             </div>
         </footer>
+        {{/if}}
+
+        {{#if hasGoogleCalendarSection}}
+        <section class="kanban-card-google" aria-label="{{googleCalendarSectionLabel}}">
+            <div class="kanban-google-section-head">
+                <span class="kanban-google-section-icon fas fa-calendar-check" aria-hidden="true"></span>
+                <span class="kanban-google-section-title">{{googleCalendarSectionLabel}}</span>
+            </div>
+            <div class="kanban-google-chips" role="list">
+                {{#each googleCalendarItems}}
+                {{#if htmlLink}}
+                <a
+                    href="{{htmlLink}}"
+                    class="kanban-google-chip"
+                    role="listitem"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="{{#if dateTooltip}}{{dateTooltip}}{{else}}{{label}}{{/if}}"
+                >
+                    {{#if emoji}}<span class="kanban-google-chip-emoji" aria-hidden="true">{{emoji}}</span>{{/if}}
+                    <span class="kanban-google-chip-label">{{label}}</span>
+                </a>
+                {{else}}
+                <span
+                    class="kanban-google-chip is-static"
+                    role="listitem"
+                    title="{{#if dateTooltip}}{{dateTooltip}}{{else}}{{label}}{{/if}}"
+                >
+                    {{#if emoji}}<span class="kanban-google-chip-emoji" aria-hidden="true">{{emoji}}</span>{{/if}}
+                    <span class="kanban-google-chip-label">{{label}}</span>
+                </span>
+                {{/if}}
+                {{/each}}
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if hasAssignmentSection}}
+        <section class="kanban-card-assignment" aria-label="Assignment">
+            <div class="kanban-dates-grid kanban-assignment-grid" role="presentation">
+                {{#if hasAssignedUser}}
+                <div class="kanban-date-label is-muted">
+                    <span class="kanban-assignment-icon fas fa-user" aria-hidden="true"></span>
+                    <span class="kanban-label-text">{{assignedUserLabel}}</span>
+                </div>
+                <div class="kanban-date-value-cell is-align-right is-muted kanban-assignment-value">
+                    {{{assignedUserHtml}}}
+                </div>
+                {{/if}}
+                {{#if hasTeams}}
+                <div class="kanban-date-label is-muted">
+                    <span class="kanban-assignment-icon fas fa-users" aria-hidden="true"></span>
+                    <span class="kanban-label-text">{{teamsLabel}}</span>
+                </div>
+                <div class="kanban-date-value-cell is-align-right is-muted kanban-assignment-value">
+                    {{{teamsHtml}}}
+                </div>
+                {{/if}}
+            </div>
+        </section>
         {{/if}}
     </div>
 </div>
