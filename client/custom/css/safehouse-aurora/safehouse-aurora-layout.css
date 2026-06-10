@@ -149,6 +149,22 @@ body #content #main > .row > .left-container + .list-container:not(:has(.list-ka
   z-index: 1;
 }
 
+/* Toolbar above table — column picker (Campi) dropdown must not sit under thead/cells */
+body #content #main > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .sticked-bar {
+  z-index: 3;
+}
+
+body #content #main .list-container:not(:has(.list-kanban)) .list-buttons-container .dropdown-menu {
+  z-index: 4;
+}
+
 /* Table lists: outer list-container owns the shell — no double glass on inner .list */
 body #content #main > .list-container:not(:has(.list-kanban)) > .list::before,
 body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list::before,
@@ -164,6 +180,50 @@ body #content #main .admin-content .table.table-admin-panel,
 body #content #main .admin-content table.table-panel {
   background-color: transparent !important;
   border: none !important;
+}
+
+/* list-container-panel: one outer glass shell — not per-child boxes from core light.css */
+body #content #main .list-container.list-container-panel > div {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Empty entity list — compact card, centered message (no tall void) */
+body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  width: 100%;
+}
+
+body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container {
+  margin-bottom: 0 !important;
+  min-height: 0 !important;
+  padding: var(--8px, 8px) var(--12px, 12px);
+  border-bottom: 1px solid var(--default-border-color);
+}
+
+body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data {
+  margin-top: 0 !important;
+  padding: var(--20px, 20px) var(--16px, 16px) var(--24px, 24px) !important;
+  text-align: center;
+  color: var(--text-muted-color, var(--text-gray-color));
+}
+
+body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data,
+body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data {
+  padding: var(--28px, 28px) var(--16px, 16px) !important;
 }
 
 body #content #main > .page-header {
