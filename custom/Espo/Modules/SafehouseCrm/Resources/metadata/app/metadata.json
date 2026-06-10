@@ -1,0 +1,5 @@
+{
+    "additionalBuilderClassNameList": [
+        "Espo\\Modules\\SafehouseCrm\\Core\\Utils\\Metadata\\AdditionalBuilder\\QuickViewDefaultNavigation"
+    ]
+}
