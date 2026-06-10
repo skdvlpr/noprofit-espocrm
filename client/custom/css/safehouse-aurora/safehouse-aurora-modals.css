@@ -34,15 +34,70 @@ body[data-is-dark='true'] {
   --aurora-modal-side-bg: rgba(255, 255, 255, 0.02);
 }
 
+/*
+ * ── Per-modal transparency split ──
+ * Quick view (cssName detail-modal): transparent glass — page shows through.
+ * Quick edit (cssName edit-modal): keeps translucency but with heavy blur,
+ * so the stack behind is hidden.
+ * Container ids are generated as `{cssName}-container-{rand}` (Espo modal.js).
+ */
+body[data-is-dark='false'] .modal-container[id^='detail-modal-container'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(248, 250, 252, 0.28) 52%,
+    rgba(255, 255, 255, 0.34) 100%
+  );
+  --aurora-modal-drawer-blur: blur(22px) saturate(1.12);
+  --aurora-modal-drawer-border: rgba(255, 255, 255, 0.55);
+  --aurora-modal-toolbar-bg: rgba(255, 255, 255, 0.26);
+}
+
+body[data-is-dark='true'] .modal-container[id^='detail-modal-container'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(28, 28, 34, 0.66) 0%,
+    rgba(22, 22, 26, 0.58) 100%
+  );
+  --aurora-modal-drawer-blur: blur(16px) saturate(1.06);
+}
+
+body[data-is-dark='false'] .modal-container[id^='edit-modal-container'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 250, 252, 0.82) 52%,
+    rgba(255, 255, 255, 0.86) 100%
+  );
+  --aurora-modal-drawer-blur: blur(48px) saturate(1.16);
+  --aurora-modal-toolbar-bg: rgba(255, 255, 255, 0.6);
+}
+
+body[data-is-dark='true'] .modal-container[id^='edit-modal-container'] {
+  --aurora-modal-drawer-bg: linear-gradient(
+    168deg,
+    rgba(32, 32, 38, 0.94) 0%,
+    rgba(24, 24, 28, 0.9) 100%
+  );
+  --aurora-modal-drawer-blur: blur(40px) saturate(1.08);
+}
+
 /* ── Backdrop ── */
-body:has(.modal.dialog-record.in) .modal-backdrop.in {
-  background-color: rgba(15, 23, 42, 0.28) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(1.04) !important;
-  backdrop-filter: blur(8px) saturate(1.04) !important;
+body:has(.modal-container[id^='detail-modal-container'] .modal.dialog-record.in) .modal-backdrop.in {
+  background-color: rgba(15, 23, 42, 0.2) !important;
+  -webkit-backdrop-filter: blur(5px) saturate(1.04) !important;
+  backdrop-filter: blur(5px) saturate(1.04) !important;
+}
+
+/* Edit on top — stronger backdrop blur hides the quick view stack behind */
+body:has(.modal-container[id^='edit-modal-container'] .modal.dialog-record.in) .modal-backdrop.in {
+  background-color: rgba(15, 23, 42, 0.34) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.06) !important;
+  backdrop-filter: blur(16px) saturate(1.06) !important;
 }
 
 body[data-is-dark='true']:has(.modal.dialog-record.in) .modal-backdrop.in {
-  background-color: rgba(0, 0, 0, 0.52) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 /* ── Drawer shell ── */
@@ -152,6 +207,31 @@ body .modal.dialog-record .modal-body .panel.panel-default .panel-body-form {
   padding-top: 0;
 }
 
+/* ── Section dividers between stacked panels ── */
+body .modal.dialog-record .modal-body .left > .middle > .panel + .panel,
+body .modal.dialog-record .modal-body .left > .bottom > .panel,
+body .modal.dialog-record .modal-body .record > div > .panel + .panel,
+body .modal.dialog-record .modal-body .edit > div > .panel + .panel {
+  margin-top: 18px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid var(--aurora-modal-divider) !important;
+  border-radius: 0 !important;
+}
+
+/* ── Even field rhythm (keeps native column grid) ── */
+body .modal.dialog-record .modal-body .cell.form-group {
+  margin-bottom: 14px !important;
+  padding-top: 0;
+}
+
+body .modal.dialog-record .modal-body .row {
+  margin-bottom: 0 !important;
+}
+
+body .modal.dialog-record .modal-body .cell.form-group > .field {
+  min-height: 22px;
+}
+
 /* Side column — soft inset strip, not a second card */
 body .modal.dialog-record .modal-body .record-grid-wide .side {
   background: var(--aurora-modal-side-bg) !important;
@@ -181,6 +261,7 @@ body .modal.dialog-record label.control-label {
   color: var(--text-muted-color) !important;
   font-size: 0.8125rem;
   font-weight: 500;
+  margin-bottom: 4px;
 }
 
 body .modal.dialog-record .cell .field {
