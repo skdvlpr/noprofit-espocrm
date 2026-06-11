@@ -69,6 +69,9 @@
   --aurora-glass-blur: blur(14px) saturate(1.08);
   --aurora-glass-border: rgba(255, 255, 255, 0.12);
   --aurora-glass-shadow: 0 10px 36px -14px rgba(0, 0, 0, 0.38);
+  --aurora-confirm-bg: rgba(28, 28, 34, 0.78);
+  --aurora-confirm-blur: blur(18px) saturate(1.08);
+  --aurora-confirm-radius: 14px;
   --aurora-list-gutter: clamp(10px, 1.15vw, 16px);
   --aurora-list-bg: rgba(20, 20, 26, 0.42);
   --aurora-list-border: rgba(255, 255, 255, 0.12);
@@ -325,11 +328,23 @@ body .modal.dialog-confirm .modal-dialog {
 }
 
 body .modal.dialog-confirm .modal-content {
-  border-radius: 12px !important;
-  border: 1px solid var(--modal-border-color) !important;
-  border-top-width: 1px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42) !important;
+  border-radius: var(--aurora-confirm-radius) !important;
+  overflow: hidden !important;
+  background: var(--aurora-confirm-bg) !important;
+  -webkit-backdrop-filter: var(--aurora-confirm-blur);
+  backdrop-filter: var(--aurora-confirm-blur);
+  border: 1px solid var(--aurora-glass-border) !important;
+  box-shadow: var(--aurora-glass-shadow) !important;
   width: 100%;
+}
+
+body .modal.dialog-confirm .modal-content .modal-header,
+body .modal.dialog-confirm .modal-content .modal-body,
+body .modal.dialog-confirm .modal-content .modal-footer {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-radius: 0 !important;
 }
 
 body .modal.dialog-confirm .modal-body {
@@ -344,12 +359,22 @@ body .modal.dialog-confirm .modal-body .confirm-message {
 }
 
 body .modal.dialog-confirm .modal-footer {
-  border-top: 1px solid var(--modal-border-color) !important;
+  border-top: 1px solid var(--aurora-glass-border) !important;
   padding: 12px 16px 14px !important;
+}
+
+body .modal.dialog-confirm .modal-footer .btn {
+  border-radius: 10px !important;
 }
 
 body .modal-backdrop.backdrop-confirm {
   z-index: 1295 !important;
+}
+
+body .modal-backdrop.backdrop-confirm.in {
+  background-color: var(--modal-backdrop-bg) !important;
+  -webkit-backdrop-filter: var(--modal-backdrop-filter) !important;
+  backdrop-filter: var(--modal-backdrop-filter) !important;
 }
 
 /* Dropdowns — opaque elevated panels (not salmon link color) */
@@ -496,6 +521,8 @@ body.theme-SafehouseAurora #content #main .list-container > .list > .stick-sub {
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --aurora-glass-bg: rgba(40, 40, 46, 0.92);
+    --aurora-confirm-bg: #1c1c21;
+    --aurora-confirm-blur: none;
     --panel-default-bg: #1c1c21;
     --modal-content-bg: #1c1c21;
     --navbar-inverse-bg: #3f3f46;
