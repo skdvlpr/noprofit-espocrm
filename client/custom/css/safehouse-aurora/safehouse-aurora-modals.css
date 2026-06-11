@@ -258,10 +258,21 @@ body .modal.dialog-record .modal-body .record-grid-wide .side > .panel {
 body .modal.dialog-record .cell label,
 body .modal.dialog-record .cell .field-label,
 body .modal.dialog-record label.control-label {
-  color: var(--text-muted-color) !important;
   font-size: 0.8125rem;
   font-weight: 500;
   margin-bottom: 4px;
+}
+
+body[data-is-dark='false'] .modal.dialog-record .cell label,
+body[data-is-dark='false'] .modal.dialog-record .cell .field-label,
+body[data-is-dark='false'] .modal.dialog-record label.control-label {
+  color: var(--text-muted-color) !important;
+}
+
+body[data-is-dark='true'] .modal.dialog-record .cell label,
+body[data-is-dark='true'] .modal.dialog-record .cell .field-label,
+body[data-is-dark='true'] .modal.dialog-record label.control-label {
+  color: var(--link-color) !important;
 }
 
 body .modal.dialog-record .cell .field {

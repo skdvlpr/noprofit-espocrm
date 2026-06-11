@@ -223,6 +223,12 @@ body .header-breadcrumbs a.active {
   color: #ef4444;
 }
 
+/* Detail/edit field names — brand red (dark theme) */
+body #content label.control-label,
+body #content .cell.form-group > label.control-label {
+  color: var(--link-color) !important;
+}
+
 /* Safehouse red accent — buttons, links, tabs, focus rings */
 body a:not(.btn):not(.nav > li > a),
 body .link {
