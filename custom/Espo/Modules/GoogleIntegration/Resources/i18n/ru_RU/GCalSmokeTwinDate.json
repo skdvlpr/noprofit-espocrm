@@ -22,6 +22,7 @@
         "googleCalendarTemplateVariableSearch": "Поиск полей",
         "googleCalendarCurrentRecordFields": "Поля текущей записи",
         "googleCalendarRelatedRecordFields": "Поля связанных записей",
+        "googleCalendarExternalRecordFields": "Внешние поля ({relation})",
         "googleCalendarNoVariables": "Переменные не найдены",
         "googleCalendarDateMain": "Дата начала",
         "googleCalendarDateEnd": "Дата окончания",

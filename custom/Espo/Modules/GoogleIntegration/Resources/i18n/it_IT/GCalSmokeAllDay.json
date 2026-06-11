@@ -22,6 +22,7 @@
         "googleCalendarTemplateVariableSearch": "Cerca campi",
         "googleCalendarCurrentRecordFields": "Campi del record corrente",
         "googleCalendarRelatedRecordFields": "Campi dei record collegati",
+        "googleCalendarExternalRecordFields": "Campi esterni ({relation})",
         "googleCalendarNoVariables": "Nessun campo corrisponde alla ricerca.",
         "googleCalendarDateMain": "Data inizio",
         "googleCalendarDateEnd": "Data fine",
