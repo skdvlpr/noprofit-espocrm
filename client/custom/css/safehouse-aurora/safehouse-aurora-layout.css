@@ -17,6 +17,22 @@ body[data-navbar='side'].minimized.side-menu-opened #navbar {
   z-index: 2160 !important;
 }
 
+/*
+ * Quick view / edit drawer above side-navbar strip (#navbar z-index 1200).
+ * Espo marks older modals .modal-container.overlaid — they must sit BELOW the active one.
+ */
+body .modal.dialog-record.in {
+  z-index: 1250 !important;
+}
+
+body .modal-container:not(.overlaid) .modal.dialog-record.in {
+  z-index: 1285 !important;
+}
+
+body .modal-container.overlaid .modal.dialog-record.in {
+  z-index: 1250 !important;
+}
+
 body #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
   -webkit-backdrop-filter: var(--aurora-glass-blur);
