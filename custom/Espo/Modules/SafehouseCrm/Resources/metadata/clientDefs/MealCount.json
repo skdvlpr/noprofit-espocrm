@@ -3,6 +3,6 @@
     "recordViews": {
         "list": "custom:views/record/list-inline-edit"
     },
-    "color": "#f1c40f",
+    "color": "#dd7e4a",
     "iconClass": "fas fa-utensils"
 }

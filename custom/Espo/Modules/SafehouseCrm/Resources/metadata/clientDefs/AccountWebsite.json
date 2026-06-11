@@ -1,5 +1,5 @@
 {
-    "color": "#f1c40f",
+    "color": "#d9a13f",
     "iconClass": "fas fa-globe",
     "controller": "controllers/record",
     "recordViews": {

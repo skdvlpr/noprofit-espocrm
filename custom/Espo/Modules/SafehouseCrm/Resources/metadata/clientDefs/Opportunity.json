@@ -3,6 +3,6 @@
         "list": "custom:views/record/list-inline-edit",
         "kanban": "safehouse-crm:views/opportunity/record/kanban"
     },
-    "color": "#dcedc8",
+    "color": "#54b874",
     "iconClass": "fas fa-hand-holding-usd"
 }

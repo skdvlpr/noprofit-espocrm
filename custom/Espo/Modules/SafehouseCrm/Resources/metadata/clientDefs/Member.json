@@ -3,6 +3,6 @@
     "recordViews": {
         "list": "custom:views/record/list-inline-edit"
     },
-    "color": "#2ecc71",
+    "color": "#41b39d",
     "iconClass": "fas fa-id-card"
 }
