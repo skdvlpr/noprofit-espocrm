@@ -460,6 +460,11 @@ $ok('Opportunity Google field migration script exists', is_file(__DIR__ . '/migr
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
+$ok(
+    'EventPusher omits date label for Meeting/Call period titles (U7)',
+    str_contains($eventPusherSource, 'resolveGoogleTitleLabel')
+        && str_contains($eventPusherSource, "in_array(\$entityType, ['Meeting', 'Call']")
+);
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
 ) ?: '';
@@ -607,8 +612,8 @@ try {
     $defaulted = $getSelected->invoke($eventPusherForDates, $emptyListEntity, $sources);
 
     $ok(
-        'getSelectedDateSourceTypes defaults to all allowed when list empty',
-        $defaulted === ['main', 'endDate'],
+        'getSelectedDateSourceTypes returns empty when list empty (strict U7)',
+        $defaulted === [],
         'got=' . implode(',', $defaulted)
     );
 
@@ -622,8 +627,8 @@ try {
     $defaultedUnset = $getSelected->invoke($eventPusherForDates, $unsetListEntity, $sources);
 
     $ok(
-        'getSelectedDateSourceTypes defaults when list unset',
-        $defaultedUnset === ['main', 'endDate'],
+        'getSelectedDateSourceTypes returns empty when list unset (strict U7)',
+        $defaultedUnset === [],
         'got=' . implode(',', $defaultedUnset)
     );
 
@@ -648,8 +653,8 @@ try {
     $built = $buildEvents->invoke($eventPusherForDates, $emptyListEntity, $sources);
 
     $ok(
-        'buildCalendarDateSourceGoogleEvents builds events when date list empty',
-        count($built) === 2,
+        'buildCalendarDateSourceGoogleEvents builds no events when date list empty (strict U7)',
+        count($built) === 0,
         'count=' . count($built)
     );
 } catch (Throwable $e) {

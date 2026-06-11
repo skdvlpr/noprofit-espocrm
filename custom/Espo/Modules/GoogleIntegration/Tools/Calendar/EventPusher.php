@@ -373,7 +373,7 @@ class EventPusher
         $selected = $entity->get('googleCalendarDateSourceList');
 
         if (!is_array($selected) || $selected === []) {
-            return $allowed;
+            return [];
         }
 
         return array_values(array_unique(array_filter(
@@ -681,13 +681,33 @@ class EventPusher
     {
         $name = trim((string) ($entity->get('name') ?? ''));
         $base = $name !== '' ? $name : $entity->getEntityType() . ' ' . $entity->getId();
-        $label = trim((string) ($source['label'] ?? ''));
-
-        if ($label === '') {
-            $label = $this->resolveSourceLabel($entity->getEntityType(), $sourceDateType);
-        }
+        $label = $this->resolveGoogleTitleLabel($entity->getEntityType(), $sourceDateType, $source);
 
         return GoogleCalendarEventTitle::format($base, $label);
+    }
+
+    /**
+     * Meeting/Call period (dateStart–dateEnd): Google title is record name only (U7).
+     *
+     * @param ?array<string, mixed> $source
+     */
+    private function resolveGoogleTitleLabel(string $entityType, string $sourceDateType, ?array $source): string
+    {
+        if (in_array($entityType, ['Meeting', 'Call'], true)) {
+            $endField = trim((string) ($source['endDateField'] ?? ''));
+
+            if ($endField !== '') {
+                return '';
+            }
+        }
+
+        $label = trim((string) ($source['label'] ?? ''));
+
+        if ($label !== '') {
+            return $label;
+        }
+
+        return $this->resolveSourceLabel($entityType, $sourceDateType);
     }
 
     private function resolveSourceLabel(string $entityType, string $sourceDateType): string

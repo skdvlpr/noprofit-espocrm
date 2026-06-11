@@ -1,17 +1,20 @@
 <?php
 
 /**
- * Cleanup script for E2E Google Calendar test records.
+ * Cleanup script for Google Calendar test records (T- prefix + legacy tags).
  *
- * Finds all CRM records whose name starts with the given tag (or "E2E_" by default),
+ * Finds CRM records whose name starts with the given tag (or "T-" by default),
  * removes their Google Calendar events via EventRemover, then soft-deletes from CRM.
  *
  * Usage:
- *   ddev exec php bin/cleanup-gcal-e2e.php                   # cleans ALL E2E_* records
- *   ddev exec php bin/cleanup-gcal-e2e.php E2E_20260526_075603  # cleans only that tag
+ *   ddev exec php bin/cleanup-gcal-e2e.php
+ *   ddev exec php bin/cleanup-gcal-e2e.php E2E_20260526_075603
+ *   ddev exec php bin/cleanup-all-gcal-test-data.php   # full junk purge
  */
 
 declare(strict_types=1);
+
+require __DIR__ . '/lib/GcalTestFixtures.php';
 
 include __DIR__ . '/../bootstrap.php';
 
@@ -23,7 +26,7 @@ use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\EventRemover;
 use Espo\ORM\EntityManager;
 
-$tagPrefix = $argv[1] ?? 'E2E_';
+$tagPrefix = $argv[1] ?? GcalTestFixtures::TEST_PREFIX;
 
 $app = new Application();
 $container = $app->getContainer();
@@ -67,11 +70,8 @@ foreach ($entityTypes as $entityType) {
     $scopeDefs = $metadata->get(['scopes', $entityType]) ?? [];
     if (!($scopeDefs['entity'] ?? false)) continue;
 
-    $nameField = 'name';
+    $nameField = GcalTestFixtures::nameField($entityType);
     $isPerson = in_array($entityType, ['Member', 'VolunteerEmployee', 'Contact'], true);
-    if ($isPerson) {
-        $nameField = 'lastName';
-    }
 
     $records = $em->getRDBRepository($entityType)
         ->where([

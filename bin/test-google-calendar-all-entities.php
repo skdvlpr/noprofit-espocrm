@@ -1,14 +1,19 @@
 <?php
 
 /**
- * End-to-end Google Calendar checks for every active CalendarDateSource target entity.
- * Creates smoke records (dates +2 days), verifies GET/PUT, link idempotency, layouts; cleans up.
+ * E2E Google Calendar checks for production CRM entities (Meeting, Call, Member, …).
+ * Creates realistic T- prefixed records with explicit date source list, verifies push
+ * idempotency + REST; cleans up CRM + Google.
+ *
+ * GCalSmoke* custom entities: bin/test-google-calendar-smoke-entities.php
  *
  * Usage:
  *   ddev exec php bin/test-google-calendar-all-entities.php
  */
 
 declare(strict_types=1);
+
+require __DIR__ . '/lib/GcalTestFixtures.php';
 
 include __DIR__ . '/../bootstrap.php';
 
@@ -18,10 +23,10 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Json;
 use Espo\Core\Utils\Metadata;
-use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\EventRemover;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\Tools\Layout\LayoutProvider;
@@ -69,7 +74,8 @@ $countGooglePanels = static function (mixed $layout): int {
     return $n;
 };
 
-$tag = 'SmokeGCal' . gmdate('YmdHis');
+$suffix = GcalTestFixtures::makeSuffix();
+$tag = GcalTestFixtures::TEST_PREFIX . $suffix;
 $testIds = [];
 $admin = $em->getRDBRepository(User::ENTITY_TYPE)
     ->where(['userName' => 'admin', 'deleted' => false])
@@ -86,42 +92,37 @@ $applicationUser->setUser($admin);
 
 $dateSourceProvider = $injectableFactory->create(DateSourceProvider::class);
 $eventPusher = $injectableFactory->create(EventPusher::class);
+$eventRemover = $injectableFactory->create(EventRemover::class);
 $layoutProvider = $injectableFactory->create(LayoutProvider::class);
 
-$entityTypes = [];
+/** @var array<string, list<array{sourceDateType: string, dateField: string, endDateField?: mixed, allDay?: bool}>> $sourcesByEntity */
+$sourcesByEntity = [];
 
 foreach ($em->getRDBRepository('CalendarDateSource')
-    ->select(['targetEntityType', 'sourceDateType', 'dateField'])
     ->where(['isActive' => true, 'deleted' => false])
-    ->order('targetEntityType')
+    ->order('sortOrder')
     ->find() as $row) {
-    $type = $row->get('targetEntityType');
+    $type = (string) $row->get('targetEntityType');
 
-    if (!is_string($type) || $type === '') {
+    if ($type === '') {
         continue;
     }
 
-    $entityTypes[$type]['sources'][] = [
+    $sourcesByEntity[$type][] = [
         'sourceDateType' => (string) ($row->get('sourceDateType') ?? 'main'),
         'dateField' => (string) ($row->get('dateField') ?? ''),
+        'endDateField' => $row->get('endDateField'),
+        'allDay' => (bool) $row->get('allDay'),
     ];
 }
 
 if (!empty($_SERVER['GCAL_SMOKE_TEST_ONLY'])) {
-    $entityTypes = array_filter(
-        $entityTypes,
-        static fn (string $type): bool => str_starts_with($type, 'GCalSmoke'),
-        ARRAY_FILTER_USE_KEY
-    );
-
-    if ($entityTypes === []) {
-        fwrite(STDERR, "FAIL: no GCalSmoke* entities with active CalendarDateSource.\n");
-        fwrite(STDERR, "Run: ddev exec php rebuild.php && ddev exec php bin/provision-gcal-smoke-entities.php\n");
-        exit(1);
-    }
+    $sourcesByEntity = GcalTestFixtures::filterSourcesByScope($sourcesByEntity, 'smoke');
+} else {
+    $sourcesByEntity = GcalTestFixtures::filterSourcesByScope($sourcesByEntity, 'production');
 }
 
-ksort($entityTypes);
+ksort($sourcesByEntity);
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');
 $apiUser = $em->getRDBRepository(User::ENTITY_TYPE)
@@ -143,21 +144,21 @@ if ($apiUser !== null && is_string($apiUser->get('apiKey')) && $apiUser->get('ap
     ]);
 }
 
-$eventDate = (new DateTimeImmutable('+2 days', new DateTimeZone('UTC')))->format('Y-m-d');
-$eventDateTime = (new DateTimeImmutable('+2 days 10:00:00', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-$eventDateTimeEnd = (new DateTimeImmutable('+2 days 11:00:00', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
+$baseDate = new DateTimeImmutable('+2 days', new DateTimeZone('UTC'));
+$eventDate = $baseDate->format('Y-m-d');
+$eventDateTime = $baseDate->modify('+10 hours')->format('Y-m-d H:i:s');
+$eventDateTimeEnd = $baseDate->modify('+11 hours')->format('Y-m-d H:i:s');
 
 $title = !empty($_SERVER['GCAL_SMOKE_TEST_ONLY'])
     ? 'Google Calendar smoke entities test (GCalSmoke*)'
-    : 'Google Calendar all-entities test';
+    : 'Google Calendar all-entities test (production)';
 
 echo "=== {$title} ===\n";
-echo "Tag: $tag | event date: $eventDate | admin: {$admin->getId()}\n\n";
+echo "Tag: {$tag} | event date: {$eventDate} | admin: {$admin->getId()}\n\n";
 
-foreach ($entityTypes as $entityType => $info) {
-    echo "[$entityType]\n";
+foreach ($sourcesByEntity as $entityType => $sources) {
+    echo "[{$entityType}]\n";
 
-    $sources = $info['sources'];
     $sourceDateTypes = array_values(array_unique(array_map(
         static fn (array $s): string => $s['sourceDateType'],
         $sources
@@ -166,69 +167,62 @@ foreach ($entityTypes as $entityType => $info) {
     $layoutJson = $layoutProvider->get($entityType, 'detail');
     $layout = $layoutJson !== null ? Json::decode($layoutJson) : [];
     $ok(
-        "$entityType layout detail has one GoogleCalendar panel",
+        "{$entityType} layout detail has one GoogleCalendar panel",
         $countGooglePanels($layout) === 1,
         'panels=' . $countGooglePanels($layout)
     );
 
-    $record = createSmokeRecord(
-        $em,
-        $entityType,
-        $tag,
-        $eventDate,
-        $eventDateTime,
-        $eventDateTimeEnd,
-        $sources,
-        $admin->getId()
-    );
+    $dayOffset = GcalTestFixtures::dayOffset($entityType);
+    $entityBaseDate = $baseDate->modify("+{$dayOffset} days");
+
+    $record = GcalTestFixtures::createRecord($em, $entityType, [
+        'suffix' => $suffix,
+        'baseDate' => $entityBaseDate,
+        'adminId' => $admin->getId(),
+    ], $sources);
 
     if ($record === null) {
-        $ok("$entityType create smoke record", false, 'skipped (could not create)');
+        $ok("{$entityType} create T- record", false, 'skipped (could not create)');
         echo "\n";
         continue;
     }
 
     $testIds[$entityType] = $record->getId();
-    $ok("$entityType create smoke record", true, 'id=' . $record->getId());
-
-    $linkCount = countLinks($em, $entityType, $record->getId(), $admin->getId());
-    $ok("$entityType initial GoogleCalendarEventLink count", $linkCount >= 0, "links=$linkCount");
+    $ok("{$entityType} create T- record", true, 'id=' . $record->getId());
 
     $record->set([
         'saveToGoogleCalendar' => true,
         'googleCalendarDateSourceList' => $sourceDateTypes,
-        'googleCalendarEventSettings' => buildEventSettings($sourceDateTypes),
+        'googleCalendarEventSettings' => GcalTestFixtures::buildEventSettings($sourceDateTypes),
     ]);
-    fillDateFields($record, $sources, $eventDate, $eventDateTime, $eventDateTimeEnd);
+    GcalTestFixtures::fillDateFields($record, $sources, $eventDate, $eventDateTime, $eventDateTimeEnd);
 
     try {
         $em->saveEntity($record);
         $eventPusher->pushIfRequested($record, $admin);
         $eventPusher->pushIfRequested($record, $admin);
     } catch (Throwable $e) {
-        $ok("$entityType double push (EventPusher as admin)", false, $e->getMessage());
+        $ok("{$entityType} double push (EventPusher as admin)", false, $e->getMessage());
         echo "\n";
         continue;
     }
 
-    $ok("$entityType double push (EventPusher as admin)", true);
+    $ok("{$entityType} double push (EventPusher as admin)", true);
 
     $record = $em->getEntityById($entityType, $record->getId()) ?? $record;
     $linkCountAfter = countLinks($em, $entityType, $record->getId(), $admin->getId());
-    $expectedMaxLinks = max(1, count($sourceDateTypes));
+    $expectedLinks = count($sourceDateTypes);
     $ok(
-        "$entityType link count stable after double save",
-        $linkCountAfter <= $expectedMaxLinks * 2,
-        "links=$linkCountAfter sources=" . count($sourceDateTypes)
+        "{$entityType} link count matches selected date sources",
+        $linkCountAfter === $expectedLinks,
+        "links={$linkCountAfter} expected={$expectedLinks}"
     );
 
-    if ($record->get('saveToGoogleCalendar')) {
-        $ok(
-            "$entityType created GoogleCalendarEventLink when push enabled",
-            $linkCountAfter >= 1,
-            "links=$linkCountAfter (admin Google OAuth must be connected)"
-        );
-    }
+    $ok(
+        "{$entityType} created GoogleCalendarEventLink when push enabled",
+        $linkCountAfter >= 1,
+        "links={$linkCountAfter} (admin Google OAuth must be connected)"
+    );
 
     $perSource = [];
 
@@ -257,9 +251,9 @@ foreach ($entityTypes as $entityType => $info) {
         }
 
         $ok(
-            "$entityType at most one link per source $sourceDateType",
+            "{$entityType} at most one link per source {$sourceDateType}",
             $dupe <= 1,
-            "canonical=$canonical count=$dupe"
+            "canonical={$canonical} count={$dupe}"
         );
     }
 
@@ -271,13 +265,13 @@ foreach ($entityTypes as $entityType => $info) {
 
         if ($restCode === 403 && ($entityType === 'Campaign' || str_starts_with($entityType, 'GCalSmoke'))) {
             $ok(
-                "$entityType GET via REST (smoke_api_catalog)",
+                "{$entityType} GET via REST (smoke_api_catalog)",
                 true,
                 'skipped: API user lacks read ACL (run bin/setup-roles.php for GCalSmoke*)'
             );
         } else {
             $ok(
-                "$entityType GET via REST → 200",
+                "{$entityType} GET via REST → 200",
                 $restCode === 200,
                 'code=' . $restCode . ' ' . $rGet->getHeaderLine('X-Status-Reason')
             );
@@ -287,201 +281,86 @@ foreach ($entityTypes as $entityType => $info) {
     echo "\n";
 }
 
-echo "Cleanup\n";
+echo "Strict selection (empty date list → no Google events)\n";
+
+try {
+    $strictEntity = GcalTestFixtures::createRecord($em, 'Meeting', [
+        'suffix' => $suffix . 'strict',
+        'baseDate' => $baseDate,
+        'adminId' => $admin->getId(),
+        'variant' => 'strict',
+    ], $sourcesByEntity['Meeting'] ?? []);
+
+    if ($strictEntity !== null) {
+        $strictEntity->set([
+            'saveToGoogleCalendar' => true,
+            'googleCalendarDateSourceList' => [],
+            'googleCalendarEventSettings' => [],
+        ]);
+
+        $getSelected = new ReflectionMethod($eventPusher, 'getSelectedDateSourceTypes');
+        $getSelected->setAccessible(true);
+        $selected = $getSelected->invoke($eventPusher, $strictEntity, $sourcesByEntity['Meeting'] ?? []);
+        $ok('empty googleCalendarDateSourceList yields no selected types', $selected === [], 'got=' . implode(',', $selected));
+
+        $buildEvents = new ReflectionMethod($eventPusher, 'buildCalendarDateSourceGoogleEvents');
+        $buildEvents->setAccessible(true);
+        $built = $buildEvents->invoke($eventPusher, $strictEntity, $sourcesByEntity['Meeting'] ?? []);
+        $ok('empty date list builds zero Google events', count($built) === 0, 'count=' . count($built));
+
+        $testIds['Meeting_strict'] = $strictEntity->getId();
+    } else {
+        $ok('strict selection Meeting create', false, 'could not create');
+    }
+} catch (Throwable $e) {
+    $ok('strict selection smoke', false, $e->getMessage());
+}
+
+echo "\nCleanup (CRM + Google)\n";
+
+$pdo = $em->getPDO();
 
 foreach ($testIds as $entityType => $id) {
+    if ($entityType === 'Meeting_strict') {
+        $entityType = 'Meeting';
+    }
+
     try {
         $entity = $em->getEntityById($entityType, $id);
 
-        if ($entity !== null) {
-            $em->removeEntity($entity);
-        }
-
-        $ok("$entityType cleanup record $id", true);
-    } catch (Throwable $e) {
-        $ok("$entityType cleanup record $id", false, $e->getMessage());
-    }
-}
-
-echo "\n=== " . ($fail === 0 ? 'ALL PASS' : "$fail FAILURE(S)") . " ===\n";
-exit($fail === 0 ? 0 : 1);
-
-/**
- * @param array<int, array{sourceDateType: string, dateField: string}> $sources
- */
-function createSmokeRecord(
-    EntityManager $em,
-    string $entityType,
-    string $tag,
-    string $eventDate,
-    string $eventDateTime,
-    string $eventDateTimeEnd,
-    array $sources,
-    ?string $assignedUserId
-): ?Entity {
-    $entity = $em->getNewEntity($entityType);
-    $suffix = substr(Util::generateId(), 0, 6);
-
-    switch ($entityType) {
-        case 'Account':
-            $entity->set([
-                'name' => "$tag Account $suffix",
-                'cDataFirmaContratto' => $eventDate,
-            ]);
-            break;
-
-        case 'Member':
-            $entity->set([
-                'firstName' => 'Smoke',
-                'lastName' => "GCal $suffix",
-                'birthDate' => $eventDate,
-            ]);
-            break;
-
-        case 'VolunteerEmployee':
-            $entity->set([
-                'firstName' => 'Smoke',
-                'lastName' => "Vol $suffix",
-                'type' => 'Volunteer',
-                'startDate' => $eventDate,
-                'endDate' => $eventDate,
-            ]);
-            break;
-
-        case 'Opportunity':
-            $entity->set([
-                'name' => "$tag Opportunity $suffix",
-                'presentationDate' => $eventDate,
-                'closeDate' => $eventDate,
-            ]);
-            break;
-
-        case 'Meeting':
-        case 'Call':
-            $entity->set([
-                'name' => "$tag $entityType $suffix",
-                'status' => $entityType === 'Call' ? 'Planned' : 'Planned',
-                'dateStart' => $eventDateTime,
-                'dateEnd' => $eventDateTimeEnd,
-                'assignedUserId' => $assignedUserId,
-            ]);
-
-            if ($entityType === 'Call') {
-                $entity->set('direction', 'Outbound');
-            }
-
-            break;
-
-        case 'Task':
-            $entity->set([
-                'name' => "$tag Task $suffix",
-                'status' => 'Not Started',
-                'dateEnd' => $eventDateTime,
-                'dateEndDate' => $eventDate,
-                'assignedUserId' => $assignedUserId,
-            ]);
-            break;
-
-        case 'Campaign':
-            $entity->set([
-                'name' => "$tag Campaign $suffix",
-                'status' => 'Active',
-                'startDate' => $eventDate,
-            ]);
-            break;
-
-        case 'GCalSmokeAllDay':
-            $entity->set([
-                'name' => "$tag AllDay $suffix",
-                'eventDate' => $eventDate,
-                'assignedUserId' => $assignedUserId,
-            ]);
-            break;
-
-        case 'GCalSmokeDateTime':
-            $entity->set([
-                'name' => "$tag DateTime $suffix",
-                'dateStart' => $eventDateTime,
-                'dateEnd' => $eventDateTimeEnd,
-                'assignedUserId' => $assignedUserId,
-            ]);
-            break;
-
-        case 'GCalSmokeTwinDate':
-            $entity->set([
-                'name' => "$tag Twin $suffix",
-                'primaryDate' => $eventDate,
-                'reviewDate' => (new DateTimeImmutable($eventDate))->modify('+1 day')->format('Y-m-d'),
-                'assignedUserId' => $assignedUserId,
-            ]);
-            break;
-
-        default:
-            $entity->set('name', "$tag $entityType $suffix");
-            fillDateFields($entity, $sources, $eventDate, $eventDateTime, $eventDateTimeEnd);
-    }
-
-    try {
-        $em->saveEntity($entity);
-
-        return $entity;
-    } catch (Throwable) {
-        return null;
-    }
-}
-
-/**
- * @param array<int, array{sourceDateType: string, dateField: string}> $sources
- */
-function fillDateFields(
-    Entity $entity,
-    array $sources,
-    string $eventDate,
-    string $eventDateTime,
-    string $eventDateTimeEnd
-): void {
-    foreach ($sources as $source) {
-        $field = $source['dateField'] ?? '';
-
-        if ($field === '') {
+        if ($entity === null) {
+            $ok("{$entityType} cleanup record {$id}", true, 'already gone');
             continue;
         }
 
-        $type = $entity->getAttributeType($field);
+        $linkStmt = $pdo->prepare(
+            'SELECT id FROM google_calendar_event_link
+             WHERE source_entity_type = ? AND source_entity_id = ? AND deleted = 0'
+        );
+        $linkStmt->execute([$entityType, $id]);
 
-        if ($type === 'date') {
-            $entity->set($field, $eventDate);
-        } elseif ($type === 'datetime' || in_array($field, ['dateStart', 'dateEnd'], true)) {
-            $entity->set($field, str_contains($field, 'End') || $field === 'dateEnd' ? $eventDateTimeEnd : $eventDateTime);
-        } else {
-            $entity->set($field, $eventDate);
+        foreach ($linkStmt->fetchAll(PDO::FETCH_COLUMN) as $linkId) {
+            $linkEntity = $em->getEntityById('GoogleCalendarEventLink', $linkId);
+
+            if ($linkEntity !== null) {
+                try {
+                    $eventRemover->removeLink($linkEntity);
+                } catch (Throwable) {
+                    $em->removeEntity($linkEntity);
+                }
+            }
         }
+
+        $em->removeEntity($entity);
+        $ok("{$entityType} cleanup record {$id}", true);
+    } catch (Throwable $e) {
+        $ok("{$entityType} cleanup record {$id}", false, $e->getMessage());
     }
 }
 
-/**
- * @param array<int, string> $sourceDateTypes
- * @return array<int, array<string, mixed>>
- */
-function buildEventSettings(array $sourceDateTypes): array
-{
-    $rows = [];
-
-    foreach ($sourceDateTypes as $sourceDateType) {
-        $rows[] = [
-            'sourceDateType' => $sourceDateType,
-            'reminderMode' => 'none',
-            'reminders' => [],
-            'location' => '{{name}}',
-            'visibility' => 'default',
-            'transparency' => 'opaque',
-            'colorId' => '',
-            'descriptionTemplateOverride' => '',
-        ];
-    }
-
-    return $rows;
-}
+echo "\n=== " . ($fail === 0 ? 'ALL PASS' : "{$fail} FAILURE(S)") . " ===\n";
+echo 'Cleanup prefix: ' . GcalTestFixtures::TEST_PREFIX . "\n";
+exit($fail === 0 ? 0 : 1);
 
 function countLinks(EntityManager $em, string $entityType, string $entityId, string $userId): int
 {
