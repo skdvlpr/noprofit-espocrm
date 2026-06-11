@@ -3,6 +3,6 @@
     "iconClass": "fas fa-globe",
     "controller": "controllers/record",
     "recordViews": {
-        "list": "custom:views/record/list-inline-edit"
+        "list": "safehouse-crm:views/record/list-inline-edit"
     }
 }

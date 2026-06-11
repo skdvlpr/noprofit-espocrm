@@ -1,6 +1,6 @@
 {
     "recordViews": {
-        "list": "custom:views/record/list-inline-edit",
+        "list": "safehouse-crm:views/record/list-inline-edit",
         "kanban": "safehouse-crm:views/opportunity/record/kanban"
     },
     "color": "#54b874",

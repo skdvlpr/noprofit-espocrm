@@ -34,6 +34,8 @@
         "kanbanShortModifiedAt": "Modified",
         "kanbanShortProbability": "Prob. %",
         "kanbanGoogleCalendar": "Google Calendar",
+        "kanbanDatesSection": "Dates",
+        "kanbanAssignmentSection": "Assignment",
         "googleCalendarReminderNotice": "You can save this grant date to Google Calendar with or without Google reminders. For funding deadlines, use day/week reminders such as 7 days, 14 days, or 4 weeks before.",
         "googleCalendarPerDateSettingsHelp": "Configure Google Calendar options separately for each selected date on this grant."
     },

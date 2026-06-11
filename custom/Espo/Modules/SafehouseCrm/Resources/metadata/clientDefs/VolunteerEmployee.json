@@ -1,7 +1,7 @@
 {
     "controller": "controllers/record",
     "recordViews": {
-        "list": "custom:views/record/list-inline-edit"
+        "list": "safehouse-crm:views/record/list-inline-edit"
     },
     "color": "#7180d8",
     "iconClass": "fas fa-users",

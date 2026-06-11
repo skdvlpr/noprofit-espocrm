@@ -687,6 +687,8 @@ define('safehouse-crm:views/record/kanban-item', ['views/record/kanban-item'], f
                 heroEmoji: this.getFieldEmoji('amount'),
                 hasGoogleCalendarSection: this.hasGoogleCalendarSection,
                 googleCalendarSectionLabel: this.translate('kanbanGoogleCalendar', 'labels', this.scope),
+                datesSectionLabel: this.translate('kanbanDatesSection', 'labels', this.scope),
+                assignmentSectionLabel: this.translate('kanbanAssignmentSection', 'labels', this.scope),
                 hasAssignmentSection: !!(assignedUserHtml || teamsHtml),
                 hasAssignedUser: !!assignedUserHtml,
                 hasTeams: !!teamsHtml,

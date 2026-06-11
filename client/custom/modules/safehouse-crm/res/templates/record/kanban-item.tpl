@@ -44,7 +44,7 @@
         {{/if}}
 
         {{#if hasDateItems}}
-        <footer class="kanban-card-dates" aria-label="Dates">
+        <footer class="kanban-card-dates" aria-label="{{datesSectionLabel}}">
             <div class="kanban-dates-grid" role="presentation">
                 {{#each dateItems}}
                 <div class="kanban-date-label{{#if isMuted}} is-muted{{/if}}">
@@ -95,7 +95,7 @@
         {{/if}}
 
         {{#if hasAssignmentSection}}
-        <section class="kanban-card-assignment" aria-label="Assignment">
+        <section class="kanban-card-assignment" aria-label="{{assignmentSectionLabel}}">
             <div class="kanban-dates-grid kanban-assignment-grid" role="presentation">
                 {{#if hasAssignedUser}}
                 <div class="kanban-date-label is-muted">

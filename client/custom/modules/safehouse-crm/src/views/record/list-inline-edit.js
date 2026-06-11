@@ -10,7 +10,7 @@
  * - Click outside cell → save
  * - Select change (enum) → save immediately
  */
-define('custom:views/record/list-inline-edit', [
+define('safehouse-crm:views/record/list-inline-edit', [
     'views/record/list',
     'safehouse-crm:lib/quick-view-navigation',
 ], function (Dep, QuickViewNavigation) {

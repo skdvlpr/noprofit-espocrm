@@ -637,7 +637,7 @@ body .list-kanban .dropdown-menu.list-row-dropdown-menu {
   padding: 6px 0 !important;
   min-width: 148px;
   overflow: hidden;
-  z-index: 1400;
+  z-index: 1240;
 }
 
 body[data-theme-name='SafehouseAuroraLight'] .list-kanban .dropdown-menu.list-row-dropdown-menu {

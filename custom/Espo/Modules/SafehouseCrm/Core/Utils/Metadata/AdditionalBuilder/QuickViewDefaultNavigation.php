@@ -88,7 +88,7 @@ class QuickViewDefaultNavigation implements AdditionalBuilder
 
         $listView = $entityType === 'Document'
             ? 'safehouse-crm:views/document/list'
-            : 'custom:views/record/list-inline-edit';
+            : 'safehouse-crm:views/record/list-inline-edit';
 
         $data->clientDefs->$entityType->recordViews->list = $listView;
     }
