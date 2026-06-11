@@ -9,6 +9,14 @@ body #navbar {
   z-index: 1200;
 }
 
+/*
+ * Minimized side menu: body backdrop is z-index 2140; core sets .navbar to 2150 but only
+ * inside #navbar's stacking context — if #navbar stays at 1200 the panel paints behind blur.
+ */
+body[data-navbar='side'].minimized.side-menu-opened #navbar {
+  z-index: 2160 !important;
+}
+
 body #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
   -webkit-backdrop-filter: var(--aurora-glass-blur);
@@ -25,6 +33,127 @@ body[data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-bo
 body[data-navbar='side'] #navbar > .navbar {
   border-bottom: none !important;
   border-right: 1px solid var(--aurora-glass-border) !important;
+}
+
+/*
+ * Side navbar top utility bar (search + actions).
+ * Cosmetic only — never set height:auto while core keeps top+bottom (stretches full viewport).
+ */
+body[data-navbar='side'] #navbar .navbar-right,
+body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+  background: var(--aurora-glass-bg) !important;
+  -webkit-backdrop-filter: var(--aurora-glass-blur);
+  backdrop-filter: var(--aurora-glass-blur);
+  border-bottom: 1px solid var(--aurora-glass-border) !important;
+  box-shadow: var(--aurora-glass-shadow) !important;
+  height: 34px !important;
+  bottom: auto !important;
+  align-items: center;
+  padding: 0 10px 0 12px;
+  box-sizing: border-box;
+}
+
+body[data-navbar='side'] #navbar .navbar-right .global-search-container {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  max-width: min(400px, 40vw);
+  min-width: 120px;
+  margin-right: 4px;
+}
+
+body[data-navbar='side'] #navbar .navbar-right .global-search-container .form-group,
+body[data-navbar='side'] #navbar .navbar-right .global-search-container form,
+body[data-navbar='side'] #navbar .navbar-right .global-search-container .input-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+}
+
+body[data-navbar='side'] #navbar .navbar-right input.global-search-input {
+  height: 26px;
+  max-height: 26px;
+  padding: 2px 9px;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  border-radius: 8px !important;
+  box-shadow: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+body[data-navbar='side'] #navbar .navbar-right input.global-search-input:hover,
+body[data-navbar='side'] #navbar .navbar-right input.global-search-input:focus {
+  border-color: var(--input-border-focus) !important;
+  box-shadow: 0 0 0 1.5px var(--input-border-focus-rgba) !important;
+  outline: none;
+}
+
+body[data-navbar='side'] #navbar .navbar-right .global-search-container a.global-search-button {
+  height: 26px !important;
+  width: 28px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+}
+
+body[data-navbar='side'] #navbar .navbar-right > li > a {
+  height: 26px !important;
+  width: 28px !important;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+}
+
+/* Navbar dropdowns — user menu, overflow tabs */
+body #navbar .dropdown-menu {
+  margin-top: 6px !important;
+  padding: 6px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--dropdown-border) !important;
+  box-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.32) !important;
+  min-width: 196px;
+}
+
+body #navbar .dropdown-menu > li > a,
+body #navbar .dropdown-menu > li > a.nav-link {
+  display: block;
+  padding: 8px 12px !important;
+  border-radius: 8px;
+  margin: 1px 0;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--dropdown-link-color) !important;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+body #navbar .dropdown-menu > li > a:hover,
+body #navbar .dropdown-menu > li > a:focus {
+  background-color: var(--dropdown-link-hover-bg) !important;
+  color: var(--dropdown-link-hover-color) !important;
+}
+
+body #navbar .dropdown-menu > li.divider {
+  margin: 6px 4px !important;
+  background-color: var(--dropdown-divider-bg) !important;
+}
+
+body #navbar .menu-container .dropdown-menu > li:first-child > a {
+  padding: 10px 12px !important;
+  font-weight: 600;
+}
+
+body #navbar .menu-container .dropdown-menu > li:first-child > a .avatar {
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 /* ── Navbar entity tabs: neutral pill + scope-colored accent (not brand red) ── */
@@ -415,9 +544,16 @@ body #content #main .list-group.list-group-panel .list-group-item {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  body #navbar > .navbar {
+  body #navbar > .navbar,
+  body[data-navbar='side'] #navbar .navbar-right,
+  body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  body[data-navbar='side'] #navbar .navbar-right,
+  body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+    background: var(--panel-default-bg) !important;
   }
 
   body #content #main .list-group.list-group-panel::before,

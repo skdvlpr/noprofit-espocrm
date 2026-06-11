@@ -346,12 +346,37 @@ body .modal-backdrop.backdrop-confirm {
   z-index: 1295 !important;
 }
 
-/* Dropdowns — always opaque (never inherit panel glass) */
+/* Dropdowns — opaque elevated panels (not salmon link color) */
 body .selectize-dropdown,
 body .dropdown-menu {
   background-color: var(--dropdown-bg) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+  border: 1px solid var(--dropdown-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.42) !important;
+  padding: 6px !important;
+}
+
+body .dropdown-menu > li > a,
+body .dropdown-menu > li > a.nav-link {
+  color: var(--dropdown-link-color) !important;
+  padding: 8px 12px !important;
+  border-radius: 8px;
+  margin: 1px 0;
+  font-weight: 500;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+body .dropdown-menu > li > a:hover,
+body .dropdown-menu > li > a:focus {
+  background-color: var(--dropdown-link-hover-bg) !important;
+  color: var(--dropdown-link-hover-color) !important;
+}
+
+body .dropdown-menu > li.divider {
+  margin: 6px 4px !important;
+  background-color: var(--dropdown-divider-bg) !important;
 }
 
 body .selectize-dropdown .option,
