@@ -327,12 +327,15 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
             const panelWidth = Math.max(300, Math.min(460, Math.round(window.innerWidth * 0.32)));
             const panelHeight = '50vh';
 
+            // Above frosted navbar (2160 when side menu open) and record modals (~1285).
+            const panelZIndex = 2200;
+
             const $backdrop = $('<div>')
                 .addClass('google-calendar-variable-panel-backdrop')
                 .css({
                     position: 'fixed',
                     inset: 0,
-                    zIndex: 2000,
+                    zIndex: panelZIndex,
                     background: 'transparent',
                     display: 'flex',
                     flexDirection: useDesktopLeftPanel ? 'row' : 'column',
@@ -361,6 +364,12 @@ define('google-integration:lib/google-calendar-variable-panel', [], function () 
                     pointerEvents: 'auto',
                 })
                 .appendTo($backdrop);
+
+            // Bootstrap modal enforceFocus (focusin.bs.modal) steals focus from inputs outside
+            // the modal DOM — stop bubbling so the search field stays editable in Quick Edit.
+            $panel.on('focusin', event => {
+                event.stopPropagation();
+            });
 
             // Keep edited field visible by shifting the app workspace away from side panel.
             applyBodyShift(useDesktopLeftPanel, panelWidth);

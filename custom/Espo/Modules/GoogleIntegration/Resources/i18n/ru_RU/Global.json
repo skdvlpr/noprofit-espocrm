@@ -4,6 +4,7 @@
         "googleCalendarTemplateVariableSearch": "Поиск полей",
         "googleCalendarCurrentRecordFields": "Поля текущей записи",
         "googleCalendarRelatedRecordFields": "Поля связанных записей",
+        "googleCalendarExternalRecordFields": "Внешние поля ({relation})",
         "googleCalendarClearSearch": "Очистить",
         "googleCalendarNoVariables": "Переменные не найдены",
         "googleCalendarPanelCloseHint": "Правый клик - закрыть, поиск сохраняется",

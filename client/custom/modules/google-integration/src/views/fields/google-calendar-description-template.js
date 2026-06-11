@@ -167,7 +167,6 @@ define('google-integration:views/fields/google-calendar-description-template', [
                 entityType,
                 translate: (key, category, scope) => this.translate(key, category, scope),
                 currentGroupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', entityType),
-                relatedGroupLabel: this.translate('googleCalendarRelatedRecordFields', 'labels', entityType),
                 hasRelatedLink: (linkName, type) => this.hasActualRelatedRecord(linkName, type),
             });
         }

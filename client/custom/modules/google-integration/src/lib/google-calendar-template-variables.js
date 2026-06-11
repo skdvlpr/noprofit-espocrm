@@ -30,14 +30,33 @@ define('google-integration:lib/google-calendar-template-variables', [], function
     }
 
     /**
+     * @param {(key: string, category: string, scope: string) => string} translate
+     * @param {string} entityType
+     * @param {string} linkLabel
+     * @return {string}
+     */
+    function formatExternalGroupLabel(translate, entityType, linkLabel) {
+        let template = translate('googleCalendarExternalRecordFields', 'labels', entityType);
+
+        if (!template || template === 'googleCalendarExternalRecordFields') {
+            template = translate('googleCalendarExternalRecordFields', 'labels', 'Global');
+        }
+
+        if (!template || template === 'googleCalendarExternalRecordFields') {
+            template = 'External fields ({relation})';
+        }
+
+        return template.replace('{relation}', linkLabel);
+    }
+
+    /**
      * @param {import('metadata').default} metadata
      * @param {string} entityType
-     * @param {string} groupLabel
      * @param {(key: string, category: string, scope: string) => string} translate
      * @param {(linkName: string, linkType: string) => boolean} [hasRelatedLink]
      * @return {Array<{name: string, label: string, group: string, groupLabel: string}>}
      */
-    function getRelatedFieldList(metadata, entityType, groupLabel, translate, hasRelatedLink) {
+    function getRelatedFieldList(metadata, entityType, translate, hasRelatedLink) {
         const fields = metadata.get(`entityDefs.${entityType}.fields`) || {};
         const links = metadata.get(`entityDefs.${entityType}.links`) || {};
         const list = [];
@@ -64,6 +83,8 @@ define('google-integration:lib/google-calendar-template-variables', [], function
             if (!linkLabel || linkLabel === linkName) {
                 return;
             }
+
+            const groupLabel = formatExternalGroupLabel(translate, entityType, linkLabel);
 
             Object.keys(relatedFields)
                 .filter(name => isInsertableField(relatedFields[name], name))
@@ -95,7 +116,6 @@ define('google-integration:lib/google-calendar-template-variables', [], function
      * @param {string} options.entityType
      * @param {(key: string, category: string, scope: string) => string} options.translate
      * @param {string} [options.currentGroupLabel]
-     * @param {string} [options.relatedGroupLabel]
      * @param {(linkName: string, linkType: string) => boolean} [options.hasRelatedLink]
      * @return {Array<{name: string, label: string, group: string, groupLabel: string}>}
      */
@@ -105,7 +125,6 @@ define('google-integration:lib/google-calendar-template-variables', [], function
             entityType,
             translate,
             currentGroupLabel = translate('googleCalendarCurrentRecordFields', 'labels', entityType),
-            relatedGroupLabel = translate('googleCalendarRelatedRecordFields', 'labels', entityType),
             hasRelatedLink,
         } = options;
 
@@ -132,7 +151,7 @@ define('google-integration:lib/google-calendar-template-variables', [], function
 
         return [
             ...currentFields,
-            ...getRelatedFieldList(metadata, entityType, relatedGroupLabel, translate, hasRelatedLink),
+            ...getRelatedFieldList(metadata, entityType, translate, hasRelatedLink),
         ];
     }
 

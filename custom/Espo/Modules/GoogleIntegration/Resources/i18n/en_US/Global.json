@@ -4,6 +4,7 @@
         "googleCalendarTemplateVariableSearch": "Search fields",
         "googleCalendarCurrentRecordFields": "Current record fields",
         "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarExternalRecordFields": "External fields ({relation})",
         "googleCalendarClearSearch": "Clear",
         "googleCalendarNoVariables": "No variables found",
         "googleCalendarPanelCloseHint": "Right-click to close - search is remembered",

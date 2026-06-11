@@ -594,7 +594,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 entityType: this.model.entityType,
                 translate: (key, category, scope) => this.translate(key, category, scope),
                 currentGroupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', this.model.entityType),
-                relatedGroupLabel: this.translate('googleCalendarRelatedRecordFields', 'labels', this.model.entityType),
                 hasRelatedLink: (linkName, type) => this.hasActualRelatedRecord(linkName, type),
             });
         }
