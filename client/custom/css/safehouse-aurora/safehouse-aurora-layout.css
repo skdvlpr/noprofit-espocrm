@@ -198,6 +198,12 @@ body #content #main > .row > .left-container + .list-container:not(:has(.list)):
   display: flex;
   flex-direction: column;
   align-self: flex-start;
+  /* No width: 100% here — it breaks float columns (Email: folders col + list col). */
+}
+
+body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
   width: 100%;
 }
 
@@ -228,6 +234,90 @@ body #content #main .list-main-column > .list-container:not(:has(.list)):not(:ha
 
 body #content #main > .page-header {
   margin-bottom: var(--8px, 8px) !important;
+}
+
+/* ── Email folders — glass side panel (matches list shell) ── */
+body #content #main > .row > .left-container .folders-container {
+  position: relative;
+  border-radius: var(--panel-border-radius);
+  background-color: var(--aurora-list-bg, var(--panel-bg));
+  border: var(--panel-border-width) solid var(--panel-default-border);
+  box-shadow: var(--aurora-glass-shadow);
+  -webkit-backdrop-filter: var(--aurora-list-blur, none);
+  backdrop-filter: var(--aurora-list-blur, none);
+  padding: 8px 6px;
+}
+
+body #content #main > .row > .left-container .folders-container .folder-list {
+  margin-bottom: 0;
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item {
+  background: transparent !important;
+  border: none;
+  border-radius: 10px;
+  margin: 1px 2px;
+  padding: 0;
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 10px;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: background-color 0.12s ease;
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link.count {
+  display: inline-block;
+  float: right;
+  padding: 7px 10px 7px 6px;
+  color: var(--text-muted-color);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+body[data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+body[data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+body[data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+body[data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
+  background-color: rgba(220, 38, 38, 0.26);
+  color: #fecaca;
+  font-weight: 600;
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item .item-icon-container {
+  display: inline-block;
+  width: 22px;
+  color: var(--text-muted-color);
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item.selected .item-icon-container {
+  color: inherit;
+}
+
+/* Group separator (Archiviata / Bozze / Cestino block) */
+body #content #main > .row > .left-container .folder-list > li.list-group-item.group-start {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--default-border-color);
+  border-radius: 0 0 10px 10px;
+}
+
+body #content #main > .row > .left-container .folder-list > li.list-group-item.group-start > a.side-link {
+  border-radius: 10px;
 }
 
 /* Search above list — flat, like admin (glass only on list panel below) */
