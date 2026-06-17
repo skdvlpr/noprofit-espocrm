@@ -21,10 +21,14 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\ApplicationUser;
+use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\InjectableFactory;
+use Espo\Core\Utils\DateTime as DateTimeUtil;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateTimeResolver;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher;
+use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\ORM\EntityManager;
 
 $entityTypes = ['Meeting', 'Call'];
@@ -46,6 +50,9 @@ if ($admin === null) {
 $container->getByClass(ApplicationUser::class)->setUser($admin);
 $adminId = $admin->getId();
 $eventPusher = $injectableFactory->create(EventPusher::class);
+$dateTimeResolver = $injectableFactory->create(CalendarDateTimeResolver::class);
+$dtUtil = $container->getByClass(DateTimeUtil::class);
+$clientManager = $container->getByClass(ClientManager::class);
 $pdo = $em->getPDO();
 
 $tag = 'BLOCK3_' . gmdate('Ymd_His');
@@ -86,9 +93,10 @@ $countActiveLinks = function (string $entityType, string $entityId) use ($pdo, $
 };
 
 $buildEntity = function (string $entityType, string $name) use ($em, $adminId) {
-    $base = new DateTimeImmutable('next monday +10 hours', new DateTimeZone('UTC'));
-    $start = $base->format('Y-m-d H:i:s');
-    $end = $base->modify('+1 hour')->format('Y-m-d H:i:s');
+    $appTz = 'Europe/Rome';
+    $base = new DateTimeImmutable('next monday 10:00:00', new DateTimeZone($appTz));
+    $start = $base->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    $end = $base->modify('+1 hour')->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
 
     $entity = $em->getNewEntity($entityType);
 
@@ -112,6 +120,82 @@ $buildEntity = function (string $entityType, string $name) use ($em, $adminId) {
     }
 
     return $entity;
+};
+
+$assertExportWallClockMatchesCrm = function (string $entityType, string $entityId) use (
+    $em,
+    $eventPusher,
+    $dateTimeResolver,
+    $dtUtil,
+    $clientManager,
+    $adminId,
+    $ok
+): void {
+    $entity = $em->getEntityById($entityType, $entityId);
+
+    if ($entity === null) {
+        $ok("{$entityType} export wall-clock vs CRM", false, 'entity missing');
+
+        return;
+    }
+
+    $dbStart = (string) $entity->get('dateStart');
+    $buildRange = new ReflectionMethod($eventPusher, 'buildDateTimeRange');
+    $buildRange->setAccessible(true);
+    $range = $buildRange->invoke($eventPusher, $dbStart, (string) $entity->get('dateEnd'));
+    $expectedWall = $dateTimeResolver->utcStorageToWallClockDateTime($dbStart);
+    $crmDisplay = $dtUtil->convertSystemDateTime($dbStart);
+    $crmTime = preg_match('/\d{2}:\d{2}/', $crmDisplay, $m) ? $m[0] : '';
+    $exportTime = preg_match('/T(\d{2}:\d{2})/', (string) ($range['start']['dateTime'] ?? ''), $m2) ? $m2[1] : '';
+
+    $ok(
+        "{$entityType} export wall-clock matches resolver",
+        ($range['start']['dateTime'] ?? '') === $expectedWall
+            && ($range['start']['timeZone'] ?? '') === $dateTimeResolver->getExportTimeZone(),
+        'payload=' . json_encode($range['start'] ?? null)
+    );
+    $ok(
+        "{$entityType} export wall-clock time matches CRM display",
+        $crmTime !== '' && $exportTime === $crmTime,
+        "crm={$crmDisplay} exportTime={$exportTime}"
+    );
+
+    $client = $clientManager->create(Installer::INTEGRATION_ID, $adminId);
+
+    if (!$client instanceof \Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google) {
+        $ok("{$entityType} Google API wall-clock matches CRM", true, 'skipped (no Google client)');
+
+        return;
+    }
+
+    $stmt = $em->getPDO()->prepare(
+        'SELECT google_event_id FROM google_calendar_event_link
+         WHERE source_entity_type = ? AND source_entity_id = ? AND source_date_type = ?
+           AND user_id = ? AND deleted = 0 LIMIT 1'
+    );
+    $stmt->execute([$entityType, $entityId, 'main', $adminId]);
+    $gid = $stmt->fetchColumn();
+
+    if (!is_string($gid) || $gid === '') {
+        $ok("{$entityType} Google API wall-clock matches CRM", true, 'skipped (no link)');
+
+        return;
+    }
+
+    try {
+        $ev = $client->request(
+            'https://www.googleapis.com/calendar/v3/calendars/primary/events/' . rawurlencode($gid)
+        );
+        $googleDateTime = (string) ($ev['start']['dateTime'] ?? '');
+        $googleTime = preg_match('/T(\d{2}:\d{2})/', $googleDateTime, $m3) ? $m3[1] : '';
+        $ok(
+            "{$entityType} Google API wall-clock matches CRM display",
+            $crmTime !== '' && $googleTime === $crmTime,
+            "google={$googleDateTime} crm={$crmDisplay}"
+        );
+    } catch (Throwable $e) {
+        $ok("{$entityType} Google API wall-clock matches CRM", false, $e->getMessage());
+    }
 };
 
 $enableGoogleExport = function (string $entityType, string $entityId) use ($em): void {
@@ -174,6 +258,7 @@ foreach ($entityTypes as $entityType) {
         $gid = $fetchGoogleEventId($entityType, $id);
         $ok("{$entityType} 3.1 active link count = 1", $links === 1, "links={$links}");
         $ok("{$entityType} 3.1 google_event_id set", $gid !== null, $gid ? 'gid=' . substr($gid, 0, 20) . '…' : 'none');
+        $assertExportWallClockMatchesCrm($entityType, $id);
     } catch (Throwable $e) {
         $ok("{$entityType} 3.1 Google push via save", false, $e->getMessage());
         echo "\n";

@@ -16,6 +16,8 @@ final class GcalTestFixtures
 {
     public const TEST_PREFIX = 'T-';
 
+    public const DEFAULT_APP_TIMEZONE = 'Europe/Rome';
+
     /** @var list<string> */
     public const LEGACY_PREFIXES = [
         'E2E_',
@@ -216,32 +218,63 @@ final class GcalTestFixtures
      * } $context
      * @return array<string, mixed>
      */
-    /**
-     * @return array{0: string, 1: string} dateStart, dateEnd
+  /**
+     * Interpret wall-clock local time in app TZ and return UTC storage strings.
      */
-    private static function resolveDateTimes(DateTimeImmutable $baseDate, ?string $endTime = null): array
+    public static function wallClockToUtcStorage(string $localDateTime, ?string $timeZone = null): string
     {
-        if ($baseDate->format('H:i:s') !== '00:00:00') {
-            $start = $baseDate->format('Y-m-d H:i:s');
-            $end = $endTime !== null
-                ? $baseDate->format('Y-m-d') . ' ' . $endTime
-                : $baseDate->modify('+1 hour')->format('Y-m-d H:i:s');
+        $tz = new DateTimeZone($timeZone ?? self::DEFAULT_APP_TIMEZONE);
+        $parsed = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $localDateTime, $tz);
 
-            return [$start, $end];
+        if ($parsed === false) {
+            throw new RuntimeException('Could not parse wall-clock datetime `' . $localDateTime . '`.');
         }
 
-        return [
-            $baseDate->modify('+10 hours')->format('Y-m-d H:i:s'),
-            $baseDate->modify('+11 hours')->format('Y-m-d H:i:s'),
-        ];
+        return $parsed->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * @return array{0: string, 1: string} dateStart, dateEnd (UTC storage)
+     */
+    private static function resolveDateTimes(
+        DateTimeImmutable $wallClockLocal,
+        ?string $endTime = null,
+        ?string $appTimeZone = null
+    ): array {
+        $tz = $appTimeZone ?? self::DEFAULT_APP_TIMEZONE;
+        $localTz = new DateTimeZone($tz);
+        $localStart = $wallClockLocal->format('Y-m-d H:i:s');
+
+        if ($wallClockLocal->format('H:i:s') !== '00:00:00') {
+            $startUtc = self::wallClockToUtcStorage($localStart, $tz);
+            $localEnd = $endTime !== null
+                ? $wallClockLocal->format('Y-m-d') . ' ' . $endTime
+                : DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $localStart, $localTz)
+                    ->modify('+1 hour')
+                    ->format('Y-m-d H:i:s');
+            $endUtc = self::wallClockToUtcStorage($localEnd, $tz);
+
+            return [$startUtc, $endUtc];
+        }
+
+        $dateOnly = $wallClockLocal->format('Y-m-d');
+        $defaultStart = self::wallClockToUtcStorage($dateOnly . ' 10:00:00', $tz);
+        $defaultEnd = self::wallClockToUtcStorage($dateOnly . ' 11:00:00', $tz);
+
+        return [$defaultStart, $defaultEnd];
     }
 
     public static function buildAttributes(string $entityType, array $context): array
     {
         $suffix = $context['suffix'] ?? self::makeSuffix();
-        $baseDate = $context['baseDate'] ?? new DateTimeImmutable('+2 days', new DateTimeZone('UTC'));
+        $appTimeZone = isset($context['appTimeZone']) ? (string) $context['appTimeZone'] : self::DEFAULT_APP_TIMEZONE;
+        $baseDate = $context['baseDate'] ?? new DateTimeImmutable('+2 days', new DateTimeZone($appTimeZone));
         $d = $baseDate->format('Y-m-d');
-        [$dt, $de] = self::resolveDateTimes($baseDate, isset($context['endTime']) ? (string) $context['endTime'] : null);
+        [$dt, $de] = self::resolveDateTimes(
+            $baseDate,
+            isset($context['endTime']) ? (string) $context['endTime'] : null,
+            $appTimeZone
+        );
         $adminId = $context['adminId'] ?? null;
         $variant = $context['variant'] ?? null;
         $sources = $context['sources'] ?? [];
@@ -305,8 +338,8 @@ final class GcalTestFixtures
             'Task' => [
                 'name' => self::pickTitle('Task', $suffix, $variant, $titleStyle),
                 'status' => 'Not Started',
-                'dateEnd' => $dt,
                 'dateEndDate' => $d,
+                'dateStartDate' => $d,
                 'assignedUserId' => $adminId,
             ],
             'VolunteerEmployee' => [

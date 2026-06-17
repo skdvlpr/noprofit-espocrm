@@ -3,7 +3,8 @@
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 /**
- * Canonical Google Calendar / CRM calendar event title: "{record name} - {date source label}".
+ * Google Calendar / CRM calendar event title: "{record name} - {CalendarDateSource.label}".
+ * The suffix label is configured per row in CalendarDateSource (admin); never hardcoded in PHP.
  */
 final class GoogleCalendarEventTitle
 {

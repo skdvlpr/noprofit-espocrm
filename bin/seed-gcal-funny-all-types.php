@@ -17,10 +17,7 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\ApplicationUser;
-use Espo\Core\InjectableFactory;
 use Espo\Entities\User;
-use Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher;
-use Espo\Modules\GoogleIntegration\Tools\Calendar\EventRemover;
 use Espo\ORM\EntityManager;
 
 const SEED_TAG = 'T-funny-morning';
@@ -32,7 +29,6 @@ $skipCleanup = in_array('--skip-cleanup', $argv ?? [], true);
 $app = new Application();
 $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
-$injectableFactory = $container->getByClass(InjectableFactory::class);
 
 $admin = $em->getRDBRepository(User::ENTITY_TYPE)
     ->where(['userName' => 'admin', 'deleted' => false])
@@ -45,8 +41,6 @@ if ($admin === null) {
 
 $container->getByClass(ApplicationUser::class)->setUser($admin);
 $adminId = $admin->getId();
-$eventRemover = $injectableFactory->create(EventRemover::class);
-$eventPusher = $injectableFactory->create(EventPusher::class);
 $pdo = $em->getPDO();
 
 /** @var array<string, list<array{sourceDateType: string, dateField: string, endDateField?: mixed, allDay?: bool}>> $sources */
@@ -73,7 +67,7 @@ $schedule = [
     'Account' => ['date' => '2026-06-14'],
     'Call' => ['date' => '2026-06-15', 'time' => '10:00:00', 'endTime' => '10:45:00'],
     'Meeting' => ['date' => '2026-06-16', 'time' => '11:00:00', 'endTime' => '12:00:00'],
-    'Task' => ['date' => '2026-06-17', 'time' => '17:00:00', 'endTime' => '17:30:00'],
+    'Task' => ['date' => '2026-06-17'],
     'Opportunity' => ['date' => '2026-06-18'],
     'VolunteerEmployee' => ['date' => '2026-06-19'],
     'Member' => ['date' => '2026-06-21'],
@@ -107,10 +101,11 @@ $fail = 0;
 
 foreach ($sources as $entityType => $srcList) {
     $slot = $schedule[$entityType] ?? ['date' => '2026-06-20'];
-    $baseDate = new DateTimeImmutable($slot['date'], new DateTimeZone('UTC'));
+    $appTimeZone = GcalTestFixtures::DEFAULT_APP_TIMEZONE;
+    $baseDate = new DateTimeImmutable($slot['date'], new DateTimeZone($appTimeZone));
 
     if (isset($slot['time'])) {
-        $baseDate = new DateTimeImmutable($slot['date'] . ' ' . $slot['time'], new DateTimeZone('UTC'));
+        $baseDate = new DateTimeImmutable($slot['date'] . ' ' . $slot['time'], new DateTimeZone($appTimeZone));
     }
 
     $attrs = GcalTestFixtures::buildAttributes($entityType, [
@@ -120,6 +115,7 @@ foreach ($sources as $entityType => $srcList) {
         'adminId' => $adminId,
         'sources' => $srcList,
         'titleStyle' => 'funny',
+        'appTimeZone' => $appTimeZone,
     ]);
 
     if ($entityType === 'Opportunity') {
@@ -130,14 +126,6 @@ foreach ($sources as $entityType => $srcList) {
     if ($entityType === 'VolunteerEmployee') {
         $attrs['startDate'] = '2026-06-19';
         $attrs['endDate'] = '2026-06-26';
-    }
-
-    if ($entityType === 'Task') {
-        $attrs['dateStart'] = $slot['date'];
-        if (isset($slot['time'], $slot['endTime'])) {
-            $attrs['dateEnd'] = $slot['date'] . ' ' . $slot['time'];
-            $attrs['dateEndDate'] = $slot['date'];
-        }
     }
 
     if ($entityType === 'GCalSmokeTwinDate') {
@@ -163,12 +151,6 @@ foreach ($sources as $entityType => $srcList) {
         'googleCalendarEventSettings' => GcalTestFixtures::buildEventSettings($dateTypes),
     ]);
     $em->saveEntity($entity);
-
-    try {
-        $eventPusher->pushIfRequested($entity, $admin);
-    } catch (Throwable $e) {
-        echo "  [WARN] {$entityType} push — {$e->getMessage()}\n";
-    }
 
     $linkStmt = $pdo->prepare(
         'SELECT source_date_type FROM google_calendar_event_link

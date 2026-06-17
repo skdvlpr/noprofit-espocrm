@@ -6,6 +6,7 @@ use Espo\Core\Container;
 use Espo\Core\DataManager;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateSourceDefaults;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceEntityTypesReader;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DefaultCalendarTemplateProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
@@ -31,80 +32,6 @@ class Installer
     private const LEGACY_SAFEHOUSE_GOOGLE_ID = 'GoogleSafehouse';
     /** Previous integration id before rename. */
     private const LEGACY_GOOGLE_INTEGRATION_ID = 'GoogleIntegration';
-
-    /** @var array<int, array<string, mixed>> */
-    private const DEFAULT_DATE_SOURCES = [
-        [
-            'name' => 'Meeting start date',
-            'targetEntityType' => 'Meeting',
-            'dateField' => 'dateStart',
-            'endDateField' => 'dateEnd',
-            'sourceDateType' => 'main',
-            'label' => 'Meeting date',
-            'allDay' => false,
-            'sortOrder' => 10,
-        ],
-        [
-            'name' => 'Call start date',
-            'targetEntityType' => 'Call',
-            'dateField' => 'dateStart',
-            'endDateField' => 'dateEnd',
-            'sourceDateType' => 'main',
-            'label' => 'Call date',
-            'allDay' => false,
-            'sortOrder' => 20,
-        ],
-        [
-            'name' => 'Task due date',
-            'targetEntityType' => 'Task',
-            'dateField' => 'dateEnd',
-            'endDateField' => null,
-            'sourceDateType' => 'main',
-            'label' => 'Due date',
-            'allDay' => true,
-            'sortOrder' => 30,
-        ],
-        [
-            'name' => 'Opportunity presentation date',
-            'targetEntityType' => 'Opportunity',
-            'dateField' => 'presentationDate',
-            'endDateField' => null,
-            'sourceDateType' => 'presentationDate',
-            'label' => 'Presentation date',
-            'allDay' => true,
-            'sortOrder' => 40,
-        ],
-        [
-            'name' => 'Opportunity close date',
-            'targetEntityType' => 'Opportunity',
-            'dateField' => 'closeDate',
-            'endDateField' => null,
-            'sourceDateType' => 'closeDate',
-            'label' => 'Close date',
-            'allDay' => true,
-            'sortOrder' => 50,
-        ],
-        [
-            'name' => 'Volunteer / Employee start date',
-            'targetEntityType' => 'VolunteerEmployee',
-            'dateField' => 'startDate',
-            'endDateField' => null,
-            'sourceDateType' => 'main',
-            'label' => 'Start date',
-            'allDay' => true,
-            'sortOrder' => 60,
-        ],
-        [
-            'name' => 'Volunteer / Employee end date',
-            'targetEntityType' => 'VolunteerEmployee',
-            'dateField' => 'endDate',
-            'endDateField' => null,
-            'sourceDateType' => 'endDate',
-            'label' => 'End date',
-            'allDay' => true,
-            'sortOrder' => 61,
-        ],
-    ];
 
     /** @var array<int, array<string, mixed>> */
     private const DEFAULT_CALENDAR_TEMPLATES = [
@@ -219,7 +146,7 @@ class Installer
     {
         $repo = $entityManager->getRDBRepository('CalendarDateSource');
 
-        foreach (self::DEFAULT_DATE_SOURCES as $source) {
+        foreach (CalendarDateSourceDefaults::sources() as $source) {
             $existing = $repo
                 ->where([
                     'targetEntityType' => $source['targetEntityType'],

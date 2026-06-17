@@ -4,7 +4,6 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 use DateInterval;
 use DateTimeImmutable;
-use DateTimeZone;
 use Espo\Core\Acl;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\ClientManager;
@@ -45,7 +44,8 @@ class EventPusher
         private IntegrationState $integrationState,
         private Acl $acl,
         private EventRemover $eventRemover,
-        private CalendarDisplayDateResolver $calendarDisplayDateResolver
+        private CalendarDisplayDateResolver $calendarDisplayDateResolver,
+        private CalendarDateTimeResolver $calendarDateTimeResolver
     ) {}
 
     public function pushIfRequested(Entity $entity, ?User $pushUserOverride = null): void
@@ -428,8 +428,7 @@ class EventPusher
         ?array $source = null
     ): array {
         $event = [
-            // Title is always "{record name} - {date source label}"; CalendarTemplate summaryTemplate
-            // applies to description/location only (see buildDescription / buildLocation).
+            // Title: "{record name} - {CalendarDateSource.label}"; template applies to description/location only.
             'summary' => GoogleCalendarPlainText::normalize(
                 $this->buildSummary($entity, $sourceDateType, $source)
             ),
@@ -606,17 +605,7 @@ class EventPusher
             ];
         }
 
-        $start = $this->parseDateTime($startValue);
-        $end = $this->parseDateTime($endValue);
-
-        if ($end <= $start) {
-            $end = $start->add(new DateInterval('PT30M'));
-        }
-
-        return [
-            'start' => ['dateTime' => $start->format(DATE_RFC3339)],
-            'end' => ['dateTime' => $end->format(DATE_RFC3339)],
-        ];
+        return $this->calendarDateTimeResolver->buildGoogleTimedRange($startValue, $endValue);
     }
 
     /**
@@ -634,17 +623,6 @@ class EventPusher
             'start' => ['date' => $dateValue],
             'end' => ['date' => $end->format('Y-m-d')],
         ];
-    }
-
-    private function parseDateTime(string $value): DateTimeImmutable
-    {
-        $normalized = str_replace(' ', 'T', $value);
-
-        if (!str_contains($normalized, '+') && !str_ends_with($normalized, 'Z')) {
-            $normalized .= 'Z';
-        }
-
-        return new DateTimeImmutable($normalized, new DateTimeZone('UTC'));
     }
 
     private function isDateOnly(string $value): bool
@@ -681,49 +659,30 @@ class EventPusher
     {
         $name = trim((string) ($entity->get('name') ?? ''));
         $base = $name !== '' ? $name : $entity->getEntityType() . ' ' . $entity->getId();
-        $label = $this->resolveGoogleTitleLabel($entity->getEntityType(), $sourceDateType, $source);
+        $label = $this->resolveDateSourceLabel($entity->getEntityType(), $sourceDateType, $source);
 
         return GoogleCalendarEventTitle::format($base, $label);
     }
 
     /**
-     * Meeting/Call period (dateStart–dateEnd): Google title is record name only (U7).
+     * Google / CRM calendar title suffix: CalendarDateSource.label only (no PHP hardcode).
      *
      * @param ?array<string, mixed> $source
      */
-    private function resolveGoogleTitleLabel(string $entityType, string $sourceDateType, ?array $source): string
+    private function resolveDateSourceLabel(string $entityType, string $sourceDateType, ?array $source): string
     {
-        if (in_array($entityType, ['Meeting', 'Call'], true)) {
-            $endField = trim((string) ($source['endDateField'] ?? ''));
+        if (is_array($source)) {
+            $fromSource = trim((string) ($source['label'] ?? ''));
 
-            if ($endField !== '') {
-                return '';
+            if ($fromSource !== '') {
+                return $fromSource;
             }
         }
 
-        $label = trim((string) ($source['label'] ?? ''));
-
-        if ($label !== '') {
-            return $label;
-        }
-
-        return $this->resolveSourceLabel($entityType, $sourceDateType);
-    }
-
-    private function resolveSourceLabel(string $entityType, string $sourceDateType): string
-    {
-        foreach ($this->dateSourceProvider->getActiveSourcesForEntityType($entityType) as $source) {
-            if ((string) ($source['sourceDateType'] ?? '') === $sourceDateType) {
-                return trim((string) ($source['label'] ?? ''));
+        foreach ($this->dateSourceProvider->getActiveSourcesForEntityType($entityType) as $row) {
+            if ((string) ($row['sourceDateType'] ?? 'main') === $sourceDateType) {
+                return trim((string) ($row['label'] ?? ''));
             }
-        }
-
-        if ($entityType === 'Opportunity') {
-            return match ($sourceDateType) {
-                'presentationDate' => 'Presentation date',
-                'closeDate' => 'Close date',
-                default => '',
-            };
         }
 
         return '';

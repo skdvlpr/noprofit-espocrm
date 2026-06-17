@@ -461,9 +461,11 @@ $ok('Location field has variable helper', str_contains($perDateView, 'variable-h
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
 $ok(
-    'EventPusher omits date label for Meeting/Call period titles (U7)',
-    str_contains($eventPusherSource, 'resolveGoogleTitleLabel')
-        && str_contains($eventPusherSource, "in_array(\$entityType, ['Meeting', 'Call']")
+    'EventPusher title suffix uses CalendarDateSource.label only',
+    str_contains($eventPusherSource, 'resolveDateSourceLabel')
+        && !str_contains($eventPusherSource, 'resolveGoogleTitleLabel')
+        && !str_contains($eventPusherSource, 'resolveSourceLabel')
+        && !str_contains($eventPusherSource, "'Presentation date'")
 );
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
@@ -501,6 +503,18 @@ foreach ([
         ])
         ->findOne();
     $ok("Default CalendarDateSource $sourceKey exists", $source !== null);
+    if ($source !== null) {
+        $label = trim((string) $source->get('label'));
+        $ok("Default CalendarDateSource $sourceKey has non-empty label", $label !== '', 'label=' . $label);
+    }
+}
+
+foreach ($em->getRDBRepository('CalendarDateSource')->where(['deleted' => false, 'isActive' => true])->find() as $sourceRow) {
+    $sourceKey = ($sourceRow->get('targetEntityType') ?? '')
+        . ':'
+        . ($sourceRow->get('sourceDateType') ?: 'main');
+    $label = trim((string) $sourceRow->get('label'));
+    $ok("Active CalendarDateSource $sourceKey has non-empty label", $label !== '', 'label=' . $label);
 }
 
 echo "\nORM + Integration REST (API user expected 403)\n";
@@ -642,6 +656,22 @@ try {
 
     $explicit = $getSelected->invoke($eventPusherForDates, $explicitEntity, $sources);
 
+    $buildSummary = new ReflectionMethod($eventPusherForDates, 'buildSummary');
+    $buildSummary->setAccessible(true);
+    $meetingSource = $dateSourceProvider->getActiveSourcesForEntityType('Meeting')[0] ?? null;
+
+    if (is_array($meetingSource)) {
+        $meetingEntity = $em->getNewEntity('Meeting');
+        $meetingEntity->set('name', 'Smoke Meeting title');
+        $meetingTitle = $buildSummary->invoke($eventPusherForDates, $meetingEntity, 'main', $meetingSource);
+        $meetingLabel = trim((string) ($meetingSource['label'] ?? ''));
+        $ok(
+            'buildSummary appends CalendarDateSource label for Meeting',
+            $meetingLabel !== '' && str_ends_with($meetingTitle, ' - ' . $meetingLabel),
+            'title=' . $meetingTitle
+        );
+    }
+
     $ok(
         'getSelectedDateSourceTypes respects explicit subset',
         $explicit === ['main'],
@@ -656,6 +686,33 @@ try {
         'buildCalendarDateSourceGoogleEvents builds no events when date list empty (strict U7)',
         count($built) === 0,
         'count=' . count($built)
+    );
+
+    $resolver = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateTimeResolver::class);
+    $appTz = (string) ($config->get('timeZone') ?? 'UTC');
+
+    $ok(
+        'CalendarDateTimeResolver export TZ matches app config',
+        $resolver->getExportTimeZone() === $appTz,
+        'resolver=' . $resolver->getExportTimeZone() . ' config=' . $appTz
+    );
+
+    $buildDateTimeRange = new ReflectionMethod($eventPusherForDates, 'buildDateTimeRange');
+    $buildDateTimeRange->setAccessible(true);
+    $timedRange = $buildDateTimeRange->invoke(
+        $eventPusherForDates,
+        '2026-06-15 08:00:00',
+        '2026-06-15 08:45:00'
+    );
+
+    $expectedWallStart = $resolver->utcStorageToWallClockDateTime('2026-06-15 08:00:00');
+    $ok(
+        'buildDateTimeRange exports wall-clock dateTime + timeZone',
+        is_array($timedRange)
+            && ($timedRange['start']['dateTime'] ?? '') === $expectedWallStart
+            && ($timedRange['start']['timeZone'] ?? '') === $appTz
+            && ($timedRange['end']['timeZone'] ?? '') === $appTz,
+        'start=' . json_encode($timedRange['start'] ?? null)
     );
 } catch (Throwable $e) {
     $ok('EventPusher date source defaulting smoke', false, $e->getMessage());
@@ -783,6 +840,44 @@ $ok(
     is_array($syncJobMeta)
         && str_contains((string) ($syncJobMeta['jobClassName'] ?? ''), 'SyncCalendar')
 );
+
+echo "\nGCalSmoke entities (hash navigation QA)\n";
+
+foreach (['GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate'] as $smokeEntity) {
+    $smokeClientDefs = $metadata->get(['clientDefs', $smokeEntity]) ?? [];
+    $ok(
+        "$smokeEntity has clientDefs for hash navigation",
+        is_array($smokeClientDefs) && ($smokeClientDefs['controller'] ?? '') === 'controllers/record'
+    );
+    $smokeScopes = $metadata->get(['scopes', $smokeEntity]) ?? [];
+    $ok(
+        "$smokeEntity tab:false (no navbar tab)",
+        ($smokeScopes['tab'] ?? true) === false
+    );
+
+    $rSmokeList = $client->get("/api/v1/$smokeEntity", [
+        'query' => ['maxSize' => 1, 'select' => 'id,name'],
+    ]);
+    $ok(
+        "GET /api/v1/$smokeEntity list → 200",
+        $rSmokeList->getStatusCode() === 200,
+        'code=' . $rSmokeList->getStatusCode()
+    );
+
+    $smokeList = json_decode((string) $rSmokeList->getBody(), true);
+    $smokeId = is_array($smokeList['list'][0] ?? null) ? ($smokeList['list'][0]['id'] ?? '') : '';
+
+    if (is_string($smokeId) && $smokeId !== '') {
+        $rSmokeGet = $client->get("/api/v1/$smokeEntity/$smokeId", ['query' => ['select' => 'id,name']]);
+        $ok(
+            "GET /api/v1/$smokeEntity/{id} → 200",
+            $rSmokeGet->getStatusCode() === 200,
+            'id=' . $smokeId
+        );
+    } else {
+        $ok("GET /api/v1/$smokeEntity/{id} → 200", true, 'skipped (no seeded row)');
+    }
+}
 
 $smokeSourceEntityId = substr(Util::generateId(), 0, 17);
 
