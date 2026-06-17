@@ -14,7 +14,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     _select = _interopRequireDefault(_select);
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
-    const OPPORTUNITY_DATE_TYPE_LIST = ['presentationDate', 'closeDate'];
     const METHOD_LIST = ['popup', 'email'];
     const UNIT_LIST = ['minutes', 'hours', 'days', 'weeks'];
     const REMINDER_MODE_LIST = ['none', 'default', 'custom'];
@@ -254,7 +253,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
             const allowed = this.getAllowedDateTypeList();
 
-            if (!allowed.length && this.model.entityType !== 'Opportunity') {
+            if (!allowed.length) {
                 return false;
             }
 
@@ -317,10 +316,6 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 return this.dateSourceOptionList.map(item => item.sourceDateType);
             }
 
-            if (this.model.entityType === 'Opportunity') {
-                return OPPORTUNITY_DATE_TYPE_LIST;
-            }
-
             return [];
         }
 
@@ -340,7 +335,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
 
         normalizeItem(item) {
             const allowed = this.getAllowedDateTypeList();
-            const fallback = allowed[0] || 'closeDate';
+            const fallback = allowed[0] || item.sourceDateType || '';
 
             return {
                 sourceDateType: allowed.includes(item.sourceDateType) ? item.sourceDateType : fallback,
