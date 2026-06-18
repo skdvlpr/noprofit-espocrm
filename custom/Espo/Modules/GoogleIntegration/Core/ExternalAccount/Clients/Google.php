@@ -17,6 +17,7 @@ class Google extends BaseGoogle
 
     private const USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
     private const CALENDAR_LIST_URL = 'https://www.googleapis.com/calendar/v3/users/me/calendarList';
+    private const CALENDARS_URL = 'https://www.googleapis.com/calendar/v3/calendars';
     private const CALENDAR_EVENT_URL = 'https://www.googleapis.com/calendar/v3/calendars/%s/events';
 
     protected function getPingUrl()
@@ -141,6 +142,53 @@ class Google extends BaseGoogle
         ]));
 
         return is_array($result['items'] ?? null) ? $result['items'] : [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function insertCalendar(string $summary, string $timeZone = 'Europe/Rome'): array
+    {
+        $result = $this->request(
+            self::CALENDARS_URL,
+            Json::encode([
+                'summary' => $summary,
+                'timeZone' => $timeZone,
+            ]),
+            Client::HTTP_METHOD_POST,
+            Client::CONTENT_TYPE_APPLICATION_JSON
+        );
+
+        return is_array($result) ? $result : [];
+    }
+
+    public function findCalendarIdBySummary(string $summary): ?string
+    {
+        $needle = trim($summary);
+
+        if ($needle === '') {
+            return null;
+        }
+
+        foreach ($this->listCalendars() as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $itemSummary = trim((string) ($item['summary'] ?? ''));
+
+            if (strcasecmp($itemSummary, $needle) !== 0) {
+                continue;
+            }
+
+            $id = trim((string) ($item['id'] ?? ''));
+
+            if ($id !== '') {
+                return $id;
+            }
+        }
+
+        return null;
     }
 
     /**

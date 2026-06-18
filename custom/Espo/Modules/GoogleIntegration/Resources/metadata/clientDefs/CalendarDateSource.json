@@ -8,5 +8,20 @@
         "record/create": [
             "google-integration:handlers/calendar-date-source/record-setup"
         ]
+    },
+    "dynamicLogic": {
+        "fields": {
+            "dedicatedCalendarName": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "calendarRoutingMode",
+                            "value": "auto_dedicated"
+                        }
+                    ]
+                }
+            }
+        }
     }
 }

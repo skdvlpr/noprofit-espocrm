@@ -59,6 +59,12 @@
             ],
             [
                 {
+                    "name": "googleCalendarId"
+                },
+                false
+            ],
+            [
+                {
                     "name": "googleCalendarEventSettings",
                     "fullWidth": true
                 }

@@ -28,6 +28,9 @@ class GetGoogleCalendars implements Action
         }
 
         $list = [];
+        $connected = true;
+        $errorReason = null;
+        $errorMessage = null;
 
         try {
             foreach ($this->googleClientProvider->get()->listCalendars() as $item) {
@@ -47,14 +50,20 @@ class GetGoogleCalendars implements Action
                 ];
             }
         } catch (Forbidden) {
+            $connected = false;
+            $errorReason = 'not_connected';
+        } catch (Throwable $e) {
+            $connected = false;
+            $errorReason = 'api_error';
+            $errorMessage = $e->getMessage();
+        }
+
+        if (!$connected) {
             return ResponseComposer::json([
                 'list' => [['id' => 'primary', 'summary' => 'primary']],
                 'connected' => false,
-            ]);
-        } catch (Throwable) {
-            return ResponseComposer::json([
-                'list' => [['id' => 'primary', 'summary' => 'primary']],
-                'connected' => false,
+                'errorReason' => $errorReason,
+                'errorMessage' => $errorMessage,
             ]);
         }
 

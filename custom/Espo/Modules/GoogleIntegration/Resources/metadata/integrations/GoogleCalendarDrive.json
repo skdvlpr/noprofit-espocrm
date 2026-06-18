@@ -36,6 +36,10 @@
         "googleCalendarDescriptionTemplateVolunteerEmployee": {
             "type": "text",
             "default": "{{name}}\nStart: {{startDate}}\nEnd: {{endDate}}\n\n{{extra}}\n\nEspoCRM: {{espocrmUrl}}"
+        },
+        "googleCalendarAutoCreateEnabled": {
+            "type": "bool",
+            "default": false
         }
     },
     "params": {

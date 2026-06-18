@@ -204,6 +204,18 @@ if ($callId !== null) {
     $getBody = json_decode((string) $rGet->getBody(), true) ?: [];
     $ok('GET Call persists saveToGoogleCalendar', ($getBody['saveToGoogleCalendar'] ?? false) === true);
     $ok('GET Call persists googleCalendarId', ($getBody['googleCalendarId'] ?? '') === 'primary');
+
+    $familyCalendarId = 'family14994537548317285735@group.calendar.google.com';
+    $rPatch = $client->put('/api/v1/Call/' . $callId, [
+        'json' => ['googleCalendarId' => $familyCalendarId],
+    ]);
+    $patchBody = json_decode((string) $rPatch->getBody(), true) ?: [];
+    $ok(
+        'PUT Call accepts non-primary googleCalendarId',
+        $rPatch->getStatusCode() === 200 && ($patchBody['googleCalendarId'] ?? '') === $familyCalendarId,
+        'code=' . $rPatch->getStatusCode() . ' reason=' . $rPatch->getHeaderLine('X-Status-Reason')
+    );
+
     $client->delete('/api/v1/Call/' . $callId);
 }
 

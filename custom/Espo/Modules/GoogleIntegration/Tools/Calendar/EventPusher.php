@@ -45,7 +45,8 @@ class EventPusher
         private Acl $acl,
         private EventRemover $eventRemover,
         private CalendarDisplayDateResolver $calendarDisplayDateResolver,
-        private CalendarDateTimeResolver $calendarDateTimeResolver
+        private CalendarDateTimeResolver $calendarDateTimeResolver,
+        private CalendarProvisioner $calendarProvisioner
     ) {}
 
     public function pushIfRequested(Entity $entity, ?User $pushUserOverride = null): void
@@ -352,7 +353,7 @@ class EventPusher
             $events[] = [
                 'sourceDateType' => $sourceDateType,
                 'event' => $this->buildGoogleEvent($entity, $dateRange, $sourceDateType, $settings, $source),
-                'calendarId' => $this->resolveCalendarId($entity, $settings),
+                'calendarId' => $this->resolveCalendarId($entity, $source),
             ];
         }
 
@@ -394,20 +395,38 @@ class EventPusher
     }
 
     /**
-     * @param ?array<string, mixed> $settings
+     * @param ?array<string, mixed> $source
      */
-    private function resolveCalendarId(Entity $entity, ?array $settings): string
+    private function resolveCalendarId(Entity $entity, ?array $source): string
     {
-        $entityCalendarId = trim((string) ($entity->get('googleCalendarId') ?? ''));
+        $mode = CalendarRoutingMode::PRIMARY;
 
-        if ($entityCalendarId !== '') {
-            return $entityCalendarId;
+        if ($source !== null) {
+            $mode = CalendarRoutingMode::normalize(
+                is_string($source['calendarRoutingMode'] ?? null) ? $source['calendarRoutingMode'] : null
+            );
         }
 
-        $settingsCalendarId = trim((string) ($settings['calendarId'] ?? ''));
+        if ($mode === CalendarRoutingMode::USER_PICK) {
+            $entityCalendarId = trim((string) ($entity->get('googleCalendarId') ?? ''));
 
-        if ($settingsCalendarId !== '') {
-            return $settingsCalendarId;
+            return $entityCalendarId !== '' ? $entityCalendarId : self::DEFAULT_CALENDAR_ID;
+        }
+
+        if ($mode === CalendarRoutingMode::AUTO_DEDICATED) {
+            if ($source === null || !$this->integrationState->isGoogleCalendarAutoCreateEnabled()) {
+                return self::DEFAULT_CALENDAR_ID;
+            }
+
+            try {
+                return $this->calendarProvisioner->resolveDedicatedCalendarId($this->pushUser(), $source);
+            } catch (Throwable $e) {
+                $this->log->warning(
+                    'Google Calendar dedicated calendar resolve failed: ' . $e->getMessage()
+                );
+
+                return self::DEFAULT_CALENDAR_ID;
+            }
         }
 
         return self::DEFAULT_CALENDAR_ID;
@@ -469,6 +488,16 @@ class EventPusher
         $colorId = is_string($settings['colorId'] ?? null)
             ? trim($settings['colorId'])
             : '';
+
+        if ($colorId === '' && $source !== null) {
+            $defaultColorId = is_string($source['defaultColorId'] ?? null)
+                ? trim($source['defaultColorId'])
+                : '';
+
+            if ($defaultColorId !== '') {
+                $colorId = $defaultColorId;
+            }
+        }
 
         if ($colorId === '') {
             // Empty is the UI value for Google default color; the API represents it by omitting colorId.

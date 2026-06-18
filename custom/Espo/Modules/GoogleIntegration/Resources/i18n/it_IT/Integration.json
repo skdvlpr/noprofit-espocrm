@@ -7,7 +7,8 @@
         "googleCalendarDescriptionTemplateCall": "Template descrizione chiamata",
         "googleCalendarDescriptionTemplateTask": "Template descrizione compito",
         "googleCalendarDescriptionTemplateOpportunity": "Template descrizione finanziamento",
-        "googleCalendarDescriptionTemplateVolunteerEmployee": "Template descrizione volontario / dipendente"
+        "googleCalendarDescriptionTemplateVolunteerEmployee": "Template descrizione volontario / dipendente",
+        "googleCalendarAutoCreateEnabled": "Crea automaticamente calendari Google dedicati"
     },
     "labels": {
         "googleCalendarTemplateVariables": "Inserisci campo del record",
@@ -24,7 +25,9 @@
         "googleCalendarAdminDateSourcesTitle": "Origini date calendario",
         "googleCalendarAdminDateSourcesHelp": "Campi data CRM per calendario Espo ed esportazione Google.",
         "googleCalendarAdminCalendarTemplatesTitle": "Template calendario",
-        "googleCalendarAdminCalendarTemplatesHelp": "Descrizione evento, promemoria e colori per tipo entità."
+        "googleCalendarAdminCalendarTemplatesHelp": "Descrizione evento, promemoria e colori per tipo entità.",
+        "googleCalendarAutoCreateNoDedicatedWarning": "La creazione automatica è attiva, ma nessuna Origine data usa l'instradamento Calendario dedicato automatico. Gli eventi restano sul calendario principale finché non imposti l'instradamento su almeno un'origine.",
+        "googleCalendarAutoCreateHelp": "Consente all'instradamento auto_dedicated di creare/trovare calendari CRM - {label}. Devi anche impostare Instradamento calendario Google = Calendario dedicato automatico su ogni riga Origine data."
     },
     "help": {
         "GoogleCalendarDrive": "Spunta **Abilitato** per mostrare **Client ID** e **Client Secret** (Espo li nasconde se l’integrazione è disattivata). Copia il campo di sola lettura **Redirect URI** in questa pagina nella [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (credenziali **Applicazione web**). Deve coincidere esattamente (stesso host di **Amministrazione → Impostazioni → Site URL**). OAuth 2.0 per **Google Calendar** e **Google Drive** (`drive.file`). Abilita **Google Calendar API** e **Google Drive API**. Collegamento da **Account esterni personali** dopo Client ID / Secret."

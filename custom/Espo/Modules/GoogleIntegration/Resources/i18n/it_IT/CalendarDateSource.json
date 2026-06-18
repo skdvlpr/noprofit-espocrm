@@ -12,14 +12,17 @@
         "defaultTemplate": "Template predefinito",
         "sortOrder": "Ordine",
         "description": "Descrizione",
-        "setupGuide": "Guida configurazione"
+        "setupGuide": "Guida configurazione",
+        "calendarRoutingMode": "Instradamento calendario Google",
+        "dedicatedCalendarName": "Nome calendario dedicato",
+        "defaultColorId": "Colore Google predefinito"
     },
     "labels": {
         "CalendarDateSource": "Origine data calendario",
         "CalendarDateSourcePlural": "Origini date calendario",
         "Create CalendarDateSource": "Crea origine data calendario",
         "calendarDateSourceHelp": "Definisce quali campi data di un'entita CRM compaiono nel Calendario e nell'esportazione Google. Non modificare manualmente i nomi tecnici: usa i menu a tendina.",
-        "calendarDateSourceSetupGuide": "### Guida rapida\n\n| Campo | Significato |\n| --- | --- |\n| **Nome** | Titolo interno (es. *Fondi · data presentazione*). Visibile in elenco e ricerca. |\n| **Campo data inizio** | Campo CRM da leggere. Scegli **`dateStart`** / **`dateEnd`** (con orario), **non** i campi interni con “(tutto il giorno)” nel nome — sono nascosti da questo elenco. |\n| **Tutto il giorno** | Esporta come evento **tutto il giorno** in Google. **Attivo automaticamente** per campi `date`; visibile solo per `datetime` (es. `dateStart` di Riunione/Compito). Non duplicare “tutto il giorno” scegliendo un secondo campo dall'elenco. |\n| **Chiave data** | ID tecnico (`main`, `presentationDate`, …). Si aggiorna al cambio *Campo data inizio*. |\n| **Etichetta** | Suffisso nel titolo Google: `{nome record} - {etichetta}`. Se vuota → etichetta del campo data. |\n| **Ordine** | Priorità in elenco Origini date / Calendario (numero più basso = più in alto). |\n\n**Checklist**\n\n1. **Mostra nel calendario** attivo.\n2. Ricaricare Calendario (**Ctrl+Shift+R**).\n3. Le schede CRM devono avere un valore nel campo data nel mese visibile.",
+        "calendarDateSourceSetupGuide": "### Guida rapida\n\n| Campo | Significato |\n| --- | --- |\n| **Nome** | Titolo interno (es. *Fondi · data presentazione*). Visibile in elenco e ricerca. |\n| **Campo data inizio** | Campo CRM da leggere. Scegli **`dateStart`** / **`dateEnd`** (con orario), **non** i campi interni con “(tutto il giorno)” nel nome — sono nascosti da questo elenco. |\n| **Tutto il giorno** | Esporta come evento **tutto il giorno** in Google. **Attivo automaticamente** per campi `date`; visibile solo per `datetime` (es. `dateStart` di Riunione/Compito). Non duplicare “tutto il giorno” scegliendo un secondo campo dall'elenco. |\n| **Chiave data** | ID tecnico (`main`, `presentationDate`, …). Si aggiorna al cambio *Campo data inizio*. |\n| **Etichetta** | Suffisso nel titolo Google: `{nome record} - {etichetta}`. Se vuota → etichetta del campo data. |\n| **Instradamento calendario Google** | **Principale** → calendario principale. **Scelta utente** → l'utente sceglie il calendario sul record. **Dedicato automatico** → usa/crea `CRM - {Etichetta}` se in Integrazioni → Google è attiva la **creazione automatica**. |\n| **Ordine** | Priorità in elenco Origini date / Calendario (numero più basso = più in alto). |\n\n**Configurazione in due passi (auto-create)**\n\n1. Amministrazione → Integrazioni → Google → abilita **Crea automaticamente calendari Google dedicati**.\n2. Su questa riga imposta **Instradamento calendario Google** = **Calendario dedicato automatico**.\n\n**Checklist**\n\n1. **Mostra nel calendario** attivo.\n2. Ricaricare Calendario (**Ctrl+Shift+R**).\n3. Le schede CRM devono avere un valore nel campo data nel mese visibile.",
         "googleCalendarSelectTargetEntityFirst": "Seleziona prima l'entità di destinazione."
     },
     "tooltips": {
@@ -27,6 +30,29 @@
         "label": "Suffisso nel titolo evento in Calendario, dopo il nome record.",
         "sortOrder": "Priorità di ordinamento in elenco Origini date e in Calendario (non priorità CRM). Valori più bassi compaiono prima.",
         "dateField": "Campo CRM da usare. Campi datetime = eventi con orario; campi date = solo giornata intera.",
-        "allDay": "Se attivo, Google riceve un evento tutto il giorno. Per campi date è automatico e la casella è nascosta."
+        "allDay": "Se attivo, Google riceve un evento tutto il giorno. Per campi date è automatico e la casella è nascosta.",
+        "calendarRoutingMode": "primary = calendario principale; user_pick = l'utente sceglie sul record; auto_dedicated = crea/usa CRM - {etichetta} se l'admin ha abilitato la creazione automatica.",
+        "dedicatedCalendarName": "Nome personalizzato per auto_dedicated. Lascia vuoto per CRM - {Etichetta}."
+    },
+    "options": {
+        "calendarRoutingMode": {
+            "primary": "Calendario principale",
+            "user_pick": "Scelta utente",
+            "auto_dedicated": "Calendario dedicato automatico"
+        },
+        "defaultColorId": {
+            "": "Predefinito",
+            "1": "Lavanda",
+            "2": "Salvia",
+            "3": "Uva",
+            "4": "Fenicottero",
+            "5": "Banana",
+            "6": "Mandarino",
+            "7": "Pavone",
+            "8": "Grafite",
+            "9": "Mirtillo",
+            "10": "Basilico",
+            "11": "Pomodoro"
+        }
     }
 }

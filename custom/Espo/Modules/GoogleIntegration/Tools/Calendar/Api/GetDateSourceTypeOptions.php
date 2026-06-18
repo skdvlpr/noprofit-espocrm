@@ -33,6 +33,7 @@ class GetDateSourceTypeOptions implements Action
                 'sourceDateType' => (string) ($source['sourceDateType'] ?? 'main'),
                 'label' => (string) ($source['label'] ?? $source['name'] ?? ''),
                 'dateField' => (string) ($source['dateField'] ?? ''),
+                'calendarRoutingMode' => (string) ($source['calendarRoutingMode'] ?? 'primary'),
             ];
         }
 

@@ -276,6 +276,10 @@ foreach ($calendarCapableEntityTypes as $entityType) {
             $layoutHasField($layout, 'googleCalendarEventSettings')
         );
         $ok(
+            "$entityType $layoutType layout has googleCalendarId",
+            $layoutHasField($layout, 'googleCalendarId')
+        );
+        $ok(
             "$entityType $layoutType layout has no shared Google reminder fields",
             !$layoutHasField($layout, 'googleCalendarReminderMode')
                 && !$layoutHasField($layout, 'googleCalendarReminders')
@@ -324,12 +328,40 @@ $ok(
         && ($volunteerEmployeeEventSettings['view'] ?? null)
             === 'google-integration:views/fields/google-calendar-opportunity-event-settings'
 );
+$volunteerEmployeeCalendarId = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'googleCalendarId']);
+$ok(
+    'googleCalendarId is varchar (accepts dynamic Google calendar ids)',
+    is_array($volunteerEmployeeCalendarId)
+        && ($volunteerEmployeeCalendarId['type'] ?? null) === 'varchar'
+        && ($volunteerEmployeeCalendarId['view'] ?? null) === 'google-integration:views/fields/google-calendar-id'
+);
 
 $calendarDateSourceDefs = $metadata->get('entityDefs.CalendarDateSource');
 $calendarDateSourceFields = $calendarDateSourceDefs['fields'] ?? [];
 $calendarDateSourceScope = $metadata->get('scopes.CalendarDateSource') ?? [];
 $ok('CalendarDateSource metadata exists', is_array($calendarDateSourceFields) && isset($calendarDateSourceFields['targetEntityType']));
 $ok('CalendarDateSource has source fields', isset($calendarDateSourceFields['dateField'], $calendarDateSourceFields['sourceDateType'], $calendarDateSourceFields['calendarViewEnabled']));
+$ok(
+    'CalendarDateSource has calendar routing fields',
+    isset(
+        $calendarDateSourceFields['calendarRoutingMode'],
+        $calendarDateSourceFields['defaultColorId'],
+        $calendarDateSourceFields['dedicatedCalendarName']
+    )
+);
+$ok(
+    'CalendarDateSource calendarRoutingMode options',
+    in_array('user_pick', $calendarDateSourceFields['calendarRoutingMode']['options'] ?? [], true)
+        && in_array('auto_dedicated', $calendarDateSourceFields['calendarRoutingMode']['options'] ?? [], true)
+);
+$rCalendarDateSourceListLayout = $client->get('/api/v1/CalendarDateSource/layout/list');
+$calendarDateSourceListLayout = json_decode((string) $rCalendarDateSourceListLayout->getBody());
+$ok(
+    'CalendarDateSource list layout has calendarRoutingMode',
+    $rCalendarDateSourceListLayout->getStatusCode() === 200
+        && $layoutHasField($calendarDateSourceListLayout, 'calendarRoutingMode'),
+    'code=' . $rCalendarDateSourceListLayout->getStatusCode()
+);
 $ok(
     'CalendarDateSource targetEntityType accepts any date-capable entity (varchar)',
     ($calendarDateSourceFields['targetEntityType']['type'] ?? null) === 'varchar'
@@ -400,6 +432,25 @@ $ok(
     'GET google-calendars is routable',
     $rGoogleCalendars->getStatusCode() === 200 && is_array($googleCalendarsBody['list'] ?? null),
     'code=' . $rGoogleCalendars->getStatusCode()
+);
+$ok(
+    'GET google-calendars exposes connected flag',
+    array_key_exists('connected', $googleCalendarsBody)
+);
+$integrationFields = $metadata->get(['integrations', 'GoogleCalendarDrive', 'fields']) ?? [];
+$ok(
+    'Integration has googleCalendarAutoCreateEnabled field',
+    is_array($integrationFields) && isset($integrationFields['googleCalendarAutoCreateEnabled'])
+);
+$rCallDateSources = $client->get('/api/v1/GoogleIntegration/calendar/date-source-options/Call');
+$callDateSourcesBody = json_decode((string) $rCallDateSources->getBody(), true) ?: [];
+$callSources = is_array($callDateSourcesBody['sources'] ?? null) ? $callDateSourcesBody['sources'] : [];
+$callSourceHasRouting = $callSources !== []
+    && is_string($callSources[0]['calendarRoutingMode'] ?? null);
+$ok(
+    'GET date-source-options/Call includes calendarRoutingMode',
+    $rCallDateSources->getStatusCode() === 200 && $callSourceHasRouting,
+    'code=' . $rCallDateSources->getStatusCode()
 );
 $ok('CalendarDateSource scope is routable Base entity (no navbar tab)', ($calendarDateSourceScope['entity'] ?? null) === true && ($calendarDateSourceScope['type'] ?? null) === 'Base' && ($calendarDateSourceScope['tab'] ?? null) === false);
 $ok('CalendarDateSource client icon exists', ($metadata->get(['clientDefs', 'CalendarDateSource', 'iconClass']) ?? null) === 'fas fa-calendar-day');

@@ -9,7 +9,8 @@
         "googleCalendarNoVariables": "Nessuna variabile trovata",
         "googleCalendarPanelCloseHint": "Tasto destro per chiudere - ricerca salvata",
         "googleCalendarPrimary": "Calendario principale",
-        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari."
+        "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari.",
+        "googleCalendarListFailedHint": "Impossibile caricare i calendari Google. È disponibile solo il calendario principale."
     },
     "scopeNames": {
         "Account": "Account",

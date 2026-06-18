@@ -7,7 +7,8 @@
         "googleCalendarDescriptionTemplateCall": "Шаблон описания звонка",
         "googleCalendarDescriptionTemplateTask": "Шаблон описания задачи",
         "googleCalendarDescriptionTemplateOpportunity": "Шаблон описания финансирования",
-        "googleCalendarDescriptionTemplateVolunteerEmployee": "Шаблон описания волонтёра / сотрудника"
+        "googleCalendarDescriptionTemplateVolunteerEmployee": "Шаблон описания волонтёра / сотрудника",
+        "googleCalendarAutoCreateEnabled": "Автосоздание отдельных календарей Google"
     },
     "labels": {
         "googleCalendarTemplateVariables": "Вставить поле записи",
@@ -22,7 +23,9 @@
         "googleCalendarAdminDateSourcesTitle": "Источники дат календаря",
         "googleCalendarAdminDateSourcesHelp": "Поля дат CRM для календаря Espo и экспорта в Google.",
         "googleCalendarAdminCalendarTemplatesTitle": "Шаблоны календаря",
-        "googleCalendarAdminCalendarTemplatesHelp": "Описание события, напоминания и цвета по типу сущности."
+        "googleCalendarAdminCalendarTemplatesHelp": "Описание события, напоминания и цвета по типу сущности.",
+        "googleCalendarAutoCreateNoDedicatedWarning": "Автосоздание включено, но ни один источник дат не использует режим «Авто отдельный календарь». События останутся в основном календаре, пока не настроите маршрутизацию хотя бы на одном источнике.",
+        "googleCalendarAutoCreateHelp": "Разрешает режиму auto_dedicated создавать/находить календари CRM - {label}. Также нужно установить «Маршрутизация Google Calendar» = «Авто отдельный календарь» на каждой строке источника дат."
     },
     "help": {
         "GoogleCalendarDrive": "Сначала включите **Включено** — иначе **Client ID** и **Client Secret** скрыты. Скопируйте поле **Redirect URI** на этой странице в [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (тип **Web application**). URI должен совпадать побайтово (тот же хост, что в **Администрирование → Настройки → Site URL**). OAuth 2.0 для **Google Календаря** и **Drive** (`drive.file`). Включите **Google Calendar API** и **Google Drive API**. Подключение — в **личных внешних аккаунтах**."

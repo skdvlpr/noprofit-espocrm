@@ -59,6 +59,23 @@
             "default": 0,
             "tooltip": true
         },
+        "calendarRoutingMode": {
+            "type": "enum",
+            "options": ["primary", "user_pick", "auto_dedicated"],
+            "default": "primary",
+            "tooltip": true
+        },
+        "dedicatedCalendarName": {
+            "type": "varchar",
+            "maxLength": 255,
+            "tooltip": true
+        },
+        "defaultColorId": {
+            "type": "enum",
+            "options": ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+            "default": "",
+            "view": "google-integration:views/fields/google-calendar-color"
+        },
         "description": {
             "type": "text"
         },

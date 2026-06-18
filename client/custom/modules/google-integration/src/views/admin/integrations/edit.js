@@ -150,11 +150,81 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
             super.afterRender();
             this.syncCredentialFieldsVisibility();
             this.syncCalendarConfigPanelsVisibility();
+            this.syncAutoDedicatedWarning();
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.syncCredentialFieldsVisibility();
                 this.syncCalendarConfigPanelsVisibility();
+                this.syncAutoDedicatedWarning();
             });
+
+            this.listenTo(this.model, 'change:googleCalendarAutoCreateEnabled', () => {
+                this.syncAutoDedicatedWarning();
+            });
+        }
+
+        syncAutoDedicatedWarning() {
+            this.removeAutoDedicatedWarning();
+
+            if (!this.model.get('enabled') || !this.model.get('googleCalendarAutoCreateEnabled')) {
+                return;
+            }
+
+            Espo.Ajax.getRequest('CalendarDateSource', {
+                select: 'calendarRoutingMode,isActive',
+                maxSize: 200,
+            })
+                .then(response => {
+                    const list = Array.isArray(response.list) ? response.list : [];
+                    const dedicatedCount = list.filter(row => {
+                        return !!row.isActive && row.calendarRoutingMode === 'auto_dedicated';
+                    }).length;
+
+                    if (dedicatedCount > 0) {
+                        return;
+                    }
+
+                    this.renderAutoDedicatedWarning();
+                })
+                .catch(() => {
+                    void 0;
+                });
+        }
+
+        renderAutoDedicatedWarning() {
+            if (!this.$el) {
+                return;
+            }
+
+            const text = this.translate('googleCalendarAutoCreateNoDedicatedWarning', 'labels', 'Integration');
+            const linkLabel = this.translate('CalendarDateSource', 'scopeNamesPlural', 'Global');
+            const $warning = $('<div>')
+                .addClass('alert alert-warning google-calendar-auto-dedicated-warning margin-top')
+                .append(
+                    $('<span>').addClass('google-calendar-auto-dedicated-warning-text').text(text),
+                    ' ',
+                    $('<a>')
+                        .attr('href', '#CalendarDateSource')
+                        .text(linkLabel)
+                );
+
+            const $anchor = this.$el.find('.field[data-name="googleCalendarAutoCreateEnabled"]')
+                .closest('.cell, .field');
+
+            if ($anchor.length) {
+                $anchor.after($warning);
+                return;
+            }
+
+            this.$el.find('.gi-panel .panel-body-form').first().append($warning);
+        }
+
+        removeAutoDedicatedWarning() {
+            if (!this.$el) {
+                return;
+            }
+
+            this.$el.find('.google-calendar-auto-dedicated-warning').remove();
         }
 
         syncCalendarConfigPanelsVisibility() {

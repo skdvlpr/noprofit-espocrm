@@ -11,6 +11,8 @@
             [{"name": "name"}, {"name": "targetEntityType"}],
             [{"name": "dateField"}, {"name": "endDateField"}],
             [{"name": "sourceDateType"}, {"name": "label"}],
+            [{"name": "calendarRoutingMode"}, {"name": "defaultColorId"}],
+            [{"name": "dedicatedCalendarName"}, false],
             [{"name": "isActive"}, {"name": "calendarViewEnabled"}],
             [{"name": "allDay"}, {"name": "sortOrder"}],
             [{"name": "defaultTemplate"}, false],

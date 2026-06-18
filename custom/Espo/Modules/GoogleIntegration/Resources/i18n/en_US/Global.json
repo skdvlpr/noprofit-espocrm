@@ -9,7 +9,8 @@
         "googleCalendarNoVariables": "No variables found",
         "googleCalendarPanelCloseHint": "Right-click to close - search is remembered",
         "googleCalendarPrimary": "Primary calendar",
-        "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list."
+        "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list.",
+        "googleCalendarListFailedHint": "Could not load your Google calendars. Only the primary calendar is available."
     },
     "scopeNames": {
         "Account": "Account",

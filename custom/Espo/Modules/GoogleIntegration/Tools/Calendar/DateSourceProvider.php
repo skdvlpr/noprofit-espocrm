@@ -152,6 +152,11 @@ class DateSourceProvider
                 'calendarViewEnabled' => (bool) $entity->get('calendarViewEnabled'),
                 'defaultTemplateId' => $entity->get('defaultTemplateId'),
                 'sortOrder' => (int) ($entity->get('sortOrder') ?? 0),
+                'calendarRoutingMode' => CalendarRoutingMode::normalize(
+                    is_string($entity->get('calendarRoutingMode')) ? $entity->get('calendarRoutingMode') : null
+                ),
+                'dedicatedCalendarName' => $entity->get('dedicatedCalendarName'),
+                'defaultColorId' => $entity->get('defaultColorId') ?? '',
             ];
         }
 

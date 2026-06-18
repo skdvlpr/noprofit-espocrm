@@ -42,4 +42,20 @@ class IntegrationState
     {
         return $this->isGoogleCalendarDriveEnabled();
     }
+
+    public function isGoogleCalendarAutoCreateEnabled(): bool
+    {
+        if (!$this->isGoogleIntegrationEnabled()) {
+            return false;
+        }
+
+        $integration = $this->entityManager
+            ->getEntityById(IntegrationEntity::ENTITY_TYPE, Installer::INTEGRATION_ID);
+
+        if ($integration === null) {
+            return false;
+        }
+
+        return (bool) $integration->get('googleCalendarAutoCreateEnabled');
+    }
 }

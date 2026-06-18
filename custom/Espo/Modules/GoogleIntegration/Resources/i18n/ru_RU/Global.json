@@ -9,7 +9,8 @@
         "googleCalendarNoVariables": "Переменные не найдены",
         "googleCalendarPanelCloseHint": "Правый клик - закрыть, поиск сохраняется",
         "googleCalendarPrimary": "Основной календарь",
-        "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей."
+        "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей.",
+        "googleCalendarListFailedHint": "Не удалось загрузить календари Google. Доступен только основной календарь."
     },
     "scopeNames": {
         "Account": "Account",
