@@ -17,8 +17,8 @@ use Espo\Core\Utils\Config\ConfigWriter;
  *   - {@see \Espo\Modules\SafehouseCrm\AfterInstall} — the in-module class used
  *     when the module ships pre-installed (e.g. during dev workflows).
  *
- * Keeping the logic here ensures both flows hide Lead/Case from navigation,
- * surface Safehouse custom tabs in the `$CRM` block, provision the canonical
+ * Keeping the logic here ensures both flows hide Case from navigation, restore
+ * Lead in the `$CRM` block, surface Safehouse custom tabs, provision the canonical
  * roles + Administration team, and rebuild metadata.
  *
  * The class is intentionally Container-based (rather than constructor DI) so
@@ -35,7 +35,10 @@ class Installer
 
     private const OTHER_TABS_TO_ENSURE = ['Account', 'Opportunity', 'Document'];
 
-    private const ENTITIES_TO_HIDE = ['Lead', 'Case'];
+    private const ENTITIES_TO_HIDE = ['Case'];
+
+    /** Placed in `$CRM` immediately after Contact (when present). */
+    private const LEAD_NAV_TAB = 'Lead';
 
     private const CRM_DIVIDER_TEXT = '$CRM';
 
@@ -50,16 +53,20 @@ class Installer
         $tabList = $config->get('tabList', []) ?? [];
         $quickCreateList = $config->get('quickCreateList', []) ?? [];
 
-        foreach (array_merge(self::DOMAIN_ENTITIES, self::OTHER_TABS_TO_ENSURE) as $item) {
+        foreach (array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES, self::OTHER_TABS_TO_ENSURE) as $item) {
             if (!in_array($item, $tabList, true)) {
                 $tabList[] = $item;
             }
         }
 
         $tabList = $this->removeEntitiesFromList($tabList, self::ENTITIES_TO_HIDE);
-        $tabList = $this->reorderDomainEntitiesIntoCrmBlock($tabList, self::DOMAIN_ENTITIES);
+        $tabList = $this->reorderCrmNavbarBlock($tabList);
 
         $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::ENTITIES_TO_HIDE);
+
+        if (!in_array(self::LEAD_NAV_TAB, $quickCreateList, true)) {
+            $quickCreateList[] = self::LEAD_NAV_TAB;
+        }
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -88,20 +95,20 @@ class Installer
     }
 
     /**
-     * Move the domain entities into the top `$CRM` navbar section, placing them
-     * right after `Contact` (or right after the `$CRM` divider if `Contact` is
-     * absent, or at the head if neither is present).
+     * Move Lead + domain entities into the top `$CRM` navbar section:
+     * Contact → Lead → VolunteerEmployee → Member → MealCount.
      *
      * @param array<int, mixed> $tabList
-     * @param string[] $domainEntities
      * @return array<int, mixed>
      */
-    private function reorderDomainEntitiesIntoCrmBlock(array $tabList, array $domainEntities): array
+    private function reorderCrmNavbarBlock(array $tabList): array
     {
+        $crmEntities = array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES);
+
         $without = array_values(array_filter(
             $tabList,
-            static function ($item) use ($domainEntities): bool {
-                return !(is_string($item) && in_array($item, $domainEntities, true));
+            static function ($item) use ($crmEntities): bool {
+                return !(is_string($item) && in_array($item, $crmEntities, true));
             }
         ));
 
@@ -132,7 +139,7 @@ class Installer
 
         return array_merge(
             array_slice($without, 0, $insertIndex),
-            $domainEntities,
+            $crmEntities,
             array_slice($without, $insertIndex)
         );
     }

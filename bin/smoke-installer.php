@@ -5,7 +5,8 @@
  * (`Espo\Modules\SafehouseCrm\AfterInstall`).
  *
  * Asserts after the run:
- *   - `Lead` and `Case` are absent from `tabList` and `quickCreateList`;
+ *   - `Case` is absent from `tabList` and `quickCreateList`;
+ *   - `Lead` is present in `tabList` and `quickCreateList`;
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
  *     `MealCount`) are present in `tabList`;
  *   - canonical roles + Administration team exist;
@@ -49,9 +50,9 @@ $quickCreateList = $config->get('quickCreateList', []) ?? [];
 $tabStrings = array_filter($tabList, 'is_string');
 $qcStrings = array_filter($quickCreateList, 'is_string');
 
-$report('Lead absent from tabList', !in_array('Lead', $tabStrings, true));
+$report('Lead present in tabList', in_array('Lead', $tabStrings, true));
 $report('Case absent from tabList', !in_array('Case', $tabStrings, true));
-$report('Lead absent from quickCreateList', !in_array('Lead', $qcStrings, true));
+$report('Lead present in quickCreateList', in_array('Lead', $qcStrings, true));
 $report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true));
 
 foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity', 'Document'] as $must) {

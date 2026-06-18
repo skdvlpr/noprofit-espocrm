@@ -1,5 +1,6 @@
 {
     "scopeNames": {
+        "Lead": "Lead",
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайт организации",
         "VolunteerEmployee": "Сотрудники / Волонтеры",
@@ -7,6 +8,7 @@
         "MealCount": "Учет питания"
     },
     "scopeNamesPlural": {
+        "Lead": "Leads",
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайты организаций",
         "VolunteerEmployee": "Сотрудники / Волонтеры",

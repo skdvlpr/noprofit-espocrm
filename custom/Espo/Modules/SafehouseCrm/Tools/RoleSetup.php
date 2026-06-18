@@ -502,6 +502,7 @@ class RoleSetup
         foreach ($domainEntities as $e) {
             $adminData[$e] = $allFull();
         }
+        $adminData['Lead'] = $allFull();
 
         $employeeData = [];
         foreach ($domainEntities as $e) {
@@ -517,6 +518,7 @@ class RoleSetup
         $employeeData['Member'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
+        $employeeData['Lead'] = $teamCreateOwnDelete();
 
         /** @var array<string, array<string, string>> $managerData */
         $managerData = json_decode(json_encode($employeeData), true);
@@ -527,6 +529,9 @@ class RoleSetup
         $managerData['Member'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
         ];
+        $managerData['Lead'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
+        ];
 
         $volunteerData = [];
         foreach ($domainEntities as $e) {
@@ -534,6 +539,7 @@ class RoleSetup
         }
         // Grants & Funding entity type is still `Opportunity` (Espo core).
         $volunteerData['Opportunity'] = $blocked();
+        $volunteerData['Lead'] = $blocked();
         $volunteerData['Member'] = $blocked();
         $volunteerData['VolunteerEmployee'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
@@ -573,6 +579,7 @@ class RoleSetup
         foreach ($domainEntities as $e) {
             $memberData[$e] = $blocked();
         }
+        $memberData['Lead'] = $blocked();
         $memberData['Account']  = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
         $memberData['Contact']  = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
         $memberData['Document'] = ['create' => 'no', 'read' => 'own', 'edit' => 'no',  'delete' => 'no', 'stream' => 'own'];

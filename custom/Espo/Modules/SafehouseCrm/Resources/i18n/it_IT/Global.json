@@ -1,5 +1,6 @@
 {
     "scopeNames": {
+        "Lead": "Lead",
         "Opportunity": "Fondi e Finanziamenti",
         "AccountWebsite": "Sito dell'Organizzazione",
         "VolunteerEmployee": "Volontari / Dipendenti",
@@ -7,6 +8,7 @@
         "MealCount": "Conteggio Pasti"
     },
     "scopeNamesPlural": {
+        "Lead": "Lead",
         "Opportunity": "Fondi e Finanziamenti",
         "AccountWebsite": "Siti delle Organizzazioni",
         "VolunteerEmployee": "Volontari / Dipendenti",

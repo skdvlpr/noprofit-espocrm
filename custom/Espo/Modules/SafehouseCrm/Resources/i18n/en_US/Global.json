@@ -1,5 +1,6 @@
 {
     "scopeNames": {
+        "Lead": "Lead",
         "Opportunity": "Grants & Funding",
         "AccountWebsite": "Account Website",
         "VolunteerEmployee": "Volunteers / Employees",
@@ -7,6 +8,7 @@
         "MealCount": "Meal Count"
     },
     "scopeNamesPlural": {
+        "Lead": "Leads",
         "Opportunity": "Grants & Funding",
         "AccountWebsite": "Account Websites",
         "VolunteerEmployee": "Volunteers / Employees",
