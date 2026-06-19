@@ -138,21 +138,21 @@ File: `Resources/metadata/scopes/{EntityName}.json`
 
 ### ENT-004 — Navigation registration
 
-Navigation tabs are managed via `AfterInstall.php` using `ConfigWriter`. **NEVER** edit `navbar.json` or `config.php` directly.
+Navigation tabs are managed via `Tools/Installer::runPostInstall()` using `ConfigWriter`. **NEVER** edit `navbar.json` or `data/config.php` directly.
+
+**CRM block (`$CRM`):** `Contact` → `Lead` → `VolunteerEmployee` → `Member`.
+
+**Reporting block (`$Rendicontazione`):** `MealCount` (and later `AssociationMealCount`). Reporting entities live under this divider, not as top-level `$CRM` tabs. Label via `Resources/i18n/*/Global.json` → `navbarTabs.Rendicontazione` (IT: **Rendicontazione**, EN: **Reporting**).
 
 ```
-// AfterInstall.php
-$config = $this->getHelper('config');
-$tabList = $config->get('tabList', []);
-$toAdd = ['MealCount', 'VolunteerEmployee', 'Member'];
-foreach ($toAdd as $item) {
-    if (!in_array($item, $tabList)) {
-        $tabList[] = $item;
-    }
-}
-$config->set('tabList', $tabList);
-$config->save();
+// Tools/Installer.php — single source of truth
+$tabList = $this->reorderCrmNavbarBlock($tabList);
+$tabList = $this->reorderReportingNavbarBlock($tabList);
+$configWriter->set('tabList', $tabList);
+$configWriter->save();
 ```
+
+CLI refresh: `ddev exec php bin/reorder-safehouse-tabs.php` (delegates to Installer).
 
 ## SECTION 4 — FIELD RULES (FLD-\*)
 

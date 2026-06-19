@@ -11,8 +11,9 @@ use Espo\Modules\SafehouseCrm\Tools\Installer;
  * {@see Installer} which centralises the post-install actions:
  *
  *   - ensure Safehouse custom entities are visible in `tabList`;
- *   - hide `Lead` and `Case` from `tabList` and `quickCreateList`;
- *   - reorder domain entities into the top `$CRM` navbar block;
+ *   - hide `Case` from `tabList` and `quickCreateList`;
+ *   - restore `Lead` and reorder domain entities into the top `$CRM` block;
+ *   - place reporting entities under `$Rendicontazione`;
  *   - provision the canonical roles (Admin, Employee, Manager, Volunteer,
  *     Member) and the `Administration` team idempotently;
  *   - rebuild metadata so the changes are picked up immediately.

@@ -7,8 +7,10 @@
  * Asserts after the run:
  *   - `Case` is absent from `tabList` and `quickCreateList`;
  *   - `Lead` is present in `tabList` and `quickCreateList`;
- *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`,
- *     `MealCount`) are present in `tabList`;
+ *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`) are present
+ *     in `tabList`;
+ *   - `MealCount` is under the `$Rendicontazione` navbar group (not directly
+ *     after `Member` in the `$CRM` block);
  *   - canonical roles + Administration team exist;
  *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy cleanup);
  *   - rerunning is idempotent (counts stable).
@@ -58,6 +60,39 @@ $report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true))
 foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity', 'Document'] as $must) {
     $report("$must present in tabList", in_array($must, $tabStrings, true));
 }
+
+$rendicontazioneIndex = null;
+foreach ($tabList as $i => $item) {
+    if (
+        is_object($item)
+        && ($item->type ?? null) === 'divider'
+        && ($item->text ?? null) === '$Rendicontazione'
+    ) {
+        $rendicontazioneIndex = $i;
+        break;
+    }
+}
+$report(
+    '$Rendicontazione divider present in tabList',
+    $rendicontazioneIndex !== null
+);
+$report(
+    'MealCount immediately under $Rendicontazione',
+    $rendicontazioneIndex !== null
+        && ($tabList[$rendicontazioneIndex + 1] ?? null) === 'MealCount'
+);
+$memberIndex = null;
+foreach ($tabList as $i => $item) {
+    if ($item === 'Member') {
+        $memberIndex = $i;
+        break;
+    }
+}
+$report(
+    'MealCount not directly after Member (out of $CRM block)',
+    $memberIndex === null
+        || ($tabList[$memberIndex + 1] ?? null) !== 'MealCount'
+);
 
 $em = $container->get('entityManager');
 $roleNames = [];

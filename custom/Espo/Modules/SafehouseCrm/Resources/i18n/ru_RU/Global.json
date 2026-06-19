@@ -17,7 +17,8 @@
     },
     "navbarTabs": {
         "mainSections": "Главные разделы",
-        "CRM": "Главные разделы"
+        "CRM": "Главные разделы",
+        "Rendicontazione": "Отчётность"
     },
     "labels": {
         "Create VolunteerEmployee": "Создать новый",

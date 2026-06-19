@@ -18,8 +18,9 @@ use Espo\Core\Utils\Config\ConfigWriter;
  *     when the module ships pre-installed (e.g. during dev workflows).
  *
  * Keeping the logic here ensures both flows hide Case from navigation, restore
- * Lead in the `$CRM` block, surface Safehouse custom tabs, provision the canonical
- * roles + Administration team, and rebuild metadata.
+ * Lead in the `$CRM` block, place reporting entities under `$Rendicontazione`,
+ * surface Safehouse custom tabs, provision the canonical roles + Administration
+ * team, and rebuild metadata.
  *
  * The class is intentionally Container-based (rather than constructor DI) so
  * it can be invoked from `scripts/AfterInstall.php`, which receives a bare
@@ -30,6 +31,9 @@ class Installer
     private const DOMAIN_ENTITIES = [
         'VolunteerEmployee',
         'Member',
+    ];
+
+    private const REPORTING_ENTITIES = [
         'MealCount',
     ];
 
@@ -42,7 +46,13 @@ class Installer
 
     private const CRM_DIVIDER_TEXT = '$CRM';
 
+    private const REPORTING_DIVIDER_TEXT = '$Rendicontazione';
+
+    private const REPORTING_DIVIDER_ID = '748201';
+
     private const ANCHOR_BEFORE = 'Contact';
+
+    private const REPORTING_ANCHOR_AFTER = 'Member';
 
     public function runPostInstall(Container $container): void
     {
@@ -53,7 +63,14 @@ class Installer
         $tabList = $config->get('tabList', []) ?? [];
         $quickCreateList = $config->get('quickCreateList', []) ?? [];
 
-        foreach (array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES, self::OTHER_TABS_TO_ENSURE) as $item) {
+        foreach (
+            array_merge(
+                [self::LEAD_NAV_TAB],
+                self::DOMAIN_ENTITIES,
+                self::REPORTING_ENTITIES,
+                self::OTHER_TABS_TO_ENSURE
+            ) as $item
+        ) {
             if (!in_array($item, $tabList, true)) {
                 $tabList[] = $item;
             }
@@ -61,6 +78,7 @@ class Installer
 
         $tabList = $this->removeEntitiesFromList($tabList, self::ENTITIES_TO_HIDE);
         $tabList = $this->reorderCrmNavbarBlock($tabList);
+        $tabList = $this->reorderReportingNavbarBlock($tabList);
 
         $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::ENTITIES_TO_HIDE);
 
@@ -95,8 +113,8 @@ class Installer
     }
 
     /**
-     * Move Lead + domain entities into the top `$CRM` navbar section:
-     * Contact → Lead → VolunteerEmployee → Member → MealCount.
+     * Move Lead + CRM domain entities into the top `$CRM` navbar section:
+     * Contact → Lead → VolunteerEmployee → Member.
      *
      * @param array<int, mixed> $tabList
      * @return array<int, mixed>
@@ -142,5 +160,71 @@ class Installer
             $crmEntities,
             array_slice($without, $insertIndex)
         );
+    }
+
+    /**
+     * Place reporting entities under a `$Rendicontazione` navbar group
+     * immediately after Member (fallback: after last CRM domain entity).
+     *
+     * @param array<int, mixed> $tabList
+     * @return array<int, mixed>
+     */
+    private function reorderReportingNavbarBlock(array $tabList): array
+    {
+        $reportingEntities = self::REPORTING_ENTITIES;
+
+        $without = array_values(array_filter(
+            $tabList,
+            static function ($item) use ($reportingEntities): bool {
+                if (is_string($item) && in_array($item, $reportingEntities, true)) {
+                    return false;
+                }
+
+                return !(
+                    is_object($item)
+                    && ($item->type ?? null) === 'divider'
+                    && ($item->text ?? null) === self::REPORTING_DIVIDER_TEXT
+                );
+            }
+        ));
+
+        $insertIndex = $this->resolveReportingInsertIndex($without);
+
+        $divider = (object) [
+            'type' => 'divider',
+            'text' => self::REPORTING_DIVIDER_TEXT,
+            'id' => self::REPORTING_DIVIDER_ID,
+        ];
+
+        $block = array_merge([$divider], $reportingEntities);
+
+        return array_merge(
+            array_slice($without, 0, $insertIndex),
+            $block,
+            array_slice($without, $insertIndex)
+        );
+    }
+
+    /**
+     * @param array<int, mixed> $tabList
+     */
+    private function resolveReportingInsertIndex(array $tabList): int
+    {
+        foreach ($tabList as $i => $item) {
+            if (is_string($item) && $item === self::REPORTING_ANCHOR_AFTER) {
+                return $i + 1;
+            }
+        }
+
+        $crmEntities = array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES);
+
+        for ($i = count($tabList) - 1; $i >= 0; $i--) {
+            $item = $tabList[$i];
+            if (is_string($item) && in_array($item, $crmEntities, true)) {
+                return $i + 1;
+            }
+        }
+
+        return count($tabList);
     }
 }

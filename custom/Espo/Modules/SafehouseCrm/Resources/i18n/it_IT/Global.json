@@ -17,7 +17,8 @@
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
-        "CRM": "Sezioni Principali"
+        "CRM": "Sezioni Principali",
+        "Rendicontazione": "Rendicontazione"
     },
     "labels": {
         "Create VolunteerEmployee": "Crea Nuovo",
