@@ -13,8 +13,8 @@
         "stream"
     ],
     "stream": true,
-    "color": "#2ecc71",
-    "iconClass": "fas fa-id-card",
+    "color": "#a89078",
+    "iconClass": "fas fa-handshake",
     "importable": true,
     "customizable": true,
     "duplicateCheckFieldList": ["taxCode", "name", "emailAddress"]

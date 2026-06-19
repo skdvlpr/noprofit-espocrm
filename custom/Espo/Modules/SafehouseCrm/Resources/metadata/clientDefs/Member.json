@@ -3,6 +3,6 @@
     "recordViews": {
         "list": "safehouse-crm:views/record/list-inline-edit"
     },
-    "color": "#41b39d",
-    "iconClass": "fas fa-id-card"
+    "color": "#a89078",
+    "iconClass": "fas fa-handshake"
 }
