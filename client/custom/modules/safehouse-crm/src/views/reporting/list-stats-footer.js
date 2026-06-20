@@ -26,13 +26,18 @@ define('safehouse-crm:views/reporting/list-stats-footer', ['exports'], function 
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-footer').remove();
+            const removeSelector = options.removeSelector || '.safehouse-reporting-stats-footer';
+            const extraClass = options.extraClass || '';
+
+            $container.find(removeSelector).remove();
 
             const items = options.items || [];
             const title = options.title || this.view.translate('reportingListStatsTitle', 'labels', 'Global');
 
             const $footer = $('<div>')
-                .addClass('safehouse-reporting-stats-footer alert alert-info margin-bottom');
+                .addClass('safehouse-reporting-stats-footer alert alert-info margin-bottom')
+                .addClass(removeSelector.replace('.', ''))
+                .addClass(extraClass);
 
             $footer.append($('<strong>').addClass('safehouse-reporting-stats-title').text(title));
 

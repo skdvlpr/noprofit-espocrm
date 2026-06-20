@@ -23,7 +23,12 @@
     "labels": {
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
-        "Create MealCount": "Crea Nuovo"
+        "Create MealCount": "Crea Nuovo",
+        "reportingListStatsMonth": "Totali mese corrente",
+        "reportingListStatsYear": "Totali anno corrente",
+        "reportingListStatsTitle": "Totali rendicontazione",
+        "reportingExportIncludeTotals": "Includi riga Totali",
+        "reportingExportTotalsLabel": "Totali"
     },
     "themes": {
         "SafehouseAurora": "Safehouse Aurora",

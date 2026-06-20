@@ -23,7 +23,12 @@
     "labels": {
         "Create VolunteerEmployee": "Create New",
         "Create Member": "Create New",
-        "Create MealCount": "Create New"
+        "Create MealCount": "Create New",
+        "reportingListStatsMonth": "Current month totals",
+        "reportingListStatsYear": "Current year totals",
+        "reportingListStatsTitle": "Reporting totals",
+        "reportingExportIncludeTotals": "Include totals row",
+        "reportingExportTotalsLabel": "Totals"
     },
     "themes": {
         "SafehouseAurora": "Safehouse Aurora",

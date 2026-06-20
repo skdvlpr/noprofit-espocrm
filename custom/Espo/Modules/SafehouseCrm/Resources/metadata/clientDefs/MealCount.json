@@ -1,7 +1,7 @@
 {
     "controller": "controllers/record",
     "recordViews": {
-        "list": "safehouse-crm:views/record/list-inline-edit"
+        "list": "safehouse-crm:views/meal-count/list"
     },
     "color": "#dd7e4a",
     "iconClass": "fas fa-utensils"
