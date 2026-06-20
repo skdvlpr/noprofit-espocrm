@@ -140,14 +140,16 @@ File: `Resources/metadata/scopes/{EntityName}.json`
 
 Navigation tabs are managed via `Tools/Installer::runPostInstall()` using `ConfigWriter`. **NEVER** edit `navbar.json` or `data/config.php` directly.
 
-**CRM block (`$CRM`):** `Contact` → `Lead` → `VolunteerEmployee` → `Member`.
+**CRM block (`$CRM`):** `Contact` → `Lead` → `VolunteerEmployee` → `Member` → `Opportunity` (F&F).
 
-**Reporting block (`$Rendicontazione`):** `MealCount` (and later `AssociationMealCount`). Reporting entities live under this divider, not as top-level `$CRM` tabs. Label via `Resources/i18n/*/Global.json` → `navbarTabs.Rendicontazione` (IT: **Rendicontazione**, EN: **Reporting**).
+**Reporting dropdown (`type: group`, NOT `type: divider`):** native Espo group tab with label `$Rendicontazione` — works in **horizontal and vertical** navbars (divider groups are side-navbar only). `itemList` contains **only** reporting entities (`MealCount`, later `AssociationMealCount`). **Never** put `Opportunity` or other CRM scopes in this group.
+
+Label via `Resources/i18n/*/Global.json` → `navbarTabs.Rendicontazione` (IT: **Rendicontazione**, EN: **Reporting**).
 
 ```
 // Tools/Installer.php — single source of truth
 $tabList = $this->reorderCrmNavbarBlock($tabList);
-$tabList = $this->reorderReportingNavbarBlock($tabList);
+$tabList = $this->reorderReportingNavbarBlock($tabList); // inserts type: group
 $configWriter->set('tabList', $tabList);
 $configWriter->save();
 ```

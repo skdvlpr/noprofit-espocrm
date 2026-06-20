@@ -18,7 +18,8 @@ use Espo\Core\Utils\Config\ConfigWriter;
  *     when the module ships pre-installed (e.g. during dev workflows).
  *
  * Keeping the logic here ensures both flows hide Case from navigation, restore
- * Lead in the `$CRM` block, place reporting entities under `$Rendicontazione`,
+ * Lead in the `$CRM` block, place reporting entities in a native navbar group
+ * tab (`type: group` dropdown — works in horizontal and vertical navbars),
  * surface Safehouse custom tabs, provision the canonical roles + Administration
  * team, and rebuild metadata.
  *
@@ -46,13 +47,13 @@ class Installer
 
     private const CRM_DIVIDER_TEXT = '$CRM';
 
-    private const REPORTING_DIVIDER_TEXT = '$Rendicontazione';
-
-    private const REPORTING_DIVIDER_ID = '748201';
+    /** Navbar group label key — translated via Global.json → navbarTabs.Rendicontazione */
+    private const REPORTING_GROUP_TEXT = '$Rendicontazione';
 
     private const ANCHOR_BEFORE = 'Contact';
 
-    private const REPORTING_ANCHOR_AFTER = 'Member';
+    /** Reporting dropdown sits after F&F (Opportunity), not inside it. */
+    private const REPORTING_GROUP_ANCHOR_AFTER = 'Opportunity';
 
     public function runPostInstall(Container $container): void
     {
@@ -163,8 +164,9 @@ class Installer
     }
 
     /**
-     * Place reporting entities under a `$Rendicontazione` navbar group
-     * immediately after Member (fallback: after last CRM domain entity).
+     * Place reporting entities in a native Espo navbar group tab (`type: group`).
+     * Dropdown works in horizontal and vertical navbars. Only reporting entities
+     * belong in itemList — Opportunity (F&F) stays a top-level CRM tab.
      *
      * @param array<int, mixed> $tabList
      * @return array<int, mixed>
@@ -180,27 +182,34 @@ class Installer
                     return false;
                 }
 
-                return !(
-                    is_object($item)
-                    && ($item->type ?? null) === 'divider'
-                    && ($item->text ?? null) === self::REPORTING_DIVIDER_TEXT
-                );
+                if (!is_object($item)) {
+                    return true;
+                }
+
+                $type = $item->type ?? null;
+                $text = $item->text ?? null;
+
+                if ($type === 'divider' && $text === self::REPORTING_GROUP_TEXT) {
+                    return false;
+                }
+
+                return !($type === 'group' && $text === self::REPORTING_GROUP_TEXT);
             }
         ));
 
-        $insertIndex = $this->resolveReportingInsertIndex($without);
+        $insertIndex = $this->resolveReportingGroupInsertIndex($without);
 
-        $divider = (object) [
-            'type' => 'divider',
-            'text' => self::REPORTING_DIVIDER_TEXT,
-            'id' => self::REPORTING_DIVIDER_ID,
+        $group = (object) [
+            'type' => 'group',
+            'text' => self::REPORTING_GROUP_TEXT,
+            'iconClass' => 'fas fa-chart-bar',
+            'color' => '#c4886b',
+            'itemList' => $reportingEntities,
         ];
-
-        $block = array_merge([$divider], $reportingEntities);
 
         return array_merge(
             array_slice($without, 0, $insertIndex),
-            $block,
+            [$group],
             array_slice($without, $insertIndex)
         );
     }
@@ -208,19 +217,16 @@ class Installer
     /**
      * @param array<int, mixed> $tabList
      */
-    private function resolveReportingInsertIndex(array $tabList): int
+    private function resolveReportingGroupInsertIndex(array $tabList): int
     {
         foreach ($tabList as $i => $item) {
-            if (is_string($item) && $item === self::REPORTING_ANCHOR_AFTER) {
+            if ($item === self::REPORTING_GROUP_ANCHOR_AFTER) {
                 return $i + 1;
             }
         }
 
-        $crmEntities = array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES);
-
-        for ($i = count($tabList) - 1; $i >= 0; $i--) {
-            $item = $tabList[$i];
-            if (is_string($item) && in_array($item, $crmEntities, true)) {
+        foreach ($tabList as $i => $item) {
+            if ($item === 'Member') {
                 return $i + 1;
             }
         }

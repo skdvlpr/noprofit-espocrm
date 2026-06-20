@@ -9,8 +9,8 @@
  *   - `Lead` is present in `tabList` and `quickCreateList`;
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`) are present
  *     in `tabList`;
- *   - `MealCount` is under the `$Rendicontazione` navbar group (not directly
- *     after `Member` in the `$CRM` block);
+ *   - `MealCount` lives in `$Rendicontazione` group tab (`type: group`), not as
+ *     a top-level tab; `Opportunity` (F&F) is NOT in that group;
  *   - canonical roles + Administration team exist;
  *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy cleanup);
  *   - rerunning is idempotent (counts stable).
@@ -38,6 +38,20 @@ $report = function (string $name, bool $pass, string $detail = '') use (&$failur
     echo "  $marker $name" . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
+$findReportingGroup = static function (array $tabList): ?object {
+    foreach ($tabList as $item) {
+        if (
+            is_object($item)
+            && ($item->type ?? null) === 'group'
+            && ($item->text ?? null) === '$Rendicontazione'
+        ) {
+            return $item;
+        }
+    }
+
+    return null;
+};
+
 $installer = new Installer();
 
 echo "Run 1: invoke post-install via Installer\n";
@@ -57,41 +71,48 @@ $report('Case absent from tabList', !in_array('Case', $tabStrings, true));
 $report('Lead present in quickCreateList', in_array('Lead', $qcStrings, true));
 $report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true));
 
-foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity', 'Document'] as $must) {
+foreach (['VolunteerEmployee', 'Member', 'Account', 'Opportunity', 'Document'] as $must) {
     $report("$must present in tabList", in_array($must, $tabStrings, true));
 }
 
-$rendicontazioneIndex = null;
+$reportingGroup = $findReportingGroup($tabList);
+$groupItemList = $reportingGroup !== null ? ($reportingGroup->itemList ?? []) : [];
+
+$report('$Rendicontazione group tab present (type=group)', $reportingGroup !== null);
+$report('Legacy $Rendicontazione divider absent', !array_reduce(
+    $tabList,
+    static function (bool $found, $item): bool {
+        return $found || (
+            is_object($item)
+            && ($item->type ?? null) === 'divider'
+            && ($item->text ?? null) === '$Rendicontazione'
+        );
+    },
+    false
+));
+$report('MealCount in Rendicontazione group itemList', in_array('MealCount', $groupItemList, true));
+$report('MealCount not a top-level tab', !in_array('MealCount', $tabStrings, true));
+$report('Opportunity NOT in Rendicontazione group', !in_array('Opportunity', $groupItemList, true));
+
+$opportunityIndex = null;
+$groupIndex = null;
 foreach ($tabList as $i => $item) {
+    if ($item === 'Opportunity') {
+        $opportunityIndex = $i;
+    }
     if (
         is_object($item)
-        && ($item->type ?? null) === 'divider'
+        && ($item->type ?? null) === 'group'
         && ($item->text ?? null) === '$Rendicontazione'
     ) {
-        $rendicontazioneIndex = $i;
-        break;
+        $groupIndex = $i;
     }
 }
 $report(
-    '$Rendicontazione divider present in tabList',
-    $rendicontazioneIndex !== null
-);
-$report(
-    'MealCount immediately under $Rendicontazione',
-    $rendicontazioneIndex !== null
-        && ($tabList[$rendicontazioneIndex + 1] ?? null) === 'MealCount'
-);
-$memberIndex = null;
-foreach ($tabList as $i => $item) {
-    if ($item === 'Member') {
-        $memberIndex = $i;
-        break;
-    }
-}
-$report(
-    'MealCount not directly after Member (out of $CRM block)',
-    $memberIndex === null
-        || ($tabList[$memberIndex + 1] ?? null) !== 'MealCount'
+    'Opportunity tab before Rendicontazione group',
+    $opportunityIndex !== null
+        && $groupIndex !== null
+        && $opportunityIndex < $groupIndex
 );
 
 $em = $container->get('entityManager');
