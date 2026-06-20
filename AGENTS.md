@@ -1060,6 +1060,7 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/smoke-installer.php` | Post-install / `tabList` / roles |
 | `bin/smoke-lead-restore.php` | Epic 7 — Lead tab + i18n + REST CRUD |
 | `bin/smoke-lead-convert.php` | Epic 7 — Lead convert flows + Volunteer ACL |
+| `bin/smoke-rendicontazione.php` | Epic 7 — reporting aggregates + export totals layer |
 | `bin/smoke-schema-english.php` | ORM + English enum keys after migrations |
 | `bin/smoke-theme-assets.php` | Theme asset paths / overrides |
 | `bin/smoke-kanban-assets.php` | Kanban client assets |
@@ -1080,6 +1081,7 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 ddev exec php bin/smoke-installer.php
 ddev exec php bin/smoke-lead-restore.php
 ddev exec php bin/smoke-lead-convert.php
+ddev exec php bin/smoke-rendicontazione.php
 ```
 
 Run REST smoke after metadata / ACL / field-key changes that affect the API surface:

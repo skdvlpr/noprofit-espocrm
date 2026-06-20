@@ -1003,7 +1003,7 @@ class EventPusher
 
     private function escapeTemplateValue(string $value): string
     {
-        return $value;
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     private function buildRecordUrl(Entity $entity): string

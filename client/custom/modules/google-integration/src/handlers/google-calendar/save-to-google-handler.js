@@ -50,7 +50,8 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             const selected = this.model.get('googleCalendarDateSourceList');
 
             if (!Array.isArray(selected) || selected.length === 0) {
-                return this.routingSources.map(source => String(source.sourceDateType || 'main'));
+                // Match EventPusher::getSelectedDateSourceTypes — explicit list required on save.
+                return [];
             }
 
             return selected.map(item => String(item));
