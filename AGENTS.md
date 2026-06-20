@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-05-26
+**Executor:** Antigravity AI | **Last updated:** 2026-06-20
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -1058,7 +1058,29 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/smoke-safehouse.php` | ORM + formulas + scheduled jobs |
 | `bin/smoke-contact-sync.php` | ORM + `PersonContactSync` invariants |
 | `bin/smoke-installer.php` | Post-install / `tabList` / roles |
+| `bin/smoke-lead-restore.php` | Epic 7 — Lead tab + i18n + REST CRUD |
+| `bin/smoke-lead-convert.php` | Epic 7 — Lead convert flows + Volunteer ACL |
 | `bin/smoke-schema-english.php` | ORM + English enum keys after migrations |
+| `bin/smoke-theme-assets.php` | Theme asset paths / overrides |
+| `bin/smoke-kanban-assets.php` | Kanban client assets |
+| `bin/smoke-google-calendar-deep.php` | Google Calendar integration deep smoke |
+| `bin/test-gcal-full-lifecycle.php` | GCal E2E lifecycle (manual QA helper) |
+| `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
+| `bin/setup-roles.php` | Canonical roles + test API users |
+| `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning |
+| `bin/migrate-rename-italian.php` | One-shot Italian→English schema rename |
+| `bin/migrate-rename-phase1-italian.php` | Phase-1 rename helper (legacy envs) |
+| `bin/prune-google-calendar-config-tabs.php` | Prune stale GCal config tabs |
+| `bin/dev-rebuild.sh` | clear_cache + rebuild wrapper |
+| `bin/build.sh` / `bin/build-google-integration.sh` | Extension ZIP builds |
+
+**Epic 7 smokes (run together after Safehouse navbar/Lead changes):**
+
+```bash
+ddev exec php bin/smoke-installer.php
+ddev exec php bin/smoke-lead-restore.php
+ddev exec php bin/smoke-lead-convert.php
+```
 
 Run REST smoke after metadata / ACL / field-key changes that affect the API surface:
 
