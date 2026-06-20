@@ -1,0 +1,12 @@
+[
+    {
+        "route": "/SafehouseCrm/reporting/meal-count/summary",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Reporting\\Api\\GetMealCountSummary"
+    },
+    {
+        "route": "/SafehouseCrm/reporting/meal-count/totals",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Reporting\\Api\\GetMealCountTotals"
+    }
+]

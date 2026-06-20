@@ -21,6 +21,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ExportWithTotals;
+use Espo\Modules\SafehouseCrm\Tools\Reporting\MealCountStatsProvider;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingAggregateQuery;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingDateRange;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingProfileRegistry;
@@ -46,6 +47,7 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 $registry = $injectableFactory->create(ReportingProfileRegistry::class);
 $aggregateQuery = $injectableFactory->create(ReportingAggregateQuery::class);
 $exportWithTotals = $injectableFactory->create(ExportWithTotals::class);
+$mealCountStats = $injectableFactory->create(MealCountStatsProvider::class);
 
 echo "Reporting profile registry\n";
 
@@ -182,6 +184,30 @@ try {
         (int) ($totalsRow[2] ?? 0) === $expectedAdults,
         'got=' . ($totalsRow[2] ?? 'null')
     );
+
+    echo "\nMealCountStatsProvider\n";
+
+    $providerTotals = $mealCountStats->getTotals(null, $filterWhere);
+    $ok(
+        'MealCountStatsProvider getTotals adults',
+        (int) $providerTotals['adults'] === $expectedAdults,
+        'got=' . $providerTotals['adults']
+    );
+
+    $summary = $mealCountStats->getSummary();
+    $ok('MealCountStatsProvider summary has month', isset($summary->month->adults));
+    $ok('MealCountStatsProvider summary has year', isset($summary->year->foodCost));
+
+    echo "\nReporting routes metadata\n";
+
+    $routesPath = 'custom/Espo/Modules/SafehouseCrm/Resources/routes.json';
+    $routesJson = is_readable($routesPath) ? json_decode(file_get_contents($routesPath), true) : null;
+    $routePaths = is_array($routesJson)
+        ? array_column($routesJson, 'route')
+        : [];
+
+    $ok('routes.json meal-count/summary registered', in_array('/SafehouseCrm/reporting/meal-count/summary', $routePaths, true));
+    $ok('routes.json meal-count/totals registered', in_array('/SafehouseCrm/reporting/meal-count/totals', $routePaths, true));
 } finally {
     foreach ($created as $entity) {
         $em->removeEntity($entity);
