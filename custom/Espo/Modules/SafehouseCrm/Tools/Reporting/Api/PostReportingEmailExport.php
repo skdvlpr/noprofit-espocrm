@@ -22,11 +22,7 @@ class PostReportingEmailExport implements Action
 
     public function process(Request $request): Response
     {
-        $data = $request->getParsedBody() ?? [];
-
-        if (!is_array($data)) {
-            throw new BadRequest();
-        }
+        $data = ReportingApiBody::toArray($request->getParsedBody());
 
         try {
             $this->emailExporter->send($data);

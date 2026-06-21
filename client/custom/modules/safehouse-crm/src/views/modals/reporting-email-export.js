@@ -101,6 +101,10 @@ define('safehouse-crm:views/modals/reporting-email-export', [
                 emailAddressList: emailAddressList,
             };
 
+            if (this.options.fieldList && this.options.fieldList.length) {
+                payload.fieldList = this.options.fieldList;
+            }
+
             Espo.Ui.notifyWait();
 
             Espo.Ajax.postRequest('SafehouseCrm/reporting/email-export', payload)

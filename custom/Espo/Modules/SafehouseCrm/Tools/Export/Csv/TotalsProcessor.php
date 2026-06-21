@@ -7,7 +7,6 @@ use Espo\Core\Utils\Language;
 use Espo\Modules\SafehouseCrm\Tools\Export\Support\AbstractTotalsProcessor;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingProfileRegistry;
 use Espo\ORM\EntityManager;
-use Espo\Tools\Export\Format\Csv\Processor as CoreCsvProcessor;
 use Espo\Tools\Export\Processor;
 
 /**
@@ -20,13 +19,13 @@ class TotalsProcessor extends AbstractTotalsProcessor
         EntityManager $entityManager,
         Config $config,
         Language $language,
-        private CoreCsvProcessor $coreProcessor,
+        private LabeledCsvProcessor $csvProcessor,
     ) {
         parent::__construct($profileRegistry, $entityManager, $config, $language);
     }
 
     protected function getInnerProcessor(): Processor
     {
-        return $this->coreProcessor;
+        return $this->csvProcessor;
     }
 }

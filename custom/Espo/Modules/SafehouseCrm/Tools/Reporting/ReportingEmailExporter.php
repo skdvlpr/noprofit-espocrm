@@ -9,7 +9,6 @@ use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Mail\EmailSender;
 use Espo\Core\Mail\Exceptions\SendingError;
 use Espo\Core\Mail\SmtpParams;
-use Espo\Core\Select\SearchParams;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Language;
 use Espo\Entities\Attachment;
@@ -69,19 +68,12 @@ class ReportingEmailExporter
             throw new BadRequest('At least one recipient is required.');
         }
 
-        $searchParams = SearchParams::fromRaw($data);
         $includeTotals = array_key_exists('includeTotals', $data)
             ? (bool) $data['includeTotals']
             : true;
 
-        $exportParams = ExportParams::create($entityType)
-            ->withFormat($format)
-            ->withSearchParams($searchParams)
+        $exportParams = ExportParams::fromRaw($this->buildRawExportParams($entityType, $data, $format))
             ->withParam('includeTotals', $includeTotals);
-
-        if (!empty($data['fieldList']) && is_array($data['fieldList'])) {
-            $exportParams = $exportParams->withFieldList($data['fieldList']);
-        }
 
         $export = $this->exportFactory->createForUser($this->user);
         $result = $export->setParams($exportParams)->run();
@@ -128,6 +120,57 @@ class ReportingEmailExporter
         $sender->send($email);
 
         $this->entityManager->removeEntity($attachment);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private function buildRawExportParams(string $entityType, array $data, string $format): array
+    {
+        $raw = [
+            'entityType' => $entityType,
+            'format' => $format,
+        ];
+
+        $ids = $data['ids'] ?? null;
+
+        if (is_array($ids) && $ids !== []) {
+            $raw['ids'] = $ids;
+        } else {
+            $searchParams = [];
+
+            if (!empty($data['where']) && is_array($data['where'])) {
+                $searchParams['where'] = $data['where'];
+            }
+
+            if (!empty($data['primaryFilter'])) {
+                $searchParams['primaryFilter'] = $data['primaryFilter'];
+            }
+
+            if (!empty($data['boolFilterList']) && is_array($data['boolFilterList'])) {
+                $searchParams['boolFilterList'] = $data['boolFilterList'];
+            }
+
+            if (!empty($data['textFilter'])) {
+                $searchParams['textFilter'] = $data['textFilter'];
+            }
+
+            if (isset($data['orderBy'])) {
+                $searchParams['orderBy'] = $data['orderBy'];
+                $searchParams['order'] = $data['order'] ?? 'asc';
+            }
+
+            if ($searchParams !== []) {
+                $raw['searchParams'] = $searchParams;
+            }
+        }
+
+        if (!empty($data['fieldList']) && is_array($data['fieldList'])) {
+            $raw['fieldList'] = $data['fieldList'];
+        }
+
+        return $raw;
     }
 
     /**

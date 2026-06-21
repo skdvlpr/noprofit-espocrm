@@ -8,6 +8,7 @@ define('safehouse-crm:handlers/reporting/email-export', [], function () {
 
         send() {
             const searchPayload = this.buildSearchPayload();
+            const fieldList = this.buildFieldList();
             const entityType = this.view.collection?.entityType ||
                 this.view.scope ||
                 this.view.entityType;
@@ -15,12 +16,32 @@ define('safehouse-crm:handlers/reporting/email-export', [], function () {
             this.view.createView('dialog', 'safehouse-crm:views/modals/reporting-email-export', {
                 searchPayload: searchPayload,
                 entityType: entityType,
+                fieldList: fieldList,
             }, modalView => {
                 modalView.render();
             });
         }
 
+        buildFieldList() {
+            const layout = this.view.listLayout || [];
+            const fieldList = [];
+
+            layout.forEach(item => {
+                if (item && item.name) {
+                    fieldList.push(item.name);
+                }
+            });
+
+            return fieldList.length ? fieldList : null;
+        }
+
         buildSearchPayload() {
+            const view = this.view;
+
+            if (view.checkedList && view.checkedList.length && !view.allResultIsChecked) {
+                return { ids: view.checkedList.slice() };
+            }
+
             const searchManager = this.view.searchManager;
 
             if (searchManager) {

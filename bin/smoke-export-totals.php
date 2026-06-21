@@ -102,6 +102,14 @@ try {
     $hasLabel
         ? $pass[] = "csv totals row present: $lastLine"
         : $fail[] = "csv totals row missing. last line: $lastLine";
+
+    $firstLine = $lines[0] ?? '';
+    $hasTranslatedHeader = str_contains($firstLine, 'Adults')
+        && !preg_match('/(^|,)(adults|foodCost)(,|$)/', $firstLine);
+
+    $hasTranslatedHeader
+        ? $pass[] = "csv header uses translated labels: $firstLine"
+        : $fail[] = "csv header still raw attribute names: $firstLine";
 } catch (\Throwable $e) {
     $fail[] = 'csv export threw: ' . $e->getMessage();
 }

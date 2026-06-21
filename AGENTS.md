@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-06-20
+**Executor:** Antigravity AI | **Last updated:** 2026-06-21
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -15,6 +15,7 @@ Before implementing ANY task, executor MUST:
 5. Never overwrite executor logs in Notion. Append only.
 6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** Logs MUST be **handoff-ready**: include current state, files changed, verification performed, blockers, and exact next steps so another agent can continue after context compaction or token exhaustion. **Do not** create local markdown files as a Notion substitute. Mark tasks **Done** only when acceptance criteria are met. **NEVER** ask the user to paste executor logs manually into Notion. If Notion write tools are unavailable: (1) call `mcp_auth` for `plugin-notion-workspace-notion`; (2) verify MCP tools folder lists `notion-fetch` / `notion-update-page` (not only `mcp_auth`); (3) retry the write; (4) if tools are still missing after auth, tell the user to reconnect Notion MCP or restart the chat — do **not** offer a copy-paste log workaround.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
+8. **One task per user request (execution scope):** Implement **exactly one** Notion task / one bug / one acceptance slice per user message. If the user lists multiple issues, **append them to Notion** (backlog + ordered queue) and **do not** start the next item until the current one is verified (smoke + manual QA steps) or the user explicitly reprioritizes. **Exception:** launching **parallel subagents** for independent read-only work (explore, CI, security review) is allowed and encouraged when it speeds up the **single** active task — but do not ship code for multiple unrelated fixes in one turn.
 
 ## SECTION 1 — PROJECT OVERVIEW
 

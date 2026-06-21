@@ -595,3 +595,40 @@ body #content #main .list-group.list-group-panel .list-group-item {
     background-color: var(--panel-default-bg);
   }
 }
+
+/*
+ * Dashboard dashlets — grid-stack clips the "..." action menu (overflow-y:auto on
+ * .grid-stack-item-content). Espo adds .has-dropdown-opened on the panel; lift the
+ * whole grid cell so the menu is visible and clickable above neighbouring dashlets.
+ */
+.grid-stack > .grid-stack-item:has(.dashlet.has-dropdown-opened),
+.grid-stack > .grid-stack-item:has(.panel.dashlet .panel-heading .btn-group.open) {
+  z-index: 30 !important;
+}
+
+.grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.dashlet.has-dropdown-opened),
+.grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.panel.dashlet .panel-heading .btn-group.open) {
+  overflow: visible !important;
+}
+
+.dashlet-container .dashlet.has-dropdown-opened {
+  overflow: visible !important;
+}
+
+body .panel.dashlet .panel-heading {
+  position: relative;
+  z-index: 3;
+}
+
+body .panel.dashlet .panel-heading .btn-group.open {
+  z-index: 4;
+}
+
+body .panel.dashlet .panel-heading .dropdown-menu {
+  z-index: 5;
+}
+
+/* Espo uiAppInit pins fix-position menus with position:fixed — keep above glass panels */
+body .panel.dashlet .panel-heading .btn-group.fix-position .dropdown-menu {
+  z-index: 1310 !important;
+}
