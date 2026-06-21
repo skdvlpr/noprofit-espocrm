@@ -67,8 +67,10 @@ echo "\nReportingDateRange\n";
 $tz = ReportingDateRange::defaultTimezone();
 [$monthFrom, $monthTo] = ReportingDateRange::currentCalendarMonth($tz);
 [$yearFrom, $yearTo] = ReportingDateRange::currentCalendarYear($tz);
+[$weekFrom, $weekTo] = ReportingDateRange::currentCalendarWeek($tz);
 
 $ok('Month bounds non-empty', $monthFrom !== '' && $monthTo !== '');
+$ok('Week bounds non-empty', $weekFrom !== '' && $weekTo !== '');
 $ok('Year bounds span January', str_ends_with($yearFrom, '-01-01'));
 $ok('Year bounds span December', str_ends_with($yearTo, '-12-31'));
 
@@ -195,6 +197,7 @@ try {
     );
 
     $summary = $mealCountStats->getSummary();
+    $ok('MealCountStatsProvider summary has week', isset($summary->week->adults));
     $ok('MealCountStatsProvider summary has month', isset($summary->month->adults));
     $ok('MealCountStatsProvider summary has year', isset($summary->year->foodCost));
 

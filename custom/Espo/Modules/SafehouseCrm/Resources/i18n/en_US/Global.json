@@ -20,12 +20,18 @@
         "CRM": "Main Sections",
         "Rendicontazione": "Reporting"
     },
+    "fields": {
+        "csvIncludeTotals": "Include totals row",
+        "xlsxIncludeTotals": "Include totals row"
+    },
     "labels": {
         "Create VolunteerEmployee": "Create New",
         "Create Member": "Create New",
         "Create MealCount": "Create New",
+        "reportingListStatsWeek": "Current week totals",
         "reportingListStatsMonth": "Current month totals",
         "reportingListStatsYear": "Current year totals",
+        "reportingListStatsSelection": "Filtered selection totals",
         "reportingListStatsTitle": "Reporting totals",
         "reportingExportIncludeTotals": "Include totals row",
         "reportingExportTotalsLabel": "Totals"

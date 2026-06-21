@@ -1,0 +1,41 @@
+{
+    "formatDefs": {
+        "csv": {
+            "processorClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Csv\\TotalsProcessor",
+            "params": {
+                "fields": {
+                    "includeTotals": {
+                        "type": "bool",
+                        "default": true
+                    }
+                },
+                "layout": [
+                    [
+                        {"name": "includeTotals"}
+                    ]
+                ]
+            }
+        },
+        "xlsx": {
+            "processorClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Xlsx\\TotalsProcessor",
+            "params": {
+                "fields": {
+                    "includeTotals": {
+                        "type": "bool",
+                        "default": true
+                    }
+                },
+                "layout": [
+                    [
+                        {"name": "lite"},
+                        {"name": "recordLinks"},
+                        {"name": "title"}
+                    ],
+                    [
+                        {"name": "includeTotals"}
+                    ]
+                ]
+            }
+        }
+    }
+}

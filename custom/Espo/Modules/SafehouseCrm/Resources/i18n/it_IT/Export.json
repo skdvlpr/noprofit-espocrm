@@ -1,0 +1,6 @@
+{
+    "fields": {
+        "csvIncludeTotals": "Includi riga Totali",
+        "xlsxIncludeTotals": "Includi riga Totali"
+    }
+}

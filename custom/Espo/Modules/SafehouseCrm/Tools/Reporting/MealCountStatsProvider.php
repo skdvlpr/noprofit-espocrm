@@ -26,44 +26,99 @@ class MealCountStatsProvider
 
         [$monthFrom, $monthTo] = ReportingDateRange::currentCalendarMonth($timezone);
         [$yearFrom, $yearTo] = ReportingDateRange::currentCalendarYear($timezone);
+        [$weekFrom, $weekTo] = ReportingDateRange::currentCalendarWeek($timezone);
+
+        // Per-role: a Volunteer cannot read foodCost — drop it instead of 403.
+        $allowedAttributes = $this->aggregateQuery
+            ->filterReadableAttributes(self::ENTITY_TYPE, self::SUM_ATTRIBUTES);
 
         return (object) [
             'timezone' => $timezone->getName(),
-            'month' => $this->buildPeriodSummary($monthFrom, $monthTo, $timezone),
-            'year' => $this->buildPeriodSummary($yearFrom, $yearTo, $timezone),
+            'metricList' => $allowedAttributes,
+            'week' => $this->buildPeriodSummary($weekFrom, $weekTo, $timezone, $allowedAttributes),
+            'month' => $this->buildPeriodSummary($monthFrom, $monthTo, $timezone, $allowedAttributes),
+            'year' => $this->buildPeriodSummary($yearFrom, $yearTo, $timezone, $allowedAttributes),
         ];
     }
 
     /**
      * Filter-aware totals for list footer / export scope (Tasks 7.3.3, 7.3.5).
      *
-     * @return array<string, float>
+     * @return array<string, float|int>
      */
     public function getTotals(
         ?SearchParams $searchParams = null,
         ?array $additionalWhere = null,
     ): array {
-        return $this->aggregateQuery->sum(
+        $allowedAttributes = $this->aggregateQuery
+            ->filterReadableAttributes(self::ENTITY_TYPE, self::SUM_ATTRIBUTES);
+
+        if ($allowedAttributes === []) {
+            return [];
+        }
+
+        $totals = $this->aggregateQuery->sum(
             self::ENTITY_TYPE,
-            self::SUM_ATTRIBUTES,
+            $allowedAttributes,
             $searchParams,
             $additionalWhere,
         );
+
+        return $this->normalizeTotals($totals);
     }
 
-    private function buildPeriodSummary(string $from, string $to, DateTimeZone $timezone): stdClass
+    /**
+     * @param array<string, float> $totals
+     * @return array<string, float|int>
+     */
+    private function normalizeTotals(array $totals): array
     {
-        $where = ReportingDateRange::dateBetweenWhere('date', $from, $to);
-        $totals = $this->aggregateQuery->sum(self::ENTITY_TYPE, self::SUM_ATTRIBUTES, null, $where);
+        $result = [];
 
-        return (object) [
+        foreach (self::SUM_ATTRIBUTES as $attribute) {
+            if (!array_key_exists($attribute, $totals)) {
+                continue;
+            }
+
+            $result[$attribute] = $attribute === 'foodCost'
+                ? $totals[$attribute]
+                : (int) $totals[$attribute];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string[] $allowedAttributes
+     */
+    private function buildPeriodSummary(
+        string $from,
+        string $to,
+        DateTimeZone $timezone,
+        array $allowedAttributes,
+    ): stdClass {
+        $where = ReportingDateRange::dateBetweenWhere('date', $from, $to);
+
+        $totals = $allowedAttributes !== []
+            ? $this->aggregateQuery->sum(self::ENTITY_TYPE, $allowedAttributes, null, $where)
+            : [];
+
+        $result = [
             'from' => $from,
             'to' => $to,
             'timezone' => $timezone->getName(),
-            'adults' => (int) $totals['adults'],
-            'minors' => (int) $totals['minors'],
-            'totalMeals' => (int) $totals['totalMeals'],
-            'foodCost' => $totals['foodCost'],
         ];
+
+        foreach (self::SUM_ATTRIBUTES as $attribute) {
+            if (!array_key_exists($attribute, $totals)) {
+                continue;
+            }
+
+            $result[$attribute] = $attribute === 'foodCost'
+                ? $totals[$attribute]
+                : (int) $totals[$attribute];
+        }
+
+        return (object) $result;
     }
 }

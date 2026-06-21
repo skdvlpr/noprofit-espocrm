@@ -102,6 +102,29 @@ class ReportingAggregateQuery
     }
 
     /**
+     * Filter a list of sum attributes down to those the current user may read.
+     *
+     * Lets reporting surfaces (banner, list footer, export totals) degrade
+     * gracefully per role instead of failing wholesale: e.g. a Volunteer with
+     * `foodCost` field-ACL = no still gets adults/minors/totalMeals totals.
+     *
+     * @param string[] $sumAttributes
+     * @return string[]
+     */
+    public function filterReadableAttributes(string $entityType, array $sumAttributes): array
+    {
+        if (!$this->acl->check($entityType, Table::ACTION_READ)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $sumAttributes,
+            fn (string $attribute): bool =>
+                $this->acl->checkField($entityType, $attribute, Table::ACTION_READ)
+        ));
+    }
+
+    /**
      * @param string[] $sumAttributes
      */
     private function assertCanSum(string $entityType, array $sumAttributes): void

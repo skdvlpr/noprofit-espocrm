@@ -20,12 +20,18 @@
         "CRM": "Sezioni Principali",
         "Rendicontazione": "Rendicontazione"
     },
+    "fields": {
+        "csvIncludeTotals": "Includi riga Totali",
+        "xlsxIncludeTotals": "Includi riga Totali"
+    },
     "labels": {
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
         "Create MealCount": "Crea Nuovo",
+        "reportingListStatsWeek": "Totali settimana corrente",
         "reportingListStatsMonth": "Totali mese corrente",
         "reportingListStatsYear": "Totali anno corrente",
+        "reportingListStatsSelection": "Totali selezione filtrata",
         "reportingListStatsTitle": "Totali rendicontazione",
         "reportingExportIncludeTotals": "Includi riga Totali",
         "reportingExportTotalsLabel": "Totali"

@@ -1,0 +1,22 @@
+.safehouse-reporting-stats-footer {
+    margin-bottom: 12px;
+}
+
+.safehouse-reporting-stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 6px;
+}
+
+.safehouse-reporting-stats-item {
+    min-width: 120px;
+}
+
+.safehouse-reporting-stats-label {
+    font-weight: 500;
+}
+
+.safehouse-reporting-stats-value {
+    font-weight: 600;
+}

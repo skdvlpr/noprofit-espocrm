@@ -15,6 +15,21 @@ final class ReportingDateRange
     /**
      * @return array{0: string, 1: string} inclusive from, inclusive to (Y-m-d).
      */
+    public static function currentCalendarWeek(DateTimeZone $timezone): array
+    {
+        $now = new DateTimeImmutable('now', $timezone);
+        // ISO week: Monday = start (Europe/Rome reporting convention).
+        $dayOfWeek = (int) $now->format('N');
+
+        $from = $now->modify('-' . ($dayOfWeek - 1) . ' days')->format('Y-m-d');
+        $to = $now->modify('+' . (7 - $dayOfWeek) . ' days')->format('Y-m-d');
+
+        return [$from, $to];
+    }
+
+    /**
+     * @return array{0: string, 1: string} inclusive from, inclusive to (Y-m-d).
+     */
     public static function currentCalendarMonth(DateTimeZone $timezone): array
     {
         $now = new DateTimeImmutable('now', $timezone);

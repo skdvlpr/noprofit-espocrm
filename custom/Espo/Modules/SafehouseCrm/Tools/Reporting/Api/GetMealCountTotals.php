@@ -26,10 +26,8 @@ class GetMealCountTotals implements Action
         $totals = $this->mealCountStatsProvider->getTotals($searchParams);
 
         return ResponseComposer::json([
-            'adults' => (int) $totals['adults'],
-            'minors' => (int) $totals['minors'],
-            'totalMeals' => (int) $totals['totalMeals'],
-            'foodCost' => $totals['foodCost'],
+            'metricList' => array_keys($totals),
+            ...$totals,
         ]);
     }
 }
