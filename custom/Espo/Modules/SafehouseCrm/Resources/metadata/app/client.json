@@ -5,5 +5,9 @@
         "client/custom/css/safehouse-aurora/safehouse-aurora-layout.css",
         "client/custom/modules/safehouse-crm/res/css/kanban-card.css",
         "client/custom/modules/safehouse-crm/res/css/reporting-stats.css"
+    ],
+    "scriptList": [
+        "__APPEND__",
+        "client/custom/modules/safehouse-crm/lib/dashlet-dropdown.js"
     ]
 }

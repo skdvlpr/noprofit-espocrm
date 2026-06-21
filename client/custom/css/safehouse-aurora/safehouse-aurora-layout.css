@@ -652,3 +652,8 @@ body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
   max-height: none !important;
   height: auto !important;
 }
+
+/* Portaled dashlet menu (see safehouse-crm/lib/dashlet-dropdown.js) */
+body > .dropdown-menu.safehouse-dashlet-dropdown-portal {
+  z-index: 2140 !important;
+}
