@@ -77,6 +77,7 @@ define('safehouse-crm:views/modals/reporting-email-export', [
         actionSend() {
             const recordView = this.getView('record');
 
+            // Espo validate(): true = invalid (see views/record/edit in espo-main).
             if (recordView && recordView.validate()) {
                 return;
             }

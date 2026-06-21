@@ -637,3 +637,18 @@ body .panel.dashlet .panel-heading > .fix-position.open,
 body .panel.dashlet .panel-heading > .fix-position .btn-group.open {
   z-index: 1311;
 }
+
+/*
+ * SafehouseAuroraLight paints a ::before glass layer on generic panels (backdrop-filter).
+ * That creates a containing block so uiAppInit's position:fixed dropdown coords are wrong
+ * inside dashlets — menu stretches/clips (only last item visible). Drop filter on dashlets.
+ */
+body #content #main .panel.panel-default.dashlet::before {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
+  max-height: none !important;
+  height: auto !important;
+}

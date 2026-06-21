@@ -77,6 +77,12 @@ $tz = ReportingDateRange::defaultTimezone();
 
 $ok('Month bounds non-empty', $monthFrom !== '' && $monthTo !== '');
 $ok('Week bounds non-empty', $weekFrom !== '' && $weekTo !== '');
+$weekFromDow = (int) (new DateTimeImmutable($weekFrom, $tz))->format('N');
+$weekToDow = (int) (new DateTimeImmutable($weekTo, $tz))->format('N');
+$weekSpanDays = (new DateTimeImmutable($weekFrom, $tz))->diff(new DateTimeImmutable($weekTo, $tz))->days;
+$ok('Week starts Monday (ISO N=1)', $weekFromDow === 1, "from=$weekFrom dow=$weekFromDow");
+$ok('Week ends Sunday (ISO N=7)', $weekToDow === 7, "to=$weekTo dow=$weekToDow");
+$ok('Week span Mon–Sun inclusive', $weekSpanDays === 6, "from=$weekFrom to=$weekTo span=$weekSpanDays");
 $ok('Today bounds non-empty', $todayFrom !== '' && $todayTo !== '' && $todayFrom === $todayTo);
 $ok('Year bounds span January', str_ends_with($yearFrom, '-01-01'));
 $ok('Year bounds span December', str_ends_with($yearTo, '-12-31'));
