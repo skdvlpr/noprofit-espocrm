@@ -96,6 +96,14 @@ foreach ($assets as $label => $asset) {
     }
 }
 
+$dashletTplPath = 'client/custom/res/templates/dashlet.tpl';
+$dashletTpl = is_readable($dashletTplPath) ? file_get_contents($dashletTplPath) : '';
+$ok('dashlet.tpl exists', $dashletTpl !== '');
+$ok(
+    'dashlet.tpl fix-position wrapper',
+    str_contains($dashletTpl, 'pull-right fix-position') && !str_contains($dashletTpl, 'btn-group pull-right fix-position')
+);
+
 if ($fail > 0) {
     fwrite(STDERR, "\n$fail check(s) failed.\n");
     exit(1);

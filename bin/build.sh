@@ -59,6 +59,12 @@ if [[ -d "$ROOT_DIR/$FRONTEND_MODULE_PATH" ]]; then
     cp -a "$ROOT_DIR/$FRONTEND_MODULE_PATH" "$PACKAGE_DIR/files/client/custom/modules/"
 fi
 
+DASHLET_TPL_PATH="client/custom/res/templates/dashlet.tpl"
+if [[ -f "$ROOT_DIR/$DASHLET_TPL_PATH" ]]; then
+    mkdir -p "$PACKAGE_DIR/files/client/custom/res/templates"
+    cp "$ROOT_DIR/$DASHLET_TPL_PATH" "$PACKAGE_DIR/files/client/custom/res/templates/"
+fi
+
 OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"
 rm -f "$OUTPUT"
 

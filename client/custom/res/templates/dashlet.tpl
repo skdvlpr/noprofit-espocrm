@@ -5,7 +5,8 @@
   data-id="{{id}}"
 >
     <div class="panel-heading">
-        <div class="btn-group pull-right fix-position">
+        <div class="pull-right fix-position">
+        <div class="btn-group">
             {{#each buttonList}}
             <button
               type="button"
@@ -43,6 +44,7 @@
                 {{/if}}
             {{/each}}
             </ul>
+        </div>
         </div>
         <h4 class="panel-title">
             <span

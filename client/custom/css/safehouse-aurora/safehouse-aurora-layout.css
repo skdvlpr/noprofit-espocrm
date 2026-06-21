@@ -628,7 +628,12 @@ body .panel.dashlet .panel-heading .dropdown-menu {
   z-index: 5;
 }
 
-/* Espo uiAppInit pins fix-position menus with position:fixed — keep above glass panels */
-body .panel.dashlet .panel-heading .btn-group.fix-position .dropdown-menu {
+/* Espo uiAppInit pins fix-position menus with position:fixed — parent must hold the class */
+body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
   z-index: 1310 !important;
+}
+
+body .panel.dashlet .panel-heading > .fix-position.open,
+body .panel.dashlet .panel-heading > .fix-position .btn-group.open {
+  z-index: 1311;
 }
