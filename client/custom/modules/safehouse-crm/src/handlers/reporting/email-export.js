@@ -8,9 +8,13 @@ define('safehouse-crm:handlers/reporting/email-export', [], function () {
 
         send() {
             const searchPayload = this.buildSearchPayload();
+            const entityType = this.view.collection?.entityType ||
+                this.view.scope ||
+                this.view.entityType;
 
-            this.view.createView('dialog', 'safehouse-crm:views/modals/meal-count-email-export', {
+            this.view.createView('dialog', 'safehouse-crm:views/modals/reporting-email-export', {
                 searchPayload: searchPayload,
+                entityType: entityType,
             }, modalView => {
                 modalView.render();
             });

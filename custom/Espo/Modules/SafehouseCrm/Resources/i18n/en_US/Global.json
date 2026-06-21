@@ -6,7 +6,7 @@
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
         "MealCount": "Meal Count",
-        "AssociationMealCount": "Association Meal Count"
+        "AssociationMealCount": "Network Meal Count"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -15,7 +15,7 @@
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
         "MealCount": "Meal Counts",
-        "AssociationMealCount": "Association Meal Counts"
+        "AssociationMealCount": "Network Meal Counts"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",
@@ -29,21 +29,23 @@
     "labels": {
         "Create VolunteerEmployee": "Create New",
         "Create Member": "Create New",
-        "Create MealCount": "Create New",
+        "Create MealCount": "Create Meal Count",
+        "Create AssociationMealCount": "Create Network Meal Count",
         "reportingListStatsWeek": "Current week totals",
-        "reportingListStatsMonth": "Current month totals",
-        "reportingListStatsYear": "Current year totals",
+        "reportingListStatsMonth": "Month",
+        "reportingListStatsYear": "Year",
+        "reportingListStatsToday": "Today",
         "reportingListStatsSelection": "Filtered selection totals",
         "reportingListStatsTitle": "Reporting totals",
         "reportingExportIncludeTotals": "Include totals row",
         "reportingExportTotalsLabel": "Totals",
         "reportingEmailExport": "Send export via email",
         "reportingEmailExportSuccess": "Export email sent",
-        "reportingEmailExportBody": "Meal Count export is attached."
+        "reportingEmailExportBody": "{scope} export is attached."
     },
     "dashlets": {
-        "MealCountMonthlyStats": "Meal Count Stats",
-        "AssociationMealCountMonthlyStats": "Association Meal Count Stats"
+        "MealCountMonthlyStats": "Meal Count",
+        "AssociationMealCountMonthlyStats": "Network Meal Count"
     },
     "options": {
         "period": {

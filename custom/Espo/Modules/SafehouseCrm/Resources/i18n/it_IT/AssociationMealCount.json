@@ -1,7 +1,7 @@
 {
     "labels": {
-        "AssociationMealCount": "Conteggio Pasti Associati",
-        "Create AssociationMealCount": "Crea Conteggio Pasti Associati"
+        "AssociationMealCount": "Conteggio pasti per Rete",
+        "Create AssociationMealCount": "Crea Conteggio pasti per Rete"
     },
     "fields": {
         "name": "Nome",

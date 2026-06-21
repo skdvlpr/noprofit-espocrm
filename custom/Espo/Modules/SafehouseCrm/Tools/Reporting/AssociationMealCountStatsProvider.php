@@ -26,7 +26,7 @@ class AssociationMealCountStatsProvider
 
         [$monthFrom, $monthTo] = ReportingDateRange::currentCalendarMonth($timezone);
         [$yearFrom, $yearTo] = ReportingDateRange::currentCalendarYear($timezone);
-        [$weekFrom, $weekTo] = ReportingDateRange::currentCalendarWeek($timezone);
+        [$todayFrom, $todayTo] = ReportingDateRange::currentCalendarDay($timezone);
 
         $allowedAttributes = $this->aggregateQuery
             ->filterReadableAttributes(self::ENTITY_TYPE, self::SUM_ATTRIBUTES);
@@ -34,7 +34,7 @@ class AssociationMealCountStatsProvider
         return (object) [
             'timezone' => $timezone->getName(),
             'metricList' => $allowedAttributes,
-            'week' => $this->buildPeriodSummary($weekFrom, $weekTo, $timezone, $allowedAttributes),
+            'today' => $this->buildPeriodSummary($todayFrom, $todayTo, $timezone, $allowedAttributes),
             'month' => $this->buildPeriodSummary($monthFrom, $monthTo, $timezone, $allowedAttributes),
             'year' => $this->buildPeriodSummary($yearFrom, $yearTo, $timezone, $allowedAttributes),
         ];

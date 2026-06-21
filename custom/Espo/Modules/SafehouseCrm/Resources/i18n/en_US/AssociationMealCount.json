@@ -1,7 +1,7 @@
 {
     "labels": {
-        "AssociationMealCount": "Association Meal Count",
-        "Create AssociationMealCount": "Create Association Meal Count"
+        "AssociationMealCount": "Network Meal Count",
+        "Create AssociationMealCount": "Create Network Meal Count"
     },
     "fields": {
         "name": "Name",

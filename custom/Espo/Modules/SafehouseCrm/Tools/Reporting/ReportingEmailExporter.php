@@ -20,12 +20,10 @@ use Espo\Tools\Export\Factory as ExportFactory;
 use Espo\Tools\Export\Params as ExportParams;
 
 /**
- * Builds a MealCount export attachment and emails it to selected recipients (Task 7.3.6).
+ * Builds a reporting-entity export attachment and emails it (Task 7.3.6 / 7.4.2).
  */
-class MealCountEmailExporter
+class ReportingEmailExporter
 {
-    private const ENTITY_TYPE = 'MealCount';
-
     public function __construct(
         private EntityManager $entityManager,
         private Acl $acl,
@@ -34,6 +32,7 @@ class MealCountEmailExporter
         private Language $language,
         private Config $config,
         private User $user,
+        private ReportingProfileRegistry $profileRegistry,
     ) {}
 
     /**
@@ -44,7 +43,17 @@ class MealCountEmailExporter
      */
     public function send(array $data): void
     {
-        if (!$this->acl->check(self::ENTITY_TYPE, Table::ACTION_READ)) {
+        $entityType = $data['entityType'] ?? null;
+
+        if (!is_string($entityType) || $entityType === '') {
+            throw new BadRequest('Entity type is required.');
+        }
+
+        if (!$this->profileRegistry->isReportingEntity($entityType)) {
+            throw new BadRequest('Entity type is not a reporting entity.');
+        }
+
+        if (!$this->acl->check($entityType, Table::ACTION_READ)) {
             throw new Forbidden();
         }
 
@@ -65,7 +74,7 @@ class MealCountEmailExporter
             ? (bool) $data['includeTotals']
             : true;
 
-        $exportParams = ExportParams::create(self::ENTITY_TYPE)
+        $exportParams = ExportParams::create($entityType)
             ->withFormat($format)
             ->withSearchParams($searchParams)
             ->withParam('includeTotals', $includeTotals);
@@ -87,12 +96,13 @@ class MealCountEmailExporter
             throw new BadRequest('Export attachment was not created.');
         }
 
-        $scopeLabel = $this->language->translateLabel(self::ENTITY_TYPE, 'scopeNamesPlural');
+        $scopeLabel = $this->language->translateLabel($entityType, 'scopeNamesPlural');
         $subject = $scopeLabel . ' — ' . $this->language->translateLabel('reportingEmailExport', 'labels', 'Global');
-        $body = $this->language->translateLabel('reportingEmailExportBody', 'labels', 'Global');
+        $bodyTemplate = $this->language->translateLabel('reportingEmailExportBody', 'labels', 'Global');
+        $body = str_replace('{scope}', $scopeLabel, $bodyTemplate);
 
         if ($body === 'reportingEmailExportBody') {
-            $body = 'Meal Count export is attached.';
+            $body = $scopeLabel . ' export is attached.';
         }
 
         /** @var Email $email */

@@ -1,7 +1,7 @@
 {
     "labels": {
-        "MealCount": "Conteggio Pasti",
-        "Create MealCount": "Crea Conteggio Pasti"
+        "MealCount": "Conteggio pasti",
+        "Create MealCount": "Crea Conteggio pasti"
     },
     "fields": {
         "name": "Nome",

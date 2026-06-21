@@ -72,7 +72,7 @@ define('safehouse-crm:views/association-meal-count/list', [
 
             const metricList = this.reportingStats.metricList || DEFAULT_METRICS;
             const items = metricList.map(key => ({
-                key: key,
+                ...this.statsFooter.resolveMetricItem(ENTITY_SCOPE, key),
                 label: this.translate(key, 'fields', ENTITY_SCOPE),
             }));
 
@@ -81,47 +81,14 @@ define('safehouse-crm:views/association-meal-count/list', [
             }
 
             if (this.reportingStats.mode === 'selection') {
-                $container.find('.safehouse-reporting-stats-week, .safehouse-reporting-stats-month, .safehouse-reporting-stats-year').remove();
-
-                this.statsFooter.render($container, this.reportingStats.selection || {}, {
-                    title: this.translate('reportingListStatsSelection', 'labels', 'Global'),
+                this.statsFooter.renderSelection($container, this.reportingStats.selection || {}, {
                     items,
-                    removeSelector: '.safehouse-reporting-stats-selection',
-                    extraClass: 'safehouse-reporting-stats-selection',
                 });
 
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-selection').remove();
-
-            const week = this.reportingStats.week || {};
-            const month = this.reportingStats.month || {};
-            const year = this.reportingStats.year || {};
-
-            this.statsFooter.render($container, week, {
-                title: this.translate('reportingListStatsWeek', 'labels', 'Global')
-                    + (week.from && week.to ? ` (${week.from} – ${week.to})` : ''),
-                items,
-                removeSelector: '.safehouse-reporting-stats-week',
-                extraClass: 'safehouse-reporting-stats-week',
-            });
-
-            this.statsFooter.render($container, month, {
-                title: this.translate('reportingListStatsMonth', 'labels', 'Global')
-                    + (month.from && month.to ? ` (${month.from} – ${month.to})` : ''),
-                items,
-                removeSelector: '.safehouse-reporting-stats-month',
-                extraClass: 'safehouse-reporting-stats-month',
-            });
-
-            this.statsFooter.render($container, year, {
-                title: this.translate('reportingListStatsYear', 'labels', 'Global')
-                    + (year.from && year.to ? ` (${year.from} – ${year.to})` : ''),
-                items,
-                removeSelector: '.safehouse-reporting-stats-year',
-                extraClass: 'safehouse-reporting-stats-year',
-            });
+            this.statsFooter.renderPeriodGrid($container, this.reportingStats, {items});
         },
 
         getReportingStatsContainer() {

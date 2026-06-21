@@ -114,7 +114,7 @@ try {
     );
 
     $summary = $provider->getSummary();
-    $ok('summary has week', isset($summary->week->portionCount));
+    $ok('summary has today', isset($summary->today->portionCount));
     $ok('summary has month', isset($summary->month->portionCount));
     $ok('summary has year', isset($summary->year->portionCount));
     $ok(

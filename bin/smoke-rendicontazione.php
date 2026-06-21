@@ -73,9 +73,11 @@ $tz = ReportingDateRange::defaultTimezone();
 [$monthFrom, $monthTo] = ReportingDateRange::currentCalendarMonth($tz);
 [$yearFrom, $yearTo] = ReportingDateRange::currentCalendarYear($tz);
 [$weekFrom, $weekTo] = ReportingDateRange::currentCalendarWeek($tz);
+[$todayFrom, $todayTo] = ReportingDateRange::currentCalendarDay($tz);
 
 $ok('Month bounds non-empty', $monthFrom !== '' && $monthTo !== '');
 $ok('Week bounds non-empty', $weekFrom !== '' && $weekTo !== '');
+$ok('Today bounds non-empty', $todayFrom !== '' && $todayTo !== '' && $todayFrom === $todayTo);
 $ok('Year bounds span January', str_ends_with($yearFrom, '-01-01'));
 $ok('Year bounds span December', str_ends_with($yearTo, '-12-31'));
 
@@ -202,7 +204,7 @@ try {
     );
 
     $summary = $mealCountStats->getSummary();
-    $ok('MealCountStatsProvider summary has week', isset($summary->week->adults));
+    $ok('MealCountStatsProvider summary has today', isset($summary->today->adults));
     $ok('MealCountStatsProvider summary has month', isset($summary->month->adults));
     $ok('MealCountStatsProvider summary has year', isset($summary->year->foodCost));
 
@@ -217,6 +219,7 @@ try {
     $ok('routes.json meal-count/summary registered', in_array('/SafehouseCrm/reporting/meal-count/summary', $routePaths, true));
     $ok('routes.json meal-count/totals registered', in_array('/SafehouseCrm/reporting/meal-count/totals', $routePaths, true));
     $ok('routes.json meal-count/email-export registered', in_array('/SafehouseCrm/reporting/meal-count/email-export', $routePaths, true));
+    $ok('routes.json reporting/email-export registered', in_array('/SafehouseCrm/reporting/email-export', $routePaths, true));
     $ok('routes.json association-meal-count/summary registered', in_array('/SafehouseCrm/reporting/association-meal-count/summary', $routePaths, true));
     $ok('routes.json association-meal-count/totals registered', in_array('/SafehouseCrm/reporting/association-meal-count/totals', $routePaths, true));
 
@@ -225,6 +228,33 @@ try {
     $dashletPath = 'custom/Espo/Modules/SafehouseCrm/Resources/metadata/dashlets';
     $ok('MealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/MealCountMonthlyStats.json"));
     $ok('AssociationMealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/AssociationMealCountMonthlyStats.json"));
+
+    echo "\nItalian reporting labels (canonical naming)\n";
+
+    /** @var \Espo\Core\Utils\Language $language */
+    $language = $container->getByClass(\Espo\Core\Utils\Language::class);
+    $language->setLanguage('it_IT');
+
+    $ok(
+        'IT scope MealCount',
+        $language->translate('MealCount', 'scopeNames', 'Global') === 'Conteggio pasti'
+    );
+    $ok(
+        'IT scope AssociationMealCount',
+        $language->translate('AssociationMealCount', 'scopeNames', 'Global') === 'Conteggio pasti per Rete'
+    );
+    $ok(
+        'IT dashlet MealCountMonthlyStats',
+        $language->translate('MealCountMonthlyStats', 'dashlets', 'Global') === 'Conteggio pasti'
+    );
+    $ok(
+        'IT dashlet AssociationMealCountMonthlyStats',
+        $language->translate('AssociationMealCountMonthlyStats', 'dashlets', 'Global') === 'Conteggio pasti per Rete'
+    );
+    $ok(
+        'IT create AssociationMealCount button',
+        $language->translate('Create AssociationMealCount', 'labels', 'Global') === 'Crea Conteggio pasti per Rete'
+    );
 } finally {
     foreach ($created as $entity) {
         $em->removeEntity($entity);

@@ -2,6 +2,77 @@
     margin-bottom: 12px;
 }
 
+/* Accent color for reporting totals (lists + dashlets) */
+.safehouse-reporting-stats-value--accent {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* Anno | Mese | Oggi — responsive period grid */
+.safehouse-reporting-stats-period-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color, #dfe2e5);
+    border-radius: var(--border-radius, 4px);
+    overflow: hidden;
+    background: var(--border-color, #dfe2e5);
+}
+
+.safehouse-reporting-stats-period-cell {
+    background: var(--panel-bg, #fff);
+    padding: 10px 12px;
+    min-width: 0;
+}
+
+.safehouse-reporting-stats-period-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    line-height: 1.3;
+}
+
+.safehouse-reporting-stats-period-range {
+    font-size: 11px;
+    color: var(--text-soft-color, #888);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.safehouse-reporting-stats-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.safehouse-reporting-stats-metrics--inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.safehouse-reporting-stats-metric {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    line-height: 1.35;
+}
+
+.safehouse-reporting-stats-value {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.safehouse-reporting-stats-label {
+    font-size: 12px;
+    color: var(--text-soft-color, #888);
+}
+
+/* Legacy inline grid (selection banner fallback) */
 .safehouse-reporting-stats-grid {
     display: flex;
     flex-wrap: wrap;
@@ -17,6 +88,31 @@
     font-weight: 500;
 }
 
-.safehouse-reporting-stats-value {
-    font-weight: 600;
+/* Dashlet: same grid inside panel body */
+.safehouse-reporting-dashlet .safehouse-reporting-stats-period-grid {
+    margin-bottom: 0;
+}
+
+@media (max-width: 991px) {
+    .safehouse-reporting-stats-period-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .safehouse-reporting-stats-period-cell:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 575px) {
+    .safehouse-reporting-stats-period-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .safehouse-reporting-stats-period-cell:last-child:nth-child(odd) {
+        grid-column: auto;
+    }
+
+    .safehouse-reporting-stats-value {
+        font-size: 16px;
+    }
 }

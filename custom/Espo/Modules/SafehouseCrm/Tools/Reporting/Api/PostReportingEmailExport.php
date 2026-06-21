@@ -12,9 +12,9 @@ use Espo\Core\Mail\Exceptions\SendingError;
 use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingEmailExporter;
 
 /**
- * Legacy alias: MealCount email export (delegates to ReportingEmailExporter).
+ * Email reporting-entity export with current list filters (Task 7.3.6).
  */
-class PostMealCountEmailExport implements Action
+class PostReportingEmailExport implements Action
 {
     public function __construct(
         private ReportingEmailExporter $emailExporter,
@@ -27,8 +27,6 @@ class PostMealCountEmailExport implements Action
         if (!is_array($data)) {
             throw new BadRequest();
         }
-
-        $data['entityType'] = 'MealCount';
 
         try {
             $this->emailExporter->send($data);

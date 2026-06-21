@@ -76,7 +76,7 @@ define('safehouse-crm:views/meal-count/list', [
                 ['adults', 'minors', 'totalMeals', 'foodCost'];
 
             const items = metricList.map(key => ({
-                key: key,
+                ...this.statsFooter.resolveMetricItem('MealCount', key),
                 label: this.translate(key, 'fields', 'MealCount'),
             }));
 
@@ -85,60 +85,16 @@ define('safehouse-crm:views/meal-count/list', [
             }
 
             if (this.reportingStats.mode === 'selection') {
-                $container.find('.safehouse-reporting-stats-week, .safehouse-reporting-stats-month, .safehouse-reporting-stats-year').remove();
-
-                const selection = this.reportingStats.selection || {};
-                const title = this.translate('reportingListStatsSelection', 'labels', 'Global');
-
-                this.statsFooter.render($container, selection, {
-                    title,
+                this.statsFooter.renderSelection($container, this.reportingStats.selection || {}, {
                     items,
-                    removeSelector: '.safehouse-reporting-stats-selection',
-                    extraClass: 'safehouse-reporting-stats-selection',
                 });
 
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-selection').remove();
-
-            const week = this.reportingStats.week || {};
-            const month = this.reportingStats.month || {};
-            const year = this.reportingStats.year || {};
-
-            const weekTitle = this.translate('reportingListStatsWeek', 'labels', 'Global')
-                + (week.from && week.to ? ` (${week.from} – ${week.to})` : '');
-            const monthTitle = this.translate('reportingListStatsMonth', 'labels', 'Global')
-                + (month.from && month.to ? ` (${month.from} – ${month.to})` : '');
-            const yearTitle = this.translate('reportingListStatsYear', 'labels', 'Global')
-                + (year.from && year.to ? ` (${year.from} – ${year.to})` : '');
-
-            this.statsFooter.render($container, week, {
-                title: weekTitle,
-                items,
-                removeSelector: '.safehouse-reporting-stats-week',
-                extraClass: 'safehouse-reporting-stats-week',
-            });
-
-            this.statsFooter.render($container, month, {
-                title: monthTitle,
-                items,
-                removeSelector: '.safehouse-reporting-stats-month',
-                extraClass: 'safehouse-reporting-stats-month',
-            });
-
-            this.statsFooter.render($container, year, {
-                title: yearTitle,
-                items,
-                removeSelector: '.safehouse-reporting-stats-year',
-                extraClass: 'safehouse-reporting-stats-year',
-            });
+            this.statsFooter.renderPeriodGrid($container, this.reportingStats, {items});
         },
 
-        /**
-         * The record list view is rendered inside `.list-container`; stats must
-         * be prepended there (not inside the table root).
-         */
         getReportingStatsContainer() {
             const $parent = this.$el.parent('.list-container');
 
@@ -198,9 +154,7 @@ define('safehouse-crm:views/meal-count/list', [
                 return false;
             }
 
-            const where = this.collection.where || [];
-
-            return where.length > 0;
+            return (this.collection.where || []).length > 0;
         },
 
         buildTotalsSearchPayload() {

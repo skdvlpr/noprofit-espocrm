@@ -1,6 +1,13 @@
 define('safehouse-crm:views/dashlets/meal-count-monthly-stats', [
     'views/dashlets/abstract/base',
-], function (Dep) {
+    'safehouse-crm:views/reporting/list-stats-footer',
+], function (Dep, ListStatsFooter) {
+
+    const PERIOD_ORDER = ListStatsFooter.PERIOD_ORDER || [
+        {key: 'year', labelKey: 'reportingListStatsYear'},
+        {key: 'month', labelKey: 'reportingListStatsMonth'},
+        {key: 'today', labelKey: 'reportingListStatsToday'},
+    ];
 
     return Dep.extend({
 
@@ -11,32 +18,31 @@ define('safehouse-crm:views/dashlets/meal-count-monthly-stats', [
         defaultMetrics: ['adults', 'minors', 'totalMeals', 'foodCost'],
 
         templateContent: `
-            <div class="safehouse-mealcount-dashlet">
-                <div class="btn-group btn-group-xs-wide margin-bottom" role="group">
-                    <button type="button"
-                        class="btn btn-text {{#if periodIsMonth}}active{{/if}}"
-                        data-action="setPeriod"
-                        data-period="month">{{monthLabel}}</button>
-                    <button type="button"
-                        class="btn btn-text {{#if periodIsYear}}active{{/if}}"
-                        data-action="setPeriod"
-                        data-period="year">{{yearLabel}}</button>
-                </div>
+            <div class="safehouse-reporting-dashlet">
                 {{#if loading}}
-                    <div class="text-muted">{{translate 'loading'}}</div>
+                    <div class="no-data text-soft">{{loadingLabel}}</div>
                 {{else}}
                     {{#if hasStats}}
-                        <div class="text-soft small margin-bottom">{{periodRange}}</div>
-                        <div class="safehouse-reporting-stats-grid">
-                            {{#each metricItems}}
-                                <div class="safehouse-reporting-stats-item">
-                                    <span class="safehouse-reporting-stats-label">{{label}}: </span>
-                                    <span class="safehouse-reporting-stats-value">{{value}}</span>
+                        <div class="safehouse-reporting-stats-period-grid">
+                            {{#each periodSections}}
+                                <div class="safehouse-reporting-stats-period-cell">
+                                    <div class="safehouse-reporting-stats-period-title">{{title}}</div>
+                                    {{#if range}}
+                                        <div class="safehouse-reporting-stats-period-range">{{range}}</div>
+                                    {{/if}}
+                                    <div class="safehouse-reporting-stats-metrics">
+                                        {{#each metrics}}
+                                            <div class="safehouse-reporting-stats-metric">
+                                                <span class="safehouse-reporting-stats-value safehouse-reporting-stats-value--accent">{{value}}</span>
+                                                <span class="safehouse-reporting-stats-label">{{label}}</span>
+                                            </div>
+                                        {{/each}}
+                                    </div>
                                 </div>
                             {{/each}}
                         </div>
                     {{else}}
-                        <div class="text-muted">{{translate 'No Data'}}</div>
+                        <div class="no-data">{{noDataLabel}}</div>
                     {{/if}}
                 {{/if}}
             </div>
@@ -45,63 +51,83 @@ define('safehouse-crm:views/dashlets/meal-count-monthly-stats', [
         setup() {
             Dep.prototype.setup.call(this);
 
-            this.period = this.optionsData.period || 'month';
             this.summary = null;
             this.loading = true;
+            this.summaryRequestId = 0;
+            this.statsFooter = new ListStatsFooter(this);
 
-            this.addActionHandler('setPeriod', data => {
-                const period = data.period;
-
-                if (!period || period === this.period) {
-                    return;
-                }
-
-                this.period = period;
-                this.optionsData.period = period;
-                this.getPreferences().setDashletOptions(this.id, this.optionsData);
-                this.getPreferences().save();
-                this.renderStats();
-            });
-        },
-
-        afterRender() {
             this.loadSummary();
         },
 
         data() {
-            const stats = this.getPeriodStats();
-            const metricList = (this.summary && this.summary.metricList) ||
-                this.defaultMetrics;
-
-            const metricItems = metricList.map(key => ({
-                key: key,
-                label: this.translate(key, 'fields', this.entityScope),
-                value: this.formatValue(stats ? stats[key] : null),
-            }));
+            const periodSections = this.buildPeriodSections();
 
             return {
                 loading: this.loading,
-                hasStats: !!stats && metricItems.length > 0,
-                periodIsMonth: this.period === 'month',
-                periodIsYear: this.period === 'year',
-                monthLabel: this.translate('reportingListStatsMonth', 'labels', 'Global'),
-                yearLabel: this.translate('reportingListStatsYear', 'labels', 'Global'),
-                periodRange: stats && stats.from && stats.to ? `${stats.from} – ${stats.to}` : '',
-                metricItems: metricItems,
+                loadingLabel: this.translate('loading', 'labels', 'Global'),
+                noDataLabel: this.translate('No Data'),
+                hasStats: periodSections.length > 0,
+                periodSections: periodSections,
             };
+        },
+
+        buildPeriodSections() {
+            if (!this.summary) {
+                return [];
+            }
+
+            const metricList = this.summary.metricList || this.defaultMetrics;
+
+            return PERIOD_ORDER
+                .map(period => {
+                    const stats = this.summary[period.key];
+
+                    if (!stats) {
+                        return null;
+                    }
+
+                    return {
+                        key: period.key,
+                        title: this.translate(period.labelKey, 'labels', 'Global'),
+                        range: this.statsFooter.formatPeriodRange(stats.from, stats.to),
+                        metrics: metricList.map(key => {
+                            const item = this.statsFooter.resolveMetricItem(this.entityScope, key);
+
+                            return {
+                                key: key,
+                                label: this.translate(key, 'fields', this.entityScope),
+                                value: this.statsFooter.formatValue(stats[key], item),
+                            };
+                        }),
+                    };
+                })
+                .filter(section => section !== null);
         },
 
         loadSummary() {
             this.loading = true;
-            this.reRender();
+            const requestId = Date.now();
+            this.summaryRequestId = requestId;
+
+            if (this.isRendered()) {
+                this.reRender();
+            }
 
             Espo.Ajax.getRequest(this.summaryUrl)
                 .then(data => {
+                    if (this.summaryRequestId !== requestId) {
+                        return;
+                    }
+
                     this.summary = data;
                     this.loading = false;
                     this.renderStats();
                 })
                 .catch(() => {
+                    if (this.summaryRequestId !== requestId) {
+                        return;
+                    }
+
                     this.summary = null;
                     this.loading = false;
                     this.renderStats();
@@ -112,26 +138,6 @@ define('safehouse-crm:views/dashlets/meal-count-monthly-stats', [
             if (this.isRendered()) {
                 this.reRender();
             }
-        },
-
-        getPeriodStats() {
-            if (!this.summary) {
-                return null;
-            }
-
-            return this.period === 'year' ? this.summary.year : this.summary.month;
-        },
-
-        formatValue(value) {
-            if (value === null || value === undefined) {
-                return '0';
-            }
-
-            if (typeof value === 'number') {
-                return Number.isInteger(value) ? String(value) : value.toFixed(2);
-            }
-
-            return String(value);
         },
 
         actionRefresh() {

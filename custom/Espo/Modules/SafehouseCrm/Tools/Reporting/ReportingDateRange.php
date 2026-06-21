@@ -13,6 +13,16 @@ final class ReportingDateRange
     public const DEFAULT_TIMEZONE = 'Europe/Rome';
 
     /**
+     * @return array{0: string, 1: string} inclusive from, inclusive to (Y-m-d) — calendar today.
+     */
+    public static function currentCalendarDay(DateTimeZone $timezone): array
+    {
+        $today = (new DateTimeImmutable('now', $timezone))->format('Y-m-d');
+
+        return [$today, $today];
+    }
+
+    /**
      * @return array{0: string, 1: string} inclusive from, inclusive to (Y-m-d).
      */
     public static function currentCalendarWeek(DateTimeZone $timezone): array

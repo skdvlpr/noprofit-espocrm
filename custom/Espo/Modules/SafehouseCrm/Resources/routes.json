@@ -10,6 +10,11 @@
         "actionClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Reporting\\Api\\GetMealCountTotals"
     },
     {
+        "route": "/SafehouseCrm/reporting/email-export",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Reporting\\Api\\PostReportingEmailExport"
+    },
+    {
         "route": "/SafehouseCrm/reporting/meal-count/email-export",
         "method": "post",
         "actionClassName": "Espo\\Modules\\SafehouseCrm\\Tools\\Reporting\\Api\\PostMealCountEmailExport"

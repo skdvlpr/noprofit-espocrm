@@ -5,8 +5,8 @@
         "AccountWebsite": "Sito dell'Organizzazione",
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
-        "MealCount": "Conteggio Pasti",
-        "AssociationMealCount": "Conteggio Pasti Associati"
+        "MealCount": "Conteggio pasti",
+        "AssociationMealCount": "Conteggio pasti per Rete"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -14,8 +14,8 @@
         "AccountWebsite": "Siti delle Organizzazioni",
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
-        "MealCount": "Conteggio Pasti",
-        "AssociationMealCount": "Conteggio Pasti Associati"
+        "MealCount": "Conteggio pasti",
+        "AssociationMealCount": "Conteggio pasti per Rete"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
@@ -29,21 +29,23 @@
     "labels": {
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
-        "Create MealCount": "Crea Nuovo",
+        "Create MealCount": "Crea Conteggio pasti",
+        "Create AssociationMealCount": "Crea Conteggio pasti per Rete",
         "reportingListStatsWeek": "Totali settimana corrente",
-        "reportingListStatsMonth": "Totali mese corrente",
-        "reportingListStatsYear": "Totali anno corrente",
+        "reportingListStatsMonth": "Mese",
+        "reportingListStatsYear": "Anno",
+        "reportingListStatsToday": "Oggi",
         "reportingListStatsSelection": "Totali selezione filtrata",
         "reportingListStatsTitle": "Totali rendicontazione",
         "reportingExportIncludeTotals": "Includi riga Totali",
         "reportingExportTotalsLabel": "Totali",
         "reportingEmailExport": "Invia export via email",
         "reportingEmailExportSuccess": "Email export inviata",
-        "reportingEmailExportBody": "In allegato l'export Conteggio Pasti."
+        "reportingEmailExportBody": "In allegato l'export {scope}."
     },
     "dashlets": {
-        "MealCountMonthlyStats": "Statistiche Conteggio Pasti",
-        "AssociationMealCountMonthlyStats": "Statistiche Pasti Associati"
+        "MealCountMonthlyStats": "Conteggio pasti",
+        "AssociationMealCountMonthlyStats": "Conteggio pasti per Rete"
     },
     "options": {
         "period": {
