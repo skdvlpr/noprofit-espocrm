@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [{"name": "account"}, {"name": "date"}],
+            [{"name": "portionCount"}, false]
+        ]
+    },
+    {
+        "name": "Description",
+        "label": "Description",
+        "rows": [
+            [{"name": "description", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "System",
+        "label": "System",
+        "rows": [
+            [{"name": "assignedUser"}, {"name": "teams"}],
+            [{"name": "createdBy"}, {"name": "createdAt"}],
+            [{"name": "modifiedBy"}, {"name": "modifiedAt"}]
+        ]
+    }
+]

@@ -3,6 +3,20 @@
     "recordViews": {
         "list": "safehouse-crm:views/meal-count/list"
     },
+    "menu": {
+        "list": {
+            "buttons": [
+                {
+                    "labelTranslation": "Global.labels.reportingEmailExport",
+                    "name": "reportingEmailExport",
+                    "style": "default",
+                    "acl": "read",
+                    "handler": "safehouse-crm:handlers/reporting/email-export",
+                    "actionFunction": "send"
+                }
+            ]
+        }
+    },
     "color": "#dd7e4a",
     "iconClass": "fas fa-utensils"
 }

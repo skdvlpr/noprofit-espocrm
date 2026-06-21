@@ -1,0 +1,34 @@
+{
+    "view": "safehouse-crm:views/dashlets/association-meal-count-monthly-stats",
+    "aclScope": "AssociationMealCount",
+    "options": {
+        "view": "views/dashlets/options/base",
+        "fields": {
+            "title": {
+                "type": "varchar",
+                "required": true
+            },
+            "period": {
+                "type": "enum",
+                "options": ["month", "year"],
+                "default": "month"
+            },
+            "autorefreshInterval": {
+                "type": "enumFloat",
+                "options": [0, 0.5, 1, 2, 5, 10]
+            }
+        },
+        "layout": [
+            {
+                "rows": [
+                    [{"name": "title"}, false],
+                    [{"name": "period"}, false],
+                    [{"name": "autorefreshInterval"}, false]
+                ]
+            }
+        ],
+        "defaults": {
+            "period": "month"
+        }
+    }
+}

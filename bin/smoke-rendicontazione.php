@@ -58,8 +58,13 @@ $ok(
     $mealProfile !== null && $mealProfile->sumAttributes === ['adults', 'minors', 'totalMeals', 'foodCost']
 );
 $ok(
-    'AssociationMealCount profile pending (7.4)',
-    $registry->getProfile('AssociationMealCount') === null
+    'AssociationMealCount profile exists (7.4)',
+    $registry->getProfile('AssociationMealCount') !== null
+);
+$assocProfile = $registry->getProfile('AssociationMealCount');
+$ok(
+    'AssociationMealCount sum attributes',
+    $assocProfile !== null && $assocProfile->sumAttributes === ['portionCount']
 );
 
 echo "\nReportingDateRange\n";
@@ -211,6 +216,15 @@ try {
 
     $ok('routes.json meal-count/summary registered', in_array('/SafehouseCrm/reporting/meal-count/summary', $routePaths, true));
     $ok('routes.json meal-count/totals registered', in_array('/SafehouseCrm/reporting/meal-count/totals', $routePaths, true));
+    $ok('routes.json meal-count/email-export registered', in_array('/SafehouseCrm/reporting/meal-count/email-export', $routePaths, true));
+    $ok('routes.json association-meal-count/summary registered', in_array('/SafehouseCrm/reporting/association-meal-count/summary', $routePaths, true));
+    $ok('routes.json association-meal-count/totals registered', in_array('/SafehouseCrm/reporting/association-meal-count/totals', $routePaths, true));
+
+    echo "\nDashlet metadata\n";
+
+    $dashletPath = 'custom/Espo/Modules/SafehouseCrm/Resources/metadata/dashlets';
+    $ok('MealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/MealCountMonthlyStats.json"));
+    $ok('AssociationMealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/AssociationMealCountMonthlyStats.json"));
 } finally {
     foreach ($created as $entity) {
         $em->removeEntity($entity);

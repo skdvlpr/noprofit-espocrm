@@ -1,0 +1,20 @@
+{
+    "labels": {
+        "AssociationMealCount": "Conteggio Pasti Associati",
+        "Create AssociationMealCount": "Crea Conteggio Pasti Associati"
+    },
+    "fields": {
+        "name": "Nome",
+        "account": "Organizzazione",
+        "date": "Data",
+        "portionCount": "N° pasti",
+        "description": "Descrizione"
+    },
+    "links": {
+        "account": "Organizzazione",
+        "createdBy": "Creato Da",
+        "modifiedBy": "Modificato Da",
+        "assignedUser": "Utente Assegnato",
+        "teams": "Team"
+    }
+}

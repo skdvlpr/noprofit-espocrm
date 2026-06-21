@@ -5,7 +5,8 @@
         "AccountWebsite": "Account Website",
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
-        "MealCount": "Meal Count"
+        "MealCount": "Meal Count",
+        "AssociationMealCount": "Association Meal Count"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -13,7 +14,8 @@
         "AccountWebsite": "Account Websites",
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
-        "MealCount": "Meal Counts"
+        "MealCount": "Meal Counts",
+        "AssociationMealCount": "Association Meal Counts"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",
@@ -34,7 +36,20 @@
         "reportingListStatsSelection": "Filtered selection totals",
         "reportingListStatsTitle": "Reporting totals",
         "reportingExportIncludeTotals": "Include totals row",
-        "reportingExportTotalsLabel": "Totals"
+        "reportingExportTotalsLabel": "Totals",
+        "reportingEmailExport": "Send export via email",
+        "reportingEmailExportSuccess": "Export email sent",
+        "reportingEmailExportBody": "Meal Count export is attached."
+    },
+    "dashlets": {
+        "MealCountMonthlyStats": "Meal Count Stats",
+        "AssociationMealCountMonthlyStats": "Association Meal Count Stats"
+    },
+    "options": {
+        "period": {
+            "month": "Current month",
+            "year": "Current year"
+        }
     },
     "themes": {
         "SafehouseAurora": "Safehouse Aurora",

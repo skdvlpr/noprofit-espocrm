@@ -6,6 +6,8 @@ class ReportingProfileRegistry
 {
     private const MEAL_COUNT_SUM = ['adults', 'minors', 'totalMeals', 'foodCost'];
 
+    private const ASSOCIATION_MEAL_COUNT_SUM = ['portionCount'];
+
     public function getProfile(string $entityType): ?ReportingEntityProfile
     {
         if ($entityType === 'MealCount') {
@@ -16,7 +18,14 @@ class ReportingProfileRegistry
             );
         }
 
-        // AssociationMealCount — same shape; profile added in Task 7.4.
+        if ($entityType === 'AssociationMealCount') {
+            return new ReportingEntityProfile(
+                'AssociationMealCount',
+                'date',
+                self::ASSOCIATION_MEAL_COUNT_SUM,
+            );
+        }
+
         return null;
     }
 

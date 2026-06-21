@@ -5,7 +5,8 @@
         "AccountWebsite": "Sito dell'Organizzazione",
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
-        "MealCount": "Conteggio Pasti"
+        "MealCount": "Conteggio Pasti",
+        "AssociationMealCount": "Conteggio Pasti Associati"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -13,7 +14,8 @@
         "AccountWebsite": "Siti delle Organizzazioni",
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
-        "MealCount": "Conteggio Pasti"
+        "MealCount": "Conteggio Pasti",
+        "AssociationMealCount": "Conteggio Pasti Associati"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
@@ -34,7 +36,20 @@
         "reportingListStatsSelection": "Totali selezione filtrata",
         "reportingListStatsTitle": "Totali rendicontazione",
         "reportingExportIncludeTotals": "Includi riga Totali",
-        "reportingExportTotalsLabel": "Totali"
+        "reportingExportTotalsLabel": "Totali",
+        "reportingEmailExport": "Invia export via email",
+        "reportingEmailExportSuccess": "Email export inviata",
+        "reportingEmailExportBody": "In allegato l'export Conteggio Pasti."
+    },
+    "dashlets": {
+        "MealCountMonthlyStats": "Statistiche Conteggio Pasti",
+        "AssociationMealCountMonthlyStats": "Statistiche Pasti Associati"
+    },
+    "options": {
+        "period": {
+            "month": "Mese corrente",
+            "year": "Anno corrente"
+        }
     },
     "themes": {
         "SafehouseAurora": "Safehouse Aurora",

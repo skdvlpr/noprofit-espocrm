@@ -1,0 +1,9 @@
+[
+    "date",
+    "account",
+    "portionCount",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy"
+]

@@ -1,0 +1,20 @@
+{
+    "labels": {
+        "AssociationMealCount": "Association Meal Count",
+        "Create AssociationMealCount": "Create Association Meal Count"
+    },
+    "fields": {
+        "name": "Name",
+        "account": "Account",
+        "date": "Date",
+        "portionCount": "Portions",
+        "description": "Description"
+    },
+    "links": {
+        "account": "Account",
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By",
+        "assignedUser": "Assigned User",
+        "teams": "Teams"
+    }
+}

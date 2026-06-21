@@ -91,7 +91,9 @@ $report('Legacy $Rendicontazione divider absent', !array_reduce(
     false
 ));
 $report('MealCount in Rendicontazione group itemList', in_array('MealCount', $groupItemList, true));
+$report('AssociationMealCount in Rendicontazione group itemList', in_array('AssociationMealCount', $groupItemList, true));
 $report('MealCount not a top-level tab', !in_array('MealCount', $tabStrings, true));
+$report('AssociationMealCount not a top-level tab', !in_array('AssociationMealCount', $tabStrings, true));
 $report('Opportunity NOT in Rendicontazione group', !in_array('Opportunity', $groupItemList, true));
 
 $opportunityIndex = null;

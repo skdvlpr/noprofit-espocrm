@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (date == null) {\n    date = datetime\\today();\n}\n\nif (accountId != null && accountId != '') {\n    name = string\\concatenate(account.name, ' | ', date, ' | ', portionCount);\n} else {\n    name = string\\concatenate('Association Meals ', date, ' | ', portionCount);\n}"
+}

@@ -1,0 +1,8 @@
+{
+    "controller": "controllers/record",
+    "recordViews": {
+        "list": "safehouse-crm:views/association-meal-count/list"
+    },
+    "color": "#8e44ad",
+    "iconClass": "fas fa-building"
+}

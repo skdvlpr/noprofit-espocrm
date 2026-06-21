@@ -22,6 +22,11 @@
             "entity": "AccountWebsite",
             "foreign": "account",
             "audited": true
+        },
+        "associationMealCounts": {
+            "type": "hasMany",
+            "entity": "AssociationMealCount",
+            "foreign": "account"
         }
     }
 }

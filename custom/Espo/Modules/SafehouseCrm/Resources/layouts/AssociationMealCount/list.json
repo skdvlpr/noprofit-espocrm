@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "account"},
+    {"name": "date"},
+    {"name": "portionCount"},
+    {"name": "assignedUser"}
+]

@@ -36,6 +36,7 @@ class Installer
 
     private const REPORTING_ENTITIES = [
         'MealCount',
+        'AssociationMealCount',
     ];
 
     private const OTHER_TABS_TO_ENSURE = ['Account', 'Opportunity', 'Document'];

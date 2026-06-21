@@ -493,7 +493,7 @@ class RoleSetup
 
         $domainEntities = [
             'Account', 'AccountWebsite', 'Contact', 'Opportunity',
-            'VolunteerEmployee', 'Member', 'MealCount', 'Document',
+            'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'Document',
             'Meeting', 'Call', 'Task', 'Email',
             'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
@@ -509,6 +509,9 @@ class RoleSetup
             $employeeData[$e] = $teamCreateOwnDelete();
         }
         $employeeData['MealCount'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
+        ];
+        $employeeData['AssociationMealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
         // Personnel: ordinary Employee sees directory but does not create/edit/delete rows.
@@ -545,6 +548,9 @@ class RoleSetup
             'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
         ];
         $volunteerData['MealCount'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $volunteerData['AssociationMealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
         ];
         $volunteerData['Account'] = $readOnlyAll();
