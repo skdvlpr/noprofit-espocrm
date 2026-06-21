@@ -2,6 +2,7 @@
 
 namespace Espo\Modules\SafehouseCrm\Tools\Export\Csv;
 
+use Espo\Core\ORM\Type\FieldType;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Json;
 use Espo\Core\Utils\Language;
@@ -56,7 +57,7 @@ class LabeledCsvProcessor implements ProcessorInterface
         fputcsv($fp, $headerLabels, $delimiter);
 
         foreach ($collection as $entity) {
-            $preparedRow = $this->prepareRow($entity, $attributeList);
+            $preparedRow = $this->prepareRow($entity, $entityType, $attributeList);
 
             fputcsv($fp, $preparedRow, $delimiter, '"', "\0");
         }
@@ -70,12 +71,12 @@ class LabeledCsvProcessor implements ProcessorInterface
      * @param string[] $attributeList
      * @return string[]
      */
-    private function prepareRow(Entity $entity, array $attributeList): array
+    private function prepareRow(Entity $entity, string $entityType, array $attributeList): array
     {
         $preparedRow = [];
 
         foreach ($attributeList as $attribute) {
-            $value = $entity->get($attribute);
+            $value = $this->formatCellValue($entity, $entityType, $attribute);
 
             if (is_array($value) || is_object($value)) {
                 $value = Json::encode($value, JSON_UNESCAPED_UNICODE);
@@ -87,6 +88,35 @@ class LabeledCsvProcessor implements ProcessorInterface
         }
 
         return $preparedRow;
+    }
+
+    private function formatCellValue(Entity $entity, string $entityType, string $attribute): mixed
+    {
+        if (!$entity->has($attribute)) {
+            return '';
+        }
+
+        $value = $entity->get($attribute);
+
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        $fieldData = $this->fieldHelper->getData($entityType, $attribute);
+
+        if ($fieldData === null) {
+            return $value;
+        }
+
+        if ($fieldData->getType() === FieldType::ENUM) {
+            return $this->language->translateOption(
+                (string) $value,
+                $fieldData->getField(),
+                $fieldData->getEntityType()
+            );
+        }
+
+        return $value;
     }
 
     private function sanitizeCellValue(string $value): string

@@ -43,6 +43,20 @@ $xlsxClass = $metadata->get(['app', 'export', 'formatDefs', 'xlsx', 'processorCl
 $expectedCsv = 'Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Csv\\TotalsProcessor';
 $expectedXlsx = 'Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Xlsx\\TotalsProcessor';
 
+$dayOfWeekType = $metadata->get(['entityDefs', 'MealCount', 'fields', 'dayOfWeek', 'type']);
+$dayOfWeekType === 'enum'
+    ? $pass[] = 'MealCount dayOfWeek field type is enum'
+    : $fail[] = "MealCount dayOfWeek type = $dayOfWeekType (expected enum)";
+
+$itDayOptions = json_decode(
+    file_get_contents('custom/Espo/Modules/SafehouseCrm/Resources/i18n/it_IT/MealCount.json'),
+    true
+)['options']['dayOfWeek']['Friday'] ?? null;
+
+$itDayOptions === 'Venerdì'
+    ? $pass[] = 'it_IT dayOfWeek Friday -> Venerdì'
+    : $fail[] = 'it_IT dayOfWeek Friday translation missing or wrong';
+
 $csvClass === $expectedCsv
     ? $pass[] = "csv processorClassName overridden"
     : $fail[] = "csv processorClassName = $csvClass (expected $expectedCsv)";

@@ -10,7 +10,16 @@
             "tooltip": "Defaults to today on save when left empty (see formula)."
         },
         "dayOfWeek": {
-            "type": "varchar",
+            "type": "enum",
+            "options": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
             "readOnly": true,
             "storable": true
         },
