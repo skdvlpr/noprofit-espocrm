@@ -612,6 +612,13 @@ $encoded = json_encode($externalAccount->getValueMap());
 $ok('disconnect save (enabled=false) produces JSON value map', $encoded !== false && $encoded !== '');
 $ok('disconnect clears enabled flag', $externalAccount->get('enabled') === false);
 
+$authorizationCodeHandlerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php') ?: '';
+$ok(
+    'OAuth reconnect preserves existing refreshToken when Google omits it',
+    !str_contains($authorizationCodeHandlerSource, "\$entity->clear('refreshToken')")
+        && str_contains($authorizationCodeHandlerSource, "\$name === 'refreshToken'")
+);
+
 echo "\nCalendarSyncRunner ExternalAccount id* prefix\n";
 
 $integrationPrefix = GoogleIntegrationInstaller::INTEGRATION_ID . '__';
