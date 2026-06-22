@@ -1,62 +1,66 @@
+
 /**
  * Safehouse Aurora — navbar glass + entity list panels matching admin (list-group-panel).
  * Admin reference: frosted panel-bg shell, flat search above, row separators inside.
  */
 
 /* ── Frosted transparent navbar ── */
-body #navbar {
+body[data-theme-name="SafehouseAurora"] #navbar,
+body[data-theme-name="SafehouseAuroraLight"] #navbar {
   position: relative;
   z-index: 1200;
 }
-
 /*
  * Minimized side menu: body backdrop is z-index 2140; core sets .navbar to 2150 but only
  * inside #navbar's stacking context — if #navbar stays at 1200 the panel paints behind blur.
  */
-body[data-navbar='side'].minimized.side-menu-opened #navbar {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar {
   z-index: 2160 !important;
 }
-
 /*
  * Quick view / edit drawer above side-navbar strip (#navbar z-index 1200).
  * Espo marks older modals .modal-container.overlaid — they must sit BELOW the active one.
  */
-body .modal.dialog-record.in {
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record.in,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record.in {
   z-index: 1250 !important;
 }
-
-body .modal-container:not(.overlaid) .modal.dialog-record.in {
+body[data-theme-name="SafehouseAurora"] .modal-container:not(.overlaid) .modal.dialog-record.in,
+body[data-theme-name="SafehouseAuroraLight"] .modal-container:not(.overlaid) .modal.dialog-record.in {
   z-index: 1285 !important;
 }
-
-body .modal-container.overlaid .modal.dialog-record.in {
+body[data-theme-name="SafehouseAurora"] .modal-container.overlaid .modal.dialog-record.in,
+body[data-theme-name="SafehouseAuroraLight"] .modal-container.overlaid .modal.dialog-record.in {
   z-index: 1250 !important;
 }
-
-body #navbar > .navbar {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
   -webkit-backdrop-filter: var(--aurora-glass-blur);
   backdrop-filter: var(--aurora-glass-blur);
   border-bottom: 1px solid var(--aurora-glass-border) !important;
   box-shadow: var(--aurora-glass-shadow) !important;
 }
-
-body #navbar > .navbar .navbar-body,
-body[data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar .navbar-body,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar .navbar-body,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar > .navbar .navbar-body {
   background: transparent !important;
 }
-
-body[data-navbar='side'] #navbar > .navbar {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar > .navbar,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar > .navbar {
   border-bottom: none !important;
   border-right: 1px solid var(--aurora-glass-border) !important;
 }
-
 /*
  * Side navbar top utility bar (search + actions).
  * Cosmetic only — never set height:auto while core keeps top+bottom (stretches full viewport).
  */
-body[data-navbar='side'] #navbar .navbar-right,
-body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
   background: var(--aurora-glass-bg) !important;
   -webkit-backdrop-filter: var(--aurora-glass-blur);
   backdrop-filter: var(--aurora-glass-blur);
@@ -72,8 +76,8 @@ body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
   padding-left: 12px;
   padding-right: var(--navbar-width) !important;
 }
-
-body[data-navbar='side'] #navbar .navbar-right .global-search-container {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container {
   display: flex;
   align-items: center;
   flex: 0 1 auto;
@@ -81,23 +85,27 @@ body[data-navbar='side'] #navbar .navbar-right .global-search-container {
   min-width: 100px;
   margin-right: 4px;
 }
-
-body[data-navbar='side'] #navbar .navbar-right > li.quick-create-container,
-body[data-navbar='side'] #navbar .navbar-right > li.notifications-badge-container,
-body[data-navbar='side'] #navbar .navbar-right > li.menu-container {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right > li.quick-create-container,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right > li.quick-create-container,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right > li.notifications-badge-container,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right > li.notifications-badge-container,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right > li.menu-container,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right > li.menu-container {
   flex: 0 0 auto;
 }
-
-body[data-navbar='side'] #navbar .navbar-right .global-search-container .form-group,
-body[data-navbar='side'] #navbar .navbar-right .global-search-container form,
-body[data-navbar='side'] #navbar .navbar-right .global-search-container .input-group {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container .form-group,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container .form-group,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container form,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container form,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container .input-group,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container .input-group {
   display: flex;
   align-items: center;
   width: 100%;
   margin: 0;
 }
-
-body[data-navbar='side'] #navbar .navbar-right input.global-search-input {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right input.global-search-input,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right input.global-search-input {
   height: 22px !important;
   max-height: 22px !important;
   min-height: 0;
@@ -111,15 +119,16 @@ body[data-navbar='side'] #navbar .navbar-right input.global-search-input {
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
-
-body[data-navbar='side'] #navbar .navbar-right input.global-search-input:hover,
-body[data-navbar='side'] #navbar .navbar-right input.global-search-input:focus {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right input.global-search-input:hover,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right input.global-search-input:hover,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right input.global-search-input:focus,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right input.global-search-input:focus {
   border-color: var(--input-border-focus) !important;
   box-shadow: 0 0 0 1px var(--input-border-focus-rgba) !important;
   outline: none;
 }
-
-body[data-navbar='side'] #navbar .navbar-right .global-search-container a.global-search-button {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container a.global-search-button,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container a.global-search-button {
   height: 22px !important;
   width: 26px;
   padding: 0 !important;
@@ -129,8 +138,8 @@ body[data-navbar='side'] #navbar .navbar-right .global-search-container a.global
   border-radius: 8px;
   font-size: 0.8125rem;
 }
-
-body[data-navbar='side'] #navbar .navbar-right > li > a {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right > li > a,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right > li > a {
   height: 22px !important;
   width: 26px !important;
   padding: 0 !important;
@@ -140,9 +149,9 @@ body[data-navbar='side'] #navbar .navbar-right > li > a {
   border-radius: 8px;
   font-size: 0.8125rem;
 }
-
 /* Navbar dropdowns — user menu, overflow tabs */
-body #navbar .dropdown-menu {
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu {
   margin-top: 6px !important;
   padding: 6px !important;
   border-radius: 12px !important;
@@ -150,9 +159,10 @@ body #navbar .dropdown-menu {
   box-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.32) !important;
   min-width: 196px;
 }
-
-body #navbar .dropdown-menu > li > a,
-body #navbar .dropdown-menu > li > a.nav-link {
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li > a,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li > a,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li > a.nav-link,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li > a.nav-link {
   display: block;
   padding: 8px 12px !important;
   border-radius: 8px;
@@ -162,31 +172,32 @@ body #navbar .dropdown-menu > li > a.nav-link {
   color: var(--dropdown-link-color) !important;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
-
-body #navbar .dropdown-menu > li > a:hover,
-body #navbar .dropdown-menu > li > a:focus {
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li > a:hover,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li > a:hover,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li > a:focus,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li > a:focus {
   background-color: var(--dropdown-link-hover-bg) !important;
   color: var(--dropdown-link-hover-color) !important;
 }
-
-body #navbar .dropdown-menu > li.divider {
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.divider,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.divider {
   margin: 6px 4px !important;
   background-color: var(--dropdown-divider-bg) !important;
 }
-
-body #navbar .menu-container .dropdown-menu > li:first-child > a {
+body[data-theme-name="SafehouseAurora"] #navbar .menu-container .dropdown-menu > li:first-child > a,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .menu-container .dropdown-menu > li:first-child > a {
   padding: 10px 12px !important;
   font-weight: 600;
 }
-
-body #navbar .menu-container .dropdown-menu > li:first-child > a .avatar {
+body[data-theme-name="SafehouseAurora"] #navbar .menu-container .dropdown-menu > li:first-child > a .avatar,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .menu-container .dropdown-menu > li:first-child > a .avatar {
   margin-right: 8px;
   vertical-align: middle;
 }
-
 /* ── Navbar tabs: Principali scope colors; all other sections theme-neutral icons ── */
 /* Keep in sync with Installer.php CRM_NAV_ORDER */
-:root {
+body[data-theme-name="SafehouseAurora"],
+body[data-theme-name="SafehouseAuroraLight"] {
   --navbar-muted-icon-color: var(--navbar-inverse-link-icon-color);
   --navbar-muted-icon-color: color-mix(
     in srgb,
@@ -206,49 +217,66 @@ body #navbar .menu-container .dropdown-menu > li:first-child > a .avatar {
     transparent
   );
 }
-
-body #navbar > .navbar ul.tabs > li > a,
-body #navbar > .navbar ul.tabs > li > a .full-label,
-body #navbar > .navbar ul.tabs > li > a .short-label-text {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a .full-label,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a .full-label,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a .short-label-text,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a .short-label-text {
   color: var(--navbar-inverse-link-color);
 }
-
-body #navbar > .navbar ul.tabs > li > a:hover,
-body #navbar > .navbar ul.tabs > li > a:focus,
-body #navbar > .navbar ul.tabs > li > a:hover .full-label {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a:hover,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a:hover,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a:focus,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a:focus,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li > a:hover .full-label,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li > a:hover .full-label {
   color: var(--navbar-inverse-link-hover-color);
   background-color: var(--navbar-inverse-link-hover-bg);
 }
-
-body #navbar > .navbar ul.tabs > li.active > a,
-body #navbar > .navbar ul.tabs > li.active > a .full-label,
-body #navbar > .navbar ul.tabs > li.active > a .short-label-text {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.active > a,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.active > a,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.active > a .full-label,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.active > a .full-label,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.active > a .short-label-text,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.active > a .short-label-text {
   color: var(--navbar-inverse-link-hover-color);
   font-weight: 600;
 }
-
-body #navbar > .navbar ul.tabs > li.active > a[style*='border-color'] {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.active > a[style*='border-color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.active > a[style*='border-color'] {
   border-bottom: 2px solid;
 }
-
-body #navbar > .navbar ul.tabs > li.active > a:not([style*='border-color']) {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.active > a:not([style*='border-color']),
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.active > a:not([style*='border-color']) {
   border-bottom: 2px solid var(--navbar-tab-accent-default);
 }
-
-body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fas,
-body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .far,
-body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fab {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .far,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fab,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fab {
   color: var(--navbar-muted-icon-color) !important;
 }
-
-body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fas,
-body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .far,
-body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fab {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .far,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fab,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fab {
   color: var(--navbar-muted-icon-hover-color) !important;
 }
-
 /* Principali ($CRM): Lead, Contact, Account, Opportunity, Member, VolunteerEmployee */
-body #navbar > .navbar ul.tabs > li.tab:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ) > a .short-label[style*='color'] span,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
@@ -258,8 +286,15 @@ body #navbar > .navbar ul.tabs > li.tab:is(
   ) > a .short-label[style*='color'] span {
   color: inherit;
 }
-
-body #navbar > .navbar ul.tabs > li.tab:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
@@ -269,8 +304,15 @@ body #navbar > .navbar ul.tabs > li.tab:is(
   ) > a .short-label[style*='color'] {
   filter: saturate(1.12) brightness(1.06);
 }
-
-body #navbar > .navbar ul.tabs > li.tab:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
@@ -280,8 +322,7 @@ body #navbar > .navbar ul.tabs > li.tab:is(
   ).active > a .short-label[style*='color'] {
   filter: saturate(1.15) brightness(1.08);
 }
-
-body #navbar > .navbar ul.tabs > li.tab:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
@@ -289,7 +330,23 @@ body #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Member'],
     [data-name='VolunteerEmployee']
   ).active > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'] span[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
@@ -299,9 +356,8 @@ body #navbar > .navbar ul.tabs > li.tab:is(
   ).active > a .short-label[style*='color'] span[style*='color'] {
   color: inherit;
 }
-
 /* Non-Principali: neutral icons (Rendicontazione, Activities, Marketing, overflow, etc.) */
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -309,7 +365,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )) > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -317,7 +381,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )) > a .short-label[style*='color'] .fas,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -325,7 +397,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )) > a .short-label[style*='color'] .far,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -333,7 +413,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )) > a .short-label[style*='color'] .fab,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -341,21 +429,38 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )) > a .short-label .color-icon[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
-body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
-body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
-body #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
-body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
-body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fas,
-body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .far,
-body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fab,
-body #navbar .dropdown-menu > li.in-group.tab > a .short-label .color-icon[style*='color'] {
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label .color-icon[style*='color'] {
   color: var(--navbar-muted-icon-color) !important;
   filter: none;
 }
-
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -363,7 +468,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )):not(.active) > a:hover .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -371,7 +484,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )):not(.active) > a:hover .short-label[style*='color'] .fas,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -379,7 +500,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )):not(.active) > a:hover .short-label[style*='color'] .far,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -387,14 +516,25 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )):not(.active) > a:hover .short-label[style*='color'] .fab,
-body #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
-body #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
-body #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'] .fas {
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'] .fas {
   color: var(--navbar-muted-icon-hover-color) !important;
 }
-
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -402,7 +542,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )).active > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -410,7 +558,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )).active > a .short-label[style*='color'] .fas,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -418,7 +574,15 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )).active > a .short-label[style*='color'] .far,
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -426,14 +590,25 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )).active > a .short-label[style*='color'] .fab,
-body #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
-body #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas {
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas {
   color: var(--navbar-muted-icon-active-color) !important;
 }
-
-body #navbar > .navbar ul.tabs > li.tab:not(:is(
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
@@ -441,24 +616,45 @@ body #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Member'],
       [data-name='VolunteerEmployee']
     )).active > a[style*='border-color'],
-body #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
-body #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'] {
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a[style*='border-color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'] {
   border-bottom-color: var(--navbar-muted-tab-accent) !important;
 }
-
 /* ── Shared admin + entity list shell (same as .list-group-panel / .table-admin-panel) ── */
-body #content #main .list-group.list-group-panel,
-body #content #main .admin-content .table.table-admin-panel,
-body #content #main .admin-content table.table-panel,
-body #content #main > .list-container > .list,
-body #content #main .list-main-column > .list-container > .list,
-body #content #main .nested-categories-container + .list-container > .list,
-body #content #main > .row > .left-container + .list-container > .list,
-body #content #main .list-container.list-container-panel > .list,
-body #content #main > .list-container:not(:has(.list-kanban)),
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container > .list,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > .list,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) {
   position: relative;
   overflow: visible !important;
   box-sizing: border-box;
@@ -471,19 +667,30 @@ body #content #main > .row > .left-container + .list-container:not(:has(.list-ka
   backdrop-filter: none !important;
   box-shadow: none !important;
 }
-
-body #content #main .list-group.list-group-panel::before,
-body #content #main .admin-content .table.table-admin-panel::before,
-body #content #main .admin-content table.table-panel::before,
-body #content #main > .list-container > .list::before,
-body #content #main .list-main-column > .list-container > .list::before,
-body #content #main .nested-categories-container + .list-container > .list::before,
-body #content #main > .row > .left-container + .list-container > .list::before,
-body #content #main .list-container.list-container-panel > .list::before,
-body #content #main > .list-container:not(:has(.list-kanban))::before,
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban))::before,
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban))::before,
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban))::before {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban))::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban))::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -496,112 +703,147 @@ body #content #main > .row > .left-container + .list-container:not(:has(.list-ka
   -webkit-backdrop-filter: var(--aurora-list-blur, var(--aurora-glass-blur, none));
   backdrop-filter: var(--aurora-list-blur, var(--aurora-glass-blur, none));
 }
-
-body #content #main .list-group.list-group-panel > *,
-body #content #main .admin-content .table.table-admin-panel > *,
-body #content #main .admin-content table.table-panel > *,
-body #content #main .list-container > .list > *,
-body #content #main .list-main-column > .list-container > .list > *,
-body #content #main .nested-categories-container + .list-container > .list > *,
-body #content #main > .row > .left-container + .list-container > .list > *,
-body #content #main .list-container.list-container-panel > .list > *,
-body #content #main > .list-container:not(:has(.list-kanban)) > *,
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > *,
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > *,
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > * {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel > *,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel > *,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel > *,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list > *,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container > .list > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container > .list > *,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container > .list > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container > .list > *,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container > .list > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container > .list > *,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > .list > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > .list > *,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > *,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > * {
   position: relative;
   z-index: 1;
 }
-
 /* Toolbar above table — column picker (Campi) dropdown must not sit under thead/cells */
-body #content #main > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main > .list-container:not(:has(.list-kanban)) > .sticked-bar,
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .sticked-bar,
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .sticked-bar,
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .sticked-bar {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .sticked-bar,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .sticked-bar {
   z-index: 3;
 }
-
-body #content #main .list-container:not(:has(.list-kanban)) .list-buttons-container .dropdown-menu {
+body[data-theme-name="SafehouseAurora"] #content #main .list-container:not(:has(.list-kanban)) .list-buttons-container .dropdown-menu,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container:not(:has(.list-kanban)) .list-buttons-container .dropdown-menu {
   z-index: 4;
 }
-
 /* Table lists: outer list-container owns the shell — no double glass on inner .list */
-body #content #main > .list-container:not(:has(.list-kanban)) > .list::before,
-body #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list::before,
-body #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list::before,
-body #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list::before {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list::before {
   content: none !important;
   display: none !important;
 }
-
 /* Core paints panel bg/border on host — shell lives on ::before only */
-body #content #main .list-group.list-group-panel,
-body #content #main .admin-content .table.table-admin-panel,
-body #content #main .admin-content table.table-panel {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel {
   background-color: transparent !important;
   border: none !important;
 }
-
 /* list-container-panel: one outer glass shell — not per-child boxes from core light.css */
-body #content #main .list-container.list-container-panel > div {
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > div,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > div {
   background-color: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
-
 /* Empty entity list — compact card, centered message (no tall void) */
-body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
-body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
-body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
-body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
   display: flex;
   flex-direction: column;
   align-self: flex-start;
   /* No width: 100% here — it breaks float columns (Email: folders col + list col). */
 }
-
-body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
-body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
-body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) {
   width: 100%;
 }
-
-body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
-body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .list-buttons-container {
   margin-bottom: 0 !important;
   min-height: 0 !important;
   padding: var(--8px, 8px) var(--12px, 12px);
   border-bottom: 1px solid var(--default-border-color);
 }
-
-body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
-body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
-body #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
-body #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list)):not(:has(.list-kanban)) > .no-data {
   margin-top: 0 !important;
   padding: var(--20px, 20px) var(--16px, 16px) var(--24px, 24px) !important;
   text-align: center;
   color: var(--text-muted-color, var(--text-gray-color));
 }
-
-body #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data,
-body #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data {
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list)):not(:has(.list-kanban)):not(:has(.list-buttons-container)) > .no-data {
   padding: var(--28px, 28px) var(--16px, 16px) !important;
 }
-
-body #content #main > .page-header {
+body[data-theme-name="SafehouseAurora"] #content #main > .page-header,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .page-header {
   margin-bottom: var(--8px, 8px) !important;
 }
-
 /* ── Email folders — glass side panel (matches list shell) ── */
-body #content #main > .row > .left-container .folders-container {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folders-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folders-container {
   position: relative;
   border-radius: var(--panel-border-radius);
   background-color: var(--aurora-list-bg, var(--panel-bg));
@@ -611,20 +853,20 @@ body #content #main > .row > .left-container .folders-container {
   backdrop-filter: var(--aurora-list-blur, none);
   padding: 8px 6px;
 }
-
-body #content #main > .row > .left-container .folders-container .folder-list {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folders-container .folder-list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folders-container .folder-list {
   margin-bottom: 0;
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item {
   background: transparent !important;
   border: none;
   border-radius: 10px;
   margin: 1px 2px;
   padding: 0;
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link {
   display: block;
   padding: 7px 10px;
   border-radius: 10px;
@@ -632,8 +874,8 @@ body #content #main > .row > .left-container .folder-list > li.list-group-item >
   font-weight: 500;
   transition: background-color 0.12s ease;
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link.count {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link.count,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item > a.side-link.count {
   display: inline-block;
   float: right;
   padding: 7px 10px 7px 6px;
@@ -641,52 +883,53 @@ body #content #main > .row > .left-container .folder-list > li.list-group-item >
   font-weight: 600;
   font-size: 0.8125rem;
 }
-
-body[data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
+body[data-theme-name="SafehouseAurora"][data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"][data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
   background-color: rgba(0, 0, 0, 0.05);
 }
-
-body[data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
+body[data-theme-name="SafehouseAurora"][data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"][data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item:hover > a.side-link {
   background-color: rgba(255, 255, 255, 0.06);
 }
-
-body[data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
+body[data-theme-name="SafehouseAurora"][data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"][data-is-dark='false'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
   background-color: rgba(239, 68, 68, 0.1);
   color: #b91c1c;
   font-weight: 600;
 }
-
-body[data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
+body[data-theme-name="SafehouseAurora"][data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"][data-is-dark='true'] #content #main > .row > .left-container .folder-list > li.list-group-item.selected > a.side-link {
   background-color: rgba(220, 38, 38, 0.26);
   color: #fecaca;
   font-weight: 600;
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item .item-icon-container {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item .item-icon-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item .item-icon-container {
   display: inline-block;
   width: 22px;
   color: var(--text-muted-color);
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item.selected .item-icon-container {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item.selected .item-icon-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item.selected .item-icon-container {
   color: inherit;
 }
-
 /* Group separator (Archiviata / Bozze / Cestino block) */
-body #content #main > .row > .left-container .folder-list > li.list-group-item.group-start {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item.group-start,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item.group-start {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--default-border-color);
   border-radius: 0 0 10px 10px;
 }
-
-body #content #main > .row > .left-container .folder-list > li.list-group-item.group-start > a.side-link {
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container .folder-list > li.list-group-item.group-start > a.side-link,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container .folder-list > li.list-group-item.group-start > a.side-link {
   border-radius: 10px;
 }
-
 /* Search above list — flat, like admin (glass only on list panel below) */
-body #content #main > .search-container,
-body #content #main > .search-container.margin-bottom {
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container,
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container.margin-bottom,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container.margin-bottom {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -695,28 +938,31 @@ body #content #main > .search-container.margin-bottom {
   padding: 0 !important;
   margin-bottom: var(--8px, 8px) !important;
 }
-
-body #content #main > .search-container::before,
-body #content #main > .search-container.margin-bottom::before {
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container.margin-bottom::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container.margin-bottom::before {
   content: none !important;
   display: none !important;
 }
-
-body #content #main > .search-container .search-row,
-body #content #main > .search-container .search-row .input-group,
-body #content #main > .search-container .view-mode-switcher-buttons-group {
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container .search-row,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container .search-row,
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container .search-row .input-group,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container .search-row .input-group,
+body[data-theme-name="SafehouseAurora"] #content #main > .search-container .view-mode-switcher-buttons-group,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .search-container .view-mode-switcher-buttons-group {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
-
-body #content #main .admin-search-container {
+body[data-theme-name="SafehouseAurora"] #content #main .admin-search-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-search-container {
   padding: var(--10px, 10px);
   margin-bottom: var(--20px, 20px);
 }
-
 /* Nested lists inside detail panels — inherit parent panel, no second shell */
-body #content #main .panel .list-container > .list {
+body[data-theme-name="SafehouseAurora"] #content #main .panel .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list-container > .list {
   background-color: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -724,143 +970,180 @@ body #content #main .panel .list-container > .list {
   border-radius: 0;
   box-shadow: none !important;
 }
-
-body #content #main .panel .list-container > .list::before {
+body[data-theme-name="SafehouseAurora"] #content #main .panel .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list-container > .list::before {
   content: none !important;
   display: none !important;
 }
-
 /* Dashlets — no inner opaque list card */
-body .panel.dashlet .dashlet-body .list-container,
-body .panel.dashlet .dashlet-body .list-container > .list,
-body .panel.dashlet .dashlet-body .list,
-body .panel.dashlet .dashlet-body .list > table,
-body .panel.dashlet .dashlet-body .list .table,
-body .panel.dashlet .dashlet-body .list .table tr,
-body .panel.dashlet .dashlet-body .list .table td,
-body .panel.dashlet .dashlet-body .list .list-group-item {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list-container,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list-container,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list-container > .list,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list-container > .list,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list > table,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list > table,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list .table,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list .table,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list .table tr,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list .table tr,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list .table td,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list .table td,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list .list-group-item,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list .list-group-item {
   background: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   box-shadow: none !important;
 }
-
-body #content #main .list-container > .list > table {
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list > table,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list > table {
   border-radius: 0 !important;
   background-color: transparent !important;
 }
-
 /* Rows stay clear — shell carries the panel tint (admin + entity lists) */
-body #content #main .list-container > .list .table,
-body #content #main .list-container > .list .table > thead > tr > th,
-body #content #main .list-container > .list .table > tbody > tr > td,
-body #content #main .list-container > .list .table tr,
-body #content #main .list-container > .list .list-group-item,
-body #content #main .list-container > .list .list-buttons-container,
-body #content #main .admin-content .table.table-admin-panel tr,
-body #content #main .admin-content .table.table-admin-panel td,
-body #content #main .admin-content table.table-panel tr,
-body #content #main .admin-content table.table-panel td,
-body #content #main .list-group.list-group-panel .list-group-item {
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table > thead > tr > th,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table > thead > tr > th,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table > tbody > tr > td,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table > tbody > tr > td,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table tr,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table tr,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .list-group-item,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .list-group-item,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .list-buttons-container,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .list-buttons-container,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel tr,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel tr,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel td,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel td,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel tr,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel tr,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel td,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel td,
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel .list-group-item,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel .list-group-item {
   background-color: transparent !important;
 }
-
-body #content #main .list-container > .list .table,
-body #content #main .list-container > .list .table > thead > tr > th,
-body #content #main .list-container > .list .table > tbody > tr > td,
-body #content #main .admin-content .table.table-admin-panel,
-body #content #main .admin-content table.table-panel {
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table > thead > tr > th,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table > thead > tr > th,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list .table > tbody > tr > td,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list .table > tbody > tr > td,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel {
   border-color: var(--default-border-color);
 }
-
-body #content #main .list-group.list-group-panel .list-group-item {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel .list-group-item,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel .list-group-item {
   border-left: 0;
   border-right: 0;
 }
-
 @media (prefers-reduced-transparency: reduce) {
-  body #navbar > .navbar,
-  body[data-navbar='side'] #navbar .navbar-right,
-  body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-
-  body[data-navbar='side'] #navbar .navbar-right,
-  body[data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
+body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
+body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
     background: var(--panel-default-bg) !important;
   }
-
-  body #content #main .list-group.list-group-panel::before,
-  body #content #main .admin-content .table.table-admin-panel::before,
-  body #content #main .admin-content table.table-panel::before,
-  body #content #main > .list-container > .list::before,
-  body #content #main .list-main-column > .list-container > .list::before,
-  body #content #main .nested-categories-container + .list-container > .list::before,
-  body #content #main > .row > .left-container + .list-container > .list::before,
-  body #content #main .list-container.list-container-panel > .list::before {
+body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content .table.table-admin-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content .table.table-admin-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main .admin-content table.table-panel::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .admin-content table.table-panel::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container > .list::before,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > .list::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > .list::before {
     background-color: var(--panel-default-bg);
   }
 }
-
 /*
  * Dashboard dashlets — grid-stack clips the "..." action menu (overflow-y:auto on
  * .grid-stack-item-content). Espo adds .has-dropdown-opened on the panel; lift the
  * whole grid cell so the menu is visible and clickable above neighbouring dashlets.
  */
-.grid-stack > .grid-stack-item:has(.dashlet.has-dropdown-opened),
-.grid-stack > .grid-stack-item:has(.panel.dashlet .panel-heading .btn-group.open) {
+body[data-theme-name="SafehouseAurora"] .grid-stack > .grid-stack-item:has(.dashlet.has-dropdown-opened),
+body[data-theme-name="SafehouseAuroraLight"] .grid-stack > .grid-stack-item:has(.dashlet.has-dropdown-opened),
+body[data-theme-name="SafehouseAurora"] .grid-stack > .grid-stack-item:has(.panel.dashlet .panel-heading .btn-group.open),
+body[data-theme-name="SafehouseAuroraLight"] .grid-stack > .grid-stack-item:has(.panel.dashlet .panel-heading .btn-group.open) {
   z-index: 30 !important;
 }
-
-.grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.dashlet.has-dropdown-opened),
-.grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.panel.dashlet .panel-heading .btn-group.open) {
+body[data-theme-name="SafehouseAurora"] .grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.dashlet.has-dropdown-opened),
+body[data-theme-name="SafehouseAuroraLight"] .grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.dashlet.has-dropdown-opened),
+body[data-theme-name="SafehouseAurora"] .grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.panel.dashlet .panel-heading .btn-group.open),
+body[data-theme-name="SafehouseAuroraLight"] .grid-stack > .grid-stack-item > .grid-stack-item-content.dashlet-container:has(.panel.dashlet .panel-heading .btn-group.open) {
   overflow: visible !important;
 }
-
-.dashlet-container .dashlet.has-dropdown-opened,
-.dashlet-container .dashlet:has(.panel-heading .btn-group.open) {
+body[data-theme-name="SafehouseAurora"] .dashlet-container .dashlet.has-dropdown-opened,
+body[data-theme-name="SafehouseAuroraLight"] .dashlet-container .dashlet.has-dropdown-opened,
+body[data-theme-name="SafehouseAurora"] .dashlet-container .dashlet:has(.panel-heading .btn-group.open),
+body[data-theme-name="SafehouseAuroraLight"] .dashlet-container .dashlet:has(.panel-heading .btn-group.open) {
   overflow: visible !important;
 }
-
-body .panel.dashlet.has-dropdown-opened,
-body .panel.dashlet:has(.panel-heading .btn-group.open) {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet.has-dropdown-opened,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet.has-dropdown-opened,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet:has(.panel-heading .btn-group.open),
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet:has(.panel-heading .btn-group.open) {
   overflow: visible !important;
 }
-
-body .panel.dashlet .panel-heading {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .panel-heading,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .panel-heading {
   position: relative;
 }
-
-body .panel.dashlet.has-dropdown-opened > .panel-heading,
-body .panel.dashlet:has(.panel-heading .btn-group.open) > .panel-heading {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet.has-dropdown-opened > .panel-heading,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet.has-dropdown-opened > .panel-heading,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet:has(.panel-heading .btn-group.open) > .panel-heading,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet:has(.panel-heading .btn-group.open) > .panel-heading {
   z-index: 20 !important;
 }
-
-body .panel.dashlet .panel-heading .btn-group.open {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .panel-heading .btn-group.open,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .panel-heading .btn-group.open {
   z-index: 21;
 }
-
 /*
  * Espo uiAppInit + .fix-position → position:fixed on the menu (stays in DOM, clicks work).
  * Do NOT override with position:absolute — that traps the menu under dashlet-body.
  */
-body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .panel-heading > .fix-position .dropdown-menu,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
   z-index: 1310 !important;
   max-height: none !important;
   height: auto !important;
 }
-
-body .panel.dashlet .panel-heading > .fix-position.open,
-body .panel.dashlet .panel-heading > .fix-position .btn-group.open {
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .panel-heading > .fix-position.open,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .panel-heading > .fix-position.open,
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .panel-heading > .fix-position .btn-group.open,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .panel-heading > .fix-position .btn-group.open {
   z-index: 1311;
 }
-
 /*
  * SafehouseAuroraLight ::before glass layer creates a containing block for position:fixed.
  * Drop backdrop-filter on dashlets so fix-position coords stay viewport-relative.
  */
-body #content #main .panel.panel-default.dashlet::before {
+body[data-theme-name="SafehouseAurora"] #content #main .panel.panel-default.dashlet::before,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default.dashlet::before {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }

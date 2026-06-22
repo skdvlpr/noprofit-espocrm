@@ -127,6 +127,56 @@ foreach ($cssAssets as $label => $asset) {
     }
 }
 
+// Theme-leak guard: every top-level selector in the globally-appended
+// (cssList) Safehouse stylesheets must be scoped under data-theme-name so it
+// never bleeds into native Espo themes. Regression guard for the Aurora-leak
+// bug (native themes rendered flat/monochrome because unscoped body rules +
+// aurora-only CSS vars applied on every theme).
+$scopedFiles = [
+    'enum-colors' => __DIR__ . '/../client/custom/css/safehouse-aurora/safehouse-aurora-enum-colors.css',
+    'layout' => __DIR__ . '/../client/custom/css/safehouse-aurora/safehouse-aurora-layout.css',
+];
+
+$findUnscopedTopLevelSelectors = static function (string $css): array {
+    $css = preg_replace('#/\*.*?\*/#s', '', $css) ?? '';
+    $bad = [];
+    $depth = 0;
+    $buf = '';
+    $len = strlen($css);
+    for ($i = 0; $i < $len; $i++) {
+        $c = $css[$i];
+        if ($c === '{') {
+            $sel = trim($buf);
+            $buf = '';
+            if ($depth === 0 && $sel !== '' && $sel[0] !== '@') {
+                if (!str_contains($sel, 'data-theme-name')) {
+                    $bad[] = substr($sel, 0, 90);
+                }
+            }
+            $depth++;
+        } elseif ($c === '}') {
+            $depth--;
+            $buf = '';
+        } else {
+            $buf .= $c;
+        }
+    }
+    return $bad;
+};
+
+foreach ($scopedFiles as $label => $path) {
+    if (!is_file($path)) {
+        $ok("$label file present for leak guard", false, $path);
+        continue;
+    }
+    $unscoped = $findUnscopedTopLevelSelectors((string) file_get_contents($path));
+    $ok(
+        "$label has no unscoped top-level selectors",
+        $unscoped === [],
+        $unscoped === [] ? '' : ('leaks: ' . implode(' | ', array_slice($unscoped, 0, 5)))
+    );
+}
+
 // Main HTML must reference theme + cssList with cache-bust query (?r=).
 $htmlResponse = $client->get('/');
 $html = (string) $htmlResponse->getBody();

@@ -1,228 +1,260 @@
+
 /**
  * Safehouse Aurora — semantic enum colors for selectize, list cells, native selects.
  * Theme files define --enum-text-* and --enum-active-* tokens in :root.
  */
 
 /* List/detail read mode */
-body .text-default {
+body[data-theme-name="SafehouseAurora"] .text-default,
+body[data-theme-name="SafehouseAuroraLight"] .text-default {
   color: var(--enum-text-default) !important;
 }
-
-body .text-primary {
+body[data-theme-name="SafehouseAurora"] .text-primary,
+body[data-theme-name="SafehouseAuroraLight"] .text-primary {
   color: var(--enum-text-primary) !important;
 }
-
-body .text-success {
+body[data-theme-name="SafehouseAurora"] .text-success,
+body[data-theme-name="SafehouseAuroraLight"] .text-success {
   color: var(--enum-text-success) !important;
 }
-
-body .text-warning {
+body[data-theme-name="SafehouseAurora"] .text-warning,
+body[data-theme-name="SafehouseAuroraLight"] .text-warning {
   color: var(--enum-text-warning) !important;
 }
-
-body .text-danger {
+body[data-theme-name="SafehouseAurora"] .text-danger,
+body[data-theme-name="SafehouseAuroraLight"] .text-danger {
   color: var(--enum-text-danger) !important;
 }
-
-body .text-info {
+body[data-theme-name="SafehouseAurora"] .text-info,
+body[data-theme-name="SafehouseAuroraLight"] .text-info {
   color: var(--enum-text-info) !important;
 }
-
 /* Selectize dropdown options */
-body .selectize-dropdown .option.text-default,
-body .selectize-dropdown [data-selectable].text-default {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-default,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-default,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-default,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-default {
   color: var(--enum-text-default) !important;
 }
-
-body .selectize-dropdown .option.text-primary,
-body .selectize-dropdown [data-selectable].text-primary {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-primary,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-primary,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-primary,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-primary {
   color: var(--enum-text-primary) !important;
 }
-
-body .selectize-dropdown .option.text-success,
-body .selectize-dropdown [data-selectable].text-success {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-success,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-success,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-success,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-success {
   color: var(--enum-text-success) !important;
 }
-
-body .selectize-dropdown .option.text-warning,
-body .selectize-dropdown [data-selectable].text-warning {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-warning,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-warning,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-warning,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-warning {
   color: var(--enum-text-warning) !important;
 }
-
-body .selectize-dropdown .option.text-danger,
-body .selectize-dropdown [data-selectable].text-danger {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-danger,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-danger,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-danger,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-danger {
   color: var(--enum-text-danger) !important;
 }
-
-body .selectize-dropdown .option.text-info,
-body .selectize-dropdown [data-selectable].text-info {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-info,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-info,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-info,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-info {
   color: var(--enum-text-info) !important;
 }
-
 /* Selectize closed input — Espo copies option classes (text-primary, text-warning, …) onto .item */
-body .selectize-input .item.text-default span,
-body .selectize-input .item.default span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-default span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-default span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.default span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.default span {
   color: var(--enum-text-default) !important;
 }
-
-body .selectize-input .item.text-primary span,
-body .selectize-input .item.primary span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-primary span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-primary span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.primary span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.primary span {
   color: var(--enum-text-primary) !important;
 }
-
-body .selectize-input .item.text-success span,
-body .selectize-input .item.success span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-success span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-success span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.success span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.success span {
   color: var(--enum-text-success) !important;
 }
-
-body .selectize-input .item.text-warning span,
-body .selectize-input .item.warning span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-warning span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-warning span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.warning span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.warning span {
   color: var(--enum-text-warning) !important;
 }
-
-body .selectize-input .item.text-danger span,
-body .selectize-input .item.danger span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-danger span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-danger span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.danger span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.danger span {
   color: var(--enum-text-danger) !important;
 }
-
-body .selectize-input .item.text-info span,
-body .selectize-input .item.info span {
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.text-info span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.text-info span,
+body[data-theme-name="SafehouseAurora"] .selectize-input .item.info span,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-input .item.info span {
   color: var(--enum-text-info) !important;
 }
-
 /*
  * Left accent stripe on single-value enum fields.
  * :has(> .item.text-*) tracks live selectize re-renders — no JS / no page refresh.
  */
-body .selectize-control.single > .selectize-input:has(> .item) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item) {
   border-left: 3px solid var(--sh-enum-stripe-default) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-default),
-body .selectize-control.single > .selectize-input:has(> .item.default) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-default),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-default),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.default),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.default) {
   border-left-color: var(--sh-enum-stripe-default) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-primary),
-body .selectize-control.single > .selectize-input:has(> .item.primary) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-primary),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-primary),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.primary),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.primary) {
   border-left: 3px solid var(--sh-enum-stripe-primary) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-warning),
-body .selectize-control.single > .selectize-input:has(> .item.warning) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-warning),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-warning),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.warning),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.warning) {
   border-left: 3px solid var(--sh-enum-stripe-warning) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-success),
-body .selectize-control.single > .selectize-input:has(> .item.success) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-success),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-success),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.success),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.success) {
   border-left: 3px solid var(--sh-enum-stripe-success) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-danger),
-body .selectize-control.single > .selectize-input:has(> .item.danger) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-danger),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-danger),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.danger),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.danger) {
   border-left: 3px solid var(--sh-enum-stripe-danger) !important;
 }
-
-body .selectize-control.single > .selectize-input:has(> .item.text-info),
-body .selectize-control.single > .selectize-input:has(> .item.info) {
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-info),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-info),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.info),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.info) {
   border-left: 3px solid var(--sh-enum-stripe-info) !important;
 }
-
 /* Native select options (inline edit fallback) */
-body select.form-control option.text-default {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-default,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-default {
   color: var(--enum-text-default);
 }
-
-body select.form-control option.text-primary {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-primary,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-primary {
   color: var(--enum-text-primary);
 }
-
-body select.form-control option.text-success {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-success,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-success {
   color: var(--enum-text-success);
 }
-
-body select.form-control option.text-warning {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-warning,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-warning {
   color: var(--enum-text-warning);
 }
-
-body select.form-control option.text-danger {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-danger,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-danger {
   color: var(--enum-text-danger);
 }
-
-body select.form-control option.text-info {
+body[data-theme-name="SafehouseAurora"] select.form-control option.text-info,
+body[data-theme-name="SafehouseAuroraLight"] select.form-control option.text-info {
   color: var(--enum-text-info);
 }
-
 /* Active/hover — tinted by enum style, not uniform accent */
-body .selectize-dropdown .option.text-default.active,
-body .selectize-dropdown .option.text-default.selected,
-body .selectize-dropdown [data-selectable].text-default.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-default.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-default.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-default.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-default.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-default.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-default.active {
   background-color: var(--enum-active-default-bg) !important;
   color: var(--enum-active-default-text) !important;
 }
-
-body .selectize-dropdown .option.text-primary.active,
-body .selectize-dropdown .option.text-primary.selected,
-body .selectize-dropdown [data-selectable].text-primary.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-primary.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-primary.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-primary.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-primary.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-primary.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-primary.active {
   background-color: var(--enum-active-primary-bg) !important;
   color: var(--enum-active-primary-text) !important;
 }
-
-body .selectize-dropdown .option.text-success.active,
-body .selectize-dropdown .option.text-success.selected,
-body .selectize-dropdown [data-selectable].text-success.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-success.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-success.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-success.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-success.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-success.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-success.active {
   background-color: var(--enum-active-success-bg) !important;
   color: var(--enum-active-success-text) !important;
 }
-
-body .selectize-dropdown .option.text-warning.active,
-body .selectize-dropdown .option.text-warning.selected,
-body .selectize-dropdown [data-selectable].text-warning.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-warning.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-warning.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-warning.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-warning.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-warning.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-warning.active {
   background-color: var(--enum-active-warning-bg) !important;
   color: var(--enum-active-warning-text) !important;
 }
-
-body .selectize-dropdown .option.text-danger.active,
-body .selectize-dropdown .option.text-danger.selected,
-body .selectize-dropdown [data-selectable].text-danger.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-danger.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-danger.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-danger.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-danger.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-danger.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-danger.active {
   background-color: var(--enum-active-danger-bg) !important;
   color: var(--enum-active-danger-text) !important;
 }
-
-body .selectize-dropdown .option.text-info.active,
-body .selectize-dropdown .option.text-info.selected,
-body .selectize-dropdown [data-selectable].text-info.active {
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-info.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-info.active,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown .option.text-info.selected,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown .option.text-info.selected,
+body[data-theme-name="SafehouseAurora"] .selectize-dropdown [data-selectable].text-info.active,
+body[data-theme-name="SafehouseAuroraLight"] .selectize-dropdown [data-selectable].text-info.active {
   background-color: var(--enum-active-info-bg) !important;
   color: var(--enum-active-info-text) !important;
 }
-
 /* Status pills in list/detail — label-state reads --state-* tokens from glass.css */
-body .label-state.label-default {
+body[data-theme-name="SafehouseAurora"] .label-state.label-default,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-default {
   background-color: var(--state-default-bg) !important;
   color: var(--state-default-text) !important;
 }
-
-body .label-state.label-primary {
+body[data-theme-name="SafehouseAurora"] .label-state.label-primary,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-primary {
   background-color: var(--state-primary-bg) !important;
   color: var(--state-primary-text) !important;
 }
-
-body .label-state.label-success {
+body[data-theme-name="SafehouseAurora"] .label-state.label-success,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-success {
   background-color: var(--state-success-bg) !important;
   color: var(--state-success-text) !important;
 }
-
-body .label-state.label-warning {
+body[data-theme-name="SafehouseAurora"] .label-state.label-warning,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-warning {
   background-color: var(--state-warning-bg) !important;
   color: var(--state-warning-text) !important;
 }
-
-body .label-state.label-danger {
+body[data-theme-name="SafehouseAurora"] .label-state.label-danger,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-danger {
   background-color: var(--state-danger-bg) !important;
   color: var(--state-danger-text) !important;
 }
-
-body .label-state.label-info {
+body[data-theme-name="SafehouseAurora"] .label-state.label-info,
+body[data-theme-name="SafehouseAuroraLight"] .label-state.label-info {
   background-color: var(--state-info-bg) !important;
   color: var(--state-info-text) !important;
 }
