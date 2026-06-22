@@ -51,6 +51,10 @@
 /scratch_*.php
 /tmp_*.json
 
+# Integration settings export (contains client secrets — never commit)
+/integration-settings*.json
+/deploy/integration-settings*.json
+
 # Environment, dumps, logs
 .env
 .env.*
