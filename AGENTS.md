@@ -141,7 +141,7 @@ File: `Resources/metadata/scopes/{EntityName}.json`
 
 Navigation tabs are managed via `Tools/Installer::runPostInstall()` using `ConfigWriter`. **NEVER** edit `navbar.json` or `data/config.php` directly.
 
-**CRM block (`$CRM`):** `Contact` → `Lead` → `VolunteerEmployee` → `Member` → `Opportunity` (F&F).
+                                                  **CRM block (`$CRM` / Principali):** `Lead` → `Contact` → `Account` → `Opportunity` (F&F) → `Member` → `VolunteerEmployee`.
 
 **Reporting dropdown (`type: group`, NOT `type: divider`):** native Espo group tab with label `$Rendicontazione` — works in **horizontal and vertical** navbars (divider groups are side-navbar only). `itemList` contains **only** reporting entities (`MealCount`, later `AssociationMealCount`). **Never** put `Opportunity` or other CRM scopes in this group.
 

@@ -184,7 +184,29 @@ body #navbar .menu-container .dropdown-menu > li:first-child > a .avatar {
   vertical-align: middle;
 }
 
-/* ── Navbar entity tabs: neutral pill + scope-colored accent (not brand red) ── */
+/* ── Navbar tabs: Principali scope colors; all other sections theme-neutral icons ── */
+/* Keep in sync with Installer.php CRM_NAV_ORDER */
+:root {
+  --navbar-muted-icon-color: var(--navbar-inverse-link-icon-color);
+  --navbar-muted-icon-color: color-mix(
+    in srgb,
+    var(--navbar-inverse-link-color) 38%,
+    var(--text-gray-color)
+  );
+  --navbar-muted-icon-hover-color: var(--navbar-inverse-link-icon-hover-color);
+  --navbar-muted-icon-hover-color: color-mix(
+    in srgb,
+    var(--navbar-inverse-link-hover-color) 72%,
+    var(--text-muted-color)
+  );
+  --navbar-muted-icon-active-color: var(--navbar-inverse-link-hover-color);
+  --navbar-muted-tab-accent: color-mix(
+    in srgb,
+    var(--navbar-muted-icon-color) 68%,
+    transparent
+  );
+}
+
 body #navbar > .navbar ul.tabs > li > a,
 body #navbar > .navbar ul.tabs > li > a .full-label,
 body #navbar > .navbar ul.tabs > li > a .short-label-text {
@@ -205,38 +227,223 @@ body #navbar > .navbar ul.tabs > li.active > a .short-label-text {
   font-weight: 600;
 }
 
-/* Espo sets inline border-color on <a> from scope color — use as a subtle underline */
 body #navbar > .navbar ul.tabs > li.active > a[style*='border-color'] {
   border-bottom: 2px solid;
 }
 
-/* Activity / utility tabs without scope color — soft pastel red underline */
 body #navbar > .navbar ul.tabs > li.active > a:not([style*='border-color']) {
   border-bottom: 2px solid var(--navbar-tab-accent-default);
-}
-
-/* Entity tab icons: keep scope color from inline styles (override glass active white icon) */
-body #navbar > .navbar ul.tabs > li > a .short-label[style*='color'] span {
-  color: inherit;
 }
 
 body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fas,
 body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .far,
 body #navbar > .navbar ul.tabs > li:not(.active) > a .short-label:not([style*='color']) .fab {
-  color: var(--navbar-inverse-link-icon-color) !important;
+  color: var(--navbar-muted-icon-color) !important;
 }
 
-body #navbar > .navbar ul.tabs > li > a .short-label[style*='color'] {
+body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fas,
+body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .far,
+body #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fab {
+  color: var(--navbar-muted-icon-hover-color) !important;
+}
+
+/* Principali ($CRM): Lead, Contact, Account, Opportunity, Member, VolunteerEmployee */
+body #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ) > a .short-label[style*='color'] span {
+  color: inherit;
+}
+
+body #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ) > a .short-label[style*='color'] {
   filter: saturate(1.12) brightness(1.06);
 }
 
-body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'] {
+body #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'] {
   filter: saturate(1.15) brightness(1.08);
 }
 
-body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'],
-body #navbar > .navbar ul.tabs > li.active > a .short-label[style*='color'] span[style*='color'] {
+body #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Lead'],
+    [data-name='Contact'],
+    [data-name='Account'],
+    [data-name='Opportunity'],
+    [data-name='Member'],
+    [data-name='VolunteerEmployee']
+  ).active > a .short-label[style*='color'] span[style*='color'] {
   color: inherit;
+}
+
+/* Non-Principali: neutral icons (Rendicontazione, Activities, Marketing, overflow, etc.) */
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .fas,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .far,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label[style*='color'] .fab,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )) > a .short-label .color-icon[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
+body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
+body #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
+body #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
+body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
+body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fas,
+body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .far,
+body #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fab,
+body #navbar .dropdown-menu > li.in-group.tab > a .short-label .color-icon[style*='color'] {
+  color: var(--navbar-muted-icon-color) !important;
+  filter: none;
+}
+
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .fas,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .far,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )):not(.active) > a:hover .short-label[style*='color'] .fab,
+body #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
+body #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
+body #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'] .fas {
+  color: var(--navbar-muted-icon-hover-color) !important;
+}
+
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .fas,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .far,
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a .short-label[style*='color'] .fab,
+body #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
+body #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
+body #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas {
+  color: var(--navbar-muted-icon-active-color) !important;
+}
+
+body #navbar > .navbar ul.tabs > li.tab:not(:is(
+      [data-name='Lead'],
+      [data-name='Contact'],
+      [data-name='Account'],
+      [data-name='Opportunity'],
+      [data-name='Member'],
+      [data-name='VolunteerEmployee']
+    )).active > a[style*='border-color'],
+body #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
+body #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'] {
+  border-bottom-color: var(--navbar-muted-tab-accent) !important;
 }
 
 /* ── Shared admin + entity list shell (same as .list-group-panel / .table-admin-panel) ── */

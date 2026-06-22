@@ -110,7 +110,7 @@ $cssAssets = [
     ],
     'layout' => [
         'path' => '/client/custom/css/safehouse-aurora/safehouse-aurora-layout.css',
-        'needles' => ['#navbar', 'list-container'],
+        'needles' => ['#navbar', 'list-container', '--navbar-muted-icon-color'],
     ],
 ];
 

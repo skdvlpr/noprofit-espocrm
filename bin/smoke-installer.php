@@ -52,6 +52,44 @@ $findReportingGroup = static function (array $tabList): ?object {
     return null;
 };
 
+$extractCrmTabs = static function (array $tabList): array {
+    $tabs = [];
+    $pastCrmDivider = false;
+
+    foreach ($tabList as $item) {
+        if (
+            is_object($item)
+            && ($item->type ?? null) === 'divider'
+            && ($item->text ?? null) === '$CRM'
+        ) {
+            $pastCrmDivider = true;
+
+            continue;
+        }
+
+        if (!$pastCrmDivider) {
+            continue;
+        }
+
+        if (!is_string($item)) {
+            break;
+        }
+
+        $tabs[] = $item;
+    }
+
+    return $tabs;
+};
+
+$expectedCrmOrder = [
+    'Lead',
+    'Contact',
+    'Account',
+    'Opportunity',
+    'Member',
+    'VolunteerEmployee',
+];
+
 $installer = new Installer();
 
 echo "Run 1: invoke post-install via Installer\n";
@@ -70,6 +108,14 @@ $report('Lead present in tabList', in_array('Lead', $tabStrings, true));
 $report('Case absent from tabList', !in_array('Case', $tabStrings, true));
 $report('Lead present in quickCreateList', in_array('Lead', $qcStrings, true));
 $report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true));
+
+$crmTabs = $extractCrmTabs($tabList);
+$report('Lead is first tab in $CRM block', ($crmTabs[0] ?? null) === 'Lead');
+$report(
+    'CRM block tab order canonical',
+    $crmTabs === $expectedCrmOrder,
+    'actual=' . implode(' → ', $crmTabs)
+);
 
 foreach (['VolunteerEmployee', 'Member', 'Account', 'Opportunity', 'Document'] as $must) {
     $report("$must present in tabList", in_array($must, $tabStrings, true));
@@ -96,11 +142,11 @@ $report('MealCount not a top-level tab', !in_array('MealCount', $tabStrings, tru
 $report('AssociationMealCount not a top-level tab', !in_array('AssociationMealCount', $tabStrings, true));
 $report('Opportunity NOT in Rendicontazione group', !in_array('Opportunity', $groupItemList, true));
 
-$opportunityIndex = null;
+$volunteerIndex = null;
 $groupIndex = null;
 foreach ($tabList as $i => $item) {
-    if ($item === 'Opportunity') {
-        $opportunityIndex = $i;
+    if ($item === 'VolunteerEmployee') {
+        $volunteerIndex = $i;
     }
     if (
         is_object($item)
@@ -111,10 +157,10 @@ foreach ($tabList as $i => $item) {
     }
 }
 $report(
-    'Opportunity tab before Rendicontazione group',
-    $opportunityIndex !== null
+    'VolunteerEmployee tab before Rendicontazione group',
+    $volunteerIndex !== null
         && $groupIndex !== null
-        && $opportunityIndex < $groupIndex
+        && $volunteerIndex < $groupIndex
 );
 
 $em = $container->get('entityManager');
@@ -128,6 +174,15 @@ foreach (['Admin', 'Employee', 'Manager', 'Volunteer', 'Member'] as $expectedRol
 
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();
 $report('Team `Administration` provisioned', $adminTeam !== null);
+
+$metadata = $container->getByClass(\Espo\Core\Utils\Metadata::class);
+$metadata->init(true);
+foreach (['SafehouseAurora', 'SafehouseAuroraLight'] as $themeName) {
+    $report(
+        "Theme `$themeName` registered in metadata",
+        is_string($metadata->get(['themes', $themeName, 'stylesheet']))
+    );
+}
 
 $googleInt = $em->getRDBRepository('Integration')
     ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])

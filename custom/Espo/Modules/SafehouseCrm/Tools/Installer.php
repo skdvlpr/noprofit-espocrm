@@ -17,11 +17,12 @@ use Espo\Core\Utils\Config\ConfigWriter;
  *   - {@see \Espo\Modules\SafehouseCrm\AfterInstall} — the in-module class used
  *     when the module ships pre-installed (e.g. during dev workflows).
  *
- * Keeping the logic here ensures both flows hide Case from navigation, restore
- * Lead in the `$CRM` block, place reporting entities in a native navbar group
- * tab (`type: group` dropdown — works in horizontal and vertical navbars),
- * surface Safehouse custom tabs, provision the canonical roles + Administration
- * team, and rebuild metadata.
+ * Keeping the logic here ensures both flows hide Case from navigation, enforce
+ * the canonical `$CRM` tab order (Lead first), place reporting entities in a
+ * native navbar group tab (`type: group` dropdown — works in horizontal and
+ * vertical navbars), surface Safehouse custom tabs, apply the Safehouse Aurora
+ * default theme on fresh/stock-theme installs, provision the canonical roles +
+ * Administration team, and rebuild metadata.
  *
  * The class is intentionally Container-based (rather than constructor DI) so
  * it can be invoked from `scripts/AfterInstall.php`, which receives a bare
@@ -43,18 +44,51 @@ class Installer
 
     private const ENTITIES_TO_HIDE = ['Case'];
 
-    /** Placed in `$CRM` immediately after Contact (when present). */
     private const LEAD_NAV_TAB = 'Lead';
+
+    /**
+     * Canonical `$CRM` / Principali navbar order (Italian UI labels in parentheses).
+     *
+     * Lead → Contact (Contatti) → Account → Opportunity (F&F) → Member (Associati)
+     * → VolunteerEmployee (Volontari/Dipendenti).
+     *
+     * @var string[]
+     */
+    private const CRM_NAV_ORDER = [
+        'Lead',
+        'Contact',
+        'Account',
+        'Opportunity',
+        'Member',
+        'VolunteerEmployee',
+    ];
+
+    private const SAFEHOUSE_THEMES = [
+        'SafehouseAurora',
+        'SafehouseAuroraLight',
+    ];
+
+    private const DEFAULT_THEME = 'SafehouseAuroraLight';
+
+    /** Stock Espo themes replaced when Safehouse is installed (unless user already picked Safehouse). */
+    private const LEGACY_DEFAULT_THEMES = [
+        'Espo',
+        'Light',
+        'Dark',
+        'Hazyblue',
+        'Violet',
+        'Glass',
+        'Sakura',
+        'Flat',
+    ];
 
     private const CRM_DIVIDER_TEXT = '$CRM';
 
     /** Navbar group label key — translated via Global.json → navbarTabs.Rendicontazione */
     private const REPORTING_GROUP_TEXT = '$Rendicontazione';
 
-    private const ANCHOR_BEFORE = 'Contact';
-
-    /** Reporting dropdown sits after F&F (Opportunity), not inside it. */
-    private const REPORTING_GROUP_ANCHOR_AFTER = 'Opportunity';
+    /** Reporting group follows the last Principali tab (VolunteerEmployee). */
+    private const REPORTING_GROUP_ANCHOR_AFTER = 'VolunteerEmployee';
 
     public function runPostInstall(Container $container): void
     {
@@ -88,6 +122,8 @@ class Installer
             $quickCreateList[] = self::LEAD_NAV_TAB;
         }
 
+        $this->provisionDefaultTheme($config, $configWriter);
+
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
         $configWriter->save();
@@ -115,15 +151,15 @@ class Installer
     }
 
     /**
-     * Move Lead + CRM domain entities into the top `$CRM` navbar section:
-     * Contact → Lead → VolunteerEmployee → Member.
+     * Enforce canonical `$CRM` entity order immediately after the `$CRM` divider.
+     * Lead → Contact → Account → Opportunity → Member → VolunteerEmployee.
      *
      * @param array<int, mixed> $tabList
      * @return array<int, mixed>
      */
     private function reorderCrmNavbarBlock(array $tabList): array
     {
-        $crmEntities = array_merge([self::LEAD_NAV_TAB], self::DOMAIN_ENTITIES);
+        $crmEntities = self::CRM_NAV_ORDER;
 
         $without = array_values(array_filter(
             $tabList,
@@ -132,29 +168,18 @@ class Installer
             }
         ));
 
-        $contactIndex = null;
-        $crmDividerIndex = null;
+        $insertIndex = 0;
 
         foreach ($without as $i => $item) {
-            if (is_string($item) && $item === self::ANCHOR_BEFORE) {
-                $contactIndex = $i;
-            }
             if (
-                $crmDividerIndex === null
-                && is_object($item)
+                is_object($item)
                 && ($item->type ?? null) === 'divider'
                 && ($item->text ?? null) === self::CRM_DIVIDER_TEXT
             ) {
-                $crmDividerIndex = $i;
-            }
-        }
+                $insertIndex = $i + 1;
 
-        if ($contactIndex !== null) {
-            $insertIndex = $contactIndex + 1;
-        } elseif ($crmDividerIndex !== null) {
-            $insertIndex = $crmDividerIndex + 1;
-        } else {
-            $insertIndex = 0;
+                break;
+            }
         }
 
         return array_merge(
@@ -162,6 +187,27 @@ class Installer
             $crmEntities,
             array_slice($without, $insertIndex)
         );
+    }
+
+    /**
+     * Apply Safehouse Aurora Light on fresh installs; keep an explicit Safehouse theme choice.
+     */
+    private function provisionDefaultTheme(Config $config, ConfigWriter $configWriter): void
+    {
+        $theme = $config->get('theme');
+
+        if (is_string($theme) && in_array($theme, self::SAFEHOUSE_THEMES, true)) {
+            return;
+        }
+
+        if (
+            $theme === null
+            || $theme === false
+            || $theme === ''
+            || (is_string($theme) && in_array($theme, self::LEGACY_DEFAULT_THEMES, true))
+        ) {
+            $configWriter->set('theme', self::DEFAULT_THEME);
+        }
     }
 
     /**
@@ -204,7 +250,6 @@ class Installer
             'type' => 'group',
             'text' => self::REPORTING_GROUP_TEXT,
             'iconClass' => 'fas fa-chart-bar',
-            'color' => '#c4886b',
             'itemList' => $reportingEntities,
         ];
 
@@ -222,6 +267,12 @@ class Installer
     {
         foreach ($tabList as $i => $item) {
             if ($item === self::REPORTING_GROUP_ANCHOR_AFTER) {
+                return $i + 1;
+            }
+        }
+
+        foreach ($tabList as $i => $item) {
+            if ($item === 'VolunteerEmployee') {
                 return $i + 1;
             }
         }

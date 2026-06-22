@@ -1,8 +1,9 @@
 <?php
 /**
  * Re-apply Safehouse navbar tab order via {@see Installer}:
- *   - `$CRM`: Contact → Lead → VolunteerEmployee → Member
- *   - `$Rendicontazione`: MealCount (and later AssociationMealCount)
+ *   - `$CRM` (Principali): Lead → Contact → Account → Opportunity → Member → VolunteerEmployee
+ *   - `$Rendicontazione`: MealCount, AssociationMealCount (group tab)
+ *   - default theme: Safehouse Aurora Light (when still on stock Espo theme)
  *
  * Idempotent: re-running has no effect once the order matches.
  *
@@ -36,8 +37,9 @@ echo "Run Admin -> Repair -> Rebuild -> Clear Cache, then hard-refresh.\n\n";
 echo "Order (first 14 entries):\n";
 foreach (array_slice($tabList, 0, 14) as $i => $item) {
     if (is_object($item)) {
+        $type = $item->type ?? 'object';
         $text = $item->text ?? '(no text)';
-        echo sprintf("  [%2d] divider: %s\n", $i, var_export($text, true));
+        echo sprintf("  [%2d] %s: %s\n", $i, $type, var_export($text, true));
     } else {
         echo sprintf("  [%2d] %s\n", $i, $item);
     }
