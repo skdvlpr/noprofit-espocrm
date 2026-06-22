@@ -86,6 +86,9 @@
   --default-heading-bg-color: rgba(0, 0, 0, 0.03);
   --default-border-color: rgba(0, 0, 0, 0.08);
 
+  --sh-reporting-cell-tint: 24%;
+  --sh-reporting-rule-tint: 46%;
+
   --input-bg: #ffffff;
   --input-border: rgba(0, 0, 0, 0.14);
   --input-color: #18181b;
@@ -607,6 +610,16 @@ body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> 
 body #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) > * {
   position: relative;
   z-index: 1;
+}
+
+/* Dashlet menu lives in heading; body is a later sibling with the same z-index:1 — paint order hides menu */
+body #content #main .panel.panel-default.dashlet > .panel-heading {
+  z-index: 2;
+}
+
+body #content #main .panel.panel-default.dashlet.has-dropdown-opened > .panel-heading,
+body #content #main .panel.panel-default.dashlet:has(.panel-heading .btn-group.open) > .panel-heading {
+  z-index: 20 !important;
 }
 
 body #content #main .panel.panel-default.headered:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)) {

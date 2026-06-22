@@ -611,26 +611,37 @@ body #content #main .list-group.list-group-panel .list-group-item {
   overflow: visible !important;
 }
 
-.dashlet-container .dashlet.has-dropdown-opened {
+.dashlet-container .dashlet.has-dropdown-opened,
+.dashlet-container .dashlet:has(.panel-heading .btn-group.open) {
+  overflow: visible !important;
+}
+
+body .panel.dashlet.has-dropdown-opened,
+body .panel.dashlet:has(.panel-heading .btn-group.open) {
   overflow: visible !important;
 }
 
 body .panel.dashlet .panel-heading {
   position: relative;
-  z-index: 3;
+}
+
+body .panel.dashlet.has-dropdown-opened > .panel-heading,
+body .panel.dashlet:has(.panel-heading .btn-group.open) > .panel-heading {
+  z-index: 20 !important;
 }
 
 body .panel.dashlet .panel-heading .btn-group.open {
-  z-index: 4;
+  z-index: 21;
 }
 
-body .panel.dashlet .panel-heading .dropdown-menu {
-  z-index: 5;
-}
-
-/* Espo uiAppInit pins fix-position menus with position:fixed — parent must hold the class */
+/*
+ * Espo uiAppInit + .fix-position → position:fixed on the menu (stays in DOM, clicks work).
+ * Do NOT override with position:absolute — that traps the menu under dashlet-body.
+ */
 body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
   z-index: 1310 !important;
+  max-height: none !important;
+  height: auto !important;
 }
 
 body .panel.dashlet .panel-heading > .fix-position.open,
@@ -639,21 +650,10 @@ body .panel.dashlet .panel-heading > .fix-position .btn-group.open {
 }
 
 /*
- * SafehouseAuroraLight paints a ::before glass layer on generic panels (backdrop-filter).
- * That creates a containing block so uiAppInit's position:fixed dropdown coords are wrong
- * inside dashlets — menu stretches/clips (only last item visible). Drop filter on dashlets.
+ * SafehouseAuroraLight ::before glass layer creates a containing block for position:fixed.
+ * Drop backdrop-filter on dashlets so fix-position coords stay viewport-relative.
  */
 body #content #main .panel.panel-default.dashlet::before {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
-}
-
-body .panel.dashlet .panel-heading > .fix-position .dropdown-menu {
-  max-height: none !important;
-  height: auto !important;
-}
-
-/* Portaled dashlet menu (see safehouse-crm/lib/dashlet-dropdown.js) */
-body > .dropdown-menu.safehouse-dashlet-dropdown-portal {
-  z-index: 2140 !important;
 }

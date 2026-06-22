@@ -98,19 +98,34 @@ foreach ($assets as $label => $asset) {
 
 $dashletTplPath = 'client/custom/res/templates/dashlet.tpl';
 $dashletTpl = is_readable($dashletTplPath) ? file_get_contents($dashletTplPath) : '';
-$dashletDropdownJs = is_readable('client/custom/modules/safehouse-crm/lib/dashlet-dropdown.js')
-    ? file_get_contents('client/custom/modules/safehouse-crm/lib/dashlet-dropdown.js')
-    : '';
 
 $ok('dashlet.tpl exists', $dashletTpl !== '');
 $ok(
-    'dashlet.tpl fix-position wrapper',
-    str_contains($dashletTpl, 'pull-right fix-position') && !str_contains($dashletTpl, 'btn-group pull-right fix-position')
+    'dashlet.tpl fix-position wrapper for Espo uiAppInit',
+    str_contains($dashletTpl, 'pull-right fix-position') &&
+    !str_contains($dashletTpl, 'btn-group pull-right fix-position')
 );
 $ok(
-    'dashlet-dropdown.js portal handler',
-    str_contains($dashletDropdownJs, 'safehouse-dashlet-dropdown-portal') &&
-    str_contains($dashletDropdownJs, 'shown.bs.dropdown')
+    'dashlet-dropdown.js removed from scriptList',
+    !is_readable('client/custom/modules/safehouse-crm/lib/dashlet-dropdown.js')
+);
+
+$reportingStatsCss = is_readable('client/custom/modules/safehouse-crm/res/css/reporting-stats.css')
+    ? file_get_contents('client/custom/modules/safehouse-crm/res/css/reporting-stats.css')
+    : '';
+
+$ok('reporting-stats.css exists', $reportingStatsCss !== '');
+$ok(
+    'reporting-stats theme-agnostic tokens',
+    str_contains($reportingStatsCss, 'var(--panel-default-border') &&
+    str_contains($reportingStatsCss, 'var(--brand-primary') &&
+    !str_contains($reportingStatsCss, '#dfe2e5') &&
+    !str_contains($reportingStatsCss, '#e74c3c')
+);
+$ok(
+    'reporting-stats tunable tint variables',
+    str_contains($reportingStatsCss, '--sh-reporting-cell-tint') &&
+    str_contains($reportingStatsCss, 'color-mix')
 );
 
 if ($fail > 0) {
