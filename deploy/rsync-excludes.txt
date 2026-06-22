@@ -1,0 +1,58 @@
+# rsync excludes for production deploy (keep in sync with .gitignore server-state).
+# Goal: ship code (application, client, custom, vendor, public, bin, scripts)
+# while NEVER overwriting server-owned state. Espo arrives uninstalled on a
+# fresh host (no data/config.php is ever pushed), so the operator runs the web
+# installer manually.
+
+# VCS / CI / local tooling
+.git/
+.github/
+.ddev/
+.cursor/
+.cursor
+.vscode/
+.idea/
+/cursor-skills
+
+# Build / dev artifacts
+/dist/
+/build/
+/node_modules/
+*.log
+*.sql
+*.sqlite
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Secrets / env
+.env
+.env.*
+
+# EspoCRM server-owned runtime state (NEVER overwrite)
+/data/config.php
+/data/config-internal.php
+/data/config-override.php
+/data/config-override-internal.php
+/data/config-internal-override.php
+/data/state.php
+/data/cache/
+/data/logs/
+/data/tmp/
+/data/upload/
+/data/preferences/
+/data/.backup/
+
+# Installer state (server decides installed vs not)
+/install/config.php
+
+# Admin-UI customizations made on the server (Entity Manager, Layout Manager…)
+/custom/Espo/Custom/
+
+# Scratch
+/test_*.php
+/scratch_*.php
+/tmp_*.json
+/Untitled
+/add_tab.php

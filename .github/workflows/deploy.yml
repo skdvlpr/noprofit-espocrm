@@ -1,0 +1,82 @@
+name: Deploy to production (uninstalled Espo)
+
+# Ships the repository to crm.safehouse.community over SSH/rsync.
+#
+# Design (see deploy/DEPLOY.md):
+#   - Espo arrives UNINSTALLED on a fresh host: data/config.php is never
+#     pushed, so the operator completes the web installer manually.
+#   - Server-owned state (data/, install/config.php, custom/Espo/Custom/) is
+#     protected via deploy/rsync-excludes.txt and is never overwritten.
+#   - No --delete by default (safe). Set DEPLOY_RSYNC_DELETE=1 repo variable to
+#     prune stale code files (server-state excludes still protect runtime data).
+#   - After sync: if Espo is already installed, run rebuild + clear cache;
+#     otherwise print the installer URL and stop.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${DEPLOY_SSH_PORT:-22}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync repository to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+          DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE }}
+        run: |
+          set -euo pipefail
+          DELETE_FLAG=""
+          if [ "${DEPLOY_RSYNC_DELETE:-0}" = "1" ]; then
+            DELETE_FLAG="--delete --delete-excluded"
+          fi
+          rsync -rlptz --human-readable $DELETE_FLAG \
+            -e "ssh -p ${DEPLOY_SSH_PORT:-22} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            --exclude-from=deploy/rsync-excludes.txt \
+            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+      - name: Post-deploy (rebuild only if already installed; never auto-install)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_SSH_PORT:-22}" -i ~/.ssh/deploy_key \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" "DEPLOY_PATH='${DEPLOY_PATH}' bash -se" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          if [ -f data/config.php ]; then
+            echo "Espo is installed — rebuilding metadata + clearing cache."
+            php command.php rebuild || php rebuild.php || true
+          else
+            echo "Espo is NOT installed yet."
+            echo "Finish setup in the browser: https://crm.safehouse.community/install/"
+            echo "After install, configure integrations, then re-run this workflow."
+          fi
+          REMOTE
