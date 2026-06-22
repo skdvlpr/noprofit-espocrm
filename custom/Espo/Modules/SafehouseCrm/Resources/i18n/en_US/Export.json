@@ -1,6 +1,27 @@
 {
     "fields": {
         "csvIncludeTotals": "Include totals row",
-        "xlsxIncludeTotals": "Include totals row"
+        "xlsxIncludeTotals": "Include totals row",
+        "csv-emailIncludeTotals": "Include totals row",
+        "xlsx-emailIncludeTotals": "Include totals row",
+        "csv-emailEmailTo": "To",
+        "csv-emailEmailCc": "CC",
+        "csv-emailEmailBcc": "BCC",
+        "xlsx-emailEmailTo": "To",
+        "xlsx-emailEmailCc": "CC",
+        "xlsx-emailEmailBcc": "BCC",
+        "xlsx-emailLite": "Lite",
+        "xlsx-emailRecordLinks": "Record Links",
+        "xlsx-emailTitle": "Title"
+    },
+    "options": {
+        "format": {
+            "csv-email": "CSV - email export",
+            "xlsx-email": "XLSX - email export"
+        }
+    },
+    "tooltips": {
+        "xlsx-emailLite": "Consumes much less memory. Recommended if a big number of records is exported.",
+        "xlsx-emailTitle": "Print a title and current date in the header."
     }
 }

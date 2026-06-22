@@ -1,9 +1,10 @@
 define('safehouse-crm:views/meal-count/list', [
     'safehouse-crm:views/record/list-inline-edit',
     'safehouse-crm:views/reporting/list-stats-footer',
-], function (Dep, ListStatsFooter) {
+    'safehouse-crm:lib/reporting-list-export',
+], function (Dep, ListStatsFooter, ReportingListExport) {
 
-    return Dep.extend({
+    return Dep.extend(Object.assign({}, ReportingListExport, {
 
         setup() {
             Dep.prototype.setup.apply(this, arguments);
@@ -179,5 +180,5 @@ define('safehouse-crm:views/meal-count/list', [
                 order: this.collection.order,
             };
         },
-    });
+    }));
 });

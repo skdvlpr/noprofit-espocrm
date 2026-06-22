@@ -1,6 +1,27 @@
 {
     "fields": {
-        "csvIncludeTotals": "Includi riga Totali",
-        "xlsxIncludeTotals": "Includi riga Totali"
+        "csvIncludeTotals": "Includi riga totali",
+        "xlsxIncludeTotals": "Includi riga totali",
+        "csv-emailIncludeTotals": "Includi riga totali",
+        "xlsx-emailIncludeTotals": "Includi riga totali",
+        "csv-emailEmailTo": "A (To)",
+        "csv-emailEmailCc": "CC",
+        "csv-emailEmailBcc": "CCN (BCC)",
+        "xlsx-emailEmailTo": "A (To)",
+        "xlsx-emailEmailCc": "CC",
+        "xlsx-emailEmailBcc": "CCN (BCC)",
+        "xlsx-emailLite": "Leggero",
+        "xlsx-emailRecordLinks": "Collegamenti dei Record",
+        "xlsx-emailTitle": "Titolo"
+    },
+    "options": {
+        "format": {
+            "csv-email": "CSV - export via email",
+            "xlsx-email": "XLSX - export via email"
+        }
+    },
+    "tooltips": {
+        "xlsx-emailLite": "Consuma molta meno memoria. Consigliato per export di molti record.",
+        "xlsx-emailTitle": "Stampa un titolo e la data corrente nell'intestazione."
     }
 }

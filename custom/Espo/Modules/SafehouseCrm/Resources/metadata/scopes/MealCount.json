@@ -15,6 +15,12 @@
     ],
     "stream": true,
     "importable": true,
+    "exportFormatList": [
+        "xlsx",
+        "csv",
+        "xlsx-email",
+        "csv-email"
+    ],
     "customizable": true,
     "color": "#f1c40f",
     "iconClass": "fas fa-utensils"
