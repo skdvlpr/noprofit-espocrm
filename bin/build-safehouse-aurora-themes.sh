@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Builds a standalone Espo extension ZIP for `SafehouseAuroraThemes`
+# (Safehouse Aurora dark + light themes). The same module is also bundled
+# inside the SafehouseCrm package by bin/build.sh, so the themes ship with
+# both the CRM and as a self-contained themes extension.
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MODULE_PATH="custom/Espo/Modules/SafehouseCrm"
+MODULE_PATH="custom/Espo/Modules/SafehouseAuroraThemes"
 MANIFEST_PATH="$ROOT_DIR/$MODULE_PATH/manifest.json"
 
 if [[ ! -f "$MANIFEST_PATH" ]]; then
@@ -30,28 +35,19 @@ print(version)
 PY
 )"
 
-PACKAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/safehouse-crm-package.XXXXXX")"
+PACKAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/safehouse-aurora-themes-package.XXXXXX")"
 trap 'rm -rf "$PACKAGE_DIR"' EXIT
 
 THEME_CSS_PATH="client/custom/css/safehouse-aurora"
 THEME_FONT_PATH="client/fonts/jet-brains-sans"
-FRONTEND_MODULE_PATH="client/custom/modules/safehouse-crm"
 
 mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_DIR/dist"
 
 cp "$MANIFEST_PATH" "$PACKAGE_DIR/manifest.json"
 cp -a "$ROOT_DIR/$MODULE_PATH" "$PACKAGE_DIR/files/custom/Espo/Modules/"
-cp -a "$ROOT_DIR/scripts/." "$PACKAGE_DIR/scripts/"
+cp "$ROOT_DIR/bin/packaging/SafehouseAuroraThemes-zip-AfterInstall.php" "$PACKAGE_DIR/scripts/AfterInstall.php"
 
-# Bundle the Safehouse Aurora themes module so installing SafehouseCrm also
-# ships the two themes. The themes are ALSO published as a standalone package
-# via bin/build-safehouse-aurora-themes.sh (single source: this module).
-THEMES_MODULE_PATH="custom/Espo/Modules/SafehouseAuroraThemes"
-if [[ -d "$ROOT_DIR/$THEMES_MODULE_PATH" ]]; then
-    cp -a "$ROOT_DIR/$THEMES_MODULE_PATH" "$PACKAGE_DIR/files/custom/Espo/Modules/"
-fi
-
-# Safehouse Aurora themes: metadata lives in the module; runtime assets live under client/.
+# Theme runtime assets (CSS + font) live under client/, shared with SafehouseCrm.
 if [[ -d "$ROOT_DIR/$THEME_CSS_PATH" ]]; then
     mkdir -p "$PACKAGE_DIR/files/client/custom/css"
     cp -a "$ROOT_DIR/$THEME_CSS_PATH" "$PACKAGE_DIR/files/client/custom/css/"
@@ -62,18 +58,7 @@ if [[ -d "$ROOT_DIR/$THEME_FONT_PATH" ]]; then
     cp -a "$ROOT_DIR/$THEME_FONT_PATH" "$PACKAGE_DIR/files/client/fonts/"
 fi
 
-if [[ -d "$ROOT_DIR/$FRONTEND_MODULE_PATH" ]]; then
-    mkdir -p "$PACKAGE_DIR/files/client/custom/modules"
-    cp -a "$ROOT_DIR/$FRONTEND_MODULE_PATH" "$PACKAGE_DIR/files/client/custom/modules/"
-fi
-
-DASHLET_TPL_PATH="client/custom/res/templates/dashlet.tpl"
-if [[ -f "$ROOT_DIR/$DASHLET_TPL_PATH" ]]; then
-    mkdir -p "$PACKAGE_DIR/files/client/custom/res/templates"
-    cp "$ROOT_DIR/$DASHLET_TPL_PATH" "$PACKAGE_DIR/files/client/custom/res/templates/"
-fi
-
-OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"
+OUTPUT="$ROOT_DIR/dist/safehouse-aurora-themes-v${VERSION}.zip"
 rm -f "$OUTPUT"
 
 python3 - "$PACKAGE_DIR" "$OUTPUT" <<'PY'

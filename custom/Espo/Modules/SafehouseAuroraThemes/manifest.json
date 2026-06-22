@@ -1,0 +1,14 @@
+{
+    "name": "SafehouseAuroraThemes",
+    "version": "0.1.0",
+    "acceptableVersions": [
+        ">=9.3.6 <10.0.0"
+    ],
+    "php": [
+        ">=8.1"
+    ],
+    "releaseDate": "2026-06-23",
+    "author": "skdvlpr",
+    "description": "Safehouse Aurora dark & light themes (frosted glass UI). Bundled with SafehouseCrm and installable standalone.",
+    "skipBackup": false
+}
