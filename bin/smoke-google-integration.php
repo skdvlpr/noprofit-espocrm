@@ -583,6 +583,26 @@ $ok(
     'code=' . $rInt403->getStatusCode()
 );
 
+echo "\nOAuth reconnect token preservation\n";
+
+$authHandlerSource = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php'
+) ?: '';
+$googleClientSource = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Core/ExternalAccount/Clients/Google.php'
+) ?: '';
+
+$ok(
+    'AuthorizationCodeHandler does not clear refreshToken during reconnect',
+    !str_contains($authHandlerSource, "clear('refreshToken')")
+);
+$ok(
+    'Google OAuth client only returns non-empty refreshToken',
+    str_contains($googleClientSource, 'is_string($refreshToken)')
+        && str_contains($googleClientSource, '$data[\'refreshToken\'] = $refreshToken;')
+        && !str_contains($googleClientSource, '$data[\'refreshToken\'] = $result[\'refresh_token\'] ?? null;')
+);
+
 echo "\nExternalAccount calendarSyncMode hook\n";
 
 $userId = $user->getId();
