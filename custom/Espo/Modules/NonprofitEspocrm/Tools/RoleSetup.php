@@ -494,7 +494,7 @@ class RoleSetup
         $domainEntities = [
             'Account', 'AccountWebsite', 'Contact', 'Opportunity',
             'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'Document',
-            'Meeting', 'Call', 'Task', 'Email',
+            'Meeting', 'Call', 'Task', 'Email', 'Case',
             'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
 

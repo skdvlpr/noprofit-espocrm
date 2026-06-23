@@ -54,6 +54,7 @@
 # Integration settings export (contains client secrets — never commit)
 /integration-settings*.json
 /deploy/integration-settings*.json
+/deploy/backups/
 
 # Environment, dumps, logs
 .env

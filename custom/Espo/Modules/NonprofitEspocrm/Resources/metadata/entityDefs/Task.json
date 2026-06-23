@@ -1,0 +1,29 @@
+{
+    "fields": {
+        "category": {
+            "type": "enum",
+            "options": [
+                "MealPreparation",
+                "MealDistribution",
+                "Administrative",
+                "LegalDesk",
+                "DigitalDesk",
+                "Reception",
+                "ListeningDesk",
+                "MarketCollection",
+                "Cleaning",
+                "NightReceptionManagement",
+                "ProjectDevelopment",
+                "GrantsAndFundingManagement",
+                "Fundraising",
+                "EventOrganization",
+                "Secretariat",
+                "ServicesAndSupport",
+                "Activities",
+                "OnCallAvailability"
+            ],
+            "audited": true,
+            "isSorted": true
+        }
+    }
+}

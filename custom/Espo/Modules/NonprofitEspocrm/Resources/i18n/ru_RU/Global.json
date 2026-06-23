@@ -5,7 +5,8 @@
         "AccountWebsite": "Сайт организации",
         "VolunteerEmployee": "Сотрудники / Волонтеры",
         "Member": "Участники",
-        "MealCount": "Учет питания"
+        "MealCount": "Учет питания",
+        "Case": "Обращение"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -13,7 +14,8 @@
         "AccountWebsite": "Сайты организаций",
         "VolunteerEmployee": "Сотрудники / Волонтеры",
         "Member": "Участники",
-        "MealCount": "Учет питания"
+        "MealCount": "Учет питания",
+        "Case": "Обращения"
     },
     "navbarTabs": {
         "mainSections": "Главные разделы",

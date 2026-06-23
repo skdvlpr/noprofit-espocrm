@@ -1,0 +1,29 @@
+{
+    "fields": {
+        "parent": "Related record",
+        "type": "Intake type"
+    },
+    "labels": {
+        "Case": "Intake record",
+        "Cases": "Intake records",
+        "Create Case": "Create intake record"
+    },
+    "options": {
+        "type": {
+            "BeneficiaryRequest": "Assistance request",
+            "GuestIntake": "First contact / reception",
+            "ServiceAccess": "Service access",
+            "InformationRequest": "Information request",
+            "Complaint": "Complaint / critical report",
+            "PartnerOrganization": "Partner organization",
+            "SponsorOrDonor": "Sponsor / donor",
+            "SupplierOrVendor": "Supplier / vendor",
+            "InstitutionalBody": "Public institution",
+            "InternalReferral": "Internal referral",
+            "VolunteerMatter": "Volunteer / staff matter",
+            "MemberMatter": "Member matter",
+            "LegalOrAdministrative": "Legal / administrative",
+            "Other": "Other"
+        }
+    }
+}

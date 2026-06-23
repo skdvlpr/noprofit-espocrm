@@ -195,7 +195,7 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar .menu-container .dropdown-m
   vertical-align: middle;
 }
 /* ── Navbar tabs: Principali scope colors; all other sections theme-neutral icons ── */
-/* Keep in sync with Installer.php CRM_NAV_ORDER */
+/* Keep in sync with Installer.php CRM_NAV_ORDER + Case + Rendicontazione group */
 body[data-theme-name="SafehouseAurora"],
 body[data-theme-name="SafehouseAuroraLight"] {
   --navbar-muted-icon-color: var(--navbar-inverse-link-icon-color);
@@ -267,14 +267,17 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li:not(.acti
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li:not(.active) > a:hover .short-label:not([style*='color']) .fab {
   color: var(--navbar-muted-icon-hover-color) !important;
 }
-/* Principali ($CRM): Lead, Contact, Account, Opportunity, Member, VolunteerEmployee */
+/* Principali ($CRM): Lead … VolunteerEmployee, Case, Rendicontazione */
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
     [data-name='Contact'],
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ) > a .short-label[style*='color'] span,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -282,7 +285,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ) > a .short-label[style*='color'] span {
   color: inherit;
 }
@@ -292,7 +298,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ) > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -300,7 +309,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ) > a .short-label[style*='color'] {
   filter: saturate(1.12) brightness(1.06);
 }
@@ -310,7 +322,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -318,7 +333,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'] {
   filter: saturate(1.15) brightness(1.08);
 }
@@ -328,7 +346,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -336,7 +357,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -344,7 +368,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'] span[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
     [data-name='Lead'],
@@ -352,18 +379,48 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
     [data-name='Account'],
     [data-name='Opportunity'],
     [data-name='Member'],
-    [data-name='VolunteerEmployee']
+    [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
   ).active > a .short-label[style*='color'] span[style*='color'] {
   color: inherit;
 }
-/* Non-Principali: neutral icons (Rendicontazione, Activities, Marketing, overflow, etc.) */
+/* Segnalazioni + Rendicontazione: softer accent (no Principali brightness boost) */
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
+  ) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
+  ) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
+  ).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:is(
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
+  ).active > a .short-label[style*='color'] {
+  filter: none;
+  opacity: 0.92;
+}
+/* Non-Principali: neutral icons (Activities, Marketing, overflow, etc.) */
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
       [data-name='Contact'],
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -371,7 +428,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -379,7 +439,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -387,7 +450,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -395,7 +461,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -403,7 +472,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -411,7 +483,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .fab,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -419,7 +494,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label[style*='color'] .fab,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -427,7 +505,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label .color-icon[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -435,18 +516,21 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )) > a .short-label .color-icon[style*='color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .far,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label[style*='color'] .fab,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .far,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label[style*='color'] .fab,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label .color-icon[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']) > a .short-label .color-icon[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a .short-label[style*='color'] .fas,
@@ -466,7 +550,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -474,7 +561,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -482,7 +572,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -490,7 +583,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -498,7 +594,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -506,7 +605,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -514,7 +616,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .fab,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -522,12 +627,15 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )):not(.active) > a:hover .short-label[style*='color'] .fab,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not(.active) > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']):not(.active) > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']):not(.active) > a:hover .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']):not(.active) > a:hover .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']):not(.active) > a:hover .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar .dropdown-menu > li.in-group.tab > a:hover .short-label[style*='color'] .fas,
@@ -540,7 +648,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -548,7 +659,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'],
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -556,7 +670,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -564,7 +681,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .fas,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -572,7 +692,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -580,7 +703,10 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .far,
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -588,7 +714,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .fab,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -596,16 +725,19 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a .short-label[style*='color'] .fab,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas,
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a .short-label[style*='color'] .fas {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a .short-label[style*='color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a .short-label[style*='color'] .fas,
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a .short-label[style*='color'] .fas {
   color: var(--navbar-muted-icon-active-color) !important;
 }
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:is(
@@ -614,7 +746,10 @@ body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab:not(:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a[style*='border-color'],
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:not(:is(
       [data-name='Lead'],
@@ -622,12 +757,15 @@ body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab:
       [data-name='Account'],
       [data-name='Opportunity'],
       [data-name='Member'],
-      [data-name='VolunteerEmployee']
+      [data-name='VolunteerEmployee'],
+    [data-name='Case'],
+    [data-name='Rendicontazione'],
+    [data-name='$Rendicontazione']
     )).active > a[style*='border-color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.open > a[style*='border-color'],
-body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'],
-body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group.active > a[style*='border-color'] {
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a[style*='border-color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).open > a[style*='border-color'],
+body[data-theme-name="SafehouseAurora"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a[style*='border-color'],
+body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar ul.tabs > li.tab-group:not([data-name='Rendicontazione']):not([data-name='$Rendicontazione']).active > a[style*='border-color'] {
   border-bottom-color: var(--navbar-muted-tab-accent) !important;
 }
 /* ── Shared admin + entity list shell (same as .list-group-panel / .table-admin-panel) ── */

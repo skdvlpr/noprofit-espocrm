@@ -1,0 +1,61 @@
+{
+    "fields": {
+        "parent": {
+            "type": "linkParent",
+            "required": true,
+            "entityList": [
+                "Account",
+                "Contact",
+                "Lead",
+                "Opportunity",
+                "Member",
+                "VolunteerEmployee"
+            ],
+            "audited": true
+        },
+        "type": {
+            "type": "enum",
+            "required": true,
+            "options": [
+                "BeneficiaryRequest",
+                "GuestIntake",
+                "ServiceAccess",
+                "InformationRequest",
+                "Complaint",
+                "PartnerOrganization",
+                "SponsorOrDonor",
+                "SupplierOrVendor",
+                "InstitutionalBody",
+                "InternalReferral",
+                "VolunteerMatter",
+                "MemberMatter",
+                "LegalOrAdministrative",
+                "Other"
+            ],
+            "audited": true,
+            "isSorted": true
+        },
+        "account": {
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "contact": {
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "lead": {
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "contacts": {
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        }
+    },
+    "links": {
+        "parent": {
+            "type": "belongsToParent",
+            "foreign": "cases"
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "fields": {
+        "category": "Categoria"
+    },
+    "labels": {
+        "Task": "Task",
+        "Tasks": "Task",
+        "Create Task": "Crea Task"
+    },
+    "options": {
+        "category": {
+            "MealPreparation": "Preparazione pasti",
+            "MealDistribution": "Distribuzione pasti",
+            "Administrative": "Amministrativo",
+            "LegalDesk": "Sportello legale",
+            "DigitalDesk": "Sportello digitale",
+            "Reception": "Accoglienza",
+            "ListeningDesk": "Sportello d'ascolto",
+            "MarketCollection": "Raccolta mercato",
+            "Cleaning": "Pulizie",
+            "NightReceptionManagement": "Gestione notturna accoglienza",
+            "ProjectDevelopment": "Progettualità",
+            "GrantsAndFundingManagement": "Gestione e ricerca bandi/finanziamenti",
+            "Fundraising": "Raccolta fondi",
+            "EventOrganization": "Organizzazione eventi",
+            "Secretariat": "Segreteria",
+            "ServicesAndSupport": "Servizi e accompagnamento",
+            "Activities": "Attività",
+            "OnCallAvailability": "Reperibilità"
+        }
+    }
+}

@@ -5,7 +5,7 @@
  * (`Espo\Modules\NonprofitEspocrm\AfterInstall`).
  *
  * Asserts after the run:
- *   - `Case` is absent from `tabList` and `quickCreateList`;
+ *   - `Case` is present in `tabList` (Principali, before `$Rendicontazione`) and `quickCreateList`;
  *   - `Lead` is present in `tabList` and `quickCreateList`;
  *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`) are present
  *     in `tabList`;
@@ -84,6 +84,35 @@ $extractCrmTabs = static function (array $tabList): array {
     return $tabs;
 };
 
+$extractSupportTabs = static function (array $tabList): array {
+    $tabs = [];
+    $pastSupportDivider = false;
+
+    foreach ($tabList as $item) {
+        if (
+            is_object($item)
+            && ($item->type ?? null) === 'divider'
+            && ($item->text ?? null) === '$Support'
+        ) {
+            $pastSupportDivider = true;
+
+            continue;
+        }
+
+        if (!$pastSupportDivider) {
+            continue;
+        }
+
+        if (!is_string($item)) {
+            break;
+        }
+
+        $tabs[] = $item;
+    }
+
+    return $tabs;
+};
+
 $expectedCrmOrder = [
     'Lead',
     'Contact',
@@ -91,7 +120,10 @@ $expectedCrmOrder = [
     'Opportunity',
     'Member',
     'VolunteerEmployee',
+    'Case',
 ];
+
+$expectedSupportOrder = ['KnowledgeBaseArticle'];
 
 $runGooglePostInstall = static function ($container) use ($googleIntegrationAvailable): void {
     if (!$googleIntegrationAvailable) {
@@ -116,9 +148,17 @@ $tabStrings = array_filter($tabList, 'is_string');
 $qcStrings = array_filter($quickCreateList, 'is_string');
 
 $report('Lead present in tabList', in_array('Lead', $tabStrings, true));
-$report('Case absent from tabList', !in_array('Case', $tabStrings, true));
+$report('Case present in tabList', in_array('Case', $tabStrings, true));
 $report('Lead present in quickCreateList', in_array('Lead', $qcStrings, true));
-$report('Case absent from quickCreateList', !in_array('Case', $qcStrings, true));
+$report('Case present in quickCreateList', in_array('Case', $qcStrings, true));
+
+$supportTabs = $extractSupportTabs($tabList);
+$report(
+    'Support block tab order canonical',
+    $supportTabs === $expectedSupportOrder,
+    'actual=' . implode(' → ', $supportTabs)
+);
+$report('Case absent from Support block', !in_array('Case', $supportTabs, true));
 
 $crmTabs = $extractCrmTabs($tabList);
 $report('Lead is first tab in $CRM block', ($crmTabs[0] ?? null) === 'Lead');

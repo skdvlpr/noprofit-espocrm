@@ -1,0 +1,29 @@
+{
+    "fields": {
+        "parent": "Связано с",
+        "type": "Тип обращения"
+    },
+    "labels": {
+        "Case": "Обращение",
+        "Cases": "Обращения",
+        "Create Case": "Создать обращение"
+    },
+    "options": {
+        "type": {
+            "BeneficiaryRequest": "Запрос на помощь",
+            "GuestIntake": "Первичный приём",
+            "ServiceAccess": "Доступ к услуге",
+            "InformationRequest": "Запрос информации",
+            "Complaint": "Жалоба / критическое сообщение",
+            "PartnerOrganization": "Партнёрская организация",
+            "SponsorOrDonor": "Спонсор / донор",
+            "SupplierOrVendor": "Поставщик",
+            "InstitutionalBody": "Государственный орган",
+            "InternalReferral": "Внутреннее направление",
+            "VolunteerMatter": "Волонтёры / персонал",
+            "MemberMatter": "Член ассоциации",
+            "LegalOrAdministrative": "Юридическое / административное",
+            "Other": "Другое"
+        }
+    }
+}

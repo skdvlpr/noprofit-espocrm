@@ -131,6 +131,12 @@
             "entity": "Team",
             "relationName": "entityTeam",
             "layoutRelationshipsDisabled": true
+        },
+        "cases": {
+            "type": "hasChildren",
+            "entity": "Case",
+            "foreign": "parent",
+            "audited": true
         }
     },
     "collection": {

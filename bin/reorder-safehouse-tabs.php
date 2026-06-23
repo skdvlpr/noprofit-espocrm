@@ -2,7 +2,7 @@
 /**
  * Re-apply Safehouse navbar tab order via {@see Installer}:
  *   - `$CRM` (Principali): Lead → Contact → Account → Opportunity → Member → VolunteerEmployee
- *   - `$Rendicontazione`: MealCount, AssociationMealCount (group tab)
+ *   - `$CRM` (Principali): Lead → … → VolunteerEmployee → Case → `$Rendicontazione`
  *   - default theme: Safehouse Aurora Light (when still on stock Espo theme)
  *
  * Idempotent: re-running has no effect once the order matches.
@@ -21,6 +21,7 @@ use Espo\Core\Utils\Config;
 use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 
 $app = new Application();
+$app->setupSystemUser();
 $container = $app->getContainer();
 
 $installer = new Installer();

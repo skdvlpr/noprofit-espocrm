@@ -1,0 +1,14 @@
+[
+    "assignedUser",
+    "teams",
+    "status",
+    "priority",
+    "type",
+    "parent",
+    "account",
+    "contact",
+    "lead",
+    "createdAt",
+    "createdBy",
+    "modifiedAt"
+]

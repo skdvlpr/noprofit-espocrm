@@ -125,5 +125,33 @@
         "edit": {
             "module": "NonprofitEspocrm"
         }
+    },
+    "Task": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "Case": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        }
     }
 }

@@ -1,0 +1,32 @@
+{
+    "fields": {
+        "parent": "Collegato a",
+        "type": "Tipo segnalazione"
+    },
+    "labels": {
+        "Case": "Segnalazione",
+        "Cases": "Segnalazioni",
+        "Create Case": "Crea segnalazione"
+    },
+    "options": {
+        "type": {
+            "BeneficiaryRequest": "Richiesta di assistenza",
+            "GuestIntake": "Primo accesso / accoglienza",
+            "ServiceAccess": "Accesso a servizio",
+            "InformationRequest": "Richiesta informazioni",
+            "Complaint": "Reclamo / segnalazione critica",
+            "PartnerOrganization": "Organizzazione partner",
+            "SponsorOrDonor": "Sponsor / donatore",
+            "SupplierOrVendor": "Fornitore",
+            "InstitutionalBody": "Ente istituzionale",
+            "InternalReferral": "Invio interno",
+            "VolunteerMatter": "Volontariato / personale",
+            "MemberMatter": "Associato",
+            "LegalOrAdministrative": "Legale / amministrativo",
+            "Other": "Altro"
+        }
+    },
+    "links": {
+        "tasks": "Task"
+    }
+}

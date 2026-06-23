@@ -6,7 +6,8 @@
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
         "MealCount": "Meal Count",
-        "AssociationMealCount": "Network Meal Count"
+        "AssociationMealCount": "Network Meal Count",
+        "Case": "Intake record"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -15,7 +16,8 @@
         "VolunteerEmployee": "Volunteers / Employees",
         "Member": "Members",
         "MealCount": "Meal Counts",
-        "AssociationMealCount": "Network Meal Counts"
+        "AssociationMealCount": "Network Meal Counts",
+        "Case": "Intake records"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",

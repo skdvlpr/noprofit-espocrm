@@ -28,5 +28,13 @@
             "type": "date",
             "audited": true
         }
+    },
+    "links": {
+        "cases": {
+            "type": "hasChildren",
+            "entity": "Case",
+            "foreign": "parent",
+            "audited": true
+        }
     }
 }

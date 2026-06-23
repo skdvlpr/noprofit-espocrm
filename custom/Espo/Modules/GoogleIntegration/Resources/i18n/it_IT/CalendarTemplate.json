@@ -57,7 +57,7 @@
         "targetEntityType": {
             "Meeting": "Riunioni",
             "Call": "Chiamate",
-            "Task": "Compiti"
+            "Task": "Task"
         }
     },
     "labels": {

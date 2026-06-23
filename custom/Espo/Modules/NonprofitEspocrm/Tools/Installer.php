@@ -18,8 +18,8 @@ use Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisio
  *   - {@see \Espo\Modules\NonprofitEspocrm\AfterInstall} — the in-module class used
  *     when the module ships pre-installed (e.g. during dev workflows).
  *
- * Keeping the logic here ensures both flows hide Case from navigation, enforce
- * the canonical `$CRM` tab order (Lead first), place reporting entities in a
+ * Keeping the logic here ensures both flows surface intake records (Case) in the
+ * `$CRM` / Principali block immediately before `$Rendicontazione`, enforce the
  * native navbar group tab (`type: group` dropdown — works in horizontal and
  * vertical navbars), surface Safehouse custom tabs, apply the Safehouse Aurora
  * default theme on fresh/stock-theme installs, provision the canonical roles +
@@ -41,9 +41,14 @@ class Installer
         'AssociationMealCount',
     ];
 
-    private const OTHER_TABS_TO_ENSURE = ['Account', 'Opportunity', 'Document'];
+    private const OTHER_TABS_TO_ENSURE = ['Account', 'Opportunity', 'Document', 'Case'];
 
-    private const ENTITIES_TO_HIDE = ['Case'];
+    private const ENTITIES_TO_HIDE = [];
+
+    private const SUPPORT_DIVIDER_TEXT = '$Support';
+
+    /** Support block: knowledge base only (Case lives in Principali). */
+    private const SUPPORT_NAV_ORDER = ['KnowledgeBaseArticle'];
 
     private const LEAD_NAV_TAB = 'Lead';
 
@@ -88,7 +93,7 @@ class Installer
     /** Navbar group label key — translated via Global.json → navbarTabs.Rendicontazione */
     private const REPORTING_GROUP_TEXT = '$Rendicontazione';
 
-    /** Reporting group follows the last Principali tab (VolunteerEmployee). */
+    /** Reporting group follows VolunteerEmployee; Case is inserted before the group afterward. */
     private const REPORTING_GROUP_ANCHOR_AFTER = 'VolunteerEmployee';
 
     public function runPostInstall(Container $container): void
@@ -116,11 +121,17 @@ class Installer
         $tabList = $this->removeEntitiesFromList($tabList, self::ENTITIES_TO_HIDE);
         $tabList = $this->reorderCrmNavbarBlock($tabList);
         $tabList = $this->reorderReportingNavbarBlock($tabList);
+        $tabList = $this->reorderCaseBeforeReportingGroup($tabList);
+        $tabList = $this->reorderSupportNavbarBlock($tabList);
 
         $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::ENTITIES_TO_HIDE);
 
         if (!in_array(self::LEAD_NAV_TAB, $quickCreateList, true)) {
             $quickCreateList[] = self::LEAD_NAV_TAB;
+        }
+
+        if (!in_array('Case', $quickCreateList, true)) {
+            $quickCreateList[] = 'Case';
         }
 
         $this->provisionDefaultTheme($config, $configWriter);
@@ -252,7 +263,9 @@ class Installer
         $group = (object) [
             'type' => 'group',
             'text' => self::REPORTING_GROUP_TEXT,
+            'name' => 'Rendicontazione',
             'iconClass' => 'fas fa-chart-bar',
+            'color' => '#6d8f85',
             'itemList' => $reportingEntities,
         ];
 
@@ -287,5 +300,83 @@ class Installer
         }
 
         return count($tabList);
+    }
+
+    /**
+     * Place Case (Segnalazioni) in Principali immediately before `$Rendicontazione`.
+     *
+     * @param array<int, mixed> $tabList
+     * @return array<int, mixed>
+     */
+    private function reorderCaseBeforeReportingGroup(array $tabList): array
+    {
+        $without = array_values(array_filter(
+            $tabList,
+            static fn ($item): bool => $item !== 'Case'
+        ));
+
+        foreach ($without as $i => $item) {
+            if (
+                is_object($item)
+                && ($item->type ?? null) === 'group'
+                && ($item->text ?? null) === self::REPORTING_GROUP_TEXT
+            ) {
+                return array_merge(
+                    array_slice($without, 0, $i),
+                    ['Case'],
+                    array_slice($without, $i)
+                );
+            }
+        }
+
+        foreach ($without as $i => $item) {
+            if ($item === 'VolunteerEmployee') {
+                return array_merge(
+                    array_slice($without, 0, $i + 1),
+                    ['Case'],
+                    array_slice($without, $i + 1)
+                );
+            }
+        }
+
+        return array_merge($without, ['Case']);
+    }
+
+    /**
+     * Enforce Knowledge Base order in the `$Support` navbar block.
+     *
+     * @param array<int, mixed> $tabList
+     * @return array<int, mixed>
+     */
+    private function reorderSupportNavbarBlock(array $tabList): array
+    {
+        $supportEntities = self::SUPPORT_NAV_ORDER;
+
+        $without = array_values(array_filter(
+            $tabList,
+            static function ($item) use ($supportEntities): bool {
+                return !(is_string($item) && in_array($item, $supportEntities, true));
+            }
+        ));
+
+        $insertIndex = count($without);
+
+        foreach ($without as $i => $item) {
+            if (
+                is_object($item)
+                && ($item->type ?? null) === 'divider'
+                && ($item->text ?? null) === self::SUPPORT_DIVIDER_TEXT
+            ) {
+                $insertIndex = $i + 1;
+
+                break;
+            }
+        }
+
+        return array_merge(
+            array_slice($without, 0, $insertIndex),
+            $supportEntities,
+            array_slice($without, $insertIndex)
+        );
     }
 }

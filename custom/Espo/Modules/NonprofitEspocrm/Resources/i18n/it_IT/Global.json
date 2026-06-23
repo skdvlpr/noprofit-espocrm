@@ -6,7 +6,9 @@
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
         "MealCount": "Conteggio pasti",
-        "AssociationMealCount": "Conteggio pasti per Rete"
+        "AssociationMealCount": "Conteggio pasti per Rete",
+        "Task": "Task",
+        "Case": "Segnalazione"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -15,7 +17,9 @@
         "VolunteerEmployee": "Volontari / Dipendenti",
         "Member": "Associati",
         "MealCount": "Conteggio pasti",
-        "AssociationMealCount": "Conteggio pasti per Rete"
+        "AssociationMealCount": "Conteggio pasti per Rete",
+        "Task": "Task",
+        "Case": "Segnalazioni"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",

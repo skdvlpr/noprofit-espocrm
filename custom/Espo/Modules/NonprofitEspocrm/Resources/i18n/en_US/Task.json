@@ -1,0 +1,27 @@
+{
+    "fields": {
+        "category": "Category"
+    },
+    "options": {
+        "category": {
+            "MealPreparation": "Meal preparation",
+            "MealDistribution": "Meal distribution",
+            "Administrative": "Administrative",
+            "LegalDesk": "Legal desk",
+            "DigitalDesk": "Digital desk",
+            "Reception": "Reception",
+            "ListeningDesk": "Listening desk",
+            "MarketCollection": "Market collection",
+            "Cleaning": "Cleaning",
+            "NightReceptionManagement": "Night reception management",
+            "ProjectDevelopment": "Project development",
+            "GrantsAndFundingManagement": "Grants and funding research",
+            "Fundraising": "Fundraising",
+            "EventOrganization": "Event organization",
+            "Secretariat": "Secretariat",
+            "ServicesAndSupport": "Services and accompaniment",
+            "Activities": "Activities",
+            "OnCallAvailability": "On-call availability"
+        }
+    }
+}
