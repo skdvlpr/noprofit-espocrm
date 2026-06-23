@@ -1,5 +1,10 @@
 [
     {
+        "route": "/GoogleIntegration/integration-status",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetIntegrationStatus"
+    },
+    {
         "route": "/GoogleIntegration/calendar/date-options/:entityType/:id",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateOptions"

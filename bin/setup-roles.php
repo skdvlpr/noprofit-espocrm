@@ -20,7 +20,7 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
-use Espo\Modules\SafehouseCrm\Tools\RoleSetup;
+use Espo\Modules\NonprofitEspocrm\Tools\RoleSetup;
 
 $app = new Application();
 $app->setupSystemUser();

@@ -1,0 +1,32 @@
+[
+    {
+        "route": "/NonprofitEspocrm/reporting/meal-count/summary",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetMealCountSummary"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/meal-count/totals",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetMealCountTotals"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/email-export",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\PostReportingEmailExport"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/meal-count/email-export",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\PostMealCountEmailExport"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/association-meal-count/summary",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetAssociationMealCountSummary"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/association-meal-count/totals",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetAssociationMealCountTotals"
+    }
+]

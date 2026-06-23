@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MODULE_PATH="custom/Espo/Modules/SafehouseCrm"
+MODULE_PATH="custom/Espo/Modules/NonprofitEspocrm"
 MANIFEST_PATH="$ROOT_DIR/$MODULE_PATH/manifest.json"
 
 if [[ ! -f "$MANIFEST_PATH" ]]; then
@@ -30,12 +30,12 @@ print(version)
 PY
 )"
 
-PACKAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/safehouse-crm-package.XXXXXX")"
+PACKAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/nonprofit-espocrm-package.XXXXXX")"
 trap 'rm -rf "$PACKAGE_DIR"' EXIT
 
 THEME_CSS_PATH="client/custom/css/safehouse-aurora"
 THEME_FONT_PATH="client/fonts/jet-brains-sans"
-FRONTEND_MODULE_PATH="client/custom/modules/safehouse-crm"
+FRONTEND_MODULE_PATH="client/custom/modules/nonprofit-espocrm"
 
 mkdir -p "$PACKAGE_DIR/files/custom/Espo/Modules" "$PACKAGE_DIR/scripts" "$ROOT_DIR/dist"
 
@@ -73,7 +73,7 @@ if [[ -f "$ROOT_DIR/$DASHLET_TPL_PATH" ]]; then
     cp "$ROOT_DIR/$DASHLET_TPL_PATH" "$PACKAGE_DIR/files/client/custom/res/templates/"
 fi
 
-OUTPUT="$ROOT_DIR/dist/safehouse-crm-v${VERSION}.zip"
+OUTPUT="$ROOT_DIR/dist/nonprofit-espocrm-v${VERSION}.zip"
 rm -f "$OUTPUT"
 
 python3 - "$PACKAGE_DIR" "$OUTPUT" <<'PY'

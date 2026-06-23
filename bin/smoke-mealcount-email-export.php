@@ -15,7 +15,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config\ConfigWriter;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingEmailExporter;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingEmailExporter;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -197,7 +197,7 @@ try {
 
     echo "\nRoutes + frontend\n";
 
-    $exportMetaPath = 'custom/Espo/Modules/SafehouseCrm/Resources/metadata/app/export.json';
+    $exportMetaPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/app/export.json';
     $exportMeta = is_readable($exportMetaPath)
         ? json_decode(file_get_contents($exportMetaPath), true)
         : null;
@@ -208,14 +208,14 @@ try {
         $csvEmailToView === 'views/email/fields/email-address-varchar'
     );
 
-    $routesPath = 'custom/Espo/Modules/SafehouseCrm/Resources/routes.json';
+    $routesPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/routes.json';
     $routesJson = is_readable($routesPath) ? json_decode(file_get_contents($routesPath), true) : null;
     $routePaths = is_array($routesJson) ? array_column($routesJson, 'route') : [];
 
-    $ok('routes.json reporting/email-export registered', in_array('/SafehouseCrm/reporting/email-export', $routePaths, true));
+    $ok('routes.json reporting/email-export registered', in_array('/NonprofitEspocrm/reporting/email-export', $routePaths, true));
 
     foreach (['MealCount', 'AssociationMealCount'] as $entityType) {
-        $clientDefsPath = "custom/Espo/Modules/SafehouseCrm/Resources/metadata/clientDefs/{$entityType}.json";
+        $clientDefsPath = "custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/{$entityType}.json";
         $clientDefs = is_readable($clientDefsPath)
             ? json_decode(file_get_contents($clientDefsPath), true)
             : null;
@@ -234,7 +234,7 @@ try {
 
     $ok(
         'reporting export modal JS exists',
-        is_readable('client/custom/modules/safehouse-crm/src/views/export/modals/export.js')
+        is_readable('client/custom/modules/nonprofit-espocrm/src/views/export/modals/export.js')
     );
 } finally {
     foreach ($created as $entity) {

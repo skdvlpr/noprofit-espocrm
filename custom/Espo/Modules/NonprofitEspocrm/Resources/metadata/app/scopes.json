@@ -1,0 +1,23 @@
+{
+    "VolunteerEmployee": {
+        "module": "NonprofitEspocrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "Member": {
+        "module": "NonprofitEspocrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    },
+    "MealCount": {
+        "module": "NonprofitEspocrm",
+        "type": "base",
+        "entity": true,
+        "object": true,
+        "acl": true
+    }
+}

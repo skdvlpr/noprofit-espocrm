@@ -92,7 +92,48 @@ Notes:
    (Google) — or import them later via the migration scripts (see Phase 6).
 5. Re-run the deploy workflow for the next code change; it will auto-rebuild.
 
-## Manual deploy (fallback, from a workstation)
+## Extension install order and Aurora themes policy
+
+Three independent extension ZIPs are built from this repository:
+
+| ZIP | Extension ID | Purpose |
+| --- | --- | --- |
+| `google-integration-v0.1.0.zip` | `GoogleCalendarDrive` | Google OAuth2, Calendar/Drive |
+| `nonprofit-espocrm-v0.1.0.zip` | `NonprofitEspocrm` | Nonprofit CRM entities, navbar, roles — **includes bundled `SafehouseAuroraThemes` + CSS/fonts** |
+| `safehouse-aurora-themes-v0.1.0.zip` | `SafehouseAuroraThemes` | Aurora themes only (stock Espo without NonprofitEspocrm) |
+
+### Production / full Safehouse stack
+
+Install via **Administration → Extensions → Upload** (or CLI
+`php command.php extension --file=…`), then **Rebuild** after each ZIP:
+
+1. `google-integration-v0.1.0.zip`
+2. `nonprofit-espocrm-v0.1.0.zip`
+
+Do **not** install `safehouse-aurora-themes-v0.1.0.zip` on the same instance.
+NonprofitEspocrm already ships the themes module and assets; a second install
+attempts to register the same extension and is unsupported.
+
+### Standalone `safehouse-aurora-themes` ZIP
+
+Use only on Espo instances **without** NonprofitEspocrm — for example vanilla Espo
+where you want Safehouse Aurora / Aurora Light themes but not the CRM module.
+After install, run **Rebuild** and pick a theme under **Layout Manager →
+Themes**.
+
+### Verify after install
+
+- `php command.php extension --list` — expect `GoogleCalendarDrive` +
+  `NonprofitEspocrm` on a full stack; **one** themes source (bundled inside CRM, not
+  a separate `SafehouseAuroraThemes` extension row).
+- Hard-refresh browser; DevTools → Network: Google admin view must load from
+  `client/custom/modules/google-integration/…` (HTTP 200), not
+  `client/lib/transpiled/…` (404).
+- Smokes (from repo `bin/` on the server or a DDEV sibling): `smoke-installer.php`,
+  `smoke-google-integration.php`, `smoke-safehouse.php`, `smoke-theme-assets.php`.
+
+See also AGENTS.md **EXT-007** (multiple extensions in one repo).
+
 
 ```bash
 rsync -rlptz --human-readable \

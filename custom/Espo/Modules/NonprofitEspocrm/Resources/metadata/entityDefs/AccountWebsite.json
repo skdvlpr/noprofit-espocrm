@@ -1,0 +1,108 @@
+{
+    "fields": {
+        "name": {
+            "type": "url",
+            "required": true,
+            "strip": true,
+            "maxLength": 255,
+            "validatorClassNameMap": {
+                "valid": "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\AccountWebsite\\Name\\HttpUrl"
+            }
+        },
+        "urlLabel": {
+            "type": "varchar",
+            "maxLength": 100,
+            "pattern": "$noBadCharacters"
+        },
+        "isPrimary": {
+            "type": "bool",
+            "default": false
+        },
+        "account": {
+            "type": "link",
+            "required": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true,
+            "fieldManagerParamList": [
+                "useNumericFormat"
+            ]
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true,
+            "fieldManagerParamList": [
+                "useNumericFormat"
+            ]
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user",
+            "fieldManagerParamList": []
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user",
+            "fieldManagerParamList": []
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        }
+    },
+    "links": {
+        "account": {
+            "type": "belongsTo",
+            "entity": "Account",
+            "foreign": "websites"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        }
+    },
+    "indexes": {
+        "account": {
+            "columns": [
+                "accountId",
+                "deleted"
+            ]
+        },
+        "name": {
+            "columns": [
+                "name",
+                "deleted"
+            ]
+        }
+    },
+    "collection": {
+        "orderBy": "createdAt",
+        "order": "desc",
+        "textFilterFields": [
+            "name",
+            "urlLabel"
+        ]
+    },
+    "optimisticConcurrencyControl": true
+}

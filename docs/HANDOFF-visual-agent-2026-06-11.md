@@ -9,7 +9,7 @@
 ## Scope
 
 - `client/custom/css/safehouse-aurora/` — themes SafehouseAurora + SafehouseAuroraLight
-- `client/custom/modules/safehouse-crm/` — kanban, quick-view, document list
+- `client/custom/modules/nonprofit-espocrm/` — kanban, quick-view, document list
 - SafehouseCrm theme metadata + `app/client.json` cssList
 - `bin/build.sh` — must include themes + fonts + safehouse-crm frontend
 - **Not in scope:** Google Calendar PHP/JS business logic (see `HANDOFF-non-visual-agent-2026-06-11.md`)
@@ -33,9 +33,9 @@
 ### 1. list-inline-edit in Safehouse ZIP (CRITICAL)
 
 - **Current:** `client/custom/src/views/record/list-inline-edit.js` → `custom:views/record/list-inline-edit`
-- **Target:** `client/custom/modules/safehouse-crm/src/views/record/list-inline-edit.js` → `safehouse-crm:views/record/list-inline-edit`
+- **Target:** `client/custom/modules/nonprofit-espocrm/src/views/record/list-inline-edit.js` → `nonprofit-espocrm:views/record/list-inline-edit`
 - **Update:** all `clientDefs` + `QuickViewDefaultNavigation.php`
-- **Verify:** unzip `dist/safehouse-crm-v*.zip`, confirm JS path exists; list view loads on clean install
+- **Verify:** unzip `dist/nonprofit-espocrm-v*.zip`, confirm JS path exists; list view loads on clean install
 
 ### 2. Kanban dropdown z-index vs Quick View
 
@@ -78,15 +78,15 @@
 
 ```bash
 bin/build.sh
-unzip -l dist/safehouse-crm-v*.zip | grep safehouse-aurora
+unzip -l dist/nonprofit-espocrm-v*.zip | grep safehouse-aurora
 ```
 
 Must contain:
 
-- `files/custom/Espo/Modules/SafehouseCrm/Resources/metadata/themes/SafehouseAurora*.json`
+- `files/custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/themes/SafehouseAurora*.json`
 - `files/client/custom/css/safehouse-aurora/`
 - `files/client/custom/fonts/jet-brains-sans/`
-- `files/client/custom/modules/safehouse-crm/`
+- `files/client/custom/modules/nonprofit-espocrm/`
 
 ---
 

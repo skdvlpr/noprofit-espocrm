@@ -41,7 +41,7 @@ foreach ($required as $rel) {
 }
 
 // 2. Single source: SafehouseCrm must NOT define the themes anymore.
-$crmThemes = $root . '/custom/Espo/Modules/SafehouseCrm/Resources/metadata/themes';
+$crmThemes = $root . '/custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/themes';
 $ok(
     'SafehouseCrm no longer defines SafehouseAurora theme (single source)',
     !is_file("$crmThemes/SafehouseAurora.json") && !is_file("$crmThemes/SafehouseAuroraLight.json")
@@ -96,13 +96,13 @@ $zipHas = static function (string $zipPath, string $needle): bool {
 };
 
 $themesVersion = json_decode((string) file_get_contents("$moduleDir/manifest.json"), true)['version'] ?? '';
-$crmVersion = json_decode((string) file_get_contents($root . '/custom/Espo/Modules/SafehouseCrm/manifest.json'), true)['version'] ?? '';
+$crmVersion = json_decode((string) file_get_contents($root . '/custom/Espo/Modules/NonprofitEspocrm/manifest.json'), true)['version'] ?? '';
 
 shell_exec(sprintf('cd %s && %s bin/build-safehouse-aurora-themes.sh 2>&1', escapeshellarg($root), escapeshellarg($bash)));
 shell_exec(sprintf('cd %s && %s bin/build.sh 2>&1', escapeshellarg($root), escapeshellarg($bash)));
 
 $themesZip = "$root/dist/safehouse-aurora-themes-v{$themesVersion}.zip";
-$crmZip = "$root/dist/safehouse-crm-v{$crmVersion}.zip";
+$crmZip = "$root/dist/nonprofit-espocrm-v{$crmVersion}.zip";
 
 $ok('standalone ZIP built', is_file($themesZip), $themesZip);
 $ok('standalone ZIP has themes module', $zipHas($themesZip, 'custom/Espo/Modules/SafehouseAuroraThemes/Resources/metadata/themes/SafehouseAurora.json'));

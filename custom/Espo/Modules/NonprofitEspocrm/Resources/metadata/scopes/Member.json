@@ -1,0 +1,21 @@
+{
+    "entity": true,
+    "module": "NonprofitEspocrm",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "stream": true,
+    "color": "#a89078",
+    "iconClass": "fas fa-handshake",
+    "importable": true,
+    "customizable": true,
+    "duplicateCheckFieldList": ["taxCode", "name", "emailAddress"]
+}

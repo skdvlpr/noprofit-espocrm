@@ -5,6 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Hooks\Common;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave as BeforeSaveHook;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarExportGuard;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
@@ -16,11 +17,13 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
     public static int $order = 9;
 
     public function __construct(
-        private DateSourceProvider $dateSourceProvider
+        private DateSourceProvider $dateSourceProvider,
+        private GoogleCalendarExportGuard $googleCalendarExportGuard,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        $this->googleCalendarExportGuard->assertExportAllowed($entity);
         if ($this->shouldNormalizeDateSourceList($entity)) {
             $this->normalizeDateSourceList($entity);
         }
@@ -34,12 +37,24 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
 
     private function shouldNormalizeDateSourceList(Entity $entity): bool
     {
-        return $entity->get('saveToGoogleCalendar')
+        if (
+            $entity->get('saveToGoogleCalendar')
             || $entity->isAttributeChanged('googleCalendarDateSourceList')
             || $entity->isAttributeChanged('saveToGoogleCalendar')
             || $entity->isAttributeChanged('googleCalendarEventSettings')
-            || $entity->isAttributeChanged('presentationDate')
-            || $entity->isAttributeChanged('closeDate');
+        ) {
+            return true;
+        }
+
+        foreach ($this->dateSourceProvider->getActiveSourcesForEntityType($entity->getEntityType()) as $source) {
+            $field = $source['dateField'] ?? null;
+
+            if (is_string($field) && $field !== '' && $entity->isAttributeChanged($field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function normalizeDateSourceList(Entity $entity): void

@@ -189,7 +189,18 @@ $themeHrefOk = (bool) preg_match(
     '#href="([^"]+safehouse-aurora[^"]+\?r=\d+)"[^>]*id=[\'"]main-stylesheet[\'"]#',
     $html
 );
-$ok('main HTML has cache-busted theme stylesheet', $themeHrefOk);
+$activeTheme = (string) ($config->get('theme') ?? '');
+$isSafehouseTheme = str_starts_with($activeTheme, 'SafehouseAurora');
+
+if ($isSafehouseTheme) {
+    $ok('main HTML has cache-busted theme stylesheet', $themeHrefOk);
+} else {
+    $ok(
+        'main HTML has cache-busted theme stylesheet',
+        true,
+        'skipped (active theme=' . ($activeTheme !== '' ? $activeTheme : 'default') . ')'
+    );
+}
 
 $layoutHrefOk = (bool) preg_match('#safehouse-aurora-layout\.css\?r=\d+#', $html);
 $ok('main HTML links layout.css with ?r=', $layoutHrefOk);

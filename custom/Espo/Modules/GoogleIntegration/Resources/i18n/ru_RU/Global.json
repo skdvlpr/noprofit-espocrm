@@ -13,18 +13,12 @@
         "googleCalendarListFailedHint": "Не удалось загрузить календари Google. Доступен только основной календарь."
     },
     "scopeNames": {
-        "Account": "Account",
-        "Opportunity": "Grants & Funding",
-        "VolunteerEmployee": "Сотрудники / Волонтеры",
         "CalendarTemplate": "Шаблон календаря",
         "CalendarTemplatePlural": "Шаблоны календаря",
         "CalendarDateSource": "Источник дат календаря",
         "CalendarDateSourcePlural": "Источники дат календаря"
     },
     "scopeNamesPlural": {
-        "Account": "Account",
-        "Opportunity": "Grants & Funding",
-        "VolunteerEmployee": "Сотрудники / Волонтеры",
         "CalendarTemplate": "Шаблоны календаря",
         "CalendarDateSource": "Источники дат календаря"
     }

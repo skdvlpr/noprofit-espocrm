@@ -43,7 +43,33 @@ define('google-integration:views/calendar-date-export-panel', ['view'], function
             };
         },
 
+        setup() {
+            this.globalIntegrationEnabled = false;
+
+            return Dep.prototype.setup.call(this).then(() => {
+                const integrations = this.getConfig().get('integrations') || {};
+
+                if (!integrations.GoogleCalendarDrive) {
+                    return;
+                }
+
+                return Espo.Ajax.getRequest('GoogleIntegration/integration-status')
+                    .then(data => {
+                        this.globalIntegrationEnabled = !!data.enabled;
+                    })
+                    .catch(() => {
+                        this.globalIntegrationEnabled = false;
+                    });
+            });
+        },
+
         afterRender() {
+            if (!this.globalIntegrationEnabled) {
+                this.$el.addClass('hidden');
+
+                return;
+            }
+
             this.$el.on('change', '[data-role="saveToGoogleCalendar"]', e => {
                 this.model.set('saveToGoogleCalendar', $(e.currentTarget).is(':checked'), {ui: true});
                 this.reRender();

@@ -63,16 +63,7 @@ class Installer
             'name' => 'Opportunity — default',
             'targetEntityType' => 'Opportunity',
             'summaryTemplate' => '{{name}}',
-            'descriptionTemplate' => "{{name}} | {{account.name}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
-            'reminderMode' => 'none',
-            'transparency' => 'opaque',
-            'colorId' => '10',
-        ],
-        [
-            'name' => 'Volunteer / Employee — default',
-            'targetEntityType' => 'VolunteerEmployee',
-            'summaryTemplate' => '{{name}}',
-            'descriptionTemplate' => "{{name}}\nStart: {{startDate}}\nEnd: {{endDate}}\n\n{{extra}}\n\nEspoCRM: {{espocrmUrl}}",
+            'descriptionTemplate' => "{{name}} | {{account.name}}\nAmount: {{amount}}\nClose: {{closeDate}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}",
             'reminderMode' => 'none',
             'transparency' => 'opaque',
         ],
@@ -87,15 +78,17 @@ class Installer
         $dataManager = $container->getByClass(DataManager::class);
         $dataManager->rebuild();
 
-        $this->ensureDefaultDateSources($em);
-        $this->ensureDefaultCalendarTemplates($em);
+        $metadata = $container->getByClass(Metadata::class);
+        $metadata->init(true);
+
+        $this->ensureDefaultDateSources($em, $metadata);
+        $this->ensureDefaultCalendarTemplates($em, $metadata);
         $this->ensureCalendarTemplatesForActiveDateSources($container, $em);
 
         $container->getByClass(InjectableFactory::class)
             ->create(GoogleCalendarLayoutProvisioner::class)
             ->provisionAll();
 
-        $metadata = $container->getByClass(Metadata::class);
         $this->ensureAdminRoleAccess($em, $metadata);
         $this->pruneGoogleCalendarConfigFromNavigation($container);
 
@@ -142,11 +135,15 @@ class Installer
         $entityManager->saveEntity($entity);
     }
 
-    private function ensureDefaultDateSources(EntityManager $entityManager): void
+    private function ensureDefaultDateSources(EntityManager $entityManager, Metadata $metadata): void
     {
         $repo = $entityManager->getRDBRepository('CalendarDateSource');
 
         foreach (CalendarDateSourceDefaults::sources() as $source) {
+            if (!$this->isSupportedDateSource($metadata, $source)) {
+                continue;
+            }
+
             $existing = $repo
                 ->where([
                     'targetEntityType' => $source['targetEntityType'],
@@ -166,11 +163,21 @@ class Installer
         }
     }
 
-    private function ensureDefaultCalendarTemplates(EntityManager $entityManager): void
+    private function ensureDefaultCalendarTemplates(EntityManager $entityManager, Metadata $metadata): void
     {
         $repo = $entityManager->getRDBRepository('CalendarTemplate');
 
         foreach (self::DEFAULT_CALENDAR_TEMPLATES as $template) {
+            $targetEntityType = $template['targetEntityType'] ?? null;
+
+            if (
+                !is_string($targetEntityType)
+                || $targetEntityType === ''
+                || !$metadata->get(['scopes', $targetEntityType, 'entity'])
+            ) {
+                continue;
+            }
+
             $existing = $repo
                 ->where([
                     'targetEntityType' => $template['targetEntityType'],
@@ -291,5 +298,37 @@ class Installer
 
         $role->set('data', (object) $data);
         $entityManager->saveEntity($role);
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     */
+    private function isSupportedDateSource(Metadata $metadata, array $source): bool
+    {
+        $targetEntityType = $source['targetEntityType'] ?? null;
+
+        if (!is_string($targetEntityType) || $targetEntityType === '') {
+            return false;
+        }
+
+        if (!$metadata->get(['scopes', $targetEntityType, 'entity'])) {
+            return false;
+        }
+
+        foreach (['dateField', 'endDateField'] as $key) {
+            $field = $source[$key] ?? null;
+
+            if (!is_string($field) || $field === '') {
+                continue;
+            }
+
+            $fieldType = $metadata->get(['entityDefs', $targetEntityType, 'fields', $field, 'type']);
+
+            if (!in_array($fieldType, ['date', 'datetime', 'datetimeOptional'], true)) {
+                return false;
+            }
+        }
+
+        return is_string($source['dateField'] ?? null) && $source['dateField'] !== '';
     }
 }

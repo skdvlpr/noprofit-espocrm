@@ -57,8 +57,7 @@
         "targetEntityType": {
             "Meeting": "Meetings",
             "Call": "Calls",
-            "Task": "Tasks",
-            "Opportunity": "Grants & Funding"
+            "Task": "Tasks"
         }
     },
     "labels": {

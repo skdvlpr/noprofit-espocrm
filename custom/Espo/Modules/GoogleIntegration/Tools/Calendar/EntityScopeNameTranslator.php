@@ -12,7 +12,7 @@ class EntityScopeNameTranslator
 {
     /** @var list<string|null> */
     private const SCOPE_PRIORITY = [
-        'SafehouseCrm',
+        'NonprofitEspocrm',
         'GoogleIntegration',
         'Global',
         null,

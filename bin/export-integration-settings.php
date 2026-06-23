@@ -23,7 +23,7 @@ use Espo\Core\Application;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
-use Espo\Modules\SafehouseCrm\Tools\Migration\IntegrationSettings;
+use Espo\Modules\NonprofitEspocrm\Tools\Migration\IntegrationSettings;
 
 $out = $argv[1] ?? (dirname(__DIR__) . '/integration-settings.json');
 

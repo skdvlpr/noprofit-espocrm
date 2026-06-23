@@ -18,7 +18,7 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\Utils\Config;
-use Espo\Modules\SafehouseCrm\Tools\Installer;
+use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 
 $app = new Application();
 $container = $app->getContainer();

@@ -13,19 +13,16 @@
         "googleCalendarListFailedHint": "Could not load your Google calendars. Only the primary calendar is available."
     },
     "scopeNames": {
-        "Account": "Account",
-        "Opportunity": "Grants & Funding",
-        "VolunteerEmployee": "Volunteers / Employees",
         "CalendarTemplate": "Calendar Template",
         "CalendarTemplatePlural": "Calendar Templates",
         "CalendarDateSource": "Calendar Date Source",
         "CalendarDateSourcePlural": "Calendar Date Sources"
     },
     "scopeNamesPlural": {
-        "Account": "Account",
-        "Opportunity": "Grants & Funding",
-        "VolunteerEmployee": "Volunteers / Employees",
         "CalendarTemplate": "Calendar Templates",
         "CalendarDateSource": "Calendar Date Sources"
+    },
+    "messages": {
+        "googleCalendarIntegrationDisabled": "Google Calendar integration is disabled. Turn it on under Administration → Integrations, or uncheck Save in Google Calendar."
     }
 }

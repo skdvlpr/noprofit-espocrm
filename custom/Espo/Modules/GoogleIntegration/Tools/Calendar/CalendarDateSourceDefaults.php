@@ -3,8 +3,7 @@
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 /**
- * Canonical CalendarDateSource seed rows and title suffix labels ({name} - {label}).
- * Runtime titles always read label from DB; this catalog is for install/sync only.
+ * Canonical CalendarDateSource seed rows for universal (non-vertical) CRM entities.
  */
 final class CalendarDateSourceDefaults
 {
@@ -14,17 +13,8 @@ final class CalendarDateSourceDefaults
         'Call:main' => 'Call',
         'Task:main' => 'Task',
         'Task:dateStart' => 'Start',
-        'Opportunity:presentationDate' => 'Presentation',
         'Opportunity:closeDate' => 'Close',
-        'VolunteerEmployee:main' => 'Start',
-        'VolunteerEmployee:endDate' => 'End',
-        'Member:main' => 'Member',
-        'Account:main' => 'Account',
         'Campaign:campaignFinDate' => 'Campaign',
-        'GCalSmokeAllDay:main' => 'All-day',
-        'GCalSmokeDateTime:main' => 'DateTime',
-        'GCalSmokeTwinDate:primaryDate' => 'Primary',
-        'GCalSmokeTwinDate:reviewDate' => 'Review',
     ];
 
     /** @return array<int, array<string, mixed>> */
@@ -72,16 +62,6 @@ final class CalendarDateSourceDefaults
                 'sortOrder' => 31,
             ],
             [
-                'name' => 'Opportunity presentation date',
-                'targetEntityType' => 'Opportunity',
-                'dateField' => 'presentationDate',
-                'endDateField' => null,
-                'sourceDateType' => 'presentationDate',
-                'label' => self::CANONICAL_LABELS['Opportunity:presentationDate'],
-                'allDay' => true,
-                'sortOrder' => 40,
-            ],
-            [
                 'name' => 'Opportunity close date',
                 'targetEntityType' => 'Opportunity',
                 'dateField' => 'closeDate',
@@ -90,46 +70,6 @@ final class CalendarDateSourceDefaults
                 'label' => self::CANONICAL_LABELS['Opportunity:closeDate'],
                 'allDay' => true,
                 'sortOrder' => 50,
-            ],
-            [
-                'name' => 'Volunteer / Employee start date',
-                'targetEntityType' => 'VolunteerEmployee',
-                'dateField' => 'startDate',
-                'endDateField' => null,
-                'sourceDateType' => 'main',
-                'label' => self::CANONICAL_LABELS['VolunteerEmployee:main'],
-                'allDay' => true,
-                'sortOrder' => 60,
-            ],
-            [
-                'name' => 'Volunteer / Employee end date',
-                'targetEntityType' => 'VolunteerEmployee',
-                'dateField' => 'endDate',
-                'endDateField' => null,
-                'sourceDateType' => 'endDate',
-                'label' => self::CANONICAL_LABELS['VolunteerEmployee:endDate'],
-                'allDay' => true,
-                'sortOrder' => 61,
-            ],
-            [
-                'name' => 'Member birth date',
-                'targetEntityType' => 'Member',
-                'dateField' => 'birthDate',
-                'endDateField' => null,
-                'sourceDateType' => 'main',
-                'label' => self::CANONICAL_LABELS['Member:main'],
-                'allDay' => true,
-                'sortOrder' => 70,
-            ],
-            [
-                'name' => 'Account contract sign date',
-                'targetEntityType' => 'Account',
-                'dateField' => 'cDataFirmaContratto',
-                'endDateField' => null,
-                'sourceDateType' => 'main',
-                'label' => self::CANONICAL_LABELS['Account:main'],
-                'allDay' => true,
-                'sortOrder' => 80,
             ],
             [
                 'name' => 'Campaign start date',

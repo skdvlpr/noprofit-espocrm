@@ -1,7 +1,7 @@
 <?php
 
 use Espo\Core\Container;
-use Espo\Modules\SafehouseCrm\Tools\Installer;
+use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 
 /**
  * Extension-package post-install script.
@@ -18,7 +18,7 @@ use Espo\Modules\SafehouseCrm\Tools\Installer;
  *     Member) and the `Administration` team idempotently;
  *   - rebuild metadata so the changes are picked up immediately.
  *
- * The in-tree module class `Espo\Modules\SafehouseCrm\AfterInstall`
+ * The in-tree module class `Espo\Modules\NonprofitEspocrm\AfterInstall`
  * delegates to the same Installer so both install flows stay in sync.
  */
 class AfterInstall

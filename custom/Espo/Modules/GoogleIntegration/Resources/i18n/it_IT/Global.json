@@ -13,19 +13,16 @@
         "googleCalendarListFailedHint": "Impossibile caricare i calendari Google. È disponibile solo il calendario principale."
     },
     "scopeNames": {
-        "Account": "Account",
-        "Opportunity": "Fondi e Finanziamenti",
-        "VolunteerEmployee": "Volontari / Dipendenti",
         "CalendarTemplate": "Template calendario",
         "CalendarTemplatePlural": "Template calendario",
         "CalendarDateSource": "Origine data calendario",
         "CalendarDateSourcePlural": "Origini date calendario"
     },
     "scopeNamesPlural": {
-        "Account": "Account",
-        "Opportunity": "Fondi e Finanziamenti",
-        "VolunteerEmployee": "Volontari / Dipendenti",
         "CalendarTemplate": "Template calendario",
         "CalendarDateSource": "Origini date calendario"
+    },
+    "messages": {
+        "googleCalendarIntegrationDisabled": "L'integrazione Google Calendar è disattivata. Attivala in Amministrazione → Integrazioni oppure deseleziona Salva in Google Calendar."
     }
 }

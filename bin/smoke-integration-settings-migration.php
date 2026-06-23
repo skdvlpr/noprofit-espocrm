@@ -19,7 +19,7 @@ use Espo\Core\Application;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
-use Espo\Modules\SafehouseCrm\Tools\Migration\IntegrationSettings;
+use Espo\Modules\NonprofitEspocrm\Tools\Migration\IntegrationSettings;
 
 $fail = 0;
 $ok = static function (string $name, bool $pass, string $detail = '') use (&$fail): void {

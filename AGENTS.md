@@ -1,6 +1,6 @@
 # SafehouseCrm Module Rulebook
 
-**EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/SafehouseCrm/
+**EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/NonprofitEspocrm/
 **Executor:** Antigravity AI | **Last updated:** 2026-06-21
 **Language:** specs/paths/code = English | User communication = Russian
 
@@ -19,7 +19,7 @@ Before implementing ANY task, executor MUST:
 
 ## SECTION 1 — PROJECT OVERVIEW
 
-**Module path:** `custom/Espo/Modules/SafehouseCrm/`**EspoCRM version:** 9.3.6
+**Module path:** `custom/Espo/Modules/NonprofitEspocrm/`**EspoCRM version:** 9.3.6
 **Repository:** https://github.com/skdvlpr/noprofit-espocrm**Branch:\*\* `feat/custom-entity`
 
 ### Entities in scope:
@@ -38,7 +38,7 @@ Before implementing ANY task, executor MUST:
 ## SECTION 2 — DIRECTORY STRUCTURE (CANONICAL)
 
 ```
-custom/Espo/Modules/SafehouseCrm/
+custom/Espo/Modules/NonprofitEspocrm/
 ├── Controllers/
 │   └── {EntityName}.php
 ├── Hooks/
@@ -123,7 +123,7 @@ File: `Resources/metadata/scopes/{EntityName}.json`
   "entity": true,
   "object": true,
   "tab": true,
-  "module": "SafehouseCrm",
+  "module": "NonprofitEspocrm",
   "stream": false,
   "importable": true,
   "exportable": true,
@@ -402,8 +402,8 @@ For auto-status changes triggered by date (e.g. Member.status flips to `Inactive
 
 Reference these files when in doubt — they are confirmed to work in 9.3.6:
 
-- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/VolunteerEmployee.json` — uses `if {} else if {}` block syntax, direct assignments, `datetime\today`, `ifThenElse`, `number\round`, `entity\isNew` is NOT needed because it uses null checks.
-- `custom/Espo/Modules/SafehouseCrm/Resources/metadata/formula/MealCount.json` — uses `if (entity\isNew()) {}` block, arithmetic operators, `datetime\dayOfWeek` + `ifThenElse` chain for English day-of-week names (Italian translation lives in `Resources/i18n/it_IT/MealCount.json`).
+- `custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/VolunteerEmployee.json` — uses `if {} else if {}` block syntax, direct assignments, `datetime\today`, `ifThenElse`, `number\round`, `entity\isNew` is NOT needed because it uses null checks.
+- `custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/MealCount.json` — uses `if (entity\isNew()) {}` block, arithmetic operators, `datetime\dayOfWeek` + `ifThenElse` chain for English day-of-week names (Italian translation lives in `Resources/i18n/it_IT/MealCount.json`).
 
 **Debugging workflow (mandatory after every formula change):**
 1. Edit formula JSON.
@@ -520,7 +520,7 @@ Use hooks ONLY when formula cannot achieve the goal:
 
 ```
 <?php
-namespace Espo\Modules\SafehouseCrm\Hooks\MealCount;
+namespace Espo\Modules\NonprofitEspocrm\Hooks\MealCount;
 
 use Espo\Core\Hook\HookInjection;
 use Espo\ORM\Entity;
@@ -548,7 +548,7 @@ class BeforeSave
 
 ```
 {
-  "name": "SafehouseCrm",
+  "name": "NonprofitEspocrm",
   "description": "Nonprofit CRM for Safehouse organization",
   "author": "SafehouseCrm Team",
   "version": "1.0.0",
@@ -562,7 +562,7 @@ class BeforeSave
 
 **CRITICAL — two entrypoints, one source of truth.** Espo Extension Manager
 runs the ZIP-package `scripts/AfterInstall.php` after copying files. The
-in-module `Espo\Modules\SafehouseCrm\AfterInstall` is only invoked for
+in-module `Espo\Modules\NonprofitEspocrm\AfterInstall` is only invoked for
 direct in-tree installs (dev workflows). Both **must** delegate to the same
 provisioning class so fresh ZIP installs do exactly what dev installs do.
 
@@ -570,11 +570,11 @@ provisioning class so fresh ZIP installs do exactly what dev installs do.
 // scripts/AfterInstall.php (package root — invoked by Extension Manager)
 class AfterInstall {
     public function run(\Espo\Core\Container $container, array $params): void {
-        (new \Espo\Modules\SafehouseCrm\Tools\Installer())->runPostInstall($container);
+        (new \Espo\Modules\NonprofitEspocrm\Tools\Installer())->runPostInstall($container);
     }
 }
 
-// custom/Espo/Modules/SafehouseCrm/AfterInstall.php (in-tree)
+// custom/Espo/Modules/NonprofitEspocrm/AfterInstall.php (in-tree)
 class AfterInstall {
     public function run(\Espo\Core\Application $app): void {
         (new Tools\Installer())->runPostInstall($app->getContainer());
@@ -612,8 +612,8 @@ five items above and that re-running is idempotent.
 ```
 # bin/build.sh
 VERSION=$(cat manifest.json | jq -r '.version')
-zip -r dist/safehouse-crm-v${VERSION}.zip \
-  custom/Espo/Modules/SafehouseCrm/ \
+zip -r dist/nonprofit-espocrm-v${VERSION}.zip \
+  custom/Espo/Modules/NonprofitEspocrm/ \
   --exclude "*.git*" --exclude "*.DS_Store"
 ```
 
@@ -758,10 +758,10 @@ This repo ships **independent** extensions:
 
 | Extension | Backend | Frontend | Build |
 | --------- | ------- | -------- | ----- |
-| SafehouseCrm | `custom/Espo/Modules/SafehouseCrm/` | (core overrides only if needed) | `bin/build.sh` |
+| SafehouseCrm | `custom/Espo/Modules/NonprofitEspocrm/` | (core overrides only if needed) | `bin/build.sh` |
 | GoogleIntegration | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
 
-**RULE:** Do not bundle GoogleIntegration inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm.
+**RULE:** Do not bundle GoogleIntegration inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
 
 **GoogleIntegration frontend rule:** edit only
 `client/custom/modules/google-integration/`. Do not mirror runtime JS/templates
@@ -1116,7 +1116,7 @@ Create `Resources/metadata/entityDefs/{EntityName}.json`. Include all fields, li
 
 ### Step 3: scopes
 
-Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"module": "SafehouseCrm"`. **Without this file the entity does not exist in EspoCRM.** `"type": "Base"` is optional — see ENT-003.
+Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"module": "NonprofitEspocrm"`. **Without this file the entity does not exist in EspoCRM.** `"type": "Base"` is optional — see ENT-003.
 
 ### Step 4: Layouts — MOST COMMON SOURCE OF BUGS
 

@@ -341,7 +341,7 @@ class GoogleCalendarLayoutProvisioner
      */
     private function preferredBaseLayoutModules(string $entityType): array
     {
-        $preferred = ['SafehouseCrm'];
+        $preferred = ['NonprofitEspocrm'];
         $fromMetadata = $this->metadata->get("app.layouts.{$entityType}.detail.module");
 
         if (

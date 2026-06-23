@@ -22,7 +22,7 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\MealCountStatsProvider;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\MealCountStatsProvider;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -245,7 +245,7 @@ echo "\nUI filter: MealCount list â†’ search description \"" . SEED_TAG . "\" â†
 echo "URL: {$siteUrl}/#MealCount\n";
 
 // REST summary probe (UI uses same endpoint as logged-in Admin)
-$restSummary = $request($client, 'GET', '/api/v1/SafehouseCrm/reporting/meal-count/summary');
+$restSummary = $request($client, 'GET', '/api/v1/NonprofitEspocrm/reporting/meal-count/summary');
 if ($restSummary['code'] === 200) {
     echo "\nREST summary OK (smoke_api_catalog user).\n";
 } else {

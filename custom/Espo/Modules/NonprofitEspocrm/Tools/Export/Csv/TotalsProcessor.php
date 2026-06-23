@@ -1,0 +1,31 @@
+<?php
+
+namespace Espo\Modules\NonprofitEspocrm\Tools\Export\Csv;
+
+use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Language;
+use Espo\Modules\NonprofitEspocrm\Tools\Export\Support\AbstractTotalsProcessor;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingProfileRegistry;
+use Espo\ORM\EntityManager;
+use Espo\Tools\Export\Processor;
+
+/**
+ * CSV export processor with a reporting totals row (metadata-overridden).
+ */
+class TotalsProcessor extends AbstractTotalsProcessor
+{
+    public function __construct(
+        ReportingProfileRegistry $profileRegistry,
+        EntityManager $entityManager,
+        Config $config,
+        Language $language,
+        private LabeledCsvProcessor $csvProcessor,
+    ) {
+        parent::__construct($profileRegistry, $entityManager, $config, $language);
+    }
+
+    protected function getInnerProcessor(): Processor
+    {
+        return $this->csvProcessor;
+    }
+}

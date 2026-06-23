@@ -6,8 +6,7 @@
         "googleCalendarDescriptionTemplateMeeting": "Шаблон описания встречи",
         "googleCalendarDescriptionTemplateCall": "Шаблон описания звонка",
         "googleCalendarDescriptionTemplateTask": "Шаблон описания задачи",
-        "googleCalendarDescriptionTemplateOpportunity": "Шаблон описания финансирования",
-        "googleCalendarDescriptionTemplateVolunteerEmployee": "Шаблон описания волонтёра / сотрудника",
+        "googleCalendarDescriptionTemplateOpportunity": "Шаблон описания сделки",
         "googleCalendarAutoCreateEnabled": "Автосоздание отдельных календарей Google"
     },
     "labels": {

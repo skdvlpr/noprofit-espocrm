@@ -20,11 +20,11 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ExportWithTotals;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\MealCountStatsProvider;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingAggregateQuery;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingDateRange;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingProfileRegistry;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ExportWithTotals;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\MealCountStatsProvider;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingAggregateQuery;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingDateRange;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingProfileRegistry;
 use GuzzleHttp\Psr7\Stream;
 
 $app = new Application();
@@ -216,22 +216,22 @@ try {
 
     echo "\nReporting routes metadata\n";
 
-    $routesPath = 'custom/Espo/Modules/SafehouseCrm/Resources/routes.json';
+    $routesPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/routes.json';
     $routesJson = is_readable($routesPath) ? json_decode(file_get_contents($routesPath), true) : null;
     $routePaths = is_array($routesJson)
         ? array_column($routesJson, 'route')
         : [];
 
-    $ok('routes.json meal-count/summary registered', in_array('/SafehouseCrm/reporting/meal-count/summary', $routePaths, true));
-    $ok('routes.json meal-count/totals registered', in_array('/SafehouseCrm/reporting/meal-count/totals', $routePaths, true));
-    $ok('routes.json meal-count/email-export registered', in_array('/SafehouseCrm/reporting/meal-count/email-export', $routePaths, true));
-    $ok('routes.json reporting/email-export registered', in_array('/SafehouseCrm/reporting/email-export', $routePaths, true));
-    $ok('routes.json association-meal-count/summary registered', in_array('/SafehouseCrm/reporting/association-meal-count/summary', $routePaths, true));
-    $ok('routes.json association-meal-count/totals registered', in_array('/SafehouseCrm/reporting/association-meal-count/totals', $routePaths, true));
+    $ok('routes.json meal-count/summary registered', in_array('/NonprofitEspocrm/reporting/meal-count/summary', $routePaths, true));
+    $ok('routes.json meal-count/totals registered', in_array('/NonprofitEspocrm/reporting/meal-count/totals', $routePaths, true));
+    $ok('routes.json meal-count/email-export registered', in_array('/NonprofitEspocrm/reporting/meal-count/email-export', $routePaths, true));
+    $ok('routes.json reporting/email-export registered', in_array('/NonprofitEspocrm/reporting/email-export', $routePaths, true));
+    $ok('routes.json association-meal-count/summary registered', in_array('/NonprofitEspocrm/reporting/association-meal-count/summary', $routePaths, true));
+    $ok('routes.json association-meal-count/totals registered', in_array('/NonprofitEspocrm/reporting/association-meal-count/totals', $routePaths, true));
 
     echo "\nDashlet metadata\n";
 
-    $dashletPath = 'custom/Espo/Modules/SafehouseCrm/Resources/metadata/dashlets';
+    $dashletPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/dashlets';
     $ok('MealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/MealCountMonthlyStats.json"));
     $ok('AssociationMealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/AssociationMealCountMonthlyStats.json"));
 

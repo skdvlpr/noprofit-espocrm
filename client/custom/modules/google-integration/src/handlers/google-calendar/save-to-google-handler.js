@@ -4,12 +4,21 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
     Object.defineProperty(_exports, '__esModule', {value: true});
     _exports.default = void 0;
 
+    const GOOGLE_FIELD_NAMES = [
+        'saveToGoogleCalendar',
+        'googleCalendarDateSourceList',
+        'googleCalendarEventSettings',
+        'googleCalendarId',
+    ];
+
     class SaveToGoogleHandler {
         constructor(view) {
             this.view = view;
             this.model = view.model;
             this.routingSources = [];
             this.routingHintsLoaded = false;
+            this.globalIntegrationEnabled = null;
+            this.integrationStatusLoaded = false;
         }
 
         process() {
@@ -23,7 +32,39 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
                 this.control();
             });
 
-            this.loadRoutingHints();
+            this.loadIntegrationStatus();
+        }
+
+        isConfigIntegrationFlagOn() {
+            const integrations = this.view.getConfig().get('integrations') || {};
+
+            return !!integrations.GoogleCalendarDrive;
+        }
+
+        loadIntegrationStatus() {
+            if (!this.isConfigIntegrationFlagOn()) {
+                this.globalIntegrationEnabled = false;
+                this.integrationStatusLoaded = true;
+                this.control();
+
+                return;
+            }
+
+            Espo.Ajax.getRequest('GoogleIntegration/integration-status')
+                .then(data => {
+                    this.globalIntegrationEnabled = !!data.enabled;
+                    this.integrationStatusLoaded = true;
+                    this.control();
+
+                    if (this.globalIntegrationEnabled) {
+                        this.loadRoutingHints();
+                    }
+                })
+                .catch(() => {
+                    this.globalIntegrationEnabled = false;
+                    this.integrationStatusLoaded = true;
+                    this.control();
+                });
         }
 
         loadRoutingHints() {
@@ -73,10 +114,32 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             );
         }
 
+        hideGoogleCalendarUi() {
+            this.removeNotice();
+            this.removeRoutingHint();
+
+            GOOGLE_FIELD_NAMES.forEach(field => this.toggleField(field, false));
+
+            if (typeof this.view.hidePanel === 'function') {
+                this.view.hidePanel('GoogleCalendar');
+            }
+        }
+
         control() {
+            if (!this.integrationStatusLoaded) {
+                return;
+            }
+
+            if (!this.globalIntegrationEnabled) {
+                this.hideGoogleCalendarUi();
+
+                return;
+            }
+
             const enabled = !!this.model.get('saveToGoogleCalendar');
             const showCalendarPicker = enabled && this.isUserPickEnabledForSelection();
 
+            this.toggleField('saveToGoogleCalendar', true);
             this.toggleField('googleCalendarDateSourceList', enabled);
             this.toggleField('googleCalendarEventSettings', enabled);
             this.toggleField('googleCalendarId', showCalendarPicker);
@@ -95,6 +158,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
 
             if (visible) {
                 this.view.showField(field);
+
                 return;
             }
 
@@ -148,6 +212,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
 
             if ($container.length) {
                 $container.after($notice);
+
                 return;
             }
 

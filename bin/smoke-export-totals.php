@@ -15,7 +15,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\MealCountStatsProvider;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\MealCountStatsProvider;
 use Espo\Tools\Export\Export;
 use Espo\Tools\Export\Factory as ExportFactory;
 use Espo\Tools\Export\Params as ExportParams;
@@ -40,8 +40,8 @@ $injectableFactory = $container->getByClass(InjectableFactory::class);
 $csvClass = $metadata->get(['app', 'export', 'formatDefs', 'csv', 'processorClassName']);
 $xlsxClass = $metadata->get(['app', 'export', 'formatDefs', 'xlsx', 'processorClassName']);
 
-$expectedCsv = 'Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Csv\\TotalsProcessor';
-$expectedXlsx = 'Espo\\Modules\\SafehouseCrm\\Tools\\Export\\Xlsx\\TotalsProcessor';
+$expectedCsv = 'Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Csv\\TotalsProcessor';
+$expectedXlsx = 'Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\TotalsProcessor';
 
 $dayOfWeekType = $metadata->get(['entityDefs', 'MealCount', 'fields', 'dayOfWeek', 'type']);
 $dayOfWeekType === 'enum'
@@ -49,7 +49,7 @@ $dayOfWeekType === 'enum'
     : $fail[] = "MealCount dayOfWeek type = $dayOfWeekType (expected enum)";
 
 $itDayOptions = json_decode(
-    file_get_contents('custom/Espo/Modules/SafehouseCrm/Resources/i18n/it_IT/MealCount.json'),
+    file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/MealCount.json'),
     true
 )['options']['dayOfWeek']['Friday'] ?? null;
 

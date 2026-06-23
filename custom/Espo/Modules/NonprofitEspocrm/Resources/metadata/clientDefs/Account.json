@@ -1,0 +1,6 @@
+{
+    "recordViews": {
+        "list": "nonprofit-espocrm:views/record/list-inline-edit"
+    },
+    "color": "#d9a13f"
+}

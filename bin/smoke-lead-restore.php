@@ -19,7 +19,7 @@ use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
-use Espo\Modules\SafehouseCrm\Tools\Installer;
+use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 
@@ -50,7 +50,7 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 echo "Run Safehouse installer (Lead in tabList)\n";
 (new Installer())->runPostInstall($container);
 $roleSetup = $container->getByClass(\Espo\Core\InjectableFactory::class)
-    ->create(\Espo\Modules\SafehouseCrm\Tools\RoleSetup::class);
+    ->create(\Espo\Modules\NonprofitEspocrm\Tools\RoleSetup::class);
 $roleSetup->provisionRoles();
 $config->update();
 
@@ -60,7 +60,7 @@ $ok('Lead in tabList after installer', in_array('Lead', $tabStrings, true));
 $ok('Case absent from tabList', !in_array('Case', $tabStrings, true));
 $ok('Lead in quickCreateList', in_array('Lead', $qcStrings, true));
 
-$itGlobalPath = __DIR__ . '/../custom/Espo/Modules/SafehouseCrm/Resources/i18n/it_IT/Global.json';
+$itGlobalPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Global.json';
 $itGlobal = is_file($itGlobalPath)
     ? (json_decode((string) file_get_contents($itGlobalPath), true) ?: [])
     : [];

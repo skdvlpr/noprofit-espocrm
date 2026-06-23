@@ -23,7 +23,6 @@ class GoogleCalendarIntegrationTemplateFields implements AdditionalBuilder
         'Call',
         'Task',
         'Opportunity',
-        'VolunteerEmployee',
     ];
 
     public function build(stdClass $data): void

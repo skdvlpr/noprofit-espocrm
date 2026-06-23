@@ -1,8 +1,0 @@
-{
-    "color": "#d9a13f",
-    "iconClass": "fas fa-globe",
-    "controller": "controllers/record",
-    "recordViews": {
-        "list": "safehouse-crm:views/record/list-inline-edit"
-    }
-}

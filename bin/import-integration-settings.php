@@ -22,7 +22,7 @@ use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
-use Espo\Modules\SafehouseCrm\Tools\Migration\IntegrationSettings;
+use Espo\Modules\NonprofitEspocrm\Tools\Migration\IntegrationSettings;
 
 $args = array_slice($argv, 1);
 $dryRun = in_array('--dry-run', $args, true);

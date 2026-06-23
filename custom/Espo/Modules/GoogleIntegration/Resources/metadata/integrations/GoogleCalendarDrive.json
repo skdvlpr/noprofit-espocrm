@@ -31,11 +31,7 @@
         },
         "googleCalendarDescriptionTemplateOpportunity": {
             "type": "text",
-            "default": "Grants & Funding: {{name}}\nAccount: {{account.name}}\nAmount: {{amount}}\nPresentation date: {{presentationDate}}\nClose date: {{closeDate}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
-        },
-        "googleCalendarDescriptionTemplateVolunteerEmployee": {
-            "type": "text",
-            "default": "{{name}}\nStart: {{startDate}}\nEnd: {{endDate}}\n\n{{extra}}\n\nEspoCRM: {{espocrmUrl}}"
+            "default": "Opportunity: {{name}}\nAccount: {{account.name}}\nAmount: {{amount}}\nClose date: {{closeDate}}\n\n{{description}}\n\nEspoCRM: {{espocrmUrl}}"
         },
         "googleCalendarAutoCreateEnabled": {
             "type": "bool",

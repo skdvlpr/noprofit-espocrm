@@ -64,7 +64,11 @@ class DateSourceEntityTypesReader
             WHERE deleted = 0 AND is_active = 1
                 AND target_entity_type IS NOT NULL AND target_entity_type != ''";
 
-        $statement = $pdo->query($sql);
+        try {
+            $statement = $pdo->query($sql);
+        } catch (PDOException) {
+            return null;
+        }
 
         if ($statement === false) {
             return null;

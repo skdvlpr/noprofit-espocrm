@@ -1,0 +1,34 @@
+{
+    "scopeNames": {
+        "Lead": "Lead",
+        "Opportunity": "Гранты и Финансирование",
+        "AccountWebsite": "Сайт организации",
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
+        "Member": "Участники",
+        "MealCount": "Учет питания"
+    },
+    "scopeNamesPlural": {
+        "Lead": "Leads",
+        "Opportunity": "Гранты и Финансирование",
+        "AccountWebsite": "Сайты организаций",
+        "VolunteerEmployee": "Сотрудники / Волонтеры",
+        "Member": "Участники",
+        "MealCount": "Учет питания"
+    },
+    "navbarTabs": {
+        "mainSections": "Главные разделы",
+        "CRM": "Главные разделы",
+        "Rendicontazione": "Отчётность"
+    },
+    "labels": {
+        "Create VolunteerEmployee": "Создать новый",
+        "Create Member": "Создать новый",
+        "Create MealCount": "Создать новый",
+        "NonprofitEspocrmExtensionName": "Nonprofit EspoCRM",
+        "NonprofitEspocrmExtensionDescription": "Адаптация EspoCRM для некоммерческих организаций. Пользовательские сущности CRM (участники, волонтёры/сотрудники, учёт питания, гранты и финансирование, отчётность), роли, навигация и экспорт отчётов. В комплекте темы Safehouse Aurora и Safehouse Aurora Light (стеклянный UI). Полные локализации интерфейса: английский (en_US), итальянский (it_IT), русский (ru_RU)."
+    },
+    "themes": {
+        "SafehouseAurora": "Safehouse Aurora",
+        "SafehouseAuroraLight": "Safehouse Aurora Light"
+    }
+}

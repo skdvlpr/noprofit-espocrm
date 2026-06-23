@@ -2,7 +2,7 @@
 /**
  * Smoke test that exercises the unified post-install path used by both the
  * ZIP-install script (`scripts/AfterInstall.php`) and the module class
- * (`Espo\Modules\SafehouseCrm\AfterInstall`).
+ * (`Espo\Modules\NonprofitEspocrm\AfterInstall`).
  *
  * Asserts after the run:
  *   - `Case` is absent from `tabList` and `quickCreateList`;
@@ -22,8 +22,11 @@
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
-use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
-use Espo\Modules\SafehouseCrm\Tools\Installer;
+use Espo\Modules\NonprofitEspocrm\Tools\Installer;
+
+$googleIntegrationAvailable = class_exists(
+    \Espo\Modules\GoogleIntegration\Tools\Installer::class
+);
 
 $app = new Application();
 $app->setupSystemUser();
@@ -90,11 +93,19 @@ $expectedCrmOrder = [
     'VolunteerEmployee',
 ];
 
+$runGooglePostInstall = static function ($container) use ($googleIntegrationAvailable): void {
+    if (!$googleIntegrationAvailable) {
+        return;
+    }
+
+    (new \Espo\Modules\GoogleIntegration\Tools\Installer())->runPostInstall($container);
+};
+
 $installer = new Installer();
 
 echo "Run 1: invoke post-install via Installer\n";
 $installer->runPostInstall($container);
-(new GoogleIntegrationInstaller())->runPostInstall($container);
+$runGooglePostInstall($container);
 $container->getByClass(\Espo\Core\Utils\Config::class)->update();
 
 $config = $container->get('config');
@@ -184,15 +195,27 @@ foreach (['SafehouseAurora', 'SafehouseAuroraLight'] as $themeName) {
     );
 }
 
-$googleInt = $em->getRDBRepository('Integration')
-    ->where(['id' => GoogleIntegrationInstaller::INTEGRATION_ID])
-    ->findOne();
-$report('Integration `' . GoogleIntegrationInstaller::INTEGRATION_ID . '` row exists (universal extension)', $googleInt !== null);
+if ($googleIntegrationAvailable) {
+    $googleInstallerClass = \Espo\Modules\GoogleIntegration\Tools\Installer::class;
+    $googleInt = $em->getRDBRepository('Integration')
+        ->where(['id' => $googleInstallerClass::INTEGRATION_ID])
+        ->findOne();
+    $report(
+        'Integration `' . $googleInstallerClass::INTEGRATION_ID . '` row exists (universal extension)',
+        $googleInt !== null
+    );
+} else {
+    $report(
+        'Integration GoogleCalendarDrive row exists (universal extension)',
+        true,
+        'skipped (GoogleIntegration module not installed)'
+    );
+}
 
 echo "\nRun 2: invoke again — must be idempotent\n";
 $tabListBefore = $config->get('tabList', []) ?? [];
 $installer->runPostInstall($container);
-(new GoogleIntegrationInstaller())->runPostInstall($container);
+$runGooglePostInstall($container);
 $container->getByClass(\Espo\Core\Utils\Config::class)->update();
 
 $configAfter = $container->getByClass(\Espo\Core\Utils\Config::class);

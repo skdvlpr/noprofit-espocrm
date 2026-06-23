@@ -1,0 +1,129 @@
+{
+    "Account": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailConvert": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "Opportunity": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailConvert": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "kanban": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "Member": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        },
+        "sidePanels": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "VolunteerEmployee": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        },
+        "sidePanels": {
+            "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "MealCount": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        }
+    }
+}

@@ -14,6 +14,7 @@ use Espo\Core\Utils\Log;
 use Espo\Core\Utils\Metadata;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google as GoogleClient;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarExportGuard;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\Modules\GoogleIntegration\Tools\IntegrationState;
 use Espo\ORM\Entity;
@@ -42,6 +43,7 @@ class EventPusher
         private DateSourceProvider $dateSourceProvider,
         private CalendarTemplateApplier $calendarTemplateApplier,
         private IntegrationState $integrationState,
+        private GoogleCalendarExportGuard $googleCalendarExportGuard,
         private Acl $acl,
         private EventRemover $eventRemover,
         private CalendarDisplayDateResolver $calendarDisplayDateResolver,
@@ -55,13 +57,11 @@ class EventPusher
         $this->pushUserOverride = $pushUserOverride;
 
         try {
-            if (!$this->integrationState->isGoogleIntegrationEnabled()) {
-                return;
-            }
-
             if (!$entity->get('saveToGoogleCalendar')) {
                 return;
             }
+
+            $this->googleCalendarExportGuard->assertExportAllowed($entity);
 
             $actor = $this->pushUser();
 
@@ -1022,3 +1022,4 @@ class EventPusher
         return $this->pushUserOverride ?? $this->sessionUser;
     }
 }
+

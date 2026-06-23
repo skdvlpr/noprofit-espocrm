@@ -18,7 +18,7 @@ use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
-use Espo\Modules\SafehouseCrm\Tools\RoleSetup;
+use Espo\Modules\NonprofitEspocrm\Tools\RoleSetup;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 
@@ -37,6 +37,7 @@ $container = $app->getContainer();
 $em = $container->getByClass(EntityManager::class);
 /** @var Config $config */
 $config = $container->getByClass(Config::class);
+$convertCurrency = (string) ($config->get('defaultCurrency') ?? 'USD');
 
 $fail = 0;
 $ok = static function (string $name, bool $pass, string $detail = '') use (&$fail): void {
@@ -261,7 +262,7 @@ $oppResult = $leadOppId
             'name' => OPPORTUNITY_PREFIX . 'opportunity',
             'stage' => 'Preparation',
             'amount' => 1000,
-            'amountCurrency' => 'EUR',
+            'amountCurrency' => $convertCurrency,
             'closeDate' => gmdate('Y-m-d', strtotime('+30 days')),
         ],
     ])
@@ -289,7 +290,7 @@ $allResult = $leadAllId
             'name' => OPPORTUNITY_PREFIX . 'all',
             'stage' => 'Preparation',
             'amount' => 2500,
-            'amountCurrency' => 'EUR',
+            'amountCurrency' => $convertCurrency,
             'closeDate' => gmdate('Y-m-d', strtotime('+45 days')),
         ],
     ])

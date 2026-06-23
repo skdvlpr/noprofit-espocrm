@@ -1,0 +1,11 @@
+{
+    "VolunteerEmployee": {
+        "module": "NonprofitEspocrm"
+    },
+    "Member": {
+        "module": "NonprofitEspocrm"
+    },
+    "MealCount": {
+        "module": "NonprofitEspocrm"
+    }
+}

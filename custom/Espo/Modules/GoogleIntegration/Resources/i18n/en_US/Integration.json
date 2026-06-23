@@ -6,8 +6,7 @@
         "googleCalendarDescriptionTemplateMeeting": "Meeting Description Template",
         "googleCalendarDescriptionTemplateCall": "Call Description Template",
         "googleCalendarDescriptionTemplateTask": "Task Description Template",
-        "googleCalendarDescriptionTemplateOpportunity": "Funding Description Template",
-        "googleCalendarDescriptionTemplateVolunteerEmployee": "Volunteer / Employee Description Template",
+        "googleCalendarDescriptionTemplateOpportunity": "Opportunity Description Template",
         "googleCalendarAutoCreateEnabled": "Auto-create dedicated Google calendars"
     },
     "labels": {

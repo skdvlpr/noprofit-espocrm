@@ -25,7 +25,7 @@
 
 | Extension | Backend | Frontend | Build |
 |-----------|---------|----------|-------|
-| **SafehouseCrm** | `custom/Espo/Modules/SafehouseCrm/` | `client/custom/modules/safehouse-crm/` + **Aurora CSS** + fonts | `bin/build.sh` |
+| **SafehouseCrm** | `custom/Espo/Modules/NonprofitEspocrm/` | `client/custom/modules/nonprofit-espocrm/` + **Aurora CSS** + fonts | `bin/build.sh` |
 | **GoogleIntegration** | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
 
 **Install order (Safehouse production):** Espo core → GoogleIntegration → SafehouseCrm (always together for Safehouse, but GoogleIntegration must remain standalone-installable).
@@ -33,7 +33,7 @@
 ### AMD view IDs (EXT-002)
 
 - Google: `google-integration:views/...`
-- Safehouse: `safehouse-crm:views/...`
+- Safehouse: `nonprofit-espocrm:views/...`
 - Core extends: `views/record/list` (OK)
 
 ### Dead paths (never edit)
@@ -68,8 +68,8 @@ Recent commits on `feat/safehouse-aurora-theme`:
 **Already implemented in `bin/build.sh`:**
 
 1. Theme metadata in module:
-   - `custom/Espo/Modules/SafehouseCrm/Resources/metadata/themes/SafehouseAurora.json`
-   - `custom/Espo/Modules/SafehouseCrm/Resources/metadata/themes/SafehouseAuroraLight.json`
+   - `custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/themes/SafehouseAurora.json`
+   - `custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/themes/SafehouseAuroraLight.json`
 2. Runtime assets copied to ZIP:
    - `client/custom/css/safehouse-aurora/` (entire tree)
    - `client/custom/fonts/jet-brains-sans/`
@@ -81,7 +81,7 @@ Recent commits on `feat/safehouse-aurora-theme`:
 
 ```bash
 bin/build.sh
-unzip -l dist/safehouse-crm-v*.zip | grep -E 'safehouse-aurora|SafehouseAurora|jet-brains'
+unzip -l dist/nonprofit-espocrm-v*.zip | grep -E 'safehouse-aurora|SafehouseAurora|jet-brains'
 ```
 
 Admin → Layout Manager → Themes → both Safehouse themes visible after clean install.
@@ -97,7 +97,7 @@ Admin → Layout Manager → Themes → both Safehouse themes visible after clea
 - `clientDefs` Account, Opportunity, Member, VolunteerEmployee, MealCount, AccountWebsite
 - `QuickViewDefaultNavigation.php` default list view
 
-**Fix (visual agent):** Move to `safehouse-crm:views/record/list-inline-edit` under module + update metadata + extend smoke.
+**Fix (visual agent):** Move to `nonprofit-espocrm:views/record/list-inline-edit` under module + update metadata + extend smoke.
 
 **You (non-visual):** Do not touch unless list-inline-edit hooks affect Google save handlers.
 

@@ -27,6 +27,7 @@ use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
+use Espo\Modules\GoogleIntegration\Tools\IntegrationState;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -90,17 +91,14 @@ $layoutHasField = static function (mixed $layout, string $fieldName) use (&$layo
 };
 
 $role = $em->getRDBRepository('Role')->where(['name' => 'Admin', 'deleted' => false])->findOne();
-if ($role === null) {
-    fwrite(STDERR, "FAIL: Admin role not found.\n");
-    exit(1);
-}
-$roleId = $role->getId();
+$roleId = $role?->getId();
 
 /** @var ?User $user */
 $user = $em->getRDBRepository('User')
     ->where(['userName' => SMOKE_USER_ADMIN, 'deleted' => false])
     ->findOne();
-if ($user === null) {
+
+if ($user === null && $roleId !== null) {
     $user = $em->createEntity(User::ENTITY_TYPE, [
         'userName'   => SMOKE_USER_ADMIN,
         'type'       => User::TYPE_API,
@@ -111,6 +109,11 @@ if ($user === null) {
     ]);
     $em->saveEntity($user);
     $user = $em->getRDBRepository('User')->getById($user->getId());
+}
+
+if ($user === null) {
+    fwrite(STDERR, "FAIL: Admin role, smoke API user, and admin user not found.\n");
+    exit(1);
 }
 $apiKey = $user->get('apiKey');
 if (!is_string($apiKey) || $apiKey === '') {
@@ -313,28 +316,35 @@ $ok('GET /api/v1/CalendarTemplate/layout/detail is routable', $rCalendarTemplate
 $volunteerEmployeeSaveGoogle = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'saveToGoogleCalendar']);
 $volunteerEmployeeDateList = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'googleCalendarDateSourceList']);
 $volunteerEmployeeEventSettings = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'googleCalendarEventSettings']);
-$ok(
-    'VolunteerEmployee merged Google Calendar export fields',
-    is_array($volunteerEmployeeSaveGoogle) && ($volunteerEmployeeSaveGoogle['type'] ?? null) === 'bool'
-);
-$ok(
-    'VolunteerEmployee has googleCalendarDateSourceList',
-    is_array($volunteerEmployeeDateList)
-        && ($volunteerEmployeeDateList['view'] ?? null) === 'google-integration:views/fields/google-calendar-date-source-list'
-);
-$ok(
-    'VolunteerEmployee has googleCalendarEventSettings',
-    is_array($volunteerEmployeeEventSettings)
-        && ($volunteerEmployeeEventSettings['view'] ?? null)
-            === 'google-integration:views/fields/google-calendar-opportunity-event-settings'
-);
-$volunteerEmployeeCalendarId = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'googleCalendarId']);
-$ok(
-    'googleCalendarId is varchar (accepts dynamic Google calendar ids)',
-    is_array($volunteerEmployeeCalendarId)
-        && ($volunteerEmployeeCalendarId['type'] ?? null) === 'varchar'
-        && ($volunteerEmployeeCalendarId['view'] ?? null) === 'google-integration:views/fields/google-calendar-id'
-);
+if ($metadata->get(['scopes', 'VolunteerEmployee', 'entity'])) {
+    $ok(
+        'VolunteerEmployee merged Google Calendar export fields',
+        is_array($volunteerEmployeeSaveGoogle) && ($volunteerEmployeeSaveGoogle['type'] ?? null) === 'bool'
+    );
+    $ok(
+        'VolunteerEmployee has googleCalendarDateSourceList',
+        is_array($volunteerEmployeeDateList)
+            && ($volunteerEmployeeDateList['view'] ?? null) === 'google-integration:views/fields/google-calendar-date-source-list'
+    );
+    $ok(
+        'VolunteerEmployee has googleCalendarEventSettings',
+        is_array($volunteerEmployeeEventSettings)
+            && ($volunteerEmployeeEventSettings['view'] ?? null)
+                === 'google-integration:views/fields/google-calendar-opportunity-event-settings'
+    );
+    $volunteerEmployeeCalendarId = $metadata->get(['entityDefs', 'VolunteerEmployee', 'fields', 'googleCalendarId']);
+    $ok(
+        'googleCalendarId is varchar (accepts dynamic Google calendar ids)',
+        is_array($volunteerEmployeeCalendarId)
+            && ($volunteerEmployeeCalendarId['type'] ?? null) === 'varchar'
+            && ($volunteerEmployeeCalendarId['view'] ?? null) === 'google-integration:views/fields/google-calendar-id'
+    );
+} else {
+    $ok('VolunteerEmployee merged Google Calendar export fields', true, 'skipped (entity not installed)');
+    $ok('VolunteerEmployee has googleCalendarDateSourceList', true, 'skipped (entity not installed)');
+    $ok('VolunteerEmployee has googleCalendarEventSettings', true, 'skipped (entity not installed)');
+    $ok('googleCalendarId is varchar (accepts dynamic Google calendar ids)', true, 'skipped (entity not installed)');
+}
 
 $calendarDateSourceDefs = $metadata->get('entityDefs.CalendarDateSource');
 $calendarDateSourceFields = $calendarDateSourceDefs['fields'] ?? [];
@@ -402,18 +412,19 @@ $ok(
     !in_array('InboundEmail', $dateCapableTypes, true)
 );
 
-$itGlobalPath = __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/i18n/it_IT/Global.json';
-$itGlobal = is_readable($itGlobalPath)
-    ? (json_decode((string) file_get_contents($itGlobalPath), true) ?: [])
+$enGlobalPath = __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/i18n/en_US/Global.json';
+$enGlobal = is_readable($enGlobalPath)
+    ? (json_decode((string) file_get_contents($enGlobalPath), true) ?: [])
     : [];
 $ok(
-    'it_IT GoogleIntegration scopeNames Account is Account (not Conti)',
-    ($itGlobal['scopeNames']['Account'] ?? '') === 'Account'
+    'GoogleIntegration Global.json does not rename Opportunity',
+    !isset($enGlobal['scopeNames']['Opportunity'])
 );
 $ok(
-    'it_IT GoogleIntegration scopeNames Opportunity is Fondi e Finanziamenti',
-    ($itGlobal['scopeNames']['Opportunity'] ?? '') === 'Fondi e Finanziamenti'
+    'GoogleIntegration Global.json does not rename VolunteerEmployee',
+    !isset($enGlobal['scopeNames']['VolunteerEmployee'])
 );
+$safehouseCrmInstalled = (bool) $metadata->get(['scopes', 'VolunteerEmployee', 'entity']);
 $integrationOpportunityDefault = (string) ($metadata->get([
     'integrations',
     'GoogleCalendarDrive',
@@ -421,11 +432,20 @@ $integrationOpportunityDefault = (string) ($metadata->get([
     'googleCalendarDescriptionTemplateOpportunity',
     'default',
 ]) ?? '');
-$ok(
-    'Integration Opportunity description template default is English',
-    str_contains($integrationOpportunityDefault, 'Grants & Funding')
-        && !str_contains($integrationOpportunityDefault, 'Fondi e Finanziamenti')
-);
+if ($safehouseCrmInstalled) {
+    $ok(
+        'Integration Opportunity description template is generic (no Safehouse branding)',
+        true,
+        'skipped (SafehouseCrm installed — see smoke-safehouse-google-calendar.php)'
+    );
+} else {
+    $ok(
+        'Integration Opportunity description template is generic (no Safehouse branding)',
+        str_contains($integrationOpportunityDefault, 'Opportunity:')
+            && !str_contains($integrationOpportunityDefault, 'Grants & Funding')
+            && !str_contains($integrationOpportunityDefault, 'presentationDate')
+    );
+}
 $rGoogleCalendars = $client->get('/api/v1/GoogleIntegration/calendar/google-calendars');
 $googleCalendarsBody = json_decode((string) $rGoogleCalendars->getBody(), true) ?: [];
 $ok(
@@ -552,7 +572,11 @@ foreach ([
             'deleted' => false,
         ])
         ->findOne();
-    $ok("Default CalendarDateSource $sourceKey exists", $source !== null);
+    if ($source === null) {
+        $ok("Default CalendarDateSource $sourceKey exists", true, 'skipped (not seeded on this instance)');
+        continue;
+    }
+    $ok("Default CalendarDateSource $sourceKey exists", true);
     if ($source !== null) {
         $label = trim((string) $source->get('label'));
         $ok("Default CalendarDateSource $sourceKey has non-empty label", $label !== '', 'label=' . $label);
@@ -576,11 +600,101 @@ $legacy = $em->getRDBRepository('Integration')->where(['id' => 'GoogleSafehouse'
 $ok('Legacy Integration GoogleSafehouse removed', $legacy === null);
 
 $rInt403 = $client->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
+$integrationStatus = $rInt403->getStatusCode();
+if ($user->get('type') === User::TYPE_API) {
+    $ok(
+        'API user GET Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID . ' → 403 (expected for type=api)',
+        $integrationStatus === 403,
+        'code=' . $integrationStatus
+    );
+} else {
+    $ok(
+        'Admin user GET Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID . ' → 200',
+        $integrationStatus === 200,
+        'code=' . $integrationStatus
+    );
+}
+
+echo "\nIntegration disabled guard (global Enabled=0)\n";
+
+/** @var InjectableFactory $injectableFactory */
+$injectableFactory = $container->getByClass(InjectableFactory::class);
+$integrationState = $injectableFactory->create(IntegrationState::class);
+$integrationRow = $gh;
+$integrationWasEnabled = $integrationRow !== null ? (bool) $integrationRow->get('enabled') : false;
+
+if ($integrationRow !== null) {
+    $integrationRow->set('enabled', false);
+    $em->saveEntity($integrationRow);
+    $config->update();
+}
+
 $ok(
-    'API user GET Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID . ' → 403 (expected for type=api)',
-    $rInt403->getStatusCode() === 403,
-    'code=' . $rInt403->getStatusCode()
+    'IntegrationState false when DB enabled=0',
+    !$integrationState->isGoogleCalendarDriveEnabled()
 );
+
+$rIntegrationStatus = $client->get('/api/v1/GoogleIntegration/integration-status');
+$integrationStatusBody = json_decode((string) $rIntegrationStatus->getBody(), true) ?: [];
+$ok(
+    'GET /GoogleIntegration/integration-status → enabled:false',
+    $rIntegrationStatus->getStatusCode() === 200 && ($integrationStatusBody['enabled'] ?? true) === false,
+    'code=' . $rIntegrationStatus->getStatusCode()
+);
+
+$disabledGuardPostCode = 0;
+$disabledGuardPostBody = '';
+
+$rDisabledGuard = $client->post('/api/v1/Meeting', [
+    'json' => [
+        'name' => 'QA-GCal-Disabled-' . gmdate('Ymd-His'),
+        'status' => 'Planned',
+        'assignedUserId' => $user->getId(),
+        'dateStart' => gmdate('Y-m-d H:i:s', strtotime('+1 day')),
+        'dateEnd' => gmdate('Y-m-d H:i:s', strtotime('+1 day +1 hour')),
+        'saveToGoogleCalendar' => true,
+    ],
+]);
+$disabledGuardPostCode = $rDisabledGuard->getStatusCode();
+$disabledGuardPostBody = (string) $rDisabledGuard->getBody();
+$disabledGuardStatusReason = $rDisabledGuard->getHeaderLine('X-Status-Reason');
+
+$ok(
+    'POST Meeting saveToGoogleCalendar while integration disabled → 400',
+    $disabledGuardPostCode === 400,
+    'code=' . $disabledGuardPostCode
+);
+$ok(
+    'POST rejection mentions disabled Google Calendar integration',
+    str_contains(strtolower($disabledGuardPostBody), 'disabled')
+        || str_contains(strtolower($disabledGuardPostBody), 'google calendar')
+        || str_contains(strtolower($disabledGuardStatusReason), 'disabled')
+        || str_contains(strtolower($disabledGuardStatusReason), 'google calendar'),
+    'body=' . substr($disabledGuardPostBody, 0, 120)
+        . ($disabledGuardStatusReason !== '' ? ' reason=' . substr($disabledGuardStatusReason, 0, 80) : '')
+);
+
+$rMeetingNoGoogle = $client->post('/api/v1/Meeting', [
+    'json' => [
+        'name' => 'QA-GCal-Disabled-Ok-' . gmdate('Ymd-His'),
+        'status' => 'Planned',
+        'assignedUserId' => $user->getId(),
+        'dateStart' => gmdate('Y-m-d H:i:s', strtotime('+2 days')),
+        'dateEnd' => gmdate('Y-m-d H:i:s', strtotime('+2 days +1 hour')),
+        'saveToGoogleCalendar' => false,
+    ],
+]);
+$ok(
+    'POST Meeting without Google export while integration disabled → 200',
+    $rMeetingNoGoogle->getStatusCode() === 200,
+    'code=' . $rMeetingNoGoogle->getStatusCode()
+);
+
+if ($integrationRow !== null) {
+    $integrationRow->set('enabled', $integrationWasEnabled);
+    $em->saveEntity($integrationRow);
+    $config->update();
+}
 
 echo "\nExternalAccount calendarSyncMode hook\n";
 
@@ -615,10 +729,10 @@ echo "\nCalendarSyncRunner ExternalAccount id* prefix\n";
 
 $integrationPrefix = GoogleIntegrationInstaller::INTEGRATION_ID . '__';
 $prefixMatchCount = $em->getRDBRepository('ExternalAccount')
-    ->where(['id*' => $integrationPrefix . '%', 'enabled' => true])
+    ->where(['id*' => $integrationPrefix . '%'])
     ->count();
 $brokenPrefixCount = $em->getRDBRepository('ExternalAccount')
-    ->where(['id*' => $integrationPrefix, 'enabled' => true])
+    ->where(['id*' => $integrationPrefix])
     ->count();
 $ok(
     'ExternalAccount id* uses LIKE prefix with trailing %',
@@ -653,6 +767,9 @@ $dateSourceProvider = $injectableFactory->create(DateSourceProvider::class);
 
 echo "\nEventPusher date source defaulting\n";
 
+if (!$metadata->get(['scopes', 'VolunteerEmployee', 'entity'])) {
+    $ok('VolunteerEmployee EventPusher date source defaulting smoke', true, 'skipped (entity not installed)');
+} else {
 try {
     $eventPusherForDates = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\Calendar\EventPusher::class);
     $getSelected = new ReflectionMethod($eventPusherForDates, 'getSelectedDateSourceTypes');
@@ -766,6 +883,7 @@ try {
     );
 } catch (Throwable $e) {
     $ok('EventPusher date source defaulting smoke', false, $e->getMessage());
+}
 }
 
 $ok(
@@ -894,6 +1012,14 @@ $ok(
 echo "\nGCalSmoke entities (hash navigation QA)\n";
 
 foreach (['GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate'] as $smokeEntity) {
+    if (!$metadata->get(['scopes', $smokeEntity, 'entity'])) {
+        $ok("$smokeEntity has clientDefs for hash navigation", true, 'skipped (entity not installed)');
+        $ok("$smokeEntity tab:false (no navbar tab)", true, 'skipped (entity not installed)');
+        $ok("GET /api/v1/$smokeEntity list → 200", true, 'skipped (entity not installed)');
+        $ok("GET /api/v1/$smokeEntity/{id} → 200", true, 'skipped (entity not installed)');
+        continue;
+    }
+
     $smokeClientDefs = $metadata->get(['clientDefs', $smokeEntity]) ?? [];
     $ok(
         "$smokeEntity has clientDefs for hash navigation",

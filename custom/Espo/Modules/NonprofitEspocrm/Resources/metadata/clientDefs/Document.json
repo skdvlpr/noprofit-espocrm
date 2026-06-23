@@ -1,0 +1,5 @@
+{
+    "recordViews": {
+        "list": "nonprofit-espocrm:views/document/list"
+    }
+}

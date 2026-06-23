@@ -1,0 +1,25 @@
+{
+    "view": "nonprofit-espocrm:views/dashlets/association-meal-count-monthly-stats",
+    "aclScope": "AssociationMealCount",
+    "options": {
+        "view": "views/dashlets/options/base",
+        "fields": {
+            "title": {
+                "type": "varchar",
+                "required": true
+            },
+            "autorefreshInterval": {
+                "type": "enumFloat",
+                "options": [0, 0.5, 1, 2, 5, 10]
+            }
+        },
+        "layout": [
+            {
+                "rows": [
+                    [{"name": "title"}, false],
+                    [{"name": "autorefreshInterval"}, false]
+                ]
+            }
+        ]
+    }
+}

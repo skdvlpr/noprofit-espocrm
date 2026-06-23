@@ -54,7 +54,7 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 $actionList = $metadata->get(['app', 'rebuild', 'actionClassNameList']) ?? [];
 $ok(
     'BumpAppTimestamp registered',
-    in_array('Espo\\Modules\\SafehouseCrm\\Core\\Rebuild\\BumpAppTimestamp', $actionList, true),
+    in_array('Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\BumpAppTimestamp', $actionList, true),
     'actionClassNameList count=' . count($actionList)
 );
 
@@ -67,15 +67,15 @@ $client = new Client([
 
 $assets = [
     'kanban-item.tpl' => [
-        'path' => '/client/custom/modules/safehouse-crm/res/templates/record/kanban-item.tpl',
+        'path' => '/client/custom/modules/nonprofit-espocrm/res/templates/record/kanban-item.tpl',
         'needles' => ['kanban-props-grid', 'kanban-dates-grid', 'kanban-stage-chip', 'hasStatItems'],
     ],
     'kanban-item.js' => [
-        'path' => '/client/custom/modules/safehouse-crm/src/views/record/kanban-item.js',
+        'path' => '/client/custom/modules/nonprofit-espocrm/src/views/record/kanban-item.js',
         'needles' => ['hasStatItems', 'statItems', 'STAGE_EMOJI', 'getStageInfo'],
     ],
     'kanban-card.css' => [
-        'path' => '/client/custom/modules/safehouse-crm/res/css/kanban-card.css',
+        'path' => '/client/custom/modules/nonprofit-espocrm/res/css/kanban-card.css',
         'needles' => ['kanban-props-grid', 'safehouse-kanban-card', 'kanban-stage-chip', 'kanban-prob-pill'],
     ],
 ];
@@ -107,11 +107,11 @@ $ok(
 );
 $ok(
     'dashlet-dropdown.js removed from scriptList',
-    !is_readable('client/custom/modules/safehouse-crm/lib/dashlet-dropdown.js')
+    !is_readable('client/custom/modules/nonprofit-espocrm/lib/dashlet-dropdown.js')
 );
 
-$reportingStatsCss = is_readable('client/custom/modules/safehouse-crm/res/css/reporting-stats.css')
-    ? file_get_contents('client/custom/modules/safehouse-crm/res/css/reporting-stats.css')
+$reportingStatsCss = is_readable('client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css')
+    ? file_get_contents('client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css')
     : '';
 
 $ok('reporting-stats.css exists', $reportingStatsCss !== '');

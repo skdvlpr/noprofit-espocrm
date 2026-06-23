@@ -18,8 +18,8 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\AssociationMealCountStatsProvider;
-use Espo\Modules\SafehouseCrm\Tools\Reporting\ReportingProfileRegistry;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\AssociationMealCountStatsProvider;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingProfileRegistry;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -124,14 +124,14 @@ try {
 
     echo "\nLayouts\n";
 
-    $layoutBase = 'custom/Espo/Modules/SafehouseCrm/Resources/layouts/AssociationMealCount';
+    $layoutBase = 'custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/AssociationMealCount';
     $ok('list.json exists', is_readable("$layoutBase/list.json"));
     $ok('detail.json exists', is_readable("$layoutBase/detail.json"));
     $ok('filters.json exists', is_readable("$layoutBase/filters.json"));
 
     echo "\nFrontend list view\n";
 
-    $listView = 'client/custom/modules/safehouse-crm/src/views/association-meal-count/list.js';
+    $listView = 'client/custom/modules/nonprofit-espocrm/src/views/association-meal-count/list.js';
     $ok('association-meal-count list.js exists', is_readable($listView));
 } finally {
     foreach ($created as $entity) {

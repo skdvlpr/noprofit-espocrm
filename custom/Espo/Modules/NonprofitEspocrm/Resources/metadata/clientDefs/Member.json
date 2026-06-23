@@ -1,0 +1,8 @@
+{
+    "controller": "controllers/record",
+    "recordViews": {
+        "list": "nonprofit-espocrm:views/record/list-inline-edit"
+    },
+    "color": "#a89078",
+    "iconClass": "fas fa-handshake"
+}

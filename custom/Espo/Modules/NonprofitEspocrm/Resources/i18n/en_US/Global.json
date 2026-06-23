@@ -1,0 +1,62 @@
+{
+    "scopeNames": {
+        "Lead": "Lead",
+        "Opportunity": "Grants & Funding",
+        "AccountWebsite": "Account Website",
+        "VolunteerEmployee": "Volunteers / Employees",
+        "Member": "Members",
+        "MealCount": "Meal Count",
+        "AssociationMealCount": "Network Meal Count"
+    },
+    "scopeNamesPlural": {
+        "Lead": "Leads",
+        "Opportunity": "Grants & Funding",
+        "AccountWebsite": "Account Websites",
+        "VolunteerEmployee": "Volunteers / Employees",
+        "Member": "Members",
+        "MealCount": "Meal Counts",
+        "AssociationMealCount": "Network Meal Counts"
+    },
+    "navbarTabs": {
+        "mainSections": "Main Sections",
+        "CRM": "Main Sections",
+        "Rendicontazione": "Reporting"
+    },
+    "fields": {
+        "csvIncludeTotals": "Include totals row",
+        "xlsxIncludeTotals": "Include totals row"
+    },
+    "labels": {
+        "Create VolunteerEmployee": "Create New",
+        "Create Member": "Create New",
+        "Create MealCount": "Create Meal Count",
+        "Create AssociationMealCount": "Create Network Meal Count",
+        "reportingListStatsWeek": "Current week totals",
+        "reportingListStatsMonth": "Month",
+        "reportingListStatsYear": "Year",
+        "reportingListStatsToday": "Today",
+        "reportingListStatsSelection": "Filtered selection totals",
+        "reportingListStatsTitle": "Reporting totals",
+        "reportingExportIncludeTotals": "Include totals row",
+        "reportingExportTotalsLabel": "Totals",
+        "reportingEmailExport": "Send export via email",
+        "reportingEmailExportSuccess": "Export email sent",
+        "reportingEmailExportBody": "{scope} export is attached.",
+        "NonprofitEspocrmExtensionName": "Nonprofit EspoCRM",
+        "NonprofitEspocrmExtensionDescription": "Adaptation of EspoCRM for nonprofit organizations. Custom CRM entities (Members, Volunteers/Employees, Meal Count, Grants & Funding, Reporting), roles, navbar, and reporting exports. Bundles Safehouse Aurora and Safehouse Aurora Light themes (frosted glass UI). Full interface localizations: English (en_US), Italian (it_IT), Russian (ru_RU)."
+    },
+    "dashlets": {
+        "MealCountMonthlyStats": "Meal Count",
+        "AssociationMealCountMonthlyStats": "Network Meal Count"
+    },
+    "options": {
+        "period": {
+            "month": "Current month",
+            "year": "Current year"
+        }
+    },
+    "themes": {
+        "SafehouseAurora": "Safehouse Aurora",
+        "SafehouseAuroraLight": "Safehouse Aurora Light"
+    }
+}

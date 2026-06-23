@@ -6,8 +6,7 @@
         "googleCalendarDescriptionTemplateMeeting": "Template descrizione riunione",
         "googleCalendarDescriptionTemplateCall": "Template descrizione chiamata",
         "googleCalendarDescriptionTemplateTask": "Template descrizione compito",
-        "googleCalendarDescriptionTemplateOpportunity": "Template descrizione finanziamento",
-        "googleCalendarDescriptionTemplateVolunteerEmployee": "Template descrizione volontario / dipendente",
+        "googleCalendarDescriptionTemplateOpportunity": "Template descrizione opportunità",
         "googleCalendarAutoCreateEnabled": "Crea automaticamente calendari Google dedicati"
     },
     "labels": {
