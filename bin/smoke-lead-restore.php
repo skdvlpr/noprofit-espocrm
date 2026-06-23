@@ -57,8 +57,9 @@ $config->update();
 $tabStrings = array_filter($config->get('tabList', []) ?? [], 'is_string');
 $qcStrings = array_filter($config->get('quickCreateList', []) ?? [], 'is_string');
 $ok('Lead in tabList after installer', in_array('Lead', $tabStrings, true));
-$ok('Case absent from tabList', !in_array('Case', $tabStrings, true));
+$ok('Case present in tabList (Segnalazioni)', in_array('Case', $tabStrings, true));
 $ok('Lead in quickCreateList', in_array('Lead', $qcStrings, true));
+$ok('Case in quickCreateList', in_array('Case', $qcStrings, true));
 
 $itGlobalPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Global.json';
 $itGlobal = is_file($itGlobalPath)
