@@ -76,6 +76,8 @@ class Installer
 
     private const DEFAULT_THEME = 'SafehouseAuroraLight';
 
+    private const APPLICATION_NAME = 'Non profit CRM';
+
     /** Stock Espo themes replaced when Safehouse is installed (unless user already picked Safehouse). */
     private const LEGACY_DEFAULT_THEMES = [
         'Espo',
@@ -135,6 +137,7 @@ class Installer
         }
 
         $this->provisionDefaultTheme($config, $configWriter);
+        $this->provisionApplicationName($config, $configWriter);
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -222,6 +225,24 @@ class Installer
         ) {
             $configWriter->set('theme', self::DEFAULT_THEME);
         }
+    }
+
+    /**
+     * Brand the instance unless an admin already chose a custom application name.
+     */
+    private function provisionApplicationName(Config $config, ConfigWriter $configWriter): void
+    {
+        $current = $config->get('applicationName');
+
+        if (
+            is_string($current)
+            && $current !== ''
+            && $current !== 'EspoCRM'
+        ) {
+            return;
+        }
+
+        $configWriter->set('applicationName', self::APPLICATION_NAME);
     }
 
     /**

@@ -72,7 +72,10 @@ jobs:
           set -euo pipefail
           cd "$DEPLOY_PATH"
           if [ -f data/config.php ]; then
-            echo "Espo is installed — rebuilding metadata + clearing cache."
+            echo "Espo is installed — rebuild + Safehouse navbar/roles provisioning."
+            php command.php rebuild || php rebuild.php || true
+            php bin/reorder-safehouse-tabs.php
+            php bin/setup-roles.php
             php command.php rebuild || php rebuild.php || true
           else
             echo "Espo is NOT installed yet."
