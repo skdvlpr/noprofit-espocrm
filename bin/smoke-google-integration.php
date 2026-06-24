@@ -745,6 +745,29 @@ $ok(
     "prefix-only count=$brokenPrefixCount"
 );
 
+$syncRunnerSource = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php'
+);
+$applyGoogleToCrmPos = strpos($syncRunnerSource, 'function applyGoogleEventToCrm');
+$saveEntityPos = strpos($syncRunnerSource, 'saveEntity($entity)');
+$ok(
+    'Google→CRM sync checks owner edit ACL before saving CRM entity',
+    $applyGoogleToCrmPos !== false
+        && $saveEntityPos !== false
+        && strpos($syncRunnerSource, 'AclManager') !== false
+        && strpos($syncRunnerSource, 'checkEntityEdit($user, $entity)') !== false
+        && strpos($syncRunnerSource, 'checkEntityEdit($user, $entity)') < $saveEntityPos
+);
+$ok(
+    'Google→CRM sync requires a matching local GoogleCalendarEventLink',
+    $applyGoogleToCrmPos !== false
+        && $saveEntityPos !== false
+        && strpos($syncRunnerSource, 'hasMatchingEventLink') !== false
+        && strpos($syncRunnerSource, "'googleEventId' => \$googleEventId") !== false
+        && strpos($syncRunnerSource, "'userId' => \$user->getId()") !== false
+        && strpos($syncRunnerSource, 'hasMatchingEventLink($user, $entityType, $entityId, $googleEvent, $private)') < $saveEntityPos
+);
+
 echo "\nGoogle Calendar DB columns for calendar-capable entities\n";
 
 foreach ($calendarCapableEntityTypes as $entityType) {

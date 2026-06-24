@@ -5,6 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
+use Espo\Core\AclManager;
 use Espo\Core\ApplicationUser;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
@@ -22,6 +23,8 @@ use Throwable;
  */
 class CalendarSyncRunner
 {
+    private const LINK_ENTITY_TYPE = 'GoogleCalendarEventLink';
+    private const MAIN_DATE_TYPE = 'main';
     private const MAX_CRM_ENTITIES_PER_USER = 100;
     private const MAX_GOOGLE_EVENTS_APPLIED_PER_USER = 100;
     /** Cap API pagination when most events on a page are not Espo-owned (wrong user / no extendedProperties). */
@@ -39,6 +42,7 @@ class CalendarSyncRunner
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private EventPusher $eventPusher,
         private ApplicationUser $applicationUser,
+        private AclManager $aclManager,
         private Log $log
     ) {}
 
@@ -217,6 +221,14 @@ class CalendarSyncRunner
             return false;
         }
 
+        if (!$this->aclManager->checkEntityEdit($user, $entity)) {
+            return false;
+        }
+
+        if (!$this->hasMatchingEventLink($user, $entityType, $entityId, $googleEvent, $private)) {
+            return false;
+        }
+
         $start = $this->googleEventInstantToCrm($googleEvent['start'] ?? null);
         $end = $this->googleEventInstantToCrm($googleEvent['end'] ?? null);
 
@@ -238,6 +250,44 @@ class CalendarSyncRunner
         $this->entityManager->saveEntity($entity);
 
         return true;
+    }
+
+    /**
+     * @param array<string, mixed> $googleEvent
+     * @param array<string, mixed> $private
+     */
+    private function hasMatchingEventLink(
+        User $user,
+        string $entityType,
+        string $entityId,
+        array $googleEvent,
+        array $private
+    ): bool {
+        $googleEventId = (string) ($googleEvent['id'] ?? '');
+
+        if ($googleEventId === '') {
+            return false;
+        }
+
+        $sourceDateType = (string) ($private['espocrmSourceDateType'] ?? self::MAIN_DATE_TYPE);
+
+        if ($sourceDateType === '') {
+            $sourceDateType = self::MAIN_DATE_TYPE;
+        }
+
+        $link = $this->entityManager
+            ->getRDBRepository(self::LINK_ENTITY_TYPE)
+            ->where([
+                'sourceEntityType' => $entityType,
+                'sourceEntityId' => $entityId,
+                'sourceDateType' => $sourceDateType,
+                'userId' => $user->getId(),
+                'googleEventId' => $googleEventId,
+                'deleted' => false,
+            ])
+            ->findOne();
+
+        return $link !== null;
     }
 
     /**

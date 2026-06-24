@@ -1022,4 +1022,3 @@ class EventPusher
         return $this->pushUserOverride ?? $this->sessionUser;
     }
 }
-
