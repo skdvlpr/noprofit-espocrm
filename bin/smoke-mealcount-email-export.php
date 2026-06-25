@@ -214,6 +214,14 @@ try {
 
     $ok('routes.json reporting/email-export registered', in_array('/NonprofitEspocrm/reporting/email-export', $routePaths, true));
 
+    $recipientResolverSource = file_get_contents(
+        'custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/EmailRecipientResolver.php'
+    ) ?: '';
+    $ok(
+        'reporting email recipient resolver enforces record-level read ACL',
+        str_contains($recipientResolverSource, 'checkEntityRead($entity)')
+    );
+
     foreach (['MealCount', 'AssociationMealCount'] as $entityType) {
         $clientDefsPath = "custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/{$entityType}.json";
         $clientDefs = is_readable($clientDefsPath)

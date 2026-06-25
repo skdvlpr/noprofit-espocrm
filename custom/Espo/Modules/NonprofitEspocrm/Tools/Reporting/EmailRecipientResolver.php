@@ -69,6 +69,10 @@ class EmailRecipientResolver
             throw new BadRequest('Email recipient record was not found.');
         }
 
+        if (!$this->acl->checkEntityRead($entity)) {
+            throw new Forbidden();
+        }
+
         $email = $this->extractPrimaryEmail($entity);
 
         if ($email === null || $email === '') {

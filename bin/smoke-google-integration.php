@@ -531,6 +531,7 @@ $ok('Location field has variable helper', str_contains($perDateView, 'variable-h
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
 $eventRemoverSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php') ?: '';
 $calendarSyncRunnerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php') ?: '';
+$authorizationCodeHandlerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
 $ok(
     'EventPusher title suffix uses CalendarDateSource.label only',
@@ -557,6 +558,12 @@ $ok(
         && str_contains($calendarSyncRunnerSource, 'hasMatchingEventLink')
         && str_contains($calendarSyncRunnerSource, "'GoogleCalendarEventLink'")
         && str_contains($calendarSyncRunnerSource, "'googleEventId' => $googleEventId")
+);
+$ok(
+    'OAuth reconnect preserves existing refresh token when Google omits one',
+    !str_contains($authorizationCodeHandlerSource, "clear('refreshToken')")
+        && str_contains($authorizationCodeHandlerSource, "\$name === 'refreshToken'")
+        && str_contains($authorizationCodeHandlerSource, 'continue;')
 );
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'

@@ -56,11 +56,14 @@ class AuthorizationCodeHandler
         }
 
         $entity->clear('accessToken');
-        $entity->clear('refreshToken');
         $entity->clear('tokenType');
         $entity->clear('expiresAt');
 
         foreach ($result as $name => $value) {
+            if ($name === 'refreshToken' && (!is_string($value) || $value === '')) {
+                continue;
+            }
+
             $entity->set($name, $value);
         }
 
