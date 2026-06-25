@@ -529,6 +529,8 @@ $templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/googl
 $ok('Per-date UI uses unified date list field only', !str_contains($eventSettingsView, 'googleCalendarOpportunityDateList') && str_contains($templateLinkView, 'googleCalendarDateSourceList'));
 $ok('Location field has variable helper', str_contains($perDateView, 'variable-helper-location'));
 $eventPusherSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php') ?: '';
+$eventRemoverSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php') ?: '';
+$calendarSyncRunnerSource = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php') ?: '';
 $ok('EventPusher renders location template variables', str_contains($eventPusherSource, 'buildLocation'));
 $ok(
     'EventPusher title suffix uses CalendarDateSource.label only',
@@ -536,6 +538,25 @@ $ok(
         && !str_contains($eventPusherSource, 'resolveGoogleTitleLabel')
         && !str_contains($eventPusherSource, 'resolveSourceLabel')
         && !str_contains($eventPusherSource, "'Presentation date'")
+);
+$ok(
+    'Google push ACL uses target user AclManager',
+    str_contains($eventPusherSource, 'AclManager')
+        && str_contains($eventPusherSource, 'checkEntityEdit($actor, $entity)')
+        && !str_contains($eventPusherSource, 'checkEntityEdit($entity, $actor)')
+);
+$ok(
+    'Google stale removal ACL uses target user AclManager',
+    str_contains($eventRemoverSource, 'AclManager')
+        && str_contains($eventRemoverSource, 'checkEntityEdit($user, $entity)')
+        && !str_contains($eventRemoverSource, 'checkEntityEdit($entity, $user)')
+);
+$ok(
+    'Google pull sync requires ACL and matching event link',
+    str_contains($calendarSyncRunnerSource, 'checkEntityEdit($user, $entity)')
+        && str_contains($calendarSyncRunnerSource, 'hasMatchingEventLink')
+        && str_contains($calendarSyncRunnerSource, "'GoogleCalendarEventLink'")
+        && str_contains($calendarSyncRunnerSource, "'googleEventId' => $googleEventId")
 );
 $callDetailLayout = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'

@@ -2,7 +2,7 @@
 
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
-use Espo\Core\Acl;
+use Espo\Core\AclManager;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
@@ -24,7 +24,7 @@ class EventRemover
         private EntityManager $entityManager,
         private ClientManager $clientManager,
         private IntegrationState $integrationState,
-        private Acl $acl,
+        private AclManager $aclManager,
         private Log $log,
         private DateSourceProvider $dateSourceProvider
     ) {}
@@ -197,7 +197,7 @@ class EventRemover
             return false;
         }
 
-        return $this->acl->checkEntityEdit($entity, $user);
+        return $this->aclManager->checkEntityEdit($user, $entity);
     }
 
     /**

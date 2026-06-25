@@ -5,6 +5,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
+use Espo\Core\AclManager;
 use Espo\Core\ApplicationUser;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
@@ -38,6 +39,8 @@ class CalendarSyncRunner
         private IntegrationState $integrationState,
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private EventPusher $eventPusher,
+        private AclManager $aclManager,
+        private DateSourceProvider $dateSourceProvider,
         private ApplicationUser $applicationUser,
         private Log $log
     ) {}
@@ -201,6 +204,7 @@ class CalendarSyncRunner
         $entityType = (string) ($private['espocrmEntityType'] ?? '');
         $entityId = (string) ($private['espocrmEntityId'] ?? '');
         $userId = (string) ($private['espocrmUserId'] ?? '');
+        $sourceDateType = (string) ($private['espocrmSourceDateType'] ?? 'main');
 
         if (
             $entityType === ''
@@ -214,6 +218,19 @@ class CalendarSyncRunner
         $entity = $this->entityManager->getEntityById($entityType, $entityId);
 
         if ($entity === null || !$entity->get('saveToGoogleCalendar')) {
+            return false;
+        }
+
+        if (!$this->aclManager->checkEntityEdit($user, $entity)) {
+            $this->log->warning(
+                'Google Calendar pull skipped: no edit ACL for '
+                . $entityType . ' ' . $entityId . ' user ' . $user->getId()
+            );
+
+            return false;
+        }
+
+        if (!$this->hasMatchingEventLink($user, $entityType, $entityId, $sourceDateType, $googleEvent)) {
             return false;
         }
 
@@ -238,6 +255,52 @@ class CalendarSyncRunner
         $this->entityManager->saveEntity($entity);
 
         return true;
+    }
+
+    /**
+     * @param array<string, mixed> $googleEvent
+     */
+    private function hasMatchingEventLink(
+        User $user,
+        string $entityType,
+        string $entityId,
+        string $sourceDateType,
+        array $googleEvent
+    ): bool {
+        $googleEventId = $googleEvent['id'] ?? null;
+
+        if (!is_string($googleEventId) || $googleEventId === '') {
+            return false;
+        }
+
+        $canonicalSourceDateType = $this->dateSourceProvider->canonicalSourceDateType(
+            $entityType,
+            $sourceDateType
+        );
+
+        $links = $this->entityManager
+            ->getRDBRepository('GoogleCalendarEventLink')
+            ->where([
+                'sourceEntityType' => $entityType,
+                'sourceEntityId' => $entityId,
+                'userId' => $user->getId(),
+                'googleEventId' => $googleEventId,
+                'deleted' => false,
+            ])
+            ->find();
+
+        foreach ($links as $link) {
+            $linkSourceDateType = $this->dateSourceProvider->canonicalSourceDateType(
+                $entityType,
+                (string) ($link->get('sourceDateType') ?? '')
+            );
+
+            if ($linkSourceDateType === $canonicalSourceDateType) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
