@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           DELETE_FLAG=""
           if [ "${DEPLOY_RSYNC_DELETE:-0}" = "1" ]; then
-            DELETE_FLAG="--delete --delete-excluded"
+            DELETE_FLAG="--delete"
           fi
           rsync -rlptz --human-readable $DELETE_FLAG \
             -e "ssh -p ${DEPLOY_SSH_PORT:-22} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \

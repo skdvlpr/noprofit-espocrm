@@ -40,6 +40,8 @@ Settings → Secrets and variables → Actions → **Secrets**:
 Optional **Variable** (Settings → Variables): `DEPLOY_RSYNC_DELETE=1` to prune
 stale code files on the server (runtime/server-state excludes still protect
 `data/`, `install/config.php`, `custom/Espo/Custom/`). Default is no deletion.
+Use plain rsync `--delete` only; `--delete-excluded` would remove excluded
+server-owned state on the destination.
 
 ## Server prerequisites (one-time)
 
