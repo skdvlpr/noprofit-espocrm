@@ -25,7 +25,7 @@ class FoodParcelPdfService
         private PdfService $pdfService,
         private Acl $acl,
         private Config $config,
-        private FoodParcelContactSync $foodParcelContactSync,
+        private FoodParcelRegistrationSnapshot $foodParcelRegistrationSnapshot,
     ) {}
 
     /**
@@ -53,8 +53,12 @@ class FoodParcelPdfService
             throw new NotFound();
         }
 
-        $this->foodParcelContactSync->syncFromContactId($registration);
-        $this->entityManager->saveEntity($registration);
+        $before = $this->foodParcelRegistrationSnapshot->collect($registration);
+        $this->foodParcelRegistrationSnapshot->apply($registration);
+
+        if ($this->foodParcelRegistrationSnapshot->hasChanges($registration, $before)) {
+            $this->entityManager->saveEntity($registration);
+        }
 
         $result = $this->pdfService->generate(
             'FoodParcelRegistration',

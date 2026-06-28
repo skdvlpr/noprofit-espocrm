@@ -64,9 +64,54 @@ class FoodParcelContactSync
             ->find();
 
         foreach ($collection as $registration) {
+            $before = $this->collectContactSnapshot($registration);
+
             $this->applyContact($registration, $contact);
+
+            if (!$this->hasContactSnapshotChanges($registration, $before)) {
+                continue;
+            }
+
             $this->entityManager->saveEntity($registration);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function collectContactSnapshot(Entity $registration): array
+    {
+        $state = [];
+
+        foreach ([
+            'taxCode',
+            'phone',
+            'phonePdf',
+            'addressLine',
+            'addressStreet',
+            'addressCity',
+            'addressState',
+            'addressCountry',
+            'addressPostalCode',
+        ] as $attribute) {
+            $state[$attribute] = $registration->get($attribute);
+        }
+
+        return $state;
+    }
+
+    /**
+     * @param array<string, mixed> $before
+     */
+    private function hasContactSnapshotChanges(Entity $registration, array $before): bool
+    {
+        foreach ($before as $attribute => $previousValue) {
+            if ($registration->get($attribute) != $previousValue) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function formatContactPhones(Entity $contact): string

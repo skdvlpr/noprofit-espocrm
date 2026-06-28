@@ -14,14 +14,6 @@ define('nonprofit-espocrm:views/fields/date-array', ['views/fields/array', 'ui/d
             this.params.displayAsList = true;
             this.params.noEmptyString = true;
             this.params.itemsEditable = false;
-
-            this.listenTo(this, 'change', () => {
-                if (!this.isEditMode()) {
-                    return;
-                }
-
-                this.model.set(this.fetch(), {ui: true});
-            });
         },
 
         afterRender() {

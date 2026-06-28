@@ -50,4 +50,38 @@ class FoodParcelTextFormat
 
         return trim($text);
     }
+
+    /**
+     * @param mixed $dates
+     */
+    public static function formatDatesList(mixed $dates): string
+    {
+        if (!is_array($dates)) {
+            return '';
+        }
+
+        $lines = [];
+
+        foreach ($dates as $date) {
+            if ($date !== null && $date !== '') {
+                $lines[] = self::formatDateLine((string) $date);
+            }
+        }
+
+        $lines = array_values(array_unique($lines));
+        sort($lines);
+
+        return $lines === [] ? '' : implode("\n", $lines);
+    }
+
+    private static function formatDateLine(string $value): string
+    {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            return $value;
+        }
+
+        [$year, $month, $day] = explode('-', $value);
+
+        return $day . '.' . $month . '.' . $year;
+    }
 }

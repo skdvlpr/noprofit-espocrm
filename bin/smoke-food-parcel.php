@@ -36,6 +36,8 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 echo "FoodParcel metadata\n";
 $ok('FoodParcelRegistration scopes.entity', ($metadata->get(['scopes', 'FoodParcelRegistration', 'entity']) ?? false) === true);
 $ok('stream enabled', ($metadata->get(['scopes', 'FoodParcelRegistration', 'stream']) ?? false) === true);
+$ok('OCC disabled for volunteer edits', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'optimisticConcurrencyControl']) ?? true) === false);
+$ok('entryDates ignore OCC', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'entryDates', 'optimisticConcurrencyControlIgnore']) ?? false) === true);
 $ok('contact required', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'contact', 'required']) ?? false) === true);
 $ok('taxCode readOnly on registration', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'taxCode', 'readOnly']) ?? false) === true);
 $ok('phone readOnly on registration', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'phone', 'readOnly']) ?? false) === true);
