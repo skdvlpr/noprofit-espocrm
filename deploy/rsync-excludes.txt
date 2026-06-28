@@ -49,10 +49,3 @@ Thumbs.db
 
 # Admin-UI customizations made on the server (Entity Manager, Layout Manager…)
 /custom/Espo/Custom/
-
-# Scratch
-/test_*.php
-/scratch_*.php
-/tmp_*.json
-/Untitled
-/add_tab.php
