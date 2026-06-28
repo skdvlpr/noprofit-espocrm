@@ -282,9 +282,13 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
     box-shadow: none;
 }
 
+.food-parcel-pdf-preview {
+    width: 100%;
+}
+
 .food-parcel-pdf-frame {
     width: 100%;
-    min-height: 480px;
+    min-height: 640px;
     border: 1px solid var(--panel-default-border, #ddd);
     border-radius: var(--border-radius, 4px);
     background: var(--panel-bg, #fff);

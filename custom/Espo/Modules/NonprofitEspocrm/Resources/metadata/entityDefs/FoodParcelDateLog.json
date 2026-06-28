@@ -5,15 +5,15 @@
             "trim": true,
             "readOnly": true
         },
-        "foodParcelRegistration": {
-            "type": "link",
+        "logDate": {
+            "type": "date",
             "required": true
         },
-        "entryDate": {
-            "type": "date"
+        "entryRegistration": {
+            "type": "link"
         },
-        "exitDate": {
-            "type": "date"
+        "exitRegistration": {
+            "type": "link"
         },
         "createdAt": {
             "type": "datetime",
@@ -43,14 +43,19 @@
             "type": "belongsTo",
             "entity": "User"
         },
-        "foodParcelRegistration": {
+        "entryRegistration": {
             "type": "belongsTo",
             "entity": "FoodParcelRegistration",
-            "foreign": "dateLogs"
+            "foreign": "entryDateLogs"
+        },
+        "exitRegistration": {
+            "type": "belongsTo",
+            "entity": "FoodParcelRegistration",
+            "foreign": "exitDateLogs"
         }
     },
     "collection": {
-        "orderBy": "entryDate",
+        "orderBy": "logDate",
         "order": "desc"
     },
     "optimisticConcurrencyControl": true

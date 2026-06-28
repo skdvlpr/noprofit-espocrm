@@ -18,7 +18,9 @@
             "maxLength": 255
         },
         "household": {
-            "type": "text"
+            "type": "int",
+            "min": 1,
+            "max": 100
         },
         "phone": {
             "type": "varchar",
@@ -31,7 +33,26 @@
         "notes": {
             "type": "text"
         },
-        "dateLogsText": {
+        "entryDates": {
+            "type": "array",
+            "displayAsList": true,
+            "noEmptyString": true,
+            "view": "nonprofit-espocrm:views/fields/date-array",
+            "default": []
+        },
+        "exitDates": {
+            "type": "array",
+            "displayAsList": true,
+            "noEmptyString": true,
+            "view": "nonprofit-espocrm:views/fields/date-array",
+            "default": []
+        },
+        "entryDatesText": {
+            "type": "text",
+            "readOnly": true,
+            "utility": true
+        },
+        "exitDatesText": {
             "type": "text",
             "readOnly": true,
             "utility": true
@@ -87,10 +108,19 @@
             "entity": "Contact",
             "foreign": "foodParcelRegistrations"
         },
-        "dateLogs": {
+        "entryDateLogs": {
             "type": "hasMany",
             "entity": "FoodParcelDateLog",
-            "foreign": "foodParcelRegistration"
+            "foreign": "entryRegistration",
+            "relationName": "foodParcelEntryDateLogs",
+            "layoutRelationshipsDisabled": true
+        },
+        "exitDateLogs": {
+            "type": "hasMany",
+            "entity": "FoodParcelDateLog",
+            "foreign": "exitRegistration",
+            "relationName": "foodParcelExitDateLogs",
+            "layoutRelationshipsDisabled": true
         }
     },
     "collection": {

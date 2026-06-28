@@ -1,13 +1,13 @@
 {
     "fields": {
         "name": "Name",
-        "entryDate": "Entry date",
-        "exitDate": "Exit date",
-        "foodParcelRegistration": "Food parcel registration"
+        "logDate": "Date",
+        "entryRegistration": "Food parcel registration (entry)",
+        "exitRegistration": "Food parcel registration (exit)"
     },
     "labels": {
-        "FoodParcelDateLog": "Date log entry",
-        "FoodParcelDateLogPlural": "Date log entries",
-        "Create FoodParcelDateLog": "Add date entry"
+        "FoodParcelDateLog": "Date entry",
+        "FoodParcelDateLogPlural": "Date entries",
+        "Create FoodParcelDateLog": "Add date"
     }
 }

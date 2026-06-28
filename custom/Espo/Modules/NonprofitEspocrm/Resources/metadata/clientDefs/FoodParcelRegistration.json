@@ -5,21 +5,13 @@
     "recordViews": {
         "detail": "nonprofit-espocrm:views/food-parcel-registration/detail"
     },
-    "relationshipPanels": {
-        "dateLogs": {
-            "create": true,
-            "select": false,
-            "orderBy": "entryDate",
-            "orderDirection": "desc"
-        }
-    },
-    "sidePanels": {
+    "bottomPanels": {
         "detail": [
             {
                 "name": "pdfPreview",
-                "label": "PDF Preview",
+                "label": "pdfPreview",
                 "view": "nonprofit-espocrm:views/food-parcel-registration/panels/pdf-preview",
-                "sticked": false
+                "order": 1
             }
         ]
     }

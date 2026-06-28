@@ -12,20 +12,24 @@
             ],
             [
                 {"name": "phone"},
-                false
+                {"name": "household"}
             ],
             [
                 {"name": "address", "fullWidth": true}
             ],
             [
-                {"name": "household", "fullWidth": true}
-            ],
-            [
                 {"name": "notes", "fullWidth": true}
+            ]
+        ]
+    },
+    {
+        "label": "Dates",
+        "rows": [
+            [
+                {"name": "entryDates", "fullWidth": true}
             ],
             [
-                {"name": "assignedUser"},
-                {"name": "teams"}
+                {"name": "exitDates", "fullWidth": true}
             ]
         ]
     }

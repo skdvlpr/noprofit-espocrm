@@ -3,7 +3,6 @@
 namespace Espo\Modules\NonprofitEspocrm\Tools\FoodParcel;
 
 use Espo\Core\Acl;
-use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
 use Espo\Core\Utils\Config;
 use Espo\Entities\Template;
@@ -11,10 +10,15 @@ use Espo\ORM\EntityManager;
 use Espo\Tools\Pdf\Data;
 use Espo\Tools\Pdf\Params;
 use Espo\Tools\Pdf\Service as PdfService;
+use RuntimeException;
 
 class FoodParcelPdfService
 {
     public const TEMPLATE_NAME = 'Food Parcel Registration — Safehouse';
+
+    private const TEMPLATE_BODY_PATH = __DIR__ . '/../../Resources/templates/FoodParcelRegistration/pdfBody.html';
+
+    private const LOGO_TAG_PLACEHOLDER = '{{LOGO_TAG}}';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -28,6 +32,8 @@ class FoodParcelPdfService
      */
     public function generateForRecord(string $id): array
     {
+        $this->provisionTemplate();
+
         $template = $this->entityManager
             ->getRDBRepository(Template::ENTITY_TYPE)
             ->where([
@@ -56,6 +62,8 @@ class FoodParcelPdfService
 
     public function provisionTemplate(): void
     {
+        $body = $this->buildTemplateBody();
+
         $existing = $this->entityManager
             ->getRDBRepository(Template::ENTITY_TYPE)
             ->where([
@@ -64,43 +72,72 @@ class FoodParcelPdfService
             ])
             ->findOne();
 
-        if ($existing) {
+        if ($existing && $existing->get('body') === $body) {
             return;
         }
 
-        $siteUrl = rtrim((string) $this->config->get('siteUrl'), '/');
-        $logoUrl = $siteUrl . '/client/img/logo.svg';
+        $payload = [
+            'body' => $body,
+            'pageFormat' => 'A4',
+            'pageOrientation' => 'Portrait',
+            'fontFace' => 'DejaVu Sans',
+        ];
 
-        $body = <<<HTML
-<div style="font-family: DejaVu Sans, sans-serif; font-size: 11pt;">
-  <div style="background:#c0392b;color:#fff;padding:12px 16px;margin-bottom:20px;">
-    <table width="100%"><tr>
-      <td><strong>MODULO DI REGISTRAZIONE</strong><br><em>Pacco Spesa</em></td>
-      <td align="right"><img src="{$logoUrl}" height="48" alt="Safe House"></td>
-    </tr></table>
-  </div>
-  <p><strong>Nome / Cognome:</strong> {contactName}</p>
-  <p><strong>Cod. Fisc.:</strong> {taxCode}</p>
-  <p><strong>Nato a:</strong> {birthPlace}</p>
-  <p><strong>Via/cso:</strong> {addressStreet} &nbsp; <strong>N°</strong> &nbsp; <strong>CAP</strong> {addressPostalCode}</p>
-  <p><strong>Nucleo Famigliare:</strong> {household}</p>
-  <p><strong>Telefono:</strong> {phone}</p>
-  <p><strong>NOTE:</strong><br>{notes}</p>
-  <h4>Date log (entrata | uscita)</h4>
-  <pre>{dateLogsText}</pre>
-</div>
-HTML;
+        if ($existing) {
+            $existing->set($payload);
+            $this->entityManager->saveEntity($existing);
+
+            return;
+        }
 
         $template = $this->entityManager->getNewEntity(Template::ENTITY_TYPE);
         $template->set([
             'name' => self::TEMPLATE_NAME,
             'entityType' => 'FoodParcelRegistration',
-            'body' => $body,
-            'pageFormat' => 'A4',
-            'pageOrientation' => 'Portrait',
-            'fontFace' => 'DejaVu Sans',
+            ...$payload,
         ]);
 
         $this->entityManager->saveEntity($template);
+    }
+
+    private function buildTemplateBody(): string
+    {
+        if (!is_readable(self::TEMPLATE_BODY_PATH)) {
+            throw new RuntimeException('Food parcel PDF template file is missing.');
+        }
+
+        $contents = file_get_contents(self::TEMPLATE_BODY_PATH);
+
+        if ($contents === false || $contents === '') {
+            throw new RuntimeException('Food parcel PDF template file is empty.');
+        }
+
+        return str_replace(self::LOGO_TAG_PLACEHOLDER, $this->buildLogoImgTag(), $contents);
+    }
+
+    private function buildLogoImgTag(): string
+    {
+        $paths = [
+            dirname(__DIR__, 2) . '/Resources/branding/logo.png',
+            dirname(__DIR__, 6) . '/client/img/logo.png',
+        ];
+
+        foreach ($paths as $path) {
+            if (!is_readable($path)) {
+                continue;
+            }
+
+            $contents = file_get_contents($path);
+
+            if ($contents === false || $contents === '') {
+                continue;
+            }
+
+            $encoded = base64_encode($contents);
+
+            return '<img src="@' . $encoded . '" height="56" alt="Safe House">';
+        }
+
+        return '<strong>Safe House</strong>';
     }
 }

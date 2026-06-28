@@ -11,15 +11,22 @@
         "addressCity": "City",
         "addressPostalCode": "Postal Code",
         "notes": "Notes",
-        "dateLogsText": "Date log summary",
+        "entryDates": "Entry dates",
+        "exitDates": "Exit dates",
+        "entryDatesText": "Entry dates summary",
+        "exitDatesText": "Exit dates summary",
         "assignedUser": "Assigned User",
-        "teams": "Teams",
-        "dateLogs": "Date log entries"
+        "teams": "Teams"
     },
     "labels": {
         "FoodParcelRegistration": "Food Parcel Registration",
         "FoodParcelRegistrationPlural": "Food Parcel Registrations",
         "Create FoodParcelRegistration": "Create registration",
-        "openPdfPreview": "Open PDF"
+        "openPdfPreview": "Open PDF",
+        "pdfPreview": "PDF Preview",
+        "Dates": "Dates"
+    },
+    "panelLabels": {
+        "Dates": "Dates"
     }
 }

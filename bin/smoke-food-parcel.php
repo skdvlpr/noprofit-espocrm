@@ -34,13 +34,27 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 
 echo "FoodParcel metadata\n";
 $ok('FoodParcelRegistration scopes.entity', ($metadata->get(['scopes', 'FoodParcelRegistration', 'entity']) ?? false) === true);
+$ok('stream disabled', ($metadata->get(['scopes', 'FoodParcelRegistration', 'stream']) ?? true) === false);
 $ok('contact required', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'contact', 'required']) ?? false) === true);
-$ok('address field', $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'address', 'type']) === 'address');
-$ok('FoodParcelDateLog link', $metadata->get(['entityDefs', 'FoodParcelDateLog', 'fields', 'foodParcelRegistration', 'type']) === 'link');
+$ok('entryDates array field', $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'entryDates', 'type']) === 'array');
+$ok('exitDates array field', $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'exitDates', 'type']) === 'array');
+$ok('date-array view', str_contains(
+    (string) $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'entryDates', 'view']),
+    'date-array'
+));
 
 $pdfService = $injectableFactory->create(FoodParcelPdfService::class);
 $pdfService->provisionTemplate();
-$ok('PDF template provisioned', true);
+
+$template = $em->getRDBRepository('Template')
+    ->where([
+        'entityType' => 'FoodParcelRegistration',
+        'name' => FoodParcelPdfService::TEMPLATE_NAME,
+    ])
+    ->findOne();
+$templateBody = $template ? (string) $template->get('body') : '';
+$ok('PDF template handlebars syntax', str_contains($templateBody, '{{{entryDatesText}}}') && str_contains($templateBody, '{{{exitDatesText}}}'));
+$ok('PDF template provisioned', $template !== null);
 
 $contact = $em->getNewEntity('Contact');
 $contact->set([
@@ -49,25 +63,25 @@ $contact->set([
 ]);
 $em->saveEntity($contact);
 
+$today = date('Y-m-d');
 $registration = $em->getNewEntity('FoodParcelRegistration');
 $registration->set([
     'contactId' => $contact->getId(),
     'taxCode' => 'SMKFP0000000000',
+    'household' => 3,
     'notes' => 'SMOKE food parcel',
+    'entryDates' => [$today],
+    'exitDates' => [$today],
 ]);
 $em->saveEntity($registration);
 $ok('registration create', $registration->getId() !== null);
 
-$log = $em->getNewEntity('FoodParcelDateLog');
-$log->set([
-    'foodParcelRegistrationId' => $registration->getId(),
-    'entryDate' => date('Y-m-d'),
-]);
-$em->saveEntity($log);
-$ok('date log create', $log->getId() !== null);
-
 $registration = $em->getEntityById('FoodParcelRegistration', $registration->getId());
-$ok('dateLogsText synced', is_string($registration->get('dateLogsText')) && str_contains((string) $registration->get('dateLogsText'), date('Y-m-d')));
+$entryText = (string) $registration->get('entryDatesText');
+$exitText = (string) $registration->get('exitDatesText');
+$displayToday = date('d.m.Y', strtotime($today));
+$ok('entryDatesText synced', str_contains($entryText, $displayToday));
+$ok('exitDatesText synced', str_contains($exitText, $displayToday));
 
 if ($registration->getId()) {
     try {
@@ -77,7 +91,6 @@ if ($registration->getId()) {
         $ok('PDF generate', false, $e->getMessage());
     }
 
-    $em->removeEntity($log);
     $em->removeEntity($registration);
 }
 

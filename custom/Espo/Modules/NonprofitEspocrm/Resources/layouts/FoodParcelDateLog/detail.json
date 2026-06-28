@@ -1,11 +1,9 @@
 [
     {
-        "label": "",
+        "name": "Overview",
+        "label": "Overview",
         "rows": [
-            [
-                {"name": "entryDate"},
-                {"name": "exitDate"}
-            ]
+            [{"name": "logDate"}, false]
         ]
     }
 ]

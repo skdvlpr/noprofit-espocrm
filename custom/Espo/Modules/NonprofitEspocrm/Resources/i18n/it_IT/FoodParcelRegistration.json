@@ -11,15 +11,22 @@
         "addressCity": "Città",
         "addressPostalCode": "CAP",
         "notes": "Note",
-        "dateLogsText": "Riepilogo date",
+        "entryDates": "Date entrata",
+        "exitDates": "Date uscita",
+        "entryDatesText": "Riepilogo date entrata",
+        "exitDatesText": "Riepilogo date uscita",
         "assignedUser": "Assegnato a",
-        "teams": "Gruppi",
-        "dateLogs": "Registro date"
+        "teams": "Gruppi"
     },
     "labels": {
         "FoodParcelRegistration": "Modulo registrazione pacco spesa",
         "FoodParcelRegistrationPlural": "Moduli pacco spesa",
         "Create FoodParcelRegistration": "Crea modulo",
-        "openPdfPreview": "Apri PDF"
+        "openPdfPreview": "Apri PDF",
+        "pdfPreview": "Anteprima PDF",
+        "Dates": "Date"
+    },
+    "panelLabels": {
+        "Dates": "Date"
     }
 }
