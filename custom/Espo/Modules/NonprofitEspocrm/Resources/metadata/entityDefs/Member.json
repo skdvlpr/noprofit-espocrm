@@ -121,11 +121,6 @@
             "entity": "Case",
             "foreign": "parent",
             "audited": true
-        },
-        "contacts": {
-            "type": "hasChildren",
-            "entity": "Contact",
-            "foreign": "relatedRecord"
         }
     },
     "collection": {

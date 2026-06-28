@@ -7,28 +7,29 @@
                 "HelpSeeker",
                 "Colleague",
                 "MemberContact",
-                "AssociationRepresentative"
+                "AssociationRepresentative",
+                "Other"
             ],
             "default": "",
             "isSorted": true,
             "audited": true
         },
         "relatedRecord": {
-            "type": "linkParent",
-            "entityList": [
-                "Lead",
-                "Account",
-                "Opportunity",
-                "Member",
-                "VolunteerEmployee",
-                "Case",
-                "Document",
-                "MealCount",
-                "AssociationMealCount",
-                "Intervention",
-                "FoodParcelRegistration"
-            ],
+            "type": "link",
+            "entity": "Account",
             "audited": true
+        },
+        "account": {
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutFiltersDisabled": true,
+            "layoutMassUpdateDisabled": true
+        },
+        "accounts": {
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutFiltersDisabled": true,
+            "layoutMassUpdateDisabled": true
         },
         "address": {
             "viewMap": true
@@ -36,8 +37,8 @@
     },
     "links": {
         "relatedRecord": {
-            "type": "belongsToParent",
-            "foreign": "contacts"
+            "type": "belongsTo",
+            "entity": "Account"
         },
         "foodParcelRegistrations": {
             "type": "hasMany",

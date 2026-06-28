@@ -3,8 +3,8 @@
         "label": "",
         "rows": [
             [{"name": "name", "fullWidth": true}],
-            [{"name": "contactType"}, {"name": "relatedRecord"}],
-            [{"name": "accounts", "fullWidth": true}],
+            [{"name": "contactType", "fullWidth": true}],
+            [{"name": "relatedRecord", "fullWidth": true}],
             [{"name": "emailAddress", "fullWidth": true}],
             [{"name": "phoneNumber", "fullWidth": true}],
             [{"name": "address", "fullWidth": true}],

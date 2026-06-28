@@ -34,7 +34,7 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 
 echo "FoodParcel metadata\n";
 $ok('FoodParcelRegistration scopes.entity', ($metadata->get(['scopes', 'FoodParcelRegistration', 'entity']) ?? false) === true);
-$ok('stream disabled', ($metadata->get(['scopes', 'FoodParcelRegistration', 'stream']) ?? true) === false);
+$ok('stream enabled', ($metadata->get(['scopes', 'FoodParcelRegistration', 'stream']) ?? false) === true);
 $ok('contact required', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'contact', 'required']) ?? false) === true);
 $ok('entryDates array field', $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'entryDates', 'type']) === 'array');
 $ok('exitDates array field', $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'exitDates', 'type']) === 'array');

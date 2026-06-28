@@ -1,7 +1,7 @@
 [
     {"name": "name", "link": true},
     {"name": "contactType"},
+    {"name": "relatedRecord"},
     {"name": "emailAddress"},
-    {"name": "phoneNumber"},
-    {"name": "relatedRecord"}
+    {"name": "phoneNumber"}
 ]

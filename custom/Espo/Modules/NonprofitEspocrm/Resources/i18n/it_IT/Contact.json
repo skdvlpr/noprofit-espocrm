@@ -1,14 +1,15 @@
 {
     "fields": {
         "contactType": "Tipo contatto",
-        "relatedRecord": "Record CRM collegato"
+        "relatedRecord": "Account"
     },
     "options": {
         "contactType": {
             "HelpSeeker": "Persona in difficoltà",
             "Colleague": "Collega",
             "MemberContact": "Associato",
-            "AssociationRepresentative": "Rappresentante associazione"
+            "AssociationRepresentative": "Rappresentante associazione",
+            "Other": "Altro"
         }
     }
 }

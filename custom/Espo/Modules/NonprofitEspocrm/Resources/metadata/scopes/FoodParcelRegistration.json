@@ -10,9 +10,10 @@
         "read",
         "create",
         "edit",
-        "delete"
+        "delete",
+        "stream"
     ],
-    "stream": false,
+    "stream": true,
     "importable": true,
     "customizable": true,
     "quickViewDefaultNavigation": true,

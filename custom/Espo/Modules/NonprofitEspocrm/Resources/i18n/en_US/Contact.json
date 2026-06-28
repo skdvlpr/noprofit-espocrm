@@ -1,14 +1,15 @@
 {
     "fields": {
         "contactType": "Contact type",
-        "relatedRecord": "Related CRM record"
+        "relatedRecord": "Account"
     },
     "options": {
         "contactType": {
             "HelpSeeker": "Person seeking help",
             "Colleague": "Colleague",
             "MemberContact": "Member",
-            "AssociationRepresentative": "Association representative"
+            "AssociationRepresentative": "Association representative",
+            "Other": "Other"
         }
     }
 }

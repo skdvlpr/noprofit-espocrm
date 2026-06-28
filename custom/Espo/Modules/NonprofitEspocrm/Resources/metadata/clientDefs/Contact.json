@@ -5,7 +5,8 @@
             "HelpSeeker": "primary",
             "Colleague": "info",
             "MemberContact": "success",
-            "AssociationRepresentative": "warning"
+            "AssociationRepresentative": "warning",
+            "Other": "default"
         }
     }
 }

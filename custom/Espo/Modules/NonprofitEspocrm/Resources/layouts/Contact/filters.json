@@ -1,4 +1,16 @@
 [
-    {"name": "contactType"},
-    {"name": "relatedRecord"}
+    "contactType",
+    "relatedRecord",
+    "assignedUser",
+    "teams",
+    "createdAt",
+    "createdBy",
+    "modifiedAt",
+    "streamUpdatedAt",
+    "address",
+    "emailAddress",
+    "phoneNumber",
+    "title",
+    "targetLists",
+    "campaign"
 ]

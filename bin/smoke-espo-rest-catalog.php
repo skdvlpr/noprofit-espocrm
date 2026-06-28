@@ -221,9 +221,11 @@ $cFields = is_array($contactDefs) && isset($contactDefs['fields']) && is_array($
     ? $contactDefs['fields']
     : [];
 $ok('Metadata entityDefs.Contact has contactType', isset($cFields['contactType']));
-$ok('Metadata entityDefs.Contact has relatedRecord linkParent', ($cFields['relatedRecord']['type'] ?? '') === 'linkParent');
+$ok('Metadata entityDefs.Contact has relatedRecord Account link', ($cFields['relatedRecord']['type'] ?? '') === 'link'
+    && ($cFields['relatedRecord']['entity'] ?? '') === 'Account');
 $cOpts = $cFields['contactType']['options'] ?? [];
 $ok('contactType options include HelpSeeker', is_array($cOpts) && in_array('HelpSeeker', $cOpts, true));
+$ok('contactType options include Other', is_array($cOpts) && in_array('Other', $cOpts, true));
 
 $rContactList = $client->get('/api/v1/Contact', [
     'query' => ['select' => 'id,firstName,lastName,contactType', 'maxSize' => 5],
@@ -233,6 +235,126 @@ $ok(
     $rContactList->getStatusCode() === 200,
     'code=' . $rContactList->getStatusCode()
 );
+
+$extractLayoutFieldNames = static function (mixed $layout): array {
+    if (!is_array($layout)) {
+        return [];
+    }
+
+    $names = [];
+
+    foreach ($layout as $item) {
+        if (is_string($item)) {
+            $names[] = $item;
+            continue;
+        }
+
+        if (!is_array($item)) {
+            continue;
+        }
+
+        if (isset($item['name']) && is_string($item['name'])) {
+            $names[] = $item['name'];
+            continue;
+        }
+
+        if (isset($item['rows']) && is_array($item['rows'])) {
+            foreach ($item['rows'] as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                foreach ($row as $cell) {
+                    if (is_array($cell) && isset($cell['name']) && is_string($cell['name'])) {
+                        $names[] = $cell['name'];
+                    }
+                }
+            }
+        }
+    }
+
+    return $names;
+};
+
+foreach (['detail', 'list', 'filters'] as $layoutName) {
+    $rLayout = $client->get("/api/v1/Contact/layout/$layoutName");
+    $layoutBody = json_decode((string) $rLayout->getBody(), true);
+    $fieldNames = $extractLayoutFieldNames($layoutBody);
+
+    $ok(
+        "GET Contact/layout/$layoutName → 200",
+        $rLayout->getStatusCode() === 200,
+        'code=' . $rLayout->getStatusCode()
+    );
+    $ok(
+        "Contact layout/$layoutName includes contactType",
+        in_array('contactType', $fieldNames, true),
+        implode(',', $fieldNames)
+    );
+    $ok(
+        "Contact layout/$layoutName includes relatedRecord",
+        in_array('relatedRecord', $fieldNames, true),
+        implode(',', $fieldNames)
+    );
+    $ok(
+        "Contact layout/$layoutName excludes accounts",
+        !in_array('accounts', $fieldNames, true),
+        implode(',', $fieldNames)
+    );
+}
+
+$filtersLayout = json_decode(
+    (string) $client->get('/api/v1/Contact/layout/filters')->getBody(),
+    true
+);
+$filtersAreStrings = is_array($filtersLayout)
+    && count($filtersLayout) > 0
+    && array_reduce(
+        $filtersLayout,
+        static fn (bool $carry, mixed $item): bool => $carry && is_string($item),
+        true
+    );
+$ok(
+    'Contact filters layout uses string field names (Espo search view requirement)',
+    $filtersAreStrings,
+    is_array($filtersLayout) ? json_encode(array_slice($filtersLayout, 0, 3)) : 'invalid'
+);
+
+$styleMap = json_decode(
+    (string) $client->get('/api/v1/Metadata', ['query' => ['key' => 'clientDefs.Contact.styleMap']])->getBody(),
+    true
+);
+$ok(
+    'Metadata clientDefs.Contact.styleMap.contactType.HelpSeeker === primary',
+    ($styleMap['contactType']['HelpSeeker'] ?? null) === 'primary'
+);
+
+$oppLinks = json_decode(
+    (string) $client->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.Opportunity.links']])->getBody(),
+    true
+);
+$ok(
+    'Opportunity.links.contacts is native hasMany (not relatedRecord hasChildren)',
+    ($oppLinks['contacts']['type'] ?? '') === 'hasMany'
+        && ($oppLinks['contacts']['foreign'] ?? '') === 'opportunities'
+);
+
+echo "\n--- Entity stream (Flusso attività) ---\n";
+foreach ([
+    'Intervention',
+    'PrimaNota',
+    'FoodParcelRegistration',
+    'MealCount',
+    'AssociationMealCount',
+    'Member',
+    'VolunteerEmployee',
+    'Case',
+] as $streamEntity) {
+    $scopeRow = is_array($scopes) ? ($scopes[$streamEntity] ?? null) : null;
+    $streamEnabled = is_array($scopeRow) && (($scopeRow['stream'] ?? false) === true);
+    $aclStream = is_array($acl) ? ($acl[$streamEntity]['stream'] ?? null) : null;
+    $ok("scopes[$streamEntity].stream === true", $streamEnabled);
+    $ok("acl.table[$streamEntity].stream present", $aclStream !== null, $aclStream === null ? 'missing' : (string) $aclStream);
+}
 
 foreach (['Intervention', 'PrimaNota', 'FoodParcelRegistration'] as $entity) {
     $row = is_array($acl) ? ($acl[$entity] ?? null) : null;
