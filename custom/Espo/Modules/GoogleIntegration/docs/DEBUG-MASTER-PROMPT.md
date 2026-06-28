@@ -16,7 +16,7 @@ You are a senior EspoCRM 9.x extension developer. **Stabilize GoogleIntegration 
 
 When `plugin-notion-workspace-notion` is connected:
 
-1. Fetch project page and task page (Safehouse CRM: https://www.notion.so/34e8d469d4058027af82f2ce986a6448).
+1. Fetch **active** project + task pages from `AGENTS.md` NOTION section (Projects DB + Tasks DB). Archive only: https://www.notion.so/34e8d469d4058027af82f2ce986a6448 (Safehouse CRM Phase 1 — read-only).
 2. Append executor log and deploy notes — never overwrite prior entries.
 3. Update task status (In progress / Blocked / Done); do not close OAuth tasks until blockers below are fixed.
 4. If MCP is unavailable, **skip Notion** and tell the user — do not substitute repo files.

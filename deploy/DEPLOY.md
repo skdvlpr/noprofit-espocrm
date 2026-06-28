@@ -33,7 +33,7 @@ Settings → Secrets and variables → Actions → **Secrets**:
 | --- | --- | --- |
 | `DEPLOY_HOST` | `crm.safehouse.community` | SSH host |
 | `DEPLOY_USER` | `deploy` | SSH user that owns the docroot |
-| `DEPLOY_PATH` | `/var/www/espocrm` | Absolute path to the Espo root (the dir that contains `public/`) |
+| `DEPLOY_PATH` | `/var/www/safehouse-crm` | Absolute path to the Espo root (the dir that contains `public/`) |
 | `DEPLOY_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----…` | Private key whose public half is in the server's `~/.ssh/authorized_keys` |
 | `DEPLOY_SSH_PORT` | `22` | Optional; defaults to `22` |
 
@@ -58,7 +58,7 @@ Caddyfile:
 
 ```caddyfile
 crm.safehouse.community {
-    root * /var/www/espocrm/public
+    root * /var/www/safehouse-crm/public
     encode zstd gzip
     php_fastcgi unix//run/php/php8.3-fpm.sock
     file_server
@@ -139,6 +139,6 @@ See also AGENTS.md **EXT-007** (multiple extensions in one repo).
 rsync -rlptz --human-readable \
   -e "ssh -p 22" \
   --exclude-from=deploy/rsync-excludes.txt \
-  ./ deploy@crm.safehouse.community:/var/www/espocrm/
-ssh deploy@crm.safehouse.community 'cd /var/www/espocrm && [ -f data/config.php ] && php command.php rebuild || echo "Run /install/ first"'
+  ./ deploy@crm.safehouse.community:/var/www/safehouse-crm/
+ssh deploy@crm.safehouse.community 'cd /var/www/safehouse-crm && [ -f data/config.php ] && php command.php rebuild || echo "Run /install/ first"'
 ```
