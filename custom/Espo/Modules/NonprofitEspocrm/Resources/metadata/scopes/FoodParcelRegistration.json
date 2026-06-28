@@ -4,7 +4,7 @@
     "module": "NonprofitEspocrm",
     "object": true,
     "layouts": true,
-    "tab": false,
+    "tab": true,
     "acl": true,
     "aclActionList": [
         "read",

@@ -122,6 +122,7 @@ $expectedCrmOrder = [
     'VolunteerEmployee',
     'Case',
     'Intervention',
+    'FoodParcelRegistration',
 ];
 
 $expectedSupportOrder = ['KnowledgeBaseArticle'];
@@ -220,14 +221,18 @@ $report(
 
 $caseIndex = array_search('Case', $tabList, true);
 $interventionIndex = array_search('Intervention', $tabList, true);
+$foodParcelIndex = array_search('FoodParcelRegistration', $tabList, true);
 $report(
-    'Case and Intervention before Rendicontazione group',
+    'Case, Intervention, FoodParcelRegistration before Rendicontazione group',
     $groupIndex !== null
         && $caseIndex !== false
         && $interventionIndex !== false
+        && $foodParcelIndex !== false
         && $caseIndex < $groupIndex
         && $interventionIndex < $groupIndex
+        && $foodParcelIndex < $groupIndex
         && $caseIndex < $interventionIndex
+        && $interventionIndex < $foodParcelIndex
 );
 
 $em = $container->get('entityManager');

@@ -343,7 +343,7 @@ class Installer
     {
         $without = array_values(array_filter(
             $tabList,
-            static fn ($item): bool => !in_array($item, ['Case', 'Intervention'], true)
+            static fn ($item): bool => !in_array($item, ['Case', 'Intervention', 'FoodParcelRegistration'], true)
         ));
 
         foreach ($without as $i => $item) {
@@ -354,7 +354,7 @@ class Installer
             ) {
                 return array_merge(
                     array_slice($without, 0, $i),
-                    ['Case', 'Intervention'],
+                    ['Case', 'Intervention', 'FoodParcelRegistration'],
                     array_slice($without, $i)
                 );
             }
@@ -364,13 +364,13 @@ class Installer
             if ($item === 'VolunteerEmployee') {
                 return array_merge(
                     array_slice($without, 0, $i + 1),
-                    ['Case', 'Intervention'],
+                    ['Case', 'Intervention', 'FoodParcelRegistration'],
                     array_slice($without, $i + 1)
                 );
             }
         }
 
-        return array_merge($without, ['Case', 'Intervention']);
+        return array_merge($without, ['Case', 'Intervention', 'FoodParcelRegistration']);
     }
 
     /**

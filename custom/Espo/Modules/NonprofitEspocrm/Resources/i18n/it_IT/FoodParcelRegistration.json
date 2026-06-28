@@ -19,9 +19,9 @@
         "teams": "Gruppi"
     },
     "labels": {
-        "FoodParcelRegistration": "Modulo registrazione pacco spesa",
-        "FoodParcelRegistrationPlural": "Moduli pacco spesa",
-        "Create FoodParcelRegistration": "Crea modulo",
+        "FoodParcelRegistration": "Registrazione pacco spesa",
+        "FoodParcelRegistrationPlural": "Registrazioni pacco spesa",
+        "Create FoodParcelRegistration": "Crea registrazione",
         "openPdfPreview": "Apri PDF",
         "pdfPreview": "Anteprima PDF",
         "Dates": "Date"

@@ -11,7 +11,7 @@
         "Case": "Segnalazione",
         "Intervention": "Intervento",
         "PrimaNota": "Prima nota",
-        "FoodParcelRegistration": "Modulo pacco spesa"
+        "FoodParcelRegistration": "Registrazione pacco spesa"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -25,7 +25,7 @@
         "Case": "Segnalazioni",
         "Intervention": "Interventi",
         "PrimaNota": "Prima nota",
-        "FoodParcelRegistration": "Moduli pacco spesa"
+        "FoodParcelRegistration": "Registrazioni pacco spesa"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
