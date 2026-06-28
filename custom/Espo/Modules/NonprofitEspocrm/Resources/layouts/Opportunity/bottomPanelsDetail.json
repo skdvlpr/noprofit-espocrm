@@ -1,0 +1,27 @@
+{
+    "_tabBreak_movimenti": {
+        "index": 0,
+        "tabBreak": true,
+        "tabLabel": "Movimenti"
+    },
+    "primaNotaEntries": {
+        "index": 1
+    },
+    "_tabBreak_documents": {
+        "index": 2,
+        "tabBreak": true,
+        "tabLabel": "$Documents"
+    },
+    "documents": {
+        "index": 3
+    },
+    "_tabBreak_stream": {
+        "index": 4,
+        "tabBreak": true,
+        "tabLabel": "$Stream"
+    },
+    "stream": {
+        "sticked": false,
+        "index": 5
+    }
+}

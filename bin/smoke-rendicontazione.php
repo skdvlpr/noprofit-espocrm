@@ -74,6 +74,11 @@ $ok(
     'PrimaNota sum attributes',
     $primaProfile !== null && $primaProfile->sumAttributes === ['amountIn', 'amountOut']
 );
+$listSmallPath = dirname(__DIR__) . '/custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/PrimaNota/listSmall.json';
+$listSmall = json_decode((string) file_get_contents($listSmallPath), true);
+$listSmallNames = is_array($listSmall) ? array_column($listSmall, 'name') : [];
+$ok('PrimaNota listSmall includes amount', in_array('amount', $listSmallNames, true));
+$ok('PrimaNota listSmall includes modelDClassification', in_array('modelDClassification', $listSmallNames, true));
 
 echo "\nReportingDateRange\n";
 

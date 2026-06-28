@@ -15,6 +15,7 @@
     "links": {
         "contacts": "Contatti",
         "documents": "Documenti",
+        "primaNotaEntries": "Movimenti",
         "campaign": "Campagna",
         "originalLead": "Lead Originale"
     },

@@ -1,0 +1,5 @@
+[
+    {"name": "name", "link": true},
+    {"name": "amount", "width": 14},
+    {"name": "modelDClassification", "width": 16}
+]

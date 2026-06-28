@@ -1,5 +1,7 @@
 define('nonprofit-espocrm:views/food-parcel-registration/record-contact-sync', [], function () {
 
+    const IDENTITY_FIELD_NAMES = ['taxCode', 'phone', 'address'];
+
     const formatContactPhones = contact => {
         const rows = contact.phoneNumberData;
 
@@ -32,14 +34,30 @@ define('nonprofit-espocrm:views/food-parcel-registration/record-contact-sync', [
 
         setupContactIdentitySync() {
             this.listenTo(this.model, 'change:contactId', () => {
-                this.syncContactIdentityFromContact();
+                clearTimeout(this._contactSyncTimeout);
+
+                this._contactSyncTimeout = setTimeout(() => {
+                    this.syncContactIdentityFromContact();
+                }, 0);
             });
         },
 
         afterRenderContactIdentitySync() {
             if (this.model.get('contactId')) {
-                this.syncContactIdentityFromContact();
+                setTimeout(() => {
+                    this.syncContactIdentityFromContact();
+                }, 0);
             }
+        },
+
+        reRenderIdentityFields() {
+            IDENTITY_FIELD_NAMES.forEach(name => {
+                const view = this.getFieldView(name);
+
+                if (view && view.isRendered && view.isRendered()) {
+                    view.reRender();
+                }
+            });
         },
 
         syncContactIdentityFromContact() {
@@ -54,7 +72,9 @@ define('nonprofit-espocrm:views/food-parcel-registration/record-contact-sync', [
                     addressState: null,
                     addressCountry: null,
                     addressPostalCode: null,
-                }, {ui: true});
+                }, {ui: true, skipReRender: true});
+
+                this.reRenderIdentityFields();
 
                 return;
             }
@@ -68,7 +88,9 @@ define('nonprofit-espocrm:views/food-parcel-registration/record-contact-sync', [
                     addressState: contact.addressState || null,
                     addressCountry: contact.addressCountry || null,
                     addressPostalCode: contact.addressPostalCode || null,
-                }, {ui: true});
+                }, {ui: true, skipReRender: true});
+
+                this.reRenderIdentityFields();
             });
         },
     };

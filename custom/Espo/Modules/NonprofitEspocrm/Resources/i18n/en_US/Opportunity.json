@@ -15,6 +15,7 @@
     "links": {
         "contacts": "Contacts",
         "documents": "Documents",
+        "primaNotaEntries": "Ledger entries",
         "campaign": "Campaign",
         "originalLead": "Original Lead"
     },

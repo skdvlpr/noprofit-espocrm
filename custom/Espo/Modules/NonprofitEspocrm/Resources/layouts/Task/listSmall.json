@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "category", "width": 18},
+    {"name": "status", "width": 16},
+    {"name": "priority", "width": 14},
+    {"name": "dateEnd", "width": 16}
+]

@@ -1,0 +1,19 @@
+{
+    "_tabBreak_stream": {
+        "index": 0,
+        "tabBreak": true,
+        "tabLabel": "$Stream"
+    },
+    "stream": {
+        "sticked": false,
+        "index": 1
+    },
+    "_tabBreak_tasks": {
+        "index": 2,
+        "tabBreak": true,
+        "tabLabel": "Task"
+    },
+    "tasks": {
+        "index": 3
+    }
+}

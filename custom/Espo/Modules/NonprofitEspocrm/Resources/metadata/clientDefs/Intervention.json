@@ -6,6 +6,20 @@
         "detail": "views/record/detail",
         "list": "views/record/list"
     },
+    "sidePanels": {
+        "detail": [
+            {
+                "name": "tasks",
+                "reference": "tasks"
+            }
+        ],
+        "detailSmall": [
+            {
+                "name": "tasks",
+                "reference": "tasks"
+            }
+        ]
+    },
     "relationshipPanels": {
         "tasks": {
             "create": true,

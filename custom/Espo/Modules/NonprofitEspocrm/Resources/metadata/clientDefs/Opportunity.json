@@ -5,6 +5,14 @@
     },
     "color": "#54b874",
     "iconClass": "fas fa-hand-holding-usd",
+    "relationshipPanels": {
+        "primaNotaEntries": {
+            "create": true,
+            "select": true,
+            "orderBy": "transactionDate",
+            "orderDirection": "desc"
+        }
+    },
     "dynamicLogic": {
         "fields": {
             "fundraisingProgress": {

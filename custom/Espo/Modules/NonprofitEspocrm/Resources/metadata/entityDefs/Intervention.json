@@ -20,7 +20,14 @@
                 "Cooperation"
             ],
             "isSorted": true,
-            "audited": true
+            "audited": true,
+            "style": {
+                "StreetUnit": "primary",
+                "DigitalDesk": "info",
+                "LegalDesk": "warning",
+                "HumanitarianAid": "success",
+                "Cooperation": "default"
+            }
         },
         "interventionDate": {
             "type": "date",
@@ -134,7 +141,8 @@
         "tasks": {
             "type": "hasChildren",
             "entity": "Task",
-            "foreign": "parent"
+            "foreign": "parent",
+            "audited": true
         }
     },
     "collection": {

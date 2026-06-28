@@ -61,6 +61,7 @@ $templateBody = $template ? (string) $template->get('body') : '';
 $ok('PDF template handlebars syntax', str_contains($templateBody, '{{{entryDatesText}}}') && str_contains($templateBody, '{{{exitDatesText}}}'));
 $ok('PDF template uses Indirizzo label', str_contains($templateBody, 'Indirizzo:'));
 $ok('PDF template uses phonePdf block', str_contains($templateBody, '{{{phonePdf}}}'));
+$ok('PDF template uses notesPdf block', str_contains($templateBody, '{{{notesPdf}}}'));
 $ok('PDF template provisioned', $template !== null);
 
 $contact = $em->getNewEntity('Contact');
@@ -97,7 +98,7 @@ $registration = $em->getNewEntity('FoodParcelRegistration');
 $registration->set([
     'contactId' => $contact->getId(),
     'household' => 3,
-    'notes' => 'SMOKE food parcel',
+    'notes' => 'SMOKE food parcel<br />second line',
     'entryDates' => [$today],
     'exitDates' => [$today],
 ]);
@@ -111,6 +112,10 @@ $ok('phone synced all contact numbers', str_contains($phoneText, '+39 055 123456
 $ok('addressStreet synced from contact', $registration->get('addressStreet') === 'Via Smoke 12');
 $ok('addressLine synced from contact', str_contains((string) $registration->get('addressLine'), 'Via Smoke 12'));
 $ok('phonePdf synced from contact', str_contains((string) $registration->get('phonePdf'), '+39 055 7654321'));
+$notesPdf = (string) $registration->get('notesPdf');
+$ok('notesPdf strips raw br tag', !str_contains($notesPdf, '<br />') && !str_contains($notesPdf, '&lt;br'));
+$ok('notesPdf keeps note text', str_contains($notesPdf, 'SMOKE food parcel') && str_contains($notesPdf, 'second line'));
+$ok('notesPdf uses compact div layout', str_contains($notesPdf, 'line-height:1.35') && !str_contains($notesPdf, '<br'));
 
 $entryText = (string) $registration->get('entryDatesText');
 $exitText = (string) $registration->get('exitDatesText');

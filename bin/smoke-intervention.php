@@ -38,6 +38,11 @@ $ok('Task parent includes Intervention', in_array(
     $metadata->get(['entityDefs', 'Task', 'fields', 'parent', 'entityList']) ?? [],
     true
 ));
+$ok('sidePanels tasks reference', ($metadata->get(['clientDefs', 'Intervention', 'sidePanels', 'detail', 0, 'reference']) ?? '') === 'tasks');
+$ok('department style map', is_array($metadata->get(['entityDefs', 'Intervention', 'fields', 'department', 'style'])));
+$listSmallPath = dirname(__DIR__) . '/custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/Task/listSmall.json';
+$listSmall = json_decode((string) file_get_contents($listSmallPath), true);
+$ok('Task listSmall includes category', is_array($listSmall) && in_array('category', array_column($listSmall, 'name'), true));
 
 echo "\nIntervention CRUD\n";
 $contact = $em->getNewEntity('Contact');
@@ -59,6 +64,7 @@ $entity->set([
 $em->saveEntity($entity);
 $ok('create', $entity->getId() !== null);
 $ok('formula name', is_string($entity->get('name')) && $entity->get('name') !== '');
+$ok('formula name translated department', str_contains((string) $entity->get('name'), 'Street Unit') || str_contains((string) $entity->get('name'), 'Unità'));
 
 if ($entity->getId()) {
     $em->removeEntity($entity);

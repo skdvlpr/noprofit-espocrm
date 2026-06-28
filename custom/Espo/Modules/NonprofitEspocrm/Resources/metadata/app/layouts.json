@@ -60,6 +60,9 @@
         },
         "massUpdate": {
             "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
         }
     },
     "Member": {
@@ -173,6 +176,9 @@
         "list": {
             "module": "NonprofitEspocrm"
         },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
         "filters": {
             "module": "NonprofitEspocrm"
         },
@@ -191,6 +197,9 @@
             "module": "NonprofitEspocrm"
         },
         "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
             "module": "NonprofitEspocrm"
         },
         "filters": {
@@ -228,6 +237,9 @@
             "module": "NonprofitEspocrm"
         },
         "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
             "module": "NonprofitEspocrm"
         }
     },

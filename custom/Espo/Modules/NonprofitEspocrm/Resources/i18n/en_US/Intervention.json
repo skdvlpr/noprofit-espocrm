@@ -30,5 +30,8 @@
             "HumanitarianAid": "Humanitarian Aid",
             "Cooperation": "Cooperation"
         }
+    },
+    "links": {
+        "tasks": "Tasks"
     }
 }

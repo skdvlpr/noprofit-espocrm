@@ -15,7 +15,7 @@
         "parent": "Record collegato",
         "assignedUser": "Assegnato a",
         "teams": "Gruppi",
-        "tasks": "Attività"
+        "tasks": "Task"
     },
     "labels": {
         "Intervention": "Intervento",
@@ -30,5 +30,8 @@
             "HumanitarianAid": "Aiuti umanitari",
             "Cooperation": "Cooperazione"
         }
+    },
+    "links": {
+        "tasks": "Task"
     }
 }

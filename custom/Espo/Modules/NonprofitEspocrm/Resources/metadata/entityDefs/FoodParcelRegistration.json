@@ -7,7 +7,8 @@
         },
         "contact": {
             "type": "link",
-            "required": true
+            "required": true,
+            "view": "nonprofit-espocrm:views/food-parcel-registration/fields/contact-link"
         },
         "taxCode": {
             "type": "varchar",
@@ -65,6 +66,11 @@
             "utility": true
         },
         "phonePdf": {
+            "type": "text",
+            "readOnly": true,
+            "utility": true
+        },
+        "notesPdf": {
             "type": "text",
             "readOnly": true,
             "utility": true
