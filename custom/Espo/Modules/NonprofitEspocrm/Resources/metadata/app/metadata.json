@@ -1,5 +1,6 @@
 {
     "additionalBuilderClassNameList": [
-        "Espo\\Modules\\NonprofitEspocrm\\Core\\Utils\\Metadata\\AdditionalBuilder\\QuickViewDefaultNavigation"
+        "Espo\\Modules\\NonprofitEspocrm\\Core\\Utils\\Metadata\\AdditionalBuilder\\QuickViewDefaultNavigation",
+        "Espo\\Modules\\NonprofitEspocrm\\Core\\Utils\\Metadata\\AdditionalBuilder\\DefaultAssignedUser"
     ]
 }
