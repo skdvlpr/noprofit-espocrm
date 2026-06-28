@@ -10,14 +10,11 @@
             "buttons": [
                 {
                     "labelTranslation": "Global.labels.reportingEmailExport",
-                    "acl": "create",
+                    "name": "reportingEmailExport",
+                    "style": "default",
+                    "acl": "read",
                     "handler": "nonprofit-espocrm:handlers/reporting/email-export",
-                    "initFunction": "initReportingEmailExport",
-                    "actionFunction": "reportingEmailExport",
-                    "checkVisibilityFunction": "isReportingEmailExportVisible",
-                    "data": {
-                        "scope": "PrimaNota"
-                    }
+                    "actionFunction": "send"
                 }
             ]
         }

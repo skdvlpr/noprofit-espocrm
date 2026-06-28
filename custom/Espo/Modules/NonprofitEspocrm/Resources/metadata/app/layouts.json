@@ -140,6 +140,46 @@
             "module": "NonprofitEspocrm"
         }
     },
+    "AssociationMealCount": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "PrimaNota": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        },
+        "massUpdate": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        }
+    },
     "Task": {
         "detail": {
             "module": "NonprofitEspocrm"
