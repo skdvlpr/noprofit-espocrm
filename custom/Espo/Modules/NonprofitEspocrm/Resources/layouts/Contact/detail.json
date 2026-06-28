@@ -5,6 +5,7 @@
             [{"name": "name"}, {"name": "contactType"}],
             [{"name": "relatedRecord"}, false],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
+            [{"name": "taxCode"}, false],
             [{"name": "address"}, false],
             [{"name": "description", "fullWidth": true}]
         ]

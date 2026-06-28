@@ -33,6 +33,14 @@
         },
         "address": {
             "viewMap": true
+        },
+        "taxCode": {
+            "type": "varchar",
+            "maxLength": 16,
+            "trim": true,
+            "validatorClassNameList": [
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
+            ]
         }
     },
     "links": {

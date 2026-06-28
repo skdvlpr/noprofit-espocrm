@@ -1,4 +1,7 @@
-define('nonprofit-espocrm:views/food-parcel-registration/detail', ['views/record/detail'], function (Dep) {
+define('nonprofit-espocrm:views/food-parcel-registration/detail', [
+    'views/record/detail',
+    'nonprofit-espocrm:views/food-parcel-registration/record-contact-sync',
+], function (Dep, RecordContactSync) {
 
     return Dep.extend({
 
@@ -10,6 +13,14 @@ define('nonprofit-espocrm:views/food-parcel-registration/detail', ['views/record
                     this.trigger('panel:pdfPreview:refresh');
                 }
             });
+
+            RecordContactSync.setupContactIdentitySync.call(this);
+        },
+
+        afterRender() {
+            Dep.prototype.afterRender.call(this);
+
+            RecordContactSync.afterRenderContactIdentitySync.call(this);
         },
     });
 });

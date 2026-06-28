@@ -11,7 +11,8 @@
         },
         "taxCode": {
             "type": "varchar",
-            "maxLength": 16
+            "maxLength": 16,
+            "readOnly": true
         },
         "birthPlace": {
             "type": "varchar",
@@ -23,12 +24,13 @@
             "max": 100
         },
         "phone": {
-            "type": "varchar",
-            "maxLength": 50
+            "type": "text",
+            "readOnly": true
         },
         "address": {
             "type": "address",
-            "viewMap": true
+            "viewMap": true,
+            "readOnly": true
         },
         "notes": {
             "type": "text"
@@ -53,6 +55,16 @@
             "utility": true
         },
         "exitDatesText": {
+            "type": "text",
+            "readOnly": true,
+            "utility": true
+        },
+        "addressLine": {
+            "type": "text",
+            "readOnly": true,
+            "utility": true
+        },
+        "phonePdf": {
             "type": "text",
             "readOnly": true,
             "utility": true

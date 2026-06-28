@@ -25,6 +25,7 @@ class FoodParcelPdfService
         private PdfService $pdfService,
         private Acl $acl,
         private Config $config,
+        private FoodParcelContactSync $foodParcelContactSync,
     ) {}
 
     /**
@@ -45,6 +46,15 @@ class FoodParcelPdfService
         if (!$template) {
             throw new NotFound('PDF template not found.');
         }
+
+        $registration = $this->entityManager->getEntityById('FoodParcelRegistration', $id);
+
+        if ($registration === null) {
+            throw new NotFound();
+        }
+
+        $this->foodParcelContactSync->syncFromContactId($registration);
+        $this->entityManager->saveEntity($registration);
 
         $result = $this->pdfService->generate(
             'FoodParcelRegistration',

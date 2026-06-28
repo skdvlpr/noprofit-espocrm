@@ -3,7 +3,8 @@
     "color": "#c0392b",
     "iconClass": "fas fa-shopping-basket",
     "recordViews": {
-        "detail": "nonprofit-espocrm:views/food-parcel-registration/detail"
+        "detail": "nonprofit-espocrm:views/food-parcel-registration/detail",
+        "edit": "nonprofit-espocrm:views/food-parcel-registration/edit"
     },
     "bottomPanels": {
         "detail": [

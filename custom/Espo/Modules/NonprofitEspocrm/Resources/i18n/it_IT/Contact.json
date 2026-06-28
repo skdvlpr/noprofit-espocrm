@@ -1,7 +1,8 @@
 {
     "fields": {
         "contactType": "Tipo contatto",
-        "relatedRecord": "Account"
+        "relatedRecord": "Account",
+        "taxCode": "Codice Fiscale"
     },
     "options": {
         "contactType": {
