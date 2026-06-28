@@ -3,9 +3,12 @@
         "name": "Nome",
         "description": "Descrizione (causale movimento)",
         "subjectName": "Soggetto pagatore / beneficiario",
+        "entryType": "Tipo movimento",
+        "amount": "Importo",
         "amountIn": "Entrata",
         "amountOut": "Uscita",
         "managementBalance": "Avanzo/disavanzo di gestione",
+        "internalClassification": "Classificazione interna",
         "modelDClassification": "Classificazione modello D",
         "financing": "Finanziamento",
         "transactionDate": "Data",
@@ -18,7 +21,11 @@
         "Create PrimaNota": "Crea movimento"
     },
     "options": {
-        "modelDClassification": {
+        "entryType": {
+            "Income": "Entrata",
+            "Expense": "Uscita"
+        },
+        "internalClassification": {
             "Donation": "Donazione",
             "Grant": "Contributo / finanziamento",
             "OperatingExpense": "Spesa operativa",
@@ -26,6 +33,13 @@
             "Utilities": "Utenze",
             "Supplies": "Materiali",
             "Other": "Altro"
+        },
+        "modelDClassification": {
+            "A": "A — Uscite e Entrate da attività di interesse generale",
+            "B": "B — Uscite e Entrate da attività diverse",
+            "C": "C — Uscite e Entrate da attività di raccolta fondi",
+            "D": "D — Uscite e Entrate da attività finanziarie e patrimoniali",
+            "E": "E — Uscite e Entrate di supporto generale"
         }
     }
 }

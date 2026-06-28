@@ -10,6 +10,10 @@
                 {"name": "taxCode"}
             ],
             [
+                {"name": "emailAddress"},
+                {"name": "phoneNumber"}
+            ],
+            [
                 {"name": "birthDate"},
                 {"name": "birthPlace"}
             ],
@@ -22,6 +26,9 @@
             ],
             [
                 {"name": "positionsHeld", "fullWidth": true}
+            ],
+            [
+                {"name": "notes", "fullWidth": true}
             ]
         ]
     }

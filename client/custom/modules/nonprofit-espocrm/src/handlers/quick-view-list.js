@@ -9,6 +9,10 @@ define('nonprofit-espocrm:handlers/quick-view-list', [
         }
 
         process() {
+            if (!QuickViewNavigation.isRelationshipList(this.view)) {
+                return Promise.resolve();
+            }
+
             QuickViewNavigation.ensureEnabled(this.view);
             QuickViewNavigation.patchListLinkClick(this.view);
             QuickViewNavigation.bindAfterSaveRefresh(this.view);

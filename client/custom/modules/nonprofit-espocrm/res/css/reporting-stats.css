@@ -11,6 +11,21 @@
 :root {
     --sh-reporting-cell-tint: 20%;
     --sh-reporting-rule-tint: 42%;
+    /*
+     * Semantic reporting colors — MUST stay aligned with Conteggio pasti banner accent.
+     * Expense / Uscita: same red as .safehouse-reporting-stats-value--accent
+     * Income / Entrata: olive-green from Safehouse success hue (not pale lime state-success-text)
+     */
+    --sh-reporting-expense-color: var(--brand-primary, var(--link-color, #c0392b));
+    --sh-reporting-income-color: #65a30d;
+}
+
+body[data-theme-name="SafehouseAurora"] {
+    --sh-reporting-income-color: #84cc16;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] {
+    --sh-reporting-income-color: #4d7c0f;
 }
 .safehouse-reporting-stats-period-grid {
     display: grid;
@@ -148,15 +163,123 @@
     }
 }
 
-/* Prima Nota list: income green, expense red (theme tokens) */
+/* Prima Nota: income green, expense red — same tokens as Conteggio pasti accent */
+.safehouse-reporting-stats-value--income {
+    color: var(--sh-reporting-income-color);
+    font-weight: 600;
+}
+
+.safehouse-reporting-stats-value--expense {
+    color: var(--sh-reporting-expense-color);
+    font-weight: 600;
+}
+
+.safehouse-reporting-stats-value--balance {
+    color: var(--text-color, inherit);
+    font-weight: 600;
+}
+
 .prima-nota-amount-in,
-.prima-nota-amount-in .field {
-    color: var(--state-success-text, #27ae60);
+.prima-nota-amount-in .field,
+.prima-nota-amount-in a {
+    color: var(--sh-reporting-income-color) !important;
+    font-weight: 600;
 }
 
 .prima-nota-amount-out,
-.prima-nota-amount-out .field {
-    color: var(--state-danger-text, #c0392b);
+.prima-nota-amount-out .field,
+.prima-nota-amount-out a {
+    color: var(--sh-reporting-expense-color) !important;
+    font-weight: 600;
+}
+
+/* Entry type dropdown — Entrata / Uscita */
+select.prima-nota-entry-type-income,
+.field.prima-nota-entry-type-income select,
+.prima-nota-entry-type-income select {
+    color: var(--sh-reporting-income-color);
+    border-color: color-mix(in srgb, var(--sh-reporting-income-color) 50%, transparent);
+    background-color: color-mix(in srgb, var(--sh-reporting-income-color) 14%, transparent);
+    font-weight: 600;
+}
+
+select.prima-nota-entry-type-expense,
+.field.prima-nota-entry-type-expense select,
+.prima-nota-entry-type-expense select {
+    color: var(--sh-reporting-expense-color);
+    border-color: color-mix(in srgb, var(--sh-reporting-expense-color) 50%, transparent);
+    background-color: color-mix(in srgb, var(--sh-reporting-expense-color) 14%, transparent);
+    font-weight: 600;
+}
+
+select.prima-nota-entry-type-income option[value="Income"],
+select.prima-nota-entry-type-expense option[value="Income"] {
+    color: var(--sh-reporting-income-color);
+    background-color: var(--panel-bg, #1a1a1a);
+}
+
+select.prima-nota-entry-type-income option[value="Expense"],
+select.prima-nota-entry-type-expense option[value="Expense"] {
+    color: var(--sh-reporting-expense-color);
+    background-color: var(--panel-bg, #1a1a1a);
+}
+
+@supports not (background: color-mix(in srgb, #000 10%, transparent)) {
+    select.prima-nota-entry-type-income,
+    .field.prima-nota-entry-type-income select {
+        background-color: rgba(101, 163, 13, 0.12);
+    }
+
+    select.prima-nota-entry-type-expense,
+    .field.prima-nota-entry-type-expense select {
+        background-color: rgba(220, 38, 38, 0.12);
+    }
+}
+
+.fundraising-progress-field {
+    margin: 4px 0 8px;
+}
+
+.fundraising-progress-label {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.fundraising-progress-amounts {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.fundraising-progress-collected {
+    color: var(--text-color, inherit);
+}
+
+.fundraising-progress-target {
+    color: var(--text-muted-color, var(--gray-soft, #9ca3af));
+    font-weight: 500;
+}
+
+.fundraising-progress-bar {
+    height: 10px;
+    margin-bottom: 0;
+    border-radius: var(--border-radius, 4px);
+    background-color: var(--panel-default-border, rgba(127, 127, 127, 0.2));
+    box-shadow: none;
+}
+
+.fundraising-progress-bar .fundraising-progress-fill {
+    background-color: color-mix(
+        in srgb,
+        var(--link-color, var(--brand-primary, #6366f1)) 42%,
+        var(--panel-default-bg, var(--secondary-bg-color, #374151)) 58%
+    );
+    color: transparent;
+    font-size: 0;
+    line-height: 10px;
+    min-width: 0;
+    border-radius: inherit;
+    box-shadow: none;
 }
 
 .food-parcel-pdf-frame {

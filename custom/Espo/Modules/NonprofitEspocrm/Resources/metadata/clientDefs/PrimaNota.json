@@ -18,35 +18,5 @@
                 }
             ]
         }
-    },
-    "dynamicLogic": {
-        "fields": {
-            "amountIn": {
-                "style": {
-                    "success": {
-                        "conditionGroup": [
-                            {
-                                "type": "greaterThan",
-                                "attribute": "amountIn",
-                                "value": 0
-                            }
-                        ]
-                    }
-                }
-            },
-            "amountOut": {
-                "style": {
-                    "danger": {
-                        "conditionGroup": [
-                            {
-                                "type": "greaterThan",
-                                "attribute": "amountOut",
-                                "value": 0
-                            }
-                        ]
-                    }
-                }
-            }
-        }
     }
 }

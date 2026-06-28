@@ -10,8 +10,8 @@
                 {"name": "status"}
             ],
             [
-                {"name": "assignedUser"},
-                false
+                {"name": "contractType"},
+                {"name": "assignedUser"}
             ],
             [
                 {"name": "emailAddress", "fullWidth": true}
@@ -30,6 +30,9 @@
             [
                 {"name": "weeklyHours"},
                 {"name": "monthlyHours"}
+            ],
+            [
+                {"name": "extra", "fullWidth": true}
             ]
         ]
     }

@@ -1,5 +1,9 @@
 define('nonprofit-espocrm:lib/quick-view-navigation', [], function () {
 
+    /** Relationship panel lists use listSmall + buttonsDisabled. */
+    const isRelationshipList = view =>
+        view.options?.buttonsDisabled === true || view.layoutName === 'listSmall';
+
     const ensureEnabled = view => {
         view.quickDetailDisabled = false;
         view.quickEditDisabled = false;
@@ -87,6 +91,7 @@ define('nonprofit-espocrm:lib/quick-view-navigation', [], function () {
     };
 
     return {
+        isRelationshipList,
         ensureEnabled,
         patchListLinkClick,
         patchKanbanLinkClick,

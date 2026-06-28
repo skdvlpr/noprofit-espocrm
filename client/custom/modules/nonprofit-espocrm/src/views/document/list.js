@@ -7,8 +7,12 @@ define('nonprofit-espocrm:views/document/list', [
 
         setup() {
             Dep.prototype.setup.apply(this, arguments);
-            QuickViewNavigation.ensureEnabled(this);
-            QuickViewNavigation.patchListLinkClick(this);
+
+            if (QuickViewNavigation.isRelationshipList(this)) {
+                QuickViewNavigation.ensureEnabled(this);
+                QuickViewNavigation.patchListLinkClick(this);
+            }
+
             QuickViewNavigation.bindAfterSaveRefresh(this);
         },
     });

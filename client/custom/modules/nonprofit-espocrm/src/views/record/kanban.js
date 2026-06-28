@@ -4,9 +4,6 @@ define('nonprofit-espocrm:views/record/kanban', ['views/record/kanban'], functio
 
         itemViewName: 'nonprofit-espocrm:views/record/kanban-item',
 
-        quickDetailDisabled: false,
-        quickEditDisabled: false,
-
         setup() {
             Dep.prototype.setup.apply(this, arguments);
 

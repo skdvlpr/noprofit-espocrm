@@ -1,0 +1,11 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "account"}, {"name": "date"}],
+            [{"name": "portionCount"}, false],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "assignedUser"}, {"name": "teams"}]
+        ]
+    }
+]

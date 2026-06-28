@@ -18,9 +18,11 @@
             ],
             [
                 {
-                    "name": "assignedUser"
+                    "name": "contractType"
                 },
-                false
+                {
+                    "name": "assignedUser"
+                }
             ],
             [
                 {
@@ -54,6 +56,12 @@
                 },
                 {
                     "name": "monthlyHours"
+                }
+            ],
+            [
+                {
+                    "name": "extra",
+                    "fullWidth": true
                 }
             ]
         ]

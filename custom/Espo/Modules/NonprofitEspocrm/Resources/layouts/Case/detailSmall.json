@@ -1,0 +1,13 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name"}, {"name": "number"}],
+            [{"name": "parent"}, {"name": "type"}],
+            [{"name": "status"}, {"name": "priority"}],
+            [{"name": "assignedUser"}, {"name": "teams"}],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "attachments", "fullWidth": true}]
+        ]
+    }
+]

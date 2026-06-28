@@ -20,6 +20,12 @@
             ],
             [
                 {
+                    "name": "fundraisingProgress",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
                     "name": "presentationDate"
                 },
                 {

@@ -1,3 +1,3 @@
 {
-    "beforeSaveCustomScript": "if (transactionDate == null) {\n    transactionDate = datetime\\today();\n}\nif (amountIn == null) {\n    amountIn = 0;\n}\nif (amountOut == null) {\n    amountOut = 0;\n}\nname = string\\concatenate(transactionDate, ' — ', description);"
+    "beforeSaveCustomScript": "if (transactionDate == null) {\n    transactionDate = datetime\\today();\n}\nif (amount == null) {\n    amount = 0;\n}\nif (entryType == 'Income') {\n    amountIn = amount;\n    amountOut = 0;\n} else if (entryType == 'Expense') {\n    amountOut = amount;\n    amountIn = 0;\n}\nname = string\\concatenate(transactionDate, ' — ', description);"
 }

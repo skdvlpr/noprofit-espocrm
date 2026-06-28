@@ -3,9 +3,12 @@
         "name": "Name",
         "description": "Description (movement reason)",
         "subjectName": "Payer / Beneficiary",
+        "entryType": "Type",
+        "amount": "Amount",
         "amountIn": "Income",
         "amountOut": "Expense",
         "managementBalance": "Management surplus/deficit",
+        "internalClassification": "Internal classification",
         "modelDClassification": "Model D classification",
         "financing": "Grant / Funding",
         "transactionDate": "Date",
@@ -18,7 +21,11 @@
         "Create PrimaNota": "Create ledger entry"
     },
     "options": {
-        "modelDClassification": {
+        "entryType": {
+            "Income": "Income",
+            "Expense": "Expense"
+        },
+        "internalClassification": {
             "Donation": "Donation",
             "Grant": "Grant",
             "OperatingExpense": "Operating expense",
@@ -26,6 +33,13 @@
             "Utilities": "Utilities",
             "Supplies": "Supplies",
             "Other": "Other"
+        },
+        "modelDClassification": {
+            "A": "A — Income and expenses from general-interest activities",
+            "B": "B — Income and expenses from other activities",
+            "C": "C — Income and expenses from fundraising activities",
+            "D": "D — Income and expenses from financial and asset activities",
+            "E": "E — General support income and expenses"
         }
     }
 }

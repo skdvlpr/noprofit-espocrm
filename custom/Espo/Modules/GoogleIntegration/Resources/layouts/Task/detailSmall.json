@@ -4,8 +4,10 @@
         "rows": [
             [
                 {
-                    "name": "name",
-                    "fullWidth": true
+                    "name": "name"
+                },
+                {
+                    "name": "parent"
                 }
             ],
             [
@@ -18,26 +20,24 @@
             ],
             [
                 {
-                    "name": "dateStart",
-                    "fullWidth": true
+                    "name": "category"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "dateStart"
+                },
+                {
+                    "name": "dateCompleted"
                 }
             ],
             [
                 {
-                    "name": "dateEnd",
-                    "fullWidth": true
-                }
-            ],
-            [
+                    "name": "dateEnd"
+                },
                 {
-                    "name": "parent",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "reminders",
-                    "fullWidth": true
+                    "name": "assignedUser"
                 }
             ],
             [

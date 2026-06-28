@@ -47,6 +47,7 @@ define('nonprofit-espocrm:views/record/kanban-item', ['views/record/kanban-item'
         Preparation: '📝',
         Proposal: '📤',
         Negotiation: '🤝',
+        Fundraising: '💸',
         'Closed Won': '🎉',
         'Closed Lost': '📉',
     };
@@ -57,35 +58,6 @@ define('nonprofit-espocrm:views/record/kanban-item', ['views/record/kanban-item'
     return Dep.extend({
 
         template: 'nonprofit-espocrm:record/kanban-item',
-
-        events: {
-            'click .kanban-title-value a.link': function (e) {
-                this.actionOpenQuickView(e);
-            },
-        },
-
-        actionOpenQuickView(e) {
-            if (e.ctrlKey || e.metaKey || e.shiftKey) {
-                return;
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            let listView = this.getParentView();
-
-            while (listView && typeof listView.actionQuickView !== 'function') {
-                listView = listView.getParentView();
-            }
-
-            if (!listView || listView.quickDetailDisabled) {
-                return;
-            }
-
-            listView.actionQuickView({
-                id: this.model.id,
-            });
-        },
 
         setup() {
             this.itemLayout = this.options.itemLayout;

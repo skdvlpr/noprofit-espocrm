@@ -5,6 +5,7 @@
                 "Preparation",
                 "Proposal",
                 "Negotiation",
+                "Fundraising",
                 "Closed Won",
                 "Closed Lost"
             ],
@@ -13,6 +14,7 @@
                 "Preparation": 10,
                 "Proposal": 50,
                 "Negotiation": 80,
+                "Fundraising": 60,
                 "Closed Won": 100,
                 "Closed Lost": 0
             },
@@ -20,6 +22,7 @@
                 "Preparation": "default",
                 "Proposal": "primary",
                 "Negotiation": "warning",
+                "Fundraising": "info",
                 "Closed Won": "success",
                 "Closed Lost": "danger"
             }
@@ -27,6 +30,43 @@
         "presentationDate": {
             "type": "date",
             "audited": true
+        },
+        "fundraisingCollectedAmount": {
+            "type": "currency",
+            "notStorable": true,
+            "readOnly": true,
+            "orderDisabled": true,
+            "directAccessDisabled": true,
+            "directUpdateDisabled": true,
+            "loaderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\Opportunity\\FundraisingProgressLoader"
+        },
+        "fundraisingTargetAmount": {
+            "type": "currency",
+            "notStorable": true,
+            "readOnly": true,
+            "orderDisabled": true,
+            "directAccessDisabled": true,
+            "directUpdateDisabled": true,
+            "loaderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\Opportunity\\FundraisingProgressLoader"
+        },
+        "fundraisingProgressPercent": {
+            "type": "int",
+            "notStorable": true,
+            "readOnly": true,
+            "orderDisabled": true,
+            "directAccessDisabled": true,
+            "directUpdateDisabled": true,
+            "loaderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\Opportunity\\FundraisingProgressLoader"
+        },
+        "fundraisingProgress": {
+            "type": "text",
+            "notStorable": true,
+            "readOnly": true,
+            "orderDisabled": true,
+            "directAccessDisabled": true,
+            "directUpdateDisabled": true,
+            "view": "nonprofit-espocrm:views/opportunity/fields/fundraising-progress",
+            "loaderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\Opportunity\\FundraisingProgressLoader"
         }
     },
     "links": {

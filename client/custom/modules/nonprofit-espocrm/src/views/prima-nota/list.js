@@ -12,7 +12,13 @@ define('nonprofit-espocrm:views/prima-nota/list', [
             this.statsFooter = new ListStatsFooter(this);
             this.reportingStats = null;
 
-            this.listenTo(this.collection, 'sync', () => this.loadReportingStats());
+            this.listenTo(this.collection, 'sync', () => {
+                this.loadReportingStats();
+
+                if (this.isRendered()) {
+                    this.applyAmountColors();
+                }
+            });
 
             this.loadReportingStats();
         },
@@ -24,8 +30,29 @@ define('nonprofit-espocrm:views/prima-nota/list', [
         },
 
         applyAmountColors() {
-            this.$el.find('td[data-name="amountIn"] .cell').addClass('prima-nota-amount-in');
-            this.$el.find('td[data-name="amountOut"] .cell').addClass('prima-nota-amount-out');
+            const self = this;
+
+            this.$el.find('tr.list-row').each(function () {
+                const modelId = $(this).data('id');
+                const model = self.collection.get(modelId);
+
+                if (!model) {
+                    return;
+                }
+
+                const entryType = model.get('entryType');
+                const cssClass = entryType === 'Expense'
+                    ? 'prima-nota-amount-out'
+                    : 'prima-nota-amount-in';
+
+                $(this).find('td[data-name="amount"], td[data-name="entryType"]')
+                    .removeClass('prima-nota-amount-in prima-nota-amount-out')
+                    .addClass(cssClass);
+
+                $(this).find('td[data-name="amount"] .cell, td[data-name="entryType"] .cell, td[data-name="entryType"] .field')
+                    .removeClass('prima-nota-amount-in prima-nota-amount-out')
+                    .addClass(cssClass);
+            });
         },
 
         loadReportingStats() {

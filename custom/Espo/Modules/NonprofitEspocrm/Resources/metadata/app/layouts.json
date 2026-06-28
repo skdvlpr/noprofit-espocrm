@@ -167,6 +167,9 @@
         "detail": {
             "module": "NonprofitEspocrm"
         },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
         "list": {
             "module": "NonprofitEspocrm"
         },
@@ -184,6 +187,9 @@
         "detail": {
             "module": "NonprofitEspocrm"
         },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
         "list": {
             "module": "NonprofitEspocrm"
         },
@@ -196,6 +202,9 @@
     },
     "Case": {
         "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
             "module": "NonprofitEspocrm"
         },
         "list": {

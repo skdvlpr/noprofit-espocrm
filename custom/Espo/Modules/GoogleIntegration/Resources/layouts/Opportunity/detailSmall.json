@@ -19,7 +19,13 @@
                     "name": "stage"
                 },
                 {
-                    "name": "closeDate"
+                    "name": "amount"
+                }
+            ],
+            [
+                {
+                    "name": "fundraisingProgress",
+                    "fullWidth": true
                 }
             ],
             [
@@ -27,7 +33,7 @@
                     "name": "presentationDate"
                 },
                 {
-                    "name": "amount"
+                    "name": "closeDate"
                 }
             ],
             [

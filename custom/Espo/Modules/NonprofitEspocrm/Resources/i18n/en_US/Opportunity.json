@@ -8,7 +8,9 @@
         "amount": "Amount",
         "probability": "Probability",
         "contacts": "Contacts",
-        "description": "Description"
+        "description": "Description",
+        "fundraisingProgress": "Fundraising progress",
+        "fundraisingProgressNoTarget": "Set a target amount to show fundraising progress."
     },
     "links": {
         "contacts": "Contacts",
@@ -21,6 +23,7 @@
             "Preparation": "Preparation",
             "Proposal": "Proposal",
             "Negotiation": "Negotiation",
+            "Fundraising": "Fundraising",
             "Closed Won": "Closed Won",
             "Closed Lost": "Closed Lost"
         }

@@ -6,11 +6,14 @@ use Espo\Core\Utils\Metadata\AdditionalBuilder;
 use stdClass;
 
 /**
- * Registers Quick view as the default record opener for Safehouse CRM entities.
+ * Registers list views and relationship-panel quick-view handlers.
  *
- * Entity discovery (no hardcoded list):
- * - all scopes with module = SafehouseCrm and entity = true;
- * - any scope with quickViewDefaultNavigation = true (core CRM entities customized by Safehouse);
+ * Main navbar lists open full detail (Espo default). Quick view is enabled only
+ * for relationship panel lists (listSmall + buttonsDisabled) via quick-view-list handler.
+ *
+ * Entity discovery:
+ * - all scopes with module = NonprofitEspocrm and entity = true;
+ * - any scope with quickViewDefaultNavigation = true (core CRM entities customized here);
  * - opt-out via quickViewDefaultNavigation = false on a scope.
  */
 class QuickViewDefaultNavigation implements AdditionalBuilder
@@ -18,8 +21,6 @@ class QuickViewDefaultNavigation implements AdditionalBuilder
     private const MODULE_NAME = 'NonprofitEspocrm';
 
     private const LIST_HANDLER = 'nonprofit-espocrm:handlers/quick-view-list';
-
-    private const KANBAN_HANDLER = 'nonprofit-espocrm:handlers/quick-view-kanban';
 
     /** Espo record/list uses setupHandlerType `record/list`, not `list`. */
     private const LIST_HANDLER_TYPE = 'record/list';
@@ -29,7 +30,6 @@ class QuickViewDefaultNavigation implements AdditionalBuilder
         foreach ($this->resolveEntityTypes($data) as $entityType) {
             $this->applyListView($data, $entityType);
             $this->mergeViewSetupHandler($data, $entityType, self::LIST_HANDLER_TYPE, self::LIST_HANDLER);
-            $this->mergeViewSetupHandler($data, $entityType, 'record/kanban', self::KANBAN_HANDLER);
         }
     }
 

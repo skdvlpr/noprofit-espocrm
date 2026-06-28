@@ -11,15 +11,17 @@
             ],
             [
                 {"name": "subjectName"},
-                {"name": "modelDClassification"}
+                {"name": "financing"}
             ],
             [
-                {"name": "amountIn"},
-                {"name": "amountOut"}
+                {"name": "entryType"},
+                {"name": "amount"}
             ],
             [
-                {"name": "financing"},
-                false
+                {"name": "modelDClassification", "fullWidth": true}
+            ],
+            [
+                {"name": "internalClassification", "fullWidth": true}
             ],
             [
                 {"name": "assignedUser"},

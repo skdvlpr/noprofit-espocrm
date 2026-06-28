@@ -10,13 +10,24 @@
             ],
             [
                 {"name": "taxCode"},
-                {"name": "phone"}
+                {"name": "birthPlace"}
+            ],
+            [
+                {"name": "phone"},
+                false
             ],
             [
                 {"name": "address", "fullWidth": true}
             ],
             [
                 {"name": "household", "fullWidth": true}
+            ],
+            [
+                {"name": "notes", "fullWidth": true}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
             ]
         ]
     }

@@ -11,6 +11,10 @@
             ],
             [
                 {"name": "account", "fullWidth": true}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
             ]
         ]
     }

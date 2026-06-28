@@ -58,12 +58,13 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                     const value = stats[item.key];
                     const label = item.label || item.key;
                     const formatted = this.formatValue(value, item);
+                    const valueClass = this.getMetricValueClass(item.key, value);
 
                     $metrics.append(
                         $('<div>').addClass('safehouse-reporting-stats-metric')
                             .append(
                                 $('<span>')
-                                    .addClass('safehouse-reporting-stats-value safehouse-reporting-stats-value--accent')
+                                    .addClass('safehouse-reporting-stats-value ' + valueClass)
                                     .text(formatted)
                             )
                             .append(
@@ -110,12 +111,13 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 const value = stats[item.key];
                 const label = item.label || item.key;
                 const formatted = this.formatValue(value, item);
+                const valueClass = this.getMetricValueClass(item.key, value);
 
                 $metrics.append(
                     $('<div>').addClass('safehouse-reporting-stats-metric')
                         .append(
                             $('<span>')
-                                .addClass('safehouse-reporting-stats-value safehouse-reporting-stats-value--accent')
+                                .addClass('safehouse-reporting-stats-value ' + valueClass)
                                 .text(formatted)
                         )
                         .append(
@@ -148,6 +150,32 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 fieldType: fieldDef.type || null,
                 currency: fieldDef.currency || null,
             };
+        }
+
+        getMetricValueClass(key, value) {
+            if (key === 'amountIn') {
+                return 'safehouse-reporting-stats-value--income';
+            }
+
+            if (key === 'amountOut') {
+                return 'safehouse-reporting-stats-value--expense';
+            }
+
+            if (key === 'managementBalance') {
+                const num = Number(value);
+
+                if (!Number.isNaN(num) && num < 0) {
+                    return 'safehouse-reporting-stats-value--expense';
+                }
+
+                if (!Number.isNaN(num) && num > 0) {
+                    return 'safehouse-reporting-stats-value--income';
+                }
+
+                return 'safehouse-reporting-stats-value--balance';
+            }
+
+            return 'safehouse-reporting-stats-value--accent';
         }
 
         formatValue(value, item = {}) {

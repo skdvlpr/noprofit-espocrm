@@ -2,8 +2,9 @@
     {"name": "transactionDate", "link": true},
     {"name": "description"},
     {"name": "subjectName"},
-    {"name": "amountIn"},
-    {"name": "amountOut"},
+    {"name": "entryType"},
+    {"name": "amount"},
     {"name": "modelDClassification"},
+    {"name": "internalClassification"},
     {"name": "financing"}
 ]

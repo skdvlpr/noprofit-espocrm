@@ -1,0 +1,14 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "transactionDate"}, {"name": "entryType"}],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "subjectName"}, {"name": "financing"}],
+            [{"name": "amount"}, false],
+            [{"name": "modelDClassification", "fullWidth": true}],
+            [{"name": "internalClassification", "fullWidth": true}],
+            [{"name": "assignedUser"}, {"name": "teams"}]
+        ]
+    }
+]

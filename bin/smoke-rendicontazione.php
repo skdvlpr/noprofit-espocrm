@@ -278,8 +278,8 @@ try {
     $pn->set([
         'description' => 'SMOKE-Rend-Income',
         'subjectName' => 'Donor',
-        'amountIn' => 100,
-        'amountOut' => 0,
+        'entryType' => 'Income',
+        'amount' => 100,
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn);
@@ -287,8 +287,8 @@ try {
     $pn2->set([
         'description' => 'SMOKE-Rend-Expense',
         'subjectName' => 'Vendor',
-        'amountIn' => 0,
-        'amountOut' => 40,
+        'entryType' => 'Expense',
+        'amount' => 40,
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn2);

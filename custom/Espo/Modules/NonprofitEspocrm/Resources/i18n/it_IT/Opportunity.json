@@ -8,7 +8,9 @@
         "amount": "Importo",
         "probability": "Probabilità",
         "contacts": "Contatti",
-        "description": "Descrizione"
+        "description": "Descrizione",
+        "fundraisingProgress": "Avanzamento raccolta fondi",
+        "fundraisingProgressNoTarget": "Imposta l'importo obiettivo per visualizzare l'avanzamento."
     },
     "links": {
         "contacts": "Contatti",
@@ -21,6 +23,7 @@
             "Preparation": "Preparazione",
             "Proposal": "Proposta",
             "Negotiation": "Negoziazione",
+            "Fundraising": "Raccolta fondi",
             "Closed Won": "Chiuso Positivamente",
             "Closed Lost": "Chiuso Negativamente"
         }

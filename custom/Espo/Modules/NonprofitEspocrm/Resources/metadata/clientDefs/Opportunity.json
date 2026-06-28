@@ -4,5 +4,24 @@
         "kanban": "nonprofit-espocrm:views/opportunity/record/kanban"
     },
     "color": "#54b874",
-    "iconClass": "fas fa-hand-holding-usd"
+    "iconClass": "fas fa-hand-holding-usd",
+    "dynamicLogic": {
+        "fields": {
+            "fundraisingProgress": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "stage",
+                            "value": [
+                                "Fundraising",
+                                "Closed Won",
+                                "Closed Lost"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
 }

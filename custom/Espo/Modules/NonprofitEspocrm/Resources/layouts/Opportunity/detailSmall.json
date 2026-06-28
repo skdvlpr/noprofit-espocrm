@@ -4,8 +4,9 @@
         "rows": [
             [{"name": "name", "fullWidth": true}],
             [{"name": "account", "fullWidth": true}],
-            [{"name": "stage"}, {"name": "closeDate"}],
-            [{"name": "presentationDate"}, {"name": "amount"}],
+            [{"name": "stage"}, {"name": "amount"}],
+            [{"name": "fundraisingProgress", "fullWidth": true}],
+            [{"name": "presentationDate"}, {"name": "closeDate"}],
             [{"name": "contacts", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]

@@ -13,15 +13,33 @@
             "type": "varchar",
             "maxLength": 255
         },
+        "entryType": {
+            "type": "enum",
+            "options": [
+                "Income",
+                "Expense"
+            ],
+            "required": true,
+            "default": "Income",
+            "audited": true,
+            "view": "nonprofit-espocrm:views/fields/prima-nota-entry-type"
+        },
+        "amount": {
+            "type": "currency",
+            "currency": "EUR",
+            "required": true
+        },
         "amountIn": {
             "type": "currency",
-            "currency": "EUR"
+            "currency": "EUR",
+            "readOnly": true
         },
         "amountOut": {
             "type": "currency",
-            "currency": "EUR"
+            "currency": "EUR",
+            "readOnly": true
         },
-        "modelDClassification": {
+        "internalClassification": {
             "type": "enum",
             "options": [
                 "Donation",
@@ -33,6 +51,18 @@
                 "Other"
             ],
             "isSorted": true
+        },
+        "modelDClassification": {
+            "type": "enum",
+            "options": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E"
+            ],
+            "isSorted": false,
+            "audited": true
         },
         "financing": {
             "type": "link"

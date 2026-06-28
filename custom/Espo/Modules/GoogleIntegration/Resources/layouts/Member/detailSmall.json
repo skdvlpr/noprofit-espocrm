@@ -18,6 +18,14 @@
             ],
             [
                 {
+                    "name": "emailAddress"
+                },
+                {
+                    "name": "phoneNumber"
+                }
+            ],
+            [
+                {
                     "name": "birthDate"
                 },
                 {
@@ -41,6 +49,12 @@
             [
                 {
                     "name": "positionsHeld",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "notes",
                     "fullWidth": true
                 }
             ]
