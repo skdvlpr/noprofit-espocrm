@@ -1,0 +1,14 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name", "fullWidth": true}],
+            [{"name": "contactType"}, {"name": "relatedRecord"}],
+            [{"name": "accounts", "fullWidth": true}],
+            [{"name": "emailAddress", "fullWidth": true}],
+            [{"name": "phoneNumber", "fullWidth": true}],
+            [{"name": "address", "fullWidth": true}],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

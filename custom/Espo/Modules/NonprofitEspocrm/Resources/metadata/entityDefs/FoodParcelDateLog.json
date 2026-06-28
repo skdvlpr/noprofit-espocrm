@@ -1,0 +1,57 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true,
+            "readOnly": true
+        },
+        "foodParcelRegistration": {
+            "type": "link",
+            "required": true
+        },
+        "entryDate": {
+            "type": "date"
+        },
+        "exitDate": {
+            "type": "date"
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        }
+    },
+    "links": {
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "foodParcelRegistration": {
+            "type": "belongsTo",
+            "entity": "FoodParcelRegistration",
+            "foreign": "dateLogs"
+        }
+    },
+    "collection": {
+        "orderBy": "entryDate",
+        "order": "desc"
+    },
+    "optimisticConcurrencyControl": true
+}

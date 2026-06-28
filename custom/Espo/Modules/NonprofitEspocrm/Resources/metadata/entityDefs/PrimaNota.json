@@ -1,0 +1,107 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true,
+            "readOnly": true
+        },
+        "description": {
+            "type": "text",
+            "required": true
+        },
+        "subjectName": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "amountIn": {
+            "type": "currency",
+            "currency": "EUR"
+        },
+        "amountOut": {
+            "type": "currency",
+            "currency": "EUR"
+        },
+        "modelDClassification": {
+            "type": "enum",
+            "options": [
+                "Donation",
+                "Grant",
+                "OperatingExpense",
+                "Personnel",
+                "Utilities",
+                "Supplies",
+                "Other"
+            ],
+            "isSorted": true
+        },
+        "financing": {
+            "type": "link"
+        },
+        "transactionDate": {
+            "type": "date",
+            "required": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        }
+    },
+    "links": {
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        },
+        "financing": {
+            "type": "belongsTo",
+            "entity": "Opportunity",
+            "foreign": "primaNotaEntries"
+        }
+    },
+    "collection": {
+        "orderBy": "transactionDate",
+        "order": "desc"
+    },
+    "indexes": {
+        "transactionDate": {
+            "columns": ["transactionDate", "deleted"]
+        }
+    },
+    "optimisticConcurrencyControl": true,
+    "audited": true
+}

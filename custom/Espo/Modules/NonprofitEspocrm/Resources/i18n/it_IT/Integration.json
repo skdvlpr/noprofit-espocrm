@@ -1,0 +1,13 @@
+{
+    "fields": {
+        "mapId": "ID Mappa (opzionale)"
+    },
+    "tooltips": {
+        "GoogleMaps": {
+            "mapId": "Opzionale. Google Cloud Console → Gestione mappe → ID mappa. Serve per la mappa incorporata (Visualizza mappa). Lasciare vuoto per la mappa demo predefinita. Non necessario per l'autocompletamento indirizzi."
+        }
+    },
+    "help": {
+        "GoogleMaps": "Abilitare Maps JavaScript API, Places API e Geocoding API in Google Cloud. L'autocompletamento della via usa Places API tramite il campo indirizzo del modulo."
+    }
+}

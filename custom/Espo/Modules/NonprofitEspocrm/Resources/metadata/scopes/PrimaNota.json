@@ -1,0 +1,27 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "NonprofitEspocrm",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "stream": true,
+    "importable": true,
+    "exportFormatList": [
+        "xlsx",
+        "csv",
+        "xlsx-email",
+        "csv-email"
+    ],
+    "customizable": true,
+    "color": "#27ae60",
+    "iconClass": "fas fa-book"
+}

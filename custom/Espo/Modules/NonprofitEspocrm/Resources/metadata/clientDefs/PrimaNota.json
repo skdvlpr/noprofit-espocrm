@@ -1,0 +1,55 @@
+{
+    "controller": "controllers/record",
+    "color": "#27ae60",
+    "iconClass": "fas fa-book",
+    "recordViews": {
+        "list": "nonprofit-espocrm:views/prima-nota/list"
+    },
+    "menu": {
+        "list": {
+            "buttons": [
+                {
+                    "labelTranslation": "Global.labels.reportingEmailExport",
+                    "acl": "create",
+                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
+                    "initFunction": "initReportingEmailExport",
+                    "actionFunction": "reportingEmailExport",
+                    "checkVisibilityFunction": "isReportingEmailExportVisible",
+                    "data": {
+                        "scope": "PrimaNota"
+                    }
+                }
+            ]
+        }
+    },
+    "dynamicLogic": {
+        "fields": {
+            "amountIn": {
+                "style": {
+                    "success": {
+                        "conditionGroup": [
+                            {
+                                "type": "greaterThan",
+                                "attribute": "amountIn",
+                                "value": 0
+                            }
+                        ]
+                    }
+                }
+            },
+            "amountOut": {
+                "style": {
+                    "danger": {
+                        "conditionGroup": [
+                            {
+                                "type": "greaterThan",
+                                "attribute": "amountOut",
+                                "value": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

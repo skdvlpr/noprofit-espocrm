@@ -1,0 +1,32 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "name"},
+                {"name": "department"}
+            ],
+            [
+                {"name": "interventionDate"},
+                {"name": "interventionCount"}
+            ],
+            [
+                {"name": "parent"},
+                false
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ],
+            [
+                {"name": "locationAddress", "fullWidth": true}
+            ],
+            [
+                {"name": "notes", "fullWidth": true}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
+            ]
+        ]
+    }
+]

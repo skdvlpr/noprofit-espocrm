@@ -1,4 +1,18 @@
 {
+    "Contact": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        }
+    },
     "Account": {
         "detail": {
             "module": "NonprofitEspocrm"
@@ -151,6 +165,34 @@
             "module": "NonprofitEspocrm"
         },
         "massUpdate": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "Intervention": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "FoodParcelRegistration": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "list": {
+            "module": "NonprofitEspocrm"
+        },
+        "filters": {
             "module": "NonprofitEspocrm"
         }
     }

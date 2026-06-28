@@ -1,0 +1,154 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true,
+            "readOnly": true
+        },
+        "description": {
+            "type": "text",
+            "required": true
+        },
+        "department": {
+            "type": "enum",
+            "required": true,
+            "options": [
+                "StreetUnit",
+                "DigitalDesk",
+                "LegalDesk",
+                "HumanitarianAid",
+                "Cooperation"
+            ],
+            "isSorted": true,
+            "audited": true
+        },
+        "interventionDate": {
+            "type": "date",
+            "required": true
+        },
+        "locationAddress": {
+            "type": "address",
+            "viewMap": true
+        },
+        "notes": {
+            "type": "text"
+        },
+        "interventionCount": {
+            "type": "int",
+            "min": 0,
+            "default": 1
+        },
+        "parent": {
+            "type": "linkParent",
+            "entityList": [
+                "Account",
+                "Contact",
+                "Lead",
+                "Opportunity",
+                "Member",
+                "VolunteerEmployee",
+                "Case",
+                "Document",
+                "MealCount",
+                "AssociationMealCount"
+            ],
+            "audited": true
+        },
+        "account": {
+            "type": "link",
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "contact": {
+            "type": "link",
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "lead": {
+            "type": "link",
+            "readOnly": true,
+            "customizationReadOnlyDisabled": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        }
+    },
+    "links": {
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        },
+        "parent": {
+            "type": "belongsToParent",
+            "foreign": "interventions"
+        },
+        "account": {
+            "type": "belongsTo",
+            "entity": "Account"
+        },
+        "contact": {
+            "type": "belongsTo",
+            "entity": "Contact"
+        },
+        "lead": {
+            "type": "belongsTo",
+            "entity": "Lead"
+        },
+        "tasks": {
+            "type": "hasChildren",
+            "entity": "Task",
+            "foreign": "parent"
+        }
+    },
+    "collection": {
+        "orderBy": "interventionDate",
+        "order": "desc"
+    },
+    "indexes": {
+        "interventionDate": {
+            "columns": ["interventionDate", "deleted"]
+        },
+        "department": {
+            "columns": ["department", "deleted"]
+        }
+    },
+    "optimisticConcurrencyControl": true,
+    "audited": true
+}

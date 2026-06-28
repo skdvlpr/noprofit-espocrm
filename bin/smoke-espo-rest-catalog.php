@@ -211,6 +211,36 @@ $ok(
     is_array($stageOpts) ? implode(',', $stageOpts) : 'n/a'
 );
 
+echo "\n--- Contact enhancements ---\n";
+
+$contactDefs = json_decode(
+    (string) $client->get('/api/v1/Metadata', ['query' => ['key' => 'entityDefs.Contact']])->getBody(),
+    true
+);
+$cFields = is_array($contactDefs) && isset($contactDefs['fields']) && is_array($contactDefs['fields'])
+    ? $contactDefs['fields']
+    : [];
+$ok('Metadata entityDefs.Contact has contactType', isset($cFields['contactType']));
+$ok('Metadata entityDefs.Contact has relatedRecord linkParent', ($cFields['relatedRecord']['type'] ?? '') === 'linkParent');
+$cOpts = $cFields['contactType']['options'] ?? [];
+$ok('contactType options include HelpSeeker', is_array($cOpts) && in_array('HelpSeeker', $cOpts, true));
+
+$rContactList = $client->get('/api/v1/Contact', [
+    'query' => ['select' => 'id,firstName,lastName,contactType', 'maxSize' => 5],
+]);
+$ok(
+    'GET Contact?select=contactType&maxSize=5 → 200',
+    $rContactList->getStatusCode() === 200,
+    'code=' . $rContactList->getStatusCode()
+);
+
+foreach (['Intervention', 'PrimaNota', 'FoodParcelRegistration'] as $entity) {
+    $row = is_array($acl) ? ($acl[$entity] ?? null) : null;
+    $ok("acl.table[$entity] present", is_array($row), $row === null ? 'missing' : 'ok');
+    $ent = is_array($scopes) ? ($scopes[$entity] ?? null) : null;
+    $ok("scopes[$entity].entity === true", is_array($ent) && (($ent['entity'] ?? false) === true));
+}
+
 /* --- 401 without key (skill: unauthenticated) --- */
 $bare = new Client([
     'base_uri' => $siteUrl,

@@ -1,0 +1,34 @@
+{
+    "fields": {
+        "name": "Name",
+        "description": "Intervention Description",
+        "department": "Department",
+        "interventionDate": "Date",
+        "locationAddress": "Location",
+        "locationAddressStreet": "Street",
+        "locationAddressCity": "City",
+        "locationAddressState": "State",
+        "locationAddressCountry": "Country",
+        "locationAddressPostalCode": "Postal Code",
+        "notes": "Notes",
+        "interventionCount": "Number of Interventions",
+        "parent": "Related Record",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "tasks": "Tasks"
+    },
+    "labels": {
+        "Intervention": "Intervention",
+        "Interventions": "Interventions",
+        "Create Intervention": "Create Intervention"
+    },
+    "options": {
+        "department": {
+            "StreetUnit": "Street Unit",
+            "DigitalDesk": "Digital Desk",
+            "LegalDesk": "Legal Desk",
+            "HumanitarianAid": "Humanitarian Aid",
+            "Cooperation": "Cooperation"
+        }
+    }
+}

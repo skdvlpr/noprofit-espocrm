@@ -64,12 +64,14 @@ try {
         'firstName' => 'Smoke',
         'lastName' => 'Member',
         'taxCode' => 'rsmrra80a01h501u',
-        'province' => 'rm',
+        'addressState' => 'rm',
+        'addressStreet' => 'Via Test 1',
+        'addressCity' => 'Roma',
         'joinDate' => date('Y-m-d', strtotime('-365 days')),
     ]);
     $em->saveEntity($mb);
     $created[] = $mb;
-    $results[] = ['Member active', 'status=' . $mb->get('status'), 'name=' . $mb->get('name'), 'taxCode=' . $mb->get('taxCode'), 'province=' . $mb->get('province')];
+    $results[] = ['Member active', 'status=' . $mb->get('status'), 'name=' . $mb->get('name'), 'taxCode=' . $mb->get('taxCode'), 'addressState=' . $mb->get('addressState')];
 
     $mc = $em->getNewEntity('MealCount');
     $mc->set(['date' => date('Y-m-d'), 'adults' => 25, 'minors' => 10]);

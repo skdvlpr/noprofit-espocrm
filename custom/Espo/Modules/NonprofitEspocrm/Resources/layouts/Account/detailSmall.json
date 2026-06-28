@@ -15,8 +15,7 @@
                 {"name": "phoneNumber", "fullWidth": true}
             ],
             [
-                {"name": "billingAddressCity"},
-                {"name": "billingAddressCountry"}
+                {"name": "billingAddress", "fullWidth": true}
             ],
             [
                 {"name": "type"},

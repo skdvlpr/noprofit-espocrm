@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "contact"},
+    {"name": "taxCode"},
+    {"name": "addressCity"},
+    {"name": "assignedUser"}
+]

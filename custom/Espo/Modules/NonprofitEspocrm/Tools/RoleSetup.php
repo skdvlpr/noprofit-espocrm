@@ -493,8 +493,9 @@ class RoleSetup
 
         $domainEntities = [
             'Account', 'AccountWebsite', 'Contact', 'Opportunity',
-            'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'Document',
-            'Meeting', 'Call', 'Task', 'Email', 'Case',
+            'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'PrimaNota',
+            'Intervention', 'FoodParcelRegistration', 'FoodParcelDateLog',
+            'Document', 'Meeting', 'Call', 'Task', 'Email', 'Case',
             'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
 
@@ -514,6 +515,12 @@ class RoleSetup
         $employeeData['AssociationMealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
+        $employeeData['PrimaNota'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
+        ];
+        $employeeData['Intervention'] = $teamCreateOwnDelete();
+        $employeeData['FoodParcelRegistration'] = $teamCreateOwnDelete();
+        $employeeData['FoodParcelDateLog'] = $teamCreateOwnDelete();
         // Personnel: ordinary Employee sees directory but does not create/edit/delete rows.
         $employeeData['VolunteerEmployee'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
@@ -552,6 +559,18 @@ class RoleSetup
         ];
         $volunteerData['AssociationMealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $volunteerData['PrimaNota'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $volunteerData['Intervention'] = [
+            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
+        ];
+        $volunteerData['FoodParcelRegistration'] = [
+            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
+        ];
+        $volunteerData['FoodParcelDateLog'] = [
+            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
         ];
         $volunteerData['Account'] = $readOnlyAll();
         $volunteerData['Contact'] = $readOnlyAll();

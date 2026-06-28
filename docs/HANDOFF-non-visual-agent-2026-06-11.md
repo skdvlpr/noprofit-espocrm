@@ -206,7 +206,7 @@ ddev exec php bin/test-gcal-full-lifecycle.php
 
 ## 8. Notion project context (read append-only logs)
 
-**Project page:** [Safehouse CRM](https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448)
+**Active project:** [Nonprofit EspoCRM — Доработки](https://app.notion.com/p/38d8d469d405817cbd23f6cfb3ce32af) · **Tasks DB:** [Projects - Tasks](https://app.notion.com/p/38d8d469d405805589c6000c89f3d3ab) · **Archive (Phase 1):** [Safehouse CRM](https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448)
 
 **Key historical logs (do not overwrite):**
 

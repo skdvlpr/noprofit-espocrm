@@ -1,0 +1,48 @@
+{
+    "fields": {
+        "contactType": {
+            "type": "enum",
+            "options": [
+                "",
+                "HelpSeeker",
+                "Colleague",
+                "MemberContact",
+                "AssociationRepresentative"
+            ],
+            "default": "",
+            "isSorted": true,
+            "audited": true
+        },
+        "relatedRecord": {
+            "type": "linkParent",
+            "entityList": [
+                "Lead",
+                "Account",
+                "Opportunity",
+                "Member",
+                "VolunteerEmployee",
+                "Case",
+                "Document",
+                "MealCount",
+                "AssociationMealCount",
+                "Intervention",
+                "FoodParcelRegistration"
+            ],
+            "audited": true
+        },
+        "address": {
+            "viewMap": true
+        }
+    },
+    "links": {
+        "relatedRecord": {
+            "type": "belongsToParent",
+            "foreign": "contacts"
+        },
+        "foodParcelRegistrations": {
+            "type": "hasMany",
+            "entity": "FoodParcelRegistration",
+            "foreign": "contact"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "fields": {
+        "name": "Nome",
+        "contact": "Contatto",
+        "taxCode": "Cod. Fisc.",
+        "birthPlace": "Nato a",
+        "household": "Nucleo famigliare",
+        "phone": "Telefono",
+        "address": "Indirizzo",
+        "addressStreet": "Via/cso",
+        "addressCity": "Città",
+        "addressPostalCode": "CAP",
+        "notes": "Note",
+        "dateLogsText": "Riepilogo date",
+        "assignedUser": "Assegnato a",
+        "teams": "Gruppi",
+        "dateLogs": "Registro date"
+    },
+    "labels": {
+        "FoodParcelRegistration": "Modulo registrazione pacco spesa",
+        "FoodParcelRegistrationPlural": "Moduli pacco spesa",
+        "Create FoodParcelRegistration": "Crea modulo",
+        "openPdfPreview": "Apri PDF"
+    }
+}

@@ -28,5 +28,20 @@
         "route": "/NonprofitEspocrm/reporting/association-meal-count/totals",
         "method": "post",
         "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetAssociationMealCountTotals"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/prima-nota/summary",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetPrimaNotaSummary"
+    },
+    {
+        "route": "/NonprofitEspocrm/reporting/prima-nota/totals",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetPrimaNotaTotals"
+    },
+    {
+        "route": "/NonprofitEspocrm/food-parcel-registration/:id/pdf",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\FoodParcel\\Api\\GetFoodParcelRegistrationPdf"
     }
 ]

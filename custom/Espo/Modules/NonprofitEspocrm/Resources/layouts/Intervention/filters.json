@@ -1,0 +1,7 @@
+[
+    {"name": "interventionDate"},
+    {"name": "department"},
+    {"name": "parent"},
+    {"name": "assignedUser"},
+    {"name": "teams"}
+]

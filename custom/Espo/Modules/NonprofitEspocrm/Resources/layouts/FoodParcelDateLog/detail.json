@@ -1,0 +1,11 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "entryDate"},
+                {"name": "exitDate"}
+            ]
+        ]
+    }
+]

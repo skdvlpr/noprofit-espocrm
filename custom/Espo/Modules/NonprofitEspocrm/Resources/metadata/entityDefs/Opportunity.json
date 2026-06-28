@@ -35,6 +35,16 @@
             "entity": "Case",
             "foreign": "parent",
             "audited": true
+        },
+        "primaNotaEntries": {
+            "type": "hasMany",
+            "entity": "PrimaNota",
+            "foreign": "financing"
+        },
+        "contacts": {
+            "type": "hasChildren",
+            "entity": "Contact",
+            "foreign": "relatedRecord"
         }
     }
 }

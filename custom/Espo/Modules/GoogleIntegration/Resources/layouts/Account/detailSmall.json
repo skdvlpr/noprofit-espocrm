@@ -28,10 +28,8 @@
             ],
             [
                 {
-                    "name": "billingAddressCity"
-                },
-                {
-                    "name": "billingAddressCountry"
+                    "name": "billingAddress",
+                    "fullWidth": true
                 }
             ],
             [

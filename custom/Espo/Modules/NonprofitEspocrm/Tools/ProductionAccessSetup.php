@@ -44,6 +44,7 @@ class ProductionAccessSetup
         'Account', 'AccountWebsite', 'Contact', 'Lead', 'Opportunity',
         'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'Document',
         'Meeting', 'Call', 'Task', 'Email', 'Case',
+        'Intervention', 'PrimaNota', 'FoodParcelRegistration', 'FoodParcelDateLog',
         'KnowledgeBaseArticle',
         'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
     ];

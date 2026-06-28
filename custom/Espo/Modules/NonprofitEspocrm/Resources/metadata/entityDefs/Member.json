@@ -42,16 +42,9 @@
                 "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
             ]
         },
-        "residenceAddress": {
-            "type": "varchar"
-        },
-        "city": {
-            "type": "varchar"
-        },
-        "province": {
-            "type": "varchar",
-            "maxLength": 2,
-            "trim": true
+        "address": {
+            "type": "address",
+            "viewMap": true
         },
         "joinDate": {
             "type": "date"
@@ -128,12 +121,17 @@
             "entity": "Case",
             "foreign": "parent",
             "audited": true
+        },
+        "contacts": {
+            "type": "hasChildren",
+            "entity": "Contact",
+            "foreign": "relatedRecord"
         }
     },
     "collection": {
         "orderBy": "name",
         "order": "asc",
-        "textFilterFields": ["name", "firstName", "lastName", "taxCode", "emailAddress"]
+        "textFilterFields": ["name", "firstName", "lastName", "taxCode", "emailAddress", "addressStreet", "addressCity"]
     },
     "indexes": {
         "name": {

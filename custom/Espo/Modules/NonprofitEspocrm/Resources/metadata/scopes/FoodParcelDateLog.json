@@ -1,0 +1,16 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "NonprofitEspocrm",
+    "object": true,
+    "layouts": true,
+    "tab": false,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete"
+    ],
+    "customizable": true
+}

@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (entryDate != null) {\n    name = string\\concatenate('Entry ', entryDate);\n} else if (exitDate != null) {\n    name = string\\concatenate('Exit ', exitDate);\n} else {\n    name = 'Date log';\n}"
+}

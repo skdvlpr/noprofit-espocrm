@@ -1,0 +1,23 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {"name": "name", "fullWidth": true}
+            ],
+            [
+                {"name": "department"},
+                {"name": "interventionDate"}
+            ],
+            [
+                {"name": "parent", "fullWidth": true}
+            ],
+            [
+                {"name": "locationAddress", "fullWidth": true}
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ]
+        ]
+    }
+]

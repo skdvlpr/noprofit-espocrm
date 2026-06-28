@@ -7,7 +7,10 @@
         "Member": "Members",
         "MealCount": "Meal Count",
         "AssociationMealCount": "Network Meal Count",
-        "Case": "Intake record"
+        "Case": "Intake record",
+        "Intervention": "Intervention",
+        "PrimaNota": "Ledger Entry",
+        "FoodParcelRegistration": "Food Parcel Registration"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -17,7 +20,10 @@
         "Member": "Members",
         "MealCount": "Meal Counts",
         "AssociationMealCount": "Network Meal Counts",
-        "Case": "Intake records"
+        "Case": "Intake records",
+        "Intervention": "Interventions",
+        "PrimaNota": "Ledger (Prima Nota)",
+        "FoodParcelRegistration": "Food Parcel Registrations"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",
@@ -33,6 +39,9 @@
         "Create Member": "Create New",
         "Create MealCount": "Create Meal Count",
         "Create AssociationMealCount": "Create Network Meal Count",
+        "Create Intervention": "Create Intervention",
+        "Create PrimaNota": "Create ledger entry",
+        "Create FoodParcelRegistration": "Create food parcel registration",
         "reportingListStatsWeek": "Current week totals",
         "reportingListStatsMonth": "Month",
         "reportingListStatsYear": "Year",
@@ -49,7 +58,8 @@
     },
     "dashlets": {
         "MealCountMonthlyStats": "Meal Count",
-        "AssociationMealCountMonthlyStats": "Network Meal Count"
+        "AssociationMealCountMonthlyStats": "Network Meal Count",
+        "PrimaNotaLedgerStats": "Prima Nota ledger"
     },
     "options": {
         "period": {

@@ -1,0 +1,34 @@
+{
+    "fields": {
+        "name": "Nome",
+        "description": "Descrizione intervento",
+        "department": "Reparto",
+        "interventionDate": "Data",
+        "locationAddress": "Luogo",
+        "locationAddressStreet": "Via",
+        "locationAddressCity": "Città",
+        "locationAddressState": "Provincia",
+        "locationAddressCountry": "Paese",
+        "locationAddressPostalCode": "CAP",
+        "notes": "Note",
+        "interventionCount": "Numero interventi",
+        "parent": "Record collegato",
+        "assignedUser": "Assegnato a",
+        "teams": "Gruppi",
+        "tasks": "Attività"
+    },
+    "labels": {
+        "Intervention": "Intervento",
+        "Interventions": "Interventi",
+        "Create Intervention": "Crea intervento"
+    },
+    "options": {
+        "department": {
+            "StreetUnit": "Unità di strada",
+            "DigitalDesk": "Sportello digitale",
+            "LegalDesk": "Sportello legale",
+            "HumanitarianAid": "Aiuti umanitari",
+            "Cooperation": "Cooperazione"
+        }
+    }
+}

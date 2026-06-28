@@ -8,7 +8,10 @@
         "MealCount": "Conteggio pasti",
         "AssociationMealCount": "Conteggio pasti per Rete",
         "Task": "Task",
-        "Case": "Segnalazione"
+        "Case": "Segnalazione",
+        "Intervention": "Intervento",
+        "PrimaNota": "Prima nota",
+        "FoodParcelRegistration": "Modulo pacco spesa"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -19,7 +22,10 @@
         "MealCount": "Conteggio pasti",
         "AssociationMealCount": "Conteggio pasti per Rete",
         "Task": "Task",
-        "Case": "Segnalazioni"
+        "Case": "Segnalazioni",
+        "Intervention": "Interventi",
+        "PrimaNota": "Prima nota",
+        "FoodParcelRegistration": "Moduli pacco spesa"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",

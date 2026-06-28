@@ -1,0 +1,23 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "NonprofitEspocrm",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "stream": true,
+    "importable": true,
+    "exportable": true,
+    "customizable": true,
+    "quickViewDefaultNavigation": true,
+    "color": "#3498db",
+    "iconClass": "fas fa-hands-helping"
+}

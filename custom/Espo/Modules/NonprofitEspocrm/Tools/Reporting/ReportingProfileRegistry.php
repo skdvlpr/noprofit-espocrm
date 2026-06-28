@@ -26,6 +26,14 @@ class ReportingProfileRegistry
             );
         }
 
+        if ($entityType === 'PrimaNota') {
+            return new ReportingEntityProfile(
+                'PrimaNota',
+                'transactionDate',
+                ['amountIn', 'amountOut'],
+            );
+        }
+
         return null;
     }
 
@@ -41,7 +49,7 @@ class ReportingProfileRegistry
     {
         $types = [];
 
-        foreach (['MealCount', 'AssociationMealCount'] as $entityType) {
+        foreach (['MealCount', 'AssociationMealCount', 'PrimaNota'] as $entityType) {
             if ($this->getProfile($entityType) !== null) {
                 $types[] = $entityType;
             }

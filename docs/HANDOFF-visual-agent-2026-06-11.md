@@ -104,4 +104,4 @@ ddev exec php bin/smoke-installer.php
 
 ## Notion
 
-Append logs to [Safehouse CRM project](https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448). Never overwrite prior executor entries.
+Append logs to the **active** [post-launch project](https://app.notion.com/p/38d8d469d405817cbd23f6cfb3ce32af) (Tasks DB: [Projects - Tasks](https://app.notion.com/p/38d8d469d405805589c6000c89f3d3ab)). Archive: [Safehouse CRM Phase 1](https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448). Never overwrite prior executor entries.

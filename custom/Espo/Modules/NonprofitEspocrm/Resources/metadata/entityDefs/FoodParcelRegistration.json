@@ -1,0 +1,102 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true,
+            "readOnly": true
+        },
+        "contact": {
+            "type": "link",
+            "required": true
+        },
+        "taxCode": {
+            "type": "varchar",
+            "maxLength": 16
+        },
+        "birthPlace": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "household": {
+            "type": "text"
+        },
+        "phone": {
+            "type": "varchar",
+            "maxLength": 50
+        },
+        "address": {
+            "type": "address",
+            "viewMap": true
+        },
+        "notes": {
+            "type": "text"
+        },
+        "dateLogsText": {
+            "type": "text",
+            "readOnly": true,
+            "utility": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        }
+    },
+    "links": {
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        },
+        "contact": {
+            "type": "belongsTo",
+            "entity": "Contact",
+            "foreign": "foodParcelRegistrations"
+        },
+        "dateLogs": {
+            "type": "hasMany",
+            "entity": "FoodParcelDateLog",
+            "foreign": "foodParcelRegistration"
+        }
+    },
+    "collection": {
+        "orderBy": "createdAt",
+        "order": "desc"
+    },
+    "optimisticConcurrencyControl": true,
+    "audited": true
+}

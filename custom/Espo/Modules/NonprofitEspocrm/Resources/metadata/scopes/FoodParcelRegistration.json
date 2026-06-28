@@ -1,0 +1,22 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "NonprofitEspocrm",
+    "object": true,
+    "layouts": true,
+    "tab": false,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "stream": true,
+    "importable": true,
+    "customizable": true,
+    "quickViewDefaultNavigation": true,
+    "color": "#c0392b",
+    "iconClass": "fas fa-shopping-basket"
+}

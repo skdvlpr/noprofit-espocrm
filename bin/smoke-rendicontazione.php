@@ -22,6 +22,7 @@ use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ExportWithTotals;
 use Espo\Modules\NonprofitEspocrm\Tools\Reporting\MealCountStatsProvider;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\PrimaNotaStatsProvider;
 use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingAggregateQuery;
 use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingDateRange;
 use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingProfileRegistry;
@@ -48,6 +49,7 @@ $registry = $injectableFactory->create(ReportingProfileRegistry::class);
 $aggregateQuery = $injectableFactory->create(ReportingAggregateQuery::class);
 $exportWithTotals = $injectableFactory->create(ExportWithTotals::class);
 $mealCountStats = $injectableFactory->create(MealCountStatsProvider::class);
+$primaNotaStats = $injectableFactory->create(PrimaNotaStatsProvider::class);
 
 echo "Reporting profile registry\n";
 
@@ -65,6 +67,12 @@ $assocProfile = $registry->getProfile('AssociationMealCount');
 $ok(
     'AssociationMealCount sum attributes',
     $assocProfile !== null && $assocProfile->sumAttributes === ['portionCount']
+);
+$primaProfile = $registry->getProfile('PrimaNota');
+$ok('PrimaNota profile exists', $primaProfile !== null);
+$ok(
+    'PrimaNota sum attributes',
+    $primaProfile !== null && $primaProfile->sumAttributes === ['amountIn', 'amountOut']
 );
 
 echo "\nReportingDateRange\n";
@@ -228,12 +236,15 @@ try {
     $ok('routes.json reporting/email-export registered', in_array('/NonprofitEspocrm/reporting/email-export', $routePaths, true));
     $ok('routes.json association-meal-count/summary registered', in_array('/NonprofitEspocrm/reporting/association-meal-count/summary', $routePaths, true));
     $ok('routes.json association-meal-count/totals registered', in_array('/NonprofitEspocrm/reporting/association-meal-count/totals', $routePaths, true));
+    $ok('routes.json prima-nota/summary registered', in_array('/NonprofitEspocrm/reporting/prima-nota/summary', $routePaths, true));
+    $ok('routes.json prima-nota/totals registered', in_array('/NonprofitEspocrm/reporting/prima-nota/totals', $routePaths, true));
 
     echo "\nDashlet metadata\n";
 
     $dashletPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/dashlets';
     $ok('MealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/MealCountMonthlyStats.json"));
     $ok('AssociationMealCountMonthlyStats dashlet metadata', is_readable("$dashletPath/AssociationMealCountMonthlyStats.json"));
+    $ok('PrimaNotaLedgerStats dashlet metadata', is_readable("$dashletPath/PrimaNotaLedgerStats.json"));
 
     echo "\nItalian reporting labels (canonical naming)\n";
 
@@ -262,6 +273,37 @@ try {
         $language->translate('Create AssociationMealCount', 'labels', 'Global') === 'Crea Conteggio pasti per Rete'
     );
 } finally {
+    echo "\nPrimaNota stats provider\n";
+    $pn = $em->getNewEntity('PrimaNota');
+    $pn->set([
+        'description' => 'SMOKE-Rend-Income',
+        'subjectName' => 'Donor',
+        'amountIn' => 100,
+        'amountOut' => 0,
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($pn);
+    $pn2 = $em->getNewEntity('PrimaNota');
+    $pn2->set([
+        'description' => 'SMOKE-Rend-Expense',
+        'subjectName' => 'Vendor',
+        'amountIn' => 0,
+        'amountOut' => 40,
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($pn2);
+    $summary = $primaNotaStats->getSummary();
+    $ok('PrimaNota summary today amountIn', isset($summary->today->amountIn));
+    $ok('PrimaNota summary managementBalance', isset($summary->today->managementBalance));
+    $totals = $primaNotaStats->getTotals();
+    $ok(
+        'PrimaNota totals balance math',
+        isset($totals['amountIn'], $totals['amountOut'], $totals['managementBalance'])
+            && abs($totals['managementBalance'] - ($totals['amountIn'] - $totals['amountOut'])) < 0.01
+    );
+    $em->removeEntity($pn);
+    $em->removeEntity($pn2);
+
     foreach ($created as $entity) {
         $em->removeEntity($entity);
     }

@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/NonprofitEspocrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-06-21
+**Executor:** Antigravity AI | **Last updated:** 2026-06-28
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -16,6 +16,28 @@ Before implementing ANY task, executor MUST:
 6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** Logs MUST be **handoff-ready**: include current state, files changed, verification performed, blockers, and exact next steps so another agent can continue after context compaction or token exhaustion. **Do not** create local markdown files as a Notion substitute. Mark tasks **Done** only when acceptance criteria are met. **NEVER** ask the user to paste executor logs manually into Notion. If Notion write tools are unavailable: (1) call `mcp_auth` for `plugin-notion-workspace-notion`; (2) verify MCP tools folder lists `notion-fetch` / `notion-update-page` (not only `mcp_auth`); (3) retry the write; (4) if tools are still missing after auth, tell the user to reconnect Notion MCP or restart the chat — do **not** offer a copy-paste log workaround.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
 8. **One task per user request (execution scope):** Implement **exactly one** Notion task / one bug / one acceptance slice per user message. If the user lists multiple issues, **append them to Notion** (backlog + ordered queue) and **do not** start the next item until the current one is verified (smoke + manual QA steps) or the user explicitly reprioritizes. **Exception:** launching **parallel subagents** for independent read-only work (explore, CI, security review) is allowed and encouraged when it speeds up the **single** active task — but do not ship code for multiple unrelated fixes in one turn.
+
+9. **Post-fix manual QA gate:** After each bug fix, append a **Manual QA checklist** to the Notion task (English) and wait for user confirmation (or explicit reprioritize) before starting the next queued bug. Do **not** batch unrelated fixes in one turn.
+
+10. **Notion language:** Task names, project titles, epic titles, executor logs, and acceptance criteria in Notion MUST be **English only** (no Russian/Cyrillic in Notion pages). User chat may stay Russian; Notion is the English handoff surface.
+
+## NOTION — PROJECT & TASK TRACKERS (canonical since 2026-06-28)
+
+**Active work** goes only into the **new** databases below. The old Gomercato tracker is **read-only archive** — do not create new tasks there.
+
+| Role | URL | Notes |
+| ---- | --- | ----- |
+| **Active project (post-launch)** | https://app.notion.com/p/38d8d469d405817cbd23f6cfb3ce32af | **Nonprofit EspoCRM — Post-launch enhancements** — current implementation project |
+| **Projects DB** | https://app.notion.com/p/2fb8d469d4058093a291fd990185824d | Create/update **projects** here |
+| **Tasks DB** | https://app.notion.com/p/38d8d469d405805589c6000c89f3d3ab | Create/update **tasks** here (`Projects - Tasks`) |
+| **Archive project (Phase 1)** | https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448 | **Safehouse CRM** — Gomercato tracker; Status **Done**; executor logs are historical reference only |
+
+**Mandatory rules:**
+
+1. **Every new task** MUST set the **Project** relation to the project it belongs to (never orphan tasks).
+2. **Every project page** MUST include: goal/overview, links to **all** related tasks from the Tasks DB, and append-only executor logs.
+3. Before implementation: fetch **active project page** + **target task page** from the new DBs (step 2 of PRE-TASK PROTOCOL).
+4. When closing a project phase: mark project **Done** in Projects DB; open the next project in the same DB (do not reuse the archive tracker).
 
 ## SECTION 1 — PROJECT OVERVIEW
 

@@ -121,6 +121,7 @@ $expectedCrmOrder = [
     'Member',
     'VolunteerEmployee',
     'Case',
+    'Intervention',
 ];
 
 $expectedSupportOrder = ['KnowledgeBaseArticle'];
@@ -149,6 +150,8 @@ $qcStrings = array_filter($quickCreateList, 'is_string');
 
 $report('Lead present in tabList', in_array('Lead', $tabStrings, true));
 $report('Case present in tabList', in_array('Case', $tabStrings, true));
+$report('Intervention present in tabList', in_array('Intervention', $tabStrings, true));
+$report('FoodParcelRegistration present in tabList', in_array('FoodParcelRegistration', $tabStrings, true));
 $report('Lead present in quickCreateList', in_array('Lead', $qcStrings, true));
 $report('Case present in quickCreateList', in_array('Case', $qcStrings, true));
 
@@ -189,6 +192,7 @@ $report('Legacy $Rendicontazione divider absent', !array_reduce(
 ));
 $report('MealCount in Rendicontazione group itemList', in_array('MealCount', $groupItemList, true));
 $report('AssociationMealCount in Rendicontazione group itemList', in_array('AssociationMealCount', $groupItemList, true));
+$report('PrimaNota in Rendicontazione group itemList', in_array('PrimaNota', $groupItemList, true));
 $report('MealCount not a top-level tab', !in_array('MealCount', $tabStrings, true));
 $report('AssociationMealCount not a top-level tab', !in_array('AssociationMealCount', $tabStrings, true));
 $report('Opportunity NOT in Rendicontazione group', !in_array('Opportunity', $groupItemList, true));
@@ -212,6 +216,18 @@ $report(
     $volunteerIndex !== null
         && $groupIndex !== null
         && $volunteerIndex < $groupIndex
+);
+
+$caseIndex = array_search('Case', $tabList, true);
+$interventionIndex = array_search('Intervention', $tabList, true);
+$report(
+    'Case and Intervention before Rendicontazione group',
+    $groupIndex !== null
+        && $caseIndex !== false
+        && $interventionIndex !== false
+        && $caseIndex < $groupIndex
+        && $interventionIndex < $groupIndex
+        && $caseIndex < $interventionIndex
 );
 
 $em = $container->get('entityManager');

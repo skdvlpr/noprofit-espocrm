@@ -1,0 +1,31 @@
+{
+    "fields": {
+        "name": "Nome",
+        "description": "Descrizione (causale movimento)",
+        "subjectName": "Soggetto pagatore / beneficiario",
+        "amountIn": "Entrata",
+        "amountOut": "Uscita",
+        "managementBalance": "Avanzo/disavanzo di gestione",
+        "modelDClassification": "Classificazione modello D",
+        "financing": "Finanziamento",
+        "transactionDate": "Data",
+        "assignedUser": "Assegnato a",
+        "teams": "Gruppi"
+    },
+    "labels": {
+        "PrimaNota": "Prima nota",
+        "PrimaNotaPlural": "Prima nota",
+        "Create PrimaNota": "Crea movimento"
+    },
+    "options": {
+        "modelDClassification": {
+            "Donation": "Donazione",
+            "Grant": "Contributo / finanziamento",
+            "OperatingExpense": "Spesa operativa",
+            "Personnel": "Personale",
+            "Utilities": "Utenze",
+            "Supplies": "Materiali",
+            "Other": "Altro"
+        }
+    }
+}

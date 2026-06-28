@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (interventionDate == null) {\n    interventionDate = datetime\\today();\n}\nif (interventionCount == null) {\n    interventionCount = 1;\n}\nname = string\\concatenate(department, ' — ', interventionDate);"
+}

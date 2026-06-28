@@ -147,3 +147,69 @@
         font-size: 16px;
     }
 }
+
+/* Prima Nota list: income green, expense red (theme tokens) */
+.prima-nota-amount-in,
+.prima-nota-amount-in .field {
+    color: var(--state-success-text, #27ae60);
+}
+
+.prima-nota-amount-out,
+.prima-nota-amount-out .field {
+    color: var(--state-danger-text, #c0392b);
+}
+
+.food-parcel-pdf-frame {
+    width: 100%;
+    min-height: 480px;
+    border: 1px solid var(--panel-default-border, #ddd);
+    border-radius: var(--border-radius, 4px);
+    background: var(--panel-bg, #fff);
+}
+
+/* Email list — mobile-friendly (Android narrow screens) */
+@media (max-width: 767px) {
+    body .page[data-scope="Email"] .row > .left-container,
+    body .page[data-scope="Email"] .row > .list-container {
+        width: 100%;
+        max-width: 100%;
+        float: none;
+    }
+
+    body .page[data-scope="Email"] .row > .left-container {
+        margin-bottom: 12px;
+    }
+
+    body .page[data-scope="Email"] .list-container {
+        overflow-x: hidden;
+    }
+
+    body .page[data-scope="Email"] .list-container .table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="fromEmailAddress"],
+    body .page[data-scope="Email"] .list-container .table td[data-name="fromString"] {
+        max-width: 28%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="name"] {
+        max-width: 42%;
+        word-break: break-word;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="dateSent"] {
+        max-width: 30%;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    body .page[data-scope="Email"] .list-container .table thead th[data-name="dateSent"],
+    body .page[data-scope="Email"] .list-container .table thead th[data-name="fromEmailAddress"] {
+        font-size: 11px;
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "fields": {
+        "name": "Name",
+        "contact": "Contact",
+        "taxCode": "Tax Code",
+        "birthPlace": "Place of Birth",
+        "household": "Household",
+        "phone": "Phone",
+        "address": "Address",
+        "addressStreet": "Street",
+        "addressCity": "City",
+        "addressPostalCode": "Postal Code",
+        "notes": "Notes",
+        "dateLogsText": "Date log summary",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "dateLogs": "Date log entries"
+    },
+    "labels": {
+        "FoodParcelRegistration": "Food Parcel Registration",
+        "FoodParcelRegistrationPlural": "Food Parcel Registrations",
+        "Create FoodParcelRegistration": "Create registration",
+        "openPdfPreview": "Open PDF"
+    }
+}

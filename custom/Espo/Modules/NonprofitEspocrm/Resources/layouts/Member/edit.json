@@ -21,11 +21,10 @@
             ],
             [
                 {"name": "birthPlace"},
-                {"name": "residenceAddress"}
+                false
             ],
             [
-                {"name": "city"},
-                {"name": "province"}
+                {"name": "address", "fullWidth": true}
             ],
             [
                 {"name": "joinDate"},

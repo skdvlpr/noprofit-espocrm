@@ -1,0 +1,13 @@
+{
+    "fields": {
+        "name": "Nome",
+        "entryDate": "Data entrata",
+        "exitDate": "Data uscita",
+        "foodParcelRegistration": "Modulo pacco spesa"
+    },
+    "labels": {
+        "FoodParcelDateLog": "Voce registro date",
+        "FoodParcelDateLogPlural": "Voci registro date",
+        "Create FoodParcelDateLog": "Aggiungi data"
+    }
+}

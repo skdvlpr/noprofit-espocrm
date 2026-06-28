@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (contactName != null) {\n    name = string\\concatenate(contactName, ' — Pacco spesa');\n}"
+}

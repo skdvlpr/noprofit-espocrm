@@ -39,9 +39,17 @@ class Installer
     private const REPORTING_ENTITIES = [
         'MealCount',
         'AssociationMealCount',
+        'PrimaNota',
     ];
 
-    private const OTHER_TABS_TO_ENSURE = ['Account', 'Opportunity', 'Document', 'Case'];
+    private const OTHER_TABS_TO_ENSURE = [
+        'Account',
+        'Opportunity',
+        'Document',
+        'Case',
+        'Intervention',
+        'FoodParcelRegistration',
+    ];
 
     private const ENTITIES_TO_HIDE = [];
 
@@ -148,6 +156,8 @@ class Installer
         $roleSetup->provisionTeams();
 
         $injectableFactory->create(SafehouseGoogleCalendarProvisioner::class)->run($container);
+        $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\FoodParcel\FoodParcelPdfService::class)
+            ->provisionTemplate();
 
         $container->getByClass(DataManager::class)->rebuild();
     }
@@ -333,7 +343,7 @@ class Installer
     {
         $without = array_values(array_filter(
             $tabList,
-            static fn ($item): bool => $item !== 'Case'
+            static fn ($item): bool => !in_array($item, ['Case', 'Intervention'], true)
         ));
 
         foreach ($without as $i => $item) {
@@ -344,7 +354,7 @@ class Installer
             ) {
                 return array_merge(
                     array_slice($without, 0, $i),
-                    ['Case'],
+                    ['Case', 'Intervention'],
                     array_slice($without, $i)
                 );
             }
@@ -354,13 +364,13 @@ class Installer
             if ($item === 'VolunteerEmployee') {
                 return array_merge(
                     array_slice($without, 0, $i + 1),
-                    ['Case'],
+                    ['Case', 'Intervention'],
                     array_slice($without, $i + 1)
                 );
             }
         }
 
-        return array_merge($without, ['Case']);
+        return array_merge($without, ['Case', 'Intervention']);
     }
 
     /**

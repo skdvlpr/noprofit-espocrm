@@ -18,8 +18,7 @@
                 {"name": "leaveDate"}
             ],
             [
-                {"name": "city"},
-                {"name": "province"}
+                {"name": "address", "fullWidth": true}
             ],
             [
                 {"name": "positionsHeld", "fullWidth": true}

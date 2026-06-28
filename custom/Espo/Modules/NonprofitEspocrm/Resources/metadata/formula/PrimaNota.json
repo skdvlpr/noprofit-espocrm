@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (transactionDate == null) {\n    transactionDate = datetime\\today();\n}\nif (amountIn == null) {\n    amountIn = 0;\n}\nif (amountOut == null) {\n    amountOut = 0;\n}\nname = string\\concatenate(transactionDate, ' — ', description);"
+}

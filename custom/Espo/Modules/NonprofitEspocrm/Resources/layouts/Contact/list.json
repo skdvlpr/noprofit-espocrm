@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "contactType"},
+    {"name": "emailAddress"},
+    {"name": "phoneNumber"},
+    {"name": "relatedRecord"}
+]

@@ -1,0 +1,31 @@
+{
+    "fields": {
+        "name": "Name",
+        "description": "Description (movement reason)",
+        "subjectName": "Payer / Beneficiary",
+        "amountIn": "Income",
+        "amountOut": "Expense",
+        "managementBalance": "Management surplus/deficit",
+        "modelDClassification": "Model D classification",
+        "financing": "Grant / Funding",
+        "transactionDate": "Date",
+        "assignedUser": "Assigned User",
+        "teams": "Teams"
+    },
+    "labels": {
+        "PrimaNota": "Ledger Entry",
+        "PrimaNotaPlural": "Ledger (Prima Nota)",
+        "Create PrimaNota": "Create ledger entry"
+    },
+    "options": {
+        "modelDClassification": {
+            "Donation": "Donation",
+            "Grant": "Grant",
+            "OperatingExpense": "Operating expense",
+            "Personnel": "Personnel",
+            "Utilities": "Utilities",
+            "Supplies": "Supplies",
+            "Other": "Other"
+        }
+    }
+}

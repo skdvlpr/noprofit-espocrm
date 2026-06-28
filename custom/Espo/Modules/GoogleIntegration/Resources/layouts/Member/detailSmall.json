@@ -34,10 +34,8 @@
             ],
             [
                 {
-                    "name": "city"
-                },
-                {
-                    "name": "province"
+                    "name": "address",
+                    "fullWidth": true
                 }
             ],
             [

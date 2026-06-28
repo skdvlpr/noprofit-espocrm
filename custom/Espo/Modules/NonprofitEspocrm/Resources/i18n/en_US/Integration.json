@@ -1,0 +1,13 @@
+{
+    "fields": {
+        "mapId": "Map ID (optional)"
+    },
+    "tooltips": {
+        "GoogleMaps": {
+            "mapId": "Optional. Cloud Console → Map Management → Map ID. Used for embedded map tiles (View Map). Leave empty to use the default demo map. Not required for address autocomplete."
+        }
+    },
+    "help": {
+        "GoogleMaps": "Enable Maps JavaScript API, Places API, and Geocoding API in Google Cloud. Address street autocomplete uses Places API via the module address field view."
+    }
+}

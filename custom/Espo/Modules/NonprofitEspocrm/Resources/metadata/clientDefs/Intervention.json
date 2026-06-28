@@ -1,0 +1,17 @@
+{
+    "controller": "controllers/record",
+    "color": "#3498db",
+    "iconClass": "fas fa-hands-helping",
+    "recordViews": {
+        "detail": "views/record/detail",
+        "list": "views/record/list"
+    },
+    "relationshipPanels": {
+        "tasks": {
+            "create": true,
+            "select": true,
+            "orderBy": "createdAt",
+            "orderDirection": "desc"
+        }
+    }
+}
