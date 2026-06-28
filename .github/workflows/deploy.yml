@@ -8,7 +8,7 @@ name: Deploy to production (uninstalled Espo)
 #   - Server-owned state (data/, install/config.php, custom/Espo/Custom/) is
 #     protected via deploy/rsync-excludes.txt and is never overwritten.
 #   - No --delete by default (safe). Set DEPLOY_RSYNC_DELETE=1 repo variable to
-#     prune stale code files (server-state excludes still protect runtime data).
+#     prune stale code files while preserving server-state excludes.
 #   - After sync: if Espo is already installed, run rebuild + clear cache;
 #     otherwise print the installer URL and stop.
 
@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           DELETE_FLAG=""
           if [ "${DEPLOY_RSYNC_DELETE:-0}" = "1" ]; then
-            DELETE_FLAG="--delete --delete-excluded"
+            DELETE_FLAG="--delete"
           fi
           rsync -rlptz --human-readable $DELETE_FLAG \
             -e "ssh -p ${DEPLOY_SSH_PORT:-22} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
