@@ -1,4 +1,8 @@
 {
+    "links": {
+        "opportunities": "Grants & Funding",
+        "opportunity": "Grants & Funding"
+    },
     "scopeNames": {
         "Lead": "Lead",
         "Opportunity": "Grants & Funding",
@@ -59,7 +63,10 @@
     "dashlets": {
         "MealCountMonthlyStats": "Meal Count",
         "AssociationMealCountMonthlyStats": "Network Meal Count",
-        "PrimaNotaLedgerStats": "Prima Nota ledger"
+        "PrimaNotaLedgerStats": "Prima Nota ledger",
+        "Opportunities": "Grants & Funding",
+        "OpportunitiesByStage": "Grants & Funding by Stage",
+        "OpportunitiesByLeadSource": "Grants & Funding by Lead Source"
     },
     "options": {
         "period": {

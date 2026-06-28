@@ -1,4 +1,8 @@
 {
+    "links": {
+        "opportunities": "Гранты и Финансирование",
+        "opportunity": "Гранты и Финансирование"
+    },
     "scopeNames": {
         "Lead": "Lead",
         "Opportunity": "Гранты и Финансирование",

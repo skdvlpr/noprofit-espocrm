@@ -2,7 +2,12 @@
     "fields": {
         "contactType": "Contact type",
         "relatedRecord": "Account",
-        "taxCode": "Fiscal Code"
+        "taxCode": "Fiscal Code",
+        "opportunityRole": "Grant/funding role"
+    },
+    "links": {
+        "opportunities": "Grants & Funding",
+        "opportunitiesPrimary": "Grants & Funding (Primary)"
     },
     "options": {
         "contactType": {

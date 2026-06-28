@@ -1,4 +1,8 @@
 {
+    "links": {
+        "opportunities": "Fondi e Finanziamenti",
+        "opportunity": "Fondi e Finanziamenti"
+    },
     "scopeNames": {
         "Lead": "Lead",
         "Opportunity": "Fondi e Finanziamenti",
@@ -57,7 +61,10 @@
     },
     "dashlets": {
         "MealCountMonthlyStats": "Conteggio pasti",
-        "AssociationMealCountMonthlyStats": "Conteggio pasti per Rete"
+        "AssociationMealCountMonthlyStats": "Conteggio pasti per Rete",
+        "Opportunities": "Fondi e Finanziamenti",
+        "OpportunitiesByStage": "Fondi e Finanziamenti per Stato",
+        "OpportunitiesByLeadSource": "Fondi e Finanziamenti per Provenienza Lead"
     },
     "options": {
         "period": {

@@ -31,6 +31,7 @@
     },
     "labels": {
         "Opportunity": "Grants & Funding",
+        "OpportunityPlural": "Grants & Funding",
         "Create Opportunity": "Create Grant",
         "kanbanShortPresentationDate": "Submission",
         "kanbanShortCloseDate": "Close date",

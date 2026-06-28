@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "opportunityAmount": "Grant/funding amount",
+        "opportunityAmountConverted": "Grant/funding amount (converted)",
+        "opportunityAmountCurrency": "Grant/funding amount currency",
+        "createdOpportunity": "Grants & Funding"
+    },
+    "links": {
+        "createdOpportunity": "Grants & Funding"
+    }
+}

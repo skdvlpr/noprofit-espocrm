@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "opportunityAmount": "Importo Fondo/Finanziamento",
+        "opportunityAmountConverted": "Importo Fondo/Finanziamento (convertito)",
+        "opportunityAmountCurrency": "Valuta importo Fondo/Finanziamento",
+        "createdOpportunity": "Fondi e Finanziamenti"
+    },
+    "links": {
+        "createdOpportunity": "Fondi e Finanziamenti"
+    }
+}

@@ -4,7 +4,8 @@
         "driveFileId": "ID File Drive"
     },
     "links": {
-        "volunteerEmployees": "Volontari / Dipendenti"
+        "volunteerEmployees": "Volontari / Dipendenti",
+        "opportunities": "Fondi e Finanziamenti"
     },
     "options": {
         "status": {

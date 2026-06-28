@@ -67,6 +67,14 @@ $itGlobal = is_file($itGlobalPath)
     : [];
 $ok('it_IT scopeNames Lead is Lead', ($itGlobal['scopeNames']['Lead'] ?? '') === 'Lead');
 $ok('it_IT scopeNamesPlural Lead is Lead', ($itGlobal['scopeNamesPlural']['Lead'] ?? '') === 'Lead');
+$ok('it_IT scopeNames Opportunity is Fondi e Finanziamenti', ($itGlobal['scopeNames']['Opportunity'] ?? '') === 'Fondi e Finanziamenti');
+$ok('it_IT Global links.opportunities renamed', ($itGlobal['links']['opportunities'] ?? '') === 'Fondi e Finanziamenti');
+
+$itContactPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Contact.json';
+$itContact = is_file($itContactPath)
+    ? (json_decode((string) file_get_contents($itContactPath), true) ?: [])
+    : [];
+$ok('it_IT Contact links.opportunities renamed', ($itContact['links']['opportunities'] ?? '') === 'Fondi e Finanziamenti');
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');
 if ($siteUrl === '') {

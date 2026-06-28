@@ -26,6 +26,7 @@
     },
     "labels": {
         "Opportunity": "Гранты и Финансирование",
+        "OpportunityPlural": "Гранты и Финансирование",
         "Create Opportunity": "Создать грант",
         "kanbanShortPresentationDate": "Подача",
         "kanbanShortCloseDate": "Закрытие",

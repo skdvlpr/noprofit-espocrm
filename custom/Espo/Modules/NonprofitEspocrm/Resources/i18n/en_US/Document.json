@@ -4,7 +4,8 @@
         "driveFileId": "Drive File ID"
     },
     "links": {
-        "volunteerEmployees": "Volunteers / Employees"
+        "volunteerEmployees": "Volunteers / Employees",
+        "opportunities": "Grants & Funding"
     },
     "options": {
         "status": {

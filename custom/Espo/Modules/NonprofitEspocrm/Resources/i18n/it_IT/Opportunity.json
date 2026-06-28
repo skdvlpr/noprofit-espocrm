@@ -31,6 +31,7 @@
     },
     "labels": {
         "Opportunity": "Fondi e Finanziamenti",
+        "OpportunityPlural": "Fondi e Finanziamenti",
         "Create Opportunity": "Crea Fondo/Finanziamento",
         "kanbanShortPresentationDate": "Presentazione",
         "kanbanShortCloseDate": "Chiusura",

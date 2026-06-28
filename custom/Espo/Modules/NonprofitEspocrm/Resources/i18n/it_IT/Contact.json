@@ -2,7 +2,12 @@
     "fields": {
         "contactType": "Tipo contatto",
         "relatedRecord": "Account",
-        "taxCode": "Codice Fiscale"
+        "taxCode": "Codice Fiscale",
+        "opportunityRole": "Ruolo Fondo/Finanziamento"
+    },
+    "links": {
+        "opportunities": "Fondi e Finanziamenti",
+        "opportunitiesPrimary": "Fondi e Finanziamenti (Primaria)"
     },
     "options": {
         "contactType": {
