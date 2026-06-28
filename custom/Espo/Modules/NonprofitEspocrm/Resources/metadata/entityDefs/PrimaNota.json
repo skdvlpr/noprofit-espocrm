@@ -13,6 +13,22 @@
             "type": "varchar",
             "maxLength": 255
         },
+        "subjectParty": {
+            "type": "linkParent",
+            "entityList": [
+                "Account",
+                "Contact"
+            ],
+            "audited": true
+        },
+        "createSubjectAccount": {
+            "type": "bool",
+            "default": false
+        },
+        "createSubjectContact": {
+            "type": "bool",
+            "default": false
+        },
         "entryType": {
             "type": "enum",
             "options": [
@@ -121,6 +137,9 @@
             "type": "belongsTo",
             "entity": "Opportunity",
             "foreign": "primaNotaEntries"
+        },
+        "subjectParty": {
+            "type": "belongsToParent"
         }
     },
     "collection": {

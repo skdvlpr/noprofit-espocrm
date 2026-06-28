@@ -5,6 +5,62 @@
     "recordViews": {
         "list": "nonprofit-espocrm:views/prima-nota/list"
     },
+    "dynamicLogic": {
+        "fields": {
+            "subjectName": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isNotEmpty",
+                            "attribute": "subjectPartyId"
+                        }
+                    ]
+                }
+            },
+            "subjectParty": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isFalse",
+                            "attribute": "createSubjectAccount"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createSubjectContact"
+                        }
+                    ]
+                }
+            },
+            "createSubjectAccount": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "subjectPartyId"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createSubjectContact"
+                        }
+                    ]
+                }
+            },
+            "createSubjectContact": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "subjectPartyId"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createSubjectAccount"
+                        }
+                    ]
+                }
+            }
+        }
+    },
     "menu": {
         "list": {
             "buttons": [

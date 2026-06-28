@@ -10,8 +10,18 @@
                 {"name": "description", "fullWidth": true}
             ],
             [
-                {"name": "subjectName"},
-                {"name": "financing"}
+                {"name": "subjectParty", "fullWidth": true}
+            ],
+            [
+                {"name": "subjectName", "fullWidth": true}
+            ],
+            [
+                {"name": "createSubjectAccount"},
+                {"name": "createSubjectContact"}
+            ],
+            [
+                {"name": "financing"},
+                false
             ],
             [
                 {"name": "entryType"},

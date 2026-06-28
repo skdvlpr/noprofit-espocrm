@@ -4,7 +4,10 @@
         "rows": [
             [{"name": "transactionDate"}, {"name": "entryType"}],
             [{"name": "description", "fullWidth": true}],
-            [{"name": "subjectName"}, {"name": "financing"}],
+            [{"name": "subjectParty", "fullWidth": true}],
+            [{"name": "subjectName", "fullWidth": true}],
+            [{"name": "createSubjectAccount"}, {"name": "createSubjectContact"}],
+            [{"name": "financing"}, false],
             [{"name": "amount"}, false],
             [{"name": "modelDClassification", "fullWidth": true}],
             [{"name": "internalClassification", "fullWidth": true}],
