@@ -29,6 +29,26 @@
             "type": "bool",
             "default": false
         },
+        "beneficiaryName": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "beneficiaryParty": {
+            "type": "linkParent",
+            "entityList": [
+                "Account",
+                "Contact"
+            ],
+            "audited": true
+        },
+        "createBeneficiaryAccount": {
+            "type": "bool",
+            "default": false
+        },
+        "createBeneficiaryContact": {
+            "type": "bool",
+            "default": false
+        },
         "entryType": {
             "type": "enum",
             "options": [
@@ -139,6 +159,9 @@
             "foreign": "primaNotaEntries"
         },
         "subjectParty": {
+            "type": "belongsToParent"
+        },
+        "beneficiaryParty": {
             "type": "belongsToParent"
         }
     },

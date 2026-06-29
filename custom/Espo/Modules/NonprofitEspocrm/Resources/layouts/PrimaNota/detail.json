@@ -20,6 +20,16 @@
                 {"name": "createSubjectContact"}
             ],
             [
+                {"name": "beneficiaryParty", "fullWidth": true}
+            ],
+            [
+                {"name": "beneficiaryName", "fullWidth": true}
+            ],
+            [
+                {"name": "createBeneficiaryAccount"},
+                {"name": "createBeneficiaryContact"}
+            ],
+            [
                 {"name": "financing"},
                 false
             ],

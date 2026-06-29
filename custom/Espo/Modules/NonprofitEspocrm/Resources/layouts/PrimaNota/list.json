@@ -2,6 +2,7 @@
     {"name": "transactionDate", "link": true},
     {"name": "description"},
     {"name": "subjectName"},
+    {"name": "beneficiaryName"},
     {"name": "entryType"},
     {"name": "amount"},
     {"name": "modelDClassification"},

@@ -58,6 +58,58 @@
                         }
                     ]
                 }
+            },
+            "beneficiaryName": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isNotEmpty",
+                            "attribute": "beneficiaryPartyId"
+                        }
+                    ]
+                }
+            },
+            "beneficiaryParty": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isFalse",
+                            "attribute": "createBeneficiaryAccount"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createBeneficiaryContact"
+                        }
+                    ]
+                }
+            },
+            "createBeneficiaryAccount": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "beneficiaryPartyId"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createBeneficiaryContact"
+                        }
+                    ]
+                }
+            },
+            "createBeneficiaryContact": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "beneficiaryPartyId"
+                        },
+                        {
+                            "type": "isFalse",
+                            "attribute": "createBeneficiaryAccount"
+                        }
+                    ]
+                }
             }
         }
     },

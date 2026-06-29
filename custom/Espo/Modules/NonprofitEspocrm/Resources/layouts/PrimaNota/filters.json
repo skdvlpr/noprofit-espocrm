@@ -1,10 +1,13 @@
 [
-    {"name": "transactionDate"},
-    {"name": "description"},
-    {"name": "subjectName"},
-    {"name": "entryType"},
-    {"name": "amount"},
-    {"name": "modelDClassification"},
-    {"name": "internalClassification"},
-    {"name": "financing"}
+    "transactionDate",
+    "description",
+    "subjectName",
+    "beneficiaryName",
+    "entryType",
+    "amount",
+    "modelDClassification",
+    "internalClassification",
+    "financing",
+    "assignedUser",
+    "teams"
 ]

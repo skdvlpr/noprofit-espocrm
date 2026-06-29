@@ -14,11 +14,15 @@ use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Syncs subjectName from linkParent subjectParty and optionally creates Account/Contact.
+ * Syncs payment-subject and beneficiary names from linkParent fields
+ * and optionally creates Account/Contact records.
  */
 class SubjectParty implements BeforeSave
 {
     public static int $order = 4;
+
+    /** @var list<string> */
+    private const PARTY_PREFIXES = ['subject', 'beneficiary'];
 
     public function __construct(
         private EntityManager $entityManager,
@@ -30,65 +34,74 @@ class SubjectParty implements BeforeSave
             return;
         }
 
-        $createAccount = (bool) $entity->get('createSubjectAccount');
-        $createContact = (bool) $entity->get('createSubjectContact');
-
-        if ($createAccount && $createContact) {
-            throw new BadRequest('Select either create Account or create Contact, not both.');
-        }
-
-        $subjectPartyId = $entity->get('subjectPartyId');
-        $subjectPartyType = $entity->get('subjectPartyType');
-        $subjectName = trim((string) ($entity->get('subjectName') ?? ''));
-
-        if ($subjectPartyId && ($createAccount || $createContact)) {
-            throw new BadRequest('Clear create flags when a linked subject is selected.');
-        }
-
-        if (!$subjectPartyId && $subjectName !== '' && ($createAccount || $createContact)) {
-            if ($createAccount) {
-                $this->createAndLinkAccount($entity, $subjectName);
-            } else {
-                $this->createAndLinkContact($entity, $subjectName);
-            }
-
-            $entity->set('createSubjectAccount', false);
-            $entity->set('createSubjectContact', false);
-
-            $subjectPartyId = $entity->get('subjectPartyId');
-            $subjectPartyType = $entity->get('subjectPartyType');
-        }
-
-        if ($subjectPartyId && $subjectPartyType) {
-            $displayName = $this->resolveDisplayName($subjectPartyType, (string) $subjectPartyId);
-
-            if ($displayName !== null) {
-                $entity->set('subjectName', $displayName);
-                $entity->set('subjectPartyName', $displayName);
-            }
-        } elseif ($createAccount || $createContact) {
-            throw new BadRequest('Enter payer/beneficiary name before creating a linked record.');
+        foreach (self::PARTY_PREFIXES as $prefix) {
+            $this->processPartyFields($entity, $prefix);
         }
     }
 
-    private function createAndLinkAccount(Entity $entity, string $subjectName): void
+    private function processPartyFields(Entity $entity, string $prefix): void
+    {
+        $label = $prefix === 'subject' ? 'payment subject' : 'beneficiary';
+
+        $createAccount = (bool) $entity->get('create' . ucfirst($prefix) . 'Account');
+        $createContact = (bool) $entity->get('create' . ucfirst($prefix) . 'Contact');
+
+        if ($createAccount && $createContact) {
+            throw new BadRequest("Select either create Account or create Contact for {$label}, not both.");
+        }
+
+        $partyId = $entity->get($prefix . 'PartyId');
+        $partyType = $entity->get($prefix . 'PartyType');
+        $partyName = trim((string) ($entity->get($prefix . 'Name') ?? ''));
+
+        if ($partyId && ($createAccount || $createContact)) {
+            throw new BadRequest("Clear create flags when a linked {$label} is selected.");
+        }
+
+        if (!$partyId && $partyName !== '' && ($createAccount || $createContact)) {
+            if ($createAccount) {
+                $this->createAndLinkAccount($entity, $prefix, $partyName);
+            } else {
+                $this->createAndLinkContact($entity, $prefix, $partyName);
+            }
+
+            $entity->set('create' . ucfirst($prefix) . 'Account', false);
+            $entity->set('create' . ucfirst($prefix) . 'Contact', false);
+
+            $partyId = $entity->get($prefix . 'PartyId');
+            $partyType = $entity->get($prefix . 'PartyType');
+        }
+
+        if ($partyId && $partyType) {
+            $displayName = $this->resolveDisplayName((string) $partyType, (string) $partyId);
+
+            if ($displayName !== null) {
+                $entity->set($prefix . 'Name', $displayName);
+                $entity->set($prefix . 'PartyName', $displayName);
+            }
+        } elseif ($createAccount || $createContact) {
+            throw new BadRequest("Enter {$label} name before creating a linked record.");
+        }
+    }
+
+    private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName): void
     {
         $account = $this->entityManager->getNewEntity(Account::ENTITY_TYPE);
-        $account->set(Field::NAME, $subjectName);
+        $account->set(Field::NAME, $partyName);
         $this->copyAssignment($entity, $account);
 
         $this->entityManager->saveEntity($account, [
             SaveOption::SKIP_ALL => true,
         ]);
 
-        $entity->set('subjectPartyId', $account->getId());
-        $entity->set('subjectPartyType', Account::ENTITY_TYPE);
-        $entity->set('subjectPartyName', $account->get(Field::NAME));
+        $entity->set($prefix . 'PartyId', $account->getId());
+        $entity->set($prefix . 'PartyType', Account::ENTITY_TYPE);
+        $entity->set($prefix . 'PartyName', $account->get(Field::NAME));
     }
 
-    private function createAndLinkContact(Entity $entity, string $subjectName): void
+    private function createAndLinkContact(Entity $entity, string $prefix, string $partyName): void
     {
-        [$firstName, $lastName] = $this->splitPersonName($subjectName);
+        [$firstName, $lastName] = $this->splitPersonName($partyName);
 
         $contact = $this->entityManager->getNewEntity(Contact::ENTITY_TYPE);
         $contact->set('firstName', $firstName);
@@ -99,9 +112,9 @@ class SubjectParty implements BeforeSave
             SaveOption::SKIP_ALL => true,
         ]);
 
-        $entity->set('subjectPartyId', $contact->getId());
-        $entity->set('subjectPartyType', Contact::ENTITY_TYPE);
-        $entity->set('subjectPartyName', $contact->get(Field::NAME));
+        $entity->set($prefix . 'PartyId', $contact->getId());
+        $entity->set($prefix . 'PartyType', Contact::ENTITY_TYPE);
+        $entity->set($prefix . 'PartyName', $contact->get(Field::NAME));
     }
 
     private function copyAssignment(Entity $source, Entity $target): void
@@ -118,15 +131,15 @@ class SubjectParty implements BeforeSave
     /**
      * @return array{0: string, 1: string}
      */
-    private function splitPersonName(string $subjectName): array
+    private function splitPersonName(string $partyName): array
     {
-        $subjectName = trim(preg_replace('/\s+/u', ' ', $subjectName) ?? $subjectName);
+        $partyName = trim(preg_replace('/\s+/u', ' ', $partyName) ?? $partyName);
 
-        if ($subjectName === '') {
+        if ($partyName === '') {
             return ['', ''];
         }
 
-        $parts = explode(' ', $subjectName, 2);
+        $parts = explode(' ', $partyName, 2);
 
         return [
             $parts[0],

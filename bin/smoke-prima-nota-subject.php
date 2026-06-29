@@ -31,6 +31,15 @@ $contact->set('firstName', 'Smoke');
 $contact->set('lastName', 'Subject');
 $em->saveEntity($contact);
 
+$beneficiaryAccount = $em->getNewEntity(Account::ENTITY_TYPE);
+$beneficiaryAccount->set('name', 'Smoke Beneficiary Account');
+$em->saveEntity($beneficiaryAccount);
+
+$beneficiaryContact = $em->getNewEntity(Contact::ENTITY_TYPE);
+$beneficiaryContact->set('firstName', 'Smoke');
+$beneficiaryContact->set('lastName', 'Beneficiary');
+$em->saveEntity($beneficiaryContact);
+
 $linkedAccount = $em->getNewEntity('PrimaNota');
 $linkedAccount->set([
     'description' => 'Smoke linked account subject',
@@ -103,20 +112,137 @@ $manual->set([
     'entryType' => 'Expense',
     'amount' => 14,
     'transactionDate' => date('Y-m-d'),
-    'subjectName' => 'Manual Beneficiary',
+    'subjectName' => 'Manual Payer',
 ]);
 $em->saveEntity($manual);
 $ok(
     'manual subjectName preserved',
-    $manual->get('subjectName') === 'Manual Beneficiary'
+    $manual->get('subjectName') === 'Manual Payer'
         && !$manual->get('subjectPartyId'),
     (string) $manual->get('subjectName')
 );
 
-foreach ([$linkedAccount, $linkedContact, $createdAccount, $createdContact, $manual] as $row) {
+$linkedBeneficiaryAccount = $em->getNewEntity('PrimaNota');
+$linkedBeneficiaryAccount->set([
+    'description' => 'Smoke linked account beneficiary',
+    'entryType' => 'Expense',
+    'amount' => 15,
+    'transactionDate' => date('Y-m-d'),
+    'beneficiaryPartyId' => $beneficiaryAccount->getId(),
+    'beneficiaryPartyType' => Account::ENTITY_TYPE,
+]);
+$em->saveEntity($linkedBeneficiaryAccount);
+$ok(
+    'beneficiaryName from account',
+    $linkedBeneficiaryAccount->get('beneficiaryName') === 'Smoke Beneficiary Account',
+    (string) $linkedBeneficiaryAccount->get('beneficiaryName')
+);
+
+$linkedBeneficiaryContact = $em->getNewEntity('PrimaNota');
+$linkedBeneficiaryContact->set([
+    'description' => 'Smoke linked contact beneficiary',
+    'entryType' => 'Expense',
+    'amount' => 16,
+    'transactionDate' => date('Y-m-d'),
+    'beneficiaryPartyId' => $beneficiaryContact->getId(),
+    'beneficiaryPartyType' => Contact::ENTITY_TYPE,
+]);
+$em->saveEntity($linkedBeneficiaryContact);
+$ok(
+    'beneficiaryName from contact',
+    $linkedBeneficiaryContact->get('beneficiaryName') === 'Smoke Beneficiary',
+    (string) $linkedBeneficiaryContact->get('beneficiaryName')
+);
+
+$createdBeneficiaryAccount = $em->getNewEntity('PrimaNota');
+$createdBeneficiaryAccount->set([
+    'description' => 'Smoke create account beneficiary',
+    'entryType' => 'Expense',
+    'amount' => 17,
+    'transactionDate' => date('Y-m-d'),
+    'beneficiaryName' => 'New Beneficiary Org',
+    'createBeneficiaryAccount' => true,
+]);
+$em->saveEntity($createdBeneficiaryAccount);
+$ok(
+    'create beneficiary account link',
+    $createdBeneficiaryAccount->get('beneficiaryPartyType') === Account::ENTITY_TYPE
+        && $createdBeneficiaryAccount->get('beneficiaryName') === 'New Beneficiary Org',
+    (string) $createdBeneficiaryAccount->get('beneficiaryPartyId')
+);
+
+$createdBeneficiaryContact = $em->getNewEntity('PrimaNota');
+$createdBeneficiaryContact->set([
+    'description' => 'Smoke create contact beneficiary',
+    'entryType' => 'Expense',
+    'amount' => 18,
+    'transactionDate' => date('Y-m-d'),
+    'beneficiaryName' => 'Luca Bianchi',
+    'createBeneficiaryContact' => true,
+]);
+$em->saveEntity($createdBeneficiaryContact);
+$ok(
+    'create beneficiary contact link',
+    $createdBeneficiaryContact->get('beneficiaryPartyType') === Contact::ENTITY_TYPE
+        && $createdBeneficiaryContact->get('beneficiaryName') === 'Luca Bianchi',
+    (string) $createdBeneficiaryContact->get('beneficiaryPartyId')
+);
+
+$manualBeneficiary = $em->getNewEntity('PrimaNota');
+$manualBeneficiary->set([
+    'description' => 'Smoke manual beneficiary',
+    'entryType' => 'Expense',
+    'amount' => 19,
+    'transactionDate' => date('Y-m-d'),
+    'beneficiaryName' => 'Manual Beneficiary',
+]);
+$em->saveEntity($manualBeneficiary);
+$ok(
+    'manual beneficiaryName preserved',
+    $manualBeneficiary->get('beneficiaryName') === 'Manual Beneficiary'
+        && !$manualBeneficiary->get('beneficiaryPartyId'),
+    (string) $manualBeneficiary->get('beneficiaryName')
+);
+
+$bothParties = $em->getNewEntity('PrimaNota');
+$bothParties->set([
+    'description' => 'Smoke both parties',
+    'entryType' => 'Expense',
+    'amount' => 20,
+    'transactionDate' => date('Y-m-d'),
+    'subjectPartyId' => $account->getId(),
+    'subjectPartyType' => Account::ENTITY_TYPE,
+    'beneficiaryPartyId' => $beneficiaryContact->getId(),
+    'beneficiaryPartyType' => Contact::ENTITY_TYPE,
+]);
+$em->saveEntity($bothParties);
+$ok(
+    'subject and beneficiary independent',
+    $bothParties->get('subjectName') === 'Smoke Subject Account'
+        && $bothParties->get('beneficiaryName') === 'Smoke Beneficiary',
+    $bothParties->get('subjectName') . ' / ' . $bothParties->get('beneficiaryName')
+);
+
+$rows = [
+    $linkedAccount,
+    $linkedContact,
+    $createdAccount,
+    $createdContact,
+    $manual,
+    $linkedBeneficiaryAccount,
+    $linkedBeneficiaryContact,
+    $createdBeneficiaryAccount,
+    $createdBeneficiaryContact,
+    $manualBeneficiary,
+    $bothParties,
+];
+
+foreach ($rows as $row) {
     $em->removeEntity($row);
 }
 
+$em->removeEntity($beneficiaryContact);
+$em->removeEntity($beneficiaryAccount);
 $em->removeEntity($contact);
 $em->removeEntity($account);
 

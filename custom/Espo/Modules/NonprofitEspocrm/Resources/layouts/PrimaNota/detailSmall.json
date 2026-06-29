@@ -1,17 +1,14 @@
 [
     {
-        "label": "",
         "rows": [
-            [{"name": "transactionDate"}, {"name": "entryType"}],
-            [{"name": "description", "fullWidth": true}],
             [{"name": "subjectParty", "fullWidth": true}],
             [{"name": "subjectName", "fullWidth": true}],
             [{"name": "createSubjectAccount"}, {"name": "createSubjectContact"}],
-            [{"name": "financing"}, false],
-            [{"name": "amount"}, false],
-            [{"name": "modelDClassification", "fullWidth": true}],
-            [{"name": "internalClassification", "fullWidth": true}],
-            [{"name": "assignedUser"}, {"name": "teams"}]
+            [{"name": "beneficiaryParty", "fullWidth": true}],
+            [{"name": "beneficiaryName", "fullWidth": true}],
+            [{"name": "createBeneficiaryAccount"}, {"name": "createBeneficiaryContact"}],
+            [{"name": "entryType"}, {"name": "amount"}],
+            [{"name": "modelDClassification", "fullWidth": true}]
         ]
     }
 ]
