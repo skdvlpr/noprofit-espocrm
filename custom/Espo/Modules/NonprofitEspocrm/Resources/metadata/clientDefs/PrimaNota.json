@@ -69,6 +69,16 @@
                     ]
                 }
             },
+            "description": {
+                "required": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "donationPaymentReference"
+                        }
+                    ]
+                }
+            },
             "beneficiaryParty": {
                 "visible": {
                     "conditionGroup": [
@@ -107,6 +117,82 @@
                         {
                             "type": "isFalse",
                             "attribute": "createBeneficiaryAccount"
+                        }
+                    ]
+                }
+            },
+            "donationPaymentProvider": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "internalClassification",
+                            "value": "Donation"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "id"
+                        }
+                    ]
+                }
+            },
+            "donationPaymentReference": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "internalClassification",
+                            "value": "Donation"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "id"
+                        }
+                    ]
+                }
+            },
+            "donationDonorCategory": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "internalClassification",
+                            "value": "Donation"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "id"
+                        }
+                    ]
+                }
+            },
+            "donationComment": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "internalClassification",
+                            "value": "Donation"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "id"
                         }
                     ]
                 }

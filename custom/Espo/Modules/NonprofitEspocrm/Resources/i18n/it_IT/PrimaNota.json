@@ -16,6 +16,10 @@
         "amountOut": "Uscita",
         "managementBalance": "Avanzo/disavanzo di gestione",
         "internalClassification": "Classificazione interna",
+        "donationPaymentProvider": "Piattaforma pagamento",
+        "donationPaymentReference": "Riferimento ordine",
+        "donationDonorCategory": "Tipo donatore",
+        "donationComment": "Commento donatore",
         "modelDClassification": "Classificazione mod. D",
         "financing": "Finanziamento",
         "transactionDate": "Data",
@@ -40,6 +44,10 @@
             "Utilities": "Utenze",
             "Supplies": "Materiali",
             "Other": "Altro"
+        },
+        "donationDonorCategory": {
+            "Individual": "Individuale",
+            "Organization": "Organizzazione"
         },
         "modelDClassification": {
             "A": "A — Uscite e Entrate da attività di interesse generale",

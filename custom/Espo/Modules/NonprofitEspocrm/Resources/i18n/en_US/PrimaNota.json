@@ -16,6 +16,10 @@
         "amountOut": "Expense",
         "managementBalance": "Management surplus/deficit",
         "internalClassification": "Internal classification",
+        "donationPaymentProvider": "Payment platform",
+        "donationPaymentReference": "Order reference",
+        "donationDonorCategory": "Donor type",
+        "donationComment": "Donor comment",
         "modelDClassification": "Model D classification",
         "financing": "Grant / Funding",
         "transactionDate": "Date",
@@ -40,6 +44,10 @@
             "Utilities": "Utilities",
             "Supplies": "Supplies",
             "Other": "Other"
+        },
+        "donationDonorCategory": {
+            "Individual": "Individual",
+            "Organization": "Organization"
         },
         "modelDClassification": {
             "A": "A — Income and expenses from general-interest activities",

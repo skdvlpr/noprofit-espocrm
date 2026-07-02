@@ -1,4 +1,6 @@
-# EspoCRM runtime and instance data
+# Local integration handoff docs (not committed; for other agents on dev machine)
+/docs/integrations/
+
 /data/config.php
 /data/config-internal.php
 /data/config-override.php

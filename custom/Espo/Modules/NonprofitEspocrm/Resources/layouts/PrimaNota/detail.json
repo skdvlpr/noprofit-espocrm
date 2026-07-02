@@ -44,6 +44,17 @@
                 {"name": "internalClassification", "fullWidth": true}
             ],
             [
+                {"name": "donationPaymentProvider"},
+                {"name": "donationPaymentReference"}
+            ],
+            [
+                {"name": "donationDonorCategory"},
+                false
+            ],
+            [
+                {"name": "donationComment", "fullWidth": true}
+            ],
+            [
                 {"name": "assignedUser"},
                 {"name": "teams"}
             ]

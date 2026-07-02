@@ -6,8 +6,7 @@
             "readOnly": true
         },
         "description": {
-            "type": "text",
-            "required": true
+            "type": "text"
         },
         "subjectName": {
             "type": "varchar",
@@ -87,6 +86,24 @@
                 "Other"
             ],
             "isSorted": true
+        },
+        "donationPaymentProvider": {
+            "type": "varchar",
+            "maxLength": 64
+        },
+        "donationPaymentReference": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "donationDonorCategory": {
+            "type": "enum",
+            "options": [
+                "Individual",
+                "Organization"
+            ]
+        },
+        "donationComment": {
+            "type": "text"
         },
         "modelDClassification": {
             "type": "enum",
