@@ -59,10 +59,13 @@ class SubjectParty implements BeforeSave
         }
 
         if (!$partyId && $partyName !== '' && ($createAccount || $createContact)) {
+            $email = trim((string) ($entity->get($prefix . 'EmailAddress') ?? ''));
+            $phone = trim((string) ($entity->get($prefix . 'PhoneNumber') ?? ''));
+
             if ($createAccount) {
-                $this->createAndLinkAccount($entity, $prefix, $partyName);
+                $this->createAndLinkAccount($entity, $prefix, $partyName, $email, $phone);
             } else {
-                $this->createAndLinkContact($entity, $prefix, $partyName);
+                $this->createAndLinkContact($entity, $prefix, $partyName, $email, $phone);
             }
 
             $entity->set('create' . ucfirst($prefix) . 'Account', false);
@@ -84,10 +87,16 @@ class SubjectParty implements BeforeSave
         }
     }
 
-    private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName): void
+    private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void
     {
         $account = $this->entityManager->getNewEntity(Account::ENTITY_TYPE);
         $account->set(Field::NAME, $partyName);
+        if ($email !== '') {
+            $account->set('emailAddress', $email);
+        }
+        if ($phone !== '') {
+            $account->set('phoneNumber', $phone);
+        }
         $this->copyAssignment($entity, $account);
 
         $this->entityManager->saveEntity($account, [
@@ -99,13 +108,19 @@ class SubjectParty implements BeforeSave
         $entity->set($prefix . 'PartyName', $account->get(Field::NAME));
     }
 
-    private function createAndLinkContact(Entity $entity, string $prefix, string $partyName): void
+    private function createAndLinkContact(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void
     {
         [$firstName, $lastName] = $this->splitPersonName($partyName);
 
         $contact = $this->entityManager->getNewEntity(Contact::ENTITY_TYPE);
         $contact->set('firstName', $firstName);
         $contact->set('lastName', $lastName);
+        if ($email !== '') {
+            $contact->set('emailAddress', $email);
+        }
+        if ($phone !== '') {
+            $contact->set('phoneNumber', $phone);
+        }
         $this->copyAssignment($entity, $contact);
 
         $this->entityManager->saveEntity($contact, [

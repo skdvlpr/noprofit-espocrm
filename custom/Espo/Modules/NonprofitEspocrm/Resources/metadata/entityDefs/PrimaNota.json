@@ -28,6 +28,14 @@
             "type": "bool",
             "default": false
         },
+        "subjectEmailAddress": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "subjectPhoneNumber": {
+            "type": "varchar",
+            "maxLength": 64
+        },
         "beneficiaryName": {
             "type": "varchar",
             "maxLength": 255
