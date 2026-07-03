@@ -1,0 +1,6 @@
+{
+    "inboundEmailCaseTypes": {
+        "sportello.digitale@safehouse.community": "SportelloDigitale",
+        "sportello.legale@safehouse.community": "SportelloLegale"
+    }
+}

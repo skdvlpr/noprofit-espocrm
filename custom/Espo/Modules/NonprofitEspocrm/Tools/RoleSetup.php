@@ -41,8 +41,12 @@ class RoleSetup
     public const ROLE_MANAGER   = 'Manager';
     public const ROLE_VOLUNTEER = 'Volunteer';
     public const ROLE_MEMBER    = 'Member';
+    /** Sportello desk staff: Case / Lead / Email intake with team-scoped group mailboxes. */
+    public const ROLE_DESK      = 'Desk';
 
     public const TEAM_ADMINISTRATION = 'Administration';
+    public const TEAM_DIGITAL_DESK = 'Sportello digitale';
+    public const TEAM_LEGAL_DESK   = 'Sportello legale';
 
     /**
      * Map team-name => spec.
@@ -55,6 +59,14 @@ class RoleSetup
         self::TEAM_ADMINISTRATION => [
             'description' => 'Safehouse administrative personnel: shared visibility of administrative records.',
             'roles'       => [self::ROLE_EMPLOYEE, self::ROLE_MANAGER],
+        ],
+        self::TEAM_DIGITAL_DESK => [
+            'description' => 'Digital desk (Sportello digitale): group inbox, segnalazioni and leads.',
+            'roles'       => [self::ROLE_DESK],
+        ],
+        self::TEAM_LEGAL_DESK => [
+            'description' => 'Legal desk (Sportello legale): group inbox, segnalazioni and leads.',
+            'roles'       => [self::ROLE_DESK],
         ],
     ];
 
@@ -610,6 +622,21 @@ class RoleSetup
         $memberData['Document'] = ['create' => 'no', 'read' => 'own', 'edit' => 'no',  'delete' => 'no', 'stream' => 'own'];
         $memberData['Member']   = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
 
+        $deskEntities = [
+            'Case', 'Lead', 'Email', 'EmailTemplate', 'Contact', 'Account', 'Document', 'Task',
+        ];
+
+        $deskData = [];
+        foreach ($deskEntities as $entity) {
+            $deskData[$entity] = $teamCreateOwnDelete();
+        }
+        $deskData['EmailTemplate'] = $readOnlyAll();
+        $deskData['Account'] = $readOnlyAll();
+        $deskData['Contact'] = $readOnlyAll();
+        $deskData['Document'] = [
+            'create' => 'no', 'read' => 'team', 'edit' => 'no', 'delete' => 'no', 'stream' => 'team',
+        ];
+
         return [
             self::ROLE_ADMIN => [
                 'data'      => $adminData,
@@ -684,6 +711,22 @@ class RoleSetup
                     'mentionPermission'           => 'no',
                     'userCalendarPermission'      => 'no',
                     'followerManagementPermission'=> 'no',
+                ],
+            ],
+            self::ROLE_DESK => [
+                'data'      => $deskData,
+                'fieldData' => [],
+                'perms'     => [
+                    'assignmentPermission'         => 'team',
+                    'userPermission'               => 'team',
+                    'messagePermission'            => 'team',
+                    'exportPermission'             => 'no',
+                    'massUpdatePermission'         => 'no',
+                    'auditPermission'              => 'no',
+                    'mentionPermission'            => 'team',
+                    'userCalendarPermission'       => 'team',
+                    'followerManagementPermission' => 'team',
+                    'groupEmailAccountPermission'  => 'team',
                 ],
             ],
         ];

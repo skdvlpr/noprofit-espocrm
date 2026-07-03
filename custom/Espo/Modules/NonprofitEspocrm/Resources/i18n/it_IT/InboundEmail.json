@@ -1,0 +1,8 @@
+{
+    "fields": {
+        "caseTypeDefault": "Tipo segnalazione predefinito"
+    },
+    "tooltips": {
+        "caseTypeDefault": "Impostato automaticamente sulle Segnalazioni create da email in arrivo su questa casella. Se vuoto, si usa la mappa per indirizzo in configurazione."
+    }
+}

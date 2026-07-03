@@ -1,0 +1,26 @@
+{
+    "fields": {
+        "caseTypeDefault": {
+            "type": "enum",
+            "options": [
+                "BeneficiaryRequest",
+                "GuestIntake",
+                "ServiceAccess",
+                "InformationRequest",
+                "Complaint",
+                "PartnerOrganization",
+                "SponsorOrDonor",
+                "SupplierOrVendor",
+                "InstitutionalBody",
+                "InternalReferral",
+                "VolunteerMatter",
+                "MemberMatter",
+                "LegalOrAdministrative",
+                "SportelloDigitale",
+                "SportelloLegale",
+                "Other"
+            ],
+            "tooltip": true
+        }
+    }
+}

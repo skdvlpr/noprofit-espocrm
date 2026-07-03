@@ -23,6 +23,8 @@
             "VolunteerMatter": "Волонтёры / персонал",
             "MemberMatter": "Член ассоциации",
             "LegalOrAdministrative": "Юридическое / административное",
+            "SportelloDigitale": "Sportello digitale",
+            "SportelloLegale": "Sportello legale",
             "Other": "Другое"
         }
     }

@@ -30,6 +30,8 @@
                 "VolunteerMatter",
                 "MemberMatter",
                 "LegalOrAdministrative",
+                "SportelloDigitale",
+                "SportelloLegale",
                 "Other"
             ],
             "audited": true,

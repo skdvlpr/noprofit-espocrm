@@ -23,6 +23,8 @@
             "VolunteerMatter": "Volontariato / personale",
             "MemberMatter": "Associato",
             "LegalOrAdministrative": "Legale / amministrativo",
+            "SportelloDigitale": "Sportello digitale",
+            "SportelloLegale": "Sportello legale",
             "Other": "Altro"
         }
     },

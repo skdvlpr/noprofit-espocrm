@@ -25,6 +25,20 @@ class RequireParent implements BeforeSave
         $parentType = $entity->get('parentType');
 
         if (
+            $parentId !== null
+            && $parentId !== ''
+            && $parentType !== null
+            && $parentType !== ''
+        ) {
+            return;
+        }
+
+        // Group InboundEmail intake: Espo creates the Case before the website links a Lead.
+        if ($entity->isNew() && $entity->get('inboundEmailId')) {
+            return;
+        }
+
+        if (
             $parentId === null
             || $parentId === ''
             || $parentType === null

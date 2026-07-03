@@ -23,6 +23,8 @@
             "VolunteerMatter": "Volunteer / staff matter",
             "MemberMatter": "Member matter",
             "LegalOrAdministrative": "Legal / administrative",
+            "SportelloDigitale": "Digital desk",
+            "SportelloLegale": "Legal desk",
             "Other": "Other"
         }
     }
