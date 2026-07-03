@@ -1,7 +1,10 @@
 {
     "fields": {
         "parent": "Collegato a",
-        "type": "Tipo segnalazione"
+        "type": "Tipo segnalazione",
+        "websiteReferenceId": "ID segnalazione (SH)",
+        "websiteContactName": "Nome contatto (sito)",
+        "sportelloDisplayName": "Sportello"
     },
     "labels": {
         "Case": "Segnalazione",

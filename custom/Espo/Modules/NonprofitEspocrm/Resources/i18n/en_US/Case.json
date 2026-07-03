@@ -1,7 +1,10 @@
 {
     "fields": {
         "parent": "Related record",
-        "type": "Intake type"
+        "type": "Intake type",
+        "websiteReferenceId": "Intake ID (SH)",
+        "websiteContactName": "Contact name (website)",
+        "sportelloDisplayName": "Desk"
     },
     "labels": {
         "Case": "Intake record",

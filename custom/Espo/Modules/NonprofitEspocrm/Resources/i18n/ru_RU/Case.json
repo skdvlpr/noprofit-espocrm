@@ -1,7 +1,10 @@
 {
     "fields": {
         "parent": "Связано с",
-        "type": "Тип обращения"
+        "type": "Тип обращения",
+        "websiteReferenceId": "ID обращения (SH)",
+        "websiteContactName": "Имя контакта (сайт)",
+        "sportelloDisplayName": "Sportello"
     },
     "labels": {
         "Case": "Обращение",

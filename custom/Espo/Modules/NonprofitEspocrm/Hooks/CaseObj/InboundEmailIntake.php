@@ -41,6 +41,8 @@ class InboundEmailIntake implements BeforeSave
             $entity->set('type', $this->resolveCaseType((string) $inboundEmailId) ?? 'Other');
         }
 
+        $this->populateWebsiteIntakeFields($entity);
+
         if ($entity->get('parentId') !== null && $entity->get('parentId') !== '') {
             return;
         }
@@ -69,6 +71,73 @@ class InboundEmailIntake implements BeforeSave
                 'parentId' => $entity->get('accountId'),
             ]);
         }
+    }
+
+    private function populateWebsiteIntakeFields(Entity $entity): void
+    {
+        $referenceId = $this->extractWebsiteReferenceId(
+            (string) $entity->get('name'),
+            (string) $entity->get('description'),
+        );
+
+        if ($referenceId !== null) {
+            $entity->set('websiteReferenceId', $referenceId);
+        }
+
+        if (!$entity->get('websiteContactName')) {
+            $contactName = $this->extractWebsiteContactName((string) $entity->get('description'));
+
+            if ($contactName !== null) {
+                $entity->set('websiteContactName', $contactName);
+            }
+        }
+
+        if (!$entity->get('sportelloDisplayName')) {
+            $sportello = $this->resolveSportelloDisplayName((string) $entity->get('type'));
+
+            if ($sportello !== null) {
+                $entity->set('sportelloDisplayName', $sportello);
+            }
+        }
+    }
+
+    private function extractWebsiteReferenceId(string ...$sources): ?string
+    {
+        foreach ($sources as $source) {
+            if ($source === '') {
+                continue;
+            }
+
+            if (preg_match('/\[(SH-[a-z0-9-]+)\]/i', $source, $matches) === 1) {
+                return strtolower($matches[1]);
+            }
+        }
+
+        return null;
+    }
+
+    private function extractWebsiteContactName(string $description): ?string
+    {
+        if ($description === '') {
+            return null;
+        }
+
+        if (preg_match('/^Nome:\s*(.+)$/mi', $description, $matches) !== 1) {
+            return null;
+        }
+
+        $name = trim($matches[1]);
+
+        return $name !== '' ? $name : null;
+    }
+
+    private function resolveSportelloDisplayName(string $caseType): ?string
+    {
+        return match ($caseType) {
+            'SportelloDigitale' => 'Sp. Digitale',
+            'SportelloLegale' => 'Sp. Legale',
+            default => null,
+        };
     }
 
     private function resolveCaseType(string $inboundEmailId): ?string

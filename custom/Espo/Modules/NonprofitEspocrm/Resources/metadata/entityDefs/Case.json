@@ -52,6 +52,25 @@
         "contacts": {
             "readOnly": true,
             "customizationReadOnlyDisabled": true
+        },
+        "websiteReferenceId": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true,
+            "copyDuplication": false,
+            "audited": true
+        },
+        "websiteContactName": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true,
+            "copyDuplication": false
+        },
+        "sportelloDisplayName": {
+            "type": "varchar",
+            "maxLength": 120,
+            "readOnly": true,
+            "copyDuplication": false
         }
     },
     "links": {
