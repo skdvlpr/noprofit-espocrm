@@ -1,6 +1,7 @@
 [
     {"name": "name", "link": true},
     {"name": "number", "widthPx": 90},
+    {"name": "websiteReferenceId", "width": 14},
     {"name": "type", "width": 14},
     {"name": "status", "width": 11},
     {"name": "priority", "width": 10},

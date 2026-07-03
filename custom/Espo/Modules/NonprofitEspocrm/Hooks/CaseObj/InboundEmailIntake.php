@@ -27,22 +27,49 @@ class InboundEmailIntake implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if (!$entity->isNew()) {
-            return;
-        }
-
         $inboundEmailId = $entity->get('inboundEmailId');
 
         if ($inboundEmailId === null || $inboundEmailId === '') {
             return;
         }
 
-        if ($entity->get('type') === null || $entity->get('type') === '') {
-            $entity->set('type', $this->resolveCaseType((string) $inboundEmailId) ?? 'Other');
+        $this->applyResolvedCaseType($entity, (string) $inboundEmailId);
+
+        if ($entity->isNew()) {
+            $this->populateWebsiteIntakeFields($entity);
+            $this->linkParentFromEmailRelations($entity);
+
+            return;
         }
 
-        $this->populateWebsiteIntakeFields($entity);
+        if ($entity->get('type') === 'Other' || $entity->isAttributeChanged('description')) {
+            $this->populateWebsiteIntakeFields($entity);
+        }
+    }
 
+    private function applyResolvedCaseType(Entity $entity, string $inboundEmailId): void
+    {
+        $description = (string) $entity->get('description');
+
+        $resolvedType = $this->normalizeCaseType($this->extractCaseTypeFromDescription($description))
+            ?? $this->normalizeCaseType($this->extractSportelloDisplayName($description))
+            ?? $this->resolveCaseType($inboundEmailId);
+
+        $currentType = (string) ($entity->get('type') ?? '');
+
+        if ($resolvedType !== null && ($currentType === '' || $currentType === 'Other')) {
+            $entity->set('type', $resolvedType);
+
+            return;
+        }
+
+        if ($entity->isNew() && $currentType === '') {
+            $entity->set('type', 'Other');
+        }
+    }
+
+    private function linkParentFromEmailRelations(Entity $entity): void
+    {
         if ($entity->get('parentId') !== null && $entity->get('parentId') !== '') {
             return;
         }
@@ -93,7 +120,8 @@ class InboundEmailIntake implements BeforeSave
         }
 
         if (!$entity->get('sportelloDisplayName')) {
-            $sportello = $this->resolveSportelloDisplayName((string) $entity->get('type'));
+            $sportello = $this->extractSportelloDisplayName((string) $entity->get('description'))
+                ?? $this->resolveSportelloDisplayName((string) $entity->get('type'));
 
             if ($sportello !== null) {
                 $entity->set('sportelloDisplayName', $sportello);
@@ -131,11 +159,89 @@ class InboundEmailIntake implements BeforeSave
         return $name !== '' ? $name : null;
     }
 
+    private function extractSportelloDisplayName(string $description): ?string
+    {
+        if ($description === '') {
+            return null;
+        }
+
+        if (preg_match('/^Sportello:\s*(.+)$/mi', $description, $matches) !== 1) {
+            return null;
+        }
+
+        $label = trim($matches[1]);
+
+        return $label !== '' ? $label : null;
+    }
+
+    private function extractCaseTypeFromDescription(string $description): ?string
+    {
+        if ($description === '') {
+            return null;
+        }
+
+        if (preg_match('/^Tipo segnalazione:\s*(.+)$/mi', $description, $matches) !== 1) {
+            return null;
+        }
+
+        $caseType = trim($matches[1]);
+
+        return $caseType !== '' ? $caseType : null;
+    }
+
+    private function normalizeCaseType(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        $knownTypes = [
+            'BeneficiaryRequest',
+            'GuestIntake',
+            'ServiceAccess',
+            'InformationRequest',
+            'Complaint',
+            'PartnerOrganization',
+            'SponsorOrDonor',
+            'SupplierOrVendor',
+            'InstitutionalBody',
+            'InternalReferral',
+            'VolunteerMatter',
+            'MemberMatter',
+            'LegalOrAdministrative',
+            'SportelloDigitale',
+            'SportelloLegale',
+            'Other',
+        ];
+
+        if (in_array($value, $knownTypes, true)) {
+            return $value;
+        }
+
+        $normalized = strtolower(preg_replace('/\s+/', '', $value) ?? $value);
+
+        $aliases = [
+            'sportellodigitale' => 'SportelloDigitale',
+            'sportellolegale' => 'SportelloLegale',
+            'altro' => 'Other',
+            'richiestadiassistenza' => 'BeneficiaryRequest',
+            'richiestainformazioni' => 'InformationRequest',
+        ];
+
+        return $aliases[$normalized] ?? null;
+    }
+
     private function resolveSportelloDisplayName(string $caseType): ?string
     {
         return match ($caseType) {
-            'SportelloDigitale' => 'Sp. Digitale',
-            'SportelloLegale' => 'Sp. Legale',
+            'SportelloDigitale' => 'Sportello digitale',
+            'SportelloLegale' => 'Sportello legale',
             default => null,
         };
     }

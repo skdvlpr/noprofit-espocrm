@@ -42,13 +42,21 @@ foreach ($setup->provisionTeams() as $name => $status) {
 }
 
 $bindings = [
-    RoleSetup::TEAM_DIGITAL_DESK => 'sportello.digitale@safehouse.community',
-    RoleSetup::TEAM_LEGAL_DESK   => 'sportello.legale@safehouse.community',
+    RoleSetup::TEAM_DIGITAL_DESK => [
+        'emailAddress' => 'sportello.digitale@safehouse.community',
+        'caseTypeDefault' => 'SportelloDigitale',
+    ],
+    RoleSetup::TEAM_LEGAL_DESK => [
+        'emailAddress' => 'sportello.legale@safehouse.community',
+        'caseTypeDefault' => 'SportelloLegale',
+    ],
 ];
 
 echo "\nLinking group InboundEmail accounts to teams...\n";
 
-foreach ($bindings as $teamName => $emailAddress) {
+foreach ($bindings as $teamName => $binding) {
+    $emailAddress = $binding['emailAddress'];
+    $caseTypeDefault = $binding['caseTypeDefault'];
     /** @var ?Team $team */
     $team = $em->getRDBRepositoryByClass(Team::class)
         ->where(['name' => $teamName])
@@ -77,6 +85,11 @@ foreach ($bindings as $teamName => $emailAddress) {
             'teamsIds' => [$team->getId()],
             'addAllTeamUsers' => true,
         ]);
+        $changed = true;
+    }
+
+    if ($inbound->get('caseTypeDefault') !== $caseTypeDefault) {
+        $inbound->set('caseTypeDefault', $caseTypeDefault);
         $changed = true;
     }
 

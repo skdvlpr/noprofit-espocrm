@@ -58,7 +58,8 @@
             "maxLength": 64,
             "readOnly": true,
             "copyDuplication": false,
-            "audited": true
+            "audited": true,
+            "index": true
         },
         "websiteContactName": {
             "type": "varchar",

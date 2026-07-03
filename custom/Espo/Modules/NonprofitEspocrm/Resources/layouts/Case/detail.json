@@ -11,6 +11,14 @@
                 {"name": "type"}
             ],
             [
+                {"name": "websiteReferenceId"},
+                {"name": "sportelloDisplayName"}
+            ],
+            [
+                {"name": "websiteContactName"},
+                false
+            ],
+            [
                 {"name": "status"},
                 {"name": "priority"}
             ],
