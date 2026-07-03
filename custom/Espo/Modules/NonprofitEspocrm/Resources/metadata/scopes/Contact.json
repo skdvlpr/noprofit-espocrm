@@ -1,3 +1,4 @@
 {
-    "quickViewDefaultNavigation": true
+    "quickViewDefaultNavigation": true,
+    "duplicateCheckFieldList": ["emailAddress", "phoneNumber"]
 }
