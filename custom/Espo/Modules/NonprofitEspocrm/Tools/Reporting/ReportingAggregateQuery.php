@@ -101,6 +101,24 @@ class ReportingAggregateQuery
         return $rows;
     }
 
+    public function countRecords(
+        string $entityType,
+        ?SearchParams $searchParams = null,
+        ?array $additionalWhere = null,
+    ): int {
+        if (!$this->acl->check($entityType, Table::ACTION_READ)) {
+            return 0;
+        }
+
+        $queryBuilder = $this->buildBaseQueryBuilder($entityType, $searchParams, $additionalWhere);
+        $queryBuilder->select(['COUNT:id', 'recordCount']);
+
+        $sth = $this->entityManager->getQueryExecutor()->execute($queryBuilder->build());
+        $row = $sth->fetch() ?: [];
+
+        return (int) ($row['recordCount'] ?? 0);
+    }
+
     /**
      * Filter a list of sum attributes down to those the current user may read.
      *

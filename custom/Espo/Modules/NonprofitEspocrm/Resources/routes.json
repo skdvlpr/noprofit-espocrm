@@ -40,6 +40,11 @@
         "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetPrimaNotaTotals"
     },
     {
+        "route": "/NonprofitEspocrm/reporting/intervention/totals",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Reporting\\Api\\GetInterventionTotals"
+    },
+    {
         "route": "/NonprofitEspocrm/food-parcel-registration/:id/pdf",
         "method": "get",
         "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\FoodParcel\\Api\\GetFoodParcelRegistrationPdf"
