@@ -29,6 +29,7 @@ use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
+use Espo\Modules\Crm\Entities\Contact;
 use Espo\Modules\GoogleIntegration\Tools\Installer as GoogleIntegrationInstaller;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
@@ -546,6 +547,38 @@ $ok(
     'Volunteer App/user shows VolunteerEmployee.read=own',
     is_array($volAcl) && ($volAcl['read'] ?? '') === 'own',
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
+);
+
+$volAccountAcl = is_array($volBody) ? ($volBody['acl']['table']['Account'] ?? null) : null;
+$ok(
+    'Volunteer App/user shows Account.create=no',
+    is_array($volAccountAcl) && ($volAccountAcl['create'] ?? '') === 'no',
+    is_array($volAccountAcl) ? 'create=' . ($volAccountAcl['create'] ?? '') : 'missing acl row'
+);
+
+$forbiddenContactEmail = 'smoke-prima-nota-acl-' . bin2hex(random_bytes(8)) . '@example.com';
+$rForbiddenPartyCreate = $volClient->post('/api/v1/PrimaNota', [
+    'json' => [
+        'entryType' => 'Income',
+        'amount' => 10,
+        'transactionDate' => date('Y-m-d'),
+        'subjectName' => 'Forbidden Party Create',
+        'subjectEmailAddress' => $forbiddenContactEmail,
+        'createSubjectContact' => true,
+    ],
+]);
+$ok(
+    'Volunteer PrimaNota cannot create Contact through SubjectParty hook → 403',
+    $rForbiddenPartyCreate->getStatusCode() === 403,
+    'code=' . $rForbiddenPartyCreate->getStatusCode()
+);
+$forbiddenContact = $em->getRDBRepository(Contact::ENTITY_TYPE)
+    ->where(['emailAddress' => $forbiddenContactEmail])
+    ->findOne();
+$ok(
+    'Forbidden PrimaNota party creation leaves no Contact',
+    $forbiddenContact === null,
+    $forbiddenContact === null ? 'not created' : 'created id=' . $forbiddenContact->getId()
 );
 
 $rIntVol = $volClient->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);

@@ -2,7 +2,9 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
+use Espo\Core\Acl;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Name\Field;
 use Espo\Modules\Crm\Entities\Account;
@@ -26,6 +28,7 @@ class SubjectParty implements BeforeSave
 
     public function __construct(
         private EntityManager $entityManager,
+        private Acl $acl,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
@@ -99,6 +102,10 @@ class SubjectParty implements BeforeSave
         }
         $this->copyAssignment($entity, $account);
 
+        if (!$this->acl->checkEntityCreate($account)) {
+            throw new Forbidden('No create access to Account.');
+        }
+
         $this->entityManager->saveEntity($account, [
             SaveOption::SKIP_ALL => true,
         ]);
@@ -122,6 +129,10 @@ class SubjectParty implements BeforeSave
             $contact->set('phoneNumber', $phone);
         }
         $this->copyAssignment($entity, $contact);
+
+        if (!$this->acl->checkEntityCreate($contact)) {
+            throw new Forbidden('No create access to Contact.');
+        }
 
         $this->entityManager->saveEntity($contact, [
             SaveOption::SKIP_ALL => true,
