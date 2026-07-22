@@ -34,7 +34,18 @@ class RequireParent implements BeforeSave
         }
 
         // Group InboundEmail intake: Espo creates the Case before the website links a Lead.
-        if ($entity->isNew() && $entity->get('inboundEmailId')) {
+        // Keep those records editable while they await linking, but don't allow an existing
+        // parent to be removed from an inbound Case.
+        if (
+            $entity->get('inboundEmailId')
+            && (
+                $entity->isNew()
+                || (
+                    !$entity->getFetched('parentId')
+                    && !$entity->getFetched('parentType')
+                )
+            )
+        ) {
             return;
         }
 

@@ -11,9 +11,10 @@
  *   - MealCount totalMeals = adults + minors
  *   - MealCount foodCost = totalMeals * foodUnitPrice (default 1.5 EUR)
  *   - MealCount dayOfWeek translated to English weekday
+ *   - Parentless inbound-email Case remains editable until the website links a CRM parent
  *   - Scheduled jobs renamed (English Safehouse* jobClassName, Active)
  *
- * Creates 4 temporary records and deletes them at the end.
+ * Creates 5 temporary records and deletes them at the end.
  *
  * Usage:
  *   ddev exec php bin/smoke-safehouse.php
@@ -78,6 +79,20 @@ try {
     $em->saveEntity($mc);
     $created[] = $mc;
     $results[] = ['MealCount today', 'totalMeals=' . $mc->get('totalMeals'), 'foodCost=' . $mc->get('foodCost'), 'dayOfWeek=' . $mc->get('dayOfWeek'), 'foodUnitPrice=' . $mc->get('foodUnitPrice')];
+
+    $case = $em->getNewEntity('Case');
+    $case->set([
+        'name' => 'Smoke inbound intake',
+        'description' => 'Parentless inbound intake regression smoke',
+        'inboundEmailId' => 'smokeinboundemail',
+        'status' => 'New',
+    ]);
+    $em->saveEntity($case);
+    $created[] = $case;
+
+    $case->set('status', 'Pending');
+    $em->saveEntity($case);
+    $results[] = ['Inbound Case update', 'status=' . $case->get('status'), 'parentId=' . ($case->get('parentId') ?? 'null')];
 
     $jobs = $em->getRDBRepository('ScheduledJob')->find();
     foreach ($jobs as $job) {
