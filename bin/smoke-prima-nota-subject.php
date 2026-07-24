@@ -6,8 +6,10 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\ORM\EntityManager;
+use Espo\Entities\EmailAddress as EmailAddressEntity;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -89,6 +91,8 @@ $ok(
     (string) $createdAccount->get('subjectPartyId')
 );
 
+$createdContactEmail = 'smoke-prima-nota-subject-' . bin2hex(random_bytes(4)) . '@example.com';
+$createdContactPhone = '+3906' . random_int(1000000, 9999999);
 $createdContact = $em->getNewEntity('PrimaNota');
 $createdContact->set([
     'description' => 'Smoke create contact subject',
@@ -96,6 +100,8 @@ $createdContact->set([
     'amount' => 13,
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'Anna Verdi',
+    'subjectEmailAddress' => $createdContactEmail,
+    'subjectPhoneNumber' => $createdContactPhone,
     'createSubjectContact' => true,
 ]);
 $em->saveEntity($createdContact);
@@ -104,6 +110,40 @@ $ok(
     $createdContact->get('subjectPartyType') === Contact::ENTITY_TYPE
         && $createdContact->get('subjectName') === 'Anna Verdi',
     (string) $createdContact->get('subjectPartyId')
+);
+
+$createdContactEntity = $em->getEntityById(
+    Contact::ENTITY_TYPE,
+    (string) $createdContact->get('subjectPartyId')
+);
+/** @var EmailAddressRepository $emailAddressRepository */
+$emailAddressRepository = $em->getRepository(EmailAddressEntity::ENTITY_TYPE);
+$contactByEmail = $emailAddressRepository->getEntityByAddress(
+    $createdContactEmail,
+    Contact::ENTITY_TYPE
+);
+$ok(
+    'created contact stores email (not dropped by SKIP_ALL)',
+    $contactByEmail !== null
+        && $contactByEmail->getId() === $createdContact->get('subjectPartyId'),
+    $contactByEmail ? 'id=' . $contactByEmail->getId() : 'email relation missing'
+);
+
+$reuseContact = $em->getNewEntity('PrimaNota');
+$reuseContact->set([
+    'description' => 'Smoke reuse contact by email',
+    'entryType' => 'Income',
+    'amount' => 13.5,
+    'transactionDate' => date('Y-m-d'),
+    'subjectName' => 'Different Name Should Not Duplicate',
+    'subjectEmailAddress' => $createdContactEmail,
+    'createSubjectContact' => true,
+]);
+$em->saveEntity($reuseContact);
+$ok(
+    'create with existing email reuses Contact instead of duplicating',
+    $reuseContact->get('subjectPartyId') === $createdContact->get('subjectPartyId'),
+    (string) $reuseContact->get('subjectPartyId')
 );
 
 $manual = $em->getNewEntity('PrimaNota');
@@ -228,6 +268,7 @@ $rows = [
     $linkedContact,
     $createdAccount,
     $createdContact,
+    $reuseContact,
     $manual,
     $linkedBeneficiaryAccount,
     $linkedBeneficiaryContact,
@@ -239,6 +280,34 @@ $rows = [
 
 foreach ($rows as $row) {
     $em->removeEntity($row);
+}
+
+if ($createdContactEntity) {
+    $em->removeEntity($createdContactEntity);
+}
+
+$createdAccountEntity = $em->getEntityById(
+    Account::ENTITY_TYPE,
+    (string) $createdAccount->get('subjectPartyId')
+);
+if ($createdAccountEntity) {
+    $em->removeEntity($createdAccountEntity);
+}
+
+$createdBeneficiaryAccountEntity = $em->getEntityById(
+    Account::ENTITY_TYPE,
+    (string) $createdBeneficiaryAccount->get('beneficiaryPartyId')
+);
+if ($createdBeneficiaryAccountEntity) {
+    $em->removeEntity($createdBeneficiaryAccountEntity);
+}
+
+$createdBeneficiaryContactEntity = $em->getEntityById(
+    Contact::ENTITY_TYPE,
+    (string) $createdBeneficiaryContact->get('beneficiaryPartyId')
+);
+if ($createdBeneficiaryContactEntity) {
+    $em->removeEntity($createdBeneficiaryContactEntity);
 }
 
 $em->removeEntity($beneficiaryContact);

@@ -2,9 +2,12 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
+use Espo\Core\Acl;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Name\Field;
+use Espo\Entities\EmailAddress as EmailAddressEntity;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
 use Espo\ORM\Entity;
@@ -12,6 +15,7 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Name\Attribute;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
 
 /**
  * Syncs payment-subject and beneficiary names from linkParent fields
@@ -26,6 +30,7 @@ class SubjectParty implements BeforeSave
 
     public function __construct(
         private EntityManager $entityManager,
+        private Acl $acl,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
@@ -87,49 +92,114 @@ class SubjectParty implements BeforeSave
         }
     }
 
-    private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void
-    {
+    private function createAndLinkAccount(
+        Entity $entity,
+        string $prefix,
+        string $partyName,
+        string $email,
+        string $phone
+    ): void {
+        if ($email !== '') {
+            $existing = $this->findPartyByEmail(Account::ENTITY_TYPE, $email);
+
+            if ($existing) {
+                $this->assertCanReadExistingParty($existing);
+                $this->linkParty($entity, $prefix, $existing);
+
+                return;
+            }
+        }
+
         $account = $this->entityManager->getNewEntity(Account::ENTITY_TYPE);
         $account->set(Field::NAME, $partyName);
+
         if ($email !== '') {
             $account->set('emailAddress', $email);
         }
+
         if ($phone !== '') {
             $account->set('phoneNumber', $phone);
         }
+
         $this->copyAssignment($entity, $account);
-
-        $this->entityManager->saveEntity($account, [
-            SaveOption::SKIP_ALL => true,
-        ]);
-
-        $entity->set($prefix . 'PartyId', $account->getId());
-        $entity->set($prefix . 'PartyType', Account::ENTITY_TYPE);
-        $entity->set($prefix . 'PartyName', $account->get(Field::NAME));
+        $this->assertCanCreateParty($account);
+        // Do not use SKIP_ALL: email/phone are non-storable and persist only via afterSave field processing.
+        $this->entityManager->saveEntity($account);
+        $this->linkParty($entity, $prefix, $account);
     }
 
-    private function createAndLinkContact(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void
-    {
+    private function createAndLinkContact(
+        Entity $entity,
+        string $prefix,
+        string $partyName,
+        string $email,
+        string $phone
+    ): void {
+        if ($email !== '') {
+            $existing = $this->findPartyByEmail(Contact::ENTITY_TYPE, $email);
+
+            if ($existing) {
+                $this->assertCanReadExistingParty($existing);
+                $this->linkParty($entity, $prefix, $existing);
+
+                return;
+            }
+        }
+
         [$firstName, $lastName] = $this->splitPersonName($partyName);
 
         $contact = $this->entityManager->getNewEntity(Contact::ENTITY_TYPE);
         $contact->set('firstName', $firstName);
         $contact->set('lastName', $lastName);
+
         if ($email !== '') {
             $contact->set('emailAddress', $email);
         }
+
         if ($phone !== '') {
             $contact->set('phoneNumber', $phone);
         }
+
         $this->copyAssignment($entity, $contact);
+        $this->assertCanCreateParty($contact);
+        // Do not use SKIP_ALL: email/phone are non-storable and persist only via afterSave field processing.
+        $this->entityManager->saveEntity($contact);
+        $this->linkParty($entity, $prefix, $contact);
+    }
 
-        $this->entityManager->saveEntity($contact, [
-            SaveOption::SKIP_ALL => true,
-        ]);
+    private function linkParty(Entity $entity, string $prefix, Entity $party): void
+    {
+        $entity->set($prefix . 'PartyId', $party->getId());
+        $entity->set($prefix . 'PartyType', $party->getEntityType());
+        $entity->set($prefix . 'PartyName', $party->get(Field::NAME));
+    }
 
-        $entity->set($prefix . 'PartyId', $contact->getId());
-        $entity->set($prefix . 'PartyType', Contact::ENTITY_TYPE);
-        $entity->set($prefix . 'PartyName', $contact->get(Field::NAME));
+    private function assertCanCreateParty(Entity $party): void
+    {
+        if (!$this->acl->checkEntityCreate($party)) {
+            throw new Forbidden('No create access to ' . $party->getEntityType() . '.');
+        }
+    }
+
+    private function assertCanReadExistingParty(Entity $party): void
+    {
+        if (!$this->acl->checkEntityRead($party)) {
+            throw new Forbidden('No read access to existing ' . $party->getEntityType() . '.');
+        }
+    }
+
+    private function findPartyByEmail(string $entityType, string $email): ?Entity
+    {
+        /** @var EmailAddressRepository $repository */
+        $repository = $this->entityManager->getRepository(EmailAddressEntity::ENTITY_TYPE);
+
+        $existing = $repository->getEntityByAddress($email, $entityType);
+
+        if (!$existing || $existing->getEntityType() !== $entityType) {
+            return null;
+        }
+
+        return $existing;
     }
 
     private function copyAssignment(Entity $source, Entity $target): void
