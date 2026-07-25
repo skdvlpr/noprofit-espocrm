@@ -47,7 +47,9 @@
     "messages": {
         "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can only change assigned user, teams, and Model D classification.",
         "grossRequired": "Gross amount (lordo) is required. Net is calculated automatically.",
-        "commissionExceedsGross": "Commission cannot exceed gross amount (lordo)."
+        "commissionExceedsGross": "Commission cannot exceed gross amount (lordo).",
+        "stripeManualCreateBlocked": "Stripe platform can only be set by website donation ingest. Choose another payment platform for manual ledger entries.",
+        "platformImmutable": "Payment platform cannot be changed after the ledger entry is created."
     },
     "options": {
         "entryType": {
@@ -66,6 +68,14 @@
         "donationDonorCategory": {
             "Individual": "Individual",
             "Organization": "Organization"
+        },
+        "donationPaymentProvider": {
+            "Stripe": "Stripe",
+            "SatispayDirect": "Satispay direct (NOT STRIPE)",
+            "FivePerMille": "5 x 1000",
+            "BankTransfer": "Bank transfer",
+            "Cash": "Cash",
+            "Other": "Other"
         },
         "modelDClassification": {
             "A": "A — Income and expenses from general-interest activities",

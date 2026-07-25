@@ -47,7 +47,9 @@
     "messages": {
         "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare solo assegnatario, team e classificazione modello D.",
         "grossRequired": "L’importo lordo è obbligatorio. Il netto viene calcolato automaticamente.",
-        "commissionExceedsGross": "La commissione non può superare l’importo lordo."
+        "commissionExceedsGross": "La commissione non può superare l’importo lordo.",
+        "stripeManualCreateBlocked": "La piattaforma Stripe può essere impostata solo dall’ingest donazioni del sito. Per i movimenti manuali scegli un’altra piattaforma.",
+        "platformImmutable": "La piattaforma di pagamento non può essere modificata dopo la creazione del movimento."
     },
     "options": {
         "entryType": {
@@ -66,6 +68,14 @@
         "donationDonorCategory": {
             "Individual": "Individuale",
             "Organization": "Organizzazione"
+        },
+        "donationPaymentProvider": {
+            "Stripe": "Stripe",
+            "SatispayDirect": "Satispay diretto (NON STRIPE)",
+            "FivePerMille": "5 x 1000",
+            "BankTransfer": "Bonifico bancario",
+            "Cash": "Contanti",
+            "Other": "Altro"
         },
         "modelDClassification": {
             "A": "A — Uscite e Entrate da attività di interesse generale",

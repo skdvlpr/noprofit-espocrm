@@ -39,9 +39,17 @@ $ok('amountGross field', $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'a
 $ok('commissionAmount default 0', (float) ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionAmount', 'default']) ?? -1) === 0.0);
 $ok('commissionPercent default 0', (float) ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionPercent', 'default']) ?? -1) === 0.0);
 $ok(
-    'ProtectStripeSourcedFields hook exists',
-    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php')
+    'ProtectDonationPaymentProvider hook exists',
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectDonationPaymentProvider.php')
 );
+$ok(
+    'provider is enum',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'type']) === 'enum'
+);
+$providerOptions = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'options']) ?? [];
+$ok('provider options include Stripe', in_array('Stripe', $providerOptions, true));
+$ok('provider options include SatispayDirect', in_array('SatispayDirect', $providerOptions, true));
+$ok('provider options include FivePerMille', in_array('FivePerMille', $providerOptions, true));
 $ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
@@ -55,7 +63,7 @@ $manualBase = static function (string $suffix) use ($em, &$created): \Espo\ORM\E
         'description' => 'Smoke manual ' . $suffix,
         'entryType' => 'Income',
         'internalClassification' => 'Donation',
-        'donationPaymentProvider' => 'Manual',
+        'donationPaymentProvider' => 'Other',
         'donationPaymentReference' => 'SMOKE-MANUAL-' . $suffix . '-' . date('His'),
         'amountGross' => 100.0,
         'amountGrossCurrency' => 'EUR',
@@ -183,6 +191,27 @@ try {
 }
 $ok('fee > gross → BadRequest', $feeTooHigh);
 
+// Stripe create via UI/system user must be blocked; ingest uses type=api or SKIP_ALL
+$manualStripeBlocked = false;
+try {
+    $blocked = $em->getNewEntity('PrimaNota');
+    $blocked->set([
+        'description' => 'Smoke block manual Stripe',
+        'entryType' => 'Income',
+        'internalClassification' => 'Donation',
+        'donationPaymentProvider' => 'Stripe',
+        'donationPaymentReference' => 'SMOKE-BLOCK-STRIPE-' . date('His'),
+        'amountGross' => 10.0,
+        'amountGrossCurrency' => 'EUR',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($blocked);
+    $created[] = $blocked;
+} catch (BadRequest $e) {
+    $manualStripeBlocked = str_contains($e->getMessage(), 'Stripe platform can only be set');
+}
+$ok('manual create with Stripe → BadRequest', $manualStripeBlocked);
+
 // Stripe create OK; later money/subject edit blocked; Espo field (modelD) OK
 $stripe = $em->getNewEntity('PrimaNota');
 $stripe->set([
@@ -194,12 +223,29 @@ $stripe->set([
     'amountGross' => 100.0,
     'amountGrossCurrency' => 'EUR',
     'commissionPercent' => 2.9,
+    'commissionAmount' => 2.9,
+    'commissionAmountCurrency' => 'EUR',
+    'amount' => 97.1,
+    'amountCurrency' => 'EUR',
     'subjectName' => 'Donor From Stripe',
     'transactionDate' => date('Y-m-d'),
 ]);
-$em->saveEntity($stripe);
+$em->saveEntity($stripe, [SaveOption::SKIP_ALL => true]);
 $created[] = $stripe;
-$ok('Stripe create allowed', $stripe->getId() !== null);
+$ok('Stripe create via SKIP_ALL (ingest) allowed', $stripe->getId() !== null);
+
+$platformChangeBlocked = false;
+try {
+    $other = $manualBase('platimmut');
+    $em->saveEntity($other);
+    $created[] = $other;
+    $other = $em->getEntityById('PrimaNota', $other->getId());
+    $other->set('donationPaymentProvider', 'Cash');
+    $em->saveEntity($other);
+} catch (BadRequest $e) {
+    $platformChangeBlocked = str_contains($e->getMessage(), 'cannot be changed');
+}
+$ok('platform change after create → BadRequest', $platformChangeBlocked);
 
 $stripeMoneyBlocked = false;
 try {

@@ -119,8 +119,16 @@
             "isSorted": true
         },
         "donationPaymentProvider": {
-            "type": "varchar",
-            "maxLength": 64
+            "type": "enum",
+            "options": [
+                "Stripe",
+                "SatispayDirect",
+                "FivePerMille",
+                "BankTransfer",
+                "Cash",
+                "Other"
+            ],
+            "view": "nonprofit-espocrm:views/fields/donation-payment-provider"
         },
         "donationPaymentReference": {
             "type": "varchar",
