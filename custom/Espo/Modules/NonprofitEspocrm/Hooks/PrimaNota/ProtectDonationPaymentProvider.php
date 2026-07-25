@@ -4,6 +4,7 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\Utils\Language;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOption;
@@ -15,11 +16,16 @@ use Espo\ORM\Repository\Option\SaveOptions;
  */
 class ProtectDonationPaymentProvider implements BeforeSave
 {
-    public static int $order = 4;
+    use TranslatesPrimaNotaMessages;
+
+    public static int $order = 3;
 
     public function __construct(
         private User $user,
-    ) {}
+        Language $language,
+    ) {
+        $this->language = $language;
+    }
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
@@ -31,19 +37,14 @@ class ProtectDonationPaymentProvider implements BeforeSave
 
         if ($entity->isNew()) {
             if ($this->isStripe($provider) && !$this->user->isApi()) {
-                throw new BadRequest(
-                    'Stripe platform can only be set by website donation ingest. '
-                    .'Choose another payment platform for manual ledger entries.'
-                );
+                throw new BadRequest($this->msg('stripeManualCreateBlocked'));
             }
 
             return;
         }
 
         if ($entity->isAttributeChanged('donationPaymentProvider')) {
-            throw new BadRequest(
-                'Payment platform cannot be changed after the ledger entry is created.'
-            );
+            throw new BadRequest($this->msg('platformImmutable'));
         }
     }
 

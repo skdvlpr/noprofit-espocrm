@@ -32,6 +32,16 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     echo '  [' . ($pass ? 'PASS' : 'FAIL') . '] ' . $name . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
+$isBadRequestMsg = static function (string $message, string ...$needles): bool {
+    foreach ($needles as $needle) {
+        if ($needle !== '' && str_contains($message, $needle)) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
 echo "PrimaNota commission / Stripe lock\n";
 
 $ok('amount is readOnly', (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'amount', 'readOnly']) === true);
@@ -46,10 +56,22 @@ $ok(
     'provider is enum',
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'type']) === 'enum'
 );
+$ok(
+    'provider default Other',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'default']) === 'Other'
+);
 $providerOptions = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'options']) ?? [];
 $ok('provider options include Stripe', in_array('Stripe', $providerOptions, true));
 $ok('provider options include SatispayDirect', in_array('SatispayDirect', $providerOptions, true));
 $ok('provider options include FivePerMille', in_array('FivePerMille', $providerOptions, true));
+$itMessages = json_decode(
+    (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json'),
+    true
+);
+$ok(
+    'IT locale has commissionExceedsGross',
+    ($itMessages['messages']['commissionExceedsGross'] ?? '') === 'La commissione non può superare l’importo lordo.'
+);
 $ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
@@ -111,7 +133,7 @@ try {
     $em->saveEntity($noGross);
     $created[] = $noGross;
 } catch (BadRequest $e) {
-    $newNoGrossFailed = str_contains($e->getMessage(), 'Gross amount');
+    $newNoGrossFailed = $isBadRequestMsg($e->getMessage(), 'Gross amount', 'importo lordo', 'grossRequired');
 }
 $ok('new without gross → BadRequest', $newNoGrossFailed);
 
@@ -187,7 +209,7 @@ try {
     $em->saveEntity($bad);
     $created[] = $bad;
 } catch (BadRequest $e) {
-    $feeTooHigh = str_contains($e->getMessage(), 'cannot exceed');
+    $feeTooHigh = $isBadRequestMsg($e->getMessage(), 'cannot exceed', 'non può superare', 'commissionExceedsGross');
 }
 $ok('fee > gross → BadRequest', $feeTooHigh);
 
@@ -208,7 +230,7 @@ try {
     $em->saveEntity($blocked);
     $created[] = $blocked;
 } catch (BadRequest $e) {
-    $manualStripeBlocked = str_contains($e->getMessage(), 'Stripe platform can only be set');
+    $manualStripeBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe platform can only be set', 'può essere impostata solo', 'stripeManualCreateBlocked');
 }
 $ok('manual create with Stripe → BadRequest', $manualStripeBlocked);
 
@@ -243,7 +265,7 @@ try {
     $other->set('donationPaymentProvider', 'Cash');
     $em->saveEntity($other);
 } catch (BadRequest $e) {
-    $platformChangeBlocked = str_contains($e->getMessage(), 'cannot be changed');
+    $platformChangeBlocked = $isBadRequestMsg($e->getMessage(), 'cannot be changed', 'non può essere modificata', 'platformImmutable');
 }
 $ok('platform change after create → BadRequest', $platformChangeBlocked);
 
@@ -254,7 +276,7 @@ try {
     $stripe->set('commissionAmountCurrency', 'EUR');
     $em->saveEntity($stripe);
 } catch (BadRequest $e) {
-    $stripeMoneyBlocked = str_contains($e->getMessage(), 'Stripe');
+    $stripeMoneyBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('Stripe money edit → BadRequest', $stripeMoneyBlocked);
 
@@ -264,7 +286,7 @@ try {
     $stripe->set('subjectName', 'Hacker Rename');
     $em->saveEntity($stripe);
 } catch (BadRequest $e) {
-    $stripeSubjectBlocked = str_contains($e->getMessage(), 'Stripe');
+    $stripeSubjectBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('Stripe subjectName edit → BadRequest', $stripeSubjectBlocked);
 
@@ -274,7 +296,7 @@ try {
     $stripe->set('transactionDate', '2020-01-01');
     $em->saveEntity($stripe);
 } catch (BadRequest $e) {
-    $stripeDateBlocked = str_contains($e->getMessage(), 'Stripe');
+    $stripeDateBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('Stripe transactionDate edit → BadRequest', $stripeDateBlocked);
 

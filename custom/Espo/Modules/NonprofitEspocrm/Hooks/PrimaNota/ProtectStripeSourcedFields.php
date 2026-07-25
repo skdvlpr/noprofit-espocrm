@@ -4,6 +4,7 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\Utils\Language;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
@@ -15,15 +16,14 @@ use Espo\ORM\Repository\Option\SaveOptions;
  */
 class ProtectStripeSourcedFields implements BeforeSave
 {
+    use TranslatesPrimaNotaMessages;
+
     public static int $order = 5;
 
     /**
-     * Stripe ingest / PaymentIntent-sourced attributes (money + donor + donation meta).
-     *
      * @var list<string>
      */
     private const STRIPE_SOURCED_ATTRIBUTES = [
-        // Money triangle + derived
         'amount',
         'amountCurrency',
         'amountGross',
@@ -35,7 +35,6 @@ class ProtectStripeSourcedFields implements BeforeSave
         'amountInCurrency',
         'amountOut',
         'amountOutCurrency',
-        // Movement / donation payload
         'entryType',
         'transactionDate',
         'internalClassification',
@@ -46,7 +45,6 @@ class ProtectStripeSourcedFields implements BeforeSave
         'donationDonorCategory',
         'donationComment',
         'financingId',
-        // Subject (donor) from Stripe / site form
         'subjectName',
         'subjectPartyId',
         'subjectPartyType',
@@ -54,7 +52,6 @@ class ProtectStripeSourcedFields implements BeforeSave
         'subjectPhoneNumber',
         'createSubjectAccount',
         'createSubjectContact',
-        // Beneficiary defaults from ingest
         'beneficiaryName',
         'beneficiaryPartyId',
         'beneficiaryPartyType',
@@ -63,6 +60,11 @@ class ProtectStripeSourcedFields implements BeforeSave
         'createBeneficiaryAccount',
         'createBeneficiaryContact',
     ];
+
+    public function __construct(Language $language)
+    {
+        $this->language = $language;
+    }
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
@@ -80,10 +82,7 @@ class ProtectStripeSourcedFields implements BeforeSave
 
         foreach (self::STRIPE_SOURCED_ATTRIBUTES as $attribute) {
             if ($entity->isAttributeChanged($attribute)) {
-                throw new BadRequest(
-                    'This ledger entry comes from Stripe. Stripe-sourced fields are read-only; '
-                    .'you can only change Espo fields (assigned user, teams, Model D classification).'
-                );
+                throw new BadRequest($this->msg('stripeSourcedReadOnly'));
             }
         }
     }

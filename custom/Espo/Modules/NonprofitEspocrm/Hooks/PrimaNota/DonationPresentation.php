@@ -4,6 +4,7 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\Utils\Language;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
@@ -13,7 +14,14 @@ use Espo\ORM\Repository\Option\SaveOptions;
  */
 class DonationPresentation implements BeforeSave
 {
+    use TranslatesPrimaNotaMessages;
+
     public static int $order = 1;
+
+    public function __construct(Language $language)
+    {
+        $this->language = $language;
+    }
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
@@ -21,7 +29,7 @@ class DonationPresentation implements BeforeSave
         $reference = trim((string) ($entity->get('donationPaymentReference') ?? ''));
 
         if ($description === '' && $reference === '') {
-            throw new BadRequest('Description is required.');
+            throw new BadRequest($this->msg('descriptionRequired'));
         }
 
         if ($entity->get('internalClassification') !== 'Donation') {
@@ -38,7 +46,7 @@ class DonationPresentation implements BeforeSave
 
         $provider = trim((string) ($entity->get('donationPaymentProvider') ?? ''));
         if ($provider === '') {
-            $provider = 'Stripe';
+            $provider = 'Other';
         }
 
         $description = 'Donazione '.$provider.' ordine '.$reference;

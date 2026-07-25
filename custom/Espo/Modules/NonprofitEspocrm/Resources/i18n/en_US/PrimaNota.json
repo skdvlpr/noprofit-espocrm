@@ -49,7 +49,17 @@
         "grossRequired": "Gross amount (lordo) is required. Net is calculated automatically.",
         "commissionExceedsGross": "Commission cannot exceed gross amount (lordo).",
         "stripeManualCreateBlocked": "Stripe platform can only be set by website donation ingest. Choose another payment platform for manual ledger entries.",
-        "platformImmutable": "Payment platform cannot be changed after the ledger entry is created."
+        "platformImmutable": "Payment platform cannot be changed after the ledger entry is created.",
+        "entryTypeRequired": "Prima Nota entry type must be Income or Expense.",
+        "grossNegative": "Gross amount (lordo) cannot be negative.",
+        "commissionNegative": "Commission cannot be negative.",
+        "commissionPercentRange": "Commission % must be between 0 and 100.",
+        "netNegative": "Net amount cannot be negative.",
+        "positiveAmountRequired": "Prima Nota entry requires a positive amount.",
+        "descriptionRequired": "Description is required.",
+        "partyCreateBothBlocked": "Select either create Account or create Contact, not both.",
+        "partyCreateWithLinkBlocked": "Clear create flags when a linked party is selected.",
+        "partyNameRequired": "Enter a name before creating a linked Account or Contact."
     },
     "options": {
         "entryType": {

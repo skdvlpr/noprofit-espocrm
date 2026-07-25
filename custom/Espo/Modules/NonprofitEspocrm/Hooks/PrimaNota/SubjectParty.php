@@ -5,6 +5,7 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Name\Field;
+use Espo\Core\Utils\Language;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
 use Espo\ORM\Entity;
@@ -16,9 +17,13 @@ use Espo\ORM\Repository\Option\SaveOptions;
 /**
  * Syncs payment-subject and beneficiary names from linkParent fields
  * and optionally creates Account/Contact records.
+ *
+ * Before creating, matches by email then phone and backfills missing channels.
  */
 class SubjectParty implements BeforeSave
 {
+    use TranslatesPrimaNotaMessages;
+
     public static int $order = 4;
 
     /** @var list<string> */
@@ -26,7 +31,10 @@ class SubjectParty implements BeforeSave
 
     public function __construct(
         private EntityManager $entityManager,
-    ) {}
+        Language $language,
+    ) {
+        $this->language = $language;
+    }
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
@@ -41,13 +49,11 @@ class SubjectParty implements BeforeSave
 
     private function processPartyFields(Entity $entity, string $prefix): void
     {
-        $label = $prefix === 'subject' ? 'payment subject' : 'beneficiary';
-
         $createAccount = (bool) $entity->get('create' . ucfirst($prefix) . 'Account');
         $createContact = (bool) $entity->get('create' . ucfirst($prefix) . 'Contact');
 
         if ($createAccount && $createContact) {
-            throw new BadRequest("Select either create Account or create Contact for {$label}, not both.");
+            throw new BadRequest($this->msg('partyCreateBothBlocked'));
         }
 
         $partyId = $entity->get($prefix . 'PartyId');
@@ -55,14 +61,22 @@ class SubjectParty implements BeforeSave
         $partyName = trim((string) ($entity->get($prefix . 'Name') ?? ''));
 
         if ($partyId && ($createAccount || $createContact)) {
-            throw new BadRequest("Clear create flags when a linked {$label} is selected.");
+            throw new BadRequest($this->msg('partyCreateWithLinkBlocked'));
         }
 
         if (!$partyId && $partyName !== '' && ($createAccount || $createContact)) {
             $email = trim((string) ($entity->get($prefix . 'EmailAddress') ?? ''));
             $phone = trim((string) ($entity->get($prefix . 'PhoneNumber') ?? ''));
+            $entityType = $createAccount ? Account::ENTITY_TYPE : Contact::ENTITY_TYPE;
 
-            if ($createAccount) {
+            $existing = $this->findByEmailOrPhone($entityType, $email, $phone);
+
+            if ($existing !== null) {
+                $this->backfillMissingChannels($existing, $email, $phone);
+                $entity->set($prefix . 'PartyId', $existing->getId());
+                $entity->set($prefix . 'PartyType', $entityType);
+                $entity->set($prefix . 'PartyName', $existing->get(Field::NAME));
+            } elseif ($createAccount) {
                 $this->createAndLinkAccount($entity, $prefix, $partyName, $email, $phone);
             } else {
                 $this->createAndLinkContact($entity, $prefix, $partyName, $email, $phone);
@@ -76,6 +90,13 @@ class SubjectParty implements BeforeSave
         }
 
         if ($partyId && $partyType) {
+            $linked = $this->entityManager->getEntityById((string) $partyType, (string) $partyId);
+            if ($linked) {
+                $email = trim((string) ($entity->get($prefix . 'EmailAddress') ?? ''));
+                $phone = trim((string) ($entity->get($prefix . 'PhoneNumber') ?? ''));
+                $this->backfillMissingChannels($linked, $email, $phone);
+            }
+
             $displayName = $this->resolveDisplayName((string) $partyType, (string) $partyId);
 
             if ($displayName !== null) {
@@ -83,7 +104,67 @@ class SubjectParty implements BeforeSave
                 $entity->set($prefix . 'PartyName', $displayName);
             }
         } elseif ($createAccount || $createContact) {
-            throw new BadRequest("Enter {$label} name before creating a linked record.");
+            throw new BadRequest($this->msg('partyNameRequired'));
+        }
+    }
+
+    private function findByEmailOrPhone(string $entityType, string $email, string $phone): ?Entity
+    {
+        if ($email !== '') {
+            $byEmail = $this->entityManager
+                ->getRDBRepository($entityType)
+                ->where(['emailAddress' => $email])
+                ->findOne();
+
+            if ($byEmail) {
+                return $byEmail;
+            }
+        }
+
+        if ($phone !== '') {
+            $byPhone = $this->entityManager
+                ->getRDBRepository($entityType)
+                ->where(['phoneNumber' => $phone])
+                ->findOne();
+
+            if ($byPhone) {
+                return $byPhone;
+            }
+
+            $numeric = preg_replace('/\D+/', '', $phone) ?? '';
+            if ($numeric !== '') {
+                $byNumeric = $this->entityManager
+                    ->getRDBRepository($entityType)
+                    ->where(['phoneNumberNumeric' => $numeric])
+                    ->findOne();
+
+                if ($byNumeric) {
+                    return $byNumeric;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function backfillMissingChannels(Entity $party, string $email, string $phone): void
+    {
+        $changed = false;
+
+        $existingEmail = trim((string) ($party->get('emailAddress') ?? ''));
+        if ($existingEmail === '' && $email !== '') {
+            $party->set('emailAddress', $email);
+            $changed = true;
+        }
+
+        $existingPhone = trim((string) ($party->get('phoneNumber') ?? ''));
+        if ($existingPhone === '' && $phone !== '') {
+            $party->set('phoneNumber', $phone);
+            $changed = true;
+        }
+
+        if ($changed) {
+            $this->entityManager->saveEntity($party, [SaveOption::SKIP_ALL => true]);
         }
     }
 

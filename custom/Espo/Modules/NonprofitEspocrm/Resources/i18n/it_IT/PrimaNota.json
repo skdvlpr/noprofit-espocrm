@@ -49,7 +49,17 @@
         "grossRequired": "L’importo lordo è obbligatorio. Il netto viene calcolato automaticamente.",
         "commissionExceedsGross": "La commissione non può superare l’importo lordo.",
         "stripeManualCreateBlocked": "La piattaforma Stripe può essere impostata solo dall’ingest donazioni del sito. Per i movimenti manuali scegli un’altra piattaforma.",
-        "platformImmutable": "La piattaforma di pagamento non può essere modificata dopo la creazione del movimento."
+        "platformImmutable": "La piattaforma di pagamento non può essere modificata dopo la creazione del movimento.",
+        "entryTypeRequired": "Il tipo di movimento deve essere Entrata o Uscita.",
+        "grossNegative": "L’importo lordo non può essere negativo.",
+        "commissionNegative": "La commissione non può essere negativa.",
+        "commissionPercentRange": "La commissione % deve essere tra 0 e 100.",
+        "netNegative": "L’importo netto non può essere negativo.",
+        "positiveAmountRequired": "Il movimento richiede un importo positivo.",
+        "descriptionRequired": "La descrizione è obbligatoria.",
+        "partyCreateBothBlocked": "Seleziona la creazione di Account oppure Contatto, non entrambi.",
+        "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se è già collegato un soggetto.",
+        "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato."
     },
     "options": {
         "entryType": {

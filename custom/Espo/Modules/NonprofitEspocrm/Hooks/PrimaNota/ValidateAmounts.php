@@ -4,13 +4,21 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\Utils\Language;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 class ValidateAmounts implements BeforeSave
 {
+    use TranslatesPrimaNotaMessages;
+
     public static int $order = 15;
+
+    public function __construct(Language $language)
+    {
+        $this->language = $language;
+    }
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
@@ -42,7 +50,7 @@ class ValidateAmounts implements BeforeSave
         $entryType = $entity->get('entryType');
 
         if ($entryType !== 'Income' && $entryType !== 'Expense') {
-            throw new BadRequest('Prima Nota entry type must be Income or Expense.');
+            throw new BadRequest($this->msg('entryTypeRequired'));
         }
 
         $amount = (float) ($entity->get('amount') ?? 0);
@@ -50,9 +58,7 @@ class ValidateAmounts implements BeforeSave
         $hasGross = $amountGrossRaw !== null && $amountGrossRaw !== '';
 
         if ($entity->isNew() && !$hasGross) {
-            throw new BadRequest(
-                'Gross amount (lordo) is required. Net amount is calculated automatically as lordo − commission.'
-            );
+            throw new BadRequest($this->msg('grossRequired'));
         }
 
         if ($hasGross) {
@@ -61,28 +67,26 @@ class ValidateAmounts implements BeforeSave
             $commissionPercent = (float) ($entity->get('commissionPercent') ?? 0);
 
             if ($amountGross < 0) {
-                throw new BadRequest('Gross amount (lordo) cannot be negative.');
+                throw new BadRequest($this->msg('grossNegative'));
             }
 
             if ($commissionAmount < 0) {
-                throw new BadRequest('Commission cannot be negative.');
+                throw new BadRequest($this->msg('commissionNegative'));
             }
 
             if ($commissionAmount - $amountGross > 0.0001) {
-                throw new BadRequest('Commission cannot exceed gross amount (lordo).');
+                throw new BadRequest($this->msg('commissionExceedsGross'));
             }
 
             if ($commissionPercent < 0 || $commissionPercent > 100) {
-                throw new BadRequest('Commission % must be between 0 and 100.');
+                throw new BadRequest($this->msg('commissionPercentRange'));
             }
 
-            // Net may be 0 when fee equals gross or when lordo was cleared to 0.
             if ($amount < 0) {
-                throw new BadRequest('Net amount cannot be negative.');
+                throw new BadRequest($this->msg('netNegative'));
             }
         } elseif ($amount <= 0) {
-            // Legacy rows without amountGross (pre-migration) still require a positive net.
-            throw new BadRequest('Prima Nota entry requires a positive amount.');
+            throw new BadRequest($this->msg('positiveAmountRequired'));
         }
 
         if ($entryType === 'Income') {
