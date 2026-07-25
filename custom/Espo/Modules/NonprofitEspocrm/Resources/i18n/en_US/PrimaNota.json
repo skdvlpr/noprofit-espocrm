@@ -39,9 +39,15 @@
         "Create PrimaNota": "Create ledger entry"
     },
     "toolTips": {
-        "amountGross": "Gross before fees. Net amount is calculated as gross − commission.",
-        "commissionAmount": "Fee in currency. Changing this recalculates Commission %. Leave empty for 0 (no fee).",
-        "commissionPercent": "Fee as %. Changing this recalculates Commission. Leave empty for 0 (no fee)."
+        "amount": "Net amount is always calculated as gross − commission. Not editable.",
+        "amountGross": "Gross before fees. Net = gross − commission. Required. Clearing to 0 zeros fee/%/net (only when you change this field).",
+        "commissionAmount": "Fee in currency. Changing this recalculates %. Empty = 0. Cannot exceed gross.",
+        "commissionPercent": "Fee as %. Changing this recalculates fee €. Empty = 0."
+    },
+    "messages": {
+        "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can only change assigned user, teams, and Model D classification.",
+        "grossRequired": "Gross amount (lordo) is required. Net is calculated automatically.",
+        "commissionExceedsGross": "Commission cannot exceed gross amount (lordo)."
     },
     "options": {
         "entryType": {

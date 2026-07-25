@@ -46,12 +46,42 @@ class ValidateAmounts implements BeforeSave
         }
 
         $amount = (float) ($entity->get('amount') ?? 0);
-        $amountGross = $entity->get('amountGross');
-        $hasGross = $amountGross !== null && $amountGross !== '';
+        $amountGrossRaw = $entity->get('amountGross');
+        $hasGross = $amountGrossRaw !== null && $amountGrossRaw !== '';
 
-        // Net may be 0 when formula clamps after commission >= gross (Stripe edge case).
-        // Legacy rows without amountGross still require a strictly positive amount.
-        if ($amount < 0 || (!$hasGross && $amount <= 0)) {
+        if ($entity->isNew() && !$hasGross) {
+            throw new BadRequest(
+                'Gross amount (lordo) is required. Net amount is calculated automatically as lordo − commission.'
+            );
+        }
+
+        if ($hasGross) {
+            $amountGross = (float) $amountGrossRaw;
+            $commissionAmount = (float) ($entity->get('commissionAmount') ?? 0);
+            $commissionPercent = (float) ($entity->get('commissionPercent') ?? 0);
+
+            if ($amountGross < 0) {
+                throw new BadRequest('Gross amount (lordo) cannot be negative.');
+            }
+
+            if ($commissionAmount < 0) {
+                throw new BadRequest('Commission cannot be negative.');
+            }
+
+            if ($commissionAmount - $amountGross > 0.0001) {
+                throw new BadRequest('Commission cannot exceed gross amount (lordo).');
+            }
+
+            if ($commissionPercent < 0 || $commissionPercent > 100) {
+                throw new BadRequest('Commission % must be between 0 and 100.');
+            }
+
+            // Net may be 0 when fee equals gross or when lordo was cleared to 0.
+            if ($amount < 0) {
+                throw new BadRequest('Net amount cannot be negative.');
+            }
+        } elseif ($amount <= 0) {
+            // Legacy rows without amountGross (pre-migration) still require a positive net.
             throw new BadRequest('Prima Nota entry requires a positive amount.');
         }
 

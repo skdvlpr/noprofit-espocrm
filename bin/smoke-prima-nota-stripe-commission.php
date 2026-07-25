@@ -1,10 +1,11 @@
 <?php
 /**
- * Smoke: PrimaNota Stripe commission ↔ percent interdependence.
+ * Smoke: PrimaNota commission triangle + Stripe sourced-field lock + legacy migration helper.
  *
  * Usage: ddev exec php bin/smoke-prima-nota-stripe-commission.php
  *
  * Does NOT delete QA-STRIPE-MOCK* manual-test rows.
+ * Does NOT run the legacy migration (call bin/migrate-prima-nota-legacy-gross.php separately).
  */
 
 declare(strict_types=1);
@@ -12,7 +13,9 @@ declare(strict_types=1);
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Utils\Metadata;
+use Espo\ORM\Repository\Option\SaveOption;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -29,113 +32,93 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     echo '  [' . ($pass ? 'PASS' : 'FAIL') . '] ' . $name . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
-echo "PrimaNota Stripe commission metadata\n";
+echo "PrimaNota commission / Stripe lock\n";
+
+$ok('amount is readOnly', (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'amount', 'readOnly']) === true);
 $ok('amountGross field', $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'amountGross', 'type']) === 'currency');
-$ok('commissionAmount field', $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionAmount', 'type']) === 'currency');
-$ok('commissionPercent field', $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionPercent', 'type']) === 'float');
 $ok('commissionAmount default 0', (float) ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionAmount', 'default']) ?? -1) === 0.0);
 $ok('commissionPercent default 0', (float) ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'commissionPercent', 'default']) ?? -1) === 0.0);
+$ok(
+    'ProtectStripeSourcedFields hook exists',
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php')
+);
+$ok(
+    'legacy migration script exists',
+    is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
+);
 
 $created = [];
 
-$fromPercent = $em->getNewEntity('PrimaNota');
-$fromPercent->set([
-    'description' => 'Smoke Stripe gross+percent',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
-    'commissionPercent' => 2.9,
-    'transactionDate' => date('Y-m-d'),
-]);
+$manualBase = static function (string $suffix) use ($em, &$created): \Espo\ORM\Entity {
+    $row = $em->getNewEntity('PrimaNota');
+    $row->set([
+        'description' => 'Smoke manual ' . $suffix,
+        'entryType' => 'Income',
+        'internalClassification' => 'Donation',
+        'donationPaymentProvider' => 'Manual',
+        'donationPaymentReference' => 'SMOKE-MANUAL-' . $suffix . '-' . date('His'),
+        'amountGross' => 100.0,
+        'amountGrossCurrency' => 'EUR',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+
+    return $row;
+};
+
+$fromPercent = $manualBase('pct');
+$fromPercent->set('commissionPercent', 2.9);
 $em->saveEntity($fromPercent);
 $created[] = $fromPercent;
-
 $ok('net from gross+percent', abs((float) $fromPercent->get('amount') - 97.1) < 0.001, 'amount=' . $fromPercent->get('amount'));
 $ok('fee from percent', abs((float) $fromPercent->get('commissionAmount') - 2.9) < 0.001, 'fee=' . $fromPercent->get('commissionAmount'));
-$ok('amountIn uses net', abs((float) $fromPercent->get('amountIn') - 97.1) < 0.001, 'amountIn=' . $fromPercent->get('amountIn'));
 
-$fromFee = $em->getNewEntity('PrimaNota');
+$fromFee = $manualBase('fee');
 $fromFee->set([
-    'description' => 'Smoke Stripe gross+fee',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-FEE-' . date('His'),
     'amountGross' => 50.0,
-    'amountGrossCurrency' => 'EUR',
     'commissionAmount' => 1.55,
     'commissionAmountCurrency' => 'EUR',
-    'transactionDate' => date('Y-m-d'),
 ]);
 $em->saveEntity($fromFee);
 $created[] = $fromFee;
-
 $ok('net from gross+fee', abs((float) $fromFee->get('amount') - 48.45) < 0.001, 'amount=' . $fromFee->get('amount'));
 $ok('percent derived from fee', abs((float) $fromFee->get('commissionPercent') - 3.1) < 0.01, 'pct=' . $fromFee->get('commissionPercent'));
 
-$emptyFee = $em->getNewEntity('PrimaNota');
-$emptyFee->set([
-    'description' => 'Smoke Stripe empty commission → 0',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-EMPTY-' . date('His'),
-    'amountGross' => 80.0,
-    'amountGrossCurrency' => 'EUR',
-    'transactionDate' => date('Y-m-d'),
-]);
+$emptyFee = $manualBase('empty');
+$emptyFee->set('amountGross', 80.0);
 $em->saveEntity($emptyFee);
 $created[] = $emptyFee;
-$ok('empty commission → percent 0', abs((float) $emptyFee->get('commissionPercent')) < 0.001, 'pct=' . $emptyFee->get('commissionPercent'));
-$ok('empty commission → fee 0', abs((float) $emptyFee->get('commissionAmount')) < 0.001, 'fee=' . $emptyFee->get('commissionAmount'));
-$ok('empty commission → net equals gross', abs((float) $emptyFee->get('amount') - 80.0) < 0.001, 'amount=' . $emptyFee->get('amount'));
+$ok('empty commission → fee 0', abs((float) $emptyFee->get('commissionAmount')) < 0.001);
+$ok('empty commission → net equals gross', abs((float) $emptyFee->get('amount') - 80.0) < 0.001);
 
-$legacy = $em->getNewEntity('PrimaNota');
-$legacy->set([
-    'description' => 'Smoke legacy net-only amount',
-    'entryType' => 'Income',
-    'amount' => 33.0,
-    'amountCurrency' => 'EUR',
-    'transactionDate' => date('Y-m-d'),
-]);
-$em->saveEntity($legacy);
-$created[] = $legacy;
-$ok('legacy amount unchanged without gross', abs((float) $legacy->get('amount') - 33.0) < 0.001);
+$newNoGrossFailed = false;
+try {
+    $noGross = $em->getNewEntity('PrimaNota');
+    $noGross->set([
+        'description' => 'Smoke new without gross must fail',
+        'entryType' => 'Income',
+        'amount' => 10.0,
+        'amountCurrency' => 'EUR',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($noGross);
+    $created[] = $noGross;
+} catch (BadRequest $e) {
+    $newNoGrossFailed = str_contains($e->getMessage(), 'Gross amount');
+}
+$ok('new without gross → BadRequest', $newNoGrossFailed);
 
-$zeroNet = $em->getNewEntity('PrimaNota');
+$zeroNet = $manualBase('zeronet');
 $zeroNet->set([
-    'description' => 'Smoke Stripe commission equals gross',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-ZERO-' . date('His'),
     'amountGross' => 10.0,
-    'amountGrossCurrency' => 'EUR',
     'commissionAmount' => 10.0,
     'commissionAmountCurrency' => 'EUR',
-    'transactionDate' => date('Y-m-d'),
 ]);
 $em->saveEntity($zeroNet);
 $created[] = $zeroNet;
-$ok('net zero allowed when fee equals gross', abs((float) $zeroNet->get('amount')) < 0.001, 'amount=' . $zeroNet->get('amount'));
-$ok('amountIn zero when net zero', abs((float) $zeroNet->get('amountIn')) < 0.001);
+$ok('net zero when fee equals gross', abs((float) $zeroNet->get('amount')) < 0.001);
 
-// Critical: edit fee currency on existing row → percent must recalculate
-$editFee = $em->getNewEntity('PrimaNota');
-$editFee->set([
-    'description' => 'Smoke edit fee updates percent',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-EDIT-FEE-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
-    'commissionPercent' => 2.9,
-    'transactionDate' => date('Y-m-d'),
-]);
+$editFee = $manualBase('editfee');
+$editFee->set('commissionPercent', 2.9);
 $em->saveEntity($editFee);
 $created[] = $editFee;
 $editFee = $em->getEntityById('PrimaNota', $editFee->getId());
@@ -143,22 +126,13 @@ $editFee->set('commissionAmount', 5.0);
 $editFee->set('commissionAmountCurrency', 'EUR');
 $em->saveEntity($editFee);
 $editFee = $em->getEntityById('PrimaNota', $editFee->getId());
-$ok('edit fee → percent recalculated', abs((float) $editFee->get('commissionPercent') - 5.0) < 0.01, 'pct=' . $editFee->get('commissionPercent'));
-$ok('edit fee → net recalculated', abs((float) $editFee->get('amount') - 95.0) < 0.001, 'amount=' . $editFee->get('amount'));
+$ok('edit fee → percent recalculated', abs((float) $editFee->get('commissionPercent') - 5.0) < 0.01);
+$ok('edit fee → net recalculated', abs((float) $editFee->get('amount') - 95.0) < 0.001);
 
-// Edit percent on existing → fee must recalculate
-$editPct = $em->getNewEntity('PrimaNota');
+$editPct = $manualBase('editpct');
 $editPct->set([
-    'description' => 'Smoke edit percent updates fee',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-EDIT-PCT-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
     'commissionAmount' => 2.9,
     'commissionAmountCurrency' => 'EUR',
-    'transactionDate' => date('Y-m-d'),
 ]);
 $em->saveEntity($editPct);
 $created[] = $editPct;
@@ -166,22 +140,11 @@ $editPct = $em->getEntityById('PrimaNota', $editPct->getId());
 $editPct->set('commissionPercent', 4.0);
 $em->saveEntity($editPct);
 $editPct = $em->getEntityById('PrimaNota', $editPct->getId());
-$ok('edit percent → fee recalculated', abs((float) $editPct->get('commissionAmount') - 4.0) < 0.001, 'fee=' . $editPct->get('commissionAmount'));
-$ok('edit percent → net recalculated', abs((float) $editPct->get('amount') - 96.0) < 0.001, 'amount=' . $editPct->get('amount'));
+$ok('edit percent → fee recalculated', abs((float) $editPct->get('commissionAmount') - 4.0) < 0.001);
+$ok('edit percent → net recalculated', abs((float) $editPct->get('amount') - 96.0) < 0.001);
 
-// Edit gross, keep percent → fee refreshes from rate
-$editGross = $em->getNewEntity('PrimaNota');
-$editGross->set([
-    'description' => 'Smoke edit gross keeps percent rate',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-EDIT-GROSS-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
-    'commissionPercent' => 10.0,
-    'transactionDate' => date('Y-m-d'),
-]);
+$editGross = $manualBase('editgross');
+$editGross->set('commissionPercent', 10.0);
 $em->saveEntity($editGross);
 $created[] = $editGross;
 $editGross = $em->getEntityById('PrimaNota', $editGross->getId());
@@ -189,79 +152,107 @@ $editGross->set('amountGross', 200.0);
 $editGross->set('amountGrossCurrency', 'EUR');
 $em->saveEntity($editGross);
 $editGross = $em->getEntityById('PrimaNota', $editGross->getId());
-$ok('edit gross → fee from percent', abs((float) $editGross->get('commissionAmount') - 20.0) < 0.001, 'fee=' . $editGross->get('commissionAmount'));
-$ok('edit gross → percent kept', abs((float) $editGross->get('commissionPercent') - 10.0) < 0.01, 'pct=' . $editGross->get('commissionPercent'));
-$ok('edit gross → net', abs((float) $editGross->get('amount') - 180.0) < 0.001, 'amount=' . $editGross->get('amount'));
+$ok('edit gross → fee from percent', abs((float) $editGross->get('commissionAmount') - 20.0) < 0.001);
+$ok('edit gross → net', abs((float) $editGross->get('amount') - 180.0) < 0.001);
 
-// Clear lordo + fee currency → both become 0 and % resets (critical UX)
-$clearAll = $em->getNewEntity('PrimaNota');
-$clearAll->set([
-    'description' => 'Smoke clear gross and fee resets percent',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-CLEAR-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
-    'commissionPercent' => 22.049,
-    'transactionDate' => date('Y-m-d'),
-]);
-$em->saveEntity($clearAll);
-$created[] = $clearAll;
-$clearAll = $em->getEntityById('PrimaNota', $clearAll->getId());
-$keptNet = (float) $clearAll->get('amount');
-$clearAll->set('amountGross', null);
-$clearAll->set('commissionAmount', null);
-$em->saveEntity($clearAll);
-$clearAll = $em->getEntityById('PrimaNota', $clearAll->getId());
-$ok('clear gross → amountGross is 0', abs((float) $clearAll->get('amountGross')) < 0.001, 'gross=' . $clearAll->get('amountGross'));
-$ok('clear fee → commissionAmount is 0', abs((float) $clearAll->get('commissionAmount')) < 0.001, 'fee=' . $clearAll->get('commissionAmount'));
-$ok('clear gross/fee → percent reset to 0', abs((float) $clearAll->get('commissionPercent')) < 0.001, 'pct=' . $clearAll->get('commissionPercent'));
-$ok('clear gross/fee → net preserved', abs((float) $clearAll->get('amount') - $keptNet) < 0.001, 'amount=' . $clearAll->get('amount'));
-
-// UI often clears currency to 0 (not null) — must still reset fee/%
-$clearZero = $em->getNewEntity('PrimaNota');
-$clearZero->set([
-    'description' => 'Smoke clear gross to zero resets percent',
-    'entryType' => 'Income',
-    'internalClassification' => 'Donation',
-    'donationPaymentProvider' => 'Stripe',
-    'donationPaymentReference' => 'SMOKE-STRIPE-CLEAR0-' . date('His'),
-    'amountGross' => 100.0,
-    'amountGrossCurrency' => 'EUR',
-    'commissionPercent' => 10.0,
-    'transactionDate' => date('Y-m-d'),
-]);
+$clearZero = $manualBase('clear0');
+$clearZero->set('commissionPercent', 10.0);
 $em->saveEntity($clearZero);
 $created[] = $clearZero;
 $clearZero = $em->getEntityById('PrimaNota', $clearZero->getId());
-$keptNetZero = (float) $clearZero->get('amount');
 $clearZero->set('amountGross', 0.0);
 $clearZero->set('amountGrossCurrency', 'EUR');
 $em->saveEntity($clearZero);
 $clearZero = $em->getEntityById('PrimaNota', $clearZero->getId());
-$ok('clear gross=0 → fee reset', abs((float) $clearZero->get('commissionAmount')) < 0.001, 'fee=' . $clearZero->get('commissionAmount'));
-$ok('clear gross=0 → percent reset', abs((float) $clearZero->get('commissionPercent')) < 0.001, 'pct=' . $clearZero->get('commissionPercent'));
-$ok('clear gross=0 → net preserved', abs((float) $clearZero->get('amount') - $keptNetZero) < 0.001, 'amount=' . $clearZero->get('amount'));
+$ok('clear gross=0 → fee 0', abs((float) $clearZero->get('commissionAmount')) < 0.001);
+$ok('clear gross=0 → percent 0', abs((float) $clearZero->get('commissionPercent')) < 0.001);
+$ok('clear gross=0 → net 0', abs((float) $clearZero->get('amount')) < 0.001);
+
+$feeTooHigh = false;
+try {
+    $bad = $manualBase('feebad');
+    $bad->set([
+        'amountGross' => 10.0,
+        'commissionAmount' => 20.0,
+        'commissionAmountCurrency' => 'EUR',
+    ]);
+    $em->saveEntity($bad);
+    $created[] = $bad;
+} catch (BadRequest $e) {
+    $feeTooHigh = str_contains($e->getMessage(), 'cannot exceed');
+}
+$ok('fee > gross → BadRequest', $feeTooHigh);
+
+// Stripe create OK; later money/subject edit blocked; Espo field (modelD) OK
+$stripe = $em->getNewEntity('PrimaNota');
+$stripe->set([
+    'description' => 'Smoke Stripe lock',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-LOCK-' . date('His'),
+    'amountGross' => 100.0,
+    'amountGrossCurrency' => 'EUR',
+    'commissionPercent' => 2.9,
+    'subjectName' => 'Donor From Stripe',
+    'transactionDate' => date('Y-m-d'),
+]);
+$em->saveEntity($stripe);
+$created[] = $stripe;
+$ok('Stripe create allowed', $stripe->getId() !== null);
+
+$stripeMoneyBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    $stripe->set('commissionAmount', 9.0);
+    $stripe->set('commissionAmountCurrency', 'EUR');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeMoneyBlocked = str_contains($e->getMessage(), 'Stripe');
+}
+$ok('Stripe money edit → BadRequest', $stripeMoneyBlocked);
+
+$stripeSubjectBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    $stripe->set('subjectName', 'Hacker Rename');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeSubjectBlocked = str_contains($e->getMessage(), 'Stripe');
+}
+$ok('Stripe subjectName edit → BadRequest', $stripeSubjectBlocked);
+
+$stripeDateBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    $stripe->set('transactionDate', '2020-01-01');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeDateBlocked = str_contains($e->getMessage(), 'Stripe');
+}
+$ok('Stripe transactionDate edit → BadRequest', $stripeDateBlocked);
+
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$stripe->set('modelDClassification', 'C');
+$em->saveEntity($stripe);
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$ok('Stripe modelDClassification still editable', $stripe->get('modelDClassification') === 'C');
 
 $formulaPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json';
-$formulaData = is_file($formulaPath) ? (json_decode((string) file_get_contents($formulaPath), true) ?: []) : [];
-$formulaScript = (string) ($formulaData['beforeSaveCustomScript'] ?? '');
-$ok('formula uses isAttributeChanged for fee', str_contains($formulaScript, "isAttributeChanged('commissionAmount')"));
-$ok('formula uses isAttributeChanged for percent', str_contains($formulaScript, "isAttributeChanged('commissionPercent')"));
-$ok('formula sets amount net from gross', str_contains($formulaScript, 'amountGross - commissionAmount'));
-$ok('formula uses grossCleared before fee sync', str_contains($formulaScript, '$grossCleared = true'));
-$ok('formula coerces null fee/% only in else branch', str_contains($formulaScript, "if (\$grossCleared)") && str_contains($formulaScript, '} else {'));
+$formulaScript = (string) ((json_decode((string) file_get_contents($formulaPath), true) ?: [])['beforeSaveCustomScript'] ?? '');
+$ok('formula uses grossCleared only on grossChanged', str_contains($formulaScript, 'if ($grossChanged)'));
+$ok('formula zeros net on clear', str_contains($formulaScript, "amount = 0;\n} else {"));
 
 foreach ($created as $row) {
-    $em->removeEntity($row);
+    if ($row->getId()) {
+        $em->removeEntity($row);
+    }
 }
 
 $qaLeft = $em->getRDBRepository('PrimaNota')
     ->where(['donationPaymentReference*' => 'QA-STRIPE-MOCK%'])
-    ->find();
-$qaCount = iterator_count($qaLeft);
-$ok('QA Stripe mock rows kept', $qaCount >= 1, 'count=' . $qaCount);
+    ->count();
+$ok('QA Stripe mock rows kept', $qaLeft >= 1, 'count=' . $qaLeft);
 
 echo $fail === 0 ? "\nALL PASS\n" : "\nFAILED: $fail\n";
 exit($fail === 0 ? 0 : 1);

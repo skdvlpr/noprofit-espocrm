@@ -7,12 +7,118 @@
     },
     "dynamicLogic": {
         "fields": {
+            "amountGross": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "commissionAmount": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "commissionPercent": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "entryType": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "transactionDate": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "internalClassification": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "description": {
+                "required": {
+                    "conditionGroup": [
+                        {
+                            "type": "isEmpty",
+                            "attribute": "donationPaymentReference"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "financing": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
             "subjectName": {
                 "readOnly": {
                     "conditionGroup": [
                         {
-                            "type": "isNotEmpty",
-                            "attribute": "subjectPartyId"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isNotEmpty",
+                                    "attribute": "subjectPartyId"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "donationPaymentProvider",
+                                    "value": "Stripe"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -29,6 +135,15 @@
                             "attribute": "createSubjectContact"
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "createSubjectAccount": {
@@ -43,6 +158,15 @@
                             "attribute": "createSubjectContact"
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "createSubjectContact": {
@@ -55,6 +179,15 @@
                         {
                             "type": "isFalse",
                             "attribute": "createSubjectAccount"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
                         }
                     ]
                 }
@@ -76,6 +209,15 @@
                             ]
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "subjectPhoneNumber": {
@@ -95,24 +237,33 @@
                             ]
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "beneficiaryName": {
                 "readOnly": {
                     "conditionGroup": [
                         {
-                            "type": "isNotEmpty",
-                            "attribute": "beneficiaryPartyId"
-                        }
-                    ]
-                }
-            },
-            "description": {
-                "required": {
-                    "conditionGroup": [
-                        {
-                            "type": "isEmpty",
-                            "attribute": "donationPaymentReference"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isNotEmpty",
+                                    "attribute": "beneficiaryPartyId"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "donationPaymentProvider",
+                                    "value": "Stripe"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -129,6 +280,15 @@
                             "attribute": "createBeneficiaryContact"
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "createBeneficiaryAccount": {
@@ -143,6 +303,15 @@
                             "attribute": "createBeneficiaryContact"
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "createBeneficiaryContact": {
@@ -155,6 +324,15 @@
                         {
                             "type": "isFalse",
                             "attribute": "createBeneficiaryAccount"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
                         }
                     ]
                 }
@@ -176,6 +354,15 @@
                             ]
                         }
                     ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
                 }
             },
             "beneficiaryPhoneNumber": {
@@ -193,6 +380,15 @@
                                     "attribute": "createBeneficiaryContact"
                                 }
                             ]
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
                         }
                     ]
                 }

@@ -1086,7 +1086,8 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
 | `bin/setup-roles.php` | Canonical roles + test API users |
 | `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning |
-| `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota Stripe gross/fee → net formula |
+| `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota gross/fee/net formula + Stripe sourced-field lock |
+| `bin/migrate-prima-nota-legacy-gross.php` | One-shot: null amountGross → amountGross=amount, fee/%=0 (run after QA, before/with prod deploy) |
 | `bin/seed-qa-stripe-donation.php` | Keep mock Stripe PrimaNota row for manual QA |
 | `bin/dev-rebuild.sh` | clear_cache + rebuild wrapper |
 | `bin/build.sh` / `bin/build-google-integration.sh` | Extension ZIP builds |

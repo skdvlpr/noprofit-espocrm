@@ -78,7 +78,7 @@
         "amount": {
             "type": "currency",
             "currency": "EUR",
-            "required": true
+            "readOnly": true
         },
         "amountGross": {
             "type": "currency",

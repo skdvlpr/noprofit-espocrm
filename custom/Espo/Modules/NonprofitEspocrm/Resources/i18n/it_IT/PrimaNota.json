@@ -39,9 +39,15 @@
         "Create PrimaNota": "Crea movimento"
     },
     "toolTips": {
-        "amountGross": "Importo lordo prima delle commissioni. Il netto = lordo − commissione.",
-        "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0 (nessuna commissione).",
-        "commissionPercent": "Commissione in %. Se la cambi, l’importo commissione si ricalcola. Vuoto = 0 (nessuna commissione)."
+        "amount": "L’importo netto è sempre calcolato: lordo − commissione. Non modificabile.",
+        "amountGross": "Importo lordo prima delle commissioni. Netto = lordo − commissione. Obbligatorio. Se lo azzeri, si azzerano anche commissione e netto.",
+        "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non può superare il lordo.",
+        "commissionPercent": "Commissione in %. Se la cambi, l’importo commissione si ricalcola. Vuoto = 0."
+    },
+    "messages": {
+        "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare solo assegnatario, team e classificazione modello D.",
+        "grossRequired": "L’importo lordo è obbligatorio. Il netto viene calcolato automaticamente.",
+        "commissionExceedsGross": "La commissione non può superare l’importo lordo."
     },
     "options": {
         "entryType": {
