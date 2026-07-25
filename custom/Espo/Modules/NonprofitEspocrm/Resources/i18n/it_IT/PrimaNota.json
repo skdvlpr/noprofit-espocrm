@@ -38,6 +38,11 @@
         "PrimaNotaPlural": "Prima nota",
         "Create PrimaNota": "Crea movimento"
     },
+    "toolTips": {
+        "amountGross": "Importo lordo prima delle commissioni. Il netto = lordo − commissione.",
+        "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0 (nessuna commissione).",
+        "commissionPercent": "Commissione in %. Se la cambi, l’importo commissione si ricalcola. Vuoto = 0 (nessuna commissione)."
+    },
     "options": {
         "entryType": {
             "Income": "Entrata",

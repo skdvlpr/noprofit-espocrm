@@ -38,6 +38,11 @@
         "PrimaNotaPlural": "Ledger (Prima Nota)",
         "Create PrimaNota": "Create ledger entry"
     },
+    "toolTips": {
+        "amountGross": "Gross before fees. Net amount is calculated as gross − commission.",
+        "commissionAmount": "Fee in currency. Changing this recalculates Commission %. Leave empty for 0 (no fee).",
+        "commissionPercent": "Fee as %. Changing this recalculates Commission. Leave empty for 0 (no fee)."
+    },
     "options": {
         "entryType": {
             "Income": "Income",

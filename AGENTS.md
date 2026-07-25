@@ -957,16 +957,10 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 
 ### Upgrading an existing database (Italian → English schema)
 
-If the database was created **before** the English entity/field rename (tables such as
-`volontario_dipendente`, `associati`, `conteggio_pasti`), run the one-shot migration **once**
-per environment, then rebuild:
-
-1. `ddev exec php bin/migrate-rename-italian.php` (idempotent; renames tables/columns, updates polymorphic `*_type` values, rewrites `role.data` keys, fixes `tabList`, prunes stale scheduled jobs)
-2. `ddev exec php clear_cache.php && ddev exec php rebuild.php`
-3. `ddev exec php bin/setup-roles.php`
-4. Optional: `ddev exec php bin/reorder-safehouse-tabs.php`
-
-Fresh installs from current module metadata do **not** need the migration script.
+Legacy Italian table/column rename migrations were one-shot and have been removed from
+`bin/` after all environments completed the rename. Fresh installs use English metadata
+only. If an ancient DB still has Italian physical names, restore the historical migration
+from git history and run it once, then rebuild + `bin/setup-roles.php`.
 
 ### Entity creation checklist:
 
@@ -1092,9 +1086,8 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
 | `bin/setup-roles.php` | Canonical roles + test API users |
 | `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning |
-| `bin/migrate-rename-italian.php` | One-shot Italian→English schema rename |
-| `bin/migrate-rename-phase1-italian.php` | Phase-1 rename helper (legacy envs) |
-| `bin/prune-google-calendar-config-tabs.php` | Prune stale GCal config tabs |
+| `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota Stripe gross/fee → net formula |
+| `bin/seed-qa-stripe-donation.php` | Keep mock Stripe PrimaNota row for manual QA |
 | `bin/dev-rebuild.sh` | clear_cache + rebuild wrapper |
 | `bin/build.sh` / `bin/build-google-integration.sh` | Extension ZIP builds |
 
