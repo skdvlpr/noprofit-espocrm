@@ -26,6 +26,11 @@ class ValidateAmounts implements BeforeSave
             return;
         }
 
+        $transactionDate = $entity->get('transactionDate');
+        if ($transactionDate === null || $transactionDate === '') {
+            throw new BadRequest($this->msg('transactionDateRequired'));
+        }
+
         $entryType = $entity->get('entryType');
         $amount = (float) ($entity->get('amount') ?? 0);
 

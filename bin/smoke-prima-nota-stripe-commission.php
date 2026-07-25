@@ -77,6 +77,17 @@ $ok(
     preg_match('/[^\x00-\x7F]/', (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json')) === 0
 );
 $ok(
+    'formula does not autofill transactionDate with today',
+    !preg_match(
+        '/if\s*\(\s*transactionDate\s*==\s*null\s*\)\s*\{[^}]*datetime\\\\today/',
+        (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json')
+    )
+);
+$ok(
+    'transactionDate field is required',
+    (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'transactionDate', 'required']) === true
+);
+$ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
 );
@@ -123,6 +134,25 @@ $em->saveEntity($emptyFee);
 $created[] = $emptyFee;
 $ok('empty commission → fee 0', abs((float) $emptyFee->get('commissionAmount')) < 0.001);
 $ok('empty commission → net equals gross', abs((float) $emptyFee->get('amount') - 80.0) < 0.001);
+
+$noDateFailed = false;
+try {
+    $noDate = $em->getNewEntity('PrimaNota');
+    $noDate->set([
+        'description' => 'Smoke manual without date must fail',
+        'entryType' => 'Income',
+        'internalClassification' => 'Other',
+        'amountGross' => 10.0,
+        'amountGrossCurrency' => 'EUR',
+    ]);
+    $em->saveEntity($noDate);
+    $created[] = $noDate;
+} catch (\Throwable $e) {
+    $msg = $e->getMessage();
+    $noDateFailed = $e instanceof BadRequest
+        && $isBadRequestMsg($msg, 'transactionDateRequired', 'Date is required', "La data e'", 'movement date');
+}
+$ok('manual create without transactionDate → validation error', $noDateFailed);
 
 $newNoGrossFailed = false;
 try {

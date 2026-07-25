@@ -42,7 +42,8 @@
         "amount": "Net amount is always calculated as gross − commission. Not editable.",
         "amountGross": "Gross before fees. Net = gross − commission. Required. Clearing to 0 zeros fee/%/net (only when you change this field).",
         "commissionAmount": "Fee in currency. Changing this recalculates %. Empty = 0. Cannot exceed gross.",
-        "commissionPercent": "Fee as %. Changing this recalculates fee €. Empty = 0."
+        "commissionPercent": "Fee as %. Changing this recalculates fee €. Empty = 0.",
+        "transactionDate": "Required for manual entries. Not auto-filled with today. Stripe donations use the payment date from the website."
     },
     "messages": {
         "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can only change assigned user, teams, and Model D classification.",
@@ -57,6 +58,7 @@
         "netNegative": "Net amount cannot be negative.",
         "positiveAmountRequired": "Prima Nota entry requires a positive amount.",
         "descriptionRequired": "Description is required.",
+        "transactionDateRequired": "Date is required. Choose the movement date — it is not filled automatically.",
         "partyCreateBothBlocked": "Select either create Account or create Contact, not both.",
         "partyCreateWithLinkBlocked": "Clear create flags when a linked party is selected.",
         "partyNameRequired": "Enter a name before creating a linked Account or Contact."

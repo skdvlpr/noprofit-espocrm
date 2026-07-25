@@ -42,7 +42,8 @@
         "amount": "L'importo netto e' sempre calcolato: lordo - commissione. Non modificabile.",
         "amountGross": "Importo lordo prima delle commissioni. Netto = lordo - commissione. Obbligatorio. Se lo azzeri, si azzerano anche commissione e netto.",
         "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non puo' superare il lordo.",
-        "commissionPercent": "Commissione in %. Se la cambi, l'importo commissione si ricalcola. Vuoto = 0."
+        "commissionPercent": "Commissione in %. Se la cambi, l'importo commissione si ricalcola. Vuoto = 0.",
+        "transactionDate": "Obbligatoria per i movimenti manuali. Non viene compilata automaticamente con oggi. Per le donazioni Stripe usa la data del pagamento dal sito."
     },
     "messages": {
         "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare solo assegnatario, team e classificazione modello D.",
@@ -57,6 +58,7 @@
         "netNegative": "L'importo netto non puo' essere negativo.",
         "positiveAmountRequired": "Il movimento richiede un importo positivo.",
         "descriptionRequired": "La descrizione e' obbligatoria.",
+        "transactionDateRequired": "La data e' obbligatoria. Scegli la data del movimento: non viene compilata automaticamente.",
         "partyCreateBothBlocked": "Seleziona la creazione di Account oppure Contatto, non entrambi.",
         "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se e' gia' collegato un soggetto.",
         "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato."
