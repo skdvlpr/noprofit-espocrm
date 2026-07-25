@@ -482,6 +482,19 @@
                     ]
                 }
             }
+        },
+        "buttons": {
+            "copyPaymentData": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            }
         }
     },
     "menu": {
@@ -494,6 +507,18 @@
                     "acl": "read",
                     "handler": "nonprofit-espocrm:handlers/reporting/email-export",
                     "actionFunction": "send"
+                }
+            ]
+        },
+        "detail": {
+            "buttons": [
+                {
+                    "name": "copyPaymentData",
+                    "labelTranslation": "PrimaNota.labels.copyPaymentData",
+                    "style": "default",
+                    "acl": "read",
+                    "handler": "nonprofit-espocrm:handlers/prima-nota/copy-payment-data",
+                    "actionFunction": "copy"
                 }
             ]
         }

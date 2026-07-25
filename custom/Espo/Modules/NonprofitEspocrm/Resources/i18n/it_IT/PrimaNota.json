@@ -52,7 +52,8 @@
         "PrimaNota": "Prima nota",
         "PrimaNotaPlural": "Prima nota",
         "Create PrimaNota": "Crea movimento",
-        "stripeDetails": "Dettagli Stripe"
+        "stripeDetails": "Dettagli Stripe",
+        "copyPaymentData": "Copia dati pagamento"
     },
     "toolTips": {
         "amount": "L'importo netto e' sempre calcolato: lordo - commissione. Non modificabile.",
@@ -77,7 +78,9 @@
         "transactionDateRequired": "La data e' obbligatoria. Scegli la data del movimento: non viene compilata automaticamente.",
         "partyCreateBothBlocked": "Seleziona la creazione di Account oppure Contatto, non entrambi.",
         "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se e' gia' collegato un soggetto.",
-        "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato."
+        "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato.",
+        "copyPaymentDataCopied": "Dati pagamento copiati negli appunti.",
+        "copyPaymentDataFailed": "Impossibile copiare i dati pagamento."
     },
     "options": {
         "entryType": {
