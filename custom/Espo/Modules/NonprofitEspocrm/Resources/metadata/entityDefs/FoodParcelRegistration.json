@@ -41,16 +41,14 @@
             "displayAsList": true,
             "noEmptyString": true,
             "view": "nonprofit-espocrm:views/fields/date-array",
-            "default": [],
-            "optimisticConcurrencyControlIgnore": true
+            "default": []
         },
         "exitDates": {
             "type": "array",
             "displayAsList": true,
             "noEmptyString": true,
             "view": "nonprofit-espocrm:views/fields/date-array",
-            "default": [],
-            "optimisticConcurrencyControlIgnore": true
+            "default": []
         },
         "entryDatesText": {
             "type": "text",

@@ -59,6 +59,44 @@
                     ]
                 }
             },
+            "subjectEmailAddress": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createSubjectAccount"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createSubjectContact"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "subjectPhoneNumber": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createSubjectAccount"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createSubjectContact"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
             "beneficiaryName": {
                 "readOnly": {
                     "conditionGroup": [
@@ -117,6 +155,44 @@
                         {
                             "type": "isFalse",
                             "attribute": "createBeneficiaryAccount"
+                        }
+                    ]
+                }
+            },
+            "beneficiaryEmailAddress": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createBeneficiaryAccount"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createBeneficiaryContact"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "beneficiaryPhoneNumber": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createBeneficiaryAccount"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "createBeneficiaryContact"
+                                }
+                            ]
                         }
                     ]
                 }

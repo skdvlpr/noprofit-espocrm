@@ -10,7 +10,7 @@ use Espo\ORM\Repository\Option\SaveOptions;
 
 class ValidateAmounts implements BeforeSave
 {
-    public static int $order = 5;
+    public static int $order = 15;
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {

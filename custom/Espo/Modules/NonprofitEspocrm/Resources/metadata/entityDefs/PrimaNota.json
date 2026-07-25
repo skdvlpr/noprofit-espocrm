@@ -56,6 +56,14 @@
             "type": "bool",
             "default": false
         },
+        "beneficiaryEmailAddress": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "beneficiaryPhoneNumber": {
+            "type": "varchar",
+            "maxLength": 64
+        },
         "entryType": {
             "type": "enum",
             "options": [
@@ -71,6 +79,19 @@
             "type": "currency",
             "currency": "EUR",
             "required": true
+        },
+        "amountGross": {
+            "type": "currency",
+            "currency": "EUR"
+        },
+        "commissionAmount": {
+            "type": "currency",
+            "currency": "EUR"
+        },
+        "commissionPercent": {
+            "type": "float",
+            "min": 0,
+            "max": 100
         },
         "amountIn": {
             "type": "currency",

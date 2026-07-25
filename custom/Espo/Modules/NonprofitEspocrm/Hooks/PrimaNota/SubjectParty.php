@@ -99,9 +99,7 @@ class SubjectParty implements BeforeSave
         }
         $this->copyAssignment($entity, $account);
 
-        $this->entityManager->saveEntity($account, [
-            SaveOption::SKIP_ALL => true,
-        ]);
+        $this->entityManager->saveEntity($account);
 
         $entity->set($prefix . 'PartyId', $account->getId());
         $entity->set($prefix . 'PartyType', Account::ENTITY_TYPE);
@@ -123,9 +121,7 @@ class SubjectParty implements BeforeSave
         }
         $this->copyAssignment($entity, $contact);
 
-        $this->entityManager->saveEntity($contact, [
-            SaveOption::SKIP_ALL => true,
-        ]);
+        $this->entityManager->saveEntity($contact);
 
         $entity->set($prefix . 'PartyId', $contact->getId());
         $entity->set($prefix . 'PartyType', Contact::ENTITY_TYPE);

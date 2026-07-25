@@ -20,6 +20,10 @@
                 {"name": "createSubjectContact"}
             ],
             [
+                {"name": "subjectEmailAddress"},
+                {"name": "subjectPhoneNumber"}
+            ],
+            [
                 {"name": "beneficiaryParty", "fullWidth": true}
             ],
             [
@@ -30,12 +34,24 @@
                 {"name": "createBeneficiaryContact"}
             ],
             [
+                {"name": "beneficiaryEmailAddress"},
+                {"name": "beneficiaryPhoneNumber"}
+            ],
+            [
                 {"name": "financing"},
                 false
             ],
             [
                 {"name": "entryType"},
                 {"name": "amount"}
+            ],
+            [
+                {"name": "amountGross"},
+                {"name": "commissionAmount"}
+            ],
+            [
+                {"name": "commissionPercent"},
+                false
             ],
             [
                 {"name": "modelDClassification", "fullWidth": true}

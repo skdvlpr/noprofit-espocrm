@@ -22,7 +22,7 @@ class AssignedUserDefaultApplier
 
     public function applyIfEmpty(Entity $entity): void
     {
-        if ($this->user->isPortal()) {
+        if ($this->user->isPortal() || $this->user->isSystem()) {
             return;
         }
 

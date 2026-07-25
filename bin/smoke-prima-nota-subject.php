@@ -79,6 +79,8 @@ $createdAccount->set([
     'amount' => 12,
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'New Smoke Org',
+    'subjectEmailAddress' => 'org-smoke@example.com',
+    'subjectPhoneNumber' => '+390555501111',
     'createSubjectAccount' => true,
 ]);
 $em->saveEntity($createdAccount);
@@ -88,6 +90,13 @@ $ok(
         && $createdAccount->get('subjectName') === 'New Smoke Org',
     (string) $createdAccount->get('subjectPartyId')
 );
+$createdAccountParty = $em->getEntityById(Account::ENTITY_TYPE, (string) $createdAccount->get('subjectPartyId'));
+$ok(
+    'create account copies email/phone',
+    $createdAccountParty !== null
+        && $createdAccountParty->get('emailAddress') === 'org-smoke@example.com'
+        && $createdAccountParty->get('phoneNumber') === '+390555501111'
+);
 
 $createdContact = $em->getNewEntity('PrimaNota');
 $createdContact->set([
@@ -96,6 +105,8 @@ $createdContact->set([
     'amount' => 13,
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'Anna Verdi',
+    'subjectEmailAddress' => 'anna.verdi@example.com',
+    'subjectPhoneNumber' => '+390555502222',
     'createSubjectContact' => true,
 ]);
 $em->saveEntity($createdContact);
@@ -104,6 +115,13 @@ $ok(
     $createdContact->get('subjectPartyType') === Contact::ENTITY_TYPE
         && $createdContact->get('subjectName') === 'Anna Verdi',
     (string) $createdContact->get('subjectPartyId')
+);
+$createdContactParty = $em->getEntityById(Contact::ENTITY_TYPE, (string) $createdContact->get('subjectPartyId'));
+$ok(
+    'create contact copies email/phone',
+    $createdContactParty !== null
+        && $createdContactParty->get('emailAddress') === 'anna.verdi@example.com'
+        && $createdContactParty->get('phoneNumber') === '+390555502222'
 );
 
 $manual = $em->getNewEntity('PrimaNota');
@@ -161,6 +179,8 @@ $createdBeneficiaryAccount->set([
     'amount' => 17,
     'transactionDate' => date('Y-m-d'),
     'beneficiaryName' => 'New Beneficiary Org',
+    'beneficiaryEmailAddress' => 'beneficiary-org@example.com',
+    'beneficiaryPhoneNumber' => '+390555503333',
     'createBeneficiaryAccount' => true,
 ]);
 $em->saveEntity($createdBeneficiaryAccount);
@@ -170,6 +190,16 @@ $ok(
         && $createdBeneficiaryAccount->get('beneficiaryName') === 'New Beneficiary Org',
     (string) $createdBeneficiaryAccount->get('beneficiaryPartyId')
 );
+$createdBeneficiaryAccountParty = $em->getEntityById(
+    Account::ENTITY_TYPE,
+    (string) $createdBeneficiaryAccount->get('beneficiaryPartyId')
+);
+$ok(
+    'create beneficiary account copies email/phone',
+    $createdBeneficiaryAccountParty !== null
+        && $createdBeneficiaryAccountParty->get('emailAddress') === 'beneficiary-org@example.com'
+        && $createdBeneficiaryAccountParty->get('phoneNumber') === '+390555503333'
+);
 
 $createdBeneficiaryContact = $em->getNewEntity('PrimaNota');
 $createdBeneficiaryContact->set([
@@ -178,6 +208,8 @@ $createdBeneficiaryContact->set([
     'amount' => 18,
     'transactionDate' => date('Y-m-d'),
     'beneficiaryName' => 'Luca Bianchi',
+    'beneficiaryEmailAddress' => 'luca.bianchi@example.com',
+    'beneficiaryPhoneNumber' => '+390555504444',
     'createBeneficiaryContact' => true,
 ]);
 $em->saveEntity($createdBeneficiaryContact);
@@ -186,6 +218,16 @@ $ok(
     $createdBeneficiaryContact->get('beneficiaryPartyType') === Contact::ENTITY_TYPE
         && $createdBeneficiaryContact->get('beneficiaryName') === 'Luca Bianchi',
     (string) $createdBeneficiaryContact->get('beneficiaryPartyId')
+);
+$createdBeneficiaryContactParty = $em->getEntityById(
+    Contact::ENTITY_TYPE,
+    (string) $createdBeneficiaryContact->get('beneficiaryPartyId')
+);
+$ok(
+    'create beneficiary contact copies email/phone',
+    $createdBeneficiaryContactParty !== null
+        && $createdBeneficiaryContactParty->get('emailAddress') === 'luca.bianchi@example.com'
+        && $createdBeneficiaryContactParty->get('phoneNumber') === '+390555504444'
 );
 
 $manualBeneficiary = $em->getNewEntity('PrimaNota');

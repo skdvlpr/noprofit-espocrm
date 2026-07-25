@@ -4,9 +4,11 @@
             [{"name": "subjectParty", "fullWidth": true}],
             [{"name": "subjectName", "fullWidth": true}],
             [{"name": "createSubjectAccount"}, {"name": "createSubjectContact"}],
+            [{"name": "subjectEmailAddress"}, {"name": "subjectPhoneNumber"}],
             [{"name": "beneficiaryParty", "fullWidth": true}],
             [{"name": "beneficiaryName", "fullWidth": true}],
             [{"name": "createBeneficiaryAccount"}, {"name": "createBeneficiaryContact"}],
+            [{"name": "beneficiaryEmailAddress"}, {"name": "beneficiaryPhoneNumber"}],
             [{"name": "entryType"}, {"name": "amount"}],
             [{"name": "modelDClassification", "fullWidth": true}]
         ]
