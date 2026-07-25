@@ -1,8 +1,8 @@
 <?php
 /**
- * Smoke test for the Phase 1 English-schema refactor.
+ * Smoke test for English-schema invariants (Safehouse CRM).
  *
- * Verifies that after `bin/migrate-rename-phase1-italian.php`:
+ * Verifies:
  *   - `account.sector` enum accepts only English keys (`ThirdSector`,
  *     `SocialWorkers`, `Public`);
  *   - `opportunity.stage` enum accepts only English keys (`Preparation`,

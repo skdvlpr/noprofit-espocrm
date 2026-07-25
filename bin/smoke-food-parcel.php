@@ -37,6 +37,16 @@ echo "FoodParcel metadata\n";
 $ok('FoodParcelRegistration scopes.entity', ($metadata->get(['scopes', 'FoodParcelRegistration', 'entity']) ?? false) === true);
 $ok('stream enabled', ($metadata->get(['scopes', 'FoodParcelRegistration', 'stream']) ?? false) === true);
 $ok('OCC disabled for volunteer edits', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'optimisticConcurrencyControl']) ?? true) === false);
+$entryDatesField = $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'entryDates']) ?? [];
+$exitDatesField = $metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'exitDates']) ?? [];
+$ok(
+    'entryDates has no optimisticConcurrencyControlIgnore',
+    is_array($entryDatesField) && !array_key_exists('optimisticConcurrencyControlIgnore', $entryDatesField)
+);
+$ok(
+    'exitDates has no optimisticConcurrencyControlIgnore',
+    is_array($exitDatesField) && !array_key_exists('optimisticConcurrencyControlIgnore', $exitDatesField)
+);
 $ok('contact required', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'contact', 'required']) ?? false) === true);
 $ok('taxCode readOnly on registration', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'taxCode', 'readOnly']) ?? false) === true);
 $ok('phone readOnly on registration', ($metadata->get(['entityDefs', 'FoodParcelRegistration', 'fields', 'phone', 'readOnly']) ?? false) === true);

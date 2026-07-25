@@ -46,8 +46,12 @@ class ValidateAmounts implements BeforeSave
         }
 
         $amount = (float) ($entity->get('amount') ?? 0);
+        $amountGross = $entity->get('amountGross');
+        $hasGross = $amountGross !== null && $amountGross !== '';
 
-        if ($amount <= 0) {
+        // Net may be 0 when formula clamps after commission >= gross (Stripe edge case).
+        // Legacy rows without amountGross still require a strictly positive amount.
+        if ($amount < 0 || (!$hasGross && $amount <= 0)) {
             throw new BadRequest('Prima Nota entry requires a positive amount.');
         }
 

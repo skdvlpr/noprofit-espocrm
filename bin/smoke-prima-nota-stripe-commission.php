@@ -84,6 +84,24 @@ $em->saveEntity($legacy);
 $created[] = $legacy;
 $ok('legacy amount unchanged without gross', abs((float) $legacy->get('amount') - 33.0) < 0.001);
 
+$zeroNet = $em->getNewEntity('PrimaNota');
+$zeroNet->set([
+    'description' => 'Smoke Stripe commission equals gross',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-ZERO-' . date('His'),
+    'amountGross' => 10.0,
+    'amountGrossCurrency' => 'EUR',
+    'commissionAmount' => 10.0,
+    'commissionAmountCurrency' => 'EUR',
+    'transactionDate' => date('Y-m-d'),
+]);
+$em->saveEntity($zeroNet);
+$created[] = $zeroNet;
+$ok('net zero allowed when fee equals gross', abs((float) $zeroNet->get('amount')) < 0.001, 'amount=' . $zeroNet->get('amount'));
+$ok('amountIn zero when net zero', abs((float) $zeroNet->get('amountIn')) < 0.001);
+
 $formulaPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json';
 $formulaData = is_file($formulaPath) ? (json_decode((string) file_get_contents($formulaPath), true) ?: []) : [];
 $formulaScript = (string) ($formulaData['beforeSaveCustomScript'] ?? '');
