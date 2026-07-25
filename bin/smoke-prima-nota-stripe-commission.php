@@ -74,7 +74,7 @@ $ok(
 );
 $ok(
     'IT PrimaNota i18n is ASCII-only',
-    preg_match('/[^\x00-\x7F]/', (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json')) !== 1
+    preg_match('/[^\x00-\x7F]/', (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json')) === 0
 );
 $ok(
     'legacy migration script exists',
