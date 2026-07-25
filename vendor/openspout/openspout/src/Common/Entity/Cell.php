@@ -13,7 +13,9 @@ use OpenSpout\Common\Entity\Cell\EmptyCell;
 use OpenSpout\Common\Entity\Cell\FormulaCell;
 use OpenSpout\Common\Entity\Cell\NumericCell;
 use OpenSpout\Common\Entity\Cell\StringCell;
+use OpenSpout\Common\Entity\Cell\TextRunCell;
 use OpenSpout\Common\Entity\Comment\Comment;
+use OpenSpout\Common\Entity\Comment\TextRun;
 use OpenSpout\Common\Entity\Style\Style;
 
 abstract readonly class Cell
@@ -23,21 +25,30 @@ abstract readonly class Cell
         public ?Comment $comment = null,
     ) {}
 
-    abstract public function getValue(): bool|DateInterval|DateTimeInterface|float|int|string|null;
+    /**
+     * @return null|bool|DateInterval|DateTimeInterface|float|int|string|TextRun[]
+     */
+    abstract public function getValue(): array|bool|DateInterval|DateTimeInterface|float|int|string|null;
 
-    abstract public function withStyle(Style $style): self;
+    abstract public function withStyle(Style $style): static;
 
-    abstract public function withoutStyle(): self;
+    abstract public function withoutStyle(): static;
 
-    abstract public function withComment(Comment $comment): self;
+    abstract public function withComment(Comment $comment): static;
 
-    abstract public function withoutComment(): self;
+    abstract public function withoutComment(): static;
 
+    /**
+     * @param null|bool|DateInterval|DateTimeInterface|float|int|string|TextRun[] $value
+     */
     final public static function fromValue(
-        bool|DateInterval|DateTimeInterface|float|int|string|null $value,
+        array|bool|DateInterval|DateTimeInterface|float|int|string|null $value,
         ?Style $style = null,
         ?Comment $comment = null,
     ): self {
+        if (\is_array($value)) {
+            return new TextRunCell($value, $style, $comment);
+        }
         if (\is_bool($value)) {
             return new BooleanCell($value, $style, $comment);
         }

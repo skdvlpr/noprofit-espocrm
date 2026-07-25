@@ -4,11 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
+class ComposerStaticInitc4971184fe7b94063ee84e91227012bc
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
@@ -97,7 +98,6 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         '356736db98a6834f0a886b8d509b0ecd' => __DIR__ . '/..' . '/thecodingmachine/safe/generated/zlib.php',
         'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
@@ -205,7 +205,6 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         ),
         'L' => 
         array (
-            'LightnCandy\\' => 12,
             'League\\OAuth2\\Client\\' => 21,
             'League\\MimeTypeDetection\\' => 25,
             'League\\HTMLToMarkdown\\' => 22,
@@ -255,6 +254,8 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
             'Doctrine\\Common\\Lexer\\' => 22,
             'Doctrine\\Common\\' => 16,
             'DirectoryTree\\ImapEngine\\' => 25,
+            'DevTheorem\\Handlebars\\' => 22,
+            'DevTheorem\\HandlebarsParser\\' => 28,
             'DI\\' => 3,
         ),
         'C' => 
@@ -477,8 +478,8 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -535,10 +536,6 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
-        ),
-        'LightnCandy\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zordius/lightncandy/src',
         ),
         'League\\OAuth2\\Client\\' => 
         array (
@@ -598,9 +595,9 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         ),
         'Illuminate\\Support\\' => 
         array (
-            0 => __DIR__ . '/..' . '/illuminate/collections',
+            0 => __DIR__ . '/..' . '/illuminate/macroable',
             1 => __DIR__ . '/..' . '/illuminate/conditionable',
-            2 => __DIR__ . '/..' . '/illuminate/macroable',
+            2 => __DIR__ . '/..' . '/illuminate/collections',
         ),
         'Illuminate\\Contracts\\' => 
         array (
@@ -677,6 +674,14 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
         'DirectoryTree\\ImapEngine\\' => 
         array (
             0 => __DIR__ . '/..' . '/directorytree/imapengine/src',
+        ),
+        'DevTheorem\\Handlebars\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/devtheorem/php-handlebars/src',
+        ),
+        'DevTheorem\\HandlebarsParser\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/devtheorem/php-handlebars-parser/src',
         ),
         'DI\\' => 
         array (
@@ -848,10 +853,10 @@ class ComposerStaticInitec45187cd1774562b435c8a589aeeee6
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitec45187cd1774562b435c8a589aeeee6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitec45187cd1774562b435c8a589aeeee6::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitec45187cd1774562b435c8a589aeeee6::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitec45187cd1774562b435c8a589aeeee6::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc4971184fe7b94063ee84e91227012bc::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc4971184fe7b94063ee84e91227012bc::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc4971184fe7b94063ee84e91227012bc::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc4971184fe7b94063ee84e91227012bc::$classMap;
 
         }, null, ClassLoader::class);
     }

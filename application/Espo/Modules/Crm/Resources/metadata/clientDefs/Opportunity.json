@@ -99,6 +99,6 @@
             "selectHandler": "handlers/select-related/same-account-many"
         }
     },
-   "color": "#9fc77e",
+   "color": "#71ca7f",
    "iconClass": "fas fa-dollar-sign"
 }

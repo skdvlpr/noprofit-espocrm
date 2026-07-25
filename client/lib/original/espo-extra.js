@@ -86,6 +86,7 @@ define("views/email-account/record/detail", ["exports", "views/record/detail"], 
    ************************************************************************/
 
   class _default extends _detail.default {
+    hasModifyDetailLayout = true;
     setup() {
       super.setup();
       this.setupFieldsBehaviour();
@@ -893,8 +894,9 @@ define("views/import/step2", ["exports", "view", "ui/select"], function (_export
       selectList.forEach(select => _select.default.init(select));
     }
     resetFieldFilterQuickSearch() {
-      this.$fieldQuickSearch.val('');
-      this.$defaultFieldList.find('li.item').removeClass('hidden');
+      var _this$$fieldQuickSear, _this$$defaultFieldLi;
+      (_this$$fieldQuickSear = this.$fieldQuickSearch) === null || _this$$fieldQuickSear === void 0 || _this$$fieldQuickSear.val('');
+      (_this$$defaultFieldLi = this.$defaultFieldList) === null || _this$$defaultFieldLi === void 0 || (_this$$defaultFieldLi = _this$$defaultFieldLi.find('li.item')) === null || _this$$defaultFieldLi === void 0 || _this$$defaultFieldLi.removeClass('hidden');
     }
     initQuickSearchUi() {
       this.$addFieldButton.parent().on('show.bs.dropdown', () => {
@@ -1694,6 +1696,10 @@ define("views/import/step1", ["exports", "view", "model", "intl-tel-input-global
       const $container = $('#import-preview');
       $container.empty().append($table);
     }
+
+    /**
+     * @todo Use a better alternative that can parse double quotes.
+     */
     csvToArray(strData, strDelimiter, strQualifier) {
       strDelimiter = strDelimiter || ',';
       strQualifier = strQualifier || '\"';
@@ -1834,7 +1840,7 @@ define("views/import/list", ["exports", "views/list"], function (_exports, _list
     setup() {
       super.setup();
       this.menu.buttons.unshift({
-        iconHtml: '<span class="fas fa-plus fa-sm"></span>',
+        iconClass: 'fas fa-plus fa-sm',
         text: this.translate('New Import', 'labels', 'Import'),
         link: '#Import',
         acl: 'edit'
@@ -3201,6 +3207,7 @@ define("views/email-account/record/edit", ["exports", "views/record/edit", "view
    ************************************************************************/
 
   class _default extends _edit.default {
+    hasModifyDetailLayout = true;
     setup() {
       super.setup();
       _detail.default.prototype.setupFieldsBehaviour.call(this);

@@ -3,6 +3,7 @@
 namespace DirectoryTree\ImapEngine;
 
 use DirectoryTree\ImapEngine\Connection\ImapQueryBuilder;
+use DirectoryTree\ImapEngine\Enums\ImapSortKey;
 use DirectoryTree\ImapEngine\Support\ForwardsCalls;
 use Illuminate\Support\Traits\Conditionable;
 
@@ -46,6 +47,11 @@ trait QueriesMessages
     protected bool $fetchSize = false;
 
     /**
+     * Whether to fetch the message body structure.
+     */
+    protected bool $fetchBodyStructure = false;
+
+    /**
      * The fetch order.
      *
      * @var 'asc'|'desc'
@@ -61,6 +67,18 @@ trait QueriesMessages
      * The methods that should be returned from query builder.
      */
     protected array $passthru = ['toimap', 'isempty'];
+
+    /**
+     * The sort key for server-side sorting (RFC 5256).
+     */
+    protected ?ImapSortKey $sortKey = null;
+
+    /**
+     * The sort direction for server-side sorting.
+     *
+     * @var 'asc'|'desc'
+     */
+    protected string $sortDirection = 'asc';
 
     /**
      * Handle dynamic method calls into the query builder.
@@ -181,6 +199,14 @@ trait QueriesMessages
     /**
      * {@inheritDoc}
      */
+    public function isFetchingBodyStructure(): bool
+    {
+        return $this->fetchBodyStructure;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function withFlags(): MessageQueryInterface
     {
         return $this->setFetchFlags(true);
@@ -213,6 +239,14 @@ trait QueriesMessages
     /**
      * {@inheritDoc}
      */
+    public function withBodyStructure(): MessageQueryInterface
+    {
+        return $this->setFetchBodyStructure(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function withoutBody(): MessageQueryInterface
     {
         return $this->setFetchBody(false);
@@ -240,6 +274,14 @@ trait QueriesMessages
     public function withoutSize(): MessageQueryInterface
     {
         return $this->setFetchSize(false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withoutBodyStructure(): MessageQueryInterface
+    {
+        return $this->setFetchBodyStructure(false);
     }
 
     /**
@@ -278,6 +320,16 @@ trait QueriesMessages
     protected function setFetchSize(bool $fetchSize): MessageQueryInterface
     {
         $this->fetchSize = $fetchSize;
+
+        return $this;
+    }
+
+    /**
+     * Set whether to fetch the body structure.
+     */
+    protected function setFetchBodyStructure(bool $fetchBodyStructure): MessageQueryInterface
+    {
+        $this->fetchBodyStructure = $fetchBodyStructure;
 
         return $this;
     }
@@ -332,5 +384,65 @@ trait QueriesMessages
     public function newest(): MessageQueryInterface
     {
         return $this->setFetchOrder('desc');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setSortKey(ImapSortKey|string|null $key): MessageQueryInterface
+    {
+        if (is_string($key)) {
+            $key = ImapSortKey::from(strtoupper($key));
+        }
+
+        $this->sortKey = $key;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSortKey(): ?ImapSortKey
+    {
+        return $this->sortKey;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setSortDirection(string $direction): MessageQueryInterface
+    {
+        $direction = strtolower($direction);
+
+        if (in_array($direction, ['asc', 'desc'])) {
+            $this->sortDirection = $direction;
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSortDirection(): string
+    {
+        return $this->sortDirection;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sortBy(ImapSortKey|string $key, string $direction = 'asc'): MessageQueryInterface
+    {
+        return $this->setSortKey($key)->setSortDirection($direction);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function sortByDesc(ImapSortKey|string $key): MessageQueryInterface
+    {
+        return $this->sortBy($key, 'desc');
     }
 }

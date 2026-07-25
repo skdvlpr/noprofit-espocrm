@@ -174,6 +174,14 @@ class ImapQueryBuilder
     }
 
     /**
+     * Add a where "UNKEYWORD" clause to the query.
+     */
+    public function unkeyword(string $value): static
+    {
+        return $this->where(ImapSearchKey::Unkeyword, $value);
+    }
+
+    /**
      * Add a where "ON" clause to the query.
      */
     public function on(mixed $date): static
@@ -200,6 +208,36 @@ class ImapQueryBuilder
     {
         return $this->where(ImapSearchKey::Before, new RawQueryValue(
             $this->parseDate($value)->format($this->dateFormat)
+        ));
+    }
+
+    /**
+     * Add a where "SENTON" clause to the query.
+     */
+    public function sentOn(mixed $date): static
+    {
+        return $this->where(ImapSearchKey::SentOn, new RawQueryValue(
+            $this->parseDate($date)->format($this->dateFormat)
+        ));
+    }
+
+    /**
+     * Add a where "SENTSINCE" clause to the query.
+     */
+    public function sentSince(mixed $date): static
+    {
+        return $this->where(ImapSearchKey::SentSince, new RawQueryValue(
+            $this->parseDate($date)->format($this->dateFormat)
+        ));
+    }
+
+    /**
+     * Add a where "SENTBEFORE" clause to the query.
+     */
+    public function sentBefore(mixed $date): static
+    {
+        return $this->where(ImapSearchKey::SentBefore, new RawQueryValue(
+            $this->parseDate($date)->format($this->dateFormat)
         ));
     }
 
@@ -233,6 +271,22 @@ class ImapQueryBuilder
     public function uid(int|string|array $from, int|float|null $to = null): static
     {
         return $this->where(ImapSearchKey::Uid, new RawQueryValue(Str::set($from, $to)));
+    }
+
+    /**
+     * Add a where "LARGER" clause to the query.
+     */
+    public function larger(int $bytes): static
+    {
+        return $this->where(ImapSearchKey::Larger, new RawQueryValue($bytes));
+    }
+
+    /**
+     * Add a where "SMALLER" clause to the query.
+     */
+    public function smaller(int $bytes): static
+    {
+        return $this->where(ImapSearchKey::Smaller, new RawQueryValue($bytes));
     }
 
     /**

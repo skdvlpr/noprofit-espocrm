@@ -7,7 +7,7 @@ use BadMethodCallException;
 
 class FileMessage implements MessageInterface
 {
-    use HasFlags, HasParsedMessage;
+    use HasFlags, HasMessageAccessors, HasParsedMessage;
 
     /**
      * Constructor.
@@ -66,9 +66,33 @@ class FileMessage implements MessageInterface
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function bodyStructure(): ?BodyStructureCollection
+    {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasBodyStructure(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bodyPart(string $partNumber, bool $peek = true): ?string
+    {
+        throw new BadMethodCallException('FileMessage does not support fetching body parts');
+    }
+
+    /**
      * Determine if the message is empty.
      */
-    protected function isEmpty(): bool
+    public function isEmpty(): bool
     {
         return empty($this->contents);
     }

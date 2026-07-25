@@ -150,6 +150,8 @@ class Image implements EntryPoint
             $response->setHeader('Content-Type', $fileType);
         }
 
+        $fileName = str_replace("\"", "\\\"", $fileName ?? '');
+
         $response
             ->setHeader('Content-Disposition', 'inline;filename="' . $fileName . '"')
             ->setHeader('Content-Length', (string) $fileSize)

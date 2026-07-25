@@ -1,24 +1,20 @@
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 var EspoFunnel = {};
 window.EspoFunnel = EspoFunnel;
 (function (EspoFunnel) {
   EspoFunnel.Funnel = /*#__PURE__*/function () {
     function Funnel(container, params, dataList) {
       _classCallCheck(this, Funnel);
-
       this.params = Object.assign({}, params || {});
       this.dataList = dataList || [];
       this.element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
       if (container) {
         container.appendChild(this.element);
       }
-
       this.trapElementList = [];
       this.element.setAttribute('width', '100%');
       this.element.setAttribute('height', '100%');
@@ -34,29 +30,23 @@ window.EspoFunnel = EspoFunnel;
         tooltipStyleString: 'display:block;position:absolute;white-space:nowrap;',
         callbacks: {}
       };
-
       for (var param in defaultParams) {
         if (param in this.params) {
           continue;
         }
-
         this.params[param] = defaultParams[param];
       }
-
       this.draw();
     }
-
-    _createClass(Funnel, [{
+    return _createClass(Funnel, [{
       key: "getMaxValue",
       value: function getMaxValue() {
         var maxValue = 0;
-
         for (var item of this.dataList) {
           if (item.value > maxValue) {
             maxValue = item.value;
           }
         }
-
         return maxValue;
       }
     }, {
@@ -86,14 +76,12 @@ window.EspoFunnel = EspoFunnel;
           var halfTopWidth = value / 2 * ratio;
           var iTop = top + itemHeight * i + gapWidth * i;
           var iBottom = iTop + itemHeight;
-
           if (i === this.dataList.length - 1) {
             var nextValue = value;
           } else {
             var nextItem = this.dataList[i + 1];
             var nextValue = nextItem.value;
           }
-
           var halfBottomWidth = nextValue / 2 * ratio;
           this.positionList.push([iTop, iBottom, centerX, halfTopWidth, halfBottomWidth]);
           var trapElement = this.drawTrapElement(iTop, iBottom, centerX, halfTopWidth, halfBottomWidth, this.getItemColor(i));
@@ -132,11 +120,9 @@ window.EspoFunnel = EspoFunnel;
         element.setAttribute('style', style);
         element.setAttribute('class', tooltipClassName);
         var c = this.params.callbacks.tooltipHtml;
-
         if (!c) {
           return;
         }
-
         var html = c(index);
         var pos = this.positionList[index];
         var left = pos[2] + pos[3];
@@ -152,11 +138,9 @@ window.EspoFunnel = EspoFunnel;
         element.style.top = top + 'px';
         element.style.left = left + 'px';
         element.style.pointerEvents = 'none';
-
         if (toLeft) {
           element.style.transform = 'translate(-100%, 0)';
         }
-
         this.tooltipElement = element;
         document.body.appendChild(element);
       }
@@ -169,22 +153,18 @@ window.EspoFunnel = EspoFunnel;
       key: "outlineItem",
       value: function outlineItem(index) {
         var element = this.trapElementList[index];
-
         if (!element) {
           return;
         }
-
         element.setAttribute('stroke', this.params.outlineColor);
       }
     }, {
       key: "cancelOutlineItem",
       value: function cancelOutlineItem(index) {
         var element = this.trapElementList[index];
-
         if (!element) {
           return;
         }
-
         element.setAttribute('stroke', this.getItemColor(index));
       }
     }, {
@@ -203,12 +183,10 @@ window.EspoFunnel = EspoFunnel;
             });
           }
         }.bind(this);
-
         element.onmouseover = function (e) {
           this.outlineItem(i);
           if (this.params.showTooltip) this.showTooltip(i);
         }.bind(this);
-
         element.onmouseout = function (e) {
           this.cancelOutlineItem(i);
           if (this.params.showTooltip) this.hideTooltip(i);
@@ -218,16 +196,12 @@ window.EspoFunnel = EspoFunnel;
       key: "triggerEvent",
       value: function triggerEvent(name, o) {
         var c = this.params.events[name];
-
         if (!c) {
           return;
         }
-
         c.call(this, o);
       }
     }]);
-
-    return Funnel;
   }();
 }).call(this, EspoFunnel);
 

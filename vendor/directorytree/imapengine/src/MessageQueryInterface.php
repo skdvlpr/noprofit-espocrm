@@ -2,12 +2,15 @@
 
 namespace DirectoryTree\ImapEngine;
 
+use BackedEnum;
 use DirectoryTree\ImapEngine\Collections\MessageCollection;
+use DirectoryTree\ImapEngine\Connection\ImapQueryBuilder;
 use DirectoryTree\ImapEngine\Enums\ImapFetchIdentifier;
+use DirectoryTree\ImapEngine\Enums\ImapSortKey;
 use DirectoryTree\ImapEngine\Pagination\LengthAwarePaginator;
 
 /**
- * @mixin \DirectoryTree\ImapEngine\Connection\ImapQueryBuilder
+ * @mixin ImapQueryBuilder
  */
 interface MessageQueryInterface
 {
@@ -67,6 +70,11 @@ interface MessageQueryInterface
     public function isFetchingSize(): bool;
 
     /**
+     * Determine if the body structure of messages is being fetched.
+     */
+    public function isFetchingBodyStructure(): bool;
+
+    /**
      * Fetch the flags of messages.
      */
     public function withFlags(): MessageQueryInterface;
@@ -87,6 +95,11 @@ interface MessageQueryInterface
     public function withSize(): MessageQueryInterface;
 
     /**
+     * Fetch the body structure of messages.
+     */
+    public function withBodyStructure(): MessageQueryInterface;
+
+    /**
      * Don't fetch the body of messages.
      */
     public function withoutBody(): MessageQueryInterface;
@@ -105,6 +118,11 @@ interface MessageQueryInterface
      * Don't fetch the size of messages.
      */
     public function withoutSize(): MessageQueryInterface;
+
+    /**
+     * Don't fetch the body structure of messages.
+     */
+    public function withoutBodyStructure(): MessageQueryInterface;
 
     /**
      * Set the fetch order.
@@ -135,6 +153,36 @@ interface MessageQueryInterface
      * Set the fetch order to show newest messages first (descending).
      */
     public function newest(): MessageQueryInterface;
+
+    /**
+     * Set the sort key for server-side sorting (RFC 5256).
+     */
+    public function setSortKey(ImapSortKey|string|null $key): MessageQueryInterface;
+
+    /**
+     * Get the sort key for server-side sorting.
+     */
+    public function getSortKey(): ?ImapSortKey;
+
+    /**
+     * Set the sort direction for server-side sorting.
+     */
+    public function setSortDirection(string $direction): MessageQueryInterface;
+
+    /**
+     * Get the sort direction for server-side sorting.
+     */
+    public function getSortDirection(): string;
+
+    /**
+     * Sort messages by a field using server-side sorting (RFC 5256).
+     */
+    public function sortBy(ImapSortKey|string $key, string $direction = 'asc'): MessageQueryInterface;
+
+    /**
+     * Sort messages by a field in descending order using server-side sorting.
+     */
+    public function sortByDesc(ImapSortKey|string $key): MessageQueryInterface;
 
     /**
      * Count all available messages matching the current search criteria.
@@ -190,4 +238,61 @@ interface MessageQueryInterface
      * Destroy the given messages.
      */
     public function destroy(array|int $uids, bool $expunge = false): void;
+
+    /**
+     * Add or remove a flag from all messages matching the current query.
+     *
+     * @param  string  $operation  '+'|'-'
+     * @return int The number of messages affected.
+     */
+    public function flag(BackedEnum|string $flag, string $operation, bool $expunge = false): int;
+
+    /**
+     * Mark all messages matching the current query as read.
+     *
+     * @return int The number of messages affected.
+     */
+    public function markRead(): int;
+
+    /**
+     * Mark all messages matching the current query as unread.
+     *
+     * @return int The number of messages affected.
+     */
+    public function markUnread(): int;
+
+    /**
+     * Mark all messages matching the current query as flagged.
+     *
+     * @return int The number of messages affected.
+     */
+    public function markFlagged(): int;
+
+    /**
+     * Unmark all messages matching the current query as flagged.
+     *
+     * @return int The number of messages affected.
+     */
+    public function unmarkFlagged(): int;
+
+    /**
+     * Delete all messages matching the current query.
+     *
+     * @return int The number of messages affected.
+     */
+    public function delete(bool $expunge = false): int;
+
+    /**
+     * Move all messages matching the current query to the given folder.
+     *
+     * @return int The number of messages affected.
+     */
+    public function move(string $folder, bool $expunge = false): int;
+
+    /**
+     * Copy all messages matching the current query to the given folder.
+     *
+     * @return int The number of messages affected.
+     */
+    public function copy(string $folder): int;
 }

@@ -902,6 +902,18 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
     type;
 
     /**
+     * @private
+     * @type {string|null}
+     */
+    foreignType = null;
+
+    /**
+     * @private
+     * @type {string|null}
+     */
+    foreignEntityType;
+
+    /**
      * @param {{
      *     entityType: string,
      *     link: string,
@@ -913,10 +925,17 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
     }
     setup() {
       this.headerText = this.translate('Parameters', 'labels', 'EntityManager') + ' · ' + this.translate(this.props.entityType, 'scopeNames') + ' · ' + this.translate(this.props.link, 'links', this.props.entityType);
+      this.systemEntityTypeList = ['User', 'Team'];
 
-      /** @type {{type: string, isCustom: boolean}} */
+      /** @type {{type: string, isCustom?: boolean, entity?: string, foreign?: string|null}} */
       const defs = this.getMetadata().get(`entityDefs.${this.props.entityType}.links.${this.props.link}`) || {};
       this.type = defs.type;
+      const foreignEntityType = defs.entity ?? null;
+      const foreign = defs.foreign;
+      this.foreignEntityType = foreignEntityType;
+      if (foreignEntityType && foreign) {
+        this.foreignType = this.getMetadata().get(`entityDefs.${foreignEntityType}.links.${foreign}.type`);
+      }
       this.buttonList = [{
         name: 'save',
         style: 'danger',
@@ -946,14 +965,27 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
                 tooltip: 'EntityManager.linkParamReadOnly'
               }
             })
+          }, false], [{
+            view: new _bool.default({
+              name: 'cascadeRemoval',
+              labelText: this.translate('cascadeRemoval', 'fields', 'Admin'),
+              params: {
+                tooltip: 'EntityManager.linkParamCascadeRemoval'
+              }
+            })
           }, false]]
         }]
       });
-      if (!this.hasReadOnly()) {
-        this.recordView.hideField('readOnly');
-        this.recordView.setFieldReadOnly('readOnly');
-      }
-      this.assignView('record', this.recordView, '.record');
+      this.assignView('record', this.recordView).then(() => {
+        if (!this.hasReadOnly()) {
+          this.recordView.hideField('readOnly');
+          this.recordView.setFieldReadOnly('readOnly');
+        }
+        if (!this.hasCascadeRemoval()) {
+          this.recordView.hideField('cascadeRemoval');
+          this.recordView.setFieldReadOnly('cascadeRemoval');
+        }
+      });
     }
 
     /**
@@ -966,13 +998,28 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
 
     /**
      * @private
+     * @return {boolean}
+     */
+    hasCascadeRemoval() {
+      if (!this.foreignEntityType) {
+        return false;
+      }
+      if (!this.getMetadata().get(`scopes.${this.foreignEntityType}.object`) || this.systemEntityTypeList.includes(this.foreignEntityType)) {
+        return false;
+      }
+      return ['hasChildren', 'hasOne'].includes(this.type) || this.type === 'belongsTo' && this.foreignType === 'hasOne' || this.type === 'hasMany' && this.foreignType === 'belongsTo';
+    }
+
+    /**
+     * @private
      * @return {Record}
      */
     getParamsFromMetadata() {
       /** @type {Record} */
       const defs = this.getMetadata().get(`entityDefs.${this.props.entityType}.links.${this.props.link}`) || {};
       return {
-        readOnly: defs.readOnly || false
+        readOnly: defs.readOnly ?? false,
+        cascadeRemoval: defs.cascadeRemoval ?? false
       };
     }
 
@@ -1004,6 +1051,9 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
       const params = {};
       if (this.hasReadOnly()) {
         params.readOnly = this.formModel.attributes.readOnly;
+      }
+      if (this.hasCascadeRemoval()) {
+        params.cascadeRemoval = this.formModel.attributes.cascadeRemoval;
       }
       try {
         await Espo.Ajax.postRequest('EntityManager/action/updateLinkParams', {
@@ -1053,7 +1103,7 @@ define("views/admin/link-manager/modals/edit-params", ["exports", "views/modal",
   _exports.default = LinkManagerEditParamsModalView;
 });
 
-define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], function (_exports, _base) {
+define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base", "view"], function (_exports, _base, _view) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -1061,6 +1111,7 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
   });
   _exports.default = void 0;
   _base = _interopRequireDefault(_base);
+  _view = _interopRequireDefault(_view);
   function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
   /************************************************************************
    * This file is part of EspoCRM.
@@ -1115,8 +1166,8 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
     }
     additionalEvents = {
       /** @this LayoutGridView */
-      'click #layout a[data-action="addPanel"]': function () {
-        this.addPanel();
+      'click #layout a[data-action="addPanel"]': async function () {
+        await this.addPanel();
         this.setIsChanged();
         this.makeDraggable();
       },
@@ -1270,7 +1321,11 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
     onRemove() {
       if (this.$style) this.$style.remove();
     }
-    addPanel() {
+
+    /**
+     * @private
+     */
+    async addPanel() {
       this.lastPanelNumber++;
       const number = this.lastPanelNumber;
       const data = {
@@ -1290,8 +1345,11 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
       const $li = $('<li class="panel-layout"></li>');
       $li.attr('data-number', number);
       this.$el.find('ul.panels').append($li);
-      this.createPanelView(data, true, view => {
-        view.render();
+      return new Promise(resolve => {
+        this.createPanelView(data, true, view => {
+          view.render();
+          resolve();
+        });
       });
     }
     getPanelDataList() {
@@ -1326,7 +1384,14 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
         this.panelsData[i.toString()] = panel;
       });
     }
-    createPanelView(data, empty, callback) {
+
+    /**
+     *
+     * @param {Record<string, any>} data
+     * @param {boolean} empty
+     * @param {(View) => void} [callback]
+     */
+    async createPanelView(data, empty, callback) {
       data.label = data.label || '';
       data.isCustomLabel = false;
       if (data.customLabel) {
@@ -1352,21 +1417,15 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
           }
         }
       });
-      this.createView('panel-' + data.number, 'view', {
-        selector: 'li.panel-layout[data-number="' + data.number + '"]',
-        template: 'admin/layouts/grid-panel',
-        data: () => {
-          const o = Espo.Utils.clone(data);
-          o.dataAttributeList = [];
-          this.panelDataAttributeList.forEach(item => {
-            if (item === 'panelName') {
-              return;
-            }
-            o.dataAttributeList.push(item);
-          });
-          return o;
-        }
-      }, callback);
+      const view = new PanelView({
+        data: data,
+        panelDataAttributeList: this.panelDataAttributeList
+      });
+      await this.assignView(`panel-${data.number}`, view, `li.panel-layout[data-number="${data.number}"]`);
+      if (!callback) {
+        return;
+      }
+      callback(view);
     }
     makeDraggable() {
       const self = this;
@@ -1517,6 +1576,106 @@ define("views/admin/layouts/grid", ["exports", "views/admin/layouts/base"], func
     }
   }
   var _default = _exports.default = LayoutGridView;
+  class PanelView extends _view.default {
+    // language=Handlebars
+    templateContent = `
+        <header data-name="{{name}}">
+            <a
+                role="button"
+                tabindex="0"
+                data-action="edit-panel-label"
+                class="edit-panel-label"
+            ><i class="fas fa-pencil-alt fa-sm"></i></a>
+            <label
+                data-is-custom="{{#if isCustomLabel}}true{{/if}}"
+                data-label="{{label}}"
+                class="panel-label"
+            >{{labelTranslated}}</label>&nbsp;
+            <a
+                role="button"
+                tabindex="0"
+                style="float: right;"
+                data-action="removePanel"
+                class="remove-panel"
+                data-number="{{number}}"
+            ><i class="fas fa-times"></i></a>
+        </header>
+        <ul class="rows">
+        {{#each rows}}
+            <li data-cell-count="{{./this.length}}">
+                <div class="row-actions clear-fix">
+                    <a
+                        role="button"
+                        tabindex="0"
+                        data-action="removeRow"
+                        class="remove-row"
+                    ><i class="fas fa-times"></i></a>
+                    <a
+                        role="button"
+                        tabindex="0"
+                        data-action="plusCell"
+                        class="add-cell"
+                    ><i class="fas fa-plus"></i></a>
+                </div>
+                <ul class="cells" data-cell-count="{{./this.length}}">
+                {{#each this}}
+                    {{#if this}}
+                    <li
+                        class="cell"
+                        data-name="{{name}}"
+                        {{#if hasCustomLabel}}
+                        data-custom-label="{{customLabel}}"
+                        {{/if}}
+                        data-no-label="{{noLabel}}"
+                        title="{{label}}"
+                    >
+                        <div class="left" style="width: calc(100% - var(--14px));">{{label}}</div>
+                        <div class="right" style="width: var(--14px);">
+                            <a
+                                role="button"
+                                tabindex="0"
+                                data-action="removeField"
+                                class="remove-field"
+                            ><i class="fas fa-times"></i></a>
+                        </div>
+                    </li>
+                    {{else}}
+                    <li class="empty cell">
+                        <div class="right" style="width: var(--14px);">
+                            <a
+                                role="button"
+                                tabindex="0"
+                                data-action="minusCell"
+                                class="remove-field"
+                            ><i class="fas fa-minus"></i></a>
+                        </div>
+                    </li>
+                    {{/if}}
+                {{/each}}
+                </ul>
+            </li>
+        {{/each}}
+        </ul>
+        <div>
+            <a
+                role="button"
+                tabindex="0"
+                data-action="addRow"
+            ><i class="fas fa-plus"></i></a>
+        </div>
+    `;
+    data() {
+      const o = Espo.Utils.clone(this.options.data);
+      o.dataAttributeList = [];
+      this.options.panelDataAttributeList.forEach(item => {
+        if (item === 'panelName') {
+          return;
+        }
+        o.dataAttributeList.push(item);
+      });
+      return o;
+    }
+  }
 });
 
 define("views/admin/layouts/default-page", ["exports", "view"], function (_exports, _view) {
@@ -2179,7 +2338,9 @@ define("views/admin/dynamic-logic/conditions/field-types/base", ["exports", "vie
       this.fieldType = this.options.fieldType;
       this.itemData = this.options.itemData;
       this.additionalData = this.itemData.data || {};
-      this.typeList = this.getMetadata().get(`clientDefs.DynamicLogic.fieldTypes.${this.fieldType}.typeList`);
+
+      // Warning. The same data is retrieved in group-base.
+      this.typeList = this.getMetadata().get(`entityDefs.${this.scope}.fields.${this.field}.dynamicLogicConditionTypeList`) ?? this.getMetadata().get(`clientDefs.DynamicLogic.fieldTypes.${this.fieldType}.typeList`);
       this.baseModel = new _model.default();
       this.wait(true);
       this.createModel().then(model => {
@@ -3655,6 +3816,7 @@ define("views/inbound-email/record/detail", ["exports", "views/record/detail"], 
    ************************************************************************/
 
   class _default extends _detail.default {
+    hasModifyDetailLayout = true;
     setup() {
       super.setup();
       this.setupFieldsBehaviour();
@@ -3930,9 +4092,15 @@ define("views/admin/index", ["exports", "view"], function (_exports, _view) {
         panelItem.name = name;
         panelItem.itemList = panelItem.itemList || [];
         panelItem.label = this.translate(panelItem.label, 'labels', 'Admin');
+        if (panelItem.labelTranslation) {
+          panelItem.label = this.getLanguage().translatePath(panelItem.labelTranslation);
+        }
         if (panelItem.itemList) {
           panelItem.itemList.forEach(item => {
             item.label = this.translate(item.label, 'labels', 'Admin');
+            if (item.labelTranslation) {
+              item.label = this.getLanguage().translatePath(item.labelTranslation);
+            }
             if (item.description) {
               item.keywords = (this.getLanguage().get('Admin', 'keywords', item.description) || '').split(',');
               item.keywords = item.keywords.map(keyword => keyword.trim().toLowerCase());
@@ -4056,6 +4224,90 @@ define("views/admin/index", ["exports", "view"], function (_exports, _view) {
     }
   }
   var _default = _exports.default = AdminIndexView;
+});
+
+define("views/admin/pipelines/list-for-entity-type", ["exports", "views/list"], function (_exports, _list) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _list = _interopRequireDefault(_list);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class AdminPipelinesListForEntityType extends _list.default {
+    searchPanel = false;
+    keepCurrentRootUrl = true;
+
+    /**
+     * @private
+     * @type {string}
+     */
+    targetEntityType;
+    setup() {
+      super.setup();
+      this.targetEntityType = this.options.targetEntityType;
+    }
+    getCreateAttributes() {
+      return {
+        entityType: this.targetEntityType,
+        field: this.getMetadata().get(`scopes.${this.targetEntityType}.statusField`)
+      };
+    }
+    prepareCreateReturnDispatchParams(params) {
+      delete params.controller;
+    }
+    getHeader() {
+      return this.buildHeaderHtml([(() => {
+        const a = document.createElement('a');
+        a.textContent = this.translate('Administration');
+        a.href = '#Admin';
+        return a;
+      })(), (() => {
+        const a = document.createElement('a');
+        a.textContent = this.translate('Pipelines', 'labels', 'Admin');
+        a.href = `#Admin/pipelines`;
+        return a;
+      })(), (() => {
+        const span = document.createElement('span');
+        span.textContent = this.translate(this.targetEntityType, 'scopeNamesPlural');
+        span.title = this.translate('clickToRefresh', 'messages');
+        span.dataset.action = 'fullRefresh';
+        span.style.cursor = 'pointer';
+        span.style.userSelect = 'none';
+        return span;
+      })()]);
+    }
+  }
+  _exports.default = AdminPipelinesListForEntityType;
 });
 
 define("views/admin/link-manager/index", ["exports", "view", "views/admin/link-manager/modals/edit-params"], function (_exports, _view, _editParams) {
@@ -4212,7 +4464,7 @@ define("views/admin/link-manager/index", ["exports", "view", "views/admin/link-m
         }
         const labelEntityForeign = defs.entity ? this.getLanguage().translate(defs.entity, 'scopeNames') : undefined;
         const isRemovable = defs.isCustom;
-        const hasEditParams = defs.type === 'hasMany' || defs.type === 'hasChildren';
+        const hasEditParams = ['hasChildren', 'hasMany'].includes(defs.type) || ['oneToOneLeft', 'oneToOneRight', 'oneToMany'].includes(type);
         this.linkDataList.push({
           link: link,
           isCustom: defs.isCustom,
@@ -6059,6 +6311,8 @@ define("views/admin/entity-manager/record/edit-formula", ["exports", "views/reco
       let additionalFunctionDataList = null;
       if (this.options.type === 'beforeSaveApiScript') {
         additionalFunctionDataList = this.getRecordServiceFunctionDataList();
+      } else if (this.options.type === 'beforeSaveCustomScript') {
+        additionalFunctionDataList = this.getBeforeSaveFunctionDataList();
       }
       this.createField(this.field, 'views/fields/formula', {
         targetEntityType: this.options.targetEntityType,
@@ -6084,6 +6338,17 @@ define("views/admin/entity-manager/record/edit-formula", ["exports", "views/reco
       }, {
         name: 'recordService\\throwConflict',
         insertText: 'recordService\\throwConflict(MESSAGE)'
+      }];
+    }
+
+    /**
+     * @private
+     * @return {Record[]}
+     */
+    getBeforeSaveFunctionDataList() {
+      return [{
+        name: 'exception\\throwInvalid',
+        insertText: 'exception\\throwInvalid()'
       }];
     }
   }
@@ -6847,7 +7112,10 @@ define("views/admin/dynamic-logic/conditions/group-base", ["exports", "view"], f
       if (!this.getMetadata().get(['clientDefs', 'DynamicLogic', 'fieldTypes', fieldType])) {
         throw new Error();
       }
-      const type = this.getMetadata().get(['clientDefs', 'DynamicLogic', 'fieldTypes', fieldType, 'typeList'])[0];
+
+      // Warning. The same data is retrieved in conditions/base.
+      const typeList = this.getMetadata().get(`entityDefs.${this.scope}.fields.${field}.dynamicLogicConditionTypeList`) ?? this.getMetadata().get(`clientDefs.DynamicLogic.fieldTypes.${fieldType}.typeList`);
+      const type = typeList[0];
       const i = this.getIndexForNewItem();
       const key = this.getKey(i);
       this.addItemContainer(i);
@@ -7668,20 +7936,28 @@ define("views/templates/event/record/detail", ["exports", "views/record/detail"]
   class _default extends _detail.default {
     setup() {
       super.setup();
-      if (this.getAcl().checkModel(this.model, 'edit')) {
-        if (['Held', 'Not Held'].indexOf(this.model.get('status')) === -1) {
-          this.dropdownItemList.push({
-            html: this.translate('Set Held', 'labels', this.scope),
-            name: 'setHeld',
-            onClick: () => this.actionSetHeld()
-          });
-          this.dropdownItemList.push({
-            html: this.translate('Set Not Held', 'labels', this.scope),
-            name: 'setNotHeld',
-            onClick: () => this.actionSetNotHeld()
-          });
-        }
+
+      /** @type string[] */
+      const options = this.model.getFieldParam('status', 'options') ?? [];
+      if (options.includes('Held')) {
+        this.dropdownItemList.push({
+          labelTranslation: `${this.scope}.labels.Set Held`,
+          name: 'setHeld',
+          onClick: () => this.actionSetHeld()
+        });
       }
+      if (options.includes('Not Held')) {
+        this.dropdownItemList.push({
+          labelTranslation: `${this.scope}.labels.Set Not Held`,
+          name: 'setNotHeld',
+          onClick: () => this.actionSetNotHeld()
+        });
+      }
+      this.controlHeldButtons();
+      this.model.onSync({
+        owner: this,
+        callback: () => this.controlHeldButtons()
+      });
     }
     actionSetHeld() {
       this.model.save({
@@ -7690,8 +7966,7 @@ define("views/templates/event/record/detail", ["exports", "views/record/detail"]
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved', 'labels', 'Meeting'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
+        this.controlHeldButtons();
       });
     }
     actionSetNotHeld() {
@@ -7701,9 +7976,20 @@ define("views/templates/event/record/detail", ["exports", "views/record/detail"]
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved', 'labels', 'Meeting'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
       });
+    }
+
+    /**
+     * @private
+     */
+    controlHeldButtons() {
+      if (this.getAcl().checkModel(this.model, 'edit') && ['Held', 'Not Held'].includes(this.model.attributes.status)) {
+        this.hideActionItem('setHeld');
+        this.hideActionItem('setNotHeld');
+      } else {
+        this.showActionItem('setHeld');
+        this.showActionItem('setNotHeld');
+      }
     }
   }
   _exports.default = _default;
@@ -7931,7 +8217,10 @@ define("views/settings/modals/edit-tab-url", ["exports", "views/modal", "model"]
         }, {
           name: 'onlyAdmin',
           labelText: this.translate('onlyAdmin', 'fields', 'Admin')
-        }, false]]
+        }, {
+          name: 'openInNewTab',
+          labelText: this.translate('openInNewTab', 'fields', 'Admin')
+        }]]
       }];
       const model = this.model = new _model.default();
       model.set(this.options.itemData);
@@ -7960,6 +8249,9 @@ define("views/settings/modals/edit-tab-url", ["exports", "views/modal", "model"]
             tooltip: 'Admin.tabUrlAclScope'
           },
           onlyAdmin: {
+            type: 'bool'
+          },
+          openInNewTab: {
             type: 'bool'
           }
         }
@@ -8830,9 +9122,14 @@ define("views/settings/fields/oidc-redirect-uri", ["exports", "views/fields/varc
             <span class="none-value">{{translate 'None'}}</span>
         {{/if}}
     `;
+
+    /**
+     * @private
+     * @type {import('collection').default|null}
+     */
     portalCollection = null;
     data() {
-      const isNotEmpty = this.model.entityType !== 'AuthenticationProvider' || this.portalCollection;
+      const isNotEmpty = this.model.entityType !== 'AuthenticationProvider' || this.portalCollection && this.portalCollection.length;
       return {
         value: this.getValueForDisplay(),
         isNotEmpty: isNotEmpty
@@ -12026,6 +12323,7 @@ define("views/inbound-email/record/edit", ["exports", "views/record/edit", "view
    ************************************************************************/
 
   class _default extends _edit.default {
+    hasModifyDetailLayout = true;
     setup() {
       super.setup();
       _detail.default.prototype.setupFieldsBehaviour.call(this);
@@ -12608,6 +12906,7 @@ define("views/authentication-provider/record/edit", ["exports", "helpers/misc/au
      * @type {Helper}
      */
     helper;
+    hasModifyDetailLayout = true;
     setup() {
       this.helper = new _authenticationProvider.default(this);
       super.setup();
@@ -12674,6 +12973,7 @@ define("views/authentication-provider/record/detail", ["exports", "views/record/
      * @type {Helper}
      */
     helper;
+    hasModifyDetailLayout = true;
     setup() {
       this.helper = new _authenticationProvider.default(this);
       super.setup();
@@ -13485,6 +13785,7 @@ define("views/admin/authentication", ["exports", "views/settings/record/edit"], 
       },
       panels: {}
     };
+    hasModifyDetailLayout = true;
     setup() {
       this.methodList = [];
       const defs = this.getMetadata().get(['authenticationMethods']) || {};
@@ -14308,6 +14609,111 @@ define("views/admin/system-requirements/index", ["exports", "view", "ajax"], fun
     }
   }
   _exports.default = _default;
+});
+
+define("views/admin/pipelines/main", ["exports", "views/main"], function (_exports, _main) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _main = _interopRequireDefault(_main);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class AdminPipelinesMainView extends _main.default {
+    // language=Handlebars
+    templateContent = `
+        <div class="header page-header">{{{header}}}</div>
+        <div class="record">
+            {{#if entityTypeDataList.length}}
+                <ul class="list-group list-group-panel">
+                    {{#each entityTypeDataList}}
+                        <li class="list-group-item">
+                            <a href="{{link}}">{{label}}</a>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <div class="panel panel-info">
+                    <div class="panel-body">
+                        {{complexText noMessage}}
+                    </div>
+                </div>
+            {{/if}}
+        </div>
+    `;
+
+    /**
+     * @private
+     * @type {string[]}
+     */
+    entityTypeList;
+    data() {
+      return {
+        entityTypeDataList: this.getEntityTypeDataList(),
+        noMessage: this.translate('noPipelinesEnabled', 'messages', 'Admin')
+      };
+    }
+    setup() {
+      this.createView('header', 'views/header', {});
+      this.entityTypeList = this.getMetadata().getScopeEntityList().filter(scope => this.getMetadata().get(`scopes.${scope}.pipelines`));
+    }
+
+    /**
+     * @private
+     * @return {Record[]}
+     */
+    getEntityTypeDataList() {
+      return this.entityTypeList.map(it => {
+        return {
+          name: it,
+          label: this.translate(it, 'scopeNamesPlural'),
+          link: `#Admin/pipelines/scope=${it}`
+        };
+      });
+    }
+    getHeader() {
+      return this.buildHeaderHtml([(() => {
+        const a = document.createElement('a');
+        a.textContent = this.translate('Administration');
+        a.href = '#Admin';
+        return a;
+      })(), (() => {
+        const span = document.createElement('span');
+        span.textContent = this.translate('Pipelines', 'labels', 'Admin');
+        return span;
+      })()]);
+    }
+  }
+  _exports.default = AdminPipelinesMainView;
 });
 
 define("views/admin/panels/notifications", ["exports", "view"], function (_exports, _view) {
@@ -15230,7 +15636,9 @@ define("views/admin/link-manager/modals/edit", ["exports", "views/modal", "model
           if (statusReasonHeader) {
             console.error(statusReasonHeader);
           }
-          Espo.Ui.error(msg);
+          Espo.Ui.error(msg, {
+            closeButton: true
+          });
           xhr.errorIsHandled = true;
         }
         this.$el.find('button[data-name="save"]').removeClass('disabled').removeAttr('disabled');
@@ -16539,7 +16947,17 @@ define("views/admin/layouts/fields/width-complex", ["exports", "views/fields/bas
       return ['width', 'widthPx'];
     }
     setup() {
-      this.auxModel = new _model.default();
+      this.auxModel =
+      /**
+       * @type {
+       *     Model<{
+       *         width: number|null,
+       *         unit: string|null,
+       *         value: number|null,
+       *     }>
+       * }
+       */
+      new _model.default();
       this.syncAuxModel();
       this.listenTo(this.model, 'change', (m, /** Record */o) => {
         if (o.ui) {
@@ -16603,7 +17021,7 @@ define("views/admin/layouts/fields/width-complex", ["exports", "views/fields/bas
       const width = this.model.attributes.width;
       const widthPx = this.model.attributes.widthPx;
       const unit = width || !widthPx ? '%' : 'px';
-      this.auxModel.set({
+      this.auxModel.setMultiple({
         unit: unit,
         value: unit === 'px' ? widthPx : width
       });
@@ -18622,6 +19040,12 @@ define("views/admin/field-manager/edit", ["exports", "view", "model"], function 
      * @type {Record[]}
      */
     paramDataList;
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    isEntityTypeLockable;
     data() {
       return {
         scope: this.scope,
@@ -18678,6 +19102,7 @@ define("views/admin/field-manager/edit", ["exports", "view", "model"], function 
         }
       };
       this.entityTypeIsCustom = !!this.getMetadata().get(['scopes', this.scope, 'isCustom']);
+      this.isEntityTypeLockable = this.getMetadata().get(`scopes.${this.scope}.lockable`) === true;
       this.globalRestriction = {};
       if (!this.isNew) {
         this.model.id = this.field;
@@ -18770,6 +19195,12 @@ define("views/admin/field-manager/edit", ["exports", "view", "model"], function 
           if (this.hasInlineEditDisabled && !this.globalRestriction.readOnly) {
             this.paramList.push({
               name: 'inlineEditDisabled',
+              type: 'bool'
+            });
+          }
+          if (this.isEntityTypeLockable && !this.globalRestriction.readOnly) {
+            this.paramList.push({
+              name: 'notLockable',
               type: 'bool'
             });
           }
@@ -18933,6 +19364,19 @@ define("views/admin/field-manager/edit", ["exports", "view", "model"], function 
           scope: this.scope
         }));
         this.hasDynamicLogicPanel = true;
+      }
+      if (!defs.dynamicLogicCascadingDisabled && ['link', 'linkOne', 'linkMultiple'].includes(this.type)) {
+        const foreignScope = this.getMetadata().get(`entityDefs.${this.scope}.links.${this.field}.entity`);
+        if (foreignScope) {
+          const value = this.getMetadata().get(['logicDefs', this.scope, 'cascadingFields', this.field]);
+          this.model.set('dynamicLogicCascading', value);
+          promiseList.push(this.createFieldView(null, 'dynamicLogicCascading', null, {
+            view: 'views/admin/field-manager/fields/dynamic-logic-cascading',
+            scope: this.scope,
+            field: this.field,
+            foreignScope: foreignScope
+          }));
+        }
       }
       return Promise.all(promiseList);
     }
@@ -19459,7 +19903,11 @@ define("views/admin/field-manager/fields/options-with-style", ["exports", "views
       const data = super.fetch();
       data.style = {};
       (data.options || []).forEach(item => {
-        data.style[item] = this.optionsStyleMap[item] || null;
+        const style = this.optionsStyleMap[item];
+        if (style == null) {
+          return;
+        }
+        data.style[item] = style;
       });
       return data;
     }
@@ -19896,6 +20344,532 @@ define("views/admin/field-manager/fields/dynamic-logic-conditions", ["exports", 
     }
   }
   _exports.default = _default;
+});
+
+define("views/admin/field-manager/fields/dynamic-logic-cascading", ["exports", "views/fields/base", "view", "model", "collection", "views/modal", "views/record/edit-for-modal", "views/fields/enum", "views/fields/bool"], function (_exports, _base, _view, _model, _collection, _modal, _editForModal, _enum, _bool) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _base = _interopRequireDefault(_base);
+  _view = _interopRequireDefault(_view);
+  _model = _interopRequireDefault(_model);
+  _collection = _interopRequireDefault(_collection);
+  _modal = _interopRequireDefault(_modal);
+  _editForModal = _interopRequireDefault(_editForModal);
+  _enum = _interopRequireDefault(_enum);
+  _bool = _interopRequireDefault(_bool);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  // noinspection JSUnusedGlobalSymbols
+  class DynamicLogicCascadingFieldView extends _base.default {
+    // language=Handlebars
+    detailTemplateContent = `
+        {{#if ids.length}}
+            <table class="table" data-role="cascading-items-list">
+                {{#each ids}}
+                    <tr data-id="{{id}}"><td>{{{lookup ../this this}}}</td></div>
+                {{/each}}
+            </table>
+        {{/if}}
+
+        {{#unless ids.length}}
+            {{#if isSet}}
+                <span class="none-value">{{translate 'None'}}</span>
+            {{else}}
+                <span class="loading-value"></span>
+            {{/if}}
+        {{/unless}}
+    `;
+
+    // language=Handlebars
+    editTemplateContent = `
+        <style>
+            table[data-role="cascading-items-list"] {
+                border-top: 0;
+
+                > thead > tr > th {
+                    border-top: 0;
+                }
+
+                font-size: var(--13px);
+            }
+        </style>
+        {{#if ids.length}}
+            <table class="table" data-role="cascading-items-list">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="row small text-muted">
+                                <div class="col-md-5">{{localFieldLabel}}</div>
+                                <div class="col-md-5">{{foreignFieldLabel}}</div>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                {{#each ids}}
+                    <tr data-id="{{id}}"><td>{{{lookup ../this this}}}</td></div>
+                {{/each}}
+            </table>
+        {{/if}}
+
+        <div>
+            <button
+                class="btn btn-link btn-icon"
+                data-action="addRow"
+                title="{{translate 'Add'}}"
+            ><span class="fas fa-plus"></span></button>
+        </div>
+    `;
+
+    /**
+     * @private
+     * @type {import('collection').default}
+     */
+    itemCollection;
+
+    /**
+     * @private
+     * @type {ItemView[]}
+     */
+    itemViews;
+
+    /**
+     * @private
+     * @type {string}
+     */
+    foreignScope;
+    data() {
+      return {
+        isSet: this.subModel.has('items'),
+        ids: this.itemCollection.models.map(m => m.id),
+        localFieldLabel: this.translate('localField', 'fields', 'DynamicLogic'),
+        foreignFieldLabel: this.translate('foreignField', 'fields', 'DynamicLogic')
+      };
+    }
+
+    /**
+     * Prevents the change event from firing on sub-field change.
+     */
+    initElement() {}
+    setup() {
+      this.addActionHandler('addRow', () => this.addItem());
+      this.subModel = new _model.default();
+      this.foreignScope = this.params.foreignScope;
+      const syncModels = () => {
+        const value = this.model.attributes[this.name];
+        if (value !== undefined) {
+          const items = (value === null || value === void 0 ? void 0 : value.items) ?? [];
+          this.subModel.set('items', Espo.Utils.cloneDeep(items));
+        } else {
+          this.subModel.unset('items');
+        }
+      };
+      syncModels();
+      this.listenTo(this.model, 'change:' + this.name, (m, v, o) => {
+        if (o.fromView !== this) {
+          syncModels();
+        }
+        this.listenTo(this.subModel, 'change', (m, o) => {
+          if (o.ui) {
+            this.trigger('change');
+          }
+        });
+      });
+    }
+    async prepare() {
+      this.destroyItemViews();
+      this.itemCollection = new _collection.default();
+      const items = this.getItemsFromModel();
+      if (items === undefined) {
+        return;
+      }
+      let mode = this.mode;
+      if (mode !== 'detail' && mode !== 'edit') {
+        mode = 'detail';
+      }
+      const promiseList = [];
+      this.itemViews = [];
+      for (const [i, item] of items.entries()) {
+        const model = new _model.default({
+          ...item,
+          id: i.toString()
+        });
+        this.listenTo(model, 'change', (m, /** Record */o) => {
+          if (o.ui) {
+            this.model.setMultiple({
+              [this.name]: {
+                items: this.getItemsFromCollection()
+              }
+            }, {
+              ui: true
+            });
+          }
+        });
+        this.itemCollection.push(model);
+        const view = new ItemView({
+          model: model,
+          mode: mode,
+          onRemove: () => this.removeRow(i),
+          scope: this.params.scope,
+          foreignScope: this.foreignScope
+        });
+        this.itemViews.push(view);
+        const promise = this.assignView(view.model.id, view, `[data-id="${view.model.id}"]`);
+        promiseList.push(promise);
+      }
+      await Promise.all(promiseList);
+    }
+
+    /**
+     * @private
+     */
+    destroyItemViews() {
+      this.itemViews = [];
+      if (this.itemCollection) {
+        this.itemCollection.models.forEach(model => this.clearView(model.id));
+      }
+    }
+
+    /**
+     * @private
+     * @return {{
+     *     localField: string,
+     *     foreignField: string,
+     *     matchRequired: boolean,
+     * }[]|undefined}
+     */
+    getItemsFromModel() {
+      var _this$model$attribute;
+      return Espo.Utils.cloneDeep(((_this$model$attribute = this.model.attributes) === null || _this$model$attribute === void 0 || (_this$model$attribute = _this$model$attribute[this.name]) === null || _this$model$attribute === void 0 ? void 0 : _this$model$attribute.items) ?? undefined);
+    }
+
+    /**
+     * @private
+     * @return {{
+     *     localField: string,
+     *     foreignField: string,
+     *     matchRequired: boolean,
+     * }[]}
+     */
+    getItemsFromCollection() {
+      return this.itemCollection.models.map(item => {
+        return {
+          localField: item.attributes.localField,
+          foreignField: item.attributes.foreignField,
+          matchRequired: item.attributes.matchRequired
+        };
+      });
+    }
+
+    /**
+     * @private
+     */
+    async addItem() {
+      const view = new AddItemView({
+        scope: this.params.scope,
+        foreignScope: this.foreignScope,
+        onApply: item => this.addRow(item)
+      });
+      await this.assignView('modal', view);
+      await view.render();
+    }
+
+    /**
+     * @private
+     * @param {{
+     *     localField: string,
+     *     foreignField: string,
+     *     matchRequired: boolean,
+     * }} item
+     */
+    async addRow(item) {
+      const items = this.getItemsFromModel() ?? [];
+      items.push(Espo.Utils.cloneDeep(item));
+      this.model.setMultiple({
+        [this.name]: {
+          items
+        }
+      }, {
+        ui: true
+      });
+      await this.prepare();
+      await this.reRender();
+    }
+
+    /**
+     * @private
+     * @param {number} index
+     */
+    async removeRow(index) {
+      const items = this.getItemsFromModel() || [];
+      items.splice(index, 1);
+      this.model.setMultiple({
+        [this.name]: {
+          items
+        }
+      }, {
+        ui: true
+      });
+      await this.prepare();
+      await this.reRender();
+    }
+    fetch() {
+      if (!this.itemCollection) {
+        return {
+          [this.name]: null
+        };
+      }
+      const items = this.getItemsFromCollection().map(item => {
+        return {
+          localField: item.localField,
+          foreignField: item.foreignField,
+          matchRequired: item.matchRequired
+        };
+      });
+      if (!items.length) {
+        return {
+          [this.name]: null
+        };
+      }
+      return {
+        [this.name]: {
+          items
+        }
+      };
+    }
+  }
+  _exports.default = DynamicLogicCascadingFieldView;
+  class ItemView extends _view.default {
+    // language=Handlebars
+    templateContent = `
+        <style></style>
+        <div class="row">
+            <div class=" {{columnClassName}} ">{{localField}}</div>
+            <div class=" {{columnClassName}} ">{{foreignField}}</div>
+            <div class="col-md-1 ">{{#if matchRequired}}*{{/if}}</div>
+            {{#if isEditMode}}
+                <div class="col-md-1" style="text-align: center;">
+                    <a
+                        role="button"
+                        data-action="removeRow"
+                        class="pull-right"
+                        title="{{translate 'Remove'}}"
+                    ><span class="fas fa-times"></span></a>
+                </div>
+            {{/if}}
+        </div>
+    `;
+
+    /**
+     * @type {import('model').default}
+     */
+    model;
+
+    /**
+     * @type {'detail'|'edit'}
+     */
+    mode;
+
+    /**
+     * @param {{
+     *     model: import('model').default,
+     *     mode: 'detail'|'edit',
+     *     onRemove: function(),
+     *     scope: string,
+     *     foreignScope: string,
+     * }} options
+     */
+    constructor(options) {
+      super();
+      this.model = options.model;
+      this.mode = options.mode;
+      this.options = options;
+    }
+    data() {
+      return {
+        isEditMode: this.mode === 'edit',
+        columnClassName: this.mode === 'edit' ? 'col-md-5' : 'col-md-5',
+        localField: this.translate(this.model.attributes.localField, 'fields', this.options.scope),
+        foreignField: this.translate(this.model.attributes.foreignField, 'fields', this.options.foreignScope),
+        matchRequired: this.model.attributes.matchRequired
+      };
+    }
+    setup() {
+      this.addActionHandler('removeRow', () => this.options.onRemove());
+    }
+  }
+  class AddItemView extends _modal.default {
+    templateContent = `
+        <div class="record no-side-margin">{{{record}}}</div>
+    `;
+
+    /**
+     * @param {{
+     *     scope: string,
+     *     foreignScope: string,
+     *     onApply: function({
+     *         localField: string,
+     *         foreignField: string,
+     *         matchRequired: boolean,
+     *     }),
+     * }} options
+     */
+    constructor(options) {
+      super(options);
+      this.options = options;
+    }
+    setup() {
+      super.setup();
+      this.headerText = this.translate('Add');
+      this.buttonList = [{
+        name: 'apply',
+        label: 'Apply',
+        style: 'primary',
+        onClick: () => apply()
+      }, {
+        name: 'cancel',
+        label: 'Cancel',
+        onClick: () => this.close()
+      }];
+      const model = new _model.default({
+        localField: null,
+        foreignField: null,
+        matchRequired: false
+      });
+      const scope = this.options.scope;
+      const foreignScope = this.options.foreignScope;
+      const localFieldDefs = this.getMetadata().get(`entityDefs.${scope}.fields`) ?? {};
+      const foreignFieldDefs = this.getMetadata().get(`entityDefs.${foreignScope}.fields`) ?? {};
+      const localFields = Object.keys(localFieldDefs).filter(field => {
+        /** @type {Record} */
+        const defs = localFieldDefs[field];
+        if (defs.utility || defs.disabled) {
+          return false;
+        }
+        if (!['link', 'linkParent', 'linkOne', 'linkMultiple'].includes(defs.type)) {
+          return false;
+        }
+        return true;
+      });
+      const foreignFields = Object.keys(foreignFieldDefs).filter(field => {
+        /** @type {Record} */
+        const defs = foreignFieldDefs[field];
+        if (defs.utility || defs.disabled) {
+          return false;
+        }
+        if (!['link', 'linkOne', 'linkMultiple'].includes(defs.type)) {
+          return false;
+        }
+        return true;
+      });
+      localFields.unshift('');
+      foreignFields.unshift('');
+      const apply = () => {
+        if (recordView.validate()) {
+          return;
+        }
+        this.options.onApply({
+          localField: model.attributes.localField,
+          foreignField: model.attributes.foreignField,
+          matchRequired: model.attributes.matchRequired
+        });
+        this.close();
+      };
+      const recordView = new _editForModal.default({
+        model,
+        detailLayout: [{
+          rows: [[{
+            view: new _enum.default({
+              name: 'localField',
+              params: {
+                required: true,
+                options: localFields,
+                isSorted: true
+              },
+              translatedOptions: localFields.reduce((o, it) => {
+                o[it] = this.translate(it, 'fields', this.options.scope);
+                return o;
+              }, {}),
+              labelText: this.translate('localField', 'fields', 'DynamicLogic')
+            })
+          }, {
+            view: new _enum.default({
+              name: 'foreignField',
+              params: {
+                required: true
+              },
+              translatedOptions: foreignFields.reduce((o, it) => {
+                o[it] = this.translate(it, 'fields', this.options.foreignScope);
+                return o;
+              }, {}),
+              labelText: this.translate('foreignField', 'fields', 'DynamicLogic')
+            })
+          }], [{
+            view: new _bool.default({
+              name: 'matchRequired',
+              labelText: this.translate('matchRequired', 'fields', 'DynamicLogic')
+            })
+          }, false]]
+        }]
+      });
+      this.assignView('record', recordView);
+      this.listenTo(model, 'change:localField', (m, v, /** Record */o) => {
+        if (!o.ui) {
+          return;
+        }
+        const localField = model.attributes.localField;
+        const fields = foreignFields.filter(it => {
+          if (it === '') {
+            return true;
+          }
+          if (!localField) {
+            return false;
+          }
+          const type = this.getMetadata().get(`entityDefs.${scope}.fields.${localField}.type`);
+          const entityType = this.getMetadata().get(`entityDefs.${scope}.links.${localField}.entity`);
+          const foreignEntityType = this.getMetadata().get(`entityDefs.${foreignScope}.links.${it}.entity`);
+          if (type === 'linkParent') {
+            return true;
+          }
+          return entityType === foreignEntityType;
+        });
+        recordView.setFieldOptionList('foreignField', fields);
+        setTimeout(() => {
+          model.set('foreignField', null);
+        }, 0);
+      });
+    }
+  }
 });
 
 define("views/admin/field-manager/fields/currency-default", ["exports", "views/fields/enum"], function (_exports, _enum) {
@@ -21662,6 +22636,7 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
      *     string: {
      *         fieldDefs: Object.<string, *>,
      *         location?: string,
+     *         groupIndex?: number,
      *     }
      * }}
      */
@@ -21673,6 +22648,12 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
      * @type {string[]}
      */
     enumFieldList;
+
+    /**
+     * @private
+     * @type {string|null}
+     */
+    scope;
     data() {
       return {
         isNew: this.isNew,
@@ -21691,40 +22672,9 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
       }
       this.hasColorField = !this.getConfig().get('scopeColorsDisabled');
       if (scope) {
-        this.additionalParams = Espo.Utils.cloneDeep({
-          ...this.getMetadata().get(['app', 'entityManagerParams', 'Global']),
-          ...this.getMetadata().get(['app', 'entityManagerParams', '@' + (templateType || '_')]),
-          ...this.getMetadata().get(['app', 'entityManagerParams', scope])
-        });
-        this.model.set('name', scope);
-        this.model.set('labelSingular', this.translate(scope, 'scopeNames'));
-        this.model.set('labelPlural', this.translate(scope, 'scopeNamesPlural'));
-        this.model.set('type', this.getMetadata().get('scopes.' + scope + '.type') || '');
-        this.model.set('stream', this.getMetadata().get('scopes.' + scope + '.stream') || false);
-        this.model.set('disabled', this.getMetadata().get('scopes.' + scope + '.disabled') || false);
-        this.model.set('sortBy', this.getMetadata().get('entityDefs.' + scope + '.collection.orderBy'));
-        this.model.set('sortDirection', this.getMetadata().get('entityDefs.' + scope + '.collection.order'));
-        this.model.set('textFilterFields', this.getMetadata().get(['entityDefs', scope, 'collection', 'textFilterFields']) || ['name']);
-        this.model.set('fullTextSearch', this.getMetadata().get(['entityDefs', scope, 'collection', 'fullTextSearch']) || false);
-        this.model.set('countDisabled', this.getMetadata().get(['entityDefs', scope, 'collection', 'countDisabled']) || false);
-        this.model.set('statusField', this.getMetadata().get('scopes.' + scope + '.statusField') || null);
-        if (this.hasColorField) {
-          this.model.set('color', this.getMetadata().get(['clientDefs', scope, 'color']) || null);
-        }
-        this.model.set('iconClass', this.getMetadata().get(['clientDefs', scope, 'iconClass']) || null);
-        this.model.set('kanbanViewMode', this.getMetadata().get(['clientDefs', scope, 'kanbanViewMode']) || false);
-        this.model.set('kanbanStatusIgnoreList', this.getMetadata().get(['scopes', scope, 'kanbanStatusIgnoreList']) || []);
-        for (const param in this.additionalParams) {
-          /** @type {{fieldDefs: Object, location?: string, param?: string}} */
-          const defs = this.additionalParams[param];
-          const location = defs.location || this.defaultParamLocation;
-          const defaultValue = defs.fieldDefs.type === 'bool' ? false : null;
-          const actualParam = defs.param || param;
-          const value = this.getMetadata().get([location, scope, actualParam]) || defaultValue;
-          this.model.set(param, value);
-        }
-      }
-      if (scope) {
+        this.setupAdditionalParams(templateType, scope);
+        this.setupModelValues(scope);
+
         /** @type {Record.<string, Record>} */
         const fieldDefs = this.getMetadata().get(`entityDefs.${scope}.fields`) || {};
         this.orderableFieldList = Object.keys(fieldDefs).filter(item => {
@@ -21774,6 +22724,13 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
         this.statusOptionList = [];
         this.translatedStatusOptions = {};
       }
+      this.setupDetailLayout();
+    }
+
+    /**
+     * @private
+     */
+    setupDetailLayout() {
       this.detailLayout = [{
         rows: [[{
           name: 'name'
@@ -21824,41 +22781,110 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
           }
         }]]
       }];
-      if (this.scope) {
-        const rows1 = [];
-        const rows2 = [];
-        const paramList1 = Object.keys(this.additionalParams).filter(item => !!this.getMetadata().get(['app', 'entityManagerParams', 'Global', item]));
-        const paramList2 = Object.keys(this.additionalParams).filter(item => !paramList1.includes(item));
-        const add = function (rows, list) {
-          list.forEach((param, i) => {
-            if (i % 2 === 0) {
-              rows.push([]);
-            }
-            const row = rows[rows.length - 1];
-            row.push({
-              name: param
-            });
-            if (i === list.length - 1 && row.length === 1) {
-              row.push(false);
-            }
+      if (!this.scope) {
+        return;
+      }
+
+      /** @var {string[][]}*/
+      const groups = [];
+      for (const [param, it] of Object.entries(this.additionalParams)) {
+        const index = (it.groupIndex === undefined ? 9999 : it.groupIndex) + 100;
+        if (groups[index] === undefined) {
+          groups[index] = [];
+        }
+        groups[index] ??= [];
+        groups[index].push(param);
+      }
+      const add = function (rows, list) {
+        list.forEach((param, i) => {
+          if (i % 2 === 0) {
+            rows.push([]);
+          }
+          const row = rows[rows.length - 1];
+          row.push({
+            name: param
           });
-        };
-        add(rows1, paramList1);
-        add(rows2, paramList2);
-        if (rows1.length) {
+          if (i === list.length - 1 && row.length === 1) {
+            row.push(false);
+          }
+        });
+      };
+      groups.forEach(paramList => {
+        const rows = [];
+        add(rows, paramList);
+        if (rows.length) {
           this.detailLayout.push({
-            rows: rows1
+            rows: rows
           });
         }
-        if (rows2.length) {
-          this.detailLayout.push({
-            rows: rows2
-          });
-        }
+      });
+    }
+
+    /**
+     * @private
+     */
+    setupModelValues() {
+      const scope = this.scope;
+      this.model.set('name', scope);
+      this.model.set('labelSingular', this.translate(scope, 'scopeNames'));
+      this.model.set('labelPlural', this.translate(scope, 'scopeNamesPlural'));
+      this.model.set('type', this.getMetadata().get(`scopes.${scope}.type`) || '');
+      this.model.set('stream', this.getMetadata().get(`scopes.${scope}.stream`) || false);
+      this.model.set('disabled', this.getMetadata().get(`scopes.${scope}.disabled`) || false);
+      this.model.set('sortBy', this.getMetadata().get(`entityDefs.${scope}.collection.orderBy`));
+      this.model.set('sortDirection', this.getMetadata().get(`entityDefs.${scope}.collection.order`));
+      this.model.set('textFilterFields', this.getMetadata().get(['entityDefs', scope, 'collection', 'textFilterFields']) || ['name']);
+      this.model.set('fullTextSearch', this.getMetadata().get(['entityDefs', scope, 'collection', 'fullTextSearch']) || false);
+      this.model.set('countDisabled', this.getMetadata().get(['entityDefs', scope, 'collection', 'countDisabled']) || false);
+      this.model.set('statusField', this.getMetadata().get(`scopes.${scope}.statusField`) || null);
+      if (this.hasColorField) {
+        this.model.set('color', this.getMetadata().get(['clientDefs', scope, 'color']) || null);
+      }
+      this.model.set('iconClass', this.getMetadata().get(['clientDefs', scope, 'iconClass']) || null);
+      this.model.set('kanbanViewMode', this.getMetadata().get(['clientDefs', scope, 'kanbanViewMode']) || false);
+      this.model.set('kanbanStatusIgnoreList', this.getMetadata().get(['scopes', scope, 'kanbanStatusIgnoreList']) || []);
+      for (const param in this.additionalParams) {
+        /** @type {{fieldDefs: Object, location?: string, param?: string}} */
+        const defs = this.additionalParams[param];
+        const location = defs.location || this.defaultParamLocation;
+        const defaultValue = defs.fieldDefs.type === 'bool' ? false : null;
+        const actualParam = defs.param || param;
+        const value = this.getMetadata().get([location, scope, actualParam]) || defaultValue;
+        this.model.set(param, value);
       }
     }
+
+    /**
+     * @private
+     */
+    setupAdditionalParams() {
+      const scope = this.scope;
+      const templateType = this.getMetadata().get(`scopes.${this.scope}.type`) ?? null;
+      const tKey = '@' + (templateType ?? '_');
+
+      /** @var {Record.<string, *>} */
+      const globalParams = Espo.Utils.cloneDeep(this.getMetadata().get('app.entityManagerParams.Global', {}));
+      /** @var {Record.<string, *>} */
+      const templateParams = Espo.Utils.cloneDeep(this.getMetadata().get(`app.entityManagerParams.${tKey}`, {}));
+      /** @var {Record.<string, *>} */
+      const scopeParams = Espo.Utils.cloneDeep(this.getMetadata().get(`app.entityManagerParams.${scope}`, {}));
+      for (const [, it] of Object.entries(globalParams)) {
+        it.groupIndex ??= -100;
+      }
+      for (const [, it] of Object.entries(templateParams)) {
+        it.groupIndex ??= 50;
+      }
+      for (const [, it] of Object.entries(scopeParams)) {
+        it.groupIndex ??= 100;
+      }
+      this.additionalParams = {
+        ...globalParams,
+        ...templateParams,
+        ...scopeParams
+      };
+    }
     setup() {
-      const scope = this.scope = this.options.scope || false;
+      const scope = this.scope = this.options.scope ?? null;
       this.isNew = !scope;
       this.model = new _model.default();
       this.model.name = 'EntityManager';
@@ -21875,13 +22901,14 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
     }
     setupDefs() {
       const scope = this.scope;
+      const typeList = (this.getMetadata().get('app.entityTemplateList') || ['Base']).filter(it => !this.getMetadata().get(`app.entityTemplates.${it}.isNotCreatable`));
       const defs = {
         fields: {
           type: {
             type: 'enum',
             required: true,
-            options: this.getMetadata().get('app.entityTemplateList') || ['Base'],
-            readOnly: scope !== false,
+            options: typeList,
+            readOnly: scope !== null,
             tooltip: true
           },
           stream: {
@@ -21898,7 +22925,7 @@ define("views/admin/entity-manager/edit", ["exports", "view", "model"], function
             required: true,
             trim: true,
             maxLength: 64,
-            readOnly: scope !== false
+            readOnly: scope !== null
           },
           labelSingular: {
             type: 'varchar',
@@ -22463,7 +23490,7 @@ define("views/admin/entity-manager/modals/select-icon", ["exports", "views/modal
         this.processQuickSearch(target.value);
       });
       this.itemCache = {};
-      this.iconList = ["fas fa-0", "fas fa-1", "fas fa-2", "fas fa-3", "fas fa-4", "fas fa-5", "fas fa-6", "fas fa-7", "fas fa-8", "fas fa-9", "fas fa-a", "fas fa-address-book", "fas fa-address-card", "fas fa-align-center", "fas fa-align-justify", "fas fa-align-left", "fas fa-align-right", "fas fa-anchor", "fas fa-anchor-circle-check", "fas fa-anchor-circle-exclamation", "fas fa-anchor-circle-xmark", "fas fa-anchor-lock", "fas fa-angle-down", "fas fa-angle-left", "fas fa-angle-right", "fas fa-angle-up", "fas fa-angles-down", "fas fa-angles-left", "fas fa-angles-right", "fas fa-angles-up", "fas fa-ankh", "fas fa-apple-whole", "fas fa-archway", "fas fa-arrow-down", "fas fa-arrow-down-1-9", "fas fa-arrow-down-9-1", "fas fa-arrow-down-a-z", "fas fa-arrow-down-long", "fas fa-arrow-down-short-wide", "fas fa-arrow-down-up-across-line", "fas fa-arrow-down-up-lock", "fas fa-arrow-down-wide-short", "fas fa-arrow-down-z-a", "fas fa-arrow-left", "fas fa-arrow-left-long", "fas fa-arrow-pointer", "fas fa-arrow-right", "fas fa-arrow-right-arrow-left", "fas fa-arrow-right-from-bracket", "fas fa-arrow-right-long", "fas fa-arrow-right-to-bracket", "fas fa-arrow-right-to-city", "fas fa-arrow-rotate-left", "fas fa-arrow-rotate-right", "fas fa-arrow-trend-down", "fas fa-arrow-trend-up", "fas fa-arrow-turn-down", "fas fa-arrow-turn-up", "fas fa-arrow-up", "fas fa-arrow-up-1-9", "fas fa-arrow-up-9-1", "fas fa-arrow-up-a-z", "fas fa-arrow-up-from-bracket", "fas fa-arrow-up-from-ground-water", "fas fa-arrow-up-from-water-pump", "fas fa-arrow-up-long", "fas fa-arrow-up-right-dots", "fas fa-arrow-up-right-from-square", "fas fa-arrow-up-short-wide", "fas fa-arrow-up-wide-short", "fas fa-arrow-up-z-a", "fas fa-arrows-down-to-line", "fas fa-arrows-down-to-people", "fas fa-arrows-left-right", "fas fa-arrows-left-right-to-line", "fas fa-arrows-rotate", "fas fa-arrows-spin", "fas fa-arrows-split-up-and-left", "fas fa-arrows-to-circle", "fas fa-arrows-to-dot", "fas fa-arrows-to-eye", "fas fa-arrows-turn-right", "fas fa-arrows-turn-to-dots", "fas fa-arrows-up-down", "fas fa-arrows-up-down-left-right", "fas fa-arrows-up-to-line", "fas fa-asterisk", "fas fa-at", "fas fa-atom", "fas fa-audio-description", "fas fa-austral-sign", "fas fa-award", "fas fa-b", "fas fa-baby", "fas fa-baby-carriage", "fas fa-backward", "fas fa-backward-fast", "fas fa-backward-step", "fas fa-bacon", "fas fa-bacteria", "fas fa-bacterium", "fas fa-bag-shopping", "fas fa-bahai", "fas fa-baht-sign", "fas fa-ban", "fas fa-ban-smoking", "fas fa-bandage", "fas fa-bangladeshi-taka-sign", "fas fa-barcode", "fas fa-bars", "fas fa-bars-progress", "fas fa-bars-staggered", "fas fa-baseball", "fas fa-baseball-bat-ball", "fas fa-basket-shopping", "fas fa-basketball", "fas fa-bath", "fas fa-battery-empty", "fas fa-battery-full", "fas fa-battery-half", "fas fa-battery-quarter", "fas fa-battery-three-quarters", "fas fa-bed", "fas fa-bed-pulse", "fas fa-beer-mug-empty", "fas fa-bell", "fas fa-bell-concierge", "fas fa-bell-slash", "fas fa-bezier-curve", "fas fa-bicycle", "fas fa-binoculars", "fas fa-biohazard", "fas fa-bitcoin-sign", "fas fa-blender", "fas fa-blender-phone", "fas fa-blog", "fas fa-bold", "fas fa-bolt", "fas fa-bolt-lightning", "fas fa-bomb", "fas fa-bone", "fas fa-bong", "fas fa-book", "fas fa-book-atlas", "fas fa-book-bible", "fas fa-book-bookmark", "fas fa-book-journal-whills", "fas fa-book-medical", "fas fa-book-open", "fas fa-book-open-reader", "fas fa-book-quran", "fas fa-book-skull", "fas fa-book-tanakh", "fas fa-bookmark", "fas fa-border-all", "fas fa-border-none", "fas fa-border-top-left", "fas fa-bore-hole", "fas fa-bottle-droplet", "fas fa-bottle-water", "fas fa-bowl-food", "fas fa-bowl-rice", "fas fa-bowling-ball", "fas fa-box", "fas fa-box-archive", "fas fa-box-open", "fas fa-box-tissue", "fas fa-boxes-packing", "fas fa-boxes-stacked", "fas fa-braille", "fas fa-brain", "fas fa-brazilian-real-sign", "fas fa-bread-slice", "fas fa-bridge", "fas fa-bridge-circle-check", "fas fa-bridge-circle-exclamation", "fas fa-bridge-circle-xmark", "fas fa-bridge-lock", "fas fa-bridge-water", "fas fa-briefcase", "fas fa-briefcase-medical", "fas fa-broom", "fas fa-broom-ball", "fas fa-brush", "fas fa-bucket", "fas fa-bug", "fas fa-bug-slash", "fas fa-bugs", "fas fa-building", "fas fa-building-circle-arrow-right", "fas fa-building-circle-check", "fas fa-building-circle-exclamation", "fas fa-building-circle-xmark", "fas fa-building-columns", "fas fa-building-flag", "fas fa-building-lock", "fas fa-building-ngo", "fas fa-building-shield", "fas fa-building-un", "fas fa-building-user", "fas fa-building-wheat", "fas fa-bullhorn", "fas fa-bullseye", "fas fa-burger", "fas fa-burst", "fas fa-bus", "fas fa-bus-simple", "fas fa-business-time", "fas fa-c", "fas fa-cable-car", "fas fa-cake-candles", "fas fa-calculator", "fas fa-calendar", "fas fa-calendar-check", "fas fa-calendar-day", "fas fa-calendar-days", "fas fa-calendar-minus", "fas fa-calendar-plus", "fas fa-calendar-week", "fas fa-calendar-xmark", "fas fa-camera", "fas fa-camera-retro", "fas fa-camera-rotate", "fas fa-campground", "fas fa-candy-cane", "fas fa-cannabis", "fas fa-capsules", "fas fa-car", "fas fa-car-battery", "fas fa-car-burst", "fas fa-car-on", "fas fa-car-rear", "fas fa-car-side", "fas fa-car-tunnel", "fas fa-caravan", "fas fa-caret-down", "fas fa-caret-left", "fas fa-caret-right", "fas fa-caret-up", "fas fa-carrot", "fas fa-cart-arrow-down", "fas fa-cart-flatbed", "fas fa-cart-flatbed-suitcase", "fas fa-cart-plus", "fas fa-cart-shopping", "fas fa-cash-register", "fas fa-cat", "fas fa-cedi-sign", "fas fa-cent-sign", "fas fa-certificate", "fas fa-chair", "fas fa-chalkboard", "fas fa-chalkboard-user", "fas fa-champagne-glasses", "fas fa-charging-station", "fas fa-chart-area", "fas fa-chart-bar", "fas fa-chart-column", "fas fa-chart-gantt", "fas fa-chart-line", "fas fa-chart-pie", "fas fa-chart-simple", "fas fa-check", "fas fa-check-double", "fas fa-check-to-slot", "fas fa-cheese", "fas fa-chess", "fas fa-chess-bishop", "fas fa-chess-board", "fas fa-chess-king", "fas fa-chess-knight", "fas fa-chess-pawn", "fas fa-chess-queen", "fas fa-chess-rook", "fas fa-chevron-down", "fas fa-chevron-left", "fas fa-chevron-right", "fas fa-chevron-up", "fas fa-child", "fas fa-child-combatant", "fas fa-child-dress", "fas fa-child-reaching", "fas fa-children", "fas fa-church", "fas fa-circle", "fas fa-circle-arrow-down", "fas fa-circle-arrow-left", "fas fa-circle-arrow-right", "fas fa-circle-arrow-up", "fas fa-circle-check", "fas fa-circle-chevron-down", "fas fa-circle-chevron-left", "fas fa-circle-chevron-right", "fas fa-circle-chevron-up", "fas fa-circle-dollar-to-slot", "fas fa-circle-dot", "fas fa-circle-down", "fas fa-circle-exclamation", "fas fa-circle-h", "fas fa-circle-half-stroke", "fas fa-circle-info", "fas fa-circle-left", "fas fa-circle-minus", "fas fa-circle-nodes", "fas fa-circle-notch", "fas fa-circle-pause", "fas fa-circle-play", "fas fa-circle-plus", "fas fa-circle-question", "fas fa-circle-radiation", "fas fa-circle-right", "fas fa-circle-stop", "fas fa-circle-up", "fas fa-circle-user", "fas fa-circle-xmark", "fas fa-city", "fas fa-clapperboard", "fas fa-clipboard", "fas fa-clipboard-check", "fas fa-clipboard-list", "fas fa-clipboard-question", "fas fa-clipboard-user", "fas fa-clock", "fas fa-clock-rotate-left", "fas fa-clone", "fas fa-closed-captioning", "fas fa-cloud", "fas fa-cloud-arrow-down", "fas fa-cloud-arrow-up", "fas fa-cloud-bolt", "fas fa-cloud-meatball", "fas fa-cloud-moon", "fas fa-cloud-moon-rain", "fas fa-cloud-rain", "fas fa-cloud-showers-heavy", "fas fa-cloud-showers-water", "fas fa-cloud-sun", "fas fa-cloud-sun-rain", "fas fa-clover", "fas fa-code", "fas fa-code-branch", "fas fa-code-commit", "fas fa-code-compare", "fas fa-code-fork", "fas fa-code-merge", "fas fa-code-pull-request", "fas fa-coins", "fas fa-colon-sign", "fas fa-comment", "fas fa-comment-dollar", "fas fa-comment-dots", "fas fa-comment-medical", "fas fa-comment-slash", "fas fa-comment-sms", "fas fa-comments", "fas fa-comments-dollar", "fas fa-compact-disc", "fas fa-compass", "fas fa-compass-drafting", "fas fa-compress", "fas fa-computer", "fas fa-computer-mouse", "fas fa-cookie", "fas fa-cookie-bite", "fas fa-copy", "fas fa-copyright", "fas fa-couch", "fas fa-cow", "fas fa-credit-card", "fas fa-crop", "fas fa-crop-simple", "fas fa-cross", "fas fa-crosshairs", "fas fa-crow", "fas fa-crown", "fas fa-crutch", "fas fa-cruzeiro-sign", "fas fa-cube", "fas fa-cubes", "fas fa-cubes-stacked", "fas fa-d", "fas fa-database", "fas fa-delete-left", "fas fa-democrat", "fas fa-desktop", "fas fa-dharmachakra", "fas fa-diagram-next", "fas fa-diagram-predecessor", "fas fa-diagram-project", "fas fa-diagram-successor", "fas fa-diamond", "fas fa-diamond-turn-right", "fas fa-dice", "fas fa-dice-d20", "fas fa-dice-d6", "fas fa-dice-five", "fas fa-dice-four", "fas fa-dice-one", "fas fa-dice-six", "fas fa-dice-three", "fas fa-dice-two", "fas fa-disease", "fas fa-display", "fas fa-divide", "fas fa-dna", "fas fa-dog", "fas fa-dollar-sign", "fas fa-dolly", "fas fa-dong-sign", "fas fa-door-closed", "fas fa-door-open", "fas fa-dove", "fas fa-down-left-and-up-right-to-center", "fas fa-down-long", "fas fa-download", "fas fa-dragon", "fas fa-draw-polygon", "fas fa-droplet", "fas fa-droplet-slash", "fas fa-drum", "fas fa-drum-steelpan", "fas fa-drumstick-bite", "fas fa-dumbbell", "fas fa-dumpster", "fas fa-dumpster-fire", "fas fa-dungeon", "fas fa-e", "fas fa-ear-deaf", "fas fa-ear-listen", "fas fa-earth-africa", "fas fa-earth-americas", "fas fa-earth-asia", "fas fa-earth-europe", "fas fa-earth-oceania", "fas fa-egg", "fas fa-eject", "fas fa-elevator", "fas fa-ellipsis", "fas fa-ellipsis-vertical", "fas fa-envelope", "fas fa-envelope-circle-check", "fas fa-envelope-open", "fas fa-envelope-open-text", "fas fa-envelopes-bulk", "fas fa-equals", "fas fa-eraser", "fas fa-ethernet", "fas fa-euro-sign", "fas fa-exclamation", "fas fa-expand", "fas fa-explosion", "fas fa-eye", "fas fa-eye-dropper", "fas fa-eye-low-vision", "fas fa-eye-slash", "fas fa-f", "fas fa-face-angry", "fas fa-face-dizzy", "fas fa-face-flushed", "fas fa-face-frown", "fas fa-face-frown-open", "fas fa-face-grimace", "fas fa-face-grin", "fas fa-face-grin-beam", "fas fa-face-grin-beam-sweat", "fas fa-face-grin-hearts", "fas fa-face-grin-squint", "fas fa-face-grin-squint-tears", "fas fa-face-grin-stars", "fas fa-face-grin-tears", "fas fa-face-grin-tongue", "fas fa-face-grin-tongue-squint", "fas fa-face-grin-tongue-wink", "fas fa-face-grin-wide", "fas fa-face-grin-wink", "fas fa-face-kiss", "fas fa-face-kiss-beam", "fas fa-face-kiss-wink-heart", "fas fa-face-laugh", "fas fa-face-laugh-beam", "fas fa-face-laugh-squint", "fas fa-face-laugh-wink", "fas fa-face-meh", "fas fa-face-meh-blank", "fas fa-face-rolling-eyes", "fas fa-face-sad-cry", "fas fa-face-sad-tear", "fas fa-face-smile", "fas fa-face-smile-beam", "fas fa-face-smile-wink", "fas fa-face-surprise", "fas fa-face-tired", "fas fa-fan", "fas fa-faucet", "fas fa-faucet-drip", "fas fa-fax", "fas fa-feather", "fas fa-feather-pointed", "fas fa-ferry", "fas fa-file", "fas fa-file-arrow-down", "fas fa-file-arrow-up", "fas fa-file-audio", "fas fa-file-circle-check", "fas fa-file-circle-exclamation", "fas fa-file-circle-minus", "fas fa-file-circle-plus", "fas fa-file-circle-question", "fas fa-file-circle-xmark", "fas fa-file-code", "fas fa-file-contract", "fas fa-file-csv", "fas fa-file-excel", "fas fa-file-export", "fas fa-file-image", "fas fa-file-import", "fas fa-file-invoice", "fas fa-file-invoice-dollar", "fas fa-file-lines", "fas fa-file-medical", "fas fa-file-pdf", "fas fa-file-pen", "fas fa-file-powerpoint", "fas fa-file-prescription", "fas fa-file-shield", "fas fa-file-signature", "fas fa-file-video", "fas fa-file-waveform", "fas fa-file-word", "fas fa-file-zipper", "fas fa-fill", "fas fa-fill-drip", "fas fa-film", "fas fa-filter", "fas fa-filter-circle-dollar", "fas fa-filter-circle-xmark", "fas fa-fingerprint", "fas fa-fire", "fas fa-fire-burner", "fas fa-fire-extinguisher", "fas fa-fire-flame-curved", "fas fa-fire-flame-simple", "fas fa-fish", "fas fa-fish-fins", "fas fa-flag", "fas fa-flag-checkered", "fas fa-flag-usa", "fas fa-flask", "fas fa-flask-vial", "fas fa-floppy-disk", "fas fa-florin-sign", "fas fa-folder", "fas fa-folder-closed", "fas fa-folder-minus", "fas fa-folder-open", "fas fa-folder-plus", "fas fa-folder-tree", "fas fa-font", "fas fa-font-awesome", "fas fa-football", "fas fa-forward", "fas fa-forward-fast", "fas fa-forward-step", "fas fa-franc-sign", "fas fa-frog", "fas fa-futbol", "fas fa-g", "fas fa-gamepad", "fas fa-gas-pump", "fas fa-gauge", "fas fa-gauge-high", "fas fa-gauge-simple", "fas fa-gauge-simple-high", "fas fa-gavel", "fas fa-gear", "fas fa-gears", "fas fa-gem", "fas fa-genderless", "fas fa-ghost", "fas fa-gift", "fas fa-gifts", "fas fa-glass-water", "fas fa-glass-water-droplet", "fas fa-glasses", "fas fa-globe", "fas fa-golf-ball-tee", "fas fa-gopuram", "fas fa-graduation-cap", "fas fa-greater-than", "fas fa-greater-than-equal", "fas fa-grip", "fas fa-grip-lines", "fas fa-grip-lines-vertical", "fas fa-grip-vertical", "fas fa-group-arrows-rotate", "fas fa-guarani-sign", "fas fa-guitar", "fas fa-gun", "fas fa-h", "fas fa-hammer", "fas fa-hamsa", "fas fa-hand", "fas fa-hand-back-fist", "fas fa-hand-dots", "fas fa-hand-fist", "fas fa-hand-holding", "fas fa-hand-holding-dollar", "fas fa-hand-holding-droplet", "fas fa-hand-holding-hand", "fas fa-hand-holding-heart", "fas fa-hand-holding-medical", "fas fa-hand-lizard", "fas fa-hand-middle-finger", "fas fa-hand-peace", "fas fa-hand-point-down", "fas fa-hand-point-left", "fas fa-hand-point-right", "fas fa-hand-point-up", "fas fa-hand-pointer", "fas fa-hand-scissors", "fas fa-hand-sparkles", "fas fa-hand-spock", "fas fa-handcuffs", "fas fa-hands", "fas fa-hands-asl-interpreting", "fas fa-hands-bound", "fas fa-hands-bubbles", "fas fa-hands-clapping", "fas fa-hands-holding", "fas fa-hands-holding-child", "fas fa-hands-holding-circle", "fas fa-hands-praying", "fas fa-handshake", "fas fa-handshake-angle", "fas fa-handshake-simple", "fas fa-handshake-simple-slash", "fas fa-handshake-slash", "fas fa-hanukiah", "fas fa-hard-drive", "fas fa-hashtag", "fas fa-hat-cowboy", "fas fa-hat-cowboy-side", "fas fa-hat-wizard", "fas fa-head-side-cough", "fas fa-head-side-cough-slash", "fas fa-head-side-mask", "fas fa-head-side-virus", "fas fa-heading", "fas fa-headphones", "fas fa-headphones-simple", "fas fa-headset", "fas fa-heart", "fas fa-heart-circle-bolt", "fas fa-heart-circle-check", "fas fa-heart-circle-exclamation", "fas fa-heart-circle-minus", "fas fa-heart-circle-plus", "fas fa-heart-circle-xmark", "fas fa-heart-crack", "fas fa-heart-pulse", "fas fa-helicopter", "fas fa-helicopter-symbol", "fas fa-helmet-safety", "fas fa-helmet-un", "fas fa-highlighter", "fas fa-hill-avalanche", "fas fa-hill-rockslide", "fas fa-hippo", "fas fa-hockey-puck", "fas fa-holly-berry", "fas fa-horse", "fas fa-horse-head", "fas fa-hospital", "fas fa-hospital-user", "fas fa-hot-tub-person", "fas fa-hotdog", "fas fa-hotel", "fas fa-hourglass", "fas fa-hourglass-end", "fas fa-hourglass-half", "fas fa-hourglass-start", "fas fa-house", "fas fa-house-chimney", "fas fa-house-chimney-crack", "fas fa-house-chimney-medical", "fas fa-house-chimney-user", "fas fa-house-chimney-window", "fas fa-house-circle-check", "fas fa-house-circle-exclamation", "fas fa-house-circle-xmark", "fas fa-house-crack", "fas fa-house-fire", "fas fa-house-flag", "fas fa-house-flood-water", "fas fa-house-flood-water-circle-arrow-right", "fas fa-house-laptop", "fas fa-house-lock", "fas fa-house-medical", "fas fa-house-medical-circle-check", "fas fa-house-medical-circle-exclamation", "fas fa-house-medical-circle-xmark", "fas fa-house-medical-flag", "fas fa-house-signal", "fas fa-house-tsunami", "fas fa-house-user", "fas fa-hryvnia-sign", "fas fa-hurricane", "fas fa-i", "fas fa-i-cursor", "fas fa-ice-cream", "fas fa-icicles", "fas fa-icons", "fas fa-id-badge", "fas fa-id-card", "fas fa-id-card-clip", "fas fa-igloo", "fas fa-image", "fas fa-image-portrait", "fas fa-images", "fas fa-inbox", "fas fa-indent", "fas fa-indian-rupee-sign", "fas fa-industry", "fas fa-infinity", "fas fa-info", "fas fa-italic", "fas fa-j", "fas fa-jar", "fas fa-jar-wheat", "fas fa-jedi", "fas fa-jet-fighter", "fas fa-jet-fighter-up", "fas fa-joint", "fas fa-jug-detergent", "fas fa-k", "fas fa-kaaba", "fas fa-key", "fas fa-keyboard", "fas fa-khanda", "fas fa-kip-sign", "fas fa-kit-medical", "fas fa-kitchen-set", "fas fa-kiwi-bird", "fas fa-l", "fas fa-land-mine-on", "fas fa-landmark", "fas fa-landmark-dome", "fas fa-landmark-flag", "fas fa-language", "fas fa-laptop", "fas fa-laptop-code", "fas fa-laptop-file", "fas fa-laptop-medical", "fas fa-lari-sign", "fas fa-layer-group", "fas fa-leaf", "fas fa-left-long", "fas fa-left-right", "fas fa-lemon", "fas fa-less-than", "fas fa-less-than-equal", "fas fa-life-ring", "fas fa-lightbulb", "fas fa-lines-leaning", "fas fa-link", "fas fa-link-slash", "fas fa-lira-sign", "fas fa-list", "fas fa-list-check", "fas fa-list-ol", "fas fa-list-ul", "fas fa-litecoin-sign", "fas fa-location-arrow", "fas fa-location-crosshairs", "fas fa-location-dot", "fas fa-location-pin", "fas fa-location-pin-lock", "fas fa-lock", "fas fa-lock-open", "fas fa-locust", "fas fa-lungs", "fas fa-lungs-virus", "fas fa-m", "fas fa-magnet", "fas fa-magnifying-glass", "fas fa-magnifying-glass-arrow-right", "fas fa-magnifying-glass-chart", "fas fa-magnifying-glass-dollar", "fas fa-magnifying-glass-location", "fas fa-magnifying-glass-minus", "fas fa-magnifying-glass-plus", "fas fa-manat-sign", "fas fa-map", "fas fa-map-location", "fas fa-map-location-dot", "fas fa-map-pin", "fas fa-marker", "fas fa-mars", "fas fa-mars-and-venus", "fas fa-mars-and-venus-burst", "fas fa-mars-double", "fas fa-mars-stroke", "fas fa-mars-stroke-right", "fas fa-mars-stroke-up", "fas fa-martini-glass", "fas fa-martini-glass-citrus", "fas fa-martini-glass-empty", "fas fa-mask", "fas fa-mask-face", "fas fa-mask-ventilator", "fas fa-masks-theater", "fas fa-mattress-pillow", "fas fa-maximize", "fas fa-medal", "fas fa-memory", "fas fa-menorah", "fas fa-mercury", "fas fa-message", "fas fa-meteor", "fas fa-microchip", "fas fa-microphone", "fas fa-microphone-lines", "fas fa-microphone-lines-slash", "fas fa-microphone-slash", "fas fa-microscope", "fas fa-mill-sign", "fas fa-minimize", "fas fa-minus", "fas fa-mitten", "fas fa-mobile", "fas fa-mobile-button", "fas fa-mobile-retro", "fas fa-mobile-screen", "fas fa-mobile-screen-button", "fas fa-money-bill", "fas fa-money-bill-1", "fas fa-money-bill-1-wave", "fas fa-money-bill-transfer", "fas fa-money-bill-trend-up", "fas fa-money-bill-wave", "fas fa-money-bill-wheat", "fas fa-money-bills", "fas fa-money-check", "fas fa-money-check-dollar", "fas fa-monument", "fas fa-moon", "fas fa-mortar-pestle", "fas fa-mosque", "fas fa-mosquito", "fas fa-mosquito-net", "fas fa-motorcycle", "fas fa-mound", "fas fa-mountain", "fas fa-mountain-city", "fas fa-mountain-sun", "fas fa-mug-hot", "fas fa-mug-saucer", "fas fa-music", "fas fa-n", "fas fa-naira-sign", "fas fa-network-wired", "fas fa-neuter", "fas fa-newspaper", "fas fa-not-equal", "fas fa-notdef", "fas fa-note-sticky", "fas fa-notes-medical", "fas fa-o", "fas fa-object-group", "fas fa-object-ungroup", "fas fa-oil-can", "fas fa-oil-well", "fas fa-om", "fas fa-otter", "fas fa-outdent", "fas fa-p", "fas fa-pager", "fas fa-paint-roller", "fas fa-paintbrush", "fas fa-palette", "fas fa-pallet", "fas fa-panorama", "fas fa-paper-plane", "fas fa-paperclip", "fas fa-parachute-box", "fas fa-paragraph", "fas fa-passport", "fas fa-paste", "fas fa-pause", "fas fa-paw", "fas fa-peace", "fas fa-pen", "fas fa-pen-clip", "fas fa-pen-fancy", "fas fa-pen-nib", "fas fa-pen-ruler", "fas fa-pen-to-square", "fas fa-pencil", "fas fa-people-arrows", "fas fa-people-carry-box", "fas fa-people-group", "fas fa-people-line", "fas fa-people-pulling", "fas fa-people-robbery", "fas fa-people-roof", "fas fa-pepper-hot", "fas fa-percent", "fas fa-person", "fas fa-person-arrow-down-to-line", "fas fa-person-arrow-up-from-line", "fas fa-person-biking", "fas fa-person-booth", "fas fa-person-breastfeeding", "fas fa-person-burst", "fas fa-person-cane", "fas fa-person-chalkboard", "fas fa-person-circle-check", "fas fa-person-circle-exclamation", "fas fa-person-circle-minus", "fas fa-person-circle-plus", "fas fa-person-circle-question", "fas fa-person-circle-xmark", "fas fa-person-digging", "fas fa-person-dots-from-line", "fas fa-person-dress", "fas fa-person-dress-burst", "fas fa-person-drowning", "fas fa-person-falling", "fas fa-person-falling-burst", "fas fa-person-half-dress", "fas fa-person-harassing", "fas fa-person-hiking", "fas fa-person-military-pointing", "fas fa-person-military-rifle", "fas fa-person-military-to-person", "fas fa-person-praying", "fas fa-person-pregnant", "fas fa-person-rays", "fas fa-person-rifle", "fas fa-person-running", "fas fa-person-shelter", "fas fa-person-skating", "fas fa-person-skiing", "fas fa-person-skiing-nordic", "fas fa-person-snowboarding", "fas fa-person-swimming", "fas fa-person-through-window", "fas fa-person-walking", "fas fa-person-walking-arrow-loop-left", "fas fa-person-walking-arrow-right", "fas fa-person-walking-dashed-line-arrow-right", "fas fa-person-walking-luggage", "fas fa-person-walking-with-cane", "fas fa-peseta-sign", "fas fa-peso-sign", "fas fa-phone", "fas fa-phone-flip", "fas fa-phone-slash", "fas fa-phone-volume", "fas fa-photo-film", "fas fa-piggy-bank", "fas fa-pills", "fas fa-pizza-slice", "fas fa-place-of-worship", "fas fa-plane", "fas fa-plane-arrival", "fas fa-plane-circle-check", "fas fa-plane-circle-exclamation", "fas fa-plane-circle-xmark", "fas fa-plane-departure", "fas fa-plane-lock", "fas fa-plane-slash", "fas fa-plane-up", "fas fa-plant-wilt", "fas fa-plate-wheat", "fas fa-play", "fas fa-plug", "fas fa-plug-circle-bolt", "fas fa-plug-circle-check", "fas fa-plug-circle-exclamation", "fas fa-plug-circle-minus", "fas fa-plug-circle-plus", "fas fa-plug-circle-xmark", "fas fa-plus", "fas fa-plus-minus", "fas fa-podcast", "fas fa-poo", "fas fa-poo-storm", "fas fa-poop", "fas fa-power-off", "fas fa-prescription", "fas fa-prescription-bottle", "fas fa-prescription-bottle-medical", "fas fa-print", "fas fa-pump-medical", "fas fa-pump-soap", "fas fa-puzzle-piece", "fas fa-q", "fas fa-qrcode", "fas fa-question", "fas fa-quote-left", "fas fa-quote-right", "fas fa-r", "fas fa-radiation", "fas fa-radio", "fas fa-rainbow", "fas fa-ranking-star", "fas fa-receipt", "fas fa-record-vinyl", "fas fa-rectangle-ad", "fas fa-rectangle-list", "fas fa-rectangle-xmark", "fas fa-recycle", "fas fa-registered", "fas fa-repeat", "fas fa-reply", "fas fa-reply-all", "fas fa-republican", "fas fa-restroom", "fas fa-retweet", "fas fa-ribbon", "fas fa-right-from-bracket", "fas fa-right-left", "fas fa-right-long", "fas fa-right-to-bracket", "fas fa-ring", "fas fa-road", "fas fa-road-barrier", "fas fa-road-bridge", "fas fa-road-circle-check", "fas fa-road-circle-exclamation", "fas fa-road-circle-xmark", "fas fa-road-lock", "fas fa-road-spikes", "fas fa-robot", "fas fa-rocket", "fas fa-rotate", "fas fa-rotate-left", "fas fa-rotate-right", "fas fa-route", "fas fa-rss", "fas fa-ruble-sign", "fas fa-rug", "fas fa-ruler", "fas fa-ruler-combined", "fas fa-ruler-horizontal", "fas fa-ruler-vertical", "fas fa-rupee-sign", "fas fa-rupiah-sign", "fas fa-s", "fas fa-sack-dollar", "fas fa-sack-xmark", "fas fa-sailboat", "fas fa-satellite", "fas fa-satellite-dish", "fas fa-scale-balanced", "fas fa-scale-unbalanced", "fas fa-scale-unbalanced-flip", "fas fa-school", "fas fa-school-circle-check", "fas fa-school-circle-exclamation", "fas fa-school-circle-xmark", "fas fa-school-flag", "fas fa-school-lock", "fas fa-scissors", "fas fa-screwdriver", "fas fa-screwdriver-wrench", "fas fa-scroll", "fas fa-scroll-torah", "fas fa-sd-card", "fas fa-section", "fas fa-seedling", "fas fa-server", "fas fa-shapes", "fas fa-share", "fas fa-share-from-square", "fas fa-share-nodes", "fas fa-sheet-plastic", "fas fa-shekel-sign", "fas fa-shield", "fas fa-shield-cat", "fas fa-shield-dog", "fas fa-shield-halved", "fas fa-shield-heart", "fas fa-shield-virus", "fas fa-ship", "fas fa-shirt", "fas fa-shoe-prints", "fas fa-shop", "fas fa-shop-lock", "fas fa-shop-slash", "fas fa-shower", "fas fa-shrimp", "fas fa-shuffle", "fas fa-shuttle-space", "fas fa-sign-hanging", "fas fa-signal", "fas fa-signature", "fas fa-signs-post", "fas fa-sim-card", "fas fa-sink", "fas fa-sitemap", "fas fa-skull", "fas fa-skull-crossbones", "fas fa-slash", "fas fa-sleigh", "fas fa-sliders", "fas fa-smog", "fas fa-smoking", "fas fa-snowflake", "fas fa-snowman", "fas fa-snowplow", "fas fa-soap", "fas fa-socks", "fas fa-solar-panel", "fas fa-sort", "fas fa-sort-down", "fas fa-sort-up", "fas fa-spa", "fas fa-spaghetti-monster-flying", "fas fa-spell-check", "fas fa-spider", "fas fa-spinner", "fas fa-splotch", "fas fa-spoon", "fas fa-spray-can", "fas fa-spray-can-sparkles", "fas fa-square", "fas fa-square-arrow-up-right", "fas fa-square-caret-down", "fas fa-square-caret-left", "fas fa-square-caret-right", "fas fa-square-caret-up", "fas fa-square-check", "fas fa-square-envelope", "fas fa-square-full", "fas fa-square-h", "fas fa-square-minus", "fas fa-square-nfi", "fas fa-square-parking", "fas fa-square-pen", "fas fa-square-person-confined", "fas fa-square-phone", "fas fa-square-phone-flip", "fas fa-square-plus", "fas fa-square-poll-horizontal", "fas fa-square-poll-vertical", "fas fa-square-root-variable", "fas fa-square-rss", "fas fa-square-share-nodes", "fas fa-square-up-right", "fas fa-square-virus", "fas fa-square-xmark", "fas fa-staff-snake", "fas fa-stairs", "fas fa-stamp", "fas fa-stapler", "fas fa-star", "fas fa-star-and-crescent", "fas fa-star-half", "fas fa-star-half-stroke", "fas fa-star-of-david", "fas fa-star-of-life", "fas fa-sterling-sign", "fas fa-stethoscope", "fas fa-stop", "fas fa-stopwatch", "fas fa-stopwatch-20", "fas fa-store", "fas fa-store-slash", "fas fa-street-view", "fas fa-strikethrough", "fas fa-stroopwafel", "fas fa-subscript", "fas fa-suitcase", "fas fa-suitcase-medical", "fas fa-suitcase-rolling", "fas fa-sun", "fas fa-sun-plant-wilt", "fas fa-superscript", "fas fa-swatchbook", "fas fa-synagogue", "fas fa-syringe", "fas fa-t", "fas fa-table", "fas fa-table-cells", "fas fa-table-cells-column-lock", "fas fa-table-cells-large", "fas fa-table-cells-row-lock", "fas fa-table-cells-row-unlock", "fas fa-table-columns", "fas fa-table-list", "fas fa-table-tennis-paddle-ball", "fas fa-tablet", "fas fa-tablet-button", "fas fa-tablet-screen-button", "fas fa-tablets", "fas fa-tachograph-digital", "fas fa-tag", "fas fa-tags", "fas fa-tape", "fas fa-tarp", "fas fa-tarp-droplet", "fas fa-taxi", "fas fa-teeth", "fas fa-teeth-open", "fas fa-temperature-arrow-down", "fas fa-temperature-arrow-up", "fas fa-temperature-empty", "fas fa-temperature-full", "fas fa-temperature-half", "fas fa-temperature-high", "fas fa-temperature-low", "fas fa-temperature-quarter", "fas fa-temperature-three-quarters", "fas fa-tenge-sign", "fas fa-tent", "fas fa-tent-arrow-down-to-line", "fas fa-tent-arrow-left-right", "fas fa-tent-arrow-turn-left", "fas fa-tent-arrows-down", "fas fa-tents", "fas fa-terminal", "fas fa-text-height", "fas fa-text-slash", "fas fa-text-width", "fas fa-thermometer", "fas fa-thumbs-down", "fas fa-thumbs-up", "fas fa-thumbtack", "fas fa-thumbtack-slash", "fas fa-ticket", "fas fa-ticket-simple", "fas fa-timeline", "fas fa-toggle-off", "fas fa-toggle-on", "fas fa-toilet", "fas fa-toilet-paper", "fas fa-toilet-paper-slash", "fas fa-toilet-portable", "fas fa-toilets-portable", "fas fa-toolbox", "fas fa-tooth", "fas fa-torii-gate", "fas fa-tornado", "fas fa-tower-broadcast", "fas fa-tower-cell", "fas fa-tower-observation", "fas fa-tractor", "fas fa-trademark", "fas fa-traffic-light", "fas fa-trailer", "fas fa-train", "fas fa-train-subway", "fas fa-train-tram", "fas fa-transgender", "fas fa-trash", "fas fa-trash-arrow-up", "fas fa-trash-can", "fas fa-trash-can-arrow-up", "fas fa-tree", "fas fa-tree-city", "fas fa-triangle-exclamation", "fas fa-trophy", "fas fa-trowel", "fas fa-trowel-bricks", "fas fa-truck", "fas fa-truck-arrow-right", "fas fa-truck-droplet", "fas fa-truck-fast", "fas fa-truck-field", "fas fa-truck-field-un", "fas fa-truck-front", "fas fa-truck-medical", "fas fa-truck-monster", "fas fa-truck-moving", "fas fa-truck-pickup", "fas fa-truck-plane", "fas fa-truck-ramp-box", "fas fa-tty", "fas fa-turkish-lira-sign", "fas fa-turn-down", "fas fa-turn-up", "fas fa-tv", "fas fa-u", "fas fa-umbrella", "fas fa-umbrella-beach", "fas fa-underline", "fas fa-universal-access", "fas fa-unlock", "fas fa-unlock-keyhole", "fas fa-up-down", "fas fa-up-down-left-right", "fas fa-up-long", "fas fa-up-right-and-down-left-from-center", "fas fa-up-right-from-square", "fas fa-upload", "fas fa-user", "fas fa-user-astronaut", "fas fa-user-check", "fas fa-user-clock", "fas fa-user-doctor", "fas fa-user-gear", "fas fa-user-graduate", "fas fa-user-group", "fas fa-user-injured", "fas fa-user-large", "fas fa-user-large-slash", "fas fa-user-lock", "fas fa-user-minus", "fas fa-user-ninja", "fas fa-user-nurse", "fas fa-user-pen", "fas fa-user-plus", "fas fa-user-secret", "fas fa-user-shield", "fas fa-user-slash", "fas fa-user-tag", "fas fa-user-tie", "fas fa-user-xmark", "fas fa-users", "fas fa-users-between-lines", "fas fa-users-gear", "fas fa-users-line", "fas fa-users-rays", "fas fa-users-rectangle", "fas fa-users-slash", "fas fa-users-viewfinder", "fas fa-utensils", "fas fa-v", "fas fa-van-shuttle", "fas fa-vault", "fas fa-vector-square", "fas fa-venus", "fas fa-venus-double", "fas fa-venus-mars", "fas fa-vest", "fas fa-vest-patches", "fas fa-vial", "fas fa-vial-circle-check", "fas fa-vial-virus", "fas fa-vials", "fas fa-video", "fas fa-video-slash", "fas fa-vihara", "fas fa-virus", "fas fa-virus-covid", "fas fa-virus-covid-slash", "fas fa-virus-slash", "fas fa-viruses", "fas fa-voicemail", "fas fa-volcano", "fas fa-volleyball", "fas fa-volume-high", "fas fa-volume-low", "fas fa-volume-off", "fas fa-volume-xmark", "fas fa-vr-cardboard", "fas fa-w", "fas fa-walkie-talkie", "fas fa-wallet", "fas fa-wand-magic", "fas fa-wand-magic-sparkles", "fas fa-wand-sparkles", "fas fa-warehouse", "fas fa-water", "fas fa-water-ladder", "fas fa-wave-square", "fas fa-weight-hanging", "fas fa-weight-scale", "fas fa-wheat-awn", "fas fa-wheat-awn-circle-exclamation", "fas fa-wheelchair", "fas fa-wheelchair-move", "fas fa-whiskey-glass", "fas fa-wifi", "fas fa-wind", "fas fa-window-maximize", "fas fa-window-minimize", "fas fa-window-restore", "fas fa-wine-bottle", "fas fa-wine-glass", "fas fa-wine-glass-empty", "fas fa-won-sign", "fas fa-worm", "fas fa-wrench", "fas fa-x", "fas fa-x-ray", "fas fa-xmark", "fas fa-xmarks-lines", "fas fa-y", "fas fa-yen-sign", "fas fa-yin-yang", "fas fa-z", "far fa-address-book", "far fa-address-card", "far fa-bell", "far fa-bell-slash", "far fa-bookmark", "far fa-building", "far fa-calendar", "far fa-calendar-check", "far fa-calendar-days", "far fa-calendar-minus", "far fa-calendar-plus", "far fa-calendar-xmark", "far fa-chart-bar", "far fa-chess-bishop", "far fa-chess-king", "far fa-chess-knight", "far fa-chess-pawn", "far fa-chess-queen", "far fa-chess-rook", "far fa-circle", "far fa-circle-check", "far fa-circle-dot", "far fa-circle-down", "far fa-circle-left", "far fa-circle-pause", "far fa-circle-play", "far fa-circle-question", "far fa-circle-right", "far fa-circle-stop", "far fa-circle-up", "far fa-circle-user", "far fa-circle-xmark", "far fa-clipboard", "far fa-clock", "far fa-clone", "far fa-closed-captioning", "far fa-comment", "far fa-comment-dots", "far fa-comments", "far fa-compass", "far fa-copy", "far fa-copyright", "far fa-credit-card", "far fa-envelope", "far fa-envelope-open", "far fa-eye", "far fa-eye-slash", "far fa-face-angry", "far fa-face-dizzy", "far fa-face-flushed", "far fa-face-frown", "far fa-face-frown-open", "far fa-face-grimace", "far fa-face-grin", "far fa-face-grin-beam", "far fa-face-grin-beam-sweat", "far fa-face-grin-hearts", "far fa-face-grin-squint", "far fa-face-grin-squint-tears", "far fa-face-grin-stars", "far fa-face-grin-tears", "far fa-face-grin-tongue", "far fa-face-grin-tongue-squint", "far fa-face-grin-tongue-wink", "far fa-face-grin-wide", "far fa-face-grin-wink", "far fa-face-kiss", "far fa-face-kiss-beam", "far fa-face-kiss-wink-heart", "far fa-face-laugh", "far fa-face-laugh-beam", "far fa-face-laugh-squint", "far fa-face-laugh-wink", "far fa-face-meh", "far fa-face-meh-blank", "far fa-face-rolling-eyes", "far fa-face-sad-cry", "far fa-face-sad-tear", "far fa-face-smile", "far fa-face-smile-beam", "far fa-face-smile-wink", "far fa-face-surprise", "far fa-face-tired", "far fa-file", "far fa-file-audio", "far fa-file-code", "far fa-file-excel", "far fa-file-image", "far fa-file-lines", "far fa-file-pdf", "far fa-file-powerpoint", "far fa-file-video", "far fa-file-word", "far fa-file-zipper", "far fa-flag", "far fa-floppy-disk", "far fa-folder", "far fa-folder-closed", "far fa-folder-open", "far fa-font-awesome", "far fa-futbol", "far fa-gem", "far fa-hand", "far fa-hand-back-fist", "far fa-hand-lizard", "far fa-hand-peace", "far fa-hand-point-down", "far fa-hand-point-left", "far fa-hand-point-right", "far fa-hand-point-up", "far fa-hand-pointer", "far fa-hand-scissors", "far fa-hand-spock", "far fa-handshake", "far fa-hard-drive", "far fa-heart", "far fa-hospital", "far fa-hourglass", "far fa-hourglass-half", "far fa-id-badge", "far fa-id-card", "far fa-image", "far fa-images", "far fa-keyboard", "far fa-lemon", "far fa-life-ring", "far fa-lightbulb", "far fa-map", "far fa-message", "far fa-money-bill-1", "far fa-moon", "far fa-newspaper", "far fa-note-sticky", "far fa-object-group", "far fa-object-ungroup", "far fa-paper-plane", "far fa-paste", "far fa-pen-to-square", "far fa-rectangle-list", "far fa-rectangle-xmark", "far fa-registered", "far fa-share-from-square", "far fa-snowflake", "far fa-square", "far fa-square-caret-down", "far fa-square-caret-left", "far fa-square-caret-right", "far fa-square-caret-up", "far fa-square-check", "far fa-square-full", "far fa-square-minus", "far fa-square-plus", "far fa-star", "far fa-star-half", "far fa-star-half-stroke", "far fa-sun", "far fa-thumbs-down", "far fa-thumbs-up", "far fa-trash-can", "far fa-user", "far fa-window-maximize", "far fa-window-minimize", "far fa-window-restore"];
+      this.iconList = ["fas fa-0", "fas fa-1", "fas fa-2", "fas fa-3", "fas fa-4", "fas fa-5", "fas fa-6", "fas fa-7", "fas fa-8", "fas fa-9", "fas fa-a", "fas fa-address-book", "far fa-address-book", "fas fa-address-card", "far fa-address-card", "fas fa-align-center", "fas fa-align-justify", "fas fa-align-left", "fas fa-align-right", "fas fa-anchor", "fas fa-anchor-circle-check", "fas fa-anchor-circle-exclamation", "fas fa-anchor-circle-xmark", "fas fa-anchor-lock", "fas fa-angle-down", "fas fa-angle-left", "fas fa-angle-right", "fas fa-angle-up", "fas fa-angles-down", "fas fa-angles-left", "fas fa-angles-right", "fas fa-angles-up", "fas fa-ankh", "fas fa-apple-whole", "fas fa-archway", "fas fa-arrow-down", "fas fa-arrow-down-1-9", "fas fa-arrow-down-9-1", "fas fa-arrow-down-a-z", "fas fa-arrow-down-long", "fas fa-arrow-down-short-wide", "fas fa-arrow-down-up-across-line", "fas fa-arrow-down-up-lock", "fas fa-arrow-down-wide-short", "fas fa-arrow-down-z-a", "fas fa-arrow-left", "fas fa-arrow-left-long", "fas fa-arrow-pointer", "fas fa-arrow-right", "fas fa-arrow-right-arrow-left", "fas fa-arrow-right-from-bracket", "fas fa-arrow-right-long", "fas fa-arrow-right-to-bracket", "fas fa-arrow-right-to-city", "fas fa-arrow-rotate-left", "fas fa-arrow-rotate-right", "fas fa-arrow-trend-down", "fas fa-arrow-trend-up", "fas fa-arrow-turn-down", "fas fa-arrow-turn-up", "fas fa-arrow-up", "fas fa-arrow-up-1-9", "fas fa-arrow-up-9-1", "fas fa-arrow-up-a-z", "fas fa-arrow-up-from-bracket", "fas fa-arrow-up-from-ground-water", "fas fa-arrow-up-from-water-pump", "fas fa-arrow-up-long", "fas fa-arrow-up-right-dots", "fas fa-arrow-up-right-from-square", "fas fa-arrow-up-short-wide", "fas fa-arrow-up-wide-short", "fas fa-arrow-up-z-a", "fas fa-arrows-down-to-line", "fas fa-arrows-down-to-people", "fas fa-arrows-left-right", "fas fa-arrows-left-right-to-line", "fas fa-arrows-rotate", "fas fa-arrows-spin", "fas fa-arrows-split-up-and-left", "fas fa-arrows-to-circle", "fas fa-arrows-to-dot", "fas fa-arrows-to-eye", "fas fa-arrows-turn-right", "fas fa-arrows-turn-to-dots", "fas fa-arrows-up-down", "fas fa-arrows-up-down-left-right", "fas fa-arrows-up-to-line", "fas fa-asterisk", "fas fa-at", "fas fa-atom", "fas fa-audio-description", "fas fa-austral-sign", "fas fa-award", "fas fa-b", "fas fa-baby", "fas fa-baby-carriage", "fas fa-backward", "fas fa-backward-fast", "fas fa-backward-step", "fas fa-bacon", "fas fa-bacteria", "fas fa-bacterium", "fas fa-bag-shopping", "fas fa-bahai", "fas fa-baht-sign", "fas fa-ban", "fas fa-ban-smoking", "fas fa-bandage", "fas fa-bangladeshi-taka-sign", "fas fa-barcode", "fas fa-bars", "fas fa-bars-progress", "fas fa-bars-staggered", "fas fa-baseball", "fas fa-baseball-bat-ball", "fas fa-basket-shopping", "fas fa-basketball", "fas fa-bath", "fas fa-battery-empty", "fas fa-battery-full", "fas fa-battery-half", "fas fa-battery-quarter", "fas fa-battery-three-quarters", "fas fa-bed", "fas fa-bed-pulse", "fas fa-beer-mug-empty", "fas fa-bell", "far fa-bell", "fas fa-bell-concierge", "fas fa-bell-slash", "far fa-bell-slash", "fas fa-bezier-curve", "fas fa-bicycle", "fas fa-binoculars", "fas fa-biohazard", "fas fa-bitcoin-sign", "fas fa-blender", "fas fa-blender-phone", "fas fa-blog", "fas fa-bold", "fas fa-bolt", "fas fa-bolt-lightning", "fas fa-bomb", "fas fa-bone", "fas fa-bong", "fas fa-book", "fas fa-book-atlas", "fas fa-book-bible", "fas fa-book-bookmark", "fas fa-book-journal-whills", "fas fa-book-medical", "fas fa-book-open", "fas fa-book-open-reader", "fas fa-book-quran", "fas fa-book-skull", "fas fa-book-tanakh", "fas fa-bookmark", "far fa-bookmark", "fas fa-border-all", "fas fa-border-none", "fas fa-border-top-left", "fas fa-bore-hole", "fas fa-bottle-droplet", "fas fa-bottle-water", "fas fa-bowl-food", "fas fa-bowl-rice", "fas fa-bowling-ball", "fas fa-box", "fas fa-box-archive", "fas fa-box-open", "fas fa-box-tissue", "fas fa-boxes-packing", "fas fa-boxes-stacked", "fas fa-braille", "fas fa-brain", "fas fa-brazilian-real-sign", "fas fa-bread-slice", "fas fa-bridge", "fas fa-bridge-circle-check", "fas fa-bridge-circle-exclamation", "fas fa-bridge-circle-xmark", "fas fa-bridge-lock", "fas fa-bridge-water", "fas fa-briefcase", "fas fa-briefcase-medical", "fas fa-broom", "fas fa-broom-ball", "fas fa-brush", "fas fa-bucket", "fas fa-bug", "fas fa-bug-slash", "fas fa-bugs", "fas fa-building", "far fa-building", "fas fa-building-circle-arrow-right", "fas fa-building-circle-check", "fas fa-building-circle-exclamation", "fas fa-building-circle-xmark", "fas fa-building-columns", "fas fa-building-flag", "fas fa-building-lock", "fas fa-building-ngo", "fas fa-building-shield", "fas fa-building-un", "fas fa-building-user", "fas fa-building-wheat", "fas fa-bullhorn", "fas fa-bullseye", "fas fa-burger", "fas fa-burst", "fas fa-bus", "fas fa-bus-simple", "fas fa-business-time", "fas fa-c", "fas fa-cable-car", "fas fa-cake-candles", "fas fa-calculator", "fas fa-calendar", "far fa-calendar", "fas fa-calendar-check", "far fa-calendar-check", "fas fa-calendar-day", "fas fa-calendar-days", "far fa-calendar-days", "fas fa-calendar-minus", "far fa-calendar-minus", "fas fa-calendar-plus", "far fa-calendar-plus", "fas fa-calendar-week", "fas fa-calendar-xmark", "far fa-calendar-xmark", "fas fa-camera", "fas fa-camera-retro", "fas fa-camera-rotate", "fas fa-campground", "fas fa-candy-cane", "fas fa-cannabis", "fas fa-capsules", "fas fa-car", "fas fa-car-battery", "fas fa-car-burst", "fas fa-car-on", "fas fa-car-rear", "fas fa-car-side", "fas fa-car-tunnel", "fas fa-caravan", "fas fa-caret-down", "fas fa-caret-left", "fas fa-caret-right", "fas fa-caret-up", "fas fa-carrot", "fas fa-cart-arrow-down", "fas fa-cart-flatbed", "fas fa-cart-flatbed-suitcase", "fas fa-cart-plus", "fas fa-cart-shopping", "fas fa-cash-register", "fas fa-cat", "fas fa-cedi-sign", "fas fa-cent-sign", "fas fa-certificate", "fas fa-chair", "fas fa-chalkboard", "fas fa-chalkboard-user", "fas fa-champagne-glasses", "fas fa-charging-station", "fas fa-chart-area", "fas fa-chart-bar", "far fa-chart-bar", "fas fa-chart-column", "fas fa-chart-diagram", "fas fa-chart-gantt", "fas fa-chart-line", "fas fa-chart-pie", "fas fa-chart-simple", "fas fa-check", "fas fa-check-double", "fas fa-check-to-slot", "fas fa-cheese", "fas fa-chess", "fas fa-chess-bishop", "far fa-chess-bishop", "fas fa-chess-board", "fas fa-chess-king", "far fa-chess-king", "fas fa-chess-knight", "far fa-chess-knight", "fas fa-chess-pawn", "far fa-chess-pawn", "fas fa-chess-queen", "far fa-chess-queen", "fas fa-chess-rook", "far fa-chess-rook", "fas fa-chevron-down", "fas fa-chevron-left", "fas fa-chevron-right", "fas fa-chevron-up", "fas fa-child", "fas fa-child-combatant", "fas fa-child-dress", "fas fa-child-reaching", "fas fa-children", "fas fa-church", "fas fa-circle", "far fa-circle", "fas fa-circle-arrow-down", "fas fa-circle-arrow-left", "fas fa-circle-arrow-right", "fas fa-circle-arrow-up", "fas fa-circle-check", "far fa-circle-check", "fas fa-circle-chevron-down", "fas fa-circle-chevron-left", "fas fa-circle-chevron-right", "fas fa-circle-chevron-up", "fas fa-circle-dollar-to-slot", "fas fa-circle-dot", "far fa-circle-dot", "fas fa-circle-down", "far fa-circle-down", "fas fa-circle-exclamation", "fas fa-circle-h", "fas fa-circle-half-stroke", "fas fa-circle-info", "fas fa-circle-left", "far fa-circle-left", "fas fa-circle-minus", "fas fa-circle-nodes", "fas fa-circle-notch", "fas fa-circle-pause", "far fa-circle-pause", "fas fa-circle-play", "far fa-circle-play", "fas fa-circle-plus", "fas fa-circle-question", "far fa-circle-question", "fas fa-circle-radiation", "fas fa-circle-right", "far fa-circle-right", "fas fa-circle-stop", "far fa-circle-stop", "fas fa-circle-up", "far fa-circle-up", "fas fa-circle-user", "far fa-circle-user", "fas fa-circle-xmark", "far fa-circle-xmark", "fas fa-city", "fas fa-clapperboard", "fas fa-clipboard", "far fa-clipboard", "fas fa-clipboard-check", "fas fa-clipboard-list", "fas fa-clipboard-question", "fas fa-clipboard-user", "fas fa-clock", "far fa-clock", "fas fa-clock-rotate-left", "fas fa-clone", "far fa-clone", "fas fa-closed-captioning", "far fa-closed-captioning", "fas fa-cloud", "fas fa-cloud-arrow-down", "fas fa-cloud-arrow-up", "fas fa-cloud-bolt", "fas fa-cloud-meatball", "fas fa-cloud-moon", "fas fa-cloud-moon-rain", "fas fa-cloud-rain", "fas fa-cloud-showers-heavy", "fas fa-cloud-showers-water", "fas fa-cloud-sun", "fas fa-cloud-sun-rain", "fas fa-clover", "fas fa-code", "fas fa-code-branch", "fas fa-code-commit", "fas fa-code-compare", "fas fa-code-fork", "fas fa-code-merge", "fas fa-code-pull-request", "fas fa-coins", "fas fa-colon-sign", "fas fa-comment", "far fa-comment", "fas fa-comment-dollar", "fas fa-comment-dots", "far fa-comment-dots", "fas fa-comment-medical", "fas fa-comment-nodes", "fas fa-comment-slash", "fas fa-comment-sms", "fas fa-comments", "far fa-comments", "fas fa-comments-dollar", "fas fa-compact-disc", "fas fa-compass", "far fa-compass", "fas fa-compass-drafting", "fas fa-compress", "fas fa-computer", "fas fa-computer-mouse", "fas fa-cookie", "fas fa-cookie-bite", "fas fa-copy", "far fa-copy", "fas fa-copyright", "far fa-copyright", "fas fa-couch", "fas fa-cow", "fas fa-credit-card", "far fa-credit-card", "fas fa-crop", "fas fa-crop-simple", "fas fa-cross", "fas fa-crosshairs", "fas fa-crow", "fas fa-crown", "fas fa-crutch", "fas fa-cruzeiro-sign", "fas fa-cube", "fas fa-cubes", "fas fa-cubes-stacked", "fas fa-d", "fas fa-database", "fas fa-delete-left", "fas fa-democrat", "fas fa-desktop", "fas fa-dharmachakra", "fas fa-diagram-next", "fas fa-diagram-predecessor", "fas fa-diagram-project", "fas fa-diagram-successor", "fas fa-diamond", "fas fa-diamond-turn-right", "fas fa-dice", "fas fa-dice-d20", "fas fa-dice-d6", "fas fa-dice-five", "fas fa-dice-four", "fas fa-dice-one", "fas fa-dice-six", "fas fa-dice-three", "fas fa-dice-two", "fas fa-disease", "fas fa-display", "fas fa-divide", "fas fa-dna", "fas fa-dog", "fas fa-dollar-sign", "fas fa-dolly", "fas fa-dong-sign", "fas fa-door-closed", "fas fa-door-open", "fas fa-dove", "fas fa-down-left-and-up-right-to-center", "fas fa-down-long", "fas fa-download", "fas fa-dragon", "fas fa-draw-polygon", "fas fa-droplet", "fas fa-droplet-slash", "fas fa-drum", "fas fa-drum-steelpan", "fas fa-drumstick-bite", "fas fa-dumbbell", "fas fa-dumpster", "fas fa-dumpster-fire", "fas fa-dungeon", "fas fa-e", "fas fa-ear-deaf", "fas fa-ear-listen", "fas fa-earth-africa", "fas fa-earth-americas", "fas fa-earth-asia", "fas fa-earth-europe", "fas fa-earth-oceania", "fas fa-egg", "fas fa-eject", "fas fa-elevator", "fas fa-ellipsis", "fas fa-ellipsis-vertical", "fas fa-envelope", "far fa-envelope", "fas fa-envelope-circle-check", "fas fa-envelope-open", "far fa-envelope-open", "fas fa-envelope-open-text", "fas fa-envelopes-bulk", "fas fa-equals", "fas fa-eraser", "fas fa-ethernet", "fas fa-euro-sign", "fas fa-exclamation", "fas fa-expand", "fas fa-explosion", "fas fa-eye", "far fa-eye", "fas fa-eye-dropper", "fas fa-eye-low-vision", "fas fa-eye-slash", "far fa-eye-slash", "fas fa-f", "fas fa-face-angry", "far fa-face-angry", "fas fa-face-dizzy", "far fa-face-dizzy", "fas fa-face-flushed", "far fa-face-flushed", "fas fa-face-frown", "far fa-face-frown", "fas fa-face-frown-open", "far fa-face-frown-open", "fas fa-face-grimace", "far fa-face-grimace", "fas fa-face-grin", "far fa-face-grin", "fas fa-face-grin-beam", "far fa-face-grin-beam", "fas fa-face-grin-beam-sweat", "far fa-face-grin-beam-sweat", "fas fa-face-grin-hearts", "far fa-face-grin-hearts", "fas fa-face-grin-squint", "far fa-face-grin-squint", "fas fa-face-grin-squint-tears", "far fa-face-grin-squint-tears", "fas fa-face-grin-stars", "far fa-face-grin-stars", "fas fa-face-grin-tears", "far fa-face-grin-tears", "fas fa-face-grin-tongue", "far fa-face-grin-tongue", "fas fa-face-grin-tongue-squint", "far fa-face-grin-tongue-squint", "fas fa-face-grin-tongue-wink", "far fa-face-grin-tongue-wink", "fas fa-face-grin-wide", "far fa-face-grin-wide", "fas fa-face-grin-wink", "far fa-face-grin-wink", "fas fa-face-kiss", "far fa-face-kiss", "fas fa-face-kiss-beam", "far fa-face-kiss-beam", "fas fa-face-kiss-wink-heart", "far fa-face-kiss-wink-heart", "fas fa-face-laugh", "far fa-face-laugh", "fas fa-face-laugh-beam", "far fa-face-laugh-beam", "fas fa-face-laugh-squint", "far fa-face-laugh-squint", "fas fa-face-laugh-wink", "far fa-face-laugh-wink", "fas fa-face-meh", "far fa-face-meh", "fas fa-face-meh-blank", "far fa-face-meh-blank", "fas fa-face-rolling-eyes", "far fa-face-rolling-eyes", "fas fa-face-sad-cry", "far fa-face-sad-cry", "fas fa-face-sad-tear", "far fa-face-sad-tear", "fas fa-face-smile", "far fa-face-smile", "fas fa-face-smile-beam", "far fa-face-smile-beam", "fas fa-face-smile-wink", "far fa-face-smile-wink", "fas fa-face-surprise", "far fa-face-surprise", "fas fa-face-tired", "far fa-face-tired", "fas fa-fan", "fas fa-faucet", "fas fa-faucet-drip", "fas fa-fax", "fas fa-feather", "fas fa-feather-pointed", "fas fa-ferry", "fas fa-file", "far fa-file", "fas fa-file-arrow-down", "fas fa-file-arrow-up", "fas fa-file-audio", "far fa-file-audio", "fas fa-file-circle-check", "fas fa-file-circle-exclamation", "fas fa-file-circle-minus", "fas fa-file-circle-plus", "fas fa-file-circle-question", "fas fa-file-circle-xmark", "fas fa-file-code", "far fa-file-code", "fas fa-file-contract", "fas fa-file-csv", "fas fa-file-excel", "far fa-file-excel", "fas fa-file-export", "fas fa-file-fragment", "fas fa-file-half-dashed", "fas fa-file-image", "far fa-file-image", "fas fa-file-import", "fas fa-file-invoice", "fas fa-file-invoice-dollar", "fas fa-file-lines", "far fa-file-lines", "fas fa-file-medical", "fas fa-file-pdf", "far fa-file-pdf", "fas fa-file-pen", "fas fa-file-powerpoint", "far fa-file-powerpoint", "fas fa-file-prescription", "fas fa-file-shield", "fas fa-file-signature", "fas fa-file-video", "far fa-file-video", "fas fa-file-waveform", "fas fa-file-word", "far fa-file-word", "fas fa-file-zipper", "far fa-file-zipper", "fas fa-fill", "fas fa-fill-drip", "fas fa-film", "fas fa-filter", "fas fa-filter-circle-dollar", "fas fa-filter-circle-xmark", "fas fa-fingerprint", "fas fa-fire", "fas fa-fire-burner", "fas fa-fire-extinguisher", "fas fa-fire-flame-curved", "fas fa-fire-flame-simple", "fas fa-fish", "fas fa-fish-fins", "fas fa-flag", "far fa-flag", "fas fa-flag-checkered", "fas fa-flag-usa", "fas fa-flask", "fas fa-flask-vial", "fas fa-floppy-disk", "far fa-floppy-disk", "fas fa-florin-sign", "fas fa-folder", "far fa-folder", "fas fa-folder-closed", "far fa-folder-closed", "fas fa-folder-minus", "fas fa-folder-open", "far fa-folder-open", "fas fa-folder-plus", "fas fa-folder-tree", "fas fa-font", "fas fa-font-awesome", "far fa-font-awesome", "fas fa-football", "fas fa-forward", "fas fa-forward-fast", "fas fa-forward-step", "fas fa-franc-sign", "fas fa-frog", "fas fa-futbol", "far fa-futbol", "fas fa-g", "fas fa-gamepad", "fas fa-gas-pump", "fas fa-gauge", "fas fa-gauge-high", "fas fa-gauge-simple", "fas fa-gauge-simple-high", "fas fa-gavel", "fas fa-gear", "fas fa-gears", "fas fa-gem", "far fa-gem", "fas fa-genderless", "fas fa-ghost", "fas fa-gift", "fas fa-gifts", "fas fa-glass-water", "fas fa-glass-water-droplet", "fas fa-glasses", "fas fa-globe", "fas fa-golf-ball-tee", "fas fa-gopuram", "fas fa-graduation-cap", "fas fa-greater-than", "fas fa-greater-than-equal", "fas fa-grip", "fas fa-grip-lines", "fas fa-grip-lines-vertical", "fas fa-grip-vertical", "fas fa-group-arrows-rotate", "fas fa-guarani-sign", "fas fa-guitar", "fas fa-gun", "fas fa-h", "fas fa-hammer", "fas fa-hamsa", "fas fa-hand", "far fa-hand", "fas fa-hand-back-fist", "far fa-hand-back-fist", "fas fa-hand-dots", "fas fa-hand-fist", "fas fa-hand-holding", "fas fa-hand-holding-dollar", "fas fa-hand-holding-droplet", "fas fa-hand-holding-hand", "fas fa-hand-holding-heart", "fas fa-hand-holding-medical", "fas fa-hand-lizard", "far fa-hand-lizard", "fas fa-hand-middle-finger", "fas fa-hand-peace", "far fa-hand-peace", "fas fa-hand-point-down", "far fa-hand-point-down", "fas fa-hand-point-left", "far fa-hand-point-left", "fas fa-hand-point-right", "far fa-hand-point-right", "fas fa-hand-point-up", "far fa-hand-point-up", "fas fa-hand-pointer", "far fa-hand-pointer", "fas fa-hand-scissors", "far fa-hand-scissors", "fas fa-hand-sparkles", "fas fa-hand-spock", "far fa-hand-spock", "fas fa-handcuffs", "fas fa-hands", "fas fa-hands-asl-interpreting", "fas fa-hands-bound", "fas fa-hands-bubbles", "fas fa-hands-clapping", "fas fa-hands-holding", "fas fa-hands-holding-child", "fas fa-hands-holding-circle", "fas fa-hands-praying", "fas fa-handshake", "far fa-handshake", "fas fa-handshake-angle", "fas fa-handshake-simple", "fas fa-handshake-simple-slash", "fas fa-handshake-slash", "fas fa-hanukiah", "fas fa-hard-drive", "far fa-hard-drive", "fas fa-hashtag", "fas fa-hat-cowboy", "fas fa-hat-cowboy-side", "fas fa-hat-wizard", "fas fa-head-side-cough", "fas fa-head-side-cough-slash", "fas fa-head-side-mask", "fas fa-head-side-virus", "fas fa-heading", "fas fa-headphones", "fas fa-headphones-simple", "fas fa-headset", "fas fa-heart", "far fa-heart", "fas fa-heart-circle-bolt", "fas fa-heart-circle-check", "fas fa-heart-circle-exclamation", "fas fa-heart-circle-minus", "fas fa-heart-circle-plus", "fas fa-heart-circle-xmark", "fas fa-heart-crack", "fas fa-heart-pulse", "fas fa-helicopter", "fas fa-helicopter-symbol", "fas fa-helmet-safety", "fas fa-helmet-un", "fas fa-hexagon-nodes", "fas fa-hexagon-nodes-bolt", "fas fa-highlighter", "fas fa-hill-avalanche", "fas fa-hill-rockslide", "fas fa-hippo", "fas fa-hockey-puck", "fas fa-holly-berry", "fas fa-horse", "fas fa-horse-head", "fas fa-hospital", "far fa-hospital", "fas fa-hospital-user", "fas fa-hot-tub-person", "fas fa-hotdog", "fas fa-hotel", "fas fa-hourglass", "far fa-hourglass", "fas fa-hourglass-end", "fas fa-hourglass-half", "far fa-hourglass-half", "fas fa-hourglass-start", "fas fa-house", "fas fa-house-chimney", "fas fa-house-chimney-crack", "fas fa-house-chimney-medical", "fas fa-house-chimney-user", "fas fa-house-chimney-window", "fas fa-house-circle-check", "fas fa-house-circle-exclamation", "fas fa-house-circle-xmark", "fas fa-house-crack", "fas fa-house-fire", "fas fa-house-flag", "fas fa-house-flood-water", "fas fa-house-flood-water-circle-arrow-right", "fas fa-house-laptop", "fas fa-house-lock", "fas fa-house-medical", "fas fa-house-medical-circle-check", "fas fa-house-medical-circle-exclamation", "fas fa-house-medical-circle-xmark", "fas fa-house-medical-flag", "fas fa-house-signal", "fas fa-house-tsunami", "fas fa-house-user", "fas fa-hryvnia-sign", "fas fa-hurricane", "fas fa-i", "fas fa-i-cursor", "fas fa-ice-cream", "fas fa-icicles", "fas fa-icons", "fas fa-id-badge", "far fa-id-badge", "fas fa-id-card", "far fa-id-card", "fas fa-id-card-clip", "fas fa-igloo", "fas fa-image", "far fa-image", "fas fa-image-portrait", "fas fa-images", "far fa-images", "fas fa-inbox", "fas fa-indent", "fas fa-indian-rupee-sign", "fas fa-industry", "fas fa-infinity", "fas fa-info", "fas fa-italic", "fas fa-j", "fas fa-jar", "fas fa-jar-wheat", "fas fa-jedi", "fas fa-jet-fighter", "fas fa-jet-fighter-up", "fas fa-joint", "fas fa-jug-detergent", "fas fa-k", "fas fa-kaaba", "fas fa-key", "fas fa-keyboard", "far fa-keyboard", "fas fa-khanda", "fas fa-kip-sign", "fas fa-kit-medical", "fas fa-kitchen-set", "fas fa-kiwi-bird", "fas fa-l", "fas fa-land-mine-on", "fas fa-landmark", "fas fa-landmark-dome", "fas fa-landmark-flag", "fas fa-language", "fas fa-laptop", "fas fa-laptop-code", "fas fa-laptop-file", "fas fa-laptop-medical", "fas fa-lari-sign", "fas fa-layer-group", "fas fa-leaf", "fas fa-left-long", "fas fa-left-right", "fas fa-lemon", "far fa-lemon", "fas fa-less-than", "fas fa-less-than-equal", "fas fa-life-ring", "far fa-life-ring", "fas fa-lightbulb", "far fa-lightbulb", "fas fa-lines-leaning", "fas fa-link", "fas fa-link-slash", "fas fa-lira-sign", "fas fa-list", "fas fa-list-check", "fas fa-list-ol", "fas fa-list-ul", "fas fa-litecoin-sign", "fas fa-location-arrow", "fas fa-location-crosshairs", "fas fa-location-dot", "fas fa-location-pin", "fas fa-location-pin-lock", "fas fa-lock", "fas fa-lock-open", "fas fa-locust", "fas fa-lungs", "fas fa-lungs-virus", "fas fa-m", "fas fa-magnet", "fas fa-magnifying-glass", "fas fa-magnifying-glass-arrow-right", "fas fa-magnifying-glass-chart", "fas fa-magnifying-glass-dollar", "fas fa-magnifying-glass-location", "fas fa-magnifying-glass-minus", "fas fa-magnifying-glass-plus", "fas fa-manat-sign", "fas fa-map", "far fa-map", "fas fa-map-location", "fas fa-map-location-dot", "fas fa-map-pin", "fas fa-marker", "fas fa-mars", "fas fa-mars-and-venus", "fas fa-mars-and-venus-burst", "fas fa-mars-double", "fas fa-mars-stroke", "fas fa-mars-stroke-right", "fas fa-mars-stroke-up", "fas fa-martini-glass", "fas fa-martini-glass-citrus", "fas fa-martini-glass-empty", "fas fa-mask", "fas fa-mask-face", "fas fa-mask-ventilator", "fas fa-masks-theater", "fas fa-mattress-pillow", "fas fa-maximize", "fas fa-medal", "fas fa-memory", "fas fa-menorah", "fas fa-mercury", "fas fa-message", "far fa-message", "fas fa-meteor", "fas fa-microchip", "fas fa-microphone", "fas fa-microphone-lines", "fas fa-microphone-lines-slash", "fas fa-microphone-slash", "fas fa-microscope", "fas fa-mill-sign", "fas fa-minimize", "fas fa-minus", "fas fa-mitten", "fas fa-mobile", "fas fa-mobile-button", "fas fa-mobile-retro", "fas fa-mobile-screen", "fas fa-mobile-screen-button", "fas fa-money-bill", "fas fa-money-bill-1", "far fa-money-bill-1", "fas fa-money-bill-1-wave", "fas fa-money-bill-transfer", "fas fa-money-bill-trend-up", "fas fa-money-bill-wave", "fas fa-money-bill-wheat", "fas fa-money-bills", "fas fa-money-check", "fas fa-money-check-dollar", "fas fa-monument", "fas fa-moon", "far fa-moon", "fas fa-mortar-pestle", "fas fa-mosque", "fas fa-mosquito", "fas fa-mosquito-net", "fas fa-motorcycle", "fas fa-mound", "fas fa-mountain", "fas fa-mountain-city", "fas fa-mountain-sun", "fas fa-mug-hot", "fas fa-mug-saucer", "fas fa-music", "fas fa-n", "fas fa-naira-sign", "fas fa-network-wired", "fas fa-neuter", "fas fa-newspaper", "far fa-newspaper", "fas fa-not-equal", "fas fa-notdef", "fas fa-note-sticky", "far fa-note-sticky", "fas fa-notes-medical", "fas fa-o", "fas fa-object-group", "far fa-object-group", "fas fa-object-ungroup", "far fa-object-ungroup", "fas fa-oil-can", "fas fa-oil-well", "fas fa-om", "fas fa-otter", "fas fa-outdent", "fas fa-p", "fas fa-pager", "fas fa-paint-roller", "fas fa-paintbrush", "fas fa-palette", "fas fa-pallet", "fas fa-panorama", "fas fa-paper-plane", "far fa-paper-plane", "fas fa-paperclip", "fas fa-parachute-box", "fas fa-paragraph", "fas fa-passport", "fas fa-paste", "far fa-paste", "fas fa-pause", "fas fa-paw", "fas fa-peace", "fas fa-pen", "fas fa-pen-clip", "fas fa-pen-fancy", "fas fa-pen-nib", "fas fa-pen-ruler", "fas fa-pen-to-square", "far fa-pen-to-square", "fas fa-pencil", "fas fa-people-arrows", "fas fa-people-carry-box", "fas fa-people-group", "fas fa-people-line", "fas fa-people-pulling", "fas fa-people-robbery", "fas fa-people-roof", "fas fa-pepper-hot", "fas fa-percent", "fas fa-person", "fas fa-person-arrow-down-to-line", "fas fa-person-arrow-up-from-line", "fas fa-person-biking", "fas fa-person-booth", "fas fa-person-breastfeeding", "fas fa-person-burst", "fas fa-person-cane", "fas fa-person-chalkboard", "fas fa-person-circle-check", "fas fa-person-circle-exclamation", "fas fa-person-circle-minus", "fas fa-person-circle-plus", "fas fa-person-circle-question", "fas fa-person-circle-xmark", "fas fa-person-digging", "fas fa-person-dots-from-line", "fas fa-person-dress", "fas fa-person-dress-burst", "fas fa-person-drowning", "fas fa-person-falling", "fas fa-person-falling-burst", "fas fa-person-half-dress", "fas fa-person-harassing", "fas fa-person-hiking", "fas fa-person-military-pointing", "fas fa-person-military-rifle", "fas fa-person-military-to-person", "fas fa-person-praying", "fas fa-person-pregnant", "fas fa-person-rays", "fas fa-person-rifle", "fas fa-person-running", "fas fa-person-shelter", "fas fa-person-skating", "fas fa-person-skiing", "fas fa-person-skiing-nordic", "fas fa-person-snowboarding", "fas fa-person-swimming", "fas fa-person-through-window", "fas fa-person-walking", "fas fa-person-walking-arrow-loop-left", "fas fa-person-walking-arrow-right", "fas fa-person-walking-dashed-line-arrow-right", "fas fa-person-walking-luggage", "fas fa-person-walking-with-cane", "fas fa-peseta-sign", "fas fa-peso-sign", "fas fa-phone", "fas fa-phone-flip", "fas fa-phone-slash", "fas fa-phone-volume", "fas fa-photo-film", "fas fa-piggy-bank", "fas fa-pills", "fas fa-pizza-slice", "fas fa-place-of-worship", "fas fa-plane", "fas fa-plane-arrival", "fas fa-plane-circle-check", "fas fa-plane-circle-exclamation", "fas fa-plane-circle-xmark", "fas fa-plane-departure", "fas fa-plane-lock", "fas fa-plane-slash", "fas fa-plane-up", "fas fa-plant-wilt", "fas fa-plate-wheat", "fas fa-play", "fas fa-plug", "fas fa-plug-circle-bolt", "fas fa-plug-circle-check", "fas fa-plug-circle-exclamation", "fas fa-plug-circle-minus", "fas fa-plug-circle-plus", "fas fa-plug-circle-xmark", "fas fa-plus", "fas fa-plus-minus", "fas fa-podcast", "fas fa-poo", "fas fa-poo-storm", "fas fa-poop", "fas fa-power-off", "fas fa-prescription", "fas fa-prescription-bottle", "fas fa-prescription-bottle-medical", "fas fa-print", "fas fa-pump-medical", "fas fa-pump-soap", "fas fa-puzzle-piece", "fas fa-q", "fas fa-qrcode", "fas fa-question", "fas fa-quote-left", "fas fa-quote-right", "fas fa-r", "fas fa-radiation", "fas fa-radio", "fas fa-rainbow", "fas fa-ranking-star", "fas fa-receipt", "fas fa-record-vinyl", "fas fa-rectangle-ad", "fas fa-rectangle-list", "far fa-rectangle-list", "fas fa-rectangle-xmark", "far fa-rectangle-xmark", "fas fa-recycle", "fas fa-registered", "far fa-registered", "fas fa-repeat", "fas fa-reply", "fas fa-reply-all", "fas fa-republican", "fas fa-restroom", "fas fa-retweet", "fas fa-ribbon", "fas fa-right-from-bracket", "fas fa-right-left", "fas fa-right-long", "fas fa-right-to-bracket", "fas fa-ring", "fas fa-road", "fas fa-road-barrier", "fas fa-road-bridge", "fas fa-road-circle-check", "fas fa-road-circle-exclamation", "fas fa-road-circle-xmark", "fas fa-road-lock", "fas fa-road-spikes", "fas fa-robot", "fas fa-rocket", "fas fa-rotate", "fas fa-rotate-left", "fas fa-rotate-right", "fas fa-route", "fas fa-rss", "fas fa-ruble-sign", "fas fa-rug", "fas fa-ruler", "fas fa-ruler-combined", "fas fa-ruler-horizontal", "fas fa-ruler-vertical", "fas fa-rupee-sign", "fas fa-rupiah-sign", "fas fa-s", "fas fa-sack-dollar", "fas fa-sack-xmark", "fas fa-sailboat", "fas fa-satellite", "fas fa-satellite-dish", "fas fa-scale-balanced", "fas fa-scale-unbalanced", "fas fa-scale-unbalanced-flip", "fas fa-school", "fas fa-school-circle-check", "fas fa-school-circle-exclamation", "fas fa-school-circle-xmark", "fas fa-school-flag", "fas fa-school-lock", "fas fa-scissors", "fas fa-screwdriver", "fas fa-screwdriver-wrench", "fas fa-scroll", "fas fa-scroll-torah", "fas fa-sd-card", "fas fa-section", "fas fa-seedling", "fas fa-server", "fas fa-shapes", "fas fa-share", "fas fa-share-from-square", "far fa-share-from-square", "fas fa-share-nodes", "fas fa-sheet-plastic", "fas fa-shekel-sign", "fas fa-shield", "fas fa-shield-cat", "fas fa-shield-dog", "fas fa-shield-halved", "fas fa-shield-heart", "fas fa-shield-virus", "fas fa-ship", "fas fa-shirt", "fas fa-shoe-prints", "fas fa-shop", "fas fa-shop-lock", "fas fa-shop-slash", "fas fa-shower", "fas fa-shrimp", "fas fa-shuffle", "fas fa-shuttle-space", "fas fa-sign-hanging", "fas fa-signal", "fas fa-signature", "fas fa-signs-post", "fas fa-sim-card", "fas fa-sink", "fas fa-sitemap", "fas fa-skull", "fas fa-skull-crossbones", "fas fa-slash", "fas fa-sleigh", "fas fa-sliders", "fas fa-smog", "fas fa-smoking", "fas fa-snowflake", "far fa-snowflake", "fas fa-snowman", "fas fa-snowplow", "fas fa-soap", "fas fa-socks", "fas fa-solar-panel", "fas fa-sort", "fas fa-sort-down", "fas fa-sort-up", "fas fa-spa", "fas fa-spaghetti-monster-flying", "fas fa-spell-check", "fas fa-spider", "fas fa-spinner", "fas fa-splotch", "fas fa-spoon", "fas fa-spray-can", "fas fa-spray-can-sparkles", "fas fa-square", "far fa-square", "fas fa-square-arrow-up-right", "fas fa-square-binary", "fas fa-square-caret-down", "far fa-square-caret-down", "fas fa-square-caret-left", "far fa-square-caret-left", "fas fa-square-caret-right", "far fa-square-caret-right", "fas fa-square-caret-up", "far fa-square-caret-up", "fas fa-square-check", "far fa-square-check", "fas fa-square-envelope", "fas fa-square-full", "far fa-square-full", "fas fa-square-h", "fas fa-square-minus", "far fa-square-minus", "fas fa-square-nfi", "fas fa-square-parking", "fas fa-square-pen", "fas fa-square-person-confined", "fas fa-square-phone", "fas fa-square-phone-flip", "fas fa-square-plus", "far fa-square-plus", "fas fa-square-poll-horizontal", "fas fa-square-poll-vertical", "fas fa-square-root-variable", "fas fa-square-rss", "fas fa-square-share-nodes", "fas fa-square-up-right", "fas fa-square-virus", "fas fa-square-xmark", "fas fa-staff-snake", "fas fa-stairs", "fas fa-stamp", "fas fa-stapler", "fas fa-star", "far fa-star", "fas fa-star-and-crescent", "fas fa-star-half", "far fa-star-half", "fas fa-star-half-stroke", "far fa-star-half-stroke", "fas fa-star-of-david", "fas fa-star-of-life", "fas fa-sterling-sign", "fas fa-stethoscope", "fas fa-stop", "fas fa-stopwatch", "fas fa-stopwatch-20", "fas fa-store", "fas fa-store-slash", "fas fa-street-view", "fas fa-strikethrough", "fas fa-stroopwafel", "fas fa-subscript", "fas fa-suitcase", "fas fa-suitcase-medical", "fas fa-suitcase-rolling", "fas fa-sun", "far fa-sun", "fas fa-sun-plant-wilt", "fas fa-superscript", "fas fa-swatchbook", "fas fa-synagogue", "fas fa-syringe", "fas fa-t", "fas fa-table", "fas fa-table-cells", "fas fa-table-cells-column-lock", "fas fa-table-cells-large", "fas fa-table-cells-row-lock", "fas fa-table-cells-row-unlock", "fas fa-table-columns", "fas fa-table-list", "fas fa-table-tennis-paddle-ball", "fas fa-tablet", "fas fa-tablet-button", "fas fa-tablet-screen-button", "fas fa-tablets", "fas fa-tachograph-digital", "fas fa-tag", "fas fa-tags", "fas fa-tape", "fas fa-tarp", "fas fa-tarp-droplet", "fas fa-taxi", "fas fa-teeth", "fas fa-teeth-open", "fas fa-temperature-arrow-down", "fas fa-temperature-arrow-up", "fas fa-temperature-empty", "fas fa-temperature-full", "fas fa-temperature-half", "fas fa-temperature-high", "fas fa-temperature-low", "fas fa-temperature-quarter", "fas fa-temperature-three-quarters", "fas fa-tenge-sign", "fas fa-tent", "fas fa-tent-arrow-down-to-line", "fas fa-tent-arrow-left-right", "fas fa-tent-arrow-turn-left", "fas fa-tent-arrows-down", "fas fa-tents", "fas fa-terminal", "fas fa-text-height", "fas fa-text-slash", "fas fa-text-width", "fas fa-thermometer", "fas fa-thumbs-down", "far fa-thumbs-down", "fas fa-thumbs-up", "far fa-thumbs-up", "fas fa-thumbtack", "fas fa-thumbtack-slash", "fas fa-ticket", "fas fa-ticket-simple", "fas fa-timeline", "fas fa-toggle-off", "fas fa-toggle-on", "fas fa-toilet", "fas fa-toilet-paper", "fas fa-toilet-paper-slash", "fas fa-toilet-portable", "fas fa-toilets-portable", "fas fa-toolbox", "fas fa-tooth", "fas fa-torii-gate", "fas fa-tornado", "fas fa-tower-broadcast", "fas fa-tower-cell", "fas fa-tower-observation", "fas fa-tractor", "fas fa-trademark", "fas fa-traffic-light", "fas fa-trailer", "fas fa-train", "fas fa-train-subway", "fas fa-train-tram", "fas fa-transgender", "fas fa-trash", "fas fa-trash-arrow-up", "fas fa-trash-can", "far fa-trash-can", "fas fa-trash-can-arrow-up", "fas fa-tree", "fas fa-tree-city", "fas fa-triangle-exclamation", "fas fa-trophy", "fas fa-trowel", "fas fa-trowel-bricks", "fas fa-truck", "fas fa-truck-arrow-right", "fas fa-truck-droplet", "fas fa-truck-fast", "fas fa-truck-field", "fas fa-truck-field-un", "fas fa-truck-front", "fas fa-truck-medical", "fas fa-truck-monster", "fas fa-truck-moving", "fas fa-truck-pickup", "fas fa-truck-plane", "fas fa-truck-ramp-box", "fas fa-tty", "fas fa-turkish-lira-sign", "fas fa-turn-down", "fas fa-turn-up", "fas fa-tv", "fas fa-u", "fas fa-umbrella", "fas fa-umbrella-beach", "fas fa-underline", "fas fa-universal-access", "fas fa-unlock", "fas fa-unlock-keyhole", "fas fa-up-down", "fas fa-up-down-left-right", "fas fa-up-long", "fas fa-up-right-and-down-left-from-center", "fas fa-up-right-from-square", "fas fa-upload", "fas fa-user", "far fa-user", "fas fa-user-astronaut", "fas fa-user-check", "fas fa-user-clock", "fas fa-user-doctor", "fas fa-user-gear", "fas fa-user-graduate", "fas fa-user-group", "fas fa-user-injured", "fas fa-user-large", "fas fa-user-large-slash", "fas fa-user-lock", "fas fa-user-minus", "fas fa-user-ninja", "fas fa-user-nurse", "fas fa-user-pen", "fas fa-user-plus", "fas fa-user-secret", "fas fa-user-shield", "fas fa-user-slash", "fas fa-user-tag", "fas fa-user-tie", "fas fa-user-xmark", "fas fa-users", "fas fa-users-between-lines", "fas fa-users-gear", "fas fa-users-line", "fas fa-users-rays", "fas fa-users-rectangle", "fas fa-users-slash", "fas fa-users-viewfinder", "fas fa-utensils", "fas fa-v", "fas fa-van-shuttle", "fas fa-vault", "fas fa-vector-square", "fas fa-venus", "fas fa-venus-double", "fas fa-venus-mars", "fas fa-vest", "fas fa-vest-patches", "fas fa-vial", "fas fa-vial-circle-check", "fas fa-vial-virus", "fas fa-vials", "fas fa-video", "fas fa-video-slash", "fas fa-vihara", "fas fa-virus", "fas fa-virus-covid", "fas fa-virus-covid-slash", "fas fa-virus-slash", "fas fa-viruses", "fas fa-voicemail", "fas fa-volcano", "fas fa-volleyball", "fas fa-volume-high", "fas fa-volume-low", "fas fa-volume-off", "fas fa-volume-xmark", "fas fa-vr-cardboard", "fas fa-w", "fas fa-walkie-talkie", "fas fa-wallet", "fas fa-wand-magic", "fas fa-wand-magic-sparkles", "fas fa-wand-sparkles", "fas fa-warehouse", "fas fa-water", "fas fa-water-ladder", "fas fa-wave-square", "fas fa-web-awesome", "fas fa-weight-hanging", "fas fa-weight-scale", "fas fa-wheat-awn", "fas fa-wheat-awn-circle-exclamation", "fas fa-wheelchair", "fas fa-wheelchair-move", "fas fa-whiskey-glass", "fas fa-wifi", "fas fa-wind", "fas fa-window-maximize", "far fa-window-maximize", "fas fa-window-minimize", "far fa-window-minimize", "fas fa-window-restore", "far fa-window-restore", "fas fa-wine-bottle", "fas fa-wine-glass", "fas fa-wine-glass-empty", "fas fa-won-sign", "fas fa-worm", "fas fa-wrench", "fas fa-x", "fas fa-x-ray", "fas fa-xmark", "fas fa-xmarks-lines", "fas fa-y", "fas fa-yen-sign", "fas fa-yin-yang", "fas fa-z"];
       this.iconList.push(...this.getMetadata().get('app.clientIcons.classList', []));
     }
 
@@ -25106,7 +26133,7 @@ define("controllers/portal-role", ["exports", "controllers/record"], function (_
   var _default = _exports.default = PortalRoleController;
 });
 
-define("controllers/admin", ["exports", "controller", "search-manager", "views/admin/index", "di", "language", "views/edit"], function (_exports, _controller, _searchManager, _index, _di, _language, _edit) {
+define("controllers/admin", ["exports", "controller", "search-manager", "views/admin/index", "di", "language", "views/edit", "views/admin/pipelines/list-for-entity-type"], function (_exports, _controller, _searchManager, _index, _di, _language, _edit, _listForEntityType) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -25118,6 +26145,7 @@ define("controllers/admin", ["exports", "controller", "search-manager", "views/a
   _index = _interopRequireDefault(_index);
   _language = _interopRequireDefault(_language);
   _edit = _interopRequireDefault(_edit);
+  _listForEntityType = _interopRequireDefault(_listForEntityType);
   var _staticBlock;
   let _init_language, _init_extra_language;
   /************************************************************************
@@ -25207,12 +26235,16 @@ define("controllers/admin", ["exports", "controller", "search-manager", "views/a
       if (!_edit.default.isPrototypeOf(ViewClass)) {
         throw new Error("View should inherit views/edit.");
       }
+      let label = defs.label;
+      if (defs.labelTranslation) {
+        label = this.language.translatePath(defs.labelTranslation);
+      }
       const editView = new ViewClass({
         model: model,
         headerTemplate: 'admin/settings/headers/page',
         recordView: defs.recordView,
         page: page,
-        label: defs.label,
+        label: label,
         optionsToPass: ['page', 'label']
       });
       this.main(editView);
@@ -25529,6 +26561,32 @@ define("controllers/admin", ["exports", "controller", "search-manager", "views/a
           searchManager: searchManager
         });
       });
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @param {Record} options
+     */
+    async actionPipelines() {
+      let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      if (options !== null && options !== void 0 && options.scope) {
+        const collection = await this.collectionFactory.create('Pipeline');
+        collection.maxSize = this.getConfig().get('recordsPerPage');
+        collection.where = [{
+          type: 'equals',
+          attribute: 'entityType',
+          value: options.scope
+        }];
+        const view = new _listForEntityType.default({
+          scope: 'Pipeline',
+          collection,
+          targetEntityType: options.scope
+        });
+        this.main(view);
+        return;
+      }
+      this.main('views/admin/pipelines/main');
     }
 
     // noinspection JSUnusedGlobalSymbols

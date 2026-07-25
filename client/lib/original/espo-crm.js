@@ -1,3 +1,81 @@
+define("modules/crm/views/meeting/record/row-actions/default", ["exports", "views/record/row-actions/default"], function (_exports, _default) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default = _interopRequireDefault(_default);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class MeetingDefaultRowActionsView extends _default.default {
+    getActionList() {
+      const actionList = super.getActionList();
+      actionList.forEach(item => {
+        item.data = item.data ?? {};
+        item.data.scope = this.model.entityType;
+      });
+      if (this.options.acl.edit && !['Held', 'Not Held'].includes(this.model.attributes.status) && this.getAcl().checkField(this.model.entityType, 'status', 'edit')) {
+        /** @type {string[]} */
+        const options = this.model.getFieldParam('status', 'options') ?? [];
+        const notActualStatuses = [...this.getMetadata().get(`scopes.${this.model.entityType}.completedStatusList`, []), ...this.getMetadata().get(`scopes.${this.model.entityType}.canceledStatusList`, [])];
+        if (options.includes('Held') && !notActualStatuses.includes(this.model.attributes.status)) {
+          actionList.push({
+            action: 'setHeld',
+            label: 'Set Held',
+            data: {
+              id: this.model.id,
+              scope: this.model.entityType
+            },
+            groupIndex: 1,
+            iconClass: 'fas fa-check'
+          });
+        }
+        if (options.includes('Not Held') && !notActualStatuses.includes(this.model.attributes.status)) {
+          actionList.push({
+            action: 'setNotHeld',
+            label: 'Set Not Held',
+            data: {
+              id: this.model.id,
+              scope: this.model.entityType
+            },
+            groupIndex: 1
+          });
+        }
+      }
+      return actionList;
+    }
+  }
+  _exports.default = MeetingDefaultRowActionsView;
+});
+
 define("modules/crm/views/meeting/fields/attendees", ["exports", "views/fields/link-multiple-with-role"], function (_exports, _linkMultipleWithRole) {
   "use strict";
 
@@ -224,6 +302,67 @@ define("modules/crm/views/task/record/list", ["exports", "views/record/list"], f
   _exports.default = _default;
 });
 
+define("modules/crm/views/task/record/row-actions/default", ["exports", "views/record/row-actions/default"], function (_exports, _default) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default = _interopRequireDefault(_default);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class TaskDefaultRowActionsView extends _default.default {
+    getActionList() {
+      const actionList = super.getActionList();
+      const historyStatusList = [...this.getMetadata().get(`scopes.${this.model.entityType}.completedStatusList`, []), ...this.getMetadata().get(`scopes.${this.model.entityType}.canceledStatusList`, [])];
+
+      /** @type {string[]} */
+      const options = this.model.getFieldParam('status', 'options') ?? [];
+      if (this.options.acl.edit && options.includes('Completed') && !historyStatusList.includes(this.model.attributes.status)) {
+        actionList.push({
+          action: 'setCompleted',
+          label: 'Complete',
+          data: {
+            id: this.model.id
+          },
+          groupIndex: 1,
+          iconClass: 'fas fa-check'
+        });
+      }
+      return actionList;
+    }
+  }
+  _exports.default = TaskDefaultRowActionsView;
+});
+
 define("modules/crm/views/record/panels/tasks", ["exports", "views/record/panels/relationship", "helpers/record/create-related"], function (_exports, _relationship, _createRelated) {
   "use strict";
 
@@ -278,7 +417,8 @@ define("modules/crm/views/record/panels/tasks", ["exports", "views/record/panels
     }];
     actionList = [{
       label: 'View List',
-      action: 'viewRelatedList'
+      action: 'viewRelatedList',
+      iconClass: 'fas fa-align-justify'
     }];
     listLayout = {
       rows: [[{
@@ -304,6 +444,7 @@ define("modules/crm/views/record/panels/tasks", ["exports", "views/record/panels
         this.link = 'tasksPrimary';
       }
       this.url = this.model.entityType + '/' + this.model.id + '/' + this.link;
+      this.setupListLayout();
       this.setupSorting();
       if (this.filterList && this.filterList.length) {
         this.filter = this.getStoredFilter();
@@ -331,6 +472,25 @@ define("modules/crm/views/record/panels/tasks", ["exports", "views/record/panels
         events += ' update-related:tasks';
       }
       this.listenTo(this.model, events, () => this.collection.fetch());
+    }
+
+    /**
+     * @private
+     */
+    setupListLayout() {
+      if (!this.getMetadata().get(`scopes.Task.assignedUsers`)) {
+        return;
+      }
+      this.listLayout = Espo.Utils.cloneDeep(this.listLayout);
+      for (const row of this.listLayout.rows) {
+        const index = row.findIndex(row => row.name === 'assignedUser');
+        if (index !== -1) {
+          row.splice(index, 1);
+        }
+      }
+      this.listLayout.rows.push([{
+        name: 'assignedUsers'
+      }]);
     }
     afterRender() {
       this.createView('list', 'views/record/list-expanded', {
@@ -444,7 +604,8 @@ define("modules/crm/views/record/panels/activities", ["exports", "views/record/p
       action: 'composeEmail',
       label: 'Compose Email',
       acl: 'create',
-      aclScope: 'Email'
+      aclScope: 'Email',
+      iconClass: 'far fa-envelope'
     }];
     listLayout = {};
     defaultListLayout = {
@@ -578,7 +739,8 @@ define("modules/crm/views/record/panels/activities", ["exports", "views/record/p
           text: this.translate(label, 'labels', scope),
           data: {},
           acl: 'create',
-          aclScope: scope
+          aclScope: scope,
+          iconClass: 'fas fa-plus'
         };
         const link = this.getMetadata().get(['clientDefs', scope, 'activityDefs', 'link']);
         if (link) {
@@ -629,7 +791,8 @@ define("modules/crm/views/record/panels/activities", ["exports", "views/record/p
             scope: scope
           },
           acl: 'read',
-          aclScope: scope
+          aclScope: scope,
+          iconClass: 'fas fa-align-justify'
         };
         this.actionList.push(o);
       });
@@ -650,7 +813,7 @@ define("modules/crm/views/record/panels/activities", ["exports", "views/record/p
           rowActionsView: this.rowActionsView,
           checkboxes: false,
           collection: this.collection,
-          listLayout: this.listLayout
+          multiListLayout: this.listLayout
         }, view => {
           view.render();
           this.listenTo(view, 'after:save', () => {
@@ -977,6 +1140,7 @@ define("modules/crm/views/meeting/detail", ["exports", "views/detail", "moment"]
       this.addMenuItem('buttons', {
         name: 'setAcceptanceStatus',
         text: '',
+        style: 'text',
         hidden: true,
         onClick: () => this.actionSetAcceptanceStatus()
       });
@@ -1262,6 +1426,47 @@ define("modules/crm/views/meeting/record/list", ["exports", "views/record/list"]
       });
     }
   }
+  _exports.default = _default;
+});
+
+define("modules/crm/views/meeting/record/row-actions/dashlet", ["exports", "modules/crm/views/meeting/record/row-actions/default"], function (_exports, _default2) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default2 = _interopRequireDefault(_default2);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class _default extends _default2.default {}
   _exports.default = _default;
 });
 
@@ -2342,236 +2547,118 @@ define('crm:views/task/record/list-expanded',
     });
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/task/record/detail", ["exports", "views/record/detail", "ui"], function (_exports, _detail, _ui) {
+  "use strict";
 
-define('crm:views/task/record/detail', ['views/record/detail'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _detail = _interopRequireDefault(_detail);
+  _ui = _interopRequireDefault(_ui);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        duplicateAction: true,
-
-        setupActionItems: function () {
-            Dep.prototype.setupActionItems.call(this);
-            if (this.getAcl().checkModel(this.model, 'edit')) {
-                if (
-                    !~['Completed', 'Canceled'].indexOf(this.model.get('status')) &&
-                    this.getAcl().checkField(this.entityType, 'status', 'edit')
-                ) {
-                    this.dropdownItemList.push({
-                        'label': 'Complete',
-                        'name': 'setCompleted'
-                    });
-                }
-
-                this.listenToOnce(this.model, 'sync', function () {
-                    if (~['Completed', 'Canceled'].indexOf(this.model.get('status'))) {
-                        this.removeButton('setCompleted');
-                    }
-                }, this);
-            }
-        },
-
-        manageAccessEdit: function (second) {
-            Dep.prototype.manageAccessEdit.call(this, second);
-
-            if (second) {
-                if (!this.getAcl().checkModel(this.model, 'edit', true)) {
-                    this.hideActionItem('setCompleted');
-                }
-            }
-        },
-
-        actionSetCompleted: function () {
-            this.model.save({status: 'Completed'}, {patch: true})
-                .then(() => Espo.Ui.success(this.translate('Saved')));
-
-        },
-    });
+  class TaskDetailRecordView extends _detail.default {
+    setupActionItems() {
+      super.setupActionItems();
+      this.dropdownItemList.push({
+        label: 'Complete',
+        name: 'setCompleted',
+        onClick: () => this.actionSetCompleted(),
+        iconClass: 'fas fa-check'
+      });
+      const historyStatusList = [...this.getMetadata().get(`scopes.${this.entityType}.completedStatusList`, []), ...this.getMetadata().get(`scopes.${this.entityType}.canceledStatusList`, [])];
+      const control = () => {
+        if (historyStatusList.includes(this.model.attributes.status) || !this.getAcl().checkModel(this.model, 'edit')) {
+          this.hideActionItem('setCompleted');
+        } else {
+          this.showActionItem('setCompleted');
+        }
+      };
+      control();
+      this.model.onSync({
+        owner: this,
+        callback: () => control()
+      });
+    }
+    async actionSetCompleted() {
+      await this.model.save({
+        status: 'Completed'
+      }, {
+        patch: true
+      });
+      _ui.default.success(this.translate('Saved'));
+    }
+  }
+  _exports.default = TaskDetailRecordView;
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/task/record/row-actions/dashlet", ["exports", "modules/crm/views/task/record/row-actions/default"], function (_exports, _default2) {
+  "use strict";
 
-define('crm:views/task/record/row-actions/default', ['views/record/row-actions/view-and-edit'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default2 = _interopRequireDefault(_default2);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            if (this.options.acl.edit && !~['Completed', 'Canceled'].indexOf(this.model.get('status'))) {
-                actionList.push({
-                    action: 'setCompleted',
-                    label: 'Complete',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        },
-    });
-});
-
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
-
-define('crm:views/task/record/row-actions/dashlet', ['views/record/row-actions/view-and-edit'], function (Dep) {
-
-    return Dep.extend({
-
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            if (this.options.acl.edit && !~['Completed', 'Canceled'].indexOf(this.model.get('status'))) {
-                actionList.push({
-                    action: 'setCompleted',
-                    label: 'Complete',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        },
-    });
-});
-
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
-
-define('crm:views/task/modals/detail', ['views/modals/detail'], function (Dep) {
-
-    return Dep.extend({});
+  class _default extends _default2.default {}
+  _exports.default = _default;
 });
 
 define("modules/crm/views/task/fields/tasks", ["exports", "views/fields/link-multiple-with-status"], function (_exports, _linkMultipleWithStatus) {
@@ -2994,7 +3081,11 @@ define('crm:views/target-list/record/row-actions/default', ['views/record/row-ac
         getActionList: function () {
             const list = Dep.prototype.getActionList.call(this);
 
-            if (this.options.acl.edit) {
+            if (
+                this.model.collection &&
+                this.model.collection.parentModel &&
+                this.getAcl().checkModel(this.model.collection.parentModel, 'edit')
+            ) {
                 if (this.model.get('targetListIsOptedOut')) {
                     list.push({
                         action: 'cancelOptOut',
@@ -3215,7 +3306,7 @@ function (Dep, MultiCollection) {
                     rowActionsView: 'crm:views/target-list/record/row-actions/opted-out',
                     checkboxes: false,
                     collection: this.collection,
-                    listLayout: this.listLayout,
+                    multiListLayout: this.listLayout,
                 }, view => {
                     view.render();
                 });
@@ -3519,6 +3610,7 @@ define('crm:views/record/row-actions/tasks', ['views/record/row-actions/relation
                 },
                 link: '#' + this.model.entityType + '/view/' + this.model.id,
                 groupIndex: 0,
+                iconClass: Dep.ICON_CLASS_VIEW,
             }];
 
             if (this.options.acl.edit) {
@@ -3530,9 +3622,11 @@ define('crm:views/record/row-actions/tasks', ['views/record/row-actions/relation
                     },
                     link: '#' + this.model.entityType + '/edit/' + this.model.id,
                     groupIndex: 0,
+                    iconClass: Dep.ICON_CLASS_EDIT,
                 });
 
-                if (!~['Completed', 'Canceled'].indexOf(this.model.get('status'))) {
+                // @todo Refactor.
+                if (!['Completed', 'Canceled'].includes(this.model.get('status'))) {
                     list.push({
                         action: 'Complete',
                         text: this.translate('Complete', 'labels', 'Task'),
@@ -3540,6 +3634,7 @@ define('crm:views/record/row-actions/tasks', ['views/record/row-actions/relation
                             id: this.model.id
                         },
                         groupIndex: 1,
+                        iconClass: 'fas fa-check',
                     });
                 }
             }
@@ -3552,6 +3647,7 @@ define('crm:views/record/row-actions/tasks', ['views/record/row-actions/relation
                         id: this.model.id
                     },
                     groupIndex: 0,
+                    iconClass: Dep.ICON_CLASS_REMOVE,
                 });
             }
 
@@ -3622,273 +3718,231 @@ define('crm:views/record/row-actions/relationship-target', ['views/record/row-ac
     });
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/record/row-actions/history", ["exports", "views/record/row-actions/relationship"], function (_exports, _relationship) {
+  "use strict";
 
-define('crm:views/record/row-actions/history', ['views/record/row-actions/relationship'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _relationship = _interopRequireDefault(_relationship);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        getActionList: function () {
-            var list = [{
-                action: 'quickView',
-                label: 'View',
-                data: {
-                    id: this.model.id
-                },
-                link: '#' + this.model.entityType + '/view/' + this.model.id,
-                groupIndex: 0,
-            }];
-
-            if (this.model.entityType === 'Email') {
-                list.push({
-                    action: 'reply',
-                    text: this.translate('Reply', 'labels', 'Email'),
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.edit) {
-                list = list.concat([
-                    {
-                        action: 'quickEdit',
-                        label: 'Edit',
-                        data: {
-                            id: this.model.id
-                        },
-                        link: '#' + this.model.entityType + '/edit/' + this.model.id,
-                        groupIndex: 0,
-                    },
-                ]);
-            }
-
-            if (this.options.acl.delete) {
-                list.push({
-                    action: 'removeRelated',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return list;
-        },
-
-    });
+  class ActivitiesRowActionsView extends _relationship.default {
+    setup() {
+      super.setup();
+      this.options.unlinkDisabled = true;
+    }
+    getActionList() {
+      const list = super.getActionList();
+      if (this.model.entityType === 'Email' && this.getAcl().checkScope('Email', 'create')) {
+        list.push({
+          action: 'reply',
+          text: this.translate('Reply', 'labels', 'Email'),
+          data: {
+            id: this.model.id
+          },
+          groupIndex: 1,
+          iconClass: 'fas fa-reply'
+        });
+      }
+      return list;
+    }
+  }
+  _exports.default = ActivitiesRowActionsView;
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/record/row-actions/activities", ["exports", "views/record/row-actions/relationship"], function (_exports, _relationship) {
+  "use strict";
 
-define('crm:views/record/row-actions/activities', ['views/record/row-actions/relationship'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _relationship = _interopRequireDefault(_relationship);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        getActionList: function () {
-            var list = [{
-                action: 'quickView',
-                label: 'View',
-                data: {
-                    id: this.model.id,
-                },
-                link: '#' + this.model.entityType + '/view/' + this.model.id,
-                groupIndex: 0,
-            }];
-
-            if (this.options.acl.edit) {
-                list.push({
-                    action: 'quickEdit',
-                    label: 'Edit',
-                    data: {
-                        id: this.model.id,
-                    },
-                    link: '#' + this.model.entityType + '/edit/' + this.model.id,
-                    groupIndex: 0,
-                });
-
-                if (this.model.entityType === 'Meeting' || this.model.entityType === 'Call') {
-                    list.push({
-                        action: 'setHeld',
-                        text: this.translate('Set Held', 'labels', 'Meeting'),
-                        data: {
-                            id: this.model.id,
-                        },
-                        groupIndex: 1,
-                    });
-
-                    list.push({
-                        action: 'setNotHeld',
-                        text: this.translate('Set Not Held', 'labels', 'Meeting'),
-                        data: {
-                            id: this.model.id,
-                        },
-                        groupIndex: 1,
-                    });
-                }
-            }
-
-            if (this.options.acl.delete) {
-                list.push({
-                    action: 'removeRelated',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return list;
-        },
-    });
+  class ActivitiesRowActionsView extends _relationship.default {
+    setup() {
+      super.setup();
+      this.options.unlinkDisabled = true;
+    }
+    getActionList() {
+      const actionList = super.getActionList();
+      if (this.options.acl.edit) {
+        if (this.model.entityType === 'Meeting' || this.model.entityType === 'Call') {
+          /** @type {string[]} */
+          const options = this.model.getFieldParam('status', 'options') ?? [];
+          const notActualStatuses = [...this.getMetadata().get(`scopes.${this.model.entityType}.completedStatusList`, []), ...this.getMetadata().get(`scopes.${this.model.entityType}.canceledStatusList`, [])];
+          if (options.includes('Held') && !notActualStatuses.includes(this.model.attributes.status)) {
+            actionList.push({
+              action: 'setHeld',
+              text: this.translate('Set Held', 'labels', 'Meeting'),
+              data: {
+                id: this.model.id
+              },
+              groupIndex: 1,
+              iconClass: 'fas fa-check'
+            });
+          }
+          if (options.includes('Not Held') && !notActualStatuses.includes(this.model.attributes.status)) {
+            actionList.push({
+              action: 'setNotHeld',
+              text: this.translate('Set Not Held', 'labels', 'Meeting'),
+              data: {
+                id: this.model.id
+              },
+              groupIndex: 1
+            });
+          }
+        }
+      }
+      return actionList;
+    }
+  }
+  _exports.default = ActivitiesRowActionsView;
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/record/row-actions/activities-dashlet", ["exports", "views/record/row-actions/default"], function (_exports, _default) {
+  "use strict";
 
-define('crm:views/record/row-actions/activities-dashlet', ['views/record/row-actions/view-and-edit'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default = _interopRequireDefault(_default);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
+  class ActivitiesDashletRowActionsView extends _default.default {
+    getActionList() {
+      const actionList = super.getActionList();
+      const entityType = this.model.entityType;
 
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            var scope = this.model.entityType;
-
-            actionList.forEach(function (item) {
-                item.data = item.data || {};
-                item.data.scope = this.model.entityType;
-            }, this);
-
-            if (scope === 'Task') {
-                if (this.options.acl.edit && !~['Completed', 'Canceled'].indexOf(this.model.get('status'))) {
-                    actionList.push({
-                        action: 'setCompleted',
-                        label: 'Complete',
-                        data: {
-                            id: this.model.id
-                        },
-                        groupIndex: 1,
-                    });
-                }
-            } else {
-                if (this.options.acl.edit && !~['Held', 'Not Held'].indexOf(this.model.get('status'))) {
-                    actionList.push({
-                        action: 'setHeld',
-                        label: 'Set Held',
-                        data: {
-                            id: this.model.id,
-                            scope: this.model.entityType
-                        },
-                        groupIndex: 1,
-                    });
-                    actionList.push({
-                        action: 'setNotHeld',
-                        label: 'Set Not Held',
-                        data: {
-                            id: this.model.id,
-                            scope: this.model.entityType
-                        },
-                        groupIndex: 1,
-                    });
-                }
-            }
-
-            if (this.options.acl.edit) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        },
-    });
+      /** @type {string[]} */
+      const options = this.model.getFieldParam('status', 'options') ?? [];
+      const notActualStatuses = [...this.getMetadata().get(`scopes.${this.model.entityType}.completedStatusList`, []), ...this.getMetadata().get(`scopes.${this.model.entityType}.canceledStatusList`, [])];
+      if (entityType === 'Task') {
+        if (this.options.acl.edit && options.includes('Completed') && !notActualStatuses.includes(this.model.attributes.status)) {
+          actionList.push({
+            action: 'setCompleted',
+            label: 'Complete',
+            data: {
+              id: this.model.id
+            },
+            groupIndex: 1,
+            iconClass: 'fas fa-check'
+          });
+        }
+      } else if (this.options.acl.edit && !notActualStatuses.includes(this.model.attributes.status)) {
+        if (options.includes('Held')) {
+          actionList.push({
+            action: 'setHeld',
+            label: 'Set Held',
+            data: {
+              id: this.model.id,
+              scope: this.model.entityType
+            },
+            groupIndex: 1,
+            iconClass: 'fas fa-check'
+          });
+        }
+        if (options.includes('Not Held')) {
+          actionList.push({
+            action: 'setNotHeld',
+            label: 'Set Not Held',
+            data: {
+              id: this.model.id,
+              scope: this.model.entityType
+            },
+            groupIndex: 1
+          });
+        }
+      }
+      return actionList;
+    }
+  }
+  _exports.default = ActivitiesDashletRowActionsView;
 });
 
 /************************************************************************
@@ -4030,7 +4084,8 @@ define("modules/crm/views/record/panels/history", ["exports", "crm:views/record/
         action: 'archiveEmail',
         label: 'Archive Email',
         acl: 'create',
-        aclScope: 'Email'
+        aclScope: 'Email',
+        iconClass: 'far fa-envelope'
       });
     }
     getArchiveEmailAttributes(scope, data, callback) {
@@ -4112,7 +4167,8 @@ define("modules/crm/views/record/panels/history", ["exports", "crm:views/record/
       this.getModelFactory().create('Email').then(model => {
         model.id = id;
         model.fetch().then(() => {
-          const attributes = emailHelper.getReplyAttributes(model, data, this.getPreferences().get('emailReplyToAllByDefault'));
+          const replyToAllByDefault = this.getPreferences().get('emailReplyToAllByDefault');
+          const attributes = emailHelper.getReplyAttributes(model, replyToAllByDefault);
           const viewName = this.getMetadata().get('clientDefs.Email.modalViews.compose') || 'views/modals/compose-email';
           return this.createView('quickCreate', viewName, {
             attributes: attributes,
@@ -4813,6 +4869,7 @@ define("modules/crm/views/meeting/popup-notification", ["exports", "views/popup-
     type = 'event';
     style = 'primary';
     closeButton = true;
+    collapseButton = true;
     setup() {
       if (!this.notificationData.entityType) {
         return;
@@ -4843,6 +4900,9 @@ define("modules/crm/views/meeting/popup-notification", ["exports", "views/popup-
       Espo.Ajax.postRequest('Activities/action/removePopupNotification', {
         id: this.notificationId
       });
+    }
+    getTitle() {
+      return this.notificationData.name ?? this.translate(this.notificationData.entityType, 'scopeNames');
     }
   }
   var _default = _exports.default = MeetingPopupNotificationView;
@@ -4973,7 +5033,7 @@ define("modules/crm/views/meeting/record/detail", ["exports", "views/record/deta
     duplicateAction = true;
     setupActionItems() {
       super.setupActionItems();
-      if (!this.getAcl().checkModel(this.model, 'edit')) {
+      if (!this.getAcl().checkScope(this.model.entityType)) {
         return;
       }
       if (['Held', 'Not Held'].includes(this.model.get('status')) || !this.getAcl().checkField(this.entityType, 'status', 'edit')) {
@@ -4986,20 +5046,28 @@ define("modules/crm/views/meeting/record/detail", ["exports", "views/record/deta
       this.dropdownItemList.push({
         'label': 'Set Held',
         'name': 'setHeld',
-        onClick: () => this.actionSetHeld()
+        onClick: () => this.actionSetHeld(),
+        iconClass: 'fas fa-check'
       });
       this.dropdownItemList.push({
         'label': 'Set Not Held',
         'name': 'setNotHeld',
         onClick: () => this.actionSetNotHeld()
       });
-    }
-    manageAccessEdit(second) {
-      super.manageAccessEdit(second);
-      if (second && !this.getAcl().checkModel(this.model, 'edit', true)) {
-        this.hideActionItem('setHeld');
-        this.hideActionItem('setNotHeld');
-      }
+      const control = () => {
+        if (historyStatusList.includes(this.model.attributes.status) || !this.getAcl().checkModel(this.model, 'edit')) {
+          this.hideActionItem('setHeld');
+          this.hideActionItem('setNotHeld');
+        } else {
+          this.showActionItem('setHeld');
+          this.showActionItem('setNotHeld');
+        }
+      };
+      control();
+      this.model.onSync({
+        owner: this,
+        callback: () => control()
+      });
     }
     actionSetHeld() {
       this.model.save({
@@ -5008,8 +5076,6 @@ define("modules/crm/views/meeting/record/detail", ["exports", "views/record/deta
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
       });
     }
     actionSetNotHeld() {
@@ -5019,178 +5085,10 @@ define("modules/crm/views/meeting/record/detail", ["exports", "views/record/deta
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
       });
     }
   }
   var _default = _exports.default = MeetingDetailRecordView;
-});
-
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
-
-define('crm:views/meeting/record/row-actions/default', ['views/record/row-actions/view-and-edit'], function (Dep) {
-
-    return Dep.extend({
-
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            actionList.forEach(item => {
-                item.data = item.data || {};
-                item.data.scope = this.model.entityType;
-            });
-
-            if (
-                this.options.acl.edit &&
-                !['Held', 'Not Held'].includes(this.model.get('status')) &&
-                this.getAcl().checkField(this.model.entityType, 'status', 'edit')
-            ) {
-                actionList.push({
-                    action: 'setHeld',
-                    label: 'Set Held',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 1,
-                });
-
-                actionList.push({
-                    action: 'setNotHeld',
-                    label: 'Set Not Held',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        }
-    });
-});
-
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
-
-define('crm:views/meeting/record/row-actions/dashlet', ['views/record/row-actions/view-and-edit'], function (Dep) {
-
-    return Dep.extend({
-
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            actionList.forEach(item => {
-                item.data = item.data || {};
-                item.data.scope = this.model.entityType;
-            });
-
-            if (
-                this.options.acl.edit &&
-                !['Held', 'Not Held'].includes(this.model.get('status')) &&
-                this.getAcl().checkField(this.model.entityType, 'status', 'edit')
-            ) {
-                actionList.push({
-                    action: 'setHeld',
-                    label: 'Set Held',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 1,
-                });
-
-                actionList.push({
-                    action: 'setNotHeld',
-                    label: 'Set Not Held',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType,
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        }
-    });
 });
 
 /************************************************************************
@@ -5310,203 +5208,173 @@ define('crm:views/meeting/record/panels/attendees', ['views/record/panels/side']
     });
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/meeting/modals/send-invitations", ["exports", "utils", "views/modal", "collection", "ajax", "ui"], function (_exports, _utils, _modal, _collection, _ajax, _ui) {
+  "use strict";
 
-define('crm:views/meeting/modals/send-invitations', ['views/modal', 'collection'], function (Dep, Collection) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _utils = _interopRequireDefault(_utils);
+  _modal = _interopRequireDefault(_modal);
+  _collection = _interopRequireDefault(_collection);
+  _ajax = _interopRequireDefault(_ajax);
+  _ui = _interopRequireDefault(_ui);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+
+  class SendInvitationsModalView extends _modal.default {
+    backdrop = true;
+    templateContent = `
+        <div class="margin-bottom">
+            <p>{{message}}</p>
+        </div>
+        <div class="list-container">{{{list}}}</div>
+    `;
+    data() {
+      return {
+        message: this.translate('sendInvitationsToSelectedAttendees', 'messages', 'Meeting')
+      };
+    }
+    setup() {
+      this.shortcutKeys = {};
+      this.shortcutKeys['Control+Enter'] = e => {
+        if (!this.hasAvailableActionItem('send')) {
+          return;
+        }
+        e.preventDefault();
+        this.actionSend();
+      };
+      this.$header = $('<span>').append($('<span>').text(this.translate(this.model.entityType, 'scopeNames')), ' <span class="chevron-right"></span> ', $('<span>').text(this.model.get('name')), ' <span class="chevron-right"></span> ', $('<span>').text(this.translate('Send Invitations', 'labels', 'Meeting')));
+      this.addButton({
+        label: 'Send',
+        name: 'send',
+        style: 'danger',
+        disabled: true
+      });
+      this.addButton({
+        label: 'Cancel',
+        name: 'cancel'
+      });
+      this.collection = new _collection.default();
+      this.collection.url = this.model.entityType + `/${this.model.id}/attendees`;
+      this.wait(this.prepareList());
+    }
+
     /**
-     * @module crm_views/meeting/modals/send-invitations
+     * @private
+     * @return {Promise<void>}
      */
+    async prepareList() {
+      await this.collection.fetch();
+      _utils.default.clone(this.collection.models).forEach(model => {
+        model.entityType = model.get('_scope');
+        if (!model.get('emailAddress')) {
+          this.collection.remove(model.id);
+        }
+      });
+      const view = await this.createView('list', 'views/record/list', {
+        selector: '.list-container',
+        collection: this.collection,
+        rowActionsDisabled: true,
+        massActionsDisabled: true,
+        checkAllResultDisabled: true,
+        selectable: true,
+        buttonsDisabled: true,
+        listLayout: [{
+          name: 'name',
+          customLabel: this.translate('name', 'fields'),
+          notSortable: true
+        }, {
+          name: 'acceptanceStatus',
+          width: 40,
+          customLabel: this.translate('acceptanceStatus', 'fields', 'Meeting'),
+          notSortable: true,
+          view: 'views/fields/enum',
+          params: {
+            options: this.model.getFieldParam('acceptanceStatus', 'options'),
+            style: this.model.getFieldParam('acceptanceStatus', 'style')
+          }
+        }]
+      });
+      this.collection.models.filter(model => {
+        const status = model.get('acceptanceStatus');
+        return !status || status === 'None';
+      }).forEach(model => {
+        this.getListView().checkRecord(model.id);
+      });
+      this.listenTo(view, 'check', () => this.controlSendButton());
+      this.controlSendButton();
+    }
+    controlSendButton() {
+      this.getListView().getCheckedIds().length ? this.enableButton('send') : this.disableButton('send');
+    }
 
     /**
-     * @class
-     * @name Class
-     * @extends module:views/modal
-     * @memberOf module:crm_views/meeting/modals/send-invitations
+     * @return {import('views/record/list').default}
      */
-    return Dep.extend(/** @lends module:crm_views/meeting/modals/send-invitations.Class# */{
-
-        backdrop: true,
-
-        templateContent: `
-            <div class="margin-bottom">
-                <p>{{message}}</p>
-            </div>
-            <div class="list-container">{{{list}}}</div>
-        `,
-
-        data: function () {
-            return {
-                message: this.translate('sendInvitationsToSelectedAttendees', 'messages', 'Meeting'),
-            };
-        },
-
-        setup: function () {
-            Dep.prototype.setup.call(this);
-
-            this.shortcutKeys = {};
-            this.shortcutKeys['Control+Enter'] = e => {
-                if (!this.hasAvailableActionItem('send')) {
-                    return;
-                }
-
-                e.preventDefault();
-
-                this.actionSend();
-            };
-
-            this.$header = $('<span>').append(
-                $('<span>')
-                    .text(this.translate(this.model.entityType, 'scopeNames')),
-                ' <span class="chevron-right"></span> ',
-                $('<span>')
-                    .text(this.model.get('name')),
-                ' <span class="chevron-right"></span> ',
-                $('<span>')
-                    .text(this.translate('Send Invitations', 'labels', 'Meeting'))
-            );
-
-            this.addButton({
-                label: 'Send',
-                name: 'send',
-                style: 'danger',
-                disabled: true,
-            });
-
-            this.addButton({
-                label: 'Cancel',
-                name: 'cancel',
-            });
-
-            this.collection = new Collection();
-            this.collection.url = this.model.entityType + `/${this.model.id}/attendees`;
-
-            this.wait(
-                this.collection.fetch()
-                    .then(() => {
-                        Espo.Utils.clone(this.collection.models).forEach(model => {
-                            model.entityType = model.get('_scope');
-
-                            if (!model.get('emailAddress')) {
-                                this.collection.remove(model.id);
-                            }
-                        });
-
-                        return this.createView('list', 'views/record/list', {
-                            selector: '.list-container',
-                            collection: this.collection,
-                            rowActionsDisabled: true,
-                            massActionsDisabled: true,
-                            checkAllResultDisabled: true,
-                            selectable: true,
-                            buttonsDisabled: true,
-                            listLayout: [
-                                {
-                                    name: 'name',
-                                    customLabel: this.translate('name', 'fields'),
-                                    notSortable: true,
-                                },
-                                {
-                                    name: 'acceptanceStatus',
-                                    width: 40,
-                                    customLabel: this.translate('acceptanceStatus', 'fields', 'Meeting'),
-                                    notSortable: true,
-                                    view: 'views/fields/enum',
-                                    params: {
-                                        options: this.model.getFieldParam('acceptanceStatus', 'options'),
-                                        style: this.model.getFieldParam('acceptanceStatus', 'style'),
-                                    },
-                                },
-                            ],
-                        })
-                    })
-                    .then(view => {
-                        this.collection.models
-                            .filter(model => {
-                                let status = model.get('acceptanceStatus');
-
-                                return !status || status === 'None';
-                            })
-                            .forEach(model => {
-                                this.getListView().checkRecord(model.id);
-                            });
-
-                        this.listenTo(view, 'check', () => this.controlSendButton());
-
-                        this.controlSendButton();
-                    })
-            );
-        },
-
-        controlSendButton: function () {
-            this.getListView().checkedList.length ?
-                this.enableButton('send') :
-                this.disableButton('send');
-        },
-
-        /**
-         * @return {module:views/record/list}
-         */
-        getListView: function () {
-            return this.getView('list');
-        },
-
-        actionSend: function () {
-            this.disableButton('send');
-
-            Espo.Ui.notifyWait();
-
-            let targets = this.getListView().checkedList.map(id => {
-                return {
-                    entityType: this.collection.get(id).entityType,
-                    id: id,
-                };
-            });
-
-            Espo.Ajax
-                .postRequest(this.model.entityType + '/action/sendInvitations', {
-                    id: this.model.id,
-                    targets: targets,
-                })
-                .then(result => {
-                    result ?
-                        Espo.Ui.success(this.translate('Sent')) :
-                        Espo.Ui.warning(this.translate('nothingHasBeenSent', 'messages', 'Meeting'));
-
-                    this.trigger('sent');
-
-                    this.close();
-                })
-                .catch(() => {
-                    this.enableButton('send');
-                });
-        },
-    });
+    getListView() {
+      return this.getView('list');
+    }
+    actionSend() {
+      this.disableButton('send');
+      Espo.Ui.notifyWait();
+      const targets = this.getListView().getCheckedIds().map(id => this.collection.get(id));
+      _ajax.default.postRequest(`${this.model.entityType}/action/sendInvitations`, {
+        id: this.model.id,
+        targets: targets.map(m => {
+          return {
+            entityType: m.entityType,
+            id: m.id
+          };
+        })
+      }).then(/** {idList: string[]} */result => {
+        if (result.idList.length === 0) {
+          _ui.default.warning(this.translate('nothingHasBeenSent', 'messages', 'Meeting'));
+        } else if (result.idList.length === targets.length) {
+          _ui.default.success(this.translate('Sent'));
+        } else {
+          const recipientsString = targets.filter(m => result.idList.includes(m.id)).map(m => m.attributes.name ?? m.attributes.id).join(', ');
+          const failedRecipientsString = targets.filter(m => !result.idList.includes(m.id)).map(m => m.attributes.name ?? m.attributes.id).join(', ');
+          const message = this.translate('invitationsSentTo', 'messages', 'Meeting').replace('{recipients}', recipientsString).replace('{failedRecipients}', failedRecipientsString);
+          _ui.default.notify(message, 'warning', null, {
+            closeButton: true
+          });
+        }
+        this.trigger('sent');
+        this.close();
+      }).catch(() => {
+        this.enableButton('send');
+      });
+    }
+  }
+  _exports.default = SendInvitationsModalView;
 });
 
 /************************************************************************
@@ -5776,7 +5644,8 @@ define("modules/crm/views/meeting/modals/detail", ["exports", "moment", "views/m
         this.addDropdownItem({
           name: 'setHeld',
           text: this.translate('Set Held', 'labels', this.model.entityType),
-          hidden: true
+          hidden: true,
+          iconClass: 'fas fa-check'
         });
         this.addDropdownItem({
           name: 'setNotHeld',
@@ -5788,7 +5657,9 @@ define("modules/crm/views/meeting/modals/detail", ["exports", "moment", "views/m
         name: 'sendInvitations',
         text: this.translate('Send Invitations', 'labels', 'Meeting'),
         hidden: !this.isSendInvitationsToBeDisplayed(),
-        onClick: () => this.actionSendInvitations()
+        onClick: () => this.actionSendInvitations(),
+        groupIndex: 10,
+        iconClass: 'far fa-paper-plane'
       });
       this.initAcceptanceStatus();
       this.on('switch-model', (model, previousModel) => {
@@ -5890,20 +5761,7 @@ define("modules/crm/views/meeting/modals/detail", ["exports", "moment", "views/m
     }
     showAcceptanceButton() {
       this.showActionItem('setAcceptanceStatus');
-      if (!this.isRendered()) {
-        this.once('after:render', this.showAcceptanceButton, this);
-        return;
-      }
-      const data = this.getAcceptanceButtonData();
-      const $button = this.$el.find('.modal-footer [data-name="setAcceptanceStatus"]');
-      $button.html(data.html);
-      $button.removeClass('btn-default');
-      $button.removeClass('btn-success');
-      $button.removeClass('btn-warning');
-      $button.removeClass('btn-info');
-      $button.removeClass('btn-primary');
-      $button.removeClass('btn-danger');
-      $button.addClass('btn-' + data.style);
+      this.updateActionItem('setAcceptanceStatus', this.getAcceptanceButtonData());
     }
     hideAcceptanceButton() {
       this.hideActionItem('setAcceptanceStatus');
@@ -5949,12 +5807,16 @@ define("modules/crm/views/meeting/modals/detail", ["exports", "moment", "views/m
       this.model.save({
         status: 'Held'
       });
+
+      // Needed for calendar update.
       this.trigger('after:save', this.model);
     }
     actionSetNotHeld() {
       this.model.save({
         status: 'Not Held'
       });
+
+      // Needed for calendar update.
       this.trigger('after:save', this.model);
     }
     isSendInvitationsToBeDisplayed() {
@@ -6349,7 +6211,7 @@ define("modules/crm/views/meeting/fields/reminders", ["exports", "ui/select", "m
         sortDirection: 'desc',
         /**
          * @param {string} search
-         * @param {{value: string}} item
+         * @param {{value: string, text: string}} item
          * @return {number}
          */
         score: (search, item) => {
@@ -6358,7 +6220,11 @@ define("modules/crm/views/meeting/fields/reminders", ["exports", "ui/select", "m
           if (isNaN(searchNum)) {
             return 0;
           }
-          const numOpposite = Number.MAX_SAFE_INTEGER - num;
+          const boost = item.value.startsWith(search) ? 1 : 0;
+          const numOpposite = Number.MAX_SAFE_INTEGER - num + boost;
+          if (/[a-z]/i.test(search) && item.text) {
+            return item.text.startsWith(search) ? 1 : 0;
+          }
           if (searchNum === 0 && num === 0) {
             return numOpposite;
           }
@@ -6509,6 +6375,73 @@ define("modules/crm/views/meeting/fields/reminders", ["exports", "ui/select", "m
     }
   }
   var _default = _exports.default = MeetingRemindersField;
+});
+
+define("modules/crm/views/meeting/fields/external-service", ["exports", "views/fields/enum", "di", "app-params"], function (_exports, _enum, _di, _appParams) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _enum = _interopRequireDefault(_enum);
+  _appParams = _interopRequireDefault(_appParams);
+  var _staticBlock;
+  let _init_appParams, _init_extra_appParams;
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  function _applyDecs(e, t, n, r, o, i) { var a, c, u, s, f, l, p, d = Symbol.metadata || Symbol.for("Symbol.metadata"), m = Object.defineProperty, h = Object.create, y = [h(null), h(null)], v = t.length; function g(t, n, r) { return function (o, i) { n && (i = o, o = e); for (var a = 0; a < t.length; a++) i = t[a].apply(o, r ? [i] : []); return r ? i : o; }; } function b(e, t, n, r) { if ("function" != typeof e && (r || void 0 !== e)) throw new TypeError(t + " must " + (n || "be") + " a function" + (r ? "" : " or undefined")); return e; } function applyDec(e, t, n, r, o, i, u, s, f, l, p) { function d(e) { if (!p(e)) throw new TypeError("Attempted to access private element on non-instance"); } var h = [].concat(t[0]), v = t[3], w = !u, D = 1 === o, S = 3 === o, j = 4 === o, E = 2 === o; function I(t, n, r) { return function (o, i) { return n && (i = o, o = e), r && r(o), P[t].call(o, i); }; } if (!w) { var P = {}, k = [], F = S ? "get" : j || D ? "set" : "value"; if (f ? (l || D ? P = { get: _setFunctionName(function () { return v(this); }, r, "get"), set: function (e) { t[4](this, e); } } : P[F] = v, l || _setFunctionName(P[F], r, E ? "" : F)) : l || (P = Object.getOwnPropertyDescriptor(e, r)), !l && !f) { if ((c = y[+s][r]) && 7 !== (c ^ o)) throw Error("Decorating two elements with the same name (" + P[F].name + ") is not supported yet"); y[+s][r] = o < 3 ? 1 : o; } } for (var N = e, O = h.length - 1; O >= 0; O -= n ? 2 : 1) { var T = b(h[O], "A decorator", "be", !0), z = n ? h[O - 1] : void 0, A = {}, H = { kind: ["field", "accessor", "method", "getter", "setter", "class"][o], name: r, metadata: a, addInitializer: function (e, t) { if (e.v) throw new TypeError("attempted to call addInitializer after decoration was finished"); b(t, "An initializer", "be", !0), i.push(t); }.bind(null, A) }; if (w) c = T.call(z, N, H), A.v = 1, b(c, "class decorators", "return") && (N = c);else if (H.static = s, H.private = f, c = H.access = { has: f ? p.bind() : function (e) { return r in e; } }, j || (c.get = f ? E ? function (e) { return d(e), P.value; } : I("get", 0, d) : function (e) { return e[r]; }), E || S || (c.set = f ? I("set", 0, d) : function (e, t) { e[r] = t; }), N = T.call(z, D ? { get: P.get, set: P.set } : P[F], H), A.v = 1, D) { if ("object" == typeof N && N) (c = b(N.get, "accessor.get")) && (P.get = c), (c = b(N.set, "accessor.set")) && (P.set = c), (c = b(N.init, "accessor.init")) && k.unshift(c);else if (void 0 !== N) throw new TypeError("accessor decorators must return an object with get, set, or init properties or undefined"); } else b(N, (l ? "field" : "method") + " decorators", "return") && (l ? k.unshift(N) : P[F] = N); } return o < 2 && u.push(g(k, s, 1), g(i, s, 0)), l || w || (f ? D ? u.splice(-1, 0, I("get", s), I("set", s)) : u.push(E ? P[F] : b.call.bind(P[F])) : m(e, r, P)), N; } function w(e) { return m(e, d, { configurable: !0, enumerable: !0, value: a }); } return void 0 !== i && (a = i[d]), a = h(null == a ? null : a), f = [], l = function (e) { e && f.push(g(e)); }, p = function (t, r) { for (var i = 0; i < n.length; i++) { var a = n[i], c = a[1], l = 7 & c; if ((8 & c) == t && !l == r) { var p = a[2], d = !!a[3], m = 16 & c; applyDec(t ? e : e.prototype, a, m, d ? "#" + p : _toPropertyKey(p), l, l < 2 ? [] : t ? s = s || [] : u = u || [], f, !!t, d, r, t && d ? function (t) { return _checkInRHS(t) === e; } : o); } } }, p(8, 0), p(0, 0), p(8, 1), p(0, 1), l(u), l(s), c = f, v || w(e), { e: c, get c() { var n = []; return v && [w(e = applyDec(e, [t], r, e.name, 5, n)), g(n, 1)]; } }; }
+  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+  function _setFunctionName(e, t, n) { "symbol" == typeof t && (t = (t = t.description) ? "[" + t + "]" : ""); try { Object.defineProperty(e, "name", { configurable: !0, value: n ? n + " " + t : t }); } catch (e) {} return e; }
+  function _checkInRHS(e) { if (Object(e) !== e) throw TypeError("right-hand side of 'in' should be an object, got " + (null !== e ? typeof e : "null")); return e; }
+  // noinspection JSUnusedGlobalSymbols
+  class ExternalServiceFieldView extends _enum.default {
+    constructor() {
+      super(...arguments);
+      _init_extra_appParams(this);
+    }
+    /**
+     * @private
+     * @type {AppParams}
+     */
+    appParams = _init_appParams(this);
+    setupOptions() {
+      /** @type {{name: string}[]} */
+      const list = this.appParams.get('meetingServices') ?? [];
+      this.params.options = list.map(it => it.name);
+      this.params.options.unshift('');
+    }
+    static #_ = _staticBlock = () => [_init_appParams, _init_extra_appParams] = _applyDecs(this, [], [[(0, _di.inject)(_appParams.default), 0, "appParams"]], 0, void 0, _enum.default).e;
+  }
+  _exports.default = ExternalServiceFieldView;
+  _staticBlock();
 });
 
 define("modules/crm/views/meeting/fields/date-start", ["exports", "views/fields/datetime-optional", "moment"], function (_exports, _datetimeOptional, _moment) {
@@ -8067,7 +8000,8 @@ define("modules/crm/views/knowledge-base-article/record/detail", ["exports", "mo
       if (this.getAcl().checkScope('Email', 'create')) {
         this.dropdownItemList.push({
           'label': 'Send in Email',
-          'name': 'sendInEmail'
+          'name': 'sendInEmail',
+          iconClass: 'far fa-paper-plane'
         });
       }
       if (this.getUser().isPortal() && !this.getAcl().checkScope(this.scope, 'edit') && !this.model.getLinkMultipleIdList('attachments').length) {
@@ -8883,7 +8817,7 @@ define("modules/crm/views/dashlets/calendar", ["exports", "views/dashlets/abstra
         name: 'viewCalendar',
         text: this.translate('View Calendar', 'labels', 'Calendar'),
         url: '#Calendar',
-        iconHtml: '<span class="far fa-calendar-alt"></span>',
+        iconClass: 'far fa-calendar-alt',
         onClick: () => this.actionViewCalendar()
       });
     }
@@ -9063,7 +8997,7 @@ define("modules/crm/views/dashlets/activities", ["exports", "views/dashlets/abst
           this.actionList.unshift({
             name: 'createActivity',
             text: this.translate('Create ' + scope, 'labels', scope),
-            iconHtml: '<span class="fas fa-plus"></span>',
+            iconClass: 'fas fa-plus',
             url: '#' + scope + '/create',
             data: {
               scope: scope
@@ -9090,7 +9024,7 @@ define("modules/crm/views/dashlets/activities", ["exports", "views/dashlets/abst
           rowActionsView: this.rowActionsView,
           checkboxes: false,
           collection: this.collection,
-          listLayout: this.listLayout
+          multiListLayout: this.listLayout
         }, view => {
           view.render();
         });
@@ -10845,6 +10779,7 @@ define('crm:views/campaign/fields/template', ['views/fields/link'], function (De
             return {
                 entityType: {
                     type: 'in',
+                    attribute: 'entityType',
                     value: [
                         this.getMetadata().get(['entityDefs', 'Campaign', 'fields', this.name, 'targetEntityType'])
                     ],
@@ -11083,20 +11018,38 @@ define("modules/crm/views/call/record/detail", ["exports", "views/record/detail"
     duplicateAction = true;
     setupActionItems() {
       super.setupActionItems();
-      if (this.getAcl().checkModel(this.model, 'edit') && this.getAcl().checkField(this.entityType, 'status', 'edit')) {
-        if (!['Held', 'Not Held'].includes(this.model.attributes.status)) {
-          this.dropdownItemList.push({
-            label: 'Set Held',
-            name: 'setHeld',
-            onClick: () => this.actionSetHeld()
-          });
-          this.dropdownItemList.push({
-            label: 'Set Not Held',
-            name: 'setNotHeld',
-            onClick: () => this.actionSetNotHeld()
-          });
-        }
+      if (!this.getAcl().checkModel(this.model, 'edit')) {
+        return;
       }
+      const historyStatusList = this.getMetadata().get(`scopes.${this.entityType}.historyStatusList`) || [];
+      if (!historyStatusList.includes('Held') || !historyStatusList.includes('Not Held')) {
+        return;
+      }
+      this.dropdownItemList.push({
+        'label': 'Set Held',
+        'name': 'setHeld',
+        onClick: () => this.actionSetHeld(),
+        iconClass: 'fas fa-check'
+      });
+      this.dropdownItemList.push({
+        'label': 'Set Not Held',
+        'name': 'setNotHeld',
+        onClick: () => this.actionSetNotHeld()
+      });
+      const control = () => {
+        if (historyStatusList.includes(this.model.attributes.status) || !this.getAcl().checkModel(this.model, 'edit')) {
+          this.hideActionItem('setHeld');
+          this.hideActionItem('setNotHeld');
+        } else {
+          this.showActionItem('setHeld');
+          this.showActionItem('setNotHeld');
+        }
+      };
+      control();
+      this.model.onSync({
+        owner: this,
+        callback: () => control()
+      });
     }
     manageAccessEdit(second) {
       super.manageAccessEdit(second);
@@ -11114,8 +11067,6 @@ define("modules/crm/views/call/record/detail", ["exports", "views/record/detail"
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
       });
     }
     actionSetNotHeld() {
@@ -11125,163 +11076,92 @@ define("modules/crm/views/call/record/detail", ["exports", "views/record/detail"
         patch: true
       }).then(() => {
         Espo.Ui.success(this.translate('Saved'));
-        this.removeActionItem('setHeld');
-        this.removeActionItem('setNotHeld');
       });
     }
   }
   _exports.default = _default;
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/call/record/row-actions/default", ["exports", "modules/crm/views/meeting/record/row-actions/default"], function (_exports, _default2) {
+  "use strict";
 
-define('crm:views/call/record/row-actions/default', ['views/record/row-actions/view-and-edit'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _default2 = _interopRequireDefault(_default2);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        getActionList: function () {
-            const actionList = Dep.prototype.getActionList.call(this);
-
-            if (
-                this.options.acl.edit &&
-                !['Held', 'Not Held'].includes(this.model.get('status')) &&
-                this.getAcl().checkField(this.model.entityType, 'status', 'edit')
-            ) {
-                actionList.push({
-                    action: 'setHeld',
-                    label: 'Set Held',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-                actionList.push({
-                    action: 'setNotHeld',
-                    label: 'Set Not Held',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        }
-    });
+  class _default extends _default2.default {}
+  _exports.default = _default;
 });
 
-/************************************************************************
- * This file is part of EspoCRM.
- *
- * EspoCRM – Open Source CRM application.
- * Copyright (C) 2014-2026 EspoCRM, Inc.
- * Website: https://www.espocrm.com
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License version 3.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
- * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
- ************************************************************************/
+define("modules/crm/views/call/record/row-actions/dashlet", ["exports", "modules/crm/views/meeting/record/row-actions/dashlet"], function (_exports, _dashlet) {
+  "use strict";
 
-define('crm:views/call/record/row-actions/dashlet', ['views/record/row-actions/view-and-edit'], function (Dep) {
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _dashlet = _interopRequireDefault(_dashlet);
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
 
-    return Dep.extend({
-
-        getActionList: function () {
-            var actionList = Dep.prototype.getActionList.call(this);
-
-            if (
-                this.options.acl.edit &&
-                !['Held', 'Not Held'].includes(this.model.get('status')) &&
-                this.getAcl().checkField(this.model.entityType, 'status', 'edit')
-            ) {
-                actionList.push({
-                    action: 'setHeld',
-                    label: 'Set Held',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-
-                actionList.push({
-                    action: 'setNotHeld',
-                    label: 'Set Not Held',
-                    data: {
-                        id: this.model.id
-                    },
-                    groupIndex: 1,
-                });
-            }
-
-            if (this.options.acl.delete) {
-                actionList.push({
-                    action: 'quickRemove',
-                    label: 'Remove',
-                    data: {
-                        id: this.model.id,
-                        scope: this.model.entityType
-                    },
-                    groupIndex: 0,
-                });
-            }
-
-            return actionList;
-        }
-    });
+  class _default extends _dashlet.default {}
+  _exports.default = _default;
 });
 
 define("modules/crm/views/call/fields/leads", ["exports", "modules/crm/views/call/fields/contacts"], function (_exports, _contacts) {
@@ -12417,6 +12297,7 @@ define("modules/crm/views/calendar/modals/edit", ["exports", "views/modals/edit"
         });
       });
     }
+    setupActionItems() {}
   }
   var _default = _exports.default = CalenderEditModalView;
 });
@@ -13057,6 +12938,9 @@ define("modules/crm/handlers/task/detail-actions", ["exports", "action-handler"]
       }).then(() => {
         Espo.Ui.success(this.view.getLanguage().translateOption('Completed', 'status', 'Task'));
       });
+
+      // Needed for calendar update.
+      this.view.trigger('after:save', model);
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -13188,6 +13072,89 @@ define("modules/crm/handlers/opportunity/contacts-create", ["exports", "handlers
     }
   }
   var _default = _exports.default = ContactsCreateHandler;
+});
+
+define("modules/crm/handlers/meeting/external-service", ["exports", "di", "app-params"], function (_exports, _di, _appParams) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  _appParams = _interopRequireDefault(_appParams);
+  var _staticBlock;
+  let _init_appParams, _init_extra_appParams;
+  /************************************************************************
+   * This file is part of EspoCRM.
+   *
+   * EspoCRM – Open Source CRM application.
+   * Copyright (C) 2014-2026 EspoCRM, Inc.
+   * Website: https://www.espocrm.com
+   *
+   * This program is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU Affero General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   * GNU Affero General Public License for more details.
+   *
+   * You should have received a copy of the GNU Affero General Public License
+   * along with this program. If not, see <https://www.gnu.org/licenses/>.
+   *
+   * The interactive user interfaces in modified source and object code versions
+   * of this program must display Appropriate Legal Notices, as required under
+   * Section 5 of the GNU Affero General Public License version 3.
+   *
+   * In accordance with Section 7(b) of the GNU Affero General Public License version 3,
+   * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
+   ************************************************************************/
+  function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+  function _applyDecs(e, t, n, r, o, i) { var a, c, u, s, f, l, p, d = Symbol.metadata || Symbol.for("Symbol.metadata"), m = Object.defineProperty, h = Object.create, y = [h(null), h(null)], v = t.length; function g(t, n, r) { return function (o, i) { n && (i = o, o = e); for (var a = 0; a < t.length; a++) i = t[a].apply(o, r ? [i] : []); return r ? i : o; }; } function b(e, t, n, r) { if ("function" != typeof e && (r || void 0 !== e)) throw new TypeError(t + " must " + (n || "be") + " a function" + (r ? "" : " or undefined")); return e; } function applyDec(e, t, n, r, o, i, u, s, f, l, p) { function d(e) { if (!p(e)) throw new TypeError("Attempted to access private element on non-instance"); } var h = [].concat(t[0]), v = t[3], w = !u, D = 1 === o, S = 3 === o, j = 4 === o, E = 2 === o; function I(t, n, r) { return function (o, i) { return n && (i = o, o = e), r && r(o), P[t].call(o, i); }; } if (!w) { var P = {}, k = [], F = S ? "get" : j || D ? "set" : "value"; if (f ? (l || D ? P = { get: _setFunctionName(function () { return v(this); }, r, "get"), set: function (e) { t[4](this, e); } } : P[F] = v, l || _setFunctionName(P[F], r, E ? "" : F)) : l || (P = Object.getOwnPropertyDescriptor(e, r)), !l && !f) { if ((c = y[+s][r]) && 7 !== (c ^ o)) throw Error("Decorating two elements with the same name (" + P[F].name + ") is not supported yet"); y[+s][r] = o < 3 ? 1 : o; } } for (var N = e, O = h.length - 1; O >= 0; O -= n ? 2 : 1) { var T = b(h[O], "A decorator", "be", !0), z = n ? h[O - 1] : void 0, A = {}, H = { kind: ["field", "accessor", "method", "getter", "setter", "class"][o], name: r, metadata: a, addInitializer: function (e, t) { if (e.v) throw new TypeError("attempted to call addInitializer after decoration was finished"); b(t, "An initializer", "be", !0), i.push(t); }.bind(null, A) }; if (w) c = T.call(z, N, H), A.v = 1, b(c, "class decorators", "return") && (N = c);else if (H.static = s, H.private = f, c = H.access = { has: f ? p.bind() : function (e) { return r in e; } }, j || (c.get = f ? E ? function (e) { return d(e), P.value; } : I("get", 0, d) : function (e) { return e[r]; }), E || S || (c.set = f ? I("set", 0, d) : function (e, t) { e[r] = t; }), N = T.call(z, D ? { get: P.get, set: P.set } : P[F], H), A.v = 1, D) { if ("object" == typeof N && N) (c = b(N.get, "accessor.get")) && (P.get = c), (c = b(N.set, "accessor.set")) && (P.set = c), (c = b(N.init, "accessor.init")) && k.unshift(c);else if (void 0 !== N) throw new TypeError("accessor decorators must return an object with get, set, or init properties or undefined"); } else b(N, (l ? "field" : "method") + " decorators", "return") && (l ? k.unshift(N) : P[F] = N); } return o < 2 && u.push(g(k, s, 1), g(i, s, 0)), l || w || (f ? D ? u.splice(-1, 0, I("get", s), I("set", s)) : u.push(E ? P[F] : b.call.bind(P[F])) : m(e, r, P)), N; } function w(e) { return m(e, d, { configurable: !0, enumerable: !0, value: a }); } return void 0 !== i && (a = i[d]), a = h(null == a ? null : a), f = [], l = function (e) { e && f.push(g(e)); }, p = function (t, r) { for (var i = 0; i < n.length; i++) { var a = n[i], c = a[1], l = 7 & c; if ((8 & c) == t && !l == r) { var p = a[2], d = !!a[3], m = 16 & c; applyDec(t ? e : e.prototype, a, m, d ? "#" + p : _toPropertyKey(p), l, l < 2 ? [] : t ? s = s || [] : u = u || [], f, !!t, d, r, t && d ? function (t) { return _checkInRHS(t) === e; } : o); } } }, p(8, 0), p(0, 0), p(8, 1), p(0, 1), l(u), l(s), c = f, v || w(e), { e: c, get c() { var n = []; return v && [w(e = applyDec(e, [t], r, e.name, 5, n)), g(n, 1)]; } }; }
+  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+  function _setFunctionName(e, t, n) { "symbol" == typeof t && (t = (t = t.description) ? "[" + t + "]" : ""); try { Object.defineProperty(e, "name", { configurable: !0, value: n ? n + " " + t : t }); } catch (e) {} return e; }
+  function _checkInRHS(e) { if (Object(e) !== e) throw TypeError("right-hand side of 'in' should be an object, got " + (null !== e ? typeof e : "null")); return e; }
+  // noinspection JSUnusedGlobalSymbols
+  class MeetingExternalServiceHandler {
+    /**
+     * @private
+     * @type {AppParams}
+     */
+    appParams = _init_appParams(this);
+
+    /**
+     * @param {import('views/record/detail').default} view
+     */
+    constructor(view) {
+      _init_extra_appParams(this);
+      this.view = view;
+    }
+    process() {
+      this.controlField();
+      this.view.listenTo(this.view.model, 'change:externalService', () => this.controlField());
+    }
+
+    /**
+     * @private
+     */
+    controlField() {
+      const model = this.view.model;
+      if (model.attributes.externalService) {
+        this.view.showField('externalService');
+        return;
+      }
+      const list = this.appParams.get('meetingServices') ?? [];
+      if (!list.length) {
+        this.view.hideField('externalService');
+      }
+    }
+    static #_ = _staticBlock = () => [_init_appParams, _init_extra_appParams] = _applyDecs(this, [], [[(0, _di.inject)(_appParams.default), 0, "appParams"]]).e;
+  }
+  _exports.default = MeetingExternalServiceHandler;
+  _staticBlock();
 });
 
 define("modules/crm/handlers/knowledge-base-article/send-in-email", ["exports", "handlers/row-action"], function (_exports, _rowAction) {

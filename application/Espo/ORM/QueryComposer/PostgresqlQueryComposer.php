@@ -35,7 +35,6 @@ use Espo\ORM\Query\Delete as DeleteQuery;
 use Espo\ORM\Query\DeleteBuilder;
 use Espo\ORM\Query\Insert as InsertQuery;
 use Espo\ORM\Query\LockTable as LockTableQuery;
-
 use Espo\ORM\Query\Part\Condition as Cond;
 use Espo\ORM\Query\SelectBuilder;
 use Espo\ORM\Query\Update as UpdateQuery;
@@ -47,7 +46,7 @@ class PostgresqlQueryComposer extends BaseQueryComposer
 {
     protected string $identifierQuoteCharacter = '"';
     protected bool $indexHints = false;
-    protected bool $skipForeignIfForUpdate = true;
+    protected bool $skipForeignIfLock = true;
     protected int $aliasMaxLength = 128;
 
     /** @var array<string, string> */
@@ -90,7 +89,7 @@ class PostgresqlQueryComposer extends BaseQueryComposer
     protected function quoteColumn(string $column): string
     {
         $list = explode('.', $column);
-        $list = array_map(fn ($item) => '"' . $item . '"', $list);
+        $list = array_map(fn ($item) => $this->quoteIdentifier($item), $list);
 
         return implode('.', $list);
     }
@@ -174,7 +173,7 @@ class PostgresqlQueryComposer extends BaseQueryComposer
         if ($function === 'UNIX_TIMESTAMP') {
             $arg = $argumentPartList[0] ?? 'NOW()';
 
-            return "FLOOR(EXTRACT(EPOCH FROM $arg))";
+            return "FLOOR(EXTRACT(EPOCH FROM $arg::timestamp))";
         }
 
         if ($function === 'BINARY') {
@@ -346,10 +345,10 @@ class PostgresqlQueryComposer extends BaseQueryComposer
                     return "FLOOR(($toEpoch - $fromEpoch) / (3600 * 24))";
 
                 case 'TIMESTAMPDIFF_HOUR':
-                    return "($toEpoch - $fromEpoch) / 3600";
+                    return "FLOOR(($toEpoch - $fromEpoch) / 3600)";
 
                 case 'TIMESTAMPDIFF_MINUTE':
-                    return "($toEpoch - $fromEpoch) / 60";
+                    return "FLOOR(($toEpoch - $fromEpoch) / 60)";
 
                 case 'TIMESTAMPDIFF_SECOND':
                     return "$toEpoch - $fromEpoch";
@@ -531,11 +530,11 @@ class PostgresqlQueryComposer extends BaseQueryComposer
                 $alias = $this->sanitize($alias);
                 $column = $this->toDb($this->sanitize($attribute));
 
-                $left = $this->quoteColumn("{$alias}.{$column}");
+                $left = $this->quoteColumn("$alias.$column");
             } else {
                 $column = $this->toDb($this->sanitize($attribute));
 
-                $left = $this->quoteColumn("{$column}"); // Diff.
+                $left = $this->quoteColumn("$column"); // Diff.
             }
 
             $right = $isNotValue ?
@@ -584,17 +583,12 @@ class PostgresqlQueryComposer extends BaseQueryComposer
     protected function limit(string $sql, ?int $offset = null, ?int $limit = null): string
     {
         if (!is_null($offset) && !is_null($limit)) {
-            $offset = intval($offset);
-            $limit = intval($limit);
-
             $sql .= " LIMIT $limit OFFSET $offset";
 
             return $sql;
         }
 
         if (!is_null($limit)) {
-            $limit = intval($limit);
-
             $sql .= " LIMIT $limit";
 
             return $sql;

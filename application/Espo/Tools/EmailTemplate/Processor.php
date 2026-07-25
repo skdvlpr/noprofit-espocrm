@@ -53,7 +53,7 @@ use Exception;
 
 class Processor
 {
-    private const KEY_PARENT = 'Parent';
+    private const string KEY_PARENT = 'Parent';
 
     public function __construct(
         private Formatter $formatter,
@@ -91,7 +91,7 @@ class Processor
                 }
 
                 if ($handlebarsInBody) {
-                    $body = $htmlizer->render($parent, $body, null, null, false, true);
+                    $body = $htmlizer->render($parent, $body, null, false, true);
                 }
             }
         }
@@ -156,19 +156,19 @@ class Processor
 
         $attributeList = $entity->getAttributeList();
 
-        $forbiddenAttributeList = [];
+        $forbiddenAttributeList = $this->aclManager->getScopeRestrictedAttributeList(
+            $entity->getEntityType(),
+            [
+                GlobalRestriction::TYPE_FORBIDDEN,
+                GlobalRestriction::TYPE_INTERNAL,
+                GlobalRestriction::TYPE_ONLY_ADMIN,
+            ]
+        );
 
         if (!$skipAcl) {
             $forbiddenAttributeList = array_merge(
+                $forbiddenAttributeList,
                 $this->aclManager->getScopeForbiddenAttributeList($user, $entity->getEntityType()),
-                $this->aclManager->getScopeRestrictedAttributeList(
-                    $entity->getEntityType(),
-                    [
-                        GlobalRestriction::TYPE_FORBIDDEN,
-                        GlobalRestriction::TYPE_INTERNAL,
-                        GlobalRestriction::TYPE_ONLY_ADMIN,
-                    ]
-                )
             );
         }
 
@@ -225,16 +225,14 @@ class Processor
 
         $entityDefs = $this->entityManager->getDefs()->getEntity($entity->getEntityType());
 
-        $forbiddenLinkList = $skipAcl ?
-            $this->aclManager->getScopeRestrictedLinkList(
-                $entity->getEntityType(),
-                [
-                    GlobalRestriction::TYPE_FORBIDDEN,
-                    GlobalRestriction::TYPE_INTERNAL,
-                    GlobalRestriction::TYPE_ONLY_ADMIN,
-                ]
-            ) :
-            [];
+        $forbiddenLinkList = $this->aclManager->getScopeRestrictedLinkList(
+            $entity->getEntityType(),
+            [
+                GlobalRestriction::TYPE_FORBIDDEN,
+                GlobalRestriction::TYPE_INTERNAL,
+                GlobalRestriction::TYPE_ONLY_ADMIN,
+            ]
+        );
 
         foreach ($entity->getRelationList() as $relation) {
             if (in_array($relation, $forbiddenLinkList)) {
