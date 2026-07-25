@@ -39,26 +39,26 @@
         "Create PrimaNota": "Crea movimento"
     },
     "toolTips": {
-        "amount": "L’importo netto è sempre calcolato: lordo − commissione. Non modificabile.",
-        "amountGross": "Importo lordo prima delle commissioni. Netto = lordo − commissione. Obbligatorio. Se lo azzeri, si azzerano anche commissione e netto.",
-        "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non può superare il lordo.",
-        "commissionPercent": "Commissione in %. Se la cambi, l’importo commissione si ricalcola. Vuoto = 0."
+        "amount": "L'importo netto e' sempre calcolato: lordo - commissione. Non modificabile.",
+        "amountGross": "Importo lordo prima delle commissioni. Netto = lordo - commissione. Obbligatorio. Se lo azzeri, si azzerano anche commissione e netto.",
+        "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non puo' superare il lordo.",
+        "commissionPercent": "Commissione in %. Se la cambi, l'importo commissione si ricalcola. Vuoto = 0."
     },
     "messages": {
         "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare solo assegnatario, team e classificazione modello D.",
-        "grossRequired": "L’importo lordo è obbligatorio. Il netto viene calcolato automaticamente.",
-        "commissionExceedsGross": "La commissione non può superare l’importo lordo.",
-        "stripeManualCreateBlocked": "La piattaforma Stripe può essere impostata solo dall’ingest donazioni del sito. Per i movimenti manuali scegli un’altra piattaforma.",
-        "platformImmutable": "La piattaforma di pagamento non può essere modificata dopo la creazione del movimento.",
+        "grossRequired": "L'importo lordo e' obbligatorio. Il netto viene calcolato automaticamente.",
+        "commissionExceedsGross": "La commissione non puo' superare l'importo lordo.",
+        "stripeManualCreateBlocked": "La piattaforma Stripe puo' essere impostata solo dall'ingest donazioni del sito. Per i movimenti manuali scegli un'altra piattaforma.",
+        "platformImmutable": "La piattaforma di pagamento non puo' essere modificata dopo la creazione del movimento.",
         "entryTypeRequired": "Il tipo di movimento deve essere Entrata o Uscita.",
-        "grossNegative": "L’importo lordo non può essere negativo.",
-        "commissionNegative": "La commissione non può essere negativa.",
+        "grossNegative": "L'importo lordo non puo' essere negativo.",
+        "commissionNegative": "La commissione non puo' essere negativa.",
         "commissionPercentRange": "La commissione % deve essere tra 0 e 100.",
-        "netNegative": "L’importo netto non può essere negativo.",
+        "netNegative": "L'importo netto non puo' essere negativo.",
         "positiveAmountRequired": "Il movimento richiede un importo positivo.",
-        "descriptionRequired": "La descrizione è obbligatoria.",
+        "descriptionRequired": "La descrizione e' obbligatoria.",
         "partyCreateBothBlocked": "Seleziona la creazione di Account oppure Contatto, non entrambi.",
-        "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se è già collegato un soggetto.",
+        "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se e' gia' collegato un soggetto.",
         "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato."
     },
     "options": {
@@ -88,11 +88,11 @@
             "Other": "Altro"
         },
         "modelDClassification": {
-            "A": "A — Uscite e Entrate da attività di interesse generale",
-            "B": "B — Uscite e Entrate da attività diverse",
-            "C": "C — Uscite e Entrate da attività di raccolta fondi",
-            "D": "D — Uscite e Entrate da attività finanziarie e patrimoniali",
-            "E": "E — Uscite e Entrate di supporto generale"
+            "A": "A - Uscite e Entrate da attivita' di interesse generale",
+            "B": "B - Uscite e Entrate da attivita' diverse",
+            "C": "C - Uscite e Entrate da attivita' di raccolta fondi",
+            "D": "D - Uscite e Entrate da attivita' finanziarie e patrimoniali",
+            "E": "E - Uscite e Entrate di supporto generale"
         }
     }
 }
