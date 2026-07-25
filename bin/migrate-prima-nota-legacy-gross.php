@@ -31,6 +31,7 @@ $repo = $em->getRDBRepository('PrimaNota');
 $allowedProviders = [
     'Stripe',
     'SatispayDirect',
+    'GoFundMe',
     'FivePerMille',
     'BankTransfer',
     'Cash',
@@ -75,6 +76,7 @@ foreach ($all as $entity) {
     $normalized = match (strtolower($raw)) {
         'stripe' => 'Stripe',
         'satispaydirect', 'satispay direct', 'satispay direct (not stripe)', 'satispay' => 'SatispayDirect',
+        'gofundme', 'gofund.me', 'go fund me', 'go fundme' => 'GoFundMe',
         'fivepermille', '5x1000', '5 x 1000', '5 per mille', '5xmille' => 'FivePerMille',
         'banktransfer', 'bank transfer', 'bonifico' => 'BankTransfer',
         'cash', 'contanti' => 'Cash',

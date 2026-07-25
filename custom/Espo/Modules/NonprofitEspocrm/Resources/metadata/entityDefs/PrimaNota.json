@@ -123,6 +123,7 @@
             "options": [
                 "Stripe",
                 "SatispayDirect",
+                "GoFundMe",
                 "FivePerMille",
                 "BankTransfer",
                 "Cash",

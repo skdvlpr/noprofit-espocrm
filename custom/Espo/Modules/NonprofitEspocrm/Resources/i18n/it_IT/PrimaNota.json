@@ -104,6 +104,7 @@
         "donationPaymentProvider": {
             "Stripe": "Stripe",
             "SatispayDirect": "Satispay diretto (non Stripe)",
+            "GoFundMe": "GoFund.me",
             "FivePerMille": "5 x 1000",
             "BankTransfer": "Bonifico bancario",
             "Cash": "Contanti",

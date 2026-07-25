@@ -63,6 +63,7 @@ $ok(
 $providerOptions = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationPaymentProvider', 'options']) ?? [];
 $ok('provider options include Stripe', in_array('Stripe', $providerOptions, true));
 $ok('provider options include SatispayDirect', in_array('SatispayDirect', $providerOptions, true));
+$ok('provider options include GoFundMe', in_array('GoFundMe', $providerOptions, true));
 $ok('provider options include FivePerMille', in_array('FivePerMille', $providerOptions, true));
 $itMessages = json_decode(
     (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json'),
