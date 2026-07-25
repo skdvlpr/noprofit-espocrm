@@ -16,7 +16,7 @@
         "beneficiaryPhoneNumber": "Telefono beneficiario",
         "entryType": "Tipo movimento",
         "amount": "Importo netto",
-        "amountGross": "Importo lordo (senza commissione)",
+        "amountGross": "Importo lordo",
         "commissionAmount": "Commissione",
         "commissionPercent": "Commissione %",
         "amountIn": "Entrata",
@@ -81,7 +81,7 @@
         },
         "donationPaymentProvider": {
             "Stripe": "Stripe",
-            "SatispayDirect": "Satispay diretto (NON STRIPE)",
+            "SatispayDirect": "Satispay diretto (non Stripe)",
             "FivePerMille": "5 x 1000",
             "BankTransfer": "Bonifico bancario",
             "Cash": "Contanti",

@@ -16,7 +16,7 @@
         "beneficiaryPhoneNumber": "Beneficiary phone",
         "entryType": "Type",
         "amount": "Net amount",
-        "amountGross": "Gross amount (before commission)",
+        "amountGross": "Gross amount",
         "commissionAmount": "Commission",
         "commissionPercent": "Commission %",
         "amountIn": "Income",
@@ -30,7 +30,7 @@
         "modelDClassification": "Model D classification",
         "financing": "Grant / Funding",
         "transactionDate": "Date",
-        "assignedUser": "Assigned User",
+        "assignedUser": "Assigned user",
         "teams": "Teams"
     },
     "labels": {
@@ -81,7 +81,7 @@
         },
         "donationPaymentProvider": {
             "Stripe": "Stripe",
-            "SatispayDirect": "Satispay direct (NOT STRIPE)",
+            "SatispayDirect": "Satispay direct (not Stripe)",
             "FivePerMille": "5 x 1000",
             "BankTransfer": "Bank transfer",
             "Cash": "Cash",
