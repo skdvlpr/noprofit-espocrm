@@ -468,6 +468,26 @@
                         }
                     ]
                 }
+            },
+            "donationFrequency": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "internalClassification",
+                            "value": "Donation"
+                        }
+                    ]
+                },
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
             }
         },
         "panels": {

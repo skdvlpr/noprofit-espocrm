@@ -18,6 +18,7 @@ define('nonprofit-espocrm:handlers/prima-nota/copy-payment-data', [], function (
         'donationPaymentProvider',
         'donationPaymentReference',
         'donationDonorCategory',
+        'donationFrequency',
         'donationComment',
         'financingId',
         'financingName',

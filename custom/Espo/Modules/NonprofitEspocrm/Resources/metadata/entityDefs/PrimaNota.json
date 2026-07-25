@@ -142,6 +142,14 @@
                 "Organization"
             ]
         },
+        "donationFrequency": {
+            "type": "enum",
+            "options": [
+                "OneTime",
+                "Recurring"
+            ],
+            "default": "OneTime"
+        },
         "donationComment": {
             "type": "text"
         },

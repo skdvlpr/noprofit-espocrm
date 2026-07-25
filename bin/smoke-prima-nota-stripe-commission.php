@@ -100,6 +100,17 @@ $ok(
     $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'panels', 'stripeDetails', 'visible', 'conditionGroup', 0, 'value']) === 'Stripe'
 );
 $ok(
+    'donationFrequency is enum',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationFrequency', 'type']) === 'enum'
+);
+$freqOpts = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationFrequency', 'options']) ?? [];
+$ok('donationFrequency options OneTime', in_array('OneTime', $freqOpts, true));
+$ok('donationFrequency options Recurring', in_array('Recurring', $freqOpts, true));
+$ok(
+    'donationFrequency default OneTime',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationFrequency', 'default']) === 'OneTime'
+);
+$ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
 );

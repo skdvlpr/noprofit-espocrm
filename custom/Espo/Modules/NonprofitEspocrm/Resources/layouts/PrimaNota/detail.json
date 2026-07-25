@@ -3,76 +3,144 @@
         "label": "Overview",
         "rows": [
             [
-                {"name": "name"},
-                {"name": "transactionDate"}
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "transactionDate"
+                }
             ],
             [
-                {"name": "description", "fullWidth": true}
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "subjectParty", "fullWidth": true}
+                {
+                    "name": "subjectParty",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "subjectName", "fullWidth": true}
+                {
+                    "name": "subjectName",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "createSubjectAccount"},
-                {"name": "createSubjectContact"}
+                {
+                    "name": "createSubjectAccount"
+                },
+                {
+                    "name": "createSubjectContact"
+                }
             ],
             [
-                {"name": "subjectEmailAddress"},
-                {"name": "subjectPhoneNumber"}
+                {
+                    "name": "subjectEmailAddress"
+                },
+                {
+                    "name": "subjectPhoneNumber"
+                }
             ],
             [
-                {"name": "beneficiaryParty", "fullWidth": true}
+                {
+                    "name": "beneficiaryParty",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "beneficiaryName", "fullWidth": true}
+                {
+                    "name": "beneficiaryName",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "createBeneficiaryAccount"},
-                {"name": "createBeneficiaryContact"}
+                {
+                    "name": "createBeneficiaryAccount"
+                },
+                {
+                    "name": "createBeneficiaryContact"
+                }
             ],
             [
-                {"name": "beneficiaryEmailAddress"},
-                {"name": "beneficiaryPhoneNumber"}
+                {
+                    "name": "beneficiaryEmailAddress"
+                },
+                {
+                    "name": "beneficiaryPhoneNumber"
+                }
             ],
             [
-                {"name": "financing"},
+                {
+                    "name": "financing"
+                },
                 false
             ],
             [
-                {"name": "entryType"},
-                {"name": "amount"}
+                {
+                    "name": "entryType"
+                },
+                {
+                    "name": "amount"
+                }
             ],
             [
-                {"name": "amountGross"},
-                {"name": "commissionAmount"}
+                {
+                    "name": "amountGross"
+                },
+                {
+                    "name": "commissionAmount"
+                }
             ],
             [
-                {"name": "commissionPercent"},
+                {
+                    "name": "commissionPercent"
+                },
                 false
             ],
             [
-                {"name": "modelDClassification", "fullWidth": true}
+                {
+                    "name": "modelDClassification",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "internalClassification", "fullWidth": true}
+                {
+                    "name": "internalClassification",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "donationPaymentProvider"},
-                {"name": "donationPaymentReference"}
+                {
+                    "name": "donationPaymentProvider"
+                },
+                {
+                    "name": "donationPaymentReference"
+                }
             ],
             [
-                {"name": "donationDonorCategory"},
-                false
+                {
+                    "name": "donationDonorCategory"
+                },
+                {
+                    "name": "donationFrequency"
+                }
             ],
             [
-                {"name": "donationComment", "fullWidth": true}
+                {
+                    "name": "donationComment",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "assignedUser"},
-                {"name": "teams"}
+                {
+                    "name": "assignedUser"
+                },
+                {
+                    "name": "teams"
+                }
             ]
         ]
     },
@@ -81,37 +149,70 @@
         "label": "Stripe details",
         "rows": [
             [
-                {"name": "stripePaymentCreatedAt"},
-                {"name": "stripeLivemode"}
+                {
+                    "name": "stripePaymentCreatedAt"
+                },
+                {
+                    "name": "stripeLivemode"
+                }
             ],
             [
-                {"name": "stripeChargeId"},
-                {"name": "stripeBalanceTransactionId"}
+                {
+                    "name": "stripeChargeId"
+                },
+                {
+                    "name": "stripeBalanceTransactionId"
+                }
             ],
             [
-                {"name": "stripePaymentMethodType"},
-                {"name": "stripeCustomerId"}
+                {
+                    "name": "stripePaymentMethodType"
+                },
+                {
+                    "name": "stripeCustomerId"
+                }
             ],
             [
-                {"name": "stripeCardBrand"},
-                {"name": "stripeCardLast4"}
+                {
+                    "name": "stripeCardBrand"
+                },
+                {
+                    "name": "stripeCardLast4"
+                }
             ],
             [
-                {"name": "stripeReceiptEmail"},
-                {"name": "stripeBillingEmail"}
+                {
+                    "name": "stripeReceiptEmail"
+                },
+                {
+                    "name": "stripeBillingEmail"
+                }
             ],
             [
-                {"name": "stripeBillingPhone"},
-                {"name": "stripeRadarRiskLevel"}
+                {
+                    "name": "stripeBillingPhone"
+                },
+                {
+                    "name": "stripeRadarRiskLevel"
+                }
             ],
             [
-                {"name": "stripeReceiptUrl", "fullWidth": true}
+                {
+                    "name": "stripeReceiptUrl",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "stripeStatementDescriptor", "fullWidth": true}
+                {
+                    "name": "stripeStatementDescriptor",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "stripeFeeDetailsJson", "fullWidth": true}
+                {
+                    "name": "stripeFeeDetailsJson",
+                    "fullWidth": true
+                }
             ]
         ]
     }

@@ -46,7 +46,8 @@
         "stripeLivemode": "Stripe live mode",
         "stripeRadarRiskLevel": "Livello rischio Radar Stripe",
         "stripeStatementDescriptor": "Descrittore estratto conto Stripe",
-        "stripeCustomerId": "ID customer Stripe"
+        "stripeCustomerId": "ID customer Stripe",
+        "donationFrequency": "Frequenza donazione"
     },
     "labels": {
         "PrimaNota": "Prima nota",
@@ -114,6 +115,10 @@
             "C": "C - Uscite e Entrate da attivita' di raccolta fondi",
             "D": "D - Uscite e Entrate da attivita' finanziarie e patrimoniali",
             "E": "E - Uscite e Entrate di supporto generale"
+        },
+        "donationFrequency": {
+            "OneTime": "Una tantum",
+            "Recurring": "Ricorrente"
         }
     }
 }

@@ -46,7 +46,8 @@
         "stripeLivemode": "Stripe live mode",
         "stripeRadarRiskLevel": "Stripe Radar risk level",
         "stripeStatementDescriptor": "Stripe statement descriptor",
-        "stripeCustomerId": "Stripe customer ID"
+        "stripeCustomerId": "Stripe customer ID",
+        "donationFrequency": "Donation frequency"
     },
     "labels": {
         "PrimaNota": "Ledger Entry",
@@ -114,6 +115,10 @@
             "C": "C — Income and expenses from fundraising activities",
             "D": "D — Income and expenses from financial and asset activities",
             "E": "E — General support income and expenses"
+        },
+        "donationFrequency": {
+            "OneTime": "One-time",
+            "Recurring": "Recurring"
         }
     }
 }

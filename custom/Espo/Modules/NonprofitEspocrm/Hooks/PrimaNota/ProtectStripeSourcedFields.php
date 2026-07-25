@@ -43,6 +43,7 @@ class ProtectStripeSourcedFields implements BeforeSave
         'donationPaymentProvider',
         'donationPaymentReference',
         'donationDonorCategory',
+        'donationFrequency',
         'donationComment',
         'financingId',
         'subjectName',
