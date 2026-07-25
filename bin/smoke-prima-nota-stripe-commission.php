@@ -219,12 +219,39 @@ $ok('clear fee → commissionAmount is 0', abs((float) $clearAll->get('commissio
 $ok('clear gross/fee → percent reset to 0', abs((float) $clearAll->get('commissionPercent')) < 0.001, 'pct=' . $clearAll->get('commissionPercent'));
 $ok('clear gross/fee → net preserved', abs((float) $clearAll->get('amount') - $keptNet) < 0.001, 'amount=' . $clearAll->get('amount'));
 
+// UI often clears currency to 0 (not null) — must still reset fee/%
+$clearZero = $em->getNewEntity('PrimaNota');
+$clearZero->set([
+    'description' => 'Smoke clear gross to zero resets percent',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-CLEAR0-' . date('His'),
+    'amountGross' => 100.0,
+    'amountGrossCurrency' => 'EUR',
+    'commissionPercent' => 10.0,
+    'transactionDate' => date('Y-m-d'),
+]);
+$em->saveEntity($clearZero);
+$created[] = $clearZero;
+$clearZero = $em->getEntityById('PrimaNota', $clearZero->getId());
+$keptNetZero = (float) $clearZero->get('amount');
+$clearZero->set('amountGross', 0.0);
+$clearZero->set('amountGrossCurrency', 'EUR');
+$em->saveEntity($clearZero);
+$clearZero = $em->getEntityById('PrimaNota', $clearZero->getId());
+$ok('clear gross=0 → fee reset', abs((float) $clearZero->get('commissionAmount')) < 0.001, 'fee=' . $clearZero->get('commissionAmount'));
+$ok('clear gross=0 → percent reset', abs((float) $clearZero->get('commissionPercent')) < 0.001, 'pct=' . $clearZero->get('commissionPercent'));
+$ok('clear gross=0 → net preserved', abs((float) $clearZero->get('amount') - $keptNetZero) < 0.001, 'amount=' . $clearZero->get('amount'));
+
 $formulaPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json';
 $formulaData = is_file($formulaPath) ? (json_decode((string) file_get_contents($formulaPath), true) ?: []) : [];
 $formulaScript = (string) ($formulaData['beforeSaveCustomScript'] ?? '');
 $ok('formula uses isAttributeChanged for fee', str_contains($formulaScript, "isAttributeChanged('commissionAmount')"));
 $ok('formula uses isAttributeChanged for percent', str_contains($formulaScript, "isAttributeChanged('commissionPercent')"));
 $ok('formula sets amount net from gross', str_contains($formulaScript, 'amountGross - commissionAmount'));
+$ok('formula uses grossCleared before fee sync', str_contains($formulaScript, '$grossCleared = true'));
+$ok('formula coerces null fee/% only in else branch', str_contains($formulaScript, "if (\$grossCleared)") && str_contains($formulaScript, '} else {'));
 
 foreach ($created as $row) {
     $em->removeEntity($row);
