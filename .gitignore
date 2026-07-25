@@ -76,3 +76,6 @@
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Upgrade / installer backups + local debug helpers (never ship via CD)
+bin/debug-*.php
