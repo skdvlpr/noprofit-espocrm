@@ -75,5 +75,44 @@
                 {"name": "teams"}
             ]
         ]
+    },
+    {
+        "name": "stripeDetails",
+        "label": "Stripe details",
+        "rows": [
+            [
+                {"name": "stripePaymentCreatedAt"},
+                {"name": "stripeLivemode"}
+            ],
+            [
+                {"name": "stripeChargeId"},
+                {"name": "stripeBalanceTransactionId"}
+            ],
+            [
+                {"name": "stripePaymentMethodType"},
+                {"name": "stripeCustomerId"}
+            ],
+            [
+                {"name": "stripeCardBrand"},
+                {"name": "stripeCardLast4"}
+            ],
+            [
+                {"name": "stripeReceiptEmail"},
+                {"name": "stripeBillingEmail"}
+            ],
+            [
+                {"name": "stripeBillingPhone"},
+                {"name": "stripeRadarRiskLevel"}
+            ],
+            [
+                {"name": "stripeReceiptUrl", "fullWidth": true}
+            ],
+            [
+                {"name": "stripeStatementDescriptor", "fullWidth": true}
+            ],
+            [
+                {"name": "stripeFeeDetailsJson", "fullWidth": true}
+            ]
+        ]
     }
 ]

@@ -31,12 +31,28 @@
         "financing": "Grant / Funding",
         "transactionDate": "Date",
         "assignedUser": "Assigned user",
-        "teams": "Teams"
+        "teams": "Teams",
+        "stripePaymentCreatedAt": "Stripe payment created at",
+        "stripeChargeId": "Stripe charge ID",
+        "stripeBalanceTransactionId": "Stripe balance transaction ID",
+        "stripePaymentMethodType": "Stripe payment method",
+        "stripeCardBrand": "Card brand",
+        "stripeCardLast4": "Card last 4",
+        "stripeReceiptUrl": "Stripe receipt URL",
+        "stripeReceiptEmail": "Stripe receipt email",
+        "stripeBillingEmail": "Stripe billing email",
+        "stripeBillingPhone": "Stripe billing phone",
+        "stripeFeeDetailsJson": "Stripe fee details (JSON)",
+        "stripeLivemode": "Stripe live mode",
+        "stripeRadarRiskLevel": "Stripe Radar risk level",
+        "stripeStatementDescriptor": "Stripe statement descriptor",
+        "stripeCustomerId": "Stripe customer ID"
     },
     "labels": {
         "PrimaNota": "Ledger Entry",
         "PrimaNotaPlural": "Ledger (Prima Nota)",
-        "Create PrimaNota": "Create ledger entry"
+        "Create PrimaNota": "Create ledger entry",
+        "stripeDetails": "Stripe details"
     },
     "toolTips": {
         "amount": "Net amount is always calculated as gross − commission. Not editable.",

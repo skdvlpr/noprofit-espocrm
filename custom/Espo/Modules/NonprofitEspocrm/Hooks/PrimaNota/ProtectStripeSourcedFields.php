@@ -59,6 +59,21 @@ class ProtectStripeSourcedFields implements BeforeSave
         'beneficiaryPhoneNumber',
         'createBeneficiaryAccount',
         'createBeneficiaryContact',
+        'stripePaymentCreatedAt',
+        'stripeChargeId',
+        'stripeBalanceTransactionId',
+        'stripePaymentMethodType',
+        'stripeCardBrand',
+        'stripeCardLast4',
+        'stripeReceiptUrl',
+        'stripeReceiptEmail',
+        'stripeBillingEmail',
+        'stripeBillingPhone',
+        'stripeFeeDetailsJson',
+        'stripeLivemode',
+        'stripeRadarRiskLevel',
+        'stripeStatementDescriptor',
+        'stripeCustomerId',
     ];
 
     public function __construct(Language $language)

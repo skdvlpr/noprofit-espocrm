@@ -88,6 +88,18 @@ $ok(
     (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'transactionDate', 'required']) === true
 );
 $ok(
+    'stripePaymentMethodType field exists',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'type']) === 'varchar'
+);
+$ok(
+    'stripeChargeId field exists',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeChargeId', 'type']) === 'varchar'
+);
+$ok(
+    'stripeDetails panel dynamicLogic',
+    $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'panels', 'stripeDetails', 'visible', 'conditionGroup', 0, 'value']) === 'Stripe'
+);
+$ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
 );

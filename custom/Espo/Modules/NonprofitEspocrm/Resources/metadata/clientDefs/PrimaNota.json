@@ -469,6 +469,19 @@
                     ]
                 }
             }
+        },
+        "panels": {
+            "stripeDetails": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            }
         }
     },
     "menu": {

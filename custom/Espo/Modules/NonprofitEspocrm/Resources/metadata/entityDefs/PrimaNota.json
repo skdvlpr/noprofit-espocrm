@@ -145,6 +145,75 @@
         "donationComment": {
             "type": "text"
         },
+        "stripePaymentCreatedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "stripeChargeId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true
+        },
+        "stripeBalanceTransactionId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true
+        },
+        "stripePaymentMethodType": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true
+        },
+        "stripeCardBrand": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true
+        },
+        "stripeCardLast4": {
+            "type": "varchar",
+            "maxLength": 4,
+            "readOnly": true
+        },
+        "stripeReceiptUrl": {
+            "type": "url",
+            "readOnly": true
+        },
+        "stripeReceiptEmail": {
+            "type": "email",
+            "readOnly": true
+        },
+        "stripeBillingEmail": {
+            "type": "email",
+            "readOnly": true
+        },
+        "stripeBillingPhone": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true
+        },
+        "stripeFeeDetailsJson": {
+            "type": "text",
+            "readOnly": true
+        },
+        "stripeLivemode": {
+            "type": "bool",
+            "readOnly": true
+        },
+        "stripeRadarRiskLevel": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true
+        },
+        "stripeStatementDescriptor": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true
+        },
+        "stripeCustomerId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true
+        },
         "modelDClassification": {
             "type": "enum",
             "options": [
@@ -228,7 +297,10 @@
     },
     "indexes": {
         "transactionDate": {
-            "columns": ["transactionDate", "deleted"]
+            "columns": [
+                "transactionDate",
+                "deleted"
+            ]
         }
     },
     "optimisticConcurrencyControl": true,

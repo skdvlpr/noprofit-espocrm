@@ -31,12 +31,28 @@
         "financing": "Finanziamento",
         "transactionDate": "Data",
         "assignedUser": "Assegnato a",
-        "teams": "Gruppi"
+        "teams": "Gruppi",
+        "stripePaymentCreatedAt": "Data creazione pagamento Stripe",
+        "stripeChargeId": "ID charge Stripe",
+        "stripeBalanceTransactionId": "ID balance transaction Stripe",
+        "stripePaymentMethodType": "Metodo di pagamento Stripe",
+        "stripeCardBrand": "Brand carta",
+        "stripeCardLast4": "Ultime 4 cifre carta",
+        "stripeReceiptUrl": "URL ricevuta Stripe",
+        "stripeReceiptEmail": "Email ricevuta Stripe",
+        "stripeBillingEmail": "Email fatturazione Stripe",
+        "stripeBillingPhone": "Telefono fatturazione Stripe",
+        "stripeFeeDetailsJson": "Dettaglio commissioni Stripe (JSON)",
+        "stripeLivemode": "Stripe live mode",
+        "stripeRadarRiskLevel": "Livello rischio Radar Stripe",
+        "stripeStatementDescriptor": "Descrittore estratto conto Stripe",
+        "stripeCustomerId": "ID customer Stripe"
     },
     "labels": {
         "PrimaNota": "Prima nota",
         "PrimaNotaPlural": "Prima nota",
-        "Create PrimaNota": "Crea movimento"
+        "Create PrimaNota": "Crea movimento",
+        "stripeDetails": "Dettagli Stripe"
     },
     "toolTips": {
         "amount": "L'importo netto e' sempre calcolato: lordo - commissione. Non modificabile.",
