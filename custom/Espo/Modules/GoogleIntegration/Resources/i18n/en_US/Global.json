@@ -10,7 +10,15 @@
         "googleCalendarPanelCloseHint": "Right-click to close - search is remembered",
         "googleCalendarPrimary": "Primary calendar",
         "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list.",
-        "googleCalendarListFailedHint": "Could not load your Google calendars. Only the primary calendar is available."
+        "googleCalendarListFailedHint": "Could not load your Google calendars. Only the primary calendar is available.",
+        "googleCalendarCreateNew": "Create new calendar",
+        "googleCalendarCreateNewNamePlaceholder": "New calendar name",
+        "googleCalendarCreateNewHelp": "Creates the calendar in your Google account, then selects it here. You can reuse it next time from the list.",
+        "googleCalendarCreateNewSubmit": "Create calendar",
+        "googleCalendarCreateNewNameRequired": "Enter a name for the new calendar.",
+        "googleCalendarCreateNewSuccess": "Google calendar created.",
+        "googleCalendarCreateNewExists": "Calendar already existed — selected.",
+        "googleCalendarCreateNewFailed": "Could not create Google calendar."
     },
     "scopeNames": {
         "CalendarTemplate": "Calendar Template",

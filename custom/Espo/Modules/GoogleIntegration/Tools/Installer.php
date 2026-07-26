@@ -10,6 +10,7 @@ use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateSourceDefaults;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceEntityTypesReader;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DefaultCalendarTemplateProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
+use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner;
 use Espo\Entities\Integration as IntegrationEntity;
 use Espo\Entities\Role;
 use Espo\ORM\EntityManager;
@@ -72,6 +73,7 @@ class Installer
     public function runPostInstall(Container $container): void
     {
         $em = $container->getByClass(EntityManager::class);
+        $this->migrateLegacyIntegrationCredentials($em);
         $this->removeLegacyIntegrationRow($em);
         $this->ensureIntegrationRow($em);
 
@@ -89,10 +91,86 @@ class Installer
             ->create(GoogleCalendarLayoutProvisioner::class)
             ->provisionAll();
 
+        $this->migrateLegacyExternalAccounts($container);
         $this->ensureAdminRoleAccess($em, $metadata);
         $this->pruneGoogleCalendarConfigFromNavigation($container);
 
         $dataManager->rebuild();
+    }
+
+    /**
+     * Copy Client ID/Secret from legacy Integration rows before they are removed.
+     */
+    private function migrateLegacyIntegrationCredentials(EntityManager $entityManager): void
+    {
+        $canonical = $entityManager->getEntityById(IntegrationEntity::ENTITY_TYPE, self::INTEGRATION_ID);
+
+        foreach ([self::LEGACY_GOOGLE_INTEGRATION_ID, self::LEGACY_SAFEHOUSE_GOOGLE_ID] as $legacyId) {
+            $legacy = $entityManager->getEntityById(IntegrationEntity::ENTITY_TYPE, $legacyId);
+
+            if ($legacy === null) {
+                continue;
+            }
+
+            if ($canonical === null) {
+                $canonical = $entityManager->getNewEntity(IntegrationEntity::ENTITY_TYPE);
+                $canonical->set('id', self::INTEGRATION_ID);
+                $canonical->set('enabled', (bool) $legacy->get('enabled'));
+            }
+
+            foreach (['clientId', 'clientSecret'] as $field) {
+                $value = $legacy->get($field);
+                $current = $canonical->get($field);
+
+                if (
+                    (is_string($value) && $value !== '')
+                    && (!is_string($current) || $current === '')
+                ) {
+                    $canonical->set($field, $value);
+                }
+            }
+
+            if ($legacy->get('enabled') && !$canonical->get('enabled')) {
+                $canonical->set('enabled', true);
+            }
+
+            $entityManager->saveEntity($canonical);
+
+            return;
+        }
+    }
+
+    private function migrateLegacyExternalAccounts(Container $container): void
+    {
+        $em = $container->getByClass(EntityManager::class);
+        $provisioner = $container->getByClass(InjectableFactory::class)
+            ->create(AccountProvisioner::class);
+
+        $legacyRows = $em->getRDBRepository('ExternalAccount')
+            ->where([
+                'OR' => [
+                    ['id*' => self::LEGACY_GOOGLE_INTEGRATION_ID . '__%'],
+                    ['id*' => self::LEGACY_SAFEHOUSE_GOOGLE_ID . '__%'],
+                ],
+                'deleted' => false,
+            ])
+            ->find();
+
+        foreach ($legacyRows as $legacy) {
+            $id = $legacy->getId();
+
+            if (!is_string($id) || !str_contains($id, '__')) {
+                continue;
+            }
+
+            [, $userId] = explode('__', $id, 2);
+
+            if ($userId === '') {
+                continue;
+            }
+
+            $provisioner->ensureForUser($userId);
+        }
     }
 
     private function removeLegacyIntegrationRow(EntityManager $entityManager): void

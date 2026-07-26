@@ -27,6 +27,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         setup() {
             super.setup();
 
+            this.addActionHandler('disconnect', () => this.actionDisconnect());
+
             this.listenToOnce(this.model, 'sync', () => {
                 this.initCalendarSyncModeField();
             });
@@ -44,6 +46,27 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         setNotConnected() {
             super.setNotConnected();
             this.reRender();
+        }
+
+        /**
+         * Espo core has no Disconnect button: uncheck Enabled + Save.
+         * Explicit action so users can clear tokens without hunting the checkbox.
+         */
+        actionDisconnect() {
+            const enabledView = this.getView('enabled');
+
+            if (enabledView && typeof enabledView.fetchToModel === 'function') {
+                // Force unchecked before save (checkbox may still look checked in DOM).
+                this.model.set('enabled', false);
+
+                if (typeof enabledView.reRender === 'function') {
+                    enabledView.reRender();
+                }
+            } else {
+                this.model.set('enabled', false);
+            }
+
+            this.save();
         }
 
         afterRender() {

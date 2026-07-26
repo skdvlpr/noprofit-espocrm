@@ -9,12 +9,14 @@ use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 
 class GetDateSourceTypeOptions implements Action
 {
     public function __construct(
         private DateSourceProvider $dateSourceProvider,
+        private CalendarProvisioner $calendarProvisioner,
         private Acl $acl
     ) {}
 
@@ -34,6 +36,12 @@ class GetDateSourceTypeOptions implements Action
                 'label' => (string) ($source['label'] ?? $source['name'] ?? ''),
                 'dateField' => (string) ($source['dateField'] ?? ''),
                 'calendarRoutingMode' => (string) ($source['calendarRoutingMode'] ?? 'primary'),
+                'dedicatedCalendarName' => is_string($source['dedicatedCalendarName'] ?? null)
+                    ? trim((string) $source['dedicatedCalendarName'])
+                    : '',
+                'resolvedDedicatedCalendarName' => $this->calendarProvisioner
+                    ->resolveDedicatedCalendarName($source),
+                'entityLabel' => $this->calendarProvisioner->resolveEntityLabel($entityType),
             ];
         }
 

@@ -4,6 +4,7 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\ExternalAccount\ClientManager;
+use Espo\Core\Utils\Language;
 use Espo\Core\Utils\Log;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google;
@@ -14,6 +15,9 @@ use RuntimeException;
 
 /**
  * Resolves or creates per-user dedicated Google calendars for auto_dedicated routing.
+ *
+ * Default name is CRM - {entity scope label} so all auto_dedicated date sources for the
+ * same entity share one calendar. Per-source dedicatedCalendarName still overrides.
  */
 class CalendarProvisioner
 {
@@ -22,13 +26,14 @@ class CalendarProvisioner
     public function __construct(
         private EntityManager $entityManager,
         private ClientManager $clientManager,
-        private Log $log
+        private Log $log,
+        private Language $language,
     ) {}
 
     public function resolveDedicatedCalendarId(User $user, array $source): string
     {
         $summary = $this->resolveDedicatedCalendarName($source);
-        $cacheKey = $this->buildCacheKey($source);
+        $cacheKey = $this->buildCacheKey($source, $summary);
 
         $cached = $this->readCachedCalendarId($user, $cacheKey);
 
@@ -58,6 +63,9 @@ class CalendarProvisioner
         return $id;
     }
 
+    /**
+     * @param array<string, mixed> $source
+     */
     public function resolveDedicatedCalendarName(array $source): string
     {
         $name = trim((string) ($source['dedicatedCalendarName'] ?? ''));
@@ -66,21 +74,42 @@ class CalendarProvisioner
             return $name;
         }
 
-        $label = trim((string) ($source['label'] ?? ''));
+        $entityType = trim((string) ($source['targetEntityType'] ?? ''));
+        $entityLabel = $this->resolveEntityLabel($entityType);
 
-        if ($label === '') {
-            $label = trim((string) ($source['name'] ?? ''));
-        }
-
-        return 'CRM - ' . ($label !== '' ? $label : 'Calendar');
+        return 'CRM - ' . ($entityLabel !== '' ? $entityLabel : 'Calendar');
     }
 
-    private function buildCacheKey(array $source): string
+    public function resolveEntityLabel(string $entityType): string
+    {
+        $entityType = trim($entityType);
+
+        if ($entityType === '') {
+            return '';
+        }
+
+        $label = trim((string) $this->language->translate($entityType, 'scopeNames'));
+
+        if ($label === '' || $label === $entityType) {
+            $fromEntity = trim((string) $this->language->translate($entityType, 'labels', $entityType));
+
+            if ($fromEntity !== '' && $fromEntity !== $entityType) {
+                return $fromEntity;
+            }
+        }
+
+        return $label !== '' ? $label : $entityType;
+    }
+
+    /**
+     * @param array<string, mixed> $source
+     */
+    private function buildCacheKey(array $source, string $summary): string
     {
         $entityType = (string) ($source['targetEntityType'] ?? '');
-        $sourceDateType = (string) ($source['sourceDateType'] ?? 'main');
 
-        return $entityType . ':' . $sourceDateType;
+        // Same resolved name → same calendar (entity-level default shared across dates).
+        return $entityType . ':' . md5(mb_strtolower($summary));
     }
 
     private function readCachedCalendarId(User $user, string $cacheKey): ?string

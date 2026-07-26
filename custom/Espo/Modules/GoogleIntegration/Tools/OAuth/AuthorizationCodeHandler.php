@@ -9,6 +9,7 @@ use Espo\Core\HookManager;
 use Espo\Core\Utils\Config;
 use Espo\Entities\ExternalAccount as ExternalAccountEntity;
 use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google as GoogleClient;
+use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\ORM\EntityManager;
 
@@ -22,6 +23,7 @@ class AuthorizationCodeHandler
         private ClientManager $clientManager,
         private Config $config,
         private HookManager $hookManager,
+        private AccountProvisioner $accountProvisioner,
     ) {}
 
     public function exchange(string $userId, string $code, ?string $redirectUriFromClient): bool
@@ -29,14 +31,7 @@ class AuthorizationCodeHandler
         $integration = Installer::INTEGRATION_ID;
         $redirectUri = RedirectUri::resolve($this->config, $redirectUriFromClient);
 
-        $entity = $this->entityManager->getEntityById(
-            ExternalAccountEntity::ENTITY_TYPE,
-            $integration . '__' . $userId
-        );
-
-        if ($entity === null) {
-            throw new Error("External Account $integration not found for $userId.");
-        }
+        $entity = $this->accountProvisioner->ensureForUser($userId);
 
         $entity->set('enabled', true);
         $this->entityManager->saveEntity($entity);
@@ -44,7 +39,11 @@ class AuthorizationCodeHandler
         $client = $this->clientManager->create($integration, $userId);
 
         if (!$client instanceof OAuth2Abstract) {
-            throw new Error("Could not load client for $integration.");
+            throw new Error(
+                "Could not load OAuth client for $integration. "
+                . 'Enable the integration under Administration → Integrations → Google calendar & drive '
+                . 'and confirm Client ID / Client Secret are saved.'
+            );
         }
 
         $client->setParams(['redirectUri' => $redirectUri]);

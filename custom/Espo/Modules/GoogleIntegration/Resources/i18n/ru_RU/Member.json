@@ -21,7 +21,7 @@
         "googleCalendarRoutingHintTitle": "Маршрутизация Google Calendar (по выбранным датам)",
         "googleCalendarRoutingHintPrimary": "События попадут в основной календарь Google.",
         "googleCalendarRoutingHintUserPick": "Выберите календарь ниже (админ включил выбор пользователя для этой даты).",
-        "googleCalendarRoutingHintAutoDedicated": "События попадут в отдельный календарь CRM - {label} (если админ включил автосоздание).",
+        "googleCalendarRoutingHintAutoDedicated": "События попадут в общий календарь сущности {calendarName} (если админ включил автосоздание).",
         "googleCalendarTemplateVariables": "Вставить поле записи",
         "googleCalendarTemplateVariableSearch": "Поиск полей",
         "googleCalendarCurrentRecordFields": "Поля текущей записи",

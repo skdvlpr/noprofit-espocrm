@@ -29,8 +29,8 @@
         "sortOrder": "По возрастанию: 10, 20, 30… Согласуйте с источниками по умолчанию модуля.",
         "dateField": "Поле CRM. datetime — с временем; date — только дата (весь день автоматически).",
         "allDay": "Событие на весь день в Google. Для полей date включается автоматически.",
-        "calendarRoutingMode": "primary — основной календарь; user_pick — пользователь выбирает на записи; auto_dedicated — CRM - {метка}, если админ включил автосоздание.",
-        "dedicatedCalendarName": "Своё имя для auto_dedicated. Пусто = CRM - {Метка}."
+        "calendarRoutingMode": "primary — основной календарь; user_pick — пользователь выбирает на записи; auto_dedicated — CRM - {метка сущности}, если админ включил автосоздание.",
+        "dedicatedCalendarName": "Своё имя для auto_dedicated. Пусто = CRM - {метка сущности} (общий для всех auto-дат этой сущности)."
     },
     "options": {
         "calendarRoutingMode": {

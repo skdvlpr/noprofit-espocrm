@@ -40,6 +40,11 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetGoogleCalendars"
     },
     {
+        "route": "/GoogleIntegration/calendar/google-calendars",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PostGoogleCalendar"
+    },
+    {
         "route": "/GoogleIntegration/calendar/google-events",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetGoogleEvents"

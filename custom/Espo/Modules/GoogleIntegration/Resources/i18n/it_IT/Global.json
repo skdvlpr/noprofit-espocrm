@@ -10,7 +10,15 @@
         "googleCalendarPanelCloseHint": "Tasto destro per chiudere - ricerca salvata",
         "googleCalendarPrimary": "Calendario principale",
         "googleCalendarConnectAccountHint": "Collega l'account Google in Account esterni per caricare l'elenco dei calendari.",
-        "googleCalendarListFailedHint": "Impossibile caricare i calendari Google. È disponibile solo il calendario principale."
+        "googleCalendarListFailedHint": "Impossibile caricare i calendari Google. È disponibile solo il calendario principale.",
+        "googleCalendarCreateNew": "Crea nuovo calendario",
+        "googleCalendarCreateNewNamePlaceholder": "Nome del nuovo calendario",
+        "googleCalendarCreateNewHelp": "Crea il calendario nel tuo account Google e lo seleziona qui. Al prossimo accesso sarà nell'elenco.",
+        "googleCalendarCreateNewSubmit": "Crea calendario",
+        "googleCalendarCreateNewNameRequired": "Inserisci un nome per il nuovo calendario.",
+        "googleCalendarCreateNewSuccess": "Calendario Google creato.",
+        "googleCalendarCreateNewExists": "Il calendario esisteva già — selezionato.",
+        "googleCalendarCreateNewFailed": "Impossibile creare il calendario Google."
     },
     "scopeNames": {
         "CalendarTemplate": "Template calendario",

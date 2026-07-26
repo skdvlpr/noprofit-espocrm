@@ -10,7 +10,15 @@
         "googleCalendarPanelCloseHint": "Правый клик - закрыть, поиск сохраняется",
         "googleCalendarPrimary": "Основной календарь",
         "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей.",
-        "googleCalendarListFailedHint": "Не удалось загрузить календари Google. Доступен только основной календарь."
+        "googleCalendarListFailedHint": "Не удалось загрузить календари Google. Доступен только основной календарь.",
+        "googleCalendarCreateNew": "Создать новый календарь",
+        "googleCalendarCreateNewNamePlaceholder": "Имя нового календаря",
+        "googleCalendarCreateNewHelp": "Создаёт календарь в вашем Google-аккаунте и выбирает его здесь. В следующий раз он будет в списке.",
+        "googleCalendarCreateNewSubmit": "Создать календарь",
+        "googleCalendarCreateNewNameRequired": "Введите имя нового календаря.",
+        "googleCalendarCreateNewSuccess": "Календарь Google создан.",
+        "googleCalendarCreateNewExists": "Календарь уже существовал — выбран.",
+        "googleCalendarCreateNewFailed": "Не удалось создать календарь Google."
     },
     "scopeNames": {
         "CalendarTemplate": "Шаблон календаря",

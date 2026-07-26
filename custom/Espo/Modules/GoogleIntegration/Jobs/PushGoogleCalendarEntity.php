@@ -33,22 +33,22 @@ class PushGoogleCalendarEntity implements JobContract
             return;
         }
 
-        $entity = $this->entityManager->getEntityById($entityType, $entityId);
-
-        if ($entity === null || !$entity->get('saveToGoogleCalendar')) {
-            return;
-        }
-
-        $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
-
-        if ($user === null) {
-            return;
-        }
-
         try {
+            $entity = $this->entityManager->getEntityById($entityType, $entityId);
+
+            if ($entity === null || !$entity->get('saveToGoogleCalendar')) {
+                return;
+            }
+
+            $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
+
+            if ($user === null) {
+                return;
+            }
+
             $this->eventPusher->pushIfRequested($entity, $user);
         } catch (Throwable) {
-            // Logged inside EventPusher callers when invoked from hooks; keep job quiet.
+            // Schema drift / OAuth failures must not crash the job worker as uncaught 500.
         }
     }
 }

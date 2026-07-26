@@ -31,8 +31,8 @@
         "sortOrder": "Priorità di ordinamento in elenco Origini date e in Calendario (non priorità CRM). Valori più bassi compaiono prima.",
         "dateField": "Campo CRM da usare. Campi datetime = eventi con orario; campi date = solo giornata intera.",
         "allDay": "Se attivo, Google riceve un evento tutto il giorno. Per campi date è automatico e la casella è nascosta.",
-        "calendarRoutingMode": "primary = calendario principale; user_pick = l'utente sceglie sul record; auto_dedicated = crea/usa CRM - {etichetta} se l'admin ha abilitato la creazione automatica.",
-        "dedicatedCalendarName": "Nome personalizzato per auto_dedicated. Lascia vuoto per CRM - {Etichetta}."
+        "calendarRoutingMode": "primary = calendario principale; user_pick = l'utente sceglie sul record; auto_dedicated = crea/usa CRM - {etichetta entità} se l'admin ha abilitato la creazione automatica.",
+        "dedicatedCalendarName": "Nome personalizzato per auto_dedicated. Lascia vuoto per CRM - {etichetta entità} (condiviso da tutte le date auto di questa entità)."
     },
     "options": {
         "calendarRoutingMode": {

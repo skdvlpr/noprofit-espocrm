@@ -25,6 +25,20 @@
             <span
                 class="connected-label label label-success {{#unless isConnected}}hidden{{/unless}}"
             >{{translate 'Connected' scope='ExternalAccount'}}</span>
+            {{#if isConnected}}
+            <div class="btn-group margin-top" role="group">
+                <button
+                    type="button"
+                    class="btn btn-default btn-xs-wide"
+                    data-action="connect"
+                >{{translate 'reconnectGoogleAccount' scope='ExternalAccount' category='labels'}}</button>
+                <button
+                    type="button"
+                    class="btn btn-default btn-xs-wide"
+                    data-action="disconnect"
+                >{{translate 'Disconnect' scope='ExternalAccount'}}</button>
+            </div>
+            {{/if}}
         </div>
         {{#if showGoogleAccountProfile}}
         <div class="panel panel-default margin-top">

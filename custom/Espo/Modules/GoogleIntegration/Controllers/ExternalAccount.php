@@ -8,8 +8,8 @@ use Espo\Core\Api\Response;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\Exceptions\Forbidden;
-use Espo\Core\ExternalAccount\ClientManager;
-use Espo\Core\HookManager;
+use Espo\Core\Record\ReadParams;
+use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\IdParser;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
 use Espo\Modules\GoogleIntegration\Tools\OAuth\AuthorizationCodeHandler;
@@ -18,12 +18,39 @@ use stdClass;
 
 /**
  * External account API: host guard, safe id parsing, canonical Google redirect URI.
+ *
+ * Espo 10 controllers have no getContainer() — use RecordBase::$injectableFactory.
  */
 class ExternalAccount extends BaseExternalAccount
 {
     public function putActionUpdate(Request $request, Response $response): stdClass
     {
         return parent::putActionUpdate($request, $response);
+    }
+
+    public function getActionRead(Request $request, Response $response): stdClass
+    {
+        $id = $request->getRouteParam('id');
+
+        if (!is_string($id) || $id === '') {
+            throw new BadRequest();
+        }
+
+        $parsed = IdParser::parse($id);
+
+        if ($parsed['integration'] === Installer::INTEGRATION_ID) {
+            if ($this->user->getId() !== $parsed['userId'] && !$this->user->isAdmin()) {
+                throw new Forbidden();
+            }
+
+            $this->injectableFactory
+                ->create(AccountProvisioner::class)
+                ->ensureForUser($parsed['userId']);
+        }
+
+        return $this->getRecordService()
+            ->read($id, ReadParams::create())
+            ->getValueMap();
     }
 
     public function getActionGetOAuth2Info(Request $request): ?stdClass
@@ -40,6 +67,12 @@ class ExternalAccount extends BaseExternalAccount
 
         if ($this->user->getId() !== $parsed['userId'] && !$this->user->isAdmin()) {
             throw new Forbidden();
+        }
+
+        if ($parsed['integration'] === Installer::INTEGRATION_ID) {
+            $this->injectableFactory
+                ->create(AccountProvisioner::class)
+                ->ensureForUser($parsed['userId']);
         }
 
         $result = parent::getActionGetOAuth2Info($request);
@@ -94,12 +127,7 @@ class ExternalAccount extends BaseExternalAccount
         }
 
         try {
-            $handler = new AuthorizationCodeHandler(
-                $this->entityManager,
-                $this->getContainer()->getByClass(ClientManager::class),
-                $this->config,
-                $this->getContainer()->getByClass(HookManager::class),
-            );
+            $handler = $this->injectableFactory->create(AuthorizationCodeHandler::class);
 
             return $handler->exchange(
                 $parsed['userId'],

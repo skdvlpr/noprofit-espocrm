@@ -21,7 +21,7 @@
         "googleCalendarRoutingHintTitle": "Google calendar routing (per selected date)",
         "googleCalendarRoutingHintPrimary": "Events go to your Google primary calendar.",
         "googleCalendarRoutingHintUserPick": "Choose a calendar below (admin enabled user pick for this date).",
-        "googleCalendarRoutingHintAutoDedicated": "Events go to dedicated calendar CRM - {label} (when admin enabled auto-create).",
+        "googleCalendarRoutingHintAutoDedicated": "Events go to shared entity calendar {calendarName} (when admin enabled auto-create).",
         "googleCalendarTemplateVariables": "Insert record field",
         "googleCalendarTemplateVariableSearch": "Search fields",
         "googleCalendarCurrentRecordFields": "Current record fields",

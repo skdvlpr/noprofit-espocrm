@@ -16,6 +16,6 @@
         "reconnectGoogleAccount": "Ricollega account Google"
     },
     "help": {
-        "GoogleCalendarDrive": "Collega il tuo account Google per **Calendario** e **Drive** usati da questa istanza Espo (ambito `drive.file`). Disconnetti rimuove i token salvati. Dopo la connessione, verifica email/nome/avatar mostrati, scegli la modalità di sincronizzazione (opzionale) e clicca **Salva**."
+        "GoogleCalendarDrive": "Usa **Connetti** per autorizzare Google. Se già connesso: **Ricollega** cambia account; **Disconnetti** cancella i token (come spegnere **Abilitato** e **Salva**). Dopo la connessione verifica email/nome/avatar, scegli la sync opzionale e clicca **Salva**."
     }
 }

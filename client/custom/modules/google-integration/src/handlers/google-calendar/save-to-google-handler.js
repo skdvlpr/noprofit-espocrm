@@ -289,13 +289,24 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             }
 
             if (mode === 'auto_dedicated') {
+                const calendarName = String(
+                    source.resolvedDedicatedCalendarName
+                    || source.dedicatedCalendarName
+                    || ('CRM - ' + (
+                        source.entityLabel
+                        || this.view.translate(this.view.entityType, 'scopeNames')
+                        || this.view.entityType
+                    ))
+                );
                 const template = this.view.translate(
                     'googleCalendarRoutingHintAutoDedicated',
                     'labels',
                     this.view.entityType
                 );
 
-                return prefix + template.replace('{label}', label);
+                return prefix + template
+                    .replace(/\{calendarName\}/g, calendarName)
+                    .replace(/\{label\}/g, calendarName);
             }
 
             return prefix + this.view.translate(

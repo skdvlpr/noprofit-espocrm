@@ -30,8 +30,8 @@
         "sortOrder": "Display order in date-source list and Calendar (not CRM priority). Lower numbers appear first.",
         "dateField": "CRM field to read. Use datetime fields for timed events; use date fields for all-day-only data.",
         "allDay": "When checked, Google Calendar gets an all-day event. For date-type fields this is automatic and the checkbox is hidden.",
-        "calendarRoutingMode": "primary = always main calendar; user_pick = user selects calendar on record; auto_dedicated = create/use CRM - {label} when admin enabled auto-create globally.",
-        "dedicatedCalendarName": "Override name for auto_dedicated mode. Leave empty for CRM - {Display label}."
+        "calendarRoutingMode": "primary = always main calendar; user_pick = user selects calendar on record; auto_dedicated = create/use CRM - {entity label} when admin enabled auto-create globally.",
+        "dedicatedCalendarName": "Override name for auto_dedicated mode. Leave empty for CRM - {entity label} (shared by all auto dates of this entity)."
     },
     "options": {
         "calendarRoutingMode": {

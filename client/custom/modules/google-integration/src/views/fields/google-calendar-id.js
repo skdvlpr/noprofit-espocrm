@@ -22,6 +22,9 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             this.calendarLoadPending = false;
             this.connectHintShown = false;
             this.needsCalendarRefresh = false;
+            this.createNewCalendar = false;
+            this.newCalendarName = '';
+            this.createInProgress = false;
         }
 
         setupOptions() {
@@ -76,6 +79,171 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             }
 
             this.decorateLabels();
+            this.renderCreateNewUi();
+            this.syncCreateNewUiState();
+        }
+
+        renderCreateNewUi() {
+            if (this.mode !== 'edit') {
+                return;
+            }
+
+            this.$el.find('.google-calendar-create-new').remove();
+
+            const $wrap = $('<div>')
+                .addClass('google-calendar-create-new margin-top');
+
+            const $checkLabel = $('<label>')
+                .addClass('checkbox-inline')
+                .append(
+                    $('<input>')
+                        .attr({
+                            type: 'checkbox',
+                            'data-role': 'create-new-calendar',
+                        })
+                        .prop('checked', this.createNewCalendar),
+                    ' ',
+                    document.createTextNode(this.translateLabelKey('googleCalendarCreateNew'))
+                );
+
+            const $nameRow = $('<div>')
+                .addClass('google-calendar-create-new-name margin-top')
+                .toggleClass('hidden', !this.createNewCalendar);
+
+            const $input = $('<input>')
+                .addClass('form-control')
+                .attr({
+                    type: 'text',
+                    maxlength: 200,
+                    placeholder: this.translateLabelKey('googleCalendarCreateNewNamePlaceholder'),
+                    'data-role': 'new-calendar-name',
+                })
+                .val(this.newCalendarName || this.defaultNewCalendarName());
+
+            const $createBtn = $('<button>')
+                .attr({type: 'button'})
+                .addClass('btn btn-default btn-sm margin-top')
+                .attr('data-role', 'create-calendar-submit')
+                .text(this.translateLabelKey('googleCalendarCreateNewSubmit'));
+
+            const $help = $('<p>')
+                .addClass('help-block text-muted small')
+                .text(this.translateLabelKey('googleCalendarCreateNewHelp'));
+
+            $nameRow.append($input, $createBtn, $help);
+            $wrap.append($checkLabel, $nameRow);
+            this.$el.append($wrap);
+
+            $wrap.find('[data-role="create-new-calendar"]').on('change', e => {
+                this.createNewCalendar = !!e.currentTarget.checked;
+
+                if (this.createNewCalendar && !this.newCalendarName) {
+                    this.newCalendarName = this.defaultNewCalendarName();
+                    $input.val(this.newCalendarName);
+                }
+
+                this.syncCreateNewUiState();
+            });
+
+            $input.on('input', e => {
+                this.newCalendarName = String(e.currentTarget.value || '');
+            });
+
+            $createBtn.on('click', () => this.submitCreateCalendar());
+        }
+
+        defaultNewCalendarName() {
+            const entityType = this.model.entityType || this.entityType || '';
+            const entityLabel = this.translate(entityType, 'scopeNames') || entityType || 'Calendar';
+
+            return 'CRM - ' + entityLabel;
+        }
+
+        syncCreateNewUiState() {
+            const $panel = this.$el.find('.google-calendar-create-new');
+
+            if (!$panel.length) {
+                return;
+            }
+
+            $panel.find('.google-calendar-create-new-name')
+                .toggleClass('hidden', !this.createNewCalendar);
+
+            $panel.find('[data-role="create-new-calendar"]')
+                .prop('checked', this.createNewCalendar);
+
+            if (this.createNewCalendar) {
+                $panel.find('[data-role="new-calendar-name"]').val(
+                    this.newCalendarName || this.defaultNewCalendarName()
+                );
+            }
+
+            const selectize = this.getSelectize();
+            const $select = this.$el.find('select');
+
+            if (selectize) {
+                if (this.createNewCalendar) {
+                    selectize.disable();
+                } else {
+                    selectize.enable();
+                }
+            } else if ($select.length) {
+                $select.prop('disabled', this.createNewCalendar);
+            }
+        }
+
+        submitCreateCalendar() {
+            if (this.createInProgress) {
+                return;
+            }
+
+            const summary = String(this.newCalendarName || this.$el.find('[data-role="new-calendar-name"]').val() || '')
+                .trim();
+
+            if (!summary) {
+                Espo.Ui.error(this.translateLabelKey('googleCalendarCreateNewNameRequired'));
+
+                return;
+            }
+
+            this.createInProgress = true;
+            Espo.Ui.notify(this.translate('pleaseWait', 'messages'));
+
+            Espo.Ajax.postRequest('GoogleIntegration/calendar/google-calendars', {
+                summary: summary,
+            }).then(response => {
+                this.createInProgress = false;
+                Espo.Ui.notify(false);
+
+                const id = String(response.id || '');
+                const name = String(response.summary || summary);
+
+                if (!id) {
+                    Espo.Ui.error(this.translateLabelKey('googleCalendarCreateNewFailed'));
+
+                    return;
+                }
+
+                this.calendarOptionList = this.calendarOptionList.filter(item => item.id !== id);
+                this.calendarOptionList.unshift({id: id, summary: name});
+                this.calendarLoaded = true;
+                this.createNewCalendar = false;
+                this.newCalendarName = '';
+                this.model.set(this.name, id);
+                this.applyCalendarOptions();
+                this.renderCreateNewUi();
+                this.syncCreateNewUiState();
+
+                Espo.Ui.success(
+                    response.created
+                        ? this.translateLabelKey('googleCalendarCreateNewSuccess')
+                        : this.translateLabelKey('googleCalendarCreateNewExists')
+                );
+            }).catch(() => {
+                this.createInProgress = false;
+                Espo.Ui.notify(false);
+                Espo.Ui.error(this.translateLabelKey('googleCalendarCreateNewFailed'));
+            });
         }
 
         isFieldVisible() {
@@ -143,6 +311,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
 
                 selectize.refreshOptions(false);
                 this.decorateLabels();
+                this.syncCreateNewUiState();
 
                 return;
             }

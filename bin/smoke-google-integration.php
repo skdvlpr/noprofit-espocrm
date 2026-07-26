@@ -696,6 +696,155 @@ if ($integrationRow !== null) {
     $config->update();
 }
 
+echo "\nCalendarProvisioner entity-level default name\n";
+
+$calendarProvisioner = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner::class);
+$presentationName = $calendarProvisioner->resolveDedicatedCalendarName([
+    'targetEntityType' => 'Opportunity',
+    'sourceDateType' => 'presentationDate',
+    'label' => 'Presentation',
+    'dedicatedCalendarName' => '',
+]);
+$closeName = $calendarProvisioner->resolveDedicatedCalendarName([
+    'targetEntityType' => 'Opportunity',
+    'sourceDateType' => 'closeDate',
+    'label' => 'Close',
+    'dedicatedCalendarName' => '',
+]);
+$customName = $calendarProvisioner->resolveDedicatedCalendarName([
+    'targetEntityType' => 'Opportunity',
+    'sourceDateType' => 'presentationDate',
+    'label' => 'Presentation',
+    'dedicatedCalendarName' => 'CRM - Custom Funds',
+]);
+$entityLabel = $calendarProvisioner->resolveEntityLabel('Opportunity');
+$ok(
+    'auto_dedicated default uses CRM - {entity label} (not date label)',
+    str_starts_with($presentationName, 'CRM - ')
+        && !str_contains(strtolower($presentationName), 'presentation')
+        && ($entityLabel === '' || str_contains($presentationName, $entityLabel)),
+    "name=$presentationName entityLabel=$entityLabel"
+);
+$ok(
+    'presentation + close share same default dedicated calendar name',
+    $presentationName === $closeName,
+    "presentation=$presentationName close=$closeName"
+);
+$ok(
+    'dedicatedCalendarName override still wins',
+    $customName === 'CRM - Custom Funds'
+);
+
+$postCalendarRoute = false;
+$routesPath = __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/routes.json';
+$routesJson = is_file($routesPath) ? json_decode((string) file_get_contents($routesPath), true) : null;
+if (is_array($routesJson)) {
+    foreach ($routesJson as $route) {
+        if (
+            ($route['route'] ?? '') === '/GoogleIntegration/calendar/google-calendars'
+            && strtolower((string) ($route['method'] ?? '')) === 'post'
+        ) {
+            $postCalendarRoute = true;
+            break;
+        }
+    }
+}
+$ok('POST /GoogleIntegration/calendar/google-calendars route registered', $postCalendarRoute);
+
+$calendarIdViewPath = __DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-id.js';
+$calendarIdViewSrc = is_file($calendarIdViewPath) ? (string) file_get_contents($calendarIdViewPath) : '';
+$ok(
+    'google-calendar-id field has Create new calendar UI',
+    str_contains($calendarIdViewSrc, 'googleCalendarCreateNew')
+        && str_contains($calendarIdViewSrc, 'submitCreateCalendar')
+);
+
+echo "\nExternalAccount controller Espo 10 DI\n";
+
+$controllerPath = __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Controllers/ExternalAccount.php';
+$controllerSrc = is_file($controllerPath) ? (string) file_get_contents($controllerPath) : '';
+$ok(
+    'ExternalAccount controller does not call removed getContainer()',
+    $controllerSrc !== '' && !preg_match('/\$this->getContainer\s*\(/', $controllerSrc)
+);
+$ok(
+    'ExternalAccount controller uses injectableFactory',
+    str_contains($controllerSrc, '$this->injectableFactory')
+);
+
+echo "\nExternalAccount AccountProvisioner (missing row + legacy migrate)\n";
+
+$injectableFactory = $container->getByClass(InjectableFactory::class);
+$accountProvisioner = $injectableFactory->create(\Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner::class);
+
+$provisionUserId = 'smoke_gcal_prov_' . substr(Util::generateId(), 0, 8);
+$legacyProvisionId = 'GoogleIntegration__' . $provisionUserId;
+$canonicalProvisionId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $provisionUserId;
+
+$pdo = $em->getPDO();
+$pdo->exec('DELETE FROM external_account WHERE id IN ('
+    . $pdo->quote($legacyProvisionId) . ',' . $pdo->quote($canonicalProvisionId) . ')');
+
+$legacySeed = $em->createEntity('ExternalAccount', [
+    'id' => $legacyProvisionId,
+    'enabled' => true,
+]);
+$legacySeed->set('data', (object) ['calendarSyncMode' => 'crmToGoogle', 'smokeToken' => 'legacy']);
+$em->saveEntity($legacySeed);
+
+$canonicalMissing = $pdo->query(
+    'SELECT id FROM external_account WHERE id = ' . $pdo->quote($canonicalProvisionId) . ' AND deleted = 0'
+)->fetch(\PDO::FETCH_ASSOC);
+$ok('canonical ExternalAccount missing before provision', $canonicalMissing === false);
+
+$provisioned = $accountProvisioner->ensureForUser($provisionUserId);
+$canonicalRow = $pdo->query(
+    'SELECT id, enabled FROM external_account WHERE id = ' . $pdo->quote($canonicalProvisionId) . ' AND deleted = 0'
+)->fetch(\PDO::FETCH_ASSOC);
+$ok(
+    'AccountProvisioner persists GoogleCalendarDrive__{userId} row',
+    is_array($canonicalRow) && ($canonicalRow['id'] ?? '') === $canonicalProvisionId,
+    'id=' . (string) ($canonicalRow['id'] ?? 'null')
+);
+$ok(
+    'AccountProvisioner migrates enabled from legacy GoogleIntegration__ row',
+    $provisioned->get('enabled') === true
+);
+$migratedData = $provisioned->get('data');
+$migratedMode = is_object($migratedData)
+    ? ($migratedData->calendarSyncMode ?? null)
+    : (is_array($migratedData) ? ($migratedData['calendarSyncMode'] ?? null) : null);
+$ok(
+    'AccountProvisioner copies legacy ExternalAccount data',
+    $migratedMode === 'crmToGoogle',
+    'mode=' . (string) ($migratedMode ?? 'null')
+);
+
+$pdo->exec('DELETE FROM external_account WHERE id IN ('
+    . $pdo->quote($legacyProvisionId) . ',' . $pdo->quote($canonicalProvisionId) . ')');
+
+echo "\nSchema guard: PrimaNota stripe_subscription_id (avoids GCal Internal Server Error)\n";
+
+$primaNotaTableExists = false;
+
+try {
+    $primaNotaTableExists = $pdo->query("SHOW TABLES LIKE 'prima_nota'")->fetch(\PDO::FETCH_NUM) !== false;
+} catch (\Throwable) {
+    $primaNotaTableExists = false;
+}
+
+if ($primaNotaTableExists) {
+    $stripeCol = $pdo->query(
+        "SHOW COLUMNS FROM `prima_nota` LIKE 'stripe_subscription_id'"
+    )->fetch(\PDO::FETCH_ASSOC);
+    $ok(
+        'prima_nota.stripe_subscription_id column exists (rebuild required after metadata deploy)',
+        is_array($stripeCol) && ($stripeCol['Field'] ?? '') === 'stripe_subscription_id'
+    );
+} else {
+    $ok('prima_nota.stripe_subscription_id column exists', true, 'skipped (no PrimaNota table)');
+}
+
 echo "\nExternalAccount calendarSyncMode hook\n";
 
 $userId = $user->getId();
