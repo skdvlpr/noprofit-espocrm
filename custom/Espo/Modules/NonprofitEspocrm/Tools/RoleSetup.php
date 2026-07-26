@@ -43,6 +43,11 @@ class RoleSetup
     public const ROLE_MEMBER    = 'Member';
     /** Sportello desk staff: Case / Lead / Email intake with team-scoped group mailboxes. */
     public const ROLE_DESK      = 'Desk';
+    /**
+     * Public website API user (`site_safehouse.community`): create + read + edit
+     * donation/party entities (settlement backfill, paymentStatus); no delete.
+     */
+    public const ROLE_WEBSITE   = 'Website';
 
     public const TEAM_ADMINISTRATION = 'Administration';
     public const TEAM_DIGITAL_DESK = 'Sportello digitale';
@@ -637,6 +642,22 @@ class RoleSetup
             'create' => 'no', 'read' => 'team', 'edit' => 'no', 'delete' => 'no', 'stream' => 'team',
         ];
 
+        // Website API: create/read/edit donation ledger + parties; never delete.
+        $websiteCreateReadEdit = static fn(): array => [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no',
+        ];
+        $websiteData = [];
+        foreach ($domainEntities as $e) {
+            $websiteData[$e] = $blocked();
+        }
+        $websiteData['Lead'] = $blocked();
+        foreach (['Account', 'Contact', 'Opportunity', 'PrimaNota'] as $e) {
+            $websiteData[$e] = $websiteCreateReadEdit();
+        }
+        // Sportello / contact form may create Lead + Case from the site.
+        $websiteData['Lead'] = $websiteCreateReadEdit();
+        $websiteData['Case'] = $websiteCreateReadEdit();
+
         return [
             self::ROLE_ADMIN => [
                 'data'      => $adminData,
@@ -727,6 +748,21 @@ class RoleSetup
                     'userCalendarPermission'       => 'team',
                     'followerManagementPermission' => 'team',
                     'groupEmailAccountPermission'  => 'team',
+                ],
+            ],
+            self::ROLE_WEBSITE => [
+                'data'      => $websiteData,
+                'fieldData' => [],
+                'perms'     => [
+                    'assignmentPermission'         => 'all',
+                    'userPermission'               => 'no',
+                    'messagePermission'            => 'no',
+                    'exportPermission'             => 'no',
+                    'massUpdatePermission'         => 'no',
+                    'auditPermission'              => 'no',
+                    'mentionPermission'            => 'no',
+                    'userCalendarPermission'       => 'no',
+                    'followerManagementPermission' => 'no',
                 ],
             ],
         ];
