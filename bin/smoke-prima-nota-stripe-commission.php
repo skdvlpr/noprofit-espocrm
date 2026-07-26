@@ -102,8 +102,20 @@ $ok(
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeChargeId', 'type']) === 'varchar'
 );
 $ok(
+    'stripeChargeId NOT entityDefs readOnly (API ingest must write)',
+    ! (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeChargeId', 'readOnly'])
+);
+$ok(
+    'stripeBillingEmail NOT entityDefs readOnly (API ingest must write)',
+    ! (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeBillingEmail', 'readOnly'])
+);
+$ok(
     'stripeDetails panel dynamicLogic',
     $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'panels', 'stripeDetails', 'visible', 'conditionGroup', 0, 'value']) === 'Stripe'
+);
+$ok(
+    'stripeChargeId UI readOnly via clientDefs when Stripe',
+    $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'fields', 'stripeChargeId', 'readOnly', 'conditionGroup', 0, 'value']) === 'Stripe'
 );
 $ok(
     'donationFrequency is enum',

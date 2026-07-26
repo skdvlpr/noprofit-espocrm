@@ -165,78 +165,62 @@
             "type": "text"
         },
         "stripePaymentCreatedAt": {
-            "type": "datetime",
-            "readOnly": true
+            "type": "datetime"
         },
         "stripeChargeId": {
             "type": "varchar",
-            "maxLength": 255,
-            "readOnly": true
+            "maxLength": 255
         },
         "stripeBalanceTransactionId": {
             "type": "varchar",
-            "maxLength": 255,
-            "readOnly": true
+            "maxLength": 255
         },
         "stripePaymentMethodType": {
             "type": "varchar",
-            "maxLength": 64,
-            "readOnly": true
+            "maxLength": 64
         },
         "stripeCardBrand": {
             "type": "varchar",
-            "maxLength": 64,
-            "readOnly": true
+            "maxLength": 64
         },
         "stripeCardLast4": {
             "type": "varchar",
-            "maxLength": 4,
-            "readOnly": true
+            "maxLength": 4
         },
         "stripeReceiptUrl": {
-            "type": "url",
-            "readOnly": true
+            "type": "url"
         },
         "stripeReceiptEmail": {
-            "type": "email",
-            "readOnly": true
+            "type": "email"
         },
         "stripeBillingEmail": {
-            "type": "email",
-            "readOnly": true
+            "type": "email"
         },
         "stripeBillingPhone": {
             "type": "varchar",
-            "maxLength": 64,
-            "readOnly": true
+            "maxLength": 64
         },
         "stripeFeeDetailsJson": {
-            "type": "text",
-            "readOnly": true
+            "type": "text"
         },
         "stripeLivemode": {
-            "type": "bool",
-            "readOnly": true
+            "type": "bool"
         },
         "stripeRadarRiskLevel": {
             "type": "varchar",
-            "maxLength": 64,
-            "readOnly": true
+            "maxLength": 64
         },
         "stripeStatementDescriptor": {
             "type": "varchar",
-            "maxLength": 255,
-            "readOnly": true
+            "maxLength": 255
         },
         "stripeCustomerId": {
             "type": "varchar",
-            "maxLength": 255,
-            "readOnly": true
+            "maxLength": 255
         },
         "stripeSubscriptionId": {
             "type": "varchar",
-            "maxLength": 255,
-            "readOnly": true
+            "maxLength": 255
         },
         "modelDClassification": {
             "type": "enum",

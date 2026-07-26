@@ -488,6 +488,182 @@
                         }
                     ]
                 }
+            },
+            "stripePaymentCreatedAt": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeChargeId": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeBalanceTransactionId": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripePaymentMethodType": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeCardBrand": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeCardLast4": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeReceiptUrl": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeReceiptEmail": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeBillingEmail": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeBillingPhone": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeFeeDetailsJson": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeLivemode": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeRadarRiskLevel": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeStatementDescriptor": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeCustomerId": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
+            "stripeSubscriptionId": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
             }
         },
         "panels": {

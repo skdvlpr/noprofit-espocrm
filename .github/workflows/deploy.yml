@@ -72,10 +72,8 @@ jobs:
           set -euo pipefail
           cd "$DEPLOY_PATH"
           if [ -f data/config.php ]; then
-            echo "Espo is installed — rebuild + Safehouse navbar/roles provisioning."
-            php command.php rebuild || php rebuild.php || true
-            php bin/reorder-safehouse-tabs.php
-            php bin/setup-production-access.php
+            echo "Espo is installed — rebuild + clear cache only."
+            echo "NOTE: do not run bin/*.php provisioning scripts on production (refuse-production policy)."
             php command.php rebuild || php rebuild.php || true
           else
             echo "Espo is NOT installed yet."
