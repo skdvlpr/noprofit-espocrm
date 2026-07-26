@@ -489,6 +489,17 @@
                     ]
                 }
             },
+            "paymentStatus": {
+                "readOnly": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
+                        }
+                    ]
+                }
+            },
             "stripePaymentCreatedAt": {
                 "readOnly": {
                     "conditionGroup": [

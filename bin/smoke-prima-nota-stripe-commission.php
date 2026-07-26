@@ -95,7 +95,7 @@ $ok(
 );
 $ok(
     'stripePaymentMethodType field exists',
-    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'type']) === 'varchar'
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'type']) === 'enum'
 );
 $ok(
     'stripeChargeId field exists',
@@ -129,8 +129,25 @@ $ok(
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationFrequency', 'default']) === 'OneTime'
 );
 $ok(
-    'stripeSubscriptionId field exists',
-    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeSubscriptionId', 'type']) === 'varchar'
+    'stripeRadarRiskLevel is enum with styles',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeRadarRiskLevel', 'type']) === 'enum'
+        && ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeRadarRiskLevel', 'style', 'normal']) === 'success')
+        && ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeRadarRiskLevel', 'style', 'highest']) === 'danger')
+);
+$ok(
+    'stripePaymentMethodType is enum with styles',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'type']) === 'enum'
+        && in_array('link', $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'options']) ?? [], true)
+        && ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripePaymentMethodType', 'style', 'link']) === 'info')
+);
+$ok(
+    'paymentStatus has label styles',
+    (bool) $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'displayAsLabel'])
+        && ($metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'style', 'Paid']) === 'success')
+);
+$ok(
+    'paymentStatus UI readOnly when Stripe',
+    $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'fields', 'paymentStatus', 'readOnly', 'conditionGroup', 0, 'value']) === 'Stripe'
 );
 $ok(
     'paymentStatus is enum',

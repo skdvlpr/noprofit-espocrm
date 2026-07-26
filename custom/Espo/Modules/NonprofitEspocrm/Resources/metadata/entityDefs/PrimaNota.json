@@ -159,7 +159,14 @@
                 "Cancelled",
                 "Problematic"
             ],
-            "default": "Planned"
+            "default": "Planned",
+            "displayAsLabel": true,
+            "style": {
+                "Planned": "default",
+                "Paid": "success",
+                "Cancelled": "danger",
+                "Problematic": "warning"
+            }
         },
         "donationComment": {
             "type": "text"
@@ -176,8 +183,36 @@
             "maxLength": 255
         },
         "stripePaymentMethodType": {
-            "type": "varchar",
-            "maxLength": 64
+            "type": "enum",
+            "options": [
+                "card",
+                "link",
+                "bancontact",
+                "eps",
+                "ideal",
+                "sepa_debit",
+                "paypal",
+                "amazon_pay",
+                "satispay",
+                "mb_way",
+                "klarna",
+                "other"
+            ],
+            "displayAsLabel": true,
+            "style": {
+                "card": "primary",
+                "link": "info",
+                "bancontact": "default",
+                "eps": "default",
+                "ideal": "default",
+                "sepa_debit": "default",
+                "paypal": "info",
+                "amazon_pay": "warning",
+                "satispay": "success",
+                "mb_way": "default",
+                "klarna": "warning",
+                "other": "default"
+            }
         },
         "stripeCardBrand": {
             "type": "varchar",
@@ -209,8 +244,18 @@
             "type": "bool"
         },
         "stripeRadarRiskLevel": {
-            "type": "varchar",
-            "maxLength": 64
+            "type": "enum",
+            "options": [
+                "normal",
+                "elevated",
+                "highest"
+            ],
+            "displayAsLabel": true,
+            "style": {
+                "normal": "success",
+                "elevated": "warning",
+                "highest": "danger"
+            }
         },
         "stripeStatementDescriptor": {
             "type": "varchar",

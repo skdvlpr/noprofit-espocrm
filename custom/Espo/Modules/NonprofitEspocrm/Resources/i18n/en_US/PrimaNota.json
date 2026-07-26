@@ -128,6 +128,25 @@
             "Paid": "Paid",
             "Cancelled": "Cancelled",
             "Problematic": "Problematic"
+        },
+        "stripeRadarRiskLevel": {
+            "normal": "Normal",
+            "elevated": "Elevated",
+            "highest": "Highest"
+        },
+        "stripePaymentMethodType": {
+            "card": "Card",
+            "link": "Link",
+            "bancontact": "Bancontact",
+            "eps": "EPS",
+            "ideal": "iDEAL",
+            "sepa_debit": "SEPA Direct Debit",
+            "paypal": "PayPal",
+            "amazon_pay": "Amazon Pay",
+            "satispay": "Satispay",
+            "mb_way": "MB WAY",
+            "klarna": "Klarna",
+            "other": "Other"
         }
     }
 }
