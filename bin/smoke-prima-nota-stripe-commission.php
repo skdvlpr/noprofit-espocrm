@@ -112,6 +112,10 @@ $ok(
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'donationFrequency', 'default']) === 'OneTime'
 );
 $ok(
+    'stripeSubscriptionId field exists',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeSubscriptionId', 'type']) === 'varchar'
+);
+$ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
 );

@@ -75,6 +75,7 @@ class ProtectStripeSourcedFields implements BeforeSave
         'stripeRadarRiskLevel',
         'stripeStatementDescriptor',
         'stripeCustomerId',
+        'stripeSubscriptionId',
     ];
 
     public function __construct(Language $language)

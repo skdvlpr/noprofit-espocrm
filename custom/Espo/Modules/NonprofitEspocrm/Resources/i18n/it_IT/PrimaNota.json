@@ -47,6 +47,7 @@
         "stripeRadarRiskLevel": "Livello rischio Radar Stripe",
         "stripeStatementDescriptor": "Descrittore estratto conto Stripe",
         "stripeCustomerId": "ID customer Stripe",
+        "stripeSubscriptionId": "ID abbonamento Stripe",
         "donationFrequency": "Frequenza donazione"
     },
     "labels": {

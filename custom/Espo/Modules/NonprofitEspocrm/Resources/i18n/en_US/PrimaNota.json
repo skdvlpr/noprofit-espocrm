@@ -47,6 +47,7 @@
         "stripeRadarRiskLevel": "Stripe Radar risk level",
         "stripeStatementDescriptor": "Stripe statement descriptor",
         "stripeCustomerId": "Stripe customer ID",
+        "stripeSubscriptionId": "Stripe subscription ID",
         "donationFrequency": "Donation frequency"
     },
     "labels": {

@@ -223,6 +223,11 @@
             "maxLength": 255,
             "readOnly": true
         },
+        "stripeSubscriptionId": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true
+        },
         "modelDClassification": {
             "type": "enum",
             "options": [
