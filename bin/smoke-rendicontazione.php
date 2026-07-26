@@ -289,7 +289,12 @@ try {
         'description' => 'SMOKE-Rend-Income',
         'subjectName' => 'Donor',
         'entryType' => 'Income',
-        'amount' => 100,
+        'amountGross' => 100.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 100.0,
+        'paymentStatus' => 'Paid',
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn);
@@ -298,7 +303,12 @@ try {
         'description' => 'SMOKE-Rend-Expense',
         'subjectName' => 'Vendor',
         'entryType' => 'Expense',
-        'amount' => 40,
+        'amountGross' => 40.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 40.0,
+        'paymentStatus' => 'Paid',
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn2);
@@ -311,8 +321,29 @@ try {
         isset($totals['amountIn'], $totals['amountOut'], $totals['managementBalance'])
             && abs($totals['managementBalance'] - ($totals['amountIn'] - $totals['amountOut'])) < 0.01
     );
+    $amountInBeforeRefunded = (float) ($totals['amountIn'] ?? 0);
+    $pnRefunded = $em->getNewEntity('PrimaNota');
+    $pnRefunded->set([
+        'description' => 'SMOKE-Rend-Refunded',
+        'subjectName' => 'Donor',
+        'entryType' => 'Income',
+        'amountGross' => 50.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 50.0,
+        'paymentStatus' => 'Refunded',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($pnRefunded);
+    $totalsAfterRefunded = $primaNotaStats->getTotals();
+    $ok(
+        'PrimaNota totals exclude Refunded income',
+        abs(((float) ($totalsAfterRefunded['amountIn'] ?? 0)) - $amountInBeforeRefunded) < 0.01
+    );
     $em->removeEntity($pn);
     $em->removeEntity($pn2);
+    $em->removeEntity($pnRefunded);
 
     foreach ($created as $entity) {
         $em->removeEntity($entity);
