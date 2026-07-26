@@ -2,10 +2,14 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
+use Espo\Core\Acl;
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Name\Field;
 use Espo\Core\Utils\Language;
+use Espo\Entities\EmailAddress as EmailAddressEntity;
+use Espo\Entities\PhoneNumber as PhoneNumberEntity;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
 use Espo\ORM\Entity;
@@ -13,6 +17,8 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Name\Attribute;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
+use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 
 /**
  * Syncs payment-subject and beneficiary names from linkParent fields
@@ -31,6 +37,7 @@ class SubjectParty implements BeforeSave
 
     public function __construct(
         private EntityManager $entityManager,
+        private Acl $acl,
         Language $language,
     ) {
         $this->language = $language;
@@ -72,6 +79,7 @@ class SubjectParty implements BeforeSave
             $existing = $this->findByEmailOrPhone($entityType, $email, $phone);
 
             if ($existing !== null) {
+                $this->assertCanReadExistingParty($existing);
                 $this->backfillMissingChannels($existing, $email, $phone);
                 $entity->set($prefix . 'PartyId', $existing->getId());
                 $entity->set($prefix . 'PartyType', $entityType);
@@ -90,13 +98,6 @@ class SubjectParty implements BeforeSave
         }
 
         if ($partyId && $partyType) {
-            $linked = $this->entityManager->getEntityById((string) $partyType, (string) $partyId);
-            if ($linked) {
-                $email = trim((string) ($entity->get($prefix . 'EmailAddress') ?? ''));
-                $phone = trim((string) ($entity->get($prefix . 'PhoneNumber') ?? ''));
-                $this->backfillMissingChannels($linked, $email, $phone);
-            }
-
             $displayName = $this->resolveDisplayName((string) $partyType, (string) $partyId);
 
             if ($displayName !== null) {
@@ -111,12 +112,11 @@ class SubjectParty implements BeforeSave
     private function findByEmailOrPhone(string $entityType, string $email, string $phone): ?Entity
     {
         if ($email !== '') {
-            $byEmail = $this->entityManager
-                ->getRDBRepository($entityType)
-                ->where(['emailAddress' => $email])
-                ->findOne();
+            /** @var EmailAddressRepository $emailAddressRepository */
+            $emailAddressRepository = $this->entityManager->getRepository(EmailAddressEntity::ENTITY_TYPE);
+            $byEmail = $emailAddressRepository->getEntityByAddress($email, $entityType);
 
-            if ($byEmail) {
+            if ($byEmail && $byEmail->getEntityType() === $entityType) {
                 return $byEmail;
             }
         }
@@ -151,21 +151,40 @@ class SubjectParty implements BeforeSave
     {
         $changed = false;
 
-        $existingEmail = trim((string) ($party->get('emailAddress') ?? ''));
-        if ($existingEmail === '' && $email !== '') {
+        if ($email !== '' && !$this->partyHasEmail($party)) {
             $party->set('emailAddress', $email);
             $changed = true;
         }
 
-        $existingPhone = trim((string) ($party->get('phoneNumber') ?? ''));
-        if ($existingPhone === '' && $phone !== '') {
+        if ($phone !== '' && !$this->partyHasPhone($party)) {
             $party->set('phoneNumber', $phone);
             $changed = true;
         }
 
-        if ($changed) {
-            $this->entityManager->saveEntity($party, [SaveOption::SKIP_ALL => true]);
+        if (!$changed) {
+            return;
         }
+
+        $this->assertCanEditExistingParty($party);
+
+        // Do not use SKIP_ALL: email/phone are non-storable and persist only via afterSave field processing.
+        $this->entityManager->saveEntity($party);
+    }
+
+    private function partyHasEmail(Entity $party): bool
+    {
+        /** @var EmailAddressRepository $emailAddressRepository */
+        $emailAddressRepository = $this->entityManager->getRepository(EmailAddressEntity::ENTITY_TYPE);
+
+        return $emailAddressRepository->getEmailAddressData($party) !== [];
+    }
+
+    private function partyHasPhone(Entity $party): bool
+    {
+        /** @var PhoneNumberRepository $phoneNumberRepository */
+        $phoneNumberRepository = $this->entityManager->getRepository(PhoneNumberEntity::ENTITY_TYPE);
+
+        return $phoneNumberRepository->getPhoneNumberData($party) !== [];
     }
 
     private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void
@@ -179,7 +198,9 @@ class SubjectParty implements BeforeSave
             $account->set('phoneNumber', $phone);
         }
         $this->copyAssignment($entity, $account);
+        $this->assertCanCreateParty($account);
 
+        // Do not use SKIP_ALL: email/phone are non-storable and persist only via afterSave field processing.
         $this->entityManager->saveEntity($account);
 
         $entity->set($prefix . 'PartyId', $account->getId());
@@ -201,12 +222,35 @@ class SubjectParty implements BeforeSave
             $contact->set('phoneNumber', $phone);
         }
         $this->copyAssignment($entity, $contact);
+        $this->assertCanCreateParty($contact);
 
+        // Do not use SKIP_ALL: email/phone are non-storable and persist only via afterSave field processing.
         $this->entityManager->saveEntity($contact);
 
         $entity->set($prefix . 'PartyId', $contact->getId());
         $entity->set($prefix . 'PartyType', Contact::ENTITY_TYPE);
         $entity->set($prefix . 'PartyName', $contact->get(Field::NAME));
+    }
+
+    private function assertCanCreateParty(Entity $party): void
+    {
+        if (!$this->acl->checkEntityCreate($party)) {
+            throw new Forbidden('No create access to ' . $party->getEntityType() . '.');
+        }
+    }
+
+    private function assertCanReadExistingParty(Entity $party): void
+    {
+        if (!$this->acl->checkEntityRead($party)) {
+            throw new Forbidden('No read access to existing ' . $party->getEntityType() . '.');
+        }
+    }
+
+    private function assertCanEditExistingParty(Entity $party): void
+    {
+        if (!$this->acl->checkEntityEdit($party)) {
+            throw new Forbidden('No edit access to existing ' . $party->getEntityType() . '.');
+        }
     }
 
     private function copyAssignment(Entity $source, Entity $target): void
