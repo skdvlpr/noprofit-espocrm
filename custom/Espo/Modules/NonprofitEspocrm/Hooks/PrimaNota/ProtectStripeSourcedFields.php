@@ -16,6 +16,11 @@ use Espo\ORM\Repository\Option\SaveOptions;
  *
  * Incomplete ingest window: if stripeChargeId is still empty, allow one-time
  * backfill of Stripe-sourced attributes (thank-you raced ahead of BalanceTransaction).
+ *
+ * Gap fill: even after charge id is set, allow writing a Stripe-sourced attribute
+ * only when the fetched (DB) value is empty and the incoming value is non-empty
+ * (covers email-type / partial backfill gaps without reopening money fields).
+ *
  * System retries: SaveOption::SKIP_ALL.
  */
 class ProtectStripeSourcedFields implements BeforeSave
@@ -107,9 +112,15 @@ class ProtectStripeSourcedFields implements BeforeSave
         }
 
         foreach (self::STRIPE_SOURCED_ATTRIBUTES as $attribute) {
-            if ($entity->isAttributeChanged($attribute)) {
-                throw new BadRequest($this->msg('stripeSourcedReadOnly'));
+            if (!$entity->isAttributeChanged($attribute)) {
+                continue;
             }
+
+            if ($this->isEmptyToValueFill($entity, $attribute)) {
+                continue;
+            }
+
+            throw new BadRequest($this->msg('stripeSourcedReadOnly'));
         }
     }
 
@@ -120,6 +131,42 @@ class ProtectStripeSourcedFields implements BeforeSave
         $chargeId = trim((string) ($entity->getFetched('stripeChargeId') ?? ''));
 
         return $chargeId === '';
+    }
+
+    /**
+     * Allow one-way fill of empty Stripe-sourced attrs (e.g. emails dropped by
+     * field-type quirks on an earlier partial backfill). Never overwrite a set value.
+     */
+    private function isEmptyToValueFill(Entity $entity, string $attribute): bool
+    {
+        $fetched = $entity->getFetched($attribute);
+        if (!$this->isEmptyAttributeValue($fetched)) {
+            return false;
+        }
+
+        return !$this->isEmptyAttributeValue($entity->get($attribute));
+    }
+
+    private function isEmptyAttributeValue(mixed $value): bool
+    {
+        if ($value === null) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        if (is_bool($value)) {
+            return false;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            // Money/bool-like numerics that are already stored (incl. 0) are "set".
+            return false;
+        }
+
+        return false;
     }
 
     private function isStripeProvider(Entity $entity): bool

@@ -191,10 +191,12 @@
             "type": "url"
         },
         "stripeReceiptEmail": {
-            "type": "email"
+            "type": "varchar",
+            "maxLength": 255
         },
         "stripeBillingEmail": {
-            "type": "email"
+            "type": "varchar",
+            "maxLength": 255
         },
         "stripeBillingPhone": {
             "type": "varchar",
