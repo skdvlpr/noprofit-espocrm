@@ -9,14 +9,17 @@ use Espo\Entities\User;
 use Espo\ORM\EntityManager;
 
 /**
- * Reusable role / test-user provisioning for the SafehouseCrm module.
+ * Reusable role / team provisioning for the SafehouseCrm module.
  *
  * Used from:
- *   - custom/Espo/Modules/NonprofitEspocrm/AfterInstall.php (fresh extension install)
- *   - bin/setup-roles.php (one-shot maintenance for an existing dev instance)
+ *   - Extension AfterInstall / Tools\Installer (fresh install only)
+ *   - Dev/smoke helpers that call specific methods explicitly
  *
- * All public methods are idempotent: re-running them updates existing records
- * in place rather than creating duplicates.
+ * There is NO maintenance CLI to mass-reset roles/users on an existing instance.
+ * Never invent one for production.
+ *
+ * All public methods are idempotent for creates; existing Role rows are left
+ * unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1 (dev only).
  *
  * Permission matrix (Task 2.1):
  *   - Admin     : full all / not used by the bootstrap admin user (which has
@@ -43,11 +46,6 @@ class RoleSetup
     public const ROLE_MEMBER    = 'Member';
     /** Sportello desk staff: Case / Lead / Email intake with team-scoped group mailboxes. */
     public const ROLE_DESK      = 'Desk';
-    /**
-     * Public website API user (`site_safehouse.community`): create + read + edit
-     * donation/party entities (settlement backfill, paymentStatus); no delete.
-     */
-    public const ROLE_WEBSITE   = 'Website';
 
     public const TEAM_ADMINISTRATION = 'Administration';
     public const TEAM_DIGITAL_DESK = 'Sportello digitale';
@@ -388,6 +386,12 @@ class RoleSetup
      */
     public function provisionTestUsers(): array
     {
+        if (getenv('SAFEHOUSE_ALLOW_TEST_USERS') !== '1') {
+            throw new \RuntimeException(
+                'Refusing to provision test users. Set SAFEHOUSE_ALLOW_TEST_USERS=1 for local/dev only.'
+            );
+        }
+
         $report = [];
         $em = $this->entityManager;
 
@@ -642,22 +646,6 @@ class RoleSetup
             'create' => 'no', 'read' => 'team', 'edit' => 'no', 'delete' => 'no', 'stream' => 'team',
         ];
 
-        // Website API: create/read/edit donation ledger + parties; never delete.
-        $websiteCreateReadEdit = static fn(): array => [
-            'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no',
-        ];
-        $websiteData = [];
-        foreach ($domainEntities as $e) {
-            $websiteData[$e] = $blocked();
-        }
-        $websiteData['Lead'] = $blocked();
-        foreach (['Account', 'Contact', 'Opportunity', 'PrimaNota'] as $e) {
-            $websiteData[$e] = $websiteCreateReadEdit();
-        }
-        // Sportello / contact form may create Lead + Case from the site.
-        $websiteData['Lead'] = $websiteCreateReadEdit();
-        $websiteData['Case'] = $websiteCreateReadEdit();
-
         return [
             self::ROLE_ADMIN => [
                 'data'      => $adminData,
@@ -750,21 +738,6 @@ class RoleSetup
                     'groupEmailAccountPermission'  => 'team',
                 ],
             ],
-            self::ROLE_WEBSITE => [
-                'data'      => $websiteData,
-                'fieldData' => [],
-                'perms'     => [
-                    'assignmentPermission'         => 'all',
-                    'userPermission'               => 'no',
-                    'messagePermission'            => 'no',
-                    'exportPermission'             => 'no',
-                    'massUpdatePermission'         => 'no',
-                    'auditPermission'              => 'no',
-                    'mentionPermission'            => 'no',
-                    'userCalendarPermission'       => 'no',
-                    'followerManagementPermission' => 'no',
-                ],
-            ],
         ];
     }
 
@@ -794,6 +767,11 @@ class RoleSetup
             }
             $em->saveEntity($role);
             return 'created';
+        }
+
+        // Never silently overwrite live role matrices (prod incident 2026-07-26).
+        if (getenv('SAFEHOUSE_ALLOW_ROLE_OVERWRITE') !== '1') {
+            return 'unchanged-existing';
         }
 
         $changed = false;

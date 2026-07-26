@@ -960,7 +960,7 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 Legacy Italian table/column rename migrations were one-shot and have been removed from
 `bin/` after all environments completed the rename. Fresh installs use English metadata
 only. If an ancient DB still has Italian physical names, restore the historical migration
-from git history and run it once, then rebuild + `bin/setup-roles.php`.
+from git history and run it once, then rebuild. Do **not** mass-reset roles via a CLI on production.
 
 ### Entity creation checklist:
 
@@ -1024,8 +1024,7 @@ in this repo a local symlink may exist at `cursor-skills/` — see `.gitignore`)
 1. **`siteUrl`** must be set in **Administration → Settings** to the public base URL
    (DDEV: `https://<project>.ddev.site`). The web container must reach this URL for
    HTTP self-checks.
-2. Canonical roles + test users: `ddev exec php bin/setup-roles.php` (Volunteer role,
-   `test_*` users, etc.).
+2. Canonical roles: created by extension Installer / AfterInstall on fresh instances (not a prod mass-reset CLI).
 3. **Authentication for automated scripts:** `X-Api-Key` on a dedicated **`type=api`**
    user with `authMethod = ApiKey` (never embed interactive user passwords in repo
    scripts). HMAC is allowed by Espo but not required for Safehouse smoke scripts.
@@ -1084,7 +1083,6 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/smoke-google-calendar-deep.php` | Google Calendar integration deep smoke |
 | `bin/test-gcal-full-lifecycle.php` | GCal E2E lifecycle (manual QA helper) |
 | `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
-| `bin/setup-roles.php` | Canonical roles + test API users |
 | `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning |
 | `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota gross/fee/net formula + Stripe sourced-field lock |
 | `bin/migrate-prima-nota-legacy-gross.php` | One-shot: null amountGross → amountGross=amount, fee/%=0 (run after QA, before/with prod deploy) |

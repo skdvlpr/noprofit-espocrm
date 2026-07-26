@@ -49,7 +49,7 @@ if ($siteUrl === '') {
 
 $role = $em->getRDBRepository('Role')->where(['name' => 'Admin', 'deleted' => false])->findOne();
 if ($role === null) {
-    fwrite(STDERR, "FAIL: Admin role missing. Run: ddev exec php bin/setup-roles.php\n");
+    fwrite(STDERR, "FAIL: Admin role missing. Provision via extension install / Installer, not a mass role-reset CLI.\n");
     exit(1);
 }
 

@@ -97,7 +97,6 @@ rm -rf \
 
 copy_smokes() {
     mkdir -p "$PROJECT_DIR/bin/lib"
-    cp "$ROOT_DIR/bin/setup-roles.php" "$PROJECT_DIR/bin/"
     cp "$ROOT_DIR/bin/reorder-safehouse-tabs.php" "$PROJECT_DIR/bin/"
     cp "$ROOT_DIR/bin/provision-smoke-api-user.php" "$PROJECT_DIR/bin/"
     for f in "$ROOT_DIR"/bin/smoke-*.php; do
