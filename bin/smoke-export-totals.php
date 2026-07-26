@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: reporting export totals row (Task 7.3.5) + field-ACL-graceful summary.
  *
@@ -7,8 +14,6 @@
  *
  * Usage: ddev exec php bin/smoke-export-totals.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

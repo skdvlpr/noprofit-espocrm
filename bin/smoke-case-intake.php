@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Case intake requires linkParent; metadata has NGO type options.
  *

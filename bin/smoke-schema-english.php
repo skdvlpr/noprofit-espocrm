@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test for English-schema invariants (Safehouse CRM).
  *

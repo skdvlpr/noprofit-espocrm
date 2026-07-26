@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test of {@see PersonContactSync} behavior on VolunteerEmployee / Member.
  *

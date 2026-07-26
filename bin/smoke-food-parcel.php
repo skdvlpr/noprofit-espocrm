@@ -1,11 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test for FoodParcelRegistration + PDF template (post-launch epic C).
  *
  * Usage: ddev exec php bin/smoke-food-parcel.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: reporting email export (Task 7.3.6 / 7.4.2).
  *
@@ -7,8 +14,6 @@
  *
  * Usage: ddev exec php bin/smoke-mealcount-email-export.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

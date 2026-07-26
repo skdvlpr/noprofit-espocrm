@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Safehouse kanban frontend assets are served and cache-busted via appTimestamp.
  *
@@ -10,8 +17,6 @@
  * Usage:
  *   ddev exec php bin/smoke-kanban-assets.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

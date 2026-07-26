@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Export app-level integration settings (Integration entity rows + their
  * config.integrations flag) to a portable JSON file for migration to another
@@ -14,8 +21,6 @@
  *   ddev exec php bin/export-integration-settings.php [output.json]
  *   (default output: ./integration-settings.json)
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

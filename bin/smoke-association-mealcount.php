@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: AssociationMealCount entity + reporting layer (Task 7.4).
  *
@@ -10,8 +17,6 @@
  *
  * Usage: ddev exec php bin/smoke-association-mealcount.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

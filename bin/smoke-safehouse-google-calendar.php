@@ -1,12 +1,17 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Safehouse-specific Google Calendar seeds (requires SafehouseCrm + GoogleIntegration).
  *
  * Usage:
  *   ddev exec php bin/smoke-safehouse-google-calendar.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

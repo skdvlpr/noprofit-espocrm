@@ -1,11 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test for Intervention entity (post-launch epic A).
  *
  * Usage: ddev exec php bin/smoke-intervention.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

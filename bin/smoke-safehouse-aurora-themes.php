@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Safehouse Aurora themes module is the single source of the two themes,
  * resolves in metadata, and ships in BOTH the standalone themes ZIP and the
@@ -7,8 +14,6 @@
  * Usage:
  *   ddev exec php bin/smoke-safehouse-aurora-themes.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

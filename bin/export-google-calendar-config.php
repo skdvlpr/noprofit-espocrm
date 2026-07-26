@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Export CalendarDateSource + CalendarTemplate rows for migration backup.
  *
@@ -7,8 +14,6 @@
  * Usage:
  *   ddev exec php bin/export-google-calendar-config.php [output.json]
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Lead convert flows + Volunteer ACL (Task 7.1.3).
  *
@@ -8,8 +15,6 @@
  * Usage:
  *   ddev exec php bin/smoke-lead-convert.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

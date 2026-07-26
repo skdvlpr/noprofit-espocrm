@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: PrimaNota commission triangle + Stripe sourced-field lock + legacy migration helper.
  *
@@ -7,8 +14,6 @@
  * Does NOT delete QA-STRIPE-MOCK* manual-test rows.
  * Does NOT run the legacy migration (call bin/migrate-prima-nota-legacy-gross.php separately).
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 
@@ -135,8 +140,8 @@ $ok(
         && ! preg_match("/'paymentStatus'/", $protectStripeHookSrc)
 );
 $ok(
-    'legacy migration script exists',
-    is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
+    'refuse-production guard exists',
+    is_file(__DIR__ . '/lib/refuse-production.php')
 );
 
 $created = [];

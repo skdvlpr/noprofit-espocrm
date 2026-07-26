@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Safehouse Aurora theme + cssList assets are served with cache-bust query params.
  *
@@ -10,8 +17,6 @@
  * Usage:
  *   ddev exec php bin/smoke-theme-assets.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

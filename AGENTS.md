@@ -15,11 +15,12 @@ Before implementing ANY task, executor MUST:
 5. Never overwrite executor logs in Notion. Append only.
 6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** Logs MUST be **handoff-ready**: include current state, files changed, verification performed, blockers, and exact next steps so another agent can continue after context compaction or token exhaustion. **Do not** create local markdown files as a Notion substitute. Mark tasks **Done** only when acceptance criteria are met. **NEVER** ask the user to paste executor logs manually into Notion. If Notion write tools are unavailable: (1) call `mcp_auth` for `plugin-notion-workspace-notion`; (2) verify MCP tools folder lists `notion-fetch` / `notion-update-page` (not only `mcp_auth`); (3) retry the write; (4) if tools are still missing after auth, tell the user to reconnect Notion MCP or restart the chat — do **not** offer a copy-paste log workaround.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
-8. **One task per user request (execution scope):** Implement **exactly one** Notion task / one bug / one acceptance slice per user message. If the user lists multiple issues, **append them to Notion** (backlog + ordered queue) and **do not** start the next item until the current one is verified (smoke + manual QA steps) or the user explicitly reprioritizes. **Exception:** launching **parallel subagents** for independent read-only work (explore, CI, security review) is allowed and encouraged when it speeds up the **single** active task — but do not ship code for multiple unrelated fixes in one turn.
+8. **Production CLI:** Never run `bin/*` maintenance/smoke/seed/migrate/setup/provision scripts on production without **explicit** user approval for that exact command. Prefer ephemeral self-deleting oneshots (see SECTION 14 — SCRIPT / CLI SAFETY). Smokes/tests are **local DDEV only**.
+9. **One task per user request (execution scope):** Implement **exactly one** Notion task / one bug / one acceptance slice per user message. If the user lists multiple issues, **append them to Notion** (backlog + ordered queue) and **do not** start the next item until the current one is verified (smoke + manual QA steps) or the user explicitly reprioritizes. **Exception:** launching **parallel subagents** for independent read-only work (explore, CI, security review) is allowed and encouraged when it speeds up the **single** active task — but do not ship code for multiple unrelated fixes in one turn.
 
-9. **Post-fix manual QA gate:** After each bug fix, append a **Manual QA checklist** to the Notion task (English) and wait for user confirmation (or explicit reprioritize) before starting the next queued bug. Do **not** batch unrelated fixes in one turn.
+10. **Post-fix manual QA gate:** After each bug fix, append a **Manual QA checklist** to the Notion task (English) and wait for user confirmation (or explicit reprioritize) before starting the next queued bug. Do **not** batch unrelated fixes in one turn.
 
-10. **Notion language:** Task names, project titles, epic titles, executor logs, and acceptance criteria in Notion MUST be **English only** (no Russian/Cyrillic in Notion pages). User chat may stay Russian; Notion is the English handoff surface.
+11. **Notion language:** Task names, project titles, epic titles, executor logs, and acceptance criteria in Notion MUST be **English only** (no Russian/Cyrillic in Notion pages). User chat may stay Russian; Notion is the English handoff surface.
 
 ## NOTION — PROJECT & TASK TRACKERS (canonical since 2026-06-28)
 
@@ -947,6 +948,37 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 
 ## SECTION 14 — DEVELOPMENT WORKFLOW
 
+### SCRIPT / CLI SAFETY (MANDATORY — updated 2026-07-26)
+
+**Incident context:** a long-lived `bin/setup-roles.php` was run on production, rewrote live ACL, and created test users. That class of script must never exist again as a reusable prod tool.
+
+#### Hard rules
+
+1. **Production is not a playground.** Do **not** SSH-run maintenance/smoke/seed/migrate/setup/provision scripts on `crm.safehouse.community` / `/var/www/safehouse-crm` without the user’s **explicit** written approval for that exact command.
+2. **Tests and smokes run ONLY on local DDEV** (`ddev exec php bin/smoke-…`). Never on production.
+3. **Every `bin/*.php` script MUST** `require` `bin/lib/refuse-production.php` (after `declare(strict_types=1);` if present). That helper **hard-exits** when `siteUrl` is `*.safehouse.community` or the tree is under `/var/www/safehouse-crm`. **No bypass flag.**
+4. **No long-lived migration / role-reset / seed / provision CLIs** in `bin/`. If a one-off change needs a script:
+   - Write a **new ephemeral** file under `bin/` (or `/tmp` on the server only with approval).
+   - Include `refuse-production.php` **unless** the user explicitly approved a production oneshot.
+   - For disposable oneshots: also `require bin/lib/ephemeral-oneshot.php` and call `safehouse_ephemeral_oneshot_register(__FILE__);` then exit via `safehouse_ephemeral_oneshot_exit(0)` so the file **self-deletes on success**.
+   - Do **not** leave the script in the repo after it has been applied (delete in the same PR/commit that lands the result, or let self-delete remove it).
+5. **Production `bin/`** must stay empty of runnable maintenance PHP (see server `bin/README.PRODUCTION.txt`). Quarantine leftovers; do not restore them “just in case”.
+6. **Deploy:** never rsync/copy `bin/smoke-*`, `bin/seed-*`, `bin/migrate-*`, `bin/setup-*`, `bin/provision-*`, `bin/test-*`, `bin/cleanup-*`, `bin/import-*`, `bin/export-*` onto production. Prefer excluding `bin/**` from prod deploys except packaging artifacts if required by build.
+7. **`RoleSetup`:** may **create** missing roles on fresh install; must **not** overwrite existing roles unless `SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1` (local/dev only). Test users require `SAFEHOUSE_ALLOW_TEST_USERS=1`. There is **no** `bin/setup-roles.php`.
+
+#### Allowed long-lived `bin/` tools (local / CI only)
+
+| Kind | Examples | Prod |
+| ---- | -------- | ---- |
+| Smokes | `bin/smoke-*.php` | **blocked** by `refuse-production.php` |
+| Builds | `bin/build.sh`, `bin/build-*.sh` | do not run on prod host |
+| Dev helpers | `bin/dev-rebuild.sh`, `bin/reorder-safehouse-tabs.php`, `bin/setup-mailpit-smtp.php` | blocked / local only |
+| Guards | `bin/lib/refuse-production.php`, `bin/lib/ephemeral-oneshot.php` | library only |
+
+#### Forbidden to keep as reusable CLIs
+
+`setup-roles`, `setup-production-access`, `provision-production`, `seed-qa-*`, one-shot `migrate-*` after applied, `cleanup-test-api-users`, any script that rewrites ACL/users on an existing instance.
+
 ### After EVERY metadata change:
 
 1. Admin → Repair → Rebuild
@@ -960,7 +992,8 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 Legacy Italian table/column rename migrations were one-shot and have been removed from
 `bin/` after all environments completed the rename. Fresh installs use English metadata
 only. If an ancient DB still has Italian physical names, restore the historical migration
-from git history and run it once, then rebuild. Do **not** mass-reset roles via a CLI on production.
+from git history and run it once **on a non-prod copy first**, then rebuild. Do **not**
+mass-reset roles via a CLI on production.
 
 ### Entity creation checklist:
 
@@ -1065,7 +1098,9 @@ The repo script **`bin/smoke-espo-rest-catalog.php`** automates the above for
 It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 `PersonContactSync` does not require a full mailbox graph on the API-only user.
 
-### API-TEST-004 — How this fits other smokes
+### API-TEST-004 — How this fits other smokes (LOCAL ONLY)
+
+All of the following are **local DDEV / CI only**. They include `refuse-production.php` and must never be executed on production.
 
 | Script | Layer |
 | ------ | ----- |
@@ -1083,14 +1118,16 @@ It provisions its own `VolunteerEmployee` seed with `SaveOption::SKIP_ALL` so
 | `bin/smoke-google-calendar-deep.php` | Google Calendar integration deep smoke |
 | `bin/test-gcal-full-lifecycle.php` | GCal E2E lifecycle (manual QA helper) |
 | `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
-| `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning |
-| `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota gross/fee/net formula + Stripe sourced-field lock |
-| `bin/migrate-prima-nota-legacy-gross.php` | One-shot: null amountGross → amountGross=amount, fee/%=0 (run after QA, before/with prod deploy) |
-| `bin/seed-qa-stripe-donation.php` | Keep mock Stripe PrimaNota row for manual QA |
+| `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning (local) |
+| `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota gross/fee/net + Stripe lock / backfill window |
 | `bin/dev-rebuild.sh` | clear_cache + rebuild wrapper |
 | `bin/build.sh` / `bin/build-google-integration.sh` | Extension ZIP builds |
+| `bin/lib/refuse-production.php` | Hard prod block for all bin PHP |
+| `bin/lib/ephemeral-oneshot.php` | Self-delete helper for disposable oneshots |
 
-**Epic 7 smokes (run together after Safehouse navbar/Lead changes):**
+**Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-qa-*.php`, applied `bin/migrate-*.php`, `bin/cleanup-test-api-users.php`.
+
+**Epic 7 smokes (local):**
 
 ```bash
 ddev exec php bin/smoke-installer.php
@@ -1098,8 +1135,6 @@ ddev exec php bin/smoke-lead-restore.php
 ddev exec php bin/smoke-lead-convert.php
 ddev exec php bin/smoke-rendicontazione.php
 ```
-
-Run REST smoke after metadata / ACL / field-key changes that affect the API surface:
 
 ```bash
 ddev exec php bin/smoke-espo-rest-catalog.php

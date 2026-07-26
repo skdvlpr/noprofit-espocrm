@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Configure Espo outbound SMTP for DDEV Mailpit (SMTP inside web container).
  *
@@ -11,8 +18,6 @@
  *   https://nonprofit-espocrm.ddev.site:8026
  *   or: ddev mailpit
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

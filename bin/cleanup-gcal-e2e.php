@@ -1,5 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
+
 /**
  * Cleanup script for Google Calendar test records (T- prefix + legacy tags).
  *
@@ -11,8 +18,6 @@
  *   ddev exec php bin/cleanup-gcal-e2e.php E2E_20260526_075603
  *   ddev exec php bin/cleanup-all-gcal-test-data.php   # full junk purge
  */
-
-declare(strict_types=1);
 
 require __DIR__ . '/lib/GcalTestFixtures.php';
 

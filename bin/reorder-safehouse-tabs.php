@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Re-apply Safehouse navbar tab order via {@see Installer}:
  *   - `$CRM` (Principali): Lead → Contact → Account → Opportunity → Member → VolunteerEmployee

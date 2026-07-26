@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: Lead restored in navbar + i18n + REST CRUD (Task 7.1.1–7.1.2).
  *
@@ -8,8 +15,6 @@
  * Usage:
  *   ddev exec php bin/smoke-lead-restore.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

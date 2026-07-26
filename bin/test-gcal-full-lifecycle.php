@@ -1,5 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
+
 /**
  * Full-lifecycle E2E Google Calendar test.
  *
@@ -18,8 +25,6 @@
  *
  * Cleanup: ddev exec php bin/cleanup-gcal-e2e.php <tag>
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

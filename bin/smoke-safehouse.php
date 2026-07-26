@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Read-only smoke test of post-refactor Safehouse domain entities.
  *

@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test for SafehouseCrm Rendicontazione reporting layer (Task 7.5).
  *
@@ -13,8 +20,6 @@
  * Usage:
  *   ddev exec php bin/smoke-rendicontazione.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

@@ -1,12 +1,17 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Import CalendarDateSource + CalendarTemplate from export-google-calendar-config.php.
  *
  * Usage:
  *   php bin/import-google-calendar-config.php [--dry-run] <input.json>
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

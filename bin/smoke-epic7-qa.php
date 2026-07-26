@@ -1,11 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Epic 7.0-QA — runs the full Epic 7 smoke suite (Lead + Rendicontazione + reporting).
  *
  * Usage: ddev exec php bin/smoke-epic7-qa.php
  */
-
-declare(strict_types=1);
 
 $scripts = [
     'bin/smoke-installer.php',

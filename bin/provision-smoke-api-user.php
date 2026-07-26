@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Provision a full-access Admin role + smoke_api_catalog API user on fresh Espo
  * installs that have no Safehouse roles yet (vanilla 9.3.8 clean instances).
@@ -6,8 +13,6 @@
  * Usage:
  *   ddev exec php bin/provision-smoke-api-user.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

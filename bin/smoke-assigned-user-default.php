@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke: assignedUser defaults to current user on record create.
  *
@@ -7,8 +14,6 @@
  * Auth: provisions ephemeral API user `smoke_api_assigned_user` (no hardcoded keys).
  * Optional override: ESPOCRM_API_KEY env var.
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

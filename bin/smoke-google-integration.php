@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * REST smoke for the standalone **`GoogleCalendarDrive`** Espo extension (universal
  * Google OAuth2: Calendar + `drive.file` Drive scope via core ExternalAccount).
@@ -12,8 +19,6 @@
  * Usage:
  *   ddev exec php bin/smoke-google-integration.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

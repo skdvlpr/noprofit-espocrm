@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Deep REST smoke: Google Calendar record fields, template scoping, sync metadata.
  *
@@ -8,8 +15,6 @@
  * Usage:
  *   ddev exec php bin/smoke-google-calendar-deep.php
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

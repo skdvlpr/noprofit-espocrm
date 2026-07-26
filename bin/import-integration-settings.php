@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Import app-level integration settings produced by
  * bin/export-integration-settings.php into this Espo instance.
@@ -11,8 +18,6 @@
  * Usage:
  *   ddev exec php bin/import-integration-settings.php [--dry-run] <input.json>
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 

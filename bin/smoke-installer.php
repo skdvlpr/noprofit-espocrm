@@ -1,4 +1,8 @@
 <?php
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * Smoke test that exercises the unified post-install path used by both the
  * ZIP-install script (`scripts/AfterInstall.php`) and the module class

@@ -1,4 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
+
+require __DIR__ . '/lib/refuse-production.php';
+
+
 /**
  * REST smoke aligned with skill `explore-espo-endpoints` (Workflow A + D + ACL probes).
  *
@@ -18,8 +25,6 @@
  * Requires `siteUrl` in Espo config to be reachable from the web container
  * (DDEV: https://<project>.ddev.site).
  */
-
-declare(strict_types=1);
 
 include __DIR__ . '/../bootstrap.php';
 
