@@ -151,6 +151,16 @@
             ],
             "default": "OneTime"
         },
+        "paymentStatus": {
+            "type": "enum",
+            "options": [
+                "Planned",
+                "Paid",
+                "Cancelled",
+                "Problematic"
+            ],
+            "default": "Planned"
+        },
         "donationComment": {
             "type": "text"
         },

@@ -11,8 +11,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
  * When donationPaymentProvider is Stripe, every Stripe-sourced attribute is locked
- * after create. Only Espo operational fields (assignedUser, teams, modelDClassification)
- * remain editable. Ingest create still works (isNew). System retries: SaveOption::SKIP_ALL.
+ * after create. Operational fields remain editable: assignedUser, teams,
+ * modelDClassification, paymentStatus. Ingest create still works (isNew).
+ * System retries: SaveOption::SKIP_ALL.
  */
 class ProtectStripeSourcedFields implements BeforeSave
 {

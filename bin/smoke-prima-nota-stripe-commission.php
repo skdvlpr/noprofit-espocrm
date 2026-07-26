@@ -116,6 +116,25 @@ $ok(
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'stripeSubscriptionId', 'type']) === 'varchar'
 );
 $ok(
+    'paymentStatus is enum',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'type']) === 'enum'
+);
+$paymentStatusOpts = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'options']) ?? [];
+foreach (['Planned', 'Paid', 'Cancelled', 'Problematic'] as $statusOpt) {
+    $ok("paymentStatus option $statusOpt", in_array($statusOpt, $paymentStatusOpts, true));
+}
+$ok(
+    'paymentStatus default Planned',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'default']) === 'Planned'
+);
+$protectStripeHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php';
+$protectStripeHookSrc = is_file($protectStripeHookPath) ? (string) file_get_contents($protectStripeHookPath) : '';
+$ok(
+    'paymentStatus not Stripe-locked (webhook can update)',
+    $protectStripeHookSrc !== ''
+        && ! preg_match("/'paymentStatus'/", $protectStripeHookSrc)
+);
+$ok(
     'legacy migration script exists',
     is_file(__DIR__ . '/migrate-prima-nota-legacy-gross.php')
 );

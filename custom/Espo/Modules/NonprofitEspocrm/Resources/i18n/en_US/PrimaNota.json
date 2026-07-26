@@ -48,7 +48,8 @@
         "stripeStatementDescriptor": "Stripe statement descriptor",
         "stripeCustomerId": "Stripe customer ID",
         "stripeSubscriptionId": "Stripe subscription ID",
-        "donationFrequency": "Donation frequency"
+        "donationFrequency": "Donation frequency",
+        "paymentStatus": "Payment status"
     },
     "labels": {
         "PrimaNota": "Ledger Entry",
@@ -65,7 +66,7 @@
         "transactionDate": "Required for manual entries. Not auto-filled with today. Stripe donations use the payment date from the website."
     },
     "messages": {
-        "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can only change assigned user, teams, and Model D classification.",
+        "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can change assigned user, teams, Model D classification, and payment status.",
         "grossRequired": "Gross amount (lordo) is required. Net is calculated automatically.",
         "commissionExceedsGross": "Commission cannot exceed gross amount (lordo).",
         "stripeManualCreateBlocked": "Stripe platform can only be set by website donation ingest. Choose another payment platform for manual ledger entries.",
@@ -121,6 +122,12 @@
         "donationFrequency": {
             "OneTime": "One-time",
             "Recurring": "Recurring"
+        },
+        "paymentStatus": {
+            "Planned": "Planned",
+            "Paid": "Paid",
+            "Cancelled": "Cancelled",
+            "Problematic": "Problematic"
         }
     }
 }

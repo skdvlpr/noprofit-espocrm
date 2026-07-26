@@ -48,7 +48,8 @@
         "stripeStatementDescriptor": "Descrittore estratto conto Stripe",
         "stripeCustomerId": "ID customer Stripe",
         "stripeSubscriptionId": "ID abbonamento Stripe",
-        "donationFrequency": "Frequenza donazione"
+        "donationFrequency": "Frequenza donazione",
+        "paymentStatus": "Stato pagamento"
     },
     "labels": {
         "PrimaNota": "Prima nota",
@@ -65,7 +66,7 @@
         "transactionDate": "Obbligatoria per i movimenti manuali. Non viene compilata automaticamente con oggi. Per le donazioni Stripe usa la data del pagamento dal sito."
     },
     "messages": {
-        "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare solo assegnatario, team e classificazione modello D.",
+        "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare assegnatario, team, classificazione modello D e stato pagamento.",
         "grossRequired": "L'importo lordo e' obbligatorio. Il netto viene calcolato automaticamente.",
         "commissionExceedsGross": "La commissione non puo' superare l'importo lordo.",
         "stripeManualCreateBlocked": "La piattaforma Stripe puo' essere impostata solo dall'ingest donazioni del sito. Per i movimenti manuali scegli un'altra piattaforma.",
@@ -121,6 +122,12 @@
         "donationFrequency": {
             "OneTime": "Una tantum",
             "Recurring": "Ricorrente"
+        },
+        "paymentStatus": {
+            "Planned": "Pianificato",
+            "Paid": "Pagato",
+            "Cancelled": "Annullato",
+            "Problematic": "Problematico"
         }
     }
 }
