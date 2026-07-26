@@ -154,9 +154,25 @@ $ok(
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'type']) === 'enum'
 );
 $paymentStatusOpts = $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'options']) ?? [];
-foreach (['Planned', 'Paid', 'Cancelled', 'Problematic'] as $statusOpt) {
+foreach (['Planned', 'Paid', 'Cancelled', 'Refunded', 'Disputed', 'Problematic'] as $statusOpt) {
     $ok("paymentStatus option $statusOpt", in_array($statusOpt, $paymentStatusOpts, true));
 }
+$ok(
+    'paymentStatus Refunded style warning',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'style', 'Refunded']) === 'warning'
+);
+$ok(
+    'paymentStatus Disputed style danger',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'style', 'Disputed']) === 'danger'
+);
+$ok(
+    'PrimaNota stats income filter Paid-only helper',
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php')
+        && str_contains(
+            (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php'),
+            'incomeCountedWhere'
+        )
+);
 $ok(
     'paymentStatus default Planned',
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'default']) === 'Planned'

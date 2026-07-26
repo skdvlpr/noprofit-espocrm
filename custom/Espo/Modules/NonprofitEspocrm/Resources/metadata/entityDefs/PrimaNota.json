@@ -157,6 +157,8 @@
                 "Planned",
                 "Paid",
                 "Cancelled",
+                "Refunded",
+                "Disputed",
                 "Problematic"
             ],
             "default": "Planned",
@@ -165,6 +167,8 @@
                 "Planned": "default",
                 "Paid": "success",
                 "Cancelled": "danger",
+                "Refunded": "warning",
+                "Disputed": "danger",
                 "Problematic": "warning"
             }
         },

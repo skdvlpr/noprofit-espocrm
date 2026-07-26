@@ -15,6 +15,22 @@ class PrimaNotaStatsProvider
 
     private const BALANCE_KEY = 'managementBalance';
 
+    /**
+     * Income / expense totals count only Paid rows (plus legacy null status).
+     * Cancelled / Refunded / Disputed / Problematic / Planned are excluded.
+     *
+     * @return array<string, mixed>
+     */
+    public static function incomeCountedWhere(): array
+    {
+        return [
+            'OR' => [
+                ['paymentStatus' => 'Paid'],
+                ['paymentStatus' => null],
+            ],
+        ];
+    }
+
     public function __construct(
         private ReportingAggregateQuery $aggregateQuery,
     ) {}
@@ -59,7 +75,7 @@ class PrimaNotaStatsProvider
             self::ENTITY_TYPE,
             $allowedAttributes,
             $searchParams,
-            $additionalWhere,
+            $this->mergeIncomeWhere($additionalWhere),
         );
 
         return $this->normalizeTotals($totals);
@@ -118,7 +134,9 @@ class PrimaNotaStatsProvider
         DateTimeZone $timezone,
         array $allowedAttributes,
     ): stdClass {
-        $where = ReportingDateRange::dateBetweenWhere('transactionDate', $from, $to);
+        $where = $this->mergeIncomeWhere(
+            ReportingDateRange::dateBetweenWhere('transactionDate', $from, $to)
+        );
 
         $totals = $allowedAttributes !== []
             ? $this->aggregateQuery->sum(self::ENTITY_TYPE, $allowedAttributes, null, $where)
@@ -143,5 +161,25 @@ class PrimaNotaStatsProvider
         }
 
         return (object) $result;
+    }
+
+    /**
+     * @param array<string, mixed>|null $additionalWhere
+     * @return array<string, mixed>
+     */
+    private function mergeIncomeWhere(?array $additionalWhere): array
+    {
+        $incomeWhere = self::incomeCountedWhere();
+
+        if ($additionalWhere === null || $additionalWhere === []) {
+            return $incomeWhere;
+        }
+
+        return [
+            'AND' => [
+                $additionalWhere,
+                $incomeWhere,
+            ],
+        ];
     }
 }

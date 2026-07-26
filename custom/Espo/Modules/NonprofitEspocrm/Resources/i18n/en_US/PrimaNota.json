@@ -127,6 +127,8 @@
             "Planned": "Planned",
             "Paid": "Paid",
             "Cancelled": "Cancelled",
+            "Refunded": "Refunded",
+            "Disputed": "Disputed",
             "Problematic": "Problematic"
         },
         "stripeRadarRiskLevel": {
