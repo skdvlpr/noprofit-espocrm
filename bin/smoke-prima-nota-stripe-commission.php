@@ -332,6 +332,7 @@ $stripe->set([
     'amountCurrency' => 'EUR',
     'subjectName' => 'Donor From Stripe',
     'transactionDate' => date('Y-m-d'),
+    'stripeChargeId' => 'ch_smoke_lock',
 ]);
 $em->saveEntity($stripe, [SaveOption::SKIP_ALL => true]);
 $created[] = $stripe;
@@ -360,6 +361,53 @@ try {
     $stripeMoneyBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('Stripe money edit → BadRequest', $stripeMoneyBlocked);
+
+// Incomplete Stripe ingest (no charge id): allow settlement backfill once
+$incomplete = $em->getNewEntity('PrimaNota');
+$incomplete->set([
+    'description' => 'Smoke Stripe incomplete backfill',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-INCOMPLETE-' . date('His'),
+    'amountGross' => 5.0,
+    'amountGrossCurrency' => 'EUR',
+    'commissionAmount' => 0,
+    'commissionAmountCurrency' => 'EUR',
+    'commissionPercent' => 0,
+    'amount' => 5.0,
+    'amountCurrency' => 'EUR',
+    'transactionDate' => date('Y-m-d'),
+]);
+$em->saveEntity($incomplete, [SaveOption::SKIP_ALL => true]);
+$created[] = $incomplete;
+$incomplete = $em->getEntityById('PrimaNota', $incomplete->getId());
+$incomplete->set([
+    'commissionAmount' => 0.33,
+    'commissionAmountCurrency' => 'EUR',
+    'commissionPercent' => 6.6,
+    'amount' => 4.67,
+    'amountCurrency' => 'EUR',
+    'stripeChargeId' => 'ch_smoke_backfill',
+    'stripeBalanceTransactionId' => 'txn_smoke_backfill',
+    'stripePaymentMethodType' => 'link',
+]);
+$em->saveEntity($incomplete);
+$incomplete = $em->getEntityById('PrimaNota', $incomplete->getId());
+$ok(
+    'incomplete Stripe row allows fee backfill',
+    abs((float) $incomplete->get('commissionAmount') - 0.33) < 0.001
+        && abs((float) $incomplete->get('amount') - 4.67) < 0.001
+        && $incomplete->get('stripeChargeId') === 'ch_smoke_backfill'
+);
+$incompleteLocked = false;
+try {
+    $incomplete->set('commissionAmount', 1.0);
+    $em->saveEntity($incomplete);
+} catch (BadRequest $e) {
+    $incompleteLocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
+}
+$ok('after backfill Stripe money edit → BadRequest', $incompleteLocked);
 
 $stripeSubjectBlocked = false;
 try {

@@ -13,6 +13,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
  * When donationPaymentProvider is Stripe, every Stripe-sourced attribute is locked
  * after create. Operational fields remain editable: assignedUser, teams,
  * modelDClassification, paymentStatus. Ingest create still works (isNew).
+ *
+ * Incomplete ingest window: if stripeChargeId is still empty, allow one-time
+ * backfill of Stripe-sourced attributes (thank-you raced ahead of BalanceTransaction).
  * System retries: SaveOption::SKIP_ALL.
  */
 class ProtectStripeSourcedFields implements BeforeSave
@@ -98,11 +101,25 @@ class ProtectStripeSourcedFields implements BeforeSave
             return;
         }
 
+        // Incomplete Stripe ingest (no charge id yet) — allow settlement/enrichment backfill.
+        if ($this->isIncompleteStripeIngest($entity)) {
+            return;
+        }
+
         foreach (self::STRIPE_SOURCED_ATTRIBUTES as $attribute) {
             if ($entity->isAttributeChanged($attribute)) {
                 throw new BadRequest($this->msg('stripeSourcedReadOnly'));
             }
         }
+    }
+
+    private function isIncompleteStripeIngest(Entity $entity): bool
+    {
+        // Fetched (DB) value only — do not use get(), or a backfill that sets
+        // stripeChargeId in the same save would look "complete" and lock itself out.
+        $chargeId = trim((string) ($entity->getFetched('stripeChargeId') ?? ''));
+
+        return $chargeId === '';
     }
 
     private function isStripeProvider(Entity $entity): bool
