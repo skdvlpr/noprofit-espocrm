@@ -174,8 +174,8 @@ $ok(
         )
 );
 $ok(
-    'paymentStatus default Planned',
-    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'default']) === 'Planned'
+    'paymentStatus default Paid',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'default']) === 'Paid'
 );
 $protectStripeHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php';
 $protectStripeHookSrc = is_file($protectStripeHookPath) ? (string) file_get_contents($protectStripeHookPath) : '';

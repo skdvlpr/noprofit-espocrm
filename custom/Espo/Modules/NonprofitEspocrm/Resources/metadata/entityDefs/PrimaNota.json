@@ -161,7 +161,7 @@
                 "Disputed",
                 "Problematic"
             ],
-            "default": "Planned",
+            "default": "Paid",
             "displayAsLabel": true,
             "style": {
                 "Planned": "default",

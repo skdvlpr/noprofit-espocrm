@@ -5,6 +5,7 @@
     {"name": "beneficiaryName"},
     {"name": "entryType"},
     {"name": "amount"},
+    {"name": "paymentStatus"},
     {"name": "modelDClassification"},
     {"name": "internalClassification"},
     {"name": "financing"}
