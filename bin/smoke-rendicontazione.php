@@ -345,16 +345,16 @@ try {
             ['subjectPartyType' => 'Contact'],
         ],
     ]);
-    $globalTodayIn = (float) ($summary->today->amountIn ?? 0);
-    $scopedTodayIn = (float) ($scoped->today->amountIn ?? 0);
+    $globalMonthIn = (float) ($summary->month->amountIn ?? 0);
+    $scopedMonthIn = (float) ($scoped->month->amountIn ?? 0);
     $ok(
-        'PrimaNota scoped summary today amountIn is contact-only',
-        abs($scopedTodayIn - 7.0) < 0.01,
-        'scoped=' . $scopedTodayIn . ' global=' . $globalTodayIn
+        'PrimaNota scoped summary month amountIn is contact-only',
+        abs($scopedMonthIn - 7.0) < 0.01,
+        'scoped=' . $scopedMonthIn . ' globalMonth=' . $globalMonthIn
     );
     $ok(
         'PrimaNota scoped summary is less than or equal global when other rows exist',
-        $scopedTodayIn <= $globalTodayIn + 0.01
+        $scopedMonthIn <= $globalMonthIn + 0.01
     );
 
     $emptyContact = $em->getNewEntity('Contact');
@@ -370,8 +370,59 @@ try {
     ]);
     $ok(
         'PrimaNota scoped summary for unrelated contact is zero',
-        abs((float) ($emptyScoped->today->amountIn ?? 0)) < 0.01
-            && abs((float) ($emptyScoped->today->managementBalance ?? 0)) < 0.01
+        abs((float) ($emptyScoped->month->amountIn ?? 0)) < 0.01
+            && abs((float) ($emptyScoped->month->managementBalance ?? 0)) < 0.01
+    );
+
+    // Opportunity Movimenti panel uses belongsTo financing (not belongsToParent).
+    $summaryAction = $injectableFactory->create(
+        \Espo\Modules\NonprofitEspocrm\Tools\Reporting\Api\GetPrimaNotaSummary::class
+    );
+    $resolveRelated = new ReflectionMethod($summaryAction, 'resolveRelatedWhere');
+    $resolveRelated->setAccessible(true);
+
+    $opp = $em->getNewEntity('Opportunity');
+    $opp->set('name', 'SMOKE-Rend-Opportunity');
+    $opp->set('stage', 'Prospecting');
+    $em->saveEntity($opp);
+    $created[] = $opp;
+
+    $financingWhere = $resolveRelated->invoke($summaryAction, 'Opportunity', $opp->getId(), 'primaNotaEntries');
+    $ok(
+        'Opportunity.primaNotaEntries resolves to financingId where',
+        is_array($financingWhere)
+            && ($financingWhere['financingId'] ?? null) === $opp->getId()
+    );
+
+    $pnFinanced = $em->getNewEntity('PrimaNota');
+    $pnFinanced->set([
+        'description' => 'SMOKE-Rend-Financed',
+        'entryType' => 'Income',
+        'amountGross' => 11.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 11.0,
+        'paymentStatus' => 'Paid',
+        'transactionDate' => date('Y-m-d'),
+        'financingId' => $opp->getId(),
+    ]);
+    $em->saveEntity($pnFinanced);
+    $created[] = $pnFinanced;
+
+    $oppScoped = $primaNotaStats->getSummary(null, $financingWhere);
+    $ok(
+        'PrimaNota scoped summary for Opportunity financing',
+        abs((float) ($oppScoped->month->amountIn ?? 0) - 11.0) < 0.01,
+        'scoped=' . (string) ($oppScoped->month->amountIn ?? 0)
+    );
+
+    $contactWhere = $resolveRelated->invoke($summaryAction, 'Contact', $contact->getId(), 'relatedPayments');
+    $ok(
+        'Contact.relatedPayments still resolves belongsToParent where',
+        is_array($contactWhere)
+            && isset($contactWhere['AND'])
+            && is_array($contactWhere['AND'])
     );
 
     $totals = $primaNotaStats->getTotals();

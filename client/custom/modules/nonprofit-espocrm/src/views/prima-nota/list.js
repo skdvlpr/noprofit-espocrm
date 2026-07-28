@@ -165,10 +165,9 @@ define('nonprofit-espocrm:views/prima-nota/list', [
 
             const link = match[3];
 
-            if (link !== 'relatedPayments' && link !== 'relatedPaymentsAsBeneficiary') {
-                return null;
-            }
-
+            // Any parent/{id}/{link} collection URL for PrimaNota panels
+            // (Contact relatedPayments*, Opportunity primaNotaEntries, …).
+            // Server validates the link against metadata.
             return {
                 parentType: match[1],
                 parentId: match[2],

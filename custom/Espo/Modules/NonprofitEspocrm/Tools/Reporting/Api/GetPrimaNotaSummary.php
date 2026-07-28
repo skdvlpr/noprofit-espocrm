@@ -35,7 +35,8 @@ class GetPrimaNotaSummary implements Action
     }
 
     /**
-     * Scope period banner to a parent Contact/Account relationship panel.
+     * Scope period banner to a parent relationship panel
+     * (Contact/Account Related payments, Opportunity Movimenti, …).
      *
      * @return array<string, mixed>|null
      */
@@ -73,20 +74,38 @@ class GetPrimaNotaSummary implements Action
         $foreign = $linkDefs['foreign'] ?? null;
 
         if (!is_string($foreign) || $foreign === '') {
-            throw new BadRequest("Link {$parentType}.{$link} has no foreign parent field.");
+            throw new BadRequest("Link {$parentType}.{$link} has no foreign field.");
         }
 
         $foreignType = $this->metadata->get(['entityDefs', 'PrimaNota', 'links', $foreign, 'type']);
 
-        if ($foreignType !== 'belongsToParent') {
-            throw new BadRequest("PrimaNota.{$foreign} must be belongsToParent.");
+        // Contact/Account Related payments → belongsToParent (subjectParty / beneficiaryParty)
+        if ($foreignType === 'belongsToParent') {
+            return [
+                'AND' => [
+                    [$foreign . 'Id' => $parentId],
+                    [$foreign . 'Type' => $parentType],
+                ],
+            ];
         }
 
-        return [
-            'AND' => [
-                [$foreign . 'Id' => $parentId],
-                [$foreign . 'Type' => $parentType],
-            ],
-        ];
+        // Opportunity Movimenti → belongsTo financing
+        if ($foreignType === 'belongsTo') {
+            $foreignEntity = $this->metadata->get(['entityDefs', 'PrimaNota', 'links', $foreign, 'entity']);
+
+            if (is_string($foreignEntity) && $foreignEntity !== '' && $foreignEntity !== $parentType) {
+                throw new BadRequest(
+                    "PrimaNota.{$foreign} targets {$foreignEntity}, not {$parentType}."
+                );
+            }
+
+            return [
+                $foreign . 'Id' => $parentId,
+            ];
+        }
+
+        throw new BadRequest(
+            "PrimaNota.{$foreign} link type '{$foreignType}' is not supported for scoped summary."
+        );
     }
 }
