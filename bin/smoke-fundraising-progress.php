@@ -44,6 +44,7 @@ $pn->set([
     'amount' => 1255.22,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $opp->getId(),
+    'paymentStatus' => 'Paid',
 ]);
 $em->saveEntity($pn);
 
@@ -77,6 +78,7 @@ $pn2->set([
     'amount' => 500,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $oppClosed->getId(),
+    'paymentStatus' => 'Paid',
 ]);
 $em->saveEntity($pn2);
 
@@ -91,6 +93,7 @@ $pnExpense->set([
     'amount' => 300,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $opp->getId(),
+    'paymentStatus' => 'Paid',
 ]);
 $em->saveEntity($pnExpense);
 
@@ -98,6 +101,26 @@ $loadedNet = $em->getEntityById('Opportunity', $opp->getId());
 $loader->process($loadedNet, $params);
 $ok('net collected after expense', abs((float) $loadedNet->get('fundraisingCollectedAmount') - 955.22) < 0.01);
 
+$pnRefunded = $em->getNewEntity('PrimaNota');
+$pnRefunded->set([
+    'description' => 'Smoke refunded income must not count',
+    'entryType' => 'Income',
+    'amount' => 400,
+    'transactionDate' => date('Y-m-d'),
+    'financingId' => $opp->getId(),
+    'paymentStatus' => 'Refunded',
+]);
+$em->saveEntity($pnRefunded);
+
+$loadedRefunded = $em->getEntityById('Opportunity', $opp->getId());
+$loader->process($loadedRefunded, $params);
+$ok(
+    'refunded income excluded from fundraising collected',
+    abs((float) $loadedRefunded->get('fundraisingCollectedAmount') - 955.22) < 0.01,
+    (string) $loadedRefunded->get('fundraisingCollectedAmount')
+);
+
+$em->removeEntity($pnRefunded);
 $em->removeEntity($pnExpense);
 
 $em->removeEntity($pn2);

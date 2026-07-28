@@ -6,6 +6,7 @@ use Espo\Core\FieldProcessing\Loader;
 use Espo\Core\FieldProcessing\Loader\Params;
 use Espo\Core\ORM\EntityManager;
 use Espo\Modules\Crm\Entities\Opportunity;
+use Espo\Modules\NonprofitEspocrm\Tools\Reporting\PrimaNotaStatsProvider;
 use Espo\ORM\Entity;
 
 /**
@@ -34,20 +35,15 @@ class FundraisingProgressLoader implements Loader
 
         $target = (float) ($entity->get('amount') ?? 0);
 
+        // Match PrimaNota dashlets: exclude Planned / Cancelled / Refunded / Disputed / Problematic.
         $income = (float) $this->entityManager
             ->getRDBRepository('PrimaNota')
-            ->where([
-                'financingId' => $entity->getId(),
-                'entryType' => 'Income',
-            ])
+            ->where($this->financingWhere($entity->getId(), 'Income'))
             ->sum('amount');
 
         $expense = (float) $this->entityManager
             ->getRDBRepository('PrimaNota')
-            ->where([
-                'financingId' => $entity->getId(),
-                'entryType' => 'Expense',
-            ])
+            ->where($this->financingWhere($entity->getId(), 'Expense'))
             ->sum('amount');
 
         $collected = $income - $expense;
@@ -62,5 +58,21 @@ class FundraisingProgressLoader implements Loader
         $entity->set('fundraisingTargetAmount', $target);
         $entity->set('fundraisingProgressPercent', $percent);
         $entity->set('fundraisingProgress', (string) $percent);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function financingWhere(string $opportunityId, string $entryType): array
+    {
+        return [
+            'AND' => [
+                [
+                    'financingId' => $opportunityId,
+                    'entryType' => $entryType,
+                ],
+                PrimaNotaStatsProvider::incomeCountedWhere(),
+            ],
+        ];
     }
 }
