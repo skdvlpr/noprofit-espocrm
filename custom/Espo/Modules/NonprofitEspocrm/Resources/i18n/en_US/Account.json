@@ -4,7 +4,9 @@
     },
     "links": {
         "websites": "Websites",
-        "opportunities": "Grants & Funding"
+        "opportunities": "Grants & Funding",
+        "relatedPayments": "Related payments",
+        "relatedPaymentsAsBeneficiary": "Related payments (beneficiary)"
     },
     "options": {
         "sector": {

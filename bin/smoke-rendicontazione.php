@@ -315,6 +315,65 @@ try {
     $summary = $primaNotaStats->getSummary();
     $ok('PrimaNota summary today amountIn', isset($summary->today->amountIn));
     $ok('PrimaNota summary managementBalance', isset($summary->today->managementBalance));
+
+    $contact = $em->getNewEntity('Contact');
+    $contact->set('firstName', 'Smoke');
+    $contact->set('lastName', 'RelatedBanner');
+    $em->saveEntity($contact);
+    $created[] = $contact;
+
+    $pnLinked = $em->getNewEntity('PrimaNota');
+    $pnLinked->set([
+        'description' => 'SMOKE-Rend-Linked-Contact',
+        'entryType' => 'Income',
+        'amountGross' => 7.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 7.0,
+        'paymentStatus' => 'Paid',
+        'transactionDate' => date('Y-m-d'),
+        'subjectPartyId' => $contact->getId(),
+        'subjectPartyType' => 'Contact',
+    ]);
+    $em->saveEntity($pnLinked);
+    $created[] = $pnLinked;
+
+    $scoped = $primaNotaStats->getSummary(null, [
+        'AND' => [
+            ['subjectPartyId' => $contact->getId()],
+            ['subjectPartyType' => 'Contact'],
+        ],
+    ]);
+    $globalTodayIn = (float) ($summary->today->amountIn ?? 0);
+    $scopedTodayIn = (float) ($scoped->today->amountIn ?? 0);
+    $ok(
+        'PrimaNota scoped summary today amountIn is contact-only',
+        abs($scopedTodayIn - 7.0) < 0.01,
+        'scoped=' . $scopedTodayIn . ' global=' . $globalTodayIn
+    );
+    $ok(
+        'PrimaNota scoped summary is less than or equal global when other rows exist',
+        $scopedTodayIn <= $globalTodayIn + 0.01
+    );
+
+    $emptyContact = $em->getNewEntity('Contact');
+    $emptyContact->set('firstName', 'Smoke');
+    $emptyContact->set('lastName', 'EmptyBanner');
+    $em->saveEntity($emptyContact);
+    $created[] = $emptyContact;
+    $emptyScoped = $primaNotaStats->getSummary(null, [
+        'AND' => [
+            ['subjectPartyId' => $emptyContact->getId()],
+            ['subjectPartyType' => 'Contact'],
+        ],
+    ]);
+    $ok(
+        'PrimaNota scoped summary for unrelated contact is zero',
+        abs((float) ($emptyScoped->today->amountIn ?? 0)) < 0.01
+            && abs((float) ($emptyScoped->today->managementBalance ?? 0)) < 0.01
+    );
+
     $totals = $primaNotaStats->getTotals();
     $ok(
         'PrimaNota totals balance math',

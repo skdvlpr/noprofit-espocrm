@@ -26,6 +26,49 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     echo '  [' . ($pass ? 'PASS' : 'FAIL') . '] ' . $name . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
+$metadata = $app->getContainer()->get('metadata');
+$ok(
+    'Contact.relatedPayments link',
+    ($metadata->get(['entityDefs', 'Contact', 'links', 'relatedPayments', 'entity']) === 'PrimaNota')
+        && ($metadata->get(['entityDefs', 'Contact', 'links', 'relatedPayments', 'foreign']) === 'subjectParty')
+);
+$ok(
+    'Account.relatedPayments link',
+    ($metadata->get(['entityDefs', 'Account', 'links', 'relatedPayments', 'entity']) === 'PrimaNota')
+        && ($metadata->get(['entityDefs', 'Account', 'links', 'relatedPayments', 'foreign']) === 'subjectParty')
+);
+$ok(
+    'PrimaNota.subjectParty foreign',
+    $metadata->get(['entityDefs', 'PrimaNota', 'links', 'subjectParty', 'foreign']) === 'relatedPayments'
+);
+$ok(
+    'PrimaNota.beneficiaryParty foreign',
+    $metadata->get(['entityDefs', 'PrimaNota', 'links', 'beneficiaryParty', 'foreign']) === 'relatedPaymentsAsBeneficiary'
+);
+$ok(
+    'Contact bottomPanelsDetail layout module registered',
+    $metadata->get(['app', 'layouts', 'Contact', 'bottomPanelsDetail', 'module']) === 'NonprofitEspocrm'
+);
+$ok(
+    'PrimaNota textFilter includes donationPaymentReference',
+    in_array(
+        'donationPaymentReference',
+        $metadata->get(['entityDefs', 'PrimaNota', 'collection', 'textFilterFields']) ?? [],
+        true
+    )
+);
+
+$layoutProvider = $app->getContainer()->get('injectableFactory')
+    ->create(\Espo\Tools\Layout\LayoutProvider::class);
+$contactBottom = json_decode((string) $layoutProvider->get('Contact', 'bottomPanelsDetail'), true);
+$ok(
+    'Contact bottomPanelsDetail includes relatedPayments',
+    is_array($contactBottom) && isset($contactBottom['relatedPayments']),
+    is_string($layoutProvider->get('Contact', 'bottomPanelsDetail'))
+        ? substr($layoutProvider->get('Contact', 'bottomPanelsDetail'), 0, 80)
+        : gettype($contactBottom)
+);
+
 $account = $em->getNewEntity(Account::ENTITY_TYPE);
 $account->set('name', 'Smoke Subject Account');
 $em->saveEntity($account);
@@ -48,7 +91,8 @@ $linkedAccount = $em->getNewEntity('PrimaNota');
 $linkedAccount->set([
     'description' => 'Smoke linked account subject',
     'entryType' => 'Income',
-    'amount' => 10,
+    'amountGross' => 10,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectPartyId' => $account->getId(),
     'subjectPartyType' => Account::ENTITY_TYPE,
@@ -64,7 +108,8 @@ $linkedContact = $em->getNewEntity('PrimaNota');
 $linkedContact->set([
     'description' => 'Smoke linked contact subject',
     'entryType' => 'Income',
-    'amount' => 11,
+    'amountGross' => 11,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectPartyId' => $contact->getId(),
     'subjectPartyType' => Contact::ENTITY_TYPE,
@@ -80,7 +125,8 @@ $createdAccount = $em->getNewEntity('PrimaNota');
 $createdAccount->set([
     'description' => 'Smoke create account subject',
     'entryType' => 'Income',
-    'amount' => 12,
+    'amountGross' => 12,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'New Smoke Org',
     'subjectEmailAddress' => 'org-smoke@example.com',
@@ -106,7 +152,8 @@ $createdContact = $em->getNewEntity('PrimaNota');
 $createdContact->set([
     'description' => 'Smoke create contact subject',
     'entryType' => 'Income',
-    'amount' => 13,
+    'amountGross' => 13,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'Anna Verdi',
     'subjectEmailAddress' => 'anna.verdi@example.com',
@@ -132,7 +179,8 @@ $manual = $em->getNewEntity('PrimaNota');
 $manual->set([
     'description' => 'Smoke manual subject',
     'entryType' => 'Expense',
-    'amount' => 14,
+    'amountGross' => 14,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectName' => 'Manual Payer',
 ]);
@@ -148,7 +196,8 @@ $linkedBeneficiaryAccount = $em->getNewEntity('PrimaNota');
 $linkedBeneficiaryAccount->set([
     'description' => 'Smoke linked account beneficiary',
     'entryType' => 'Expense',
-    'amount' => 15,
+    'amountGross' => 15,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'beneficiaryPartyId' => $beneficiaryAccount->getId(),
     'beneficiaryPartyType' => Account::ENTITY_TYPE,
@@ -164,7 +213,8 @@ $linkedBeneficiaryContact = $em->getNewEntity('PrimaNota');
 $linkedBeneficiaryContact->set([
     'description' => 'Smoke linked contact beneficiary',
     'entryType' => 'Expense',
-    'amount' => 16,
+    'amountGross' => 16,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'beneficiaryPartyId' => $beneficiaryContact->getId(),
     'beneficiaryPartyType' => Contact::ENTITY_TYPE,
@@ -180,7 +230,8 @@ $createdBeneficiaryAccount = $em->getNewEntity('PrimaNota');
 $createdBeneficiaryAccount->set([
     'description' => 'Smoke create account beneficiary',
     'entryType' => 'Expense',
-    'amount' => 17,
+    'amountGross' => 17,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'beneficiaryName' => 'New Beneficiary Org',
     'beneficiaryEmailAddress' => 'beneficiary-org@example.com',
@@ -209,7 +260,8 @@ $createdBeneficiaryContact = $em->getNewEntity('PrimaNota');
 $createdBeneficiaryContact->set([
     'description' => 'Smoke create contact beneficiary',
     'entryType' => 'Expense',
-    'amount' => 18,
+    'amountGross' => 18,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'beneficiaryName' => 'Luca Bianchi',
     'beneficiaryEmailAddress' => 'luca.bianchi@example.com',
@@ -238,7 +290,8 @@ $manualBeneficiary = $em->getNewEntity('PrimaNota');
 $manualBeneficiary->set([
     'description' => 'Smoke manual beneficiary',
     'entryType' => 'Expense',
-    'amount' => 19,
+    'amountGross' => 19,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'beneficiaryName' => 'Manual Beneficiary',
 ]);
@@ -254,7 +307,8 @@ $bothParties = $em->getNewEntity('PrimaNota');
 $bothParties->set([
     'description' => 'Smoke both parties',
     'entryType' => 'Expense',
-    'amount' => 20,
+    'amountGross' => 20,
+    'amountGrossCurrency' => 'EUR',
     'transactionDate' => date('Y-m-d'),
     'subjectPartyId' => $account->getId(),
     'subjectPartyType' => Account::ENTITY_TYPE,
@@ -267,6 +321,23 @@ $ok(
     $bothParties->get('subjectName') === 'Smoke Subject Account'
         && $bothParties->get('beneficiaryName') === 'Smoke Beneficiary',
     $bothParties->get('subjectName') . ' / ' . $bothParties->get('beneficiaryName')
+);
+
+
+$relatedFromContact = $em->getRDBRepository(Contact::ENTITY_TYPE)
+    ->getRelation($contact, 'relatedPayments')
+    ->find();
+$ok(
+    'Contact.relatedPayments relation returns linked PrimaNota',
+    count($relatedFromContact) >= 1
+);
+
+$relatedFromAccount = $em->getRDBRepository(Account::ENTITY_TYPE)
+    ->getRelation($account, 'relatedPayments')
+    ->find();
+$ok(
+    'Account.relatedPayments relation returns linked PrimaNota',
+    count($relatedFromAccount) >= 1
 );
 
 $rows = [

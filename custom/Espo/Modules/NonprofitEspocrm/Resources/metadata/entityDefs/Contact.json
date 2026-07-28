@@ -52,6 +52,18 @@
             "type": "hasMany",
             "entity": "FoodParcelRegistration",
             "foreign": "contact"
+        },
+        "relatedPayments": {
+            "type": "hasChildren",
+            "entity": "PrimaNota",
+            "foreign": "subjectParty",
+            "audited": true
+        },
+        "relatedPaymentsAsBeneficiary": {
+            "type": "hasChildren",
+            "entity": "PrimaNota",
+            "foreign": "beneficiaryParty",
+            "audited": true
         }
     }
 }

@@ -3,7 +3,9 @@
         "sector": "Сектор"
     },
     "links": {
-        "websites": "Сайты"
+        "websites": "Сайты",
+        "relatedPayments": "Связанные платежи",
+        "relatedPaymentsAsBeneficiary": "Связанные платежи (бенефициар)"
     },
     "options": {
         "sector": {

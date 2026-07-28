@@ -35,7 +35,10 @@ class PrimaNotaStatsProvider
         private ReportingAggregateQuery $aggregateQuery,
     ) {}
 
-    public function getSummary(?DateTimeZone $timezone = null): stdClass
+    public function getSummary(
+        ?DateTimeZone $timezone = null,
+        ?array $additionalWhere = null,
+    ): stdClass
     {
         $timezone ??= ReportingDateRange::defaultTimezone();
 
@@ -51,9 +54,27 @@ class PrimaNotaStatsProvider
         return (object) [
             'timezone' => $timezone->getName(),
             'metricList' => $metricList,
-            'today' => $this->buildPeriodSummary($todayFrom, $todayTo, $timezone, $allowedAttributes),
-            'month' => $this->buildPeriodSummary($monthFrom, $monthTo, $timezone, $allowedAttributes),
-            'year' => $this->buildPeriodSummary($yearFrom, $yearTo, $timezone, $allowedAttributes),
+            'today' => $this->buildPeriodSummary(
+                $todayFrom,
+                $todayTo,
+                $timezone,
+                $allowedAttributes,
+                $additionalWhere
+            ),
+            'month' => $this->buildPeriodSummary(
+                $monthFrom,
+                $monthTo,
+                $timezone,
+                $allowedAttributes,
+                $additionalWhere
+            ),
+            'year' => $this->buildPeriodSummary(
+                $yearFrom,
+                $yearTo,
+                $timezone,
+                $allowedAttributes,
+                $additionalWhere
+            ),
         ];
     }
 
@@ -127,16 +148,27 @@ class PrimaNotaStatsProvider
 
     /**
      * @param string[] $allowedAttributes
+     * @param array<string, mixed>|null $additionalWhere
      */
     private function buildPeriodSummary(
         string $from,
         string $to,
         DateTimeZone $timezone,
         array $allowedAttributes,
+        ?array $additionalWhere = null,
     ): stdClass {
-        $where = $this->mergeIncomeWhere(
-            ReportingDateRange::dateBetweenWhere('transactionDate', $from, $to)
-        );
+        $periodWhere = ReportingDateRange::dateBetweenWhere('transactionDate', $from, $to);
+
+        if ($additionalWhere !== null && $additionalWhere !== []) {
+            $periodWhere = [
+                'AND' => [
+                    $periodWhere,
+                    $additionalWhere,
+                ],
+            ];
+        }
+
+        $where = $this->mergeIncomeWhere($periodWhere);
 
         $totals = $allowedAttributes !== []
             ? $this->aggregateQuery->sum(self::ENTITY_TYPE, $allowedAttributes, null, $where)

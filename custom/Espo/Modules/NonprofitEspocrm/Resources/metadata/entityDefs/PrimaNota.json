@@ -344,15 +344,26 @@
             "foreign": "primaNotaEntries"
         },
         "subjectParty": {
-            "type": "belongsToParent"
+            "type": "belongsToParent",
+            "foreign": "relatedPayments"
         },
         "beneficiaryParty": {
-            "type": "belongsToParent"
+            "type": "belongsToParent",
+            "foreign": "relatedPaymentsAsBeneficiary"
         }
     },
     "collection": {
         "orderBy": "transactionDate",
-        "order": "desc"
+        "order": "desc",
+        "textFilterFields": [
+            "name",
+            "donationPaymentReference",
+            "stripeChargeId",
+            "stripeBalanceTransactionId",
+            "subjectName",
+            "beneficiaryName",
+            "description"
+        ]
     },
     "indexes": {
         "transactionDate": {

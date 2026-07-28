@@ -8,5 +8,17 @@
             "AssociationRepresentative": "warning",
             "Other": "default"
         }
+    },
+    "relationshipPanels": {
+        "relatedPayments": {
+            "layout": "listSmall",
+            "orderBy": "transactionDate",
+            "orderDirection": "desc"
+        },
+        "relatedPaymentsAsBeneficiary": {
+            "layout": "listSmall",
+            "orderBy": "transactionDate",
+            "orderDirection": "desc"
+        }
     }
 }

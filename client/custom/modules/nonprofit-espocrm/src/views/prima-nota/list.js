@@ -56,6 +56,36 @@ define('nonprofit-espocrm:views/prima-nota/list', [
         },
 
         loadReportingStats() {
+            const relatedScope = this.getRelatedScopeFilter();
+
+            // Relationship panels (Contact/Account Related payments): always scope
+            // Anno/Mese/Oggi to the parent record — never show global ledger totals.
+            if (relatedScope) {
+                Espo.Ajax.getRequest(
+                    'NonprofitEspocrm/reporting/prima-nota/summary',
+                    relatedScope
+                )
+                    .then(data => {
+                        this.reportingStats = {
+                            ...data,
+                            mode: 'period',
+                        };
+
+                        if (this.isRendered()) {
+                            this.renderReportingStats();
+                        }
+                    })
+                    .catch(() => {
+                        this.reportingStats = null;
+
+                        if (this.isRendered()) {
+                            this.clearReportingStats();
+                        }
+                    });
+
+                return;
+            }
+
             if (this.hasActiveFilters()) {
                 Espo.Ajax.postRequest(
                     'NonprofitEspocrm/reporting/prima-nota/totals',
@@ -93,6 +123,67 @@ define('nonprofit-espocrm:views/prima-nota/list', [
                 .catch(() => {
                     this.reportingStats = null;
                 });
+        },
+
+        /**
+         * When rendered inside Contact/Account relationship panels, return
+         * {parentType, parentId, link} so the summary API can scope totals.
+         *
+         * @return {?{parentType: string, parentId: string, link: string}}
+         */
+        getRelatedScopeFilter() {
+            let view = this.getParentView();
+
+            while (view) {
+                if (
+                    view.link &&
+                    view.model &&
+                    view.model.id &&
+                    view.model.entityType &&
+                    (view.entityType === 'PrimaNota' || view.scope === 'PrimaNota')
+                ) {
+                    return {
+                        parentType: view.model.entityType,
+                        parentId: view.model.id,
+                        link: view.link,
+                    };
+                }
+
+                view = typeof view.getParentView === 'function' ? view.getParentView() : null;
+            }
+
+            const url = this.collection && this.collection.url
+                ? String(this.collection.url)
+                : '';
+            const match = url.match(
+                /^([A-Za-z][A-Za-z0-9]*)\/([a-zA-Z0-9]+)\/([a-zA-Z][a-zA-Z0-9]*)$/
+            );
+
+            if (!match) {
+                return null;
+            }
+
+            const link = match[3];
+
+            if (link !== 'relatedPayments' && link !== 'relatedPaymentsAsBeneficiary') {
+                return null;
+            }
+
+            return {
+                parentType: match[1],
+                parentId: match[2],
+                link: link,
+            };
+        },
+
+        clearReportingStats() {
+            const $container = this.getReportingStatsContainer();
+
+            if ($container.length) {
+                $container.find(
+                    '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection'
+                ).remove();
+            }
         },
 
         renderReportingStats() {

@@ -1,0 +1,22 @@
+{
+    "opportunities": {
+        "index": 0
+    },
+    "cases": {
+        "index": 1
+    },
+    "targetLists": {
+        "index": 2
+    },
+    "_tabBreak_relatedPayments": {
+        "index": 3,
+        "tabBreak": true,
+        "tabLabel": "Pagamenti correlati"
+    },
+    "relatedPayments": {
+        "index": 4
+    },
+    "relatedPaymentsAsBeneficiary": {
+        "index": 5
+    }
+}

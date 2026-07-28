@@ -4,7 +4,9 @@
     },
     "links": {
         "websites": "Siti Web",
-        "opportunities": "Fondi e Finanziamenti"
+        "opportunities": "Fondi e Finanziamenti",
+        "relatedPayments": "Pagamenti correlati",
+        "relatedPaymentsAsBeneficiary": "Pagamenti correlati (beneficiario)"
     },
     "options": {
         "sector": {

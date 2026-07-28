@@ -7,7 +7,9 @@
     },
     "links": {
         "opportunities": "Grants & Funding",
-        "opportunitiesPrimary": "Grants & Funding (Primary)"
+        "opportunitiesPrimary": "Grants & Funding (Primary)",
+        "relatedPayments": "Related payments",
+        "relatedPaymentsAsBeneficiary": "Related payments (beneficiary)"
     },
     "options": {
         "contactType": {

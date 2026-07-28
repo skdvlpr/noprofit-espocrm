@@ -11,6 +11,9 @@
         },
         "filters": {
             "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
         }
     },
     "Account": {

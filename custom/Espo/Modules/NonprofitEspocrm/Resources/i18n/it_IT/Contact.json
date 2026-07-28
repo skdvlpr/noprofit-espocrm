@@ -7,7 +7,9 @@
     },
     "links": {
         "opportunities": "Fondi e Finanziamenti",
-        "opportunitiesPrimary": "Fondi e Finanziamenti (Primaria)"
+        "opportunitiesPrimary": "Fondi e Finanziamenti (Primaria)",
+        "relatedPayments": "Pagamenti correlati",
+        "relatedPaymentsAsBeneficiary": "Pagamenti correlati (beneficiario)"
     },
     "options": {
         "contactType": {

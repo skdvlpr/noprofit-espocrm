@@ -27,6 +27,18 @@
             "type": "hasMany",
             "entity": "AssociationMealCount",
             "foreign": "account"
+        },
+        "relatedPayments": {
+            "type": "hasChildren",
+            "entity": "PrimaNota",
+            "foreign": "subjectParty",
+            "audited": true
+        },
+        "relatedPaymentsAsBeneficiary": {
+            "type": "hasChildren",
+            "entity": "PrimaNota",
+            "foreign": "beneficiaryParty",
+            "audited": true
         }
     }
 }

@@ -2,5 +2,17 @@
     "recordViews": {
         "list": "nonprofit-espocrm:views/record/list-inline-edit"
     },
-    "color": "#d9a13f"
+    "color": "#d9a13f",
+    "relationshipPanels": {
+        "relatedPayments": {
+            "layout": "listSmall",
+            "orderBy": "transactionDate",
+            "orderDirection": "desc"
+        },
+        "relatedPaymentsAsBeneficiary": {
+            "layout": "listSmall",
+            "orderBy": "transactionDate",
+            "orderDirection": "desc"
+        }
+    }
 }

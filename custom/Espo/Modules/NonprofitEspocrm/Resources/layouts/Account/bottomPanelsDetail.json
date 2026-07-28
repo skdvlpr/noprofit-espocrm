@@ -25,12 +25,23 @@
     "websites": {
         "index": 6
     },
-    "_tabBreak_2": {
+    "_tabBreak_relatedPayments": {
         "index": 7,
+        "tabBreak": true,
+        "tabLabel": "Pagamenti correlati"
+    },
+    "relatedPayments": {
+        "index": 8
+    },
+    "relatedPaymentsAsBeneficiary": {
+        "index": 9
+    },
+    "_tabBreak_2": {
+        "index": 10,
         "tabBreak": true,
         "tabLabel": "$Support"
     },
     "cases": {
-        "index": 8
+        "index": 11
     }
 }

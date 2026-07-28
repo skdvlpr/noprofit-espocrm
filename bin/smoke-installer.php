@@ -202,6 +202,13 @@ $report('MealCount not a top-level tab', !in_array('MealCount', $tabStrings, tru
 $report('AssociationMealCount not a top-level tab', !in_array('AssociationMealCount', $tabStrings, true));
 $report('Opportunity NOT in Rendicontazione group', !in_array('Opportunity', $groupItemList, true));
 
+$globalSearch = $config->get('globalSearchEntityList') ?? [];
+$report(
+    'PrimaNota in globalSearchEntityList',
+    is_array($globalSearch) && in_array('PrimaNota', $globalSearch, true),
+    'actual=' . json_encode($globalSearch)
+);
+
 $volunteerIndex = null;
 $groupIndex = null;
 foreach ($tabList as $i => $item) {

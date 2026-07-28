@@ -146,6 +146,7 @@ class Installer
 
         $this->provisionDefaultTheme($config, $configWriter);
         $this->provisionApplicationName($config, $configWriter);
+        $this->provisionGlobalSearchEntityList($config, $configWriter);
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -253,6 +254,28 @@ class Installer
         }
 
         $configWriter->set('applicationName', self::APPLICATION_NAME);
+    }
+
+    /**
+     * Ensure PrimaNota is in navbar global search so payment intent IDs
+     * (`pi_…` / `#pi_…`) resolve via name and donationPaymentReference.
+     */
+    private function provisionGlobalSearchEntityList(Config $config, ConfigWriter $configWriter): void
+    {
+        $list = $config->get('globalSearchEntityList') ?? [];
+
+        if (!is_array($list)) {
+            $list = [];
+        }
+
+        $list = array_values(array_filter($list, 'is_string'));
+
+        if (in_array('PrimaNota', $list, true)) {
+            return;
+        }
+
+        $list[] = 'PrimaNota';
+        $configWriter->set('globalSearchEntityList', $list);
     }
 
     /**
