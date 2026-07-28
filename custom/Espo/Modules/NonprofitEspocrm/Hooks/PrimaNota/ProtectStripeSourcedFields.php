@@ -12,7 +12,8 @@ use Espo\ORM\Repository\Option\SaveOptions;
 /**
  * When donationPaymentProvider is Stripe, every Stripe-sourced attribute is locked
  * after create. Operational fields remain editable: assignedUser, teams,
- * modelDClassification, paymentStatus. Ingest create still works (isNew).
+ * modelDClassification. paymentStatus is locked for interactive users by
+ * ProtectStripePaymentStatus (API ingest / SKIP_ALL may still update it).
  *
  * Incomplete ingest window: if stripeChargeId is still empty, allow one-time
  * backfill of Stripe-sourced attributes (thank-you raced ahead of BalanceTransaction).

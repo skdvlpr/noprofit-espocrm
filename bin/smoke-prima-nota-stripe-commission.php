@@ -180,9 +180,17 @@ $ok(
 $protectStripeHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php';
 $protectStripeHookSrc = is_file($protectStripeHookPath) ? (string) file_get_contents($protectStripeHookPath) : '';
 $ok(
-    'paymentStatus not Stripe-locked (webhook can update)',
+    'paymentStatus not in money-lock list (dedicated status hook)',
     $protectStripeHookSrc !== ''
         && ! preg_match("/'paymentStatus'/", $protectStripeHookSrc)
+);
+$protectStatusHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripePaymentStatus.php';
+$protectStatusHookSrc = is_file($protectStatusHookPath) ? (string) file_get_contents($protectStatusHookPath) : '';
+$ok(
+    'paymentStatus server-locked for non-API Stripe updates',
+    $protectStatusHookSrc !== ''
+        && str_contains($protectStatusHookSrc, 'stripePaymentStatusReadOnly')
+        && str_contains($protectStatusHookSrc, 'isApi()')
 );
 $ok(
     'refuse-production guard exists',
@@ -484,6 +492,28 @@ $stripe->set('modelDClassification', 'C');
 $em->saveEntity($stripe);
 $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
 $ok('Stripe modelDClassification still editable', $stripe->get('modelDClassification') === 'C');
+
+// Interactive (non-API) users must not flip Stripe paymentStatus — Paid-only dashlets depend on it.
+$stripeStatusBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    $stripe->set('paymentStatus', 'Refunded');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeStatusBlocked = $isBadRequestMsg(
+        $e->getMessage(),
+        'stripePaymentStatusReadOnly',
+        'Payment status for Stripe',
+        'Lo stato pagamento dei movimenti Stripe'
+    );
+}
+$ok('Stripe paymentStatus edit by interactive user → BadRequest', $stripeStatusBlocked);
+
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$stripe->set('paymentStatus', 'Refunded');
+$em->saveEntity($stripe, [SaveOption::SKIP_ALL => true]);
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$ok('Stripe paymentStatus update via SKIP_ALL (webhook retry) allowed', $stripe->get('paymentStatus') === 'Refunded');
 
 $formulaPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json';
 $formulaScript = (string) ((json_decode((string) file_get_contents($formulaPath), true) ?: [])['beforeSaveCustomScript'] ?? '');
