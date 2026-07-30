@@ -155,17 +155,18 @@
             "type": "enum",
             "options": [
                 "Planned",
-                "Paid",
+                "Inviato",
                 "Cancelled",
                 "Refunded",
                 "Disputed",
                 "Problematic"
             ],
-            "default": "Paid",
+            "default": "Inviato",
             "displayAsLabel": true,
+            "tooltip": true,
             "style": {
                 "Planned": "default",
-                "Paid": "success",
+                "Inviato": "success",
                 "Cancelled": "danger",
                 "Refunded": "warning",
                 "Disputed": "danger",
@@ -272,6 +273,21 @@
         "stripeSubscriptionId": {
             "type": "varchar",
             "maxLength": 255
+        },
+        "stripeInvoiceId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "stripeInvoiceNumber": {
+            "type": "varchar",
+            "maxLength": 64
+        },
+        "stripePayoutId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "stripePayoutPaidAt": {
+            "type": "datetime"
         },
         "modelDClassification": {
             "type": "enum",

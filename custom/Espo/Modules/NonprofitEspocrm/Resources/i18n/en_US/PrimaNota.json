@@ -22,6 +22,10 @@
         "amountIn": "Income",
         "amountOut": "Expense",
         "managementBalance": "Management surplus/deficit",
+        "cashBalance": "Cash balance",
+        "plannedAmountIn": "Forecast income",
+        "plannedAmountOut": "Forecast expense",
+        "plannedBalance": "Forecast balance",
         "internalClassification": "Internal classification",
         "donationPaymentProvider": "Payment platform",
         "donationPaymentReference": "Order reference",
@@ -48,6 +52,10 @@
         "stripeStatementDescriptor": "Stripe statement descriptor",
         "stripeCustomerId": "Stripe customer ID",
         "stripeSubscriptionId": "Stripe subscription ID",
+        "stripeInvoiceId": "Stripe invoice ID",
+        "stripeInvoiceNumber": "Stripe invoice number",
+        "stripePayoutId": "Stripe payout ID",
+        "stripePayoutPaidAt": "Stripe payout paid at",
         "donationFrequency": "Donation frequency",
         "paymentStatus": "Payment status"
     },
@@ -63,7 +71,8 @@
         "amountGross": "Gross before fees. Net = gross − commission. Required. Clearing to 0 zeros fee/%/net (only when you change this field).",
         "commissionAmount": "Fee in currency. Changing this recalculates %. Empty = 0. Cannot exceed gross.",
         "commissionPercent": "Fee as %. Changing this recalculates fee €. Empty = 0.",
-        "transactionDate": "Required for manual entries. Not auto-filled with today. Stripe donations use the payment date from the website."
+        "transactionDate": "Required for manual entries. Not auto-filled with today. Stripe donations use the payment date from the website.",
+        "paymentStatus": "Inviato = counted in cash/totals (manual entries and Stripe after bank payout). Pianificato = Stripe charge settled but not yet paid out to the bank. Refunded/Disputed/Cancelled/Problematic = excluded from totals."
     },
     "messages": {
         "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can change assigned user, teams, Model D classification, and payment status.",
@@ -125,7 +134,7 @@
         },
         "paymentStatus": {
             "Planned": "Planned",
-            "Paid": "Paid",
+            "Inviato": "Sent",
             "Cancelled": "Cancelled",
             "Refunded": "Refunded",
             "Disputed": "Disputed",

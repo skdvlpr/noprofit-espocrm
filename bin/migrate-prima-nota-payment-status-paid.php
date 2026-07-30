@@ -1,23 +1,24 @@
 <?php
 /**
- * Backfill PrimaNota.paymentStatus Planned → Paid for historical ledger rows.
+ * Backfill PrimaNota.paymentStatus Planned → Inviato for historical ledger rows.
  *
- * Why: CRM-S11 dashlets count only Paid (and legacy null). Field default is
- * Planned, so pre-existing / manual rows fell out of year/month totals.
+ * Legacy helper (pre Inviato rename). Prefer
+ * bin/migrate-prima-nota-payment-status-inviato.php for Paid/PaidOut migration.
+ *
+ * Why: dashlets count only Inviato (and legacy null). Field default for manual
+ * rows is Inviato; Stripe ingest uses Planned until payout.
  *
  * Policy:
  *   - paymentStatus = Planned
+ *   - NOT Stripe-sourced (donationPaymentProvider != Stripe)
  *   - transactionDate IS NULL OR transactionDate <= today (Europe/Rome)
- *   → set Paid
- *   - Never touch Cancelled / Refunded / Disputed / Problematic / Paid
- *   - Future-dated Planned rows stay Planned (forecasts)
+ *   → set Inviato
+ *   - Never touch Cancelled / Refunded / Disputed / Problematic / Inviato
+ *   - Stripe Planned rows stay Planned until payout.paid
  *
  * Usage (DDEV only — refuse-production blocks prod paths):
  *   ddev exec php bin/migrate-prima-nota-payment-status-paid.php --dry-run
  *   ddev exec php bin/migrate-prima-nota-payment-status-paid.php
- *
- * Production: ask for GO, then run an ephemeral one-shot (see bin/lib/ephemeral-oneshot.php)
- * that executes the same UPDATE logic and self-deletes.
  */
 
 declare(strict_types=1);
@@ -42,9 +43,19 @@ $today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Rome')))->format
 $candidates = $em->getRDBRepository('PrimaNota')
     ->where([
         'paymentStatus' => 'Planned',
-        'OR' => [
-            ['transactionDate' => null],
-            ['transactionDate<=' => $today],
+        'AND' => [
+            [
+                'OR' => [
+                    ['donationPaymentProvider!=' => 'Stripe'],
+                    ['donationPaymentProvider' => null],
+                ],
+            ],
+            [
+                'OR' => [
+                    ['transactionDate' => null],
+                    ['transactionDate<=' => $today],
+                ],
+            ],
         ],
     ])
     ->order('transactionDate', 'ASC')
@@ -64,7 +75,7 @@ foreach ($candidates as $entity) {
     }
 
     if (! $dryRun) {
-        $entity->set('paymentStatus', 'Paid');
+        $entity->set('paymentStatus', 'Inviato');
         $em->saveEntity($entity, [
             SaveOption::SKIP_ALL => true,
             SaveOption::SILENT => true,
@@ -74,7 +85,7 @@ foreach ($candidates as $entity) {
     $updated++;
 }
 
-echo ($dryRun ? 'DRY-RUN' : 'APPLIED') . " PrimaNota Planned→Paid\n";
+echo ($dryRun ? 'DRY-RUN' : 'APPLIED') . " PrimaNota Planned→Inviato (non-Stripe)\n";
 echo "  today (Europe/Rome): {$today}\n";
 echo "  rows: {$updated}\n";
 echo "  sample:\n";

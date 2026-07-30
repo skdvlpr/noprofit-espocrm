@@ -85,6 +85,10 @@ class ProtectStripeSourcedFields implements BeforeSave
         'stripeStatementDescriptor',
         'stripeCustomerId',
         'stripeSubscriptionId',
+        'stripeInvoiceId',
+        'stripeInvoiceNumber',
+        'stripePayoutId',
+        'stripePayoutPaidAt',
     ];
 
     public function __construct(Language $language)

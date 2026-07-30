@@ -182,7 +182,23 @@
                 {
                     "name": "stripeSubscriptionId"
                 },
+                {
+                    "name": "stripeInvoiceId"
+                }
+            ],
+            [
+                {
+                    "name": "stripeInvoiceNumber"
+                },
                 false
+            ],
+            [
+                {
+                    "name": "stripePayoutId"
+                },
+                {
+                    "name": "stripePayoutPaidAt"
+                }
             ],
             [
                 {

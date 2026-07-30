@@ -23,6 +23,20 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                     <div class="no-data text-soft">{{loadingLabel}}</div>
                 {{else}}
                     {{#if hasStats}}
+                        {{#if cashBalance}}
+                            <div class="safehouse-reporting-stats-cash">
+                                <div class="safehouse-reporting-stats-period-title">{{cashBalance.title}}</div>
+                                {{#if cashBalance.range}}
+                                    <div class="safehouse-reporting-stats-period-range">{{cashBalance.range}}</div>
+                                {{/if}}
+                                <div class="safehouse-reporting-stats-metrics">
+                                    <div class="safehouse-reporting-stats-metric">
+                                        <span class="safehouse-reporting-stats-value safehouse-reporting-stats-value--accent">{{cashBalance.value}}</span>
+                                        <span class="safehouse-reporting-stats-label">{{cashBalance.label}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {{/if}}
                         <div class="safehouse-reporting-stats-period-grid">
                             {{#each periodSections}}
                                 <div class="safehouse-reporting-stats-period-cell">
@@ -64,8 +78,34 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                 loading: this.loading,
                 loadingLabel: this.translate('loading', 'labels', 'Global'),
                 noDataLabel: this.translate('No Data'),
-                hasStats: this.buildPeriodSections().length > 0,
+                hasStats: this.buildPeriodSections().length > 0 || !!this.buildCashBalanceSection(),
+                cashBalance: this.buildCashBalanceSection(),
                 periodSections: this.buildPeriodSections(),
+            };
+        },
+
+        buildCashBalanceSection() {
+            if (!this.summary || !this.summary.cashBalance) {
+                return null;
+            }
+
+            const cash = this.summary.cashBalance;
+            const item = {
+                ...this.statsFooter.resolveMetricItem(this.entityScope, 'amountIn'),
+                fieldType: 'currency',
+                currency: 'EUR',
+            };
+
+            let range = cash.asOf || '';
+            if (cash.openingAsOf) {
+                range = cash.openingAsOf + ' → ' + (cash.asOf || '');
+            }
+
+            return {
+                title: this.translate('cashBalance', 'fields', this.entityScope),
+                label: this.translate('cashBalance', 'fields', this.entityScope),
+                range: range,
+                value: this.statsFooter.formatValue(cash.balance, item),
             };
         },
 
@@ -89,8 +129,15 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                         title: this.translate(period.labelKey, 'labels', 'Global'),
                         range: this.statsFooter.formatPeriodRange(stats.from, stats.to),
                         metrics: metricList.map(key => {
+                            const formatFieldMap = {
+                                managementBalance: 'amountIn',
+                                plannedBalance: 'amountIn',
+                                plannedAmountIn: 'amountIn',
+                                plannedAmountOut: 'amountOut',
+                            };
+                            const formatField = formatFieldMap[key] || key;
                             const item = {
-                                ...this.statsFooter.resolveMetricItem(this.entityScope, key === 'managementBalance' ? 'amountIn' : key),
+                                ...this.statsFooter.resolveMetricItem(this.entityScope, formatField),
                                 fieldType: 'currency',
                                 currency: 'EUR',
                             };

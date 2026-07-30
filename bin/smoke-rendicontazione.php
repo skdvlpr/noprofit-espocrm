@@ -294,7 +294,7 @@ try {
         'commissionAmount' => 0.0,
         'commissionPercent' => 0.0,
         'amount' => 100.0,
-        'paymentStatus' => 'Paid',
+        'paymentStatus' => 'Inviato',
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn);
@@ -308,13 +308,67 @@ try {
         'commissionAmount' => 0.0,
         'commissionPercent' => 0.0,
         'amount' => 40.0,
-        'paymentStatus' => 'Paid',
+        'paymentStatus' => 'Inviato',
         'transactionDate' => date('Y-m-d'),
     ]);
     $em->saveEntity($pn2);
     $summary = $primaNotaStats->getSummary();
     $ok('PrimaNota summary today amountIn', isset($summary->today->amountIn));
     $ok('PrimaNota summary managementBalance', isset($summary->today->managementBalance));
+    $ok('PrimaNota summary cashBalance present', isset($summary->cashBalance->balance));
+
+    $openingBefore = (float) ($summary->cashBalance->opening ?? 0);
+    $balanceBefore = (float) ($summary->cashBalance->balance ?? 0);
+
+    $pnCashIn = $em->getNewEntity('PrimaNota');
+    $pnCashIn->set([
+        'description' => 'SMOKE-Rend-Cash-In',
+        'subjectName' => 'CashDonor',
+        'entryType' => 'Income',
+        'amountGross' => 10.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 10.0,
+        'paymentStatus' => 'Inviato',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($pnCashIn);
+    $created[] = $pnCashIn;
+
+    $pnCashPlanned = $em->getNewEntity('PrimaNota');
+    $pnCashPlanned->set([
+        'description' => 'SMOKE-Rend-Cash-Planned',
+        'subjectName' => 'PlannedDonor',
+        'entryType' => 'Income',
+        'amountGross' => 100.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 100.0,
+        'paymentStatus' => 'Planned',
+        'transactionDate' => date('Y-m-d'),
+    ]);
+    $em->saveEntity($pnCashPlanned);
+    $created[] = $pnCashPlanned;
+
+    $summaryAfterCash = $primaNotaStats->getSummary();
+    $balanceAfter = (float) ($summaryAfterCash->cashBalance->balance ?? 0);
+    $ok(
+        'PrimaNota cashBalance +Inviato income, ignores Planned',
+        abs(($balanceAfter - $balanceBefore) - 10.0) < 0.01,
+        'before=' . $balanceBefore . ' after=' . $balanceAfter . ' opening=' . $openingBefore
+    );
+    $ok(
+        'PrimaNota month plannedAmountIn includes Planned fixture',
+        abs((float) ($summaryAfterCash->month->plannedAmountIn ?? 0) - 100.0) < 0.01
+            || (float) ($summaryAfterCash->month->plannedAmountIn ?? 0) >= 100.0,
+        'plannedAmountIn=' . (string) ($summaryAfterCash->month->plannedAmountIn ?? 0)
+    );
+    $ok(
+        'PrimaNota month amountIn excludes Planned',
+        abs((float) ($summaryAfterCash->month->amountIn ?? 0) - (float) ($summary->month->amountIn ?? 0) - 10.0) < 0.01
+    );
 
     $contact = $em->getNewEntity('Contact');
     $contact->set('firstName', 'Smoke');
@@ -331,7 +385,7 @@ try {
         'commissionAmount' => 0.0,
         'commissionPercent' => 0.0,
         'amount' => 7.0,
-        'paymentStatus' => 'Paid',
+        'paymentStatus' => 'Inviato',
         'transactionDate' => date('Y-m-d'),
         'subjectPartyId' => $contact->getId(),
         'subjectPartyType' => 'Contact',
@@ -403,7 +457,7 @@ try {
         'commissionAmount' => 0.0,
         'commissionPercent' => 0.0,
         'amount' => 11.0,
-        'paymentStatus' => 'Paid',
+        'paymentStatus' => 'Inviato',
         'transactionDate' => date('Y-m-d'),
         'financingId' => $opp->getId(),
     ]);

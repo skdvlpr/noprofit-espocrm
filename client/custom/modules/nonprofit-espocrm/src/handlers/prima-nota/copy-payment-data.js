@@ -50,6 +50,11 @@ define('nonprofit-espocrm:handlers/prima-nota/copy-payment-data', [], function (
         'stripeRadarRiskLevel',
         'stripeStatementDescriptor',
         'stripeCustomerId',
+        'stripeSubscriptionId',
+        'stripeInvoiceId',
+        'stripeInvoiceNumber',
+        'stripePayoutId',
+        'stripePayoutPaidAt',
     ];
 
     class Handler {

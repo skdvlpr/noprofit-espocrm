@@ -22,6 +22,10 @@
         "amountIn": "Entrata",
         "amountOut": "Uscita",
         "managementBalance": "Avanzo/disavanzo di gestione",
+        "cashBalance": "Saldo di cassa",
+        "plannedAmountIn": "Previsione entrate",
+        "plannedAmountOut": "Previsione uscite",
+        "plannedBalance": "Previsione saldo",
         "internalClassification": "Classificazione interna",
         "donationPaymentProvider": "Piattaforma pagamento",
         "donationPaymentReference": "Riferimento ordine",
@@ -48,6 +52,10 @@
         "stripeStatementDescriptor": "Descrittore estratto conto Stripe",
         "stripeCustomerId": "ID customer Stripe",
         "stripeSubscriptionId": "ID abbonamento Stripe",
+        "stripeInvoiceId": "ID fattura Stripe",
+        "stripeInvoiceNumber": "Numero fattura / conto Stripe",
+        "stripePayoutId": "ID payout Stripe",
+        "stripePayoutPaidAt": "Data accredito sul conto",
         "donationFrequency": "Frequenza donazione",
         "paymentStatus": "Stato pagamento"
     },
@@ -63,7 +71,8 @@
         "amountGross": "Importo lordo prima delle commissioni. Netto = lordo - commissione. Obbligatorio. Se lo azzeri, si azzerano anche commissione e netto.",
         "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non puo' superare il lordo.",
         "commissionPercent": "Commissione in %. Se la cambi, l'importo commissione si ricalcola. Vuoto = 0.",
-        "transactionDate": "Obbligatoria per i movimenti manuali. Non viene compilata automaticamente con oggi. Per le donazioni Stripe usa la data del pagamento dal sito."
+        "transactionDate": "Obbligatoria per i movimenti manuali. Non viene compilata automaticamente con oggi. Per le donazioni Stripe usa la data del pagamento dal sito.",
+        "paymentStatus": "Inviato = conteggiato nei totali/cassa (inserimenti manuali e Stripe dopo accredito in banca). Pianificato = pagamento Stripe riuscito ma non ancora versato sul conto. Rimborsato/Contestato/Annullato/Problematico = esclusi dai totali."
     },
     "messages": {
         "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare assegnatario, team, classificazione modello D e stato pagamento.",
@@ -125,7 +134,7 @@
         },
         "paymentStatus": {
             "Planned": "Pianificato",
-            "Paid": "Pagato",
+            "Inviato": "Inviato",
             "Cancelled": "Annullato",
             "Refunded": "Rimborsato",
             "Disputed": "Contestato",

@@ -147,6 +147,7 @@ class Installer
         $this->provisionDefaultTheme($config, $configWriter);
         $this->provisionApplicationName($config, $configWriter);
         $this->provisionGlobalSearchEntityList($config, $configWriter);
+        $this->provisionPrimaNotaOpeningCashDefaults($config, $configWriter);
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -276,6 +277,17 @@ class Installer
 
         $list[] = 'PrimaNota';
         $configWriter->set('globalSearchEntityList', $list);
+    }
+
+    /**
+     * Seed Saldo di cassa opening balance keys once (CRM-S16). Admins may
+     * override via bin/set-prima-nota-opening-cash.php.
+     */
+    private function provisionPrimaNotaOpeningCashDefaults(Config $config, ConfigWriter $configWriter): void
+    {
+        if ($config->get('primaNotaOpeningCashBalance') === null) {
+            $configWriter->set('primaNotaOpeningCashBalance', 0.0);
+        }
     }
 
     /**
