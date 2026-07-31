@@ -1,0 +1,8 @@
+{
+    "fields": {
+        "duration": "Duration"
+    },
+    "labels": {
+        "Scheduler": "Scheduler"
+    }
+}

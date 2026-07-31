@@ -1,0 +1,28 @@
+{
+    "bottomPanels": {
+        "detail": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "volunteer-activity-dispatch:views/task/record/panels/scheduler",
+                "order": 1
+            }
+        ],
+        "edit": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "volunteer-activity-dispatch:views/task/record/panels/scheduler",
+                "order": 1
+            }
+        ],
+        "editSmall": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "volunteer-activity-dispatch:views/task/record/panels/scheduler",
+                "order": 1
+            }
+        ]
+    }
+}

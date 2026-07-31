@@ -1,0 +1,8 @@
+{
+    "fields": {
+        "duration": "Длительность"
+    },
+    "labels": {
+        "Scheduler": "Планировщик"
+    }
+}

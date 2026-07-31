@@ -1,0 +1,15 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [{"name": "name"}, {"name": "parent"}],
+            [{"name": "status"}, {"name": "priority"}],
+            [{"name": "category"}, false],
+            [{"name": "dateStart"}, {"name": "dateEnd"}],
+            [{"name": "duration"}, {"name": "reminders"}],
+            [{"name": "dateCompleted"}, false],
+            [{"name": "description", "fullWidth": true}],
+            [{"name": "attachments", "fullWidth": true}]
+        ]
+    }
+]

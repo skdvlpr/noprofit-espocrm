@@ -1,0 +1,13 @@
+{
+    "Task": {
+        "detail": {
+            "module": "VolunteerActivityDispatch"
+        },
+        "bottomPanelsDetail": {
+            "module": "VolunteerActivityDispatch"
+        },
+        "bottomPanelsEdit": {
+            "module": "VolunteerActivityDispatch"
+        }
+    }
+}
