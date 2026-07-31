@@ -1,7 +1,7 @@
 # SafehouseCrm Module Rulebook
 
-**EspoCRM Version:** 9.3.6 | **Module:** custom/Espo/Modules/NonprofitEspocrm/
-**Executor:** Antigravity AI | **Last updated:** 2026-06-28
+**EspoCRM Version:** 10.x (DDEV/prod; historically documented as 9.3.6) | **Module:** custom/Espo/Modules/NonprofitEspocrm/
+**Executor:** Antigravity AI / Cursor agents | **Last updated:** 2026-07-31
 **Language:** specs/paths/code = English | User communication = Russian
 
 ## MANDATORY PRE-TASK PROTOCOL
@@ -30,7 +30,7 @@ Before implementing ANY task, executor MUST:
 | ---- | --- | ----- |
 | **Active project (post-launch)** | https://app.notion.com/p/38d8d469d405817cbd23f6cfb3ce32af | **Nonprofit EspoCRM — Post-launch enhancements** — current implementation project |
 | **Projects DB** | https://app.notion.com/p/2fb8d469d4058093a291fd990185824d | Create/update **projects** here |
-| **Tasks DB** | https://app.notion.com/p/38d8d469d405805589c6000c89f3d3ab | Create/update **tasks** here (`Projects - Tasks`) |
+| **Tasks DB** | https://app.notion.com/p/38d8d469d40580b8b87ee0681b9d929c | Create/update **tasks** here (`Projects - Tasks`; data source `collection://38d8d469-d405-8080-aeef-000b8f74e026`). Legacy URL `…805589c6000c89f3d3ab` may 404 — use this live DB. |
 | **Archive project (Phase 1)** | https://app.notion.com/p/34e8d469d4058027af82f2ce986a6448 | **Safehouse CRM** — Gomercato tracker; Status **Done**; executor logs are historical reference only |
 
 **Mandatory rules:**
@@ -783,8 +783,10 @@ This repo ships **independent** extensions:
 | --------- | ------- | -------- | ----- |
 | SafehouseCrm | `custom/Espo/Modules/NonprofitEspocrm/` | (core overrides only if needed) | `bin/build.sh` |
 | GoogleIntegration | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
+| VolunteerActivityDispatch | `custom/Espo/Modules/VolunteerActivityDispatch/` | `client/custom/modules/volunteer-activity-dispatch/` | `bin/build-volunteer-activity-dispatch.sh` |
+| WorkflowEngine (planned) | `custom/Espo/Modules/WorkflowEngine/` | `client/custom/modules/workflow-engine/` | `bin/build-workflow-engine.sh` |
 
-**RULE:** Do not bundle GoogleIntegration inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
+**RULE:** Do not bundle GoogleIntegration / VolunteerActivityDispatch / WorkflowEngine inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm → optional dispatch/workflows ZIPs. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
 
 **GoogleIntegration frontend rule:** edit only
 `client/custom/modules/google-integration/`. Do not mirror runtime JS/templates
@@ -827,6 +829,61 @@ when the user explicitly asks for browser testing or visual verification.
 | Integration “always enabled” | Admin save JS crash → no PUT → `integration.enabled` and `config.integrations.GoogleIntegration` never flip to false |
 | OAuth `Malformed auth code` | `encodeURI` vs `encodeURIComponent`, COOP + `popup.location`, double token exchange, `redirect_uri` slash mismatch |
 | Connect uses `espo-extra.js` | `userView` not loading module view — wrong metadata path |
+
+## SECTION 28 — WORKFLOW ENGINE EXTENSION (WF-\*)
+
+**Notion epic (canonical):** https://app.notion.com/p/3ae8d469d405818bb1cadfcced99afc8 — *EXT — WorkflowEngine…*
+
+Universal, admin-configurable workflows (triggers + conditions + actions) as a **standalone** Espo ≥10 extension. **Not** Advanced Pack. **Not** ad-hoc entity hooks for each notify rule.
+
+### WF-001 — Native-first: when NOT to use WorkflowEngine
+
+Espo core already covers:
+
+| Need | Use instead |
+| ---- | ----------- |
+| Email when **assignedUser** changes | Admin → assignment email notifications + entity list |
+| Stream / mention emails | Config stream/mention email flags |
+| Meeting/Call invite + acceptance emails | Native `InvitationService` |
+| Computed fields on save | Entity `formula` / `beforeSaveCustomScript` |
+| One hard-coded domain rule | Prefer formula/hook **only** if product-specific and never admin-tuned |
+
+Use **WorkflowEngine** when admins must compose **flexible** “on create/update IF complex conditions THEN email / notify / set fields / …” across **any** entity (core + custom).
+
+### WF-002 — Module layout (same as EXT-\*)
+
+- Backend: `custom/Espo/Modules/WorkflowEngine/`
+- Frontend: `client/custom/modules/workflow-engine/` (AMD prefix `workflow-engine:`)
+- ZIP via `bin/build-workflow-engine.sh` (both trees + `scripts/AfterInstall.php` → `Tools\Installer`)
+- `Resources/module.json` `order` higher than CRM/Safehouse when overlays needed; never patch `application/`
+
+### WF-003 — Runtime building blocks (reuse, don’t fork)
+
+- **Conditions:** server-side evaluation of Espo-shaped `conditionGroup` (dynamicLogic-like) and/or boolean **formula**
+- **Actions:** `EmailSender` + Email templates/Htmlizer; `Notification` entity; formula attribute sets; Jobs for slow work
+- **Related template vars:** same approach as GoogleIntegration `EventPusher::resolveRelatedTemplateVariables` (`{{account.name}}`)
+- **Hooks:** prefer `lateAfterSave` (Espo 10+) for side-effect actions when safe; recursion depth + `SaveOption` skip flags mandatory
+- **Audit:** `WorkflowRunLog` (or equivalent) for every run
+
+### WF-004 — Prototype rewrite policy
+
+Early draft lives in user repo **royalacademy-crm** (GitHub `skdvlpr`; may be private/renamed). Treat as **inventory + UX inspiration only**:
+
+1. List what worked (formula fields, conditions, email, UI).
+2. Discard brittle patterns; rewrite on EXT/WF rules above.
+3. Do **not** copy-paste broken ACL/metadata paths.
+
+If `gh` cannot access the draft: **stop and ask** for clone URL or local path before coding W1.
+
+### WF-005 — Tests & Notion
+
+- Smoke per phase: `bin/smoke-workflow-engine.php` (+ REST probes via `explore-espo-endpoints`)
+- Cover: matching/non-matching conditions, email/notification side effects, recursion guard, ACL on definitions
+- Append executor logs to the Notion epic every milestone; one phase (W0→W5) per user turn unless user says continue
+
+### WF-006 — Relationship to VolunteerActivityDispatch
+
+ActivityOffer P1 uses in-app `Notification` only. Prefer **WorkflowEngine rules** for “email cohort on publish” / richer notify once W2 exists, instead of one-off mail code inside dispatch — unless product needs tight coupling.
 
 ## SECTION 27 — GOOGLE CALENDAR EXPORT / REMINDERS (GCal-\*)
 
@@ -1236,6 +1293,7 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **HOK**: hooks only when formula insufficient | `afterSave` = idempotent
 - **PKG**: `manifest.json` + `AfterInstall` rebuild | never touch `application/`
 - **EXT**: backend `custom/Espo/Modules/{Camel}/` + frontend `client/custom/modules/{hyphen}/` | metadata views use `{hyphen}:views/...` | ZIP includes both trees | see EXT-001–EXT-009
+- **WF**: WorkflowEngine = standalone admin workflows (not Advanced Pack); native assignment/stream emails first; see SECTION 28 WF-001–WF-006; Notion https://app.notion.com/p/3ae8d469d405818bb1cadfcced99afc8
 - **SEC**: ACL server-side always | no anon endpoints | test matrix per entity
 - **PERF**: no unbounded queries | aggregations via DB GROUP BY | check N+1
 - **GIT**: no `git push` / PR without explicit user request | ask before commit if unclear
