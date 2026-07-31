@@ -2,7 +2,7 @@
     "fields": {
         "parent": "Collegato a",
         "type": "Tipo segnalazione",
-        "websiteReferenceId": "ID segnalazione (SH)",
+        "websiteReferenceId": "ID segnalazione",
         "websiteContactName": "Nome contatto (sito)",
         "sportelloDisplayName": "Sportello"
     },
@@ -13,7 +13,7 @@
     },
     "options": {
         "type": {
-            "BeneficiaryRequest": "Richiesta di assistenza",
+            "AssistanceRequest": "Richiesta di assistenza",
             "GuestIntake": "Primo accesso / accoglienza",
             "ServiceAccess": "Accesso a servizio",
             "InformationRequest": "Richiesta informazioni",
@@ -28,6 +28,7 @@
             "LegalOrAdministrative": "Legale / amministrativo",
             "SportelloDigitale": "Sportello digitale",
             "SportelloLegale": "Sportello legale",
+            "RichiestaGenerica": "Richiesta generica",
             "Other": "Altro"
         }
     },

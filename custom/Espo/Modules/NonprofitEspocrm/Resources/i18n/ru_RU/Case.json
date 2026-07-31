@@ -2,7 +2,7 @@
     "fields": {
         "parent": "Связано с",
         "type": "Тип обращения",
-        "websiteReferenceId": "ID обращения (SH)",
+        "websiteReferenceId": "ID обращения",
         "websiteContactName": "Имя контакта (сайт)",
         "sportelloDisplayName": "Sportello"
     },
@@ -13,7 +13,7 @@
     },
     "options": {
         "type": {
-            "BeneficiaryRequest": "Запрос на помощь",
+            "AssistanceRequest": "Запрос на помощь",
             "GuestIntake": "Первичный приём",
             "ServiceAccess": "Доступ к услуге",
             "InformationRequest": "Запрос информации",
@@ -28,6 +28,7 @@
             "LegalOrAdministrative": "Юридическое / административное",
             "SportelloDigitale": "Sportello digitale",
             "SportelloLegale": "Sportello legale",
+            "RichiestaGenerica": "Richiesta generica",
             "Other": "Другое"
         }
     }

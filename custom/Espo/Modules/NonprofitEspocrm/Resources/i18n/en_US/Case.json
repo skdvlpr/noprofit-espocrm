@@ -2,7 +2,7 @@
     "fields": {
         "parent": "Related record",
         "type": "Intake type",
-        "websiteReferenceId": "Intake ID (SH)",
+        "websiteReferenceId": "Intake ID",
         "websiteContactName": "Contact name (website)",
         "sportelloDisplayName": "Desk"
     },
@@ -13,7 +13,7 @@
     },
     "options": {
         "type": {
-            "BeneficiaryRequest": "Assistance request",
+            "AssistanceRequest": "Assistance request",
             "GuestIntake": "First contact / reception",
             "ServiceAccess": "Service access",
             "InformationRequest": "Information request",
@@ -28,6 +28,7 @@
             "LegalOrAdministrative": "Legal / administrative",
             "SportelloDigitale": "Digital desk",
             "SportelloLegale": "Legal desk",
+            "RichiestaGenerica": "Generic request",
             "Other": "Other"
         }
     }

@@ -3,7 +3,7 @@
         "caseTypeDefault": {
             "type": "enum",
             "options": [
-                "BeneficiaryRequest",
+                "AssistanceRequest",
                 "GuestIntake",
                 "ServiceAccess",
                 "InformationRequest",
@@ -18,6 +18,7 @@
                 "LegalOrAdministrative",
                 "SportelloDigitale",
                 "SportelloLegale",
+                "RichiestaGenerica",
                 "Other"
             ],
             "tooltip": true

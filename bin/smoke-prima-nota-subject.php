@@ -76,6 +76,8 @@ $em->saveEntity($account);
 $contact = $em->getNewEntity(Contact::ENTITY_TYPE);
 $contact->set('firstName', 'Smoke');
 $contact->set('lastName', 'Subject');
+$contact->set('emailAddress', 'smoke.subject@example.com');
+$contact->set('phoneNumber', '+390555500001');
 $em->saveEntity($contact);
 
 $beneficiaryAccount = $em->getNewEntity(Account::ENTITY_TYPE);
@@ -85,6 +87,8 @@ $em->saveEntity($beneficiaryAccount);
 $beneficiaryContact = $em->getNewEntity(Contact::ENTITY_TYPE);
 $beneficiaryContact->set('firstName', 'Smoke');
 $beneficiaryContact->set('lastName', 'Beneficiary');
+$beneficiaryContact->set('emailAddress', 'smoke.beneficiary@example.com');
+$beneficiaryContact->set('phoneNumber', '+390555500002');
 $em->saveEntity($beneficiaryContact);
 
 $linkedAccount = $em->getNewEntity('PrimaNota');
@@ -354,8 +358,21 @@ $rows = [
     $bothParties,
 ];
 
+$createdParties = array_filter([
+    $createdAccountParty ?? null,
+    $createdContactParty ?? null,
+    isset($createdBeneficiaryAccount) ? $em->getEntityById(Account::ENTITY_TYPE, (string) ($createdBeneficiaryAccount->get('beneficiaryPartyId') ?? '')) : null,
+    isset($createdBeneficiaryContact) ? $em->getEntityById(Contact::ENTITY_TYPE, (string) ($createdBeneficiaryContact->get('beneficiaryPartyId') ?? '')) : null,
+]);
+
 foreach ($rows as $row) {
     $em->removeEntity($row);
+}
+
+foreach ($createdParties as $party) {
+    if ($party !== null) {
+        $em->removeEntity($party);
+    }
 }
 
 $em->removeEntity($beneficiaryContact);

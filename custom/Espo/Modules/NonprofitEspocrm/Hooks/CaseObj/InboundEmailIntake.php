@@ -4,6 +4,7 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\CaseObj;
 
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Metadata;
 use Espo\Entities\InboundEmail;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
@@ -23,6 +24,7 @@ class InboundEmailIntake implements BeforeSave
     public function __construct(
         private EntityManager $entityManager,
         private Config $config,
+        private Metadata $metadata,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
@@ -102,14 +104,8 @@ class InboundEmailIntake implements BeforeSave
 
     private function populateWebsiteIntakeFields(Entity $entity): void
     {
-        $referenceId = $this->extractWebsiteReferenceId(
-            (string) $entity->get('name'),
-            (string) $entity->get('description'),
-        );
-
-        if ($referenceId !== null) {
-            $entity->set('websiteReferenceId', $referenceId);
-        }
+        // websiteReferenceId is minted by AssignWebsiteReferenceId (CRM-owned).
+        // Do not copy site correlation tokens into that field.
 
         if (!$entity->get('websiteContactName')) {
             $contactName = $this->extractWebsiteContactName((string) $entity->get('description'));
@@ -127,21 +123,6 @@ class InboundEmailIntake implements BeforeSave
                 $entity->set('sportelloDisplayName', $sportello);
             }
         }
-    }
-
-    private function extractWebsiteReferenceId(string ...$sources): ?string
-    {
-        foreach ($sources as $source) {
-            if ($source === '') {
-                continue;
-            }
-
-            if (preg_match('/\[(SH-[a-z0-9-]+)\]/i', $source, $matches) === 1) {
-                return strtolower($matches[1]);
-            }
-        }
-
-        return null;
     }
 
     private function extractWebsiteContactName(string $description): ?string
@@ -202,7 +183,7 @@ class InboundEmailIntake implements BeforeSave
         }
 
         $knownTypes = [
-            'BeneficiaryRequest',
+            'AssistanceRequest',
             'GuestIntake',
             'ServiceAccess',
             'InformationRequest',
@@ -217,6 +198,7 @@ class InboundEmailIntake implements BeforeSave
             'LegalOrAdministrative',
             'SportelloDigitale',
             'SportelloLegale',
+            'RichiestaGenerica',
             'Other',
         ];
 
@@ -229,8 +211,12 @@ class InboundEmailIntake implements BeforeSave
         $aliases = [
             'sportellodigitale' => 'SportelloDigitale',
             'sportellolegale' => 'SportelloLegale',
+            'richiestagenerica' => 'RichiestaGenerica',
             'altro' => 'Other',
-            'richiestadiassistenza' => 'BeneficiaryRequest',
+            'assistancerequest' => 'AssistanceRequest',
+            'richiestadiassistenza' => 'AssistanceRequest',
+            // Legacy enum key (pre-rename).
+            'beneficiaryrequest' => 'AssistanceRequest',
             'richiestainformazioni' => 'InformationRequest',
         ];
 
@@ -242,6 +228,7 @@ class InboundEmailIntake implements BeforeSave
         return match ($caseType) {
             'SportelloDigitale' => 'Sportello digitale',
             'SportelloLegale' => 'Sportello legale',
+            'RichiestaGenerica' => 'Richiesta generica',
             default => null,
         };
     }
@@ -270,6 +257,11 @@ class InboundEmailIntake implements BeforeSave
 
         /** @var array<string, string> $map */
         $map = $this->config->get('inboundEmailCaseTypes') ?? [];
+
+        if ($map === []) {
+            /** @var array<string, string> $map */
+            $map = $this->metadata->get(['app', 'config', 'inboundEmailCaseTypes']) ?? [];
+        }
 
         return $map[$emailAddress] ?? null;
     }

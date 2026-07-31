@@ -148,6 +148,7 @@ class Installer
         $this->provisionApplicationName($config, $configWriter);
         $this->provisionGlobalSearchEntityList($config, $configWriter);
         $this->provisionPrimaNotaOpeningCashDefaults($config, $configWriter);
+        $this->provisionInboundEmailCaseTypes($config, $configWriter);
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -288,6 +289,31 @@ class Installer
         if ($config->get('primaNotaOpeningCashBalance') === null) {
             $configWriter->set('primaNotaOpeningCashBalance', 0.0);
         }
+    }
+
+    /**
+     * Keep Group Email Account → Case.type map in sync (incl. info@ → RichiestaGenerica).
+     */
+    private function provisionInboundEmailCaseTypes(Config $config, ConfigWriter $configWriter): void
+    {
+        $defaults = [
+            'sportello.digitale@safehouse.community' => 'SportelloDigitale',
+            'sportello.legale@safehouse.community' => 'SportelloLegale',
+            'info@safehouse.community' => 'RichiestaGenerica',
+        ];
+
+        /** @var array<string, mixed> $current */
+        $current = $config->get('inboundEmailCaseTypes') ?? [];
+        if (! is_array($current)) {
+            $current = [];
+        }
+
+        $merged = array_merge($defaults, $current);
+        foreach ($defaults as $email => $type) {
+            $merged[$email] = $type;
+        }
+
+        $configWriter->set('inboundEmailCaseTypes', $merged);
     }
 
     /**
