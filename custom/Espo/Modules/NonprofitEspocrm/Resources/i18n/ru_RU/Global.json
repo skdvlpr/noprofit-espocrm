@@ -24,7 +24,10 @@
     "navbarTabs": {
         "mainSections": "Главные разделы",
         "CRM": "Главные разделы",
-        "Rendicontazione": "Отчётность"
+        "Rendicontazione": "Отчётность",
+        "Contatti": "Контакты",
+        "ContattiVolontariDipendenti": "Волонтёры / Сотрудники",
+        "ContattiAssociati": "Ассоциаты"
     },
     "labels": {
         "Create VolunteerEmployee": "Создать новый",

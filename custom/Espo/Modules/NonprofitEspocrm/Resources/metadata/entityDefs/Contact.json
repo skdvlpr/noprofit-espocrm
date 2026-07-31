@@ -6,6 +6,8 @@
                 "",
                 "HelpSeeker",
                 "Colleague",
+                "Volunteer",
+                "Employee",
                 "MemberContact",
                 "AssociationRepresentative",
                 "Other"
@@ -41,12 +43,95 @@
             "validatorClassNameList": [
                 "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
             ]
+        },
+        "birthDate": {
+            "type": "date",
+            "isPersonalData": true
+        },
+        "isUser": {
+            "type": "bool",
+            "default": false,
+            "readOnly": true,
+            "tooltip": true
+        },
+        "linkedUser": {
+            "type": "link",
+            "view": "views/fields/user",
+            "tooltip": true
+        },
+        "personnelStatus": {
+            "type": "enum",
+            "options": ["Active", "Inactive"],
+            "default": "Active",
+            "displayAsLabel": true,
+            "labelType": "state",
+            "style": {
+                "Active": "success",
+                "Inactive": "danger"
+            }
+        },
+        "startDate": {
+            "type": "date"
+        },
+        "endDate": {
+            "type": "date"
+        },
+        "contractType": {
+            "type": "enum",
+            "options": ["Permanent", "FixedTerm", "Freelance", "Other"]
+        },
+        "weeklyHours": {
+            "type": "float"
+        },
+        "monthlyHours": {
+            "type": "float",
+            "readOnly": true,
+            "tooltip": true
+        },
+        "extra": {
+            "type": "text"
+        },
+        "birthPlace": {
+            "type": "varchar"
+        },
+        "joinDate": {
+            "type": "date"
+        },
+        "leaveDate": {
+            "type": "date"
+        },
+        "positionsHeld": {
+            "type": "text"
+        },
+        "notes": {
+            "type": "wysiwyg"
+        },
+        "migratedFromEntityType": {
+            "type": "varchar",
+            "maxLength": 64,
+            "readOnly": true,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true
+        },
+        "migratedFromEntityId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "readOnly": true,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true
         }
     },
     "links": {
         "relatedRecord": {
             "type": "belongsTo",
             "entity": "Account"
+        },
+        "linkedUser": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "linkedContacts"
         },
         "foodParcelRegistrations": {
             "type": "hasMany",
@@ -64,6 +149,17 @@
             "entity": "PrimaNota",
             "foreign": "beneficiaryParty",
             "audited": true
+        }
+    },
+    "indexes": {
+        "contactType": {
+            "columns": ["contactType", "deleted"]
+        },
+        "migratedFrom": {
+            "columns": ["migratedFromEntityType", "migratedFromEntityId", "deleted"]
+        },
+        "linkedUser": {
+            "columns": ["linkedUserId", "deleted"]
         }
     }
 }

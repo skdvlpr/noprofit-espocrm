@@ -1,6 +1,50 @@
 {
+    "fields": {
+        "contactType": "Тип контакта",
+        "relatedRecord": "Аккаунт",
+        "taxCode": "Код налогоплательщика",
+        "birthDate": "Дата рождения",
+        "isUser": "Пользователь",
+        "linkedUser": "Пользователь CRM",
+        "personnelStatus": "Статус",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "contractType": "Тип контракта",
+        "weeklyHours": "Часов в неделю",
+        "monthlyHours": "Часов в месяц",
+        "extra": "Дополнительно",
+        "birthPlace": "Место рождения",
+        "joinDate": "Дата вступления",
+        "leaveDate": "Дата выхода",
+        "positionsHeld": "Должности",
+        "notes": "Заметки"
+    },
     "links": {
         "relatedPayments": "Связанные платежи",
-        "relatedPaymentsAsBeneficiary": "Связанные платежи (бенефициар)"
+        "relatedPaymentsAsBeneficiary": "Связанные платежи (бенефициар)",
+        "linkedUser": "Пользователь CRM"
+    },
+    "options": {
+        "contactType": {
+            "HelpSeeker": "Нуждающийся",
+            "Colleague": "Коллега",
+            "Volunteer": "Волонтёр",
+            "Employee": "Сотрудник",
+            "MemberContact": "Ассоциат",
+            "AssociationRepresentative": "Представитель ассоциации",
+            "Other": "Другое"
+        },
+        "personnelStatus": {
+            "Active": "Активен",
+            "Inactive": "Неактивен"
+        }
+    },
+    "presetFilters": {
+        "volunteersEmployees": "Волонтёры / Сотрудники",
+        "associati": "Ассоциаты"
+    },
+    "tooltips": {
+        "isUser": "Да, если привязан пользователь CRM и/или портала.",
+        "linkedUser": "Обычный пользователь Espo (не портал), опционально."
     }
 }

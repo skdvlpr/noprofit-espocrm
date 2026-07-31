@@ -32,7 +32,10 @@
     "navbarTabs": {
         "mainSections": "Main Sections",
         "CRM": "Main Sections",
-        "Rendicontazione": "Reporting"
+        "Rendicontazione": "Reporting",
+        "Contatti": "Contacts",
+        "ContattiVolontariDipendenti": "Volunteers / Employees",
+        "ContattiAssociati": "Members"
     },
     "fields": {
         "csvIncludeTotals": "Include totals row",

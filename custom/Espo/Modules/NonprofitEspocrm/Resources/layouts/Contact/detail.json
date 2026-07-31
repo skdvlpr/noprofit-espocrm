@@ -1,13 +1,42 @@
 [
     {
-        "label": "",
+        "label": "Overview",
         "rows": [
             [{"name": "name"}, {"name": "contactType"}],
-            [{"name": "relatedRecord"}, false],
+            [{"name": "firstName"}, {"name": "lastName"}],
+            [{"name": "relatedRecord"}, {"name": "personnelStatus"}],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
-            [{"name": "taxCode"}, false],
+            [{"name": "taxCode"}, {"name": "birthDate"}],
             [{"name": "address"}, false],
             [{"name": "description", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "personnelVolunteerEmployee",
+        "label": "Volunteer / Employee",
+        "rows": [
+            [{"name": "startDate"}, {"name": "endDate"}],
+            [{"name": "contractType"}, {"name": "weeklyHours"}],
+            [{"name": "monthlyHours"}, false],
+            [{"name": "extra", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "personnelMember",
+        "label": "Member",
+        "rows": [
+            [{"name": "birthPlace"}, false],
+            [{"name": "joinDate"}, {"name": "leaveDate"}],
+            [{"name": "positionsHeld", "fullWidth": true}],
+            [{"name": "notes", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "userLink",
+        "label": "User link",
+        "rows": [
+            [{"name": "linkedUser"}, {"name": "isUser"}],
+            [{"name": "portalUser"}, false]
         ]
     }
 ]

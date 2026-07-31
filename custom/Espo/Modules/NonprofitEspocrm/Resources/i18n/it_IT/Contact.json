@@ -3,21 +3,58 @@
         "contactType": "Tipo contatto",
         "relatedRecord": "Account",
         "taxCode": "Codice Fiscale",
-        "opportunityRole": "Ruolo Fondo/Finanziamento"
+        "birthDate": "Data di nascita",
+        "opportunityRole": "Ruolo Fondo/Finanziamento",
+        "isUser": "È utente",
+        "linkedUser": "Utente CRM",
+        "personnelStatus": "Stato",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "contractType": "Tipo contratto",
+        "weeklyHours": "Ore settimanali",
+        "monthlyHours": "Ore mensili",
+        "extra": "Extra",
+        "birthPlace": "Luogo di nascita",
+        "joinDate": "Data di ingresso",
+        "leaveDate": "Data di uscita",
+        "positionsHeld": "Cariche ricoperte",
+        "notes": "Note"
     },
     "links": {
         "opportunities": "Fondi e Finanziamenti",
         "opportunitiesPrimary": "Fondi e Finanziamenti (Primaria)",
         "relatedPayments": "Pagamenti correlati",
-        "relatedPaymentsAsBeneficiary": "Pagamenti correlati (beneficiario)"
+        "relatedPaymentsAsBeneficiary": "Pagamenti correlati (beneficiario)",
+        "linkedUser": "Utente CRM"
     },
     "options": {
         "contactType": {
             "HelpSeeker": "Persona in difficoltà",
             "Colleague": "Collega",
+            "Volunteer": "Volontario",
+            "Employee": "Dipendente",
             "MemberContact": "Associato",
             "AssociationRepresentative": "Rappresentante associazione",
             "Other": "Altro"
+        },
+        "personnelStatus": {
+            "Active": "Attivo",
+            "Inactive": "Inattivo"
+        },
+        "contractType": {
+            "Permanent": "Indeterminato",
+            "FixedTerm": "Determinato",
+            "Freelance": "Freelance",
+            "Other": "Altro"
         }
+    },
+    "presetFilters": {
+        "volunteersEmployees": "Volontari / Dipendenti",
+        "associati": "Associati"
+    },
+    "tooltips": {
+        "isUser": "Vero se è collegato un utente CRM e/o un utente portale.",
+        "linkedUser": "Utente Espo regolare (non portale), opzionale. Indipendente dall'utente portale.",
+        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33)."
     }
 }

@@ -3,21 +3,58 @@
         "contactType": "Contact type",
         "relatedRecord": "Account",
         "taxCode": "Fiscal Code",
-        "opportunityRole": "Grant/funding role"
+        "birthDate": "Date of birth",
+        "opportunityRole": "Grant/funding role",
+        "isUser": "Is user",
+        "linkedUser": "CRM user",
+        "personnelStatus": "Status",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "contractType": "Contract type",
+        "weeklyHours": "Weekly hours",
+        "monthlyHours": "Monthly hours",
+        "extra": "Extra",
+        "birthPlace": "Birth place",
+        "joinDate": "Join date",
+        "leaveDate": "Leave date",
+        "positionsHeld": "Positions held",
+        "notes": "Notes"
     },
     "links": {
         "opportunities": "Grants & Funding",
         "opportunitiesPrimary": "Grants & Funding (Primary)",
         "relatedPayments": "Related payments",
-        "relatedPaymentsAsBeneficiary": "Related payments (beneficiary)"
+        "relatedPaymentsAsBeneficiary": "Related payments (beneficiary)",
+        "linkedUser": "CRM user"
     },
     "options": {
         "contactType": {
             "HelpSeeker": "Person seeking help",
             "Colleague": "Colleague",
+            "Volunteer": "Volunteer",
+            "Employee": "Employee",
             "MemberContact": "Member",
             "AssociationRepresentative": "Association representative",
             "Other": "Other"
+        },
+        "personnelStatus": {
+            "Active": "Active",
+            "Inactive": "Inactive"
+        },
+        "contractType": {
+            "Permanent": "Permanent",
+            "FixedTerm": "Fixed term",
+            "Freelance": "Freelance",
+            "Other": "Other"
         }
+    },
+    "presetFilters": {
+        "volunteersEmployees": "Volunteers / Employees",
+        "associati": "Members"
+    },
+    "tooltips": {
+        "isUser": "True when a CRM user and/or portal user is linked.",
+        "linkedUser": "Optional regular (non-portal) Espo user. Independent from portal user.",
+        "monthlyHours": "Approximate monthly hours (weekly × 4.33)."
     }
 }

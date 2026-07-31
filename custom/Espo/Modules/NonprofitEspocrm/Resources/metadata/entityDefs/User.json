@@ -1,0 +1,10 @@
+{
+    "links": {
+        "linkedContacts": {
+            "type": "hasMany",
+            "entity": "Contact",
+            "foreign": "linkedUser",
+            "layoutRelationshipsDisabled": true
+        }
+    }
+}

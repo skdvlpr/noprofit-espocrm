@@ -1,0 +1,6 @@
+{
+    "primaryFilterClassNameMap": {
+        "volunteersEmployees": "Espo\\Modules\\NonprofitEspocrm\\Classes\\Select\\Contact\\PrimaryFilters\\VolunteersEmployees",
+        "associati": "Espo\\Modules\\NonprofitEspocrm\\Classes\\Select\\Contact\\PrimaryFilters\\Associati"
+    }
+}

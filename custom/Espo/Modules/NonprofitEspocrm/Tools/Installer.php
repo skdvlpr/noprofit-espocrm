@@ -32,8 +32,7 @@ use Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisio
 class Installer
 {
     private const DOMAIN_ENTITIES = [
-        'VolunteerEmployee',
-        'Member',
+        // Legacy VE/Member kept in DB for rollback; hidden from navbar after Contact STI.
     ];
 
     private const REPORTING_ENTITIES = [
@@ -51,7 +50,11 @@ class Installer
         'FoodParcelRegistration',
     ];
 
-    private const ENTITIES_TO_HIDE = [];
+    /** Soft-hide after Contact STI migration (entities remain for rollback). */
+    private const ENTITIES_TO_HIDE_DEFAULT = [
+        'VolunteerEmployee',
+        'Member',
+    ];
 
     private const SUPPORT_DIVIDER_TEXT = '$Support';
 
@@ -61,21 +64,18 @@ class Installer
     private const LEAD_NAV_TAB = 'Lead';
 
     /**
-     * Canonical `$CRM` / Principali navbar order (Italian UI labels in parentheses).
-     *
-     * Lead → Contact (Contatti) → Account → Opportunity (F&F) → Member (Associati)
-     * → VolunteerEmployee (Volontari/Dipendenti).
+     * Canonical `$CRM` / Principali navbar order.
+     * Contact is replaced by Contatti group (All / Volunteers+Employees / Associati).
      *
      * @var string[]
      */
     private const CRM_NAV_ORDER = [
         'Lead',
-        'Contact',
         'Account',
         'Opportunity',
-        'Member',
-        'VolunteerEmployee',
     ];
+
+    private const CONTACTS_GROUP_TEXT = '$Contatti';
 
     private const SAFEHOUSE_THEMES = [
         'SafehouseAurora',
@@ -103,8 +103,18 @@ class Installer
     /** Navbar group label key — translated via Global.json → navbarTabs.Rendicontazione */
     private const REPORTING_GROUP_TEXT = '$Rendicontazione';
 
-    /** Reporting group follows VolunteerEmployee; Case is inserted before the group afterward. */
-    private const REPORTING_GROUP_ANCHOR_AFTER = 'VolunteerEmployee';
+    /** Reporting group follows Contatti/Opportunity; Case is inserted before the group afterward. */
+    private const REPORTING_GROUP_ANCHOR_AFTER = 'Opportunity';
+
+    /** @return string[] */
+    private static function entitiesToHide(): array
+    {
+        if (getenv('SAFEHOUSE_RESTORE_LEGACY_PARTY_TABS') === '1') {
+            return [];
+        }
+
+        return self::ENTITIES_TO_HIDE_DEFAULT;
+    }
 
     public function runPostInstall(Container $container): void
     {
@@ -120,7 +130,8 @@ class Installer
                 [self::LEAD_NAV_TAB],
                 self::DOMAIN_ENTITIES,
                 self::REPORTING_ENTITIES,
-                self::OTHER_TABS_TO_ENSURE
+                self::OTHER_TABS_TO_ENSURE,
+                ['Contact']
             ) as $item
         ) {
             if (!in_array($item, $tabList, true)) {
@@ -128,13 +139,14 @@ class Installer
             }
         }
 
-        $tabList = $this->removeEntitiesFromList($tabList, self::ENTITIES_TO_HIDE);
+        $tabList = $this->removeEntitiesFromList($tabList, self::entitiesToHide());
         $tabList = $this->reorderCrmNavbarBlock($tabList);
+        $tabList = $this->reorderContactsNavbarBlock($tabList);
         $tabList = $this->reorderReportingNavbarBlock($tabList);
         $tabList = $this->reorderCaseBeforeReportingGroup($tabList);
         $tabList = $this->reorderSupportNavbarBlock($tabList);
 
-        $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::ENTITIES_TO_HIDE);
+        $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::entitiesToHide());
 
         if (!in_array(self::LEAD_NAV_TAB, $quickCreateList, true)) {
             $quickCreateList[] = self::LEAD_NAV_TAB;
@@ -215,6 +227,98 @@ class Installer
         return array_merge(
             array_slice($without, 0, $insertIndex),
             $crmEntities,
+            array_slice($without, $insertIndex)
+        );
+    }
+
+    /**
+     * Contatti navbar group: All Contacts + Volunteers/Employees + Associati (URL primary filters).
+     * Removes bare Contact / legacy Contatti group before re-inserting.
+     *
+     * @param array<int, mixed> $tabList
+     * @return array<int, mixed>
+     */
+    private function reorderContactsNavbarBlock(array $tabList): array
+    {
+        $without = array_values(array_filter(
+            $tabList,
+            static function ($item): bool {
+                if ($item === 'Contact') {
+                    return false;
+                }
+
+                if (!is_object($item)) {
+                    return true;
+                }
+
+                $type = $item->type ?? null;
+                $text = $item->text ?? null;
+                $name = $item->name ?? null;
+
+                if ($type === 'group' && ($text === self::CONTACTS_GROUP_TEXT || $name === 'Contatti')) {
+                    return false;
+                }
+
+                // Drop previous URL filter tabs for Contact cohorts.
+                if ($type === 'url') {
+                    $url = (string) ($item->url ?? '');
+                    if (str_contains($url, '#Contact/list/primaryFilter=')) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        ));
+
+        $insertIndex = 0;
+
+        foreach ($without as $i => $item) {
+            if ($item === 'Lead') {
+                $insertIndex = $i + 1;
+                break;
+            }
+        }
+
+        if ($insertIndex === 0) {
+            foreach ($without as $i => $item) {
+                if (
+                    is_object($item)
+                    && ($item->type ?? null) === 'divider'
+                    && ($item->text ?? null) === self::CRM_DIVIDER_TEXT
+                ) {
+                    $insertIndex = $i + 1;
+                    break;
+                }
+            }
+        }
+
+        $group = (object) [
+            'type' => 'group',
+            'text' => self::CONTACTS_GROUP_TEXT,
+            'name' => 'Contatti',
+            'iconClass' => 'fas fa-id-badge',
+            'color' => '#5b9bd4',
+            'itemList' => [
+                'Contact',
+                (object) [
+                    'type' => 'url',
+                    'text' => '$ContattiVolontariDipendenti',
+                    'url' => '#Contact/list/primaryFilter=volunteersEmployees',
+                    'iconClass' => 'fas fa-hands-helping',
+                ],
+                (object) [
+                    'type' => 'url',
+                    'text' => '$ContattiAssociati',
+                    'url' => '#Contact/list/primaryFilter=associati',
+                    'iconClass' => 'fas fa-user-friends',
+                ],
+            ],
+        ];
+
+        return array_merge(
+            array_slice($without, 0, $insertIndex),
+            [$group],
             array_slice($without, $insertIndex)
         );
     }
@@ -380,13 +484,23 @@ class Installer
         }
 
         foreach ($tabList as $i => $item) {
-            if ($item === 'VolunteerEmployee') {
+            if (
+                is_object($item)
+                && ($item->type ?? null) === 'group'
+                && (($item->text ?? null) === self::CONTACTS_GROUP_TEXT || ($item->name ?? null) === 'Contatti')
+            ) {
                 return $i + 1;
             }
         }
 
         foreach ($tabList as $i => $item) {
-            if ($item === 'Member') {
+            if ($item === 'Opportunity') {
+                return $i + 1;
+            }
+        }
+
+        foreach ($tabList as $i => $item) {
+            if ($item === 'Account') {
                 return $i + 1;
             }
         }

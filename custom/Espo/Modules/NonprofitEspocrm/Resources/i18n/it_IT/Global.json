@@ -31,11 +31,14 @@
         "PrimaNota": "Prima nota",
         "FoodParcelRegistration": "Registrazioni pacco spesa"
     },
-    "navbarTabs": {
-        "mainSections": "Sezioni Principali",
-        "CRM": "Principali",
-        "Rendicontazione": "Rendicontazione"
-    },
+        "navbarTabs": {
+            "mainSections": "Sezioni Principali",
+            "CRM": "Principali",
+            "Rendicontazione": "Rendicontazione",
+            "Contatti": "Contatti",
+            "ContattiVolontariDipendenti": "Volontari / Dipendenti",
+            "ContattiAssociati": "Associati"
+        },
     "fields": {
         "csvIncludeTotals": "Includi riga Totali",
         "xlsxIncludeTotals": "Includi riga Totali"

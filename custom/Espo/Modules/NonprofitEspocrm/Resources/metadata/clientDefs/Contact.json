@@ -1,12 +1,221 @@
 {
     "color": "#5b9bd4",
+    "iconClass": "fas fa-id-badge",
     "styleMap": {
         "contactType": {
             "HelpSeeker": "primary",
             "Colleague": "info",
+            "Volunteer": "success",
+            "Employee": "warning",
             "MemberContact": "success",
             "AssociationRepresentative": "warning",
             "Other": "default"
+        },
+        "personnelStatus": {
+            "Active": "success",
+            "Inactive": "danger"
+        }
+    },
+    "filterList": [
+        "portalUsers",
+        {
+            "name": "volunteersEmployees"
+        },
+        {
+            "name": "associati"
+        }
+    ],
+    "dynamicLogic": {
+        "panels": {
+            "personnelVolunteerEmployee": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "personnelMember": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            }
+        },
+        "fields": {
+            "personnelStatus": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee", "MemberContact"]
+                        }
+                    ]
+                }
+            },
+            "startDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "endDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "contractType": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "Employee"
+                        }
+                    ]
+                }
+            },
+            "weeklyHours": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "monthlyHours": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "extra": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "birthPlace": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "joinDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "leaveDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "positionsHeld": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "notes": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "taxCode": {
+                "required": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "MemberContact"
+                        }
+                    ]
+                }
+            },
+            "firstName": {
+                "required": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee", "MemberContact"]
+                        }
+                    ]
+                }
+            },
+            "lastName": {
+                "required": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee", "MemberContact"]
+                        }
+                    ]
+                }
+            }
         }
     },
     "relationshipPanels": {

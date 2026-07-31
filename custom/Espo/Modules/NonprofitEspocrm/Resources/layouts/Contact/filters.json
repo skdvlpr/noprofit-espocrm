@@ -1,16 +1,14 @@
 [
     "contactType",
+    "personnelStatus",
     "relatedRecord",
-    "assignedUser",
-    "teams",
-    "createdAt",
-    "createdBy",
-    "modifiedAt",
-    "streamUpdatedAt",
-    "address",
     "emailAddress",
     "phoneNumber",
-    "title",
-    "targetLists",
-    "campaign"
+    "taxCode",
+    "isUser",
+    "linkedUser",
+    "startDate",
+    "endDate",
+    "joinDate",
+    "leaveDate"
 ]

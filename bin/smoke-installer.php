@@ -11,8 +11,8 @@ require __DIR__ . '/lib/refuse-production.php';
  * Asserts after the run:
  *   - `Case` is present in `tabList` (Principali, before `$Rendicontazione`) and `quickCreateList`;
  *   - `Lead` is present in `tabList` and `quickCreateList`;
- *   - all Safehouse domain entities (`VolunteerEmployee`, `Member`) are present
- *     in `tabList`;
+ *   - Contatti group tab (`type: group`) contains Contact + URL primary filters;
+ *   - legacy `VolunteerEmployee` / `Member` tabs are hidden (entities kept for rollback);
  *   - `MealCount` lives in `$Rendicontazione` group tab (`type: group`), not as
  *     a top-level tab; `Opportunity` (F&F) is NOT in that group;
  *   - canonical roles + Administration team exist;
@@ -117,17 +117,19 @@ $extractSupportTabs = static function (array $tabList): array {
     return $tabs;
 };
 
-$expectedCrmOrder = [
-    'Lead',
-    'Contact',
-    'Account',
-    'Opportunity',
-    'Member',
-    'VolunteerEmployee',
-    'Case',
-    'Intervention',
-    'FoodParcelRegistration',
-];
+$findContactsGroup = static function (array $tabList): ?object {
+    foreach ($tabList as $item) {
+        if (
+            is_object($item)
+            && ($item->type ?? null) === 'group'
+            && (($item->text ?? null) === '$Contatti' || ($item->name ?? null) === 'Contatti')
+        ) {
+            return $item;
+        }
+    }
+
+    return null;
+};
 
 $expectedSupportOrder = ['KnowledgeBaseArticle'];
 
@@ -170,13 +172,32 @@ $report('Case absent from Support block', !in_array('Case', $supportTabs, true))
 
 $crmTabs = $extractCrmTabs($tabList);
 $report('Lead is first tab in $CRM block', ($crmTabs[0] ?? null) === 'Lead');
-$report(
-    'CRM block tab order canonical',
-    $crmTabs === $expectedCrmOrder,
-    'actual=' . implode(' → ', $crmTabs)
-);
 
-foreach (['VolunteerEmployee', 'Member', 'Account', 'Opportunity', 'Document'] as $must) {
+$contactsGroup = $findContactsGroup($tabList);
+$contactsItems = $contactsGroup !== null ? ($contactsGroup->itemList ?? []) : [];
+$contactsItemStrings = array_values(array_filter($contactsItems, 'is_string'));
+$contactsUrlTexts = [];
+foreach ($contactsItems as $ci) {
+    if (is_object($ci) && ($ci->type ?? null) === 'url') {
+        $contactsUrlTexts[] = (string) ($ci->text ?? '');
+    }
+}
+
+$report('$Contatti group tab present (type=group)', $contactsGroup !== null);
+$report('Contact in Contatti group itemList', in_array('Contact', $contactsItemStrings, true));
+$report(
+    'Contatti group has Volunteers/Employees URL filter',
+    in_array('$ContattiVolontariDipendenti', $contactsUrlTexts, true),
+    'urls=' . implode(',', $contactsUrlTexts)
+);
+$report(
+    'Contatti group has Associati URL filter',
+    in_array('$ContattiAssociati', $contactsUrlTexts, true)
+);
+$report('VolunteerEmployee hidden from tabList', !in_array('VolunteerEmployee', $tabStrings, true));
+$report('Member hidden from tabList', !in_array('Member', $tabStrings, true));
+
+foreach (['Account', 'Opportunity', 'Document'] as $must) {
     $report("$must present in tabList", in_array($must, $tabStrings, true));
 }
 
@@ -209,11 +230,15 @@ $report(
     'actual=' . json_encode($globalSearch)
 );
 
-$volunteerIndex = null;
+$contactsGroupIndex = null;
 $groupIndex = null;
 foreach ($tabList as $i => $item) {
-    if ($item === 'VolunteerEmployee') {
-        $volunteerIndex = $i;
+    if (
+        is_object($item)
+        && ($item->type ?? null) === 'group'
+        && (($item->text ?? null) === '$Contatti' || ($item->name ?? null) === 'Contatti')
+    ) {
+        $contactsGroupIndex = $i;
     }
     if (
         is_object($item)
@@ -224,10 +249,10 @@ foreach ($tabList as $i => $item) {
     }
 }
 $report(
-    'VolunteerEmployee tab before Rendicontazione group',
-    $volunteerIndex !== null
+    'Contatti group before Rendicontazione group',
+    $contactsGroupIndex !== null
         && $groupIndex !== null
-        && $volunteerIndex < $groupIndex
+        && $contactsGroupIndex < $groupIndex
 );
 
 $caseIndex = array_search('Case', $tabList, true);
