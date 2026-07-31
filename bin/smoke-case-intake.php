@@ -15,6 +15,7 @@ include __DIR__ . '/../bootstrap.php';
 use Espo\Core\Application;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
+use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\ORM\EntityManager;
 
 $app = new Application();
@@ -234,6 +235,56 @@ if ($contact === null || ! $contact->hasId()) {
         }
     } catch (\Throwable $e) {
         $report('Manual AssistanceRequest mints sh- websiteReferenceId', false, $e->getMessage());
+    }
+
+    // Re-save: empty ID → mint; existing ID → never overwrite.
+    $caseResave = $entityManager->getRDBRepository('Case')->getNew();
+    $caseResave->set([
+        'name' => 'Smoke resave id ' . bin2hex(random_bytes(4)),
+        'type' => 'AssistanceRequest',
+        'parentType' => 'Contact',
+        'parentId' => $contact->getId(),
+    ]);
+
+    try {
+        $entityManager->saveEntity($caseResave);
+        $originalRef = (string) ($caseResave->get('websiteReferenceId') ?? '');
+
+        $caseResave->set('websiteReferenceId', 'sh-should-not-overwrite');
+        $caseResave->set('description', 'touch protect');
+        $entityManager->saveEntity($caseResave);
+        $protected = $entityManager->getEntityById('Case', (string) $caseResave->getId());
+        $protectedRef = (string) ($protected?->get('websiteReferenceId') ?? '');
+        $report(
+            'Re-save never overwrites existing websiteReferenceId',
+            $protectedRef === $originalRef && $originalRef !== '',
+            "original={$originalRef} after={$protectedRef}"
+        );
+
+        $protected->set('websiteReferenceId', null);
+        $entityManager->saveEntity($protected, [SaveOption::SKIP_ALL => true]);
+        $cleared = $entityManager->getEntityById('Case', (string) $caseResave->getId());
+        $clearedRef = trim((string) ($cleared?->get('websiteReferenceId') ?? ''));
+        $report(
+            'SKIP_ALL can clear websiteReferenceId for remint fixture',
+            $clearedRef === '',
+            $clearedRef
+        );
+
+        $cleared->set('description', 'touch remint');
+        $entityManager->saveEntity($cleared);
+        $reminted = (string) ($cleared->get('websiteReferenceId') ?? '');
+        $report(
+            'Re-save mints websiteReferenceId when empty',
+            str_starts_with($reminted, 'sh-') && $reminted !== $originalRef,
+            $reminted
+        );
+
+        if ($caseResave->hasId()) {
+            $entityManager->removeEntity($caseResave);
+        }
+    } catch (\Throwable $e) {
+        $report('Re-save websiteReferenceId mint/protect', false, $e->getMessage());
     }
 
     // Simulate inbound Case from info@ group mailbox (type resolved → RichiestaGenerica → rg-).

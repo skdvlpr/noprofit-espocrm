@@ -9,10 +9,11 @@ use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Mint Case.websiteReferenceId once on create (CRM-owned, never overwritten).
+ * Ensure Case.websiteReferenceId exists (CRM-owned).
  *
+ * - Mint only when empty (create OR re-save of legacy rows without ID).
+ * - Never overwrite a non-empty stored ID (restore fetched value if changed).
  * Prefix from tipo: sd / sl / rg / sh (default for all other types).
- * Applies to manual create and inbound email Cases.
  */
 class AssignWebsiteReferenceId implements BeforeSave
 {
@@ -24,8 +25,17 @@ class AssignWebsiteReferenceId implements BeforeSave
             return;
         }
 
-        if (!$entity->isNew()) {
-            return;
+        // Protect existing IDs: never replace / clear a previously stored value.
+        if (!$entity->isNew() && $entity->hasFetched('websiteReferenceId')) {
+            $fetched = trim((string) ($entity->getFetched('websiteReferenceId') ?? ''));
+
+            if ($fetched !== '') {
+                if ((string) ($entity->get('websiteReferenceId') ?? '') !== $fetched) {
+                    $entity->set('websiteReferenceId', $fetched);
+                }
+
+                return;
+            }
         }
 
         $existing = trim((string) ($entity->get('websiteReferenceId') ?? ''));
@@ -35,8 +45,7 @@ class AssignWebsiteReferenceId implements BeforeSave
         }
 
         $type = (string) ($entity->get('type') ?? '');
-        $minted = WebsiteReference::mintForType($type);
-        $entity->set('websiteReferenceId', $minted);
+        $entity->set('websiteReferenceId', WebsiteReference::mintForType($type));
 
         if (!$entity->get('sportelloDisplayName')) {
             $label = match ($type) {
