@@ -4,5 +4,8 @@
     },
     "labels": {
         "Scheduler": "Планировщик"
+    },
+    "messages": {
+        "schedulerNeedDatesAndPeople": "Укажите дату/время начала и конца (и назначенного пользователя или collaborators), чтобы увидеть timeline."
     }
 }

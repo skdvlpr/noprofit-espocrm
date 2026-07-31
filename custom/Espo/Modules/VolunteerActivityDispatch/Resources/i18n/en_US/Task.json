@@ -4,5 +4,8 @@
     },
     "labels": {
         "Scheduler": "Scheduler"
+    },
+    "messages": {
+        "schedulerNeedDatesAndPeople": "Set start and end date/time (and assigned user or collaborators) to show the planner timeline."
     }
 }

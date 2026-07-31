@@ -1,5 +1,18 @@
 {
     "fields": {
+        "dateStart": {
+            "type": "datetimeOptional",
+            "view": "crm:views/meeting/fields/date-start",
+            "before": "dateEnd",
+            "default": "javascript: return this.dateTime.getNow(15);",
+            "audited": true
+        },
+        "dateEnd": {
+            "type": "datetimeOptional",
+            "view": "crm:views/meeting/fields/date-end",
+            "after": "dateStart",
+            "audited": true
+        },
         "duration": {
             "type": "duration",
             "start": "dateStart",
