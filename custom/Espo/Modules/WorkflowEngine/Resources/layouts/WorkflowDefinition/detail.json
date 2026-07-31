@@ -1,0 +1,19 @@
+[
+    {
+        "name": "Definition",
+        "label": "Definition",
+        "rows": [
+            [{"name": "name"}, {"name": "isActive"}],
+            [{"name": "targetEntityType"}, {"name": "triggerType"}],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    },
+    {
+        "name": "Audit",
+        "label": "Audit",
+        "rows": [
+            [{"name": "createdAt"}, {"name": "createdBy"}],
+            [{"name": "modifiedAt"}, {"name": "modifiedBy"}]
+        ]
+    }
+]

@@ -1,0 +1,5 @@
+[
+    {"name": "isActive"},
+    {"name": "targetEntityType"},
+    {"name": "triggerType"}
+]

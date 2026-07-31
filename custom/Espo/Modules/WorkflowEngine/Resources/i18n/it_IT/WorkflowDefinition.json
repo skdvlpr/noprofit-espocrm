@@ -1,0 +1,25 @@
+{
+    "labels": {
+        "WorkflowDefinition": "Definizione Workflow",
+        "WorkflowDefinitionPlural": "Definizioni Workflow",
+        "Definition": "Definizione",
+        "Audit": "Audit"
+    },
+    "fields": {
+        "name": "Nome",
+        "isActive": "Attivo",
+        "targetEntityType": "Tipo di entità destinataria",
+        "triggerType": "Trigger",
+        "description": "Descrizione",
+        "createdAt": "Creato il",
+        "createdBy": "Creato da",
+        "modifiedAt": "Modificato il",
+        "modifiedBy": "Modificato da"
+    },
+    "options": {
+        "triggerType": {
+            "afterCreate": "Dopo la creazione",
+            "afterUpdate": "Dopo l'aggiornamento"
+        }
+    }
+}
