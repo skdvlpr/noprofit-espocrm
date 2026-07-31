@@ -1,0 +1,6 @@
+[
+    {"name": "name", "width": 30},
+    {"name": "dateStart"},
+    {"name": "category"},
+    {"name": "place"}
+]

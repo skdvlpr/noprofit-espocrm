@@ -1,0 +1,47 @@
+{
+    "fields": {
+        "name": "Nome",
+        "weekStart": "Inizio settimana",
+        "status": "Stato",
+        "description": "Descrizione",
+        "inviteeUsers": "Invitati",
+        "inviteTeams": "Team invitati",
+        "publishedAt": "Pubblicato il",
+        "assignedUser": "Assegnato a",
+        "teams": "Team",
+        "createdAt": "Creato il",
+        "modifiedAt": "Modificato il",
+        "createdBy": "Creato da",
+        "modifiedBy": "Modificato da"
+    },
+    "links": {
+        "slots": "Slot",
+        "tasks": "Attività",
+        "inviteeUsers": "Invitati",
+        "inviteTeams": "Team invitati",
+        "assignedUser": "Assegnato a",
+        "teams": "Team"
+    },
+    "labels": {
+        "ActivityOffer": "Offerta attività",
+        "Create ActivityOffer": "Crea offerta attività",
+        "Publish week": "Pubblica settimana",
+        "Slots": "Slot",
+        "Tasks": "Attività"
+    },
+    "options": {
+        "status": {
+            "Draft": "Bozza",
+            "Published": "Pubblicata",
+            "Closed": "Chiusa"
+        }
+    },
+    "tooltips": {
+        "inviteeUsers": "Utenti che ricevono l'invito Accetta/Rifiuta alla pubblicazione.",
+        "inviteTeams": "Tutti i membri attivi di questi team vengono invitati (uniti agli Invitati)."
+    },
+    "messages": {
+        "publishSuccess": "Settimana pubblicata: {taskCount} attività, {inviteCount} inviti, {notifyCount} notifiche.",
+        "publishConfirm": "Pubblicare questa settimana? Verranno create attività e inviti per tutti gli invitati."
+    }
+}

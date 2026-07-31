@@ -1,9 +1,18 @@
 {
     "fields": {
-        "duration": "Duration"
+        "duration": "Duration",
+        "activityOffer": "Activity offer",
+        "activityOfferSlot": "Activity slot",
+        "myInviteStatus": "My invite status"
+    },
+    "links": {
+        "activityOffer": "Activity offer",
+        "activityOfferSlot": "Activity slot",
+        "activityInvites": "Invites"
     },
     "labels": {
-        "Scheduler": "Scheduler"
+        "Scheduler": "Scheduler",
+        "Invites": "Invites"
     },
     "messages": {
         "schedulerNeedDatesAndPeople": "Set start and end date/time (and assigned user or collaborators) to show the planner timeline."

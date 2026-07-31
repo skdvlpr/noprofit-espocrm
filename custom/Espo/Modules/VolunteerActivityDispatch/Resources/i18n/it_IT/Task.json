@@ -1,9 +1,18 @@
 {
     "fields": {
-        "duration": "Durata"
+        "duration": "Durata",
+        "activityOffer": "Offerta attività",
+        "activityOfferSlot": "Slot attività",
+        "myInviteStatus": "Stato invito"
+    },
+    "links": {
+        "activityOffer": "Offerta attività",
+        "activityOfferSlot": "Slot attività",
+        "activityInvites": "Inviti"
     },
     "labels": {
-        "Scheduler": "Pianificatore"
+        "Scheduler": "Pianificatore",
+        "Invites": "Inviti"
     },
     "messages": {
         "schedulerNeedDatesAndPeople": "Imposta data/ora di inizio e fine (e utente assegnato o collaboratori) per vedere la timeline del pianificatore."

@@ -1,0 +1,47 @@
+{
+    "fields": {
+        "name": "Name",
+        "weekStart": "Week start",
+        "status": "Status",
+        "description": "Description",
+        "inviteeUsers": "Invitees",
+        "inviteTeams": "Invite teams",
+        "publishedAt": "Published at",
+        "assignedUser": "Assigned User",
+        "teams": "Teams",
+        "createdAt": "Created At",
+        "modifiedAt": "Modified At",
+        "createdBy": "Created By",
+        "modifiedBy": "Modified By"
+    },
+    "links": {
+        "slots": "Slots",
+        "tasks": "Tasks",
+        "inviteeUsers": "Invitees",
+        "inviteTeams": "Invite teams",
+        "assignedUser": "Assigned User",
+        "teams": "Teams"
+    },
+    "labels": {
+        "ActivityOffer": "Activity Offer",
+        "Create ActivityOffer": "Create Activity Offer",
+        "Publish week": "Publish week",
+        "Slots": "Slots",
+        "Tasks": "Tasks"
+    },
+    "options": {
+        "status": {
+            "Draft": "Draft",
+            "Published": "Published",
+            "Closed": "Closed"
+        }
+    },
+    "tooltips": {
+        "inviteeUsers": "Users who receive Accept/Decline invites when the week is published.",
+        "inviteTeams": "All active members of these teams are invited (merged with Invitees)."
+    },
+    "messages": {
+        "publishSuccess": "Week published: {taskCount} tasks, {inviteCount} invites, {notifyCount} notifications.",
+        "publishConfirm": "Publish this week? Tasks and invites will be created for all invitees."
+    }
+}

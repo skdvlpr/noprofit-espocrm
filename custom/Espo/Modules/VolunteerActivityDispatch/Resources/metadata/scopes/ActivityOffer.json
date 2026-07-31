@@ -1,0 +1,15 @@
+{
+    "entity": true,
+    "type": "BasePlus",
+    "module": "VolunteerActivityDispatch",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete", "stream"],
+    "stream": true,
+    "importable": false,
+    "customizable": true,
+    "color": "#e67e22",
+    "iconClass": "fas fa-calendar-week"
+}

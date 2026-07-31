@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "weekStart"},
+    {"name": "status"},
+    {"name": "publishedAt"},
+    {"name": "assignedUser"}
+]

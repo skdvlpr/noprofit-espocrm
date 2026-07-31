@@ -1,0 +1,36 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-calendar-week",
+    "color": "#e67e22",
+    "boolFilterList": ["onlyMy"],
+    "filterList": [
+        {"name": "draft"},
+        {"name": "published"}
+    ],
+    "bottomPanels": {
+        "detail": [
+            {
+                "name": "slots",
+                "label": "Slots",
+                "view": "views/record/panels/relationship",
+                "order": 1
+            },
+            {
+                "name": "tasks",
+                "label": "Tasks",
+                "view": "views/record/panels/relationship",
+                "order": 2
+            }
+        ]
+    },
+    "detailActionList": [
+        {
+            "name": "publish",
+            "label": "Publish week",
+            "handler": "volunteer-activity-dispatch:handlers/activity-offer/publish",
+            "actionFunction": "publish",
+            "acl": "edit",
+            "checkVisibilityFunction": "isPublishVisible"
+        }
+    ]
+}

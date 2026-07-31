@@ -1,0 +1,9 @@
+{
+    "ownershipCheckerClassName": "Espo\\Modules\\VolunteerActivityDispatch\\Classes\\Acl\\ActivityInvite\\OwnershipChecker",
+    "actionList": ["read", "create", "edit", "delete"],
+    "levelList": ["all", "team", "own", "no"],
+    "read": "own",
+    "create": "yes",
+    "edit": "own",
+    "delete": "no"
+}

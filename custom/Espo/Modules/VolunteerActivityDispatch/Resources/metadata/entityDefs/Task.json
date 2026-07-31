@@ -28,6 +28,43 @@
                     ["TIMESTAMPDIFF_SECOND:(dateStart, dateEnd)", "{direction}"]
                 ]
             }
+        },
+        "activityOffer": {
+            "type": "link",
+            "readOnly": true
+        },
+        "activityOfferSlot": {
+            "type": "link",
+            "readOnly": true
+        },
+        "myInviteStatus": {
+            "type": "enum",
+            "options": ["", "Pending", "Accepted", "Declined"],
+            "notStorable": true,
+            "readOnly": true,
+            "displayAsLabel": true,
+            "style": {
+                "Pending": "warning",
+                "Accepted": "success",
+                "Declined": "danger"
+            }
+        }
+    },
+    "links": {
+        "activityOffer": {
+            "type": "belongsTo",
+            "entity": "ActivityOffer",
+            "foreign": "tasks"
+        },
+        "activityOfferSlot": {
+            "type": "belongsTo",
+            "entity": "ActivityOfferSlot",
+            "foreign": "task"
+        },
+        "activityInvites": {
+            "type": "hasMany",
+            "entity": "ActivityInvite",
+            "foreign": "task"
         }
     }
 }

@@ -1,0 +1,32 @@
+{
+    "fields": {
+        "name": "Nome",
+        "task": "Attività",
+        "user": "Utente",
+        "status": "Stato",
+        "respondedAt": "Risposto il",
+        "activityOffer": "Offerta attività"
+    },
+    "links": {
+        "task": "Attività",
+        "user": "Utente",
+        "activityOffer": "Offerta attività"
+    },
+    "labels": {
+        "ActivityInvite": "Invito attività",
+        "Create ActivityInvite": "Crea invito",
+        "Accept": "Accetta",
+        "Decline": "Rifiuta"
+    },
+    "options": {
+        "status": {
+            "Pending": "In attesa",
+            "Accepted": "Accettato",
+            "Declined": "Rifiutato"
+        }
+    },
+    "messages": {
+        "acceptSuccess": "Invito accettato.",
+        "declineSuccess": "Invito rifiutato."
+    }
+}

@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (name == null || name == '') {\n    name = string\\concatenate(category, ' · ', datetime\\format(dateStart));\n}\n"
+}

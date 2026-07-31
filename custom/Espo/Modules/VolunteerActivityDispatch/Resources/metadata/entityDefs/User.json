@@ -1,0 +1,11 @@
+{
+    "links": {
+        "activityOffersAsInvitee": {
+            "type": "hasMany",
+            "entity": "ActivityOffer",
+            "foreign": "inviteeUsers",
+            "relationName": "activityOfferInviteeUser",
+            "layoutRelationshipsDisabled": true
+        }
+    }
+}

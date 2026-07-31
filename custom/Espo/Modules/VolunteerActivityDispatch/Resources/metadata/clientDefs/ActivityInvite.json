@@ -1,0 +1,21 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-user-check",
+    "color": "#27ae60",
+    "detailActionList": [
+        {
+            "name": "accept",
+            "label": "Accept",
+            "handler": "volunteer-activity-dispatch:handlers/activity-invite/respond",
+            "actionFunction": "accept",
+            "checkVisibilityFunction": "isPendingForMe"
+        },
+        {
+            "name": "decline",
+            "label": "Decline",
+            "handler": "volunteer-activity-dispatch:handlers/activity-invite/respond",
+            "actionFunction": "decline",
+            "checkVisibilityFunction": "isPendingForMe"
+        }
+    ]
+}

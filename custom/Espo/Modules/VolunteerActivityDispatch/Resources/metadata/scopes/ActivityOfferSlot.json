@@ -1,0 +1,15 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "VolunteerActivityDispatch",
+    "object": true,
+    "layouts": true,
+    "tab": false,
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete"],
+    "stream": false,
+    "importable": false,
+    "customizable": true,
+    "color": "#f39c12",
+    "iconClass": "fas fa-clock"
+}

@@ -1,0 +1,5 @@
+{
+    "accessControlFilterClassNameMap": {
+        "onlyOwn": "Espo\\Modules\\VolunteerActivityDispatch\\Classes\\Select\\ActivityInvite\\AccessControlFilters\\OnlyOwn"
+    }
+}

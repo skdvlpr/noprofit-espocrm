@@ -1,0 +1,43 @@
+{
+    "fields": {
+        "name": "Name",
+        "activityOffer": "Activity offer",
+        "dateStart": "Start",
+        "dateEnd": "End",
+        "duration": "Duration",
+        "category": "Category",
+        "place": "Place",
+        "task": "Task",
+        "sortOrder": "Sort order"
+    },
+    "links": {
+        "activityOffer": "Activity offer",
+        "task": "Task"
+    },
+    "labels": {
+        "ActivityOfferSlot": "Activity Slot",
+        "Create ActivityOfferSlot": "Create Slot"
+    },
+    "options": {
+        "category": {
+            "MealPreparation": "Meal preparation",
+            "MealDistribution": "Meal distribution",
+            "Administrative": "Administrative",
+            "LegalDesk": "Legal desk",
+            "DigitalDesk": "Digital desk",
+            "Reception": "Reception",
+            "ListeningDesk": "Listening desk",
+            "MarketCollection": "Market collection",
+            "Cleaning": "Cleaning",
+            "NightReceptionManagement": "Night reception management",
+            "ProjectDevelopment": "Project development",
+            "GrantsAndFundingManagement": "Grants & funding management",
+            "Fundraising": "Fundraising",
+            "EventOrganization": "Event organization",
+            "Secretariat": "Secretariat",
+            "ServicesAndSupport": "Services & support",
+            "Activities": "Activities",
+            "OnCallAvailability": "On-call availability"
+        }
+    }
+}

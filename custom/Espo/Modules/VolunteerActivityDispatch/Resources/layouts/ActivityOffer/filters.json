@@ -1,0 +1,7 @@
+[
+    {"name": "weekStart"},
+    {"name": "status"},
+    {"name": "assignedUser"},
+    {"name": "teams"},
+    {"name": "createdAt"}
+]
