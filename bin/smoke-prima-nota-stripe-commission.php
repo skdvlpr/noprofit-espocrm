@@ -186,17 +186,35 @@ $ok(
     'paymentStatus Disputed style danger',
     $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'paymentStatus', 'style', 'Disputed']) === 'danger'
 );
+$statsProviderSrc = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php'
+);
 $ok(
-    'PrimaNota stats income filter Inviato-only',
-    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php')
-        && str_contains(
-            (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php'),
-            "'paymentStatus' => 'Inviato'"
-        )
-        && ! str_contains(
-            (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/PrimaNotaStatsProvider.php'),
-            "'paymentStatus' => 'Paid'"
-        )
+    'PrimaNota stats income filter counts Inviato + legacy Paid/PaidOut',
+    str_contains($statsProviderSrc, "'paymentStatus' => 'Inviato'")
+        && str_contains($statsProviderSrc, "'paymentStatus' => 'Paid'")
+        && str_contains($statsProviderSrc, "'paymentStatus' => 'PaidOut'")
+);
+$normalizeStatusHookPath = __DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/NormalizeStripePaymentStatusOnCreate.php';
+$ok(
+    'Stripe create normalizes paymentStatus to Planned until payout',
+    is_file($normalizeStatusHookPath)
+        && str_contains((string) file_get_contents($normalizeStatusHookPath), "set('paymentStatus', 'Planned')")
+);
+$legacyMigratorPath = __DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/PrimaNota/PaymentStatusLegacyMigrator.php';
+$ok(
+    'Paid/PaidOut → Inviato legacy migrator exists',
+    is_file($legacyMigratorPath)
+        && str_contains((string) file_get_contents($legacyMigratorPath), "set('paymentStatus', 'Inviato')")
+);
+$installerSrc = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/Installer.php'
+);
+$ok(
+    'Installer runs Paid→Inviato legacy migrator',
+    str_contains($installerSrc, 'PaymentStatusLegacyMigrator')
 );
 $ok(
     'PrimaNota stats income filter Paid-only helper',
@@ -420,6 +438,32 @@ $stripe->set([
 $em->saveEntity($stripe, [SaveOption::SKIP_ALL => true]);
 $created[] = $stripe;
 $ok('Stripe create via SKIP_ALL (ingest) allowed', $stripe->getId() !== null);
+
+// Hook runs on normal API create (not SKIP_ALL). Exercise it directly: Espo
+// applies entityDefs default Inviato when paymentStatus is omitted.
+$normalizeHook = new \Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota\NormalizeStripePaymentStatusOnCreate();
+$pendingStripe = $em->getNewEntity('PrimaNota');
+$pendingStripe->set([
+    'donationPaymentProvider' => 'Stripe',
+    'paymentStatus' => 'Inviato',
+]);
+$emptySaveOptions = \Espo\ORM\Repository\Option\SaveOptions::fromAssoc([]);
+$normalizeHook->beforeSave($pendingStripe, $emptySaveOptions);
+$ok(
+    'Stripe create without payout normalizes Inviato default → Planned',
+    $pendingStripe->get('paymentStatus') === 'Planned'
+);
+$paidOutStripe = $em->getNewEntity('PrimaNota');
+$paidOutStripe->set([
+    'donationPaymentProvider' => 'Stripe',
+    'paymentStatus' => 'Inviato',
+    'stripePayoutId' => 'po_smoke_payout',
+]);
+$normalizeHook->beforeSave($paidOutStripe, $emptySaveOptions);
+$ok(
+    'Stripe create with payout id keeps Inviato',
+    $paidOutStripe->get('paymentStatus') === 'Inviato'
+);
 
 $platformChangeBlocked = false;
 try {
