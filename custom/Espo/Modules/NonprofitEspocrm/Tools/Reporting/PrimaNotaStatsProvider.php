@@ -21,8 +21,13 @@ class PrimaNotaStatsProvider
     public const CONFIG_OPENING_CASH_AS_OF = 'primaNotaOpeningCashAsOf';
 
     /**
-     * Income / expense totals count only Inviato rows (plus legacy null status).
-     * Cancelled / Refunded / Disputed / Problematic / Planned are excluded.
+     * Income / expense totals count only banked / sent rows.
+     *
+     * Counted: Inviato, legacy Paid/PaidOut (pre-rename DB values), null.
+     * Excluded: Planned, Cancelled, Refunded, Disputed, Problematic.
+     *
+     * Legacy Paid/PaidOut must stay counted until rows are migrated — deploy
+     * can land before AfterInstall / bin migration runs (rsync path).
      *
      * @return array<string, mixed>
      */
@@ -31,6 +36,9 @@ class PrimaNotaStatsProvider
         return [
             'OR' => [
                 ['paymentStatus' => 'Inviato'],
+                // Legacy enum values from before Paid → Inviato rename.
+                ['paymentStatus' => 'Paid'],
+                ['paymentStatus' => 'PaidOut'],
                 ['paymentStatus' => null],
             ],
         ];

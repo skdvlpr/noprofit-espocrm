@@ -8,6 +8,8 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisioner;
+use Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\PaymentStatusLegacyMigrator;
+use Espo\ORM\EntityManager;
 
 /**
  * Shared post-install / provisioning logic invoked from both extension
@@ -160,6 +162,11 @@ class Installer
         $injectableFactory->create(SafehouseGoogleCalendarProvisioner::class)->run($container);
         $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\FoodParcel\FoodParcelPdfService::class)
             ->provisionTemplate();
+
+        // Paid → Inviato rename: rewrite legacy DB values before rebuild so
+        // dashboards keep counting historical cash after enum options drop Paid.
+        $injectableFactory->create(PaymentStatusLegacyMigrator::class)
+            ->migrate($container->getByClass(EntityManager::class));
 
         $container->getByClass(DataManager::class)->rebuild();
     }
