@@ -1,25 +1,36 @@
 {
     "labels": {
-        "WorkflowDefinition": "Definizione Workflow",
-        "WorkflowDefinitionPlural": "Definizioni Workflow",
+        "WorkflowDefinition": "Definizione workflow",
+        "WorkflowDefinitionPlural": "Definizioni workflow",
         "Definition": "Definizione",
+        "Conditions": "Condizioni",
+        "Actions": "Azioni",
         "Audit": "Audit"
     },
     "fields": {
         "name": "Nome",
         "isActive": "Attivo",
-        "targetEntityType": "Tipo di entità destinataria",
+        "targetEntityType": "Entità target",
         "triggerType": "Trigger",
+        "executionOrder": "Ordine di esecuzione",
+        "conditionGroup": "Gruppo condizioni",
+        "conditionFormula": "Formula condizione",
+        "actions": "Azioni",
         "description": "Descrizione",
         "createdAt": "Creato il",
         "createdBy": "Creato da",
         "modifiedAt": "Modificato il",
         "modifiedBy": "Modificato da"
     },
+    "tooltips": {
+        "conditionGroup": "Array JSON conditionGroup in stile dynamicLogic Espo. Vuoto = sempre vero.",
+        "conditionFormula": "Formula booleana opzionale (dialetto Espo). Vuoto = ignorata.",
+        "actions": "Array JSON ordinato di azioni. Tipi W2: SendEmail, CreateNotification."
+    },
     "options": {
         "triggerType": {
-            "afterCreate": "Dopo la creazione",
-            "afterUpdate": "Dopo l'aggiornamento"
+            "afterCreate": "Dopo creazione",
+            "afterUpdate": "Dopo modifica"
         }
     }
 }

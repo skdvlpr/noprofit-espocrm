@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Espo\Modules\WorkflowEngine\Hooks\Common;
 
-use Espo\Core\Hook\Hook\LateAfterSave;
+use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\ORM\Entity as CoreEntity;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Modules\WorkflowEngine\Services\WorkflowRunner;
@@ -12,19 +12,33 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * @implements LateAfterSave<Entity>
+ * Universal afterSave trigger. Uses AfterSave (not LateAfterSave) so entity->isNew()
+ * still distinguishes create vs update — matching Espo + royalacademy prototype behaviour.
+ *
+ * @implements AfterSave<Entity>
  */
-class WorkflowTrigger implements LateAfterSave
+class WorkflowTrigger implements AfterSave
 {
+    public static int $order = 99;
+
     private const INTERNAL_ENTITY_TYPE_LIST = [
         'WorkflowDefinition',
+        'Notification',
+        'Email',
+        'Note',
+        'Job',
+        'ScheduledJob',
+        'AuthToken',
+        'AuthLogRecord',
+        'UniqueId',
+        'Attachment',
     ];
 
     public function __construct(
         private WorkflowRunner $workflowRunner
     ) {}
 
-    public function lateAfterSave(Entity $entity, SaveOptions $options): void
+    public function afterSave(Entity $entity, SaveOptions $options): void
     {
         if (
             !$entity instanceof CoreEntity
@@ -36,6 +50,8 @@ class WorkflowTrigger implements LateAfterSave
             return;
         }
 
-        $this->workflowRunner->observe($entity);
+        $triggerType = $entity->isNew() ? 'afterCreate' : 'afterUpdate';
+
+        $this->workflowRunner->process($entity, $triggerType);
     }
 }

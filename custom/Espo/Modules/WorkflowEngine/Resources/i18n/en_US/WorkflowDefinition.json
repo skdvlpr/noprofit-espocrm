@@ -3,6 +3,8 @@
         "WorkflowDefinition": "Workflow Definition",
         "WorkflowDefinitionPlural": "Workflow Definitions",
         "Definition": "Definition",
+        "Conditions": "Conditions",
+        "Actions": "Actions",
         "Audit": "Audit"
     },
     "fields": {
@@ -10,11 +12,20 @@
         "isActive": "Active",
         "targetEntityType": "Target Entity Type",
         "triggerType": "Trigger",
+        "executionOrder": "Execution order",
+        "conditionGroup": "Condition group",
+        "conditionFormula": "Condition formula",
+        "actions": "Actions",
         "description": "Description",
         "createdAt": "Created At",
         "createdBy": "Created By",
         "modifiedAt": "Modified At",
         "modifiedBy": "Modified By"
+    },
+    "tooltips": {
+        "conditionGroup": "Espo dynamicLogic-style conditionGroup JSON array. Empty = always match.",
+        "conditionFormula": "Optional boolean formula (Espo formula dialect). Empty = ignore.",
+        "actions": "Ordered JSON array of actions. W2 types: SendEmail, CreateNotification."
     },
     "options": {
         "triggerType": {

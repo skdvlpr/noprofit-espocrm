@@ -1,10 +1,10 @@
 {
     "name": "WorkflowEngine",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "acceptableVersions": [">=10.0.0 <11.0.0"],
     "php": [">=8.2"],
     "releaseDate": "2026-08-01",
     "author": "skdvlpr",
-    "description": "Standalone EspoCRM workflow foundation for administrator-configured automation.",
+    "description": "Standalone EspoCRM workflows: triggers, conditions, email and in-app notification actions.",
     "skipBackup": false
 }

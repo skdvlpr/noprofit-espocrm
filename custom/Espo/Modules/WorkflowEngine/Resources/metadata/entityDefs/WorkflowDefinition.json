@@ -10,15 +10,33 @@
             "default": true
         },
         "targetEntityType": {
-            "type": "varchar",
+            "type": "enum",
             "required": true,
-            "maxLength": 100
+            "view": "views/fields/entity-type",
+            "translation": "Global.scopeNames"
         },
         "triggerType": {
             "type": "enum",
             "required": true,
             "options": ["afterCreate", "afterUpdate"],
             "default": "afterCreate"
+        },
+        "executionOrder": {
+            "type": "int",
+            "default": 10,
+            "min": 0
+        },
+        "conditionGroup": {
+            "type": "jsonArray",
+            "tooltip": true
+        },
+        "conditionFormula": {
+            "type": "text",
+            "tooltip": true
+        },
+        "actions": {
+            "type": "jsonArray",
+            "tooltip": true
         },
         "description": {
             "type": "text"
@@ -53,8 +71,8 @@
         }
     },
     "collection": {
-        "orderBy": "modifiedAt",
-        "order": "desc",
+        "orderBy": "executionOrder",
+        "order": "asc",
         "textFilterFields": ["name", "targetEntityType", "description"]
     },
     "indexes": {
