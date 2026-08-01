@@ -17,6 +17,7 @@
             "type": "enum",
             "options": ["Pending", "Accepted", "Declined"],
             "default": "Pending",
+            "readOnly": true,
             "displayAsLabel": true,
             "style": {
                 "Pending": "warning",

@@ -13,6 +13,7 @@
             "type": "enum",
             "options": ["Draft", "Published", "Closed"],
             "default": "Draft",
+            "readOnly": true,
             "displayAsLabel": true,
             "style": {
                 "Draft": "default",

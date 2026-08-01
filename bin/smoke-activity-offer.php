@@ -14,6 +14,7 @@ use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
 use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
+use Espo\Core\Exceptions\BadRequest;
 use Espo\Modules\VolunteerActivityDispatch\Tools\InviteResponseService;
 use Espo\Modules\VolunteerActivityDispatch\Tools\PublishService;
 
@@ -83,6 +84,29 @@ $slot->set([
 $em->saveEntity($slot);
 $ok('Created ActivityOfferSlot ' . $slot->getId() . ' name=' . $slot->get('name'));
 
+// Direct status=Published must be blocked (would skip Tasks/invites/notifications).
+$offer->set('status', 'Published');
+$blockedPublish = false;
+
+try {
+    $em->saveEntity($offer);
+} catch (BadRequest $e) {
+    $blockedPublish = true;
+    $offer->set('status', 'Draft');
+}
+
+if (!$blockedPublish) {
+    $fail('Expected BadRequest when setting ActivityOffer.status=Published directly');
+}
+
+$offer = $em->getEntityById('ActivityOffer', $offer->getId());
+
+if (!$offer || $offer->get('status') !== 'Draft') {
+    $fail('Offer should remain Draft after blocked direct publish');
+}
+
+$ok('Blocked direct ActivityOffer status=Published');
+
 $publish = new PublishService($em, $acl, $systemUser);
 $result = $publish->publish($offer->getId());
 
@@ -140,6 +164,29 @@ if (!in_array($invitee->getId(), $collabIds, true)) {
 }
 
 $ok('Accept synced collaborators');
+
+// Direct invite status edit must be blocked (would desync Task.collaborators).
+$invite->set('status', 'Declined');
+$blockedInvite = false;
+
+try {
+    $em->saveEntity($invite);
+} catch (BadRequest $e) {
+    $blockedInvite = true;
+    $invite->set('status', 'Accepted');
+}
+
+if (!$blockedInvite) {
+    $fail('Expected BadRequest when setting ActivityInvite.status directly');
+}
+
+$invite = $em->getEntityById('ActivityInvite', $invite->getId());
+
+if (!$invite || $invite->get('status') !== 'Accepted') {
+    $fail('Invite should remain Accepted after blocked direct status edit');
+}
+
+$ok('Blocked direct ActivityInvite status edit');
 
 $respond->decline($invite->getId());
 $task = $em->getEntityById('Task', $task->getId());

@@ -8,6 +8,7 @@ use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
 use Espo\Core\Name\Field;
 use Espo\Entities\User;
+use Espo\Modules\VolunteerActivityDispatch\Hooks\ActivityInvite\ProtectResponseStatus;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use DateTimeImmutable;
@@ -112,7 +113,9 @@ class InviteResponseService
             'respondedAt',
             (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d H:i:s')
         );
-        $this->entityManager->saveEntity($invite);
+        $this->entityManager->saveEntity($invite, [
+            ProtectResponseStatus::SAVE_OPTION => true,
+        ]);
 
         $taskId = $invite->get('taskId');
 

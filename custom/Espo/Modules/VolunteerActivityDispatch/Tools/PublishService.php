@@ -12,6 +12,7 @@ use Espo\Core\Name\Field;
 use Espo\Entities\Notification;
 use Espo\Entities\Team;
 use Espo\Entities\User;
+use Espo\Modules\VolunteerActivityDispatch\Hooks\ActivityOffer\ProtectPublishStatus;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use DateTimeImmutable;
@@ -87,7 +88,9 @@ class PublishService
         $offer->set('status', 'Published');
         $offer->set('publishedAt', (new DateTimeImmutable('now', new DateTimeZone('UTC')))
             ->format('Y-m-d H:i:s'));
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, [
+            ProtectPublishStatus::SAVE_OPTION => true,
+        ]);
 
         $notifyCount = $this->notifyInvitees($offer, $inviteeIds, $tasks);
 
