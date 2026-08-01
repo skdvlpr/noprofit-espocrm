@@ -51,6 +51,18 @@ $check('default ACL read=no', ($acl['read'] ?? null) === 'no');
 $check('Controller class exists', class_exists(\Espo\Modules\WorkflowEngine\Controllers\WorkflowDefinition::class));
 $check('AfterSave hook class exists', class_exists(\Espo\Modules\WorkflowEngine\Hooks\Common\WorkflowTrigger::class));
 
+$adminPanel = $metadata->get(['app', 'adminPanel', 'workflowEngine']) ?? [];
+$adminItems = $adminPanel['itemList'] ?? [];
+$adminUrls = array_map(
+    static fn ($item): string => is_array($item) ? (string) ($item['url'] ?? '') : '',
+    $adminItems
+);
+$check(
+    'Admin panel Workflows → #WorkflowDefinition',
+    ($adminPanel['label'] ?? null) === 'Workflows'
+    && in_array('#WorkflowDefinition', $adminUrls, true)
+);
+
 foreach ([
     'name', 'isActive', 'targetEntityType', 'triggerType',
     'conditionGroup', 'conditionFormula', 'actions', 'executionOrder',
