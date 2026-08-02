@@ -18,7 +18,8 @@
         "ValueSourceFormula": "Formula",
         "RunManual": "Run on record",
         "Cron": "Cron expression",
-        "LastDayOfMonth": "Last day of month"
+        "LastDayOfMonth": "Last day of month",
+        "EditEmailTemplate": "Edit email template"
     },
     "fields": {
         "name": "Name",
@@ -43,10 +44,15 @@
         "modifiedBy": "Modified By",
         "to": "Recipient",
         "message": "Message",
+        "emailTemplate": "Email template",
         "subject": "Subject",
         "body": "Body",
         "isHtml": "HTML",
-        "email": "Email override",
+        "email": "Email override (legacy)",
+        "emailAddressIndex": "User email #",
+        "additionalTo": "Additional To",
+        "cc": "CC",
+        "bcc": "BCC",
         "createEntityType": "Create entity type",
         "assignments": "Field assignments",
         "TargetField": "Field to set",
@@ -65,11 +71,16 @@
         "runManualNeedTargetId": "Enter the target record ID to run this manual workflow.",
         "runManualOnly": "Run is available only when Trigger is Manual.",
         "runManualDone": "Workflow executed on the target record.",
-        "schedulingHelp": "Visual schedule builds a cron expression (UTC). Choose Cron to type an expression manually."
+        "schedulingHelp": "Visual schedule builds a cron expression (UTC). Choose Cron to type an expression manually.",
+        "selectEmailTemplateFirst": "Select an email template first.",
+        "selectEmailTemplateOrBody": "Select an email template, or enter subject/body.",
+        "emailTemplateLoadFailed": "Could not load the email template.",
+        "systemEmailNotConfigured": "System outbound email (Administration → Outbound Emails) is not configured. Emails cannot be sent until From address is set."
     },
     "tooltips": {
         "scheduling": "When Trigger is Time Interval, choose Hourly / Daily / Weekly / Monthly or enter a cron expression manually.",
-        "recurrenceMode": "Every time: runs on every save (or schedule tick) where conditions succeed. Only first time: after a successful run for a record, never runs again for that same record."
+        "recurrenceMode": "Every time: runs on every save (or schedule tick) where conditions succeed. Only first time: after a successful run for a record, never runs again for that same record.",
+        "additionalTo": "Extra To addresses, separated by commas or semicolons. Useful when the assigned user has no email #1–3."
     },
     "options": {
         "triggerType": {
@@ -109,6 +120,12 @@
         "CreateNotification": "In-app notification",
         "SendEmail": "Send email",
         "assignedUser": "Assigned user",
-        "createdBy": "Created by"
+        "createdBy": "Created by",
+        "entityEmail": "Record email address",
+        "emailAddressIndex": {
+            "1": "Email #1 (primary)",
+            "2": "Email #2",
+            "3": "Email #3"
+        }
     }
 }

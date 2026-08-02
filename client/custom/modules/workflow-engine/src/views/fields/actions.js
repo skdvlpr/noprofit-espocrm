@@ -73,6 +73,18 @@ define('workflow-engine:views/fields/actions', ['views/fields/base'], function (
                 'CreateNotification',
                 'SendEmail',
             ];
+
+            // List→detail SPA: actions jsonArray often arrives on fetch after setup.
+            this.listenTo(this.model, 'sync', () => this.reloadFromModelAndRender());
+            this.listenTo(this.model, 'change:' + this.name, () => this.reloadFromModelAndRender());
+        },
+
+        reloadFromModelAndRender: async function () {
+            this.actionConfigList = this.normalizeActionConfigList(this.model.get(this.name));
+
+            if (this.isRendered()) {
+                await this.reRender();
+            }
         },
 
         data: function () {
@@ -202,7 +214,24 @@ define('workflow-engine:views/fields/actions', ['views/fields/base'], function (
 
             if (type === 'SendEmail') {
                 const to = item.to || 'assignedUser';
-                const toLabel = this.translate(to, 'options', 'WorkflowDefinition') || to;
+                let toLabel = this.translate(to, 'options', 'WorkflowDefinition') || to;
+
+                if (to === 'assignedUser' || to === 'createdBy') {
+                    const idx = String(item.emailAddressIndex || 1);
+                    const idxLabel =
+                        this.getLanguage().translateOption(idx, 'emailAddressIndex', 'WorkflowDefinition') ||
+                        ('#' + idx);
+
+                    toLabel = toLabel + ' · ' + idxLabel;
+                }
+
+                if (item.emailTemplateId) {
+                    const templateName = (item.emailTemplateName || '').trim()
+                        || this.translate('emailTemplate', 'fields', 'WorkflowDefinition');
+
+                    return toLabel + ' · ' + templateName;
+                }
+
                 const subject = (item.subject || '').trim();
 
                 return subject ? (toLabel + ' · ' + subject) : toLabel;
@@ -235,9 +264,15 @@ define('workflow-engine:views/fields/actions', ['views/fields/base'], function (
                 return {
                     type: 'SendEmail',
                     to: 'assignedUser',
+                    emailAddressIndex: 1,
+                    emailTemplateId: null,
+                    emailTemplateName: null,
                     subject: '',
                     body: '',
                     isHtml: true,
+                    additionalTo: '',
+                    cc: '',
+                    bcc: '',
                 };
             }
 
@@ -278,9 +313,15 @@ define('workflow-engine:views/fields/actions', ['views/fields/base'], function (
                         return {
                             type: 'SendEmail',
                             to: item.to || 'assignedUser',
+                            emailAddressIndex: parseInt(item.emailAddressIndex || 1, 10) || 1,
+                            emailTemplateId: item.emailTemplateId || null,
+                            emailTemplateName: item.emailTemplateName || null,
                             subject: item.subject || '',
                             body: item.body || '',
                             isHtml: item.isHtml !== false,
+                            additionalTo: item.additionalTo || '',
+                            cc: item.cc || '',
+                            bcc: item.bcc || '',
                             email: item.email || null,
                             userId: item.userId || null,
                         };
@@ -317,6 +358,7 @@ define('workflow-engine:views/fields/actions', ['views/fields/base'], function (
 
             if (item.type === 'SendEmail') {
                 return !!(
+                    item.emailTemplateId ||
                     (item.subject && String(item.subject).trim()) ||
                     (item.body && String(item.body).trim())
                 );

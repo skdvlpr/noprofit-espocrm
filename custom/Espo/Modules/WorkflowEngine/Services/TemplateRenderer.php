@@ -27,6 +27,7 @@ class TemplateRenderer
             return '';
         }
 
+        $template = $this->normalizeEmailTemplatePlaceholders($entity, $template);
         $template = $this->resolveRelatedPathVariables($entity, $template);
 
         try {
@@ -39,6 +40,36 @@ class TemplateRenderer
 
             return $template;
         }
+    }
+
+    /**
+     * Convert EmailTemplate Segnaposti `{Entity.field}` / `{Parent.field}` into Htmlizer `{{…}}`.
+     */
+    public function normalizeEmailTemplatePlaceholders(Entity $entity, string $template): string
+    {
+        if ($template === '' || !str_contains($template, '{')) {
+            return $template;
+        }
+
+        $entityType = $entity->getEntityType();
+
+        $normalized = preg_replace_callback(
+            '/\{([A-Za-z][A-Za-z0-9_]*)\.([A-Za-z][A-Za-z0-9_.]*)\}/',
+            static function (array $matches) use ($entityType): string {
+                $scope = $matches[1];
+                $path = $matches[2];
+
+                if ($scope === 'Parent' || $scope === $entityType || $scope === 'Person') {
+                    return '{{' . $path . '}}';
+                }
+
+                // Keep unrelated entity tokens as empty Htmlizer-safe placeholders.
+                return '{{' . $path . '}}';
+            },
+            $template
+        );
+
+        return is_string($normalized) ? $normalized : $template;
     }
 
     private function resolveRelatedPathVariables(Entity $entity, string $template): string

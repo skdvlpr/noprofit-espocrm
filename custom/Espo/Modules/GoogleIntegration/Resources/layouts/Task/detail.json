@@ -29,16 +29,22 @@
                     "name": "dateStart"
                 },
                 {
-                    "name": "dateCompleted"
+                    "name": "dateEnd"
                 }
             ],
             [
                 {
-                    "name": "dateEnd"
+                    "name": "duration"
                 },
                 {
                     "name": "reminders"
                 }
+            ],
+            [
+                {
+                    "name": "dateCompleted"
+                },
+                false
             ],
             [
                 {

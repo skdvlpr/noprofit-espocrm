@@ -1,0 +1,5 @@
+{
+    "Google": {
+        "renderer": "nonprofit-espocrm:handlers/map/google-maps-renderer"
+    }
+}

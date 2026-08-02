@@ -94,6 +94,10 @@ define('workflow-engine:views/fields/conditions', ['views/fields/base'], functio
             this.anyConditionGroup = [];
             this.loadConditionGroups();
 
+            // List→detail SPA: model often hydrates jsonArray after field setup.
+            this.listenTo(this.model, 'sync', () => this.reloadFromModelAndRender());
+            this.listenTo(this.model, 'change:' + this.name, () => this.reloadFromModelAndRender());
+
             this.listenTo(this.model, 'change:targetEntityType', async () => {
                 const nextScope = this.getTargetEntityType();
 
@@ -101,15 +105,34 @@ define('workflow-engine:views/fields/conditions', ['views/fields/base'], functio
                     return;
                 }
 
+                const previousScope = this.scope;
+
                 this.scope = nextScope;
-                this.allConditionGroup = [];
-                this.anyConditionGroup = [];
-                this.syncModel();
+
+                // First hydrate (null → Account) must NOT wipe server conditions.
+                // Clear only when the user actually switches entity type in the form.
+                if (previousScope) {
+                    this.allConditionGroup = [];
+                    this.anyConditionGroup = [];
+                    this.syncModel();
+                }
+                else {
+                    this.loadConditionGroups();
+                }
 
                 if (this.isRendered()) {
                     await this.reRender();
                 }
             });
+        },
+
+        reloadFromModelAndRender: async function () {
+            this.scope = this.getTargetEntityType();
+            this.loadConditionGroups();
+
+            if (this.isRendered()) {
+                await this.reRender();
+            }
         },
 
         data: function () {

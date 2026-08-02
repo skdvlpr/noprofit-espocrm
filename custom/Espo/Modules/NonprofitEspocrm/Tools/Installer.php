@@ -159,6 +159,7 @@ class Installer
         $this->provisionDefaultTheme($config, $configWriter);
         $this->provisionApplicationName($config, $configWriter);
         $this->provisionGlobalSearchEntityList($config, $configWriter);
+        $this->provisionEmailAddressLookupEntityTypeList($config, $configWriter);
         $this->provisionPrimaNotaOpeningCashDefaults($config, $configWriter);
         $this->provisionInboundEmailCaseTypes($config, $configWriter);
 
@@ -382,6 +383,34 @@ class Installer
 
         $list[] = 'PrimaNota';
         $configWriter->set('globalSearchEntityList', $list);
+    }
+
+    /**
+     * Expand EmailAddress/search beyond default [User] so compose + WF To/CC/BCC
+     * autocomplete also matches Contact / Lead / Account (same as Select picker).
+     */
+    private function provisionEmailAddressLookupEntityTypeList(Config $config, ConfigWriter $configWriter): void
+    {
+        $desired = ['User', 'Contact', 'Lead', 'Account'];
+        $list = $config->get('emailAddressLookupEntityTypeList') ?? [];
+
+        if (!is_array($list)) {
+            $list = [];
+        }
+
+        $list = array_values(array_filter($list, 'is_string'));
+        $changed = false;
+
+        foreach ($desired as $entityType) {
+            if (!in_array($entityType, $list, true)) {
+                $list[] = $entityType;
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $configWriter->set('emailAddressLookupEntityTypeList', $list);
+        }
     }
 
     /**

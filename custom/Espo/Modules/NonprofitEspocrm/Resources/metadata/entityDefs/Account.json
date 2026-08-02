@@ -1,5 +1,12 @@
 {
     "fields": {
+        "billingAddress": {
+            "viewMap": true
+        },
+        "shippingAddress": {
+            "viewMap": true,
+            "view": "nonprofit-espocrm:views/fields/address"
+        },
         "sector": {
             "type": "enum",
             "options": [

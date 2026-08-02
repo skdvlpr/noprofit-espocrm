@@ -1,6 +1,6 @@
 {
     "name": "SafehouseAuroraThemes",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "acceptableVersions": [
         ">=9.3.6 <11.0.0"
     ],

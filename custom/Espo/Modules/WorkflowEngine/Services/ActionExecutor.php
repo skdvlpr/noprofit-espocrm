@@ -7,14 +7,18 @@ namespace Espo\Modules\WorkflowEngine\Services;
 use Espo\Core\Field\LinkParent;
 use Espo\Core\Htmlizer\HtmlizerFactory;
 use Espo\Core\Mail\EmailSender;
+use Espo\Core\Name\Field;
 use Espo\Core\ORM\Entity as CoreEntity;
 use Espo\Core\ORM\Repository\Option\SaveOption;
+use Espo\Core\Utils\Config;
 use Espo\Core\Utils\SystemUser;
+use Espo\Core\WebSocket\Submission as WebSocketSubmission;
 use Espo\Entities\Email;
 use Espo\Entities\Notification;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -30,6 +34,8 @@ class ActionExecutor
         private TemplateRenderer $templateRenderer,
         private ValueResolver $valueResolver,
         private SystemUser $systemUser,
+        private Config $config,
+        private WebSocketSubmission $webSocketSubmission,
         private LoggerInterface $log,
     ) {}
 
@@ -216,19 +222,40 @@ class ActionExecutor
      */
     private function sendEmail(array $action, Entity $entity): array
     {
-        $to = $this->resolveRecipientEmail($action, $entity);
+        $from = trim((string) ($this->config->get('outboundEmailFromAddress') ?? ''));
 
-        if ($to === null || $to === '') {
-            return ['type' => 'SendEmail', 'ok' => false, 'detail' => 'No recipient email'];
+        if ($from === '') {
+            return [
+                'type' => 'SendEmail',
+                'ok' => false,
+                'detail' => 'System outbound email address is not configured',
+            ];
         }
 
-        $subjectTpl = (string) ($action['subject'] ?? '');
-        $bodyTpl = (string) ($action['body'] ?? '');
-        $isHtml = (bool) ($action['isHtml'] ?? true);
+        $toList = $this->resolveRecipientEmailList($action, $entity);
+
+        if ($toList === []) {
+            return [
+                'type' => 'SendEmail',
+                'ok' => false,
+                'detail' => 'No recipient email (user has no address #' .
+                    ((int) ($action['emailAddressIndex'] ?? 1)) .
+                    '; set Additional To or add an email on the user)',
+            ];
+        }
+
+        [$subjectTpl, $bodyTpl, $isHtml] = $this->resolveEmailTemplates($action, $entity);
+
+        if ($subjectTpl === '' && $bodyTpl === '') {
+            return ['type' => 'SendEmail', 'ok' => false, 'detail' => 'Empty email template'];
+        }
 
         $htmlizer = $this->htmlizerFactory->create(true);
         $subject = $this->templateRenderer->render($entity, $subjectTpl, $htmlizer);
         $body = $this->templateRenderer->render($entity, $bodyTpl, $htmlizer);
+
+        $cc = $this->normalizeAddressList((string) ($action['cc'] ?? ''));
+        $bcc = $this->normalizeAddressList((string) ($action['bcc'] ?? ''));
 
         /** @var Email $email */
         $email = $this->entityManager->getRDBRepositoryByClass(Email::class)->getNew();
@@ -236,7 +263,10 @@ class ActionExecutor
             'subject' => $subject,
             'body' => $body,
             'isHtml' => $isHtml,
-            'to' => $to,
+            'from' => $from,
+            'to' => implode('; ', $toList),
+            'cc' => $cc !== [] ? implode('; ', $cc) : null,
+            'bcc' => $bcc !== [] ? implode('; ', $bcc) : null,
             'isSystem' => true,
             'parentId' => $entity->getId(),
             'parentType' => $entity->getEntityType(),
@@ -245,7 +275,7 @@ class ActionExecutor
         try {
             $this->emailSender->send($email);
 
-            return ['type' => 'SendEmail', 'ok' => true, 'detail' => $to];
+            return ['type' => 'SendEmail', 'ok' => true, 'detail' => implode(',', $toList)];
         } catch (Throwable $e) {
             $this->log->error(
                 'WorkflowEngine SendEmail failed: {message}',
@@ -280,25 +310,154 @@ class ActionExecutor
             );
         }
 
+        $relatedName = null;
+
+        if ($entity->hasAttribute(Field::NAME) && is_string($entity->get(Field::NAME))) {
+            $relatedName = $entity->get(Field::NAME);
+        }
+
         $notification = $this->entityManager->getRDBRepositoryByClass(Notification::class)->getNew();
         $notification
             ->setType(Notification::TYPE_MESSAGE)
             ->setUserId($userId)
             ->setMessage($message)
-            ->setRelated(LinkParent::create($entity->getEntityType(), $entity->getId()));
+            ->setRelated(LinkParent::create($entity->getEntityType(), $entity->getId()))
+            ->setData([
+                'workflowEngine' => true,
+                'relatedName' => $relatedName,
+            ]);
 
         $this->entityManager->saveEntity($notification);
+
+        // Native popup channel (Meeting reminders use the same pattern).
+        // No-op when WebSocket is disabled; client still polls PopupNotification/grouped.
+        $this->webSocketSubmission->submit(
+            'popupNotifications.workflowMessage',
+            $userId,
+            [
+                'list' => [
+                    [
+                        'id' => $notification->getId(),
+                        'data' => [
+                            'message' => $message,
+                            'relatedType' => $entity->getEntityType(),
+                            'relatedId' => $entity->getId(),
+                            'relatedName' => $relatedName,
+                        ],
+                    ],
+                ],
+            ]
+        );
 
         return ['type' => 'CreateNotification', 'ok' => true, 'detail' => $userId];
     }
 
     /**
+     * Prefer EmailTemplate record; fall back to inline subject/body.
+     *
+     * @param array<string, mixed> $action
+     * @return array{0: string, 1: string, 2: bool}
+     */
+    private function resolveEmailTemplates(array $action, Entity $entity): array
+    {
+        $subjectTpl = (string) ($action['subject'] ?? '');
+        $bodyTpl = (string) ($action['body'] ?? '');
+        $isHtml = (bool) ($action['isHtml'] ?? true);
+
+        // Prefer editor content saved on the action (template loaded into modal).
+        if ($subjectTpl !== '' || $bodyTpl !== '') {
+            $subjectTpl = $this->templateRenderer->normalizeEmailTemplatePlaceholders(
+                $entity,
+                $subjectTpl
+            );
+            $bodyTpl = $this->templateRenderer->normalizeEmailTemplatePlaceholders(
+                $entity,
+                $bodyTpl
+            );
+
+            return [$subjectTpl, $bodyTpl, $isHtml];
+        }
+
+        $templateId = $action['emailTemplateId'] ?? null;
+
+        if (!is_string($templateId) || $templateId === '') {
+            return ['', '', $isHtml];
+        }
+
+        $template = $this->entityManager->getEntityById('EmailTemplate', $templateId);
+
+        if (!$template) {
+            $this->log->warning(
+                'WorkflowEngine SendEmail: EmailTemplate {id} not found',
+                ['id' => $templateId]
+            );
+
+            return ['', '', $isHtml];
+        }
+
+        $subjectTpl = (string) ($template->get('subject') ?? '');
+        $bodyTpl = (string) ($template->get('body') ?? '');
+        $isHtml = (bool) ($template->get('isHtml') ?? true);
+
+        $subjectTpl = $this->templateRenderer->normalizeEmailTemplatePlaceholders(
+            $entity,
+            $subjectTpl
+        );
+        $bodyTpl = $this->templateRenderer->normalizeEmailTemplatePlaceholders(
+            $entity,
+            $bodyTpl
+        );
+
+        return [$subjectTpl, $bodyTpl, $isHtml];
+    }
+
+    /**
+     * Primary recipient(s) + additional To addresses.
+     *
+     * @param array<string, mixed> $action
+     * @return list<string>
+     */
+    private function resolveRecipientEmailList(array $action, Entity $entity): array
+    {
+        $list = [];
+
+        $primary = $this->resolvePrimaryRecipientEmail($action, $entity);
+
+        if ($primary !== null) {
+            $list[] = $primary;
+        }
+
+        // Legacy field name "email" treated as additional To.
+        foreach (['additionalTo', 'email'] as $key) {
+            if (!empty($action[$key]) && is_string($action[$key])) {
+                $list = array_merge($list, $this->normalizeAddressList($action[$key]));
+            }
+        }
+
+        $unique = [];
+
+        foreach ($list as $address) {
+            $normalized = strtolower($address);
+
+            if (!isset($unique[$normalized])) {
+                $unique[$normalized] = $address;
+            }
+        }
+
+        return array_values($unique);
+    }
+
+    /**
      * @param array<string, mixed> $action
      */
-    private function resolveRecipientEmail(array $action, Entity $entity): ?string
+    private function resolvePrimaryRecipientEmail(array $action, Entity $entity): ?string
     {
-        if (!empty($action['email']) && is_string($action['email'])) {
-            return trim($action['email']);
+        $to = (string) ($action['to'] ?? 'assignedUser');
+
+        if ($to === 'entityEmail') {
+            $email = $entity->get('emailAddress');
+
+            return is_string($email) && $email !== '' ? trim($email) : null;
         }
 
         $userId = $this->resolveRecipientUserId($action, $entity);
@@ -314,9 +473,87 @@ class ActionExecutor
             return null;
         }
 
-        $email = $user->get('emailAddress');
+        $index = (int) ($action['emailAddressIndex'] ?? 1);
 
-        return is_string($email) && $email !== '' ? $email : null;
+        if ($index < 1) {
+            $index = 1;
+        }
+
+        if ($index > 3) {
+            $index = 3;
+        }
+
+        return $this->getUserEmailByIndex($user, $index);
+    }
+
+    private function getUserEmailByIndex(User $user, int $index): ?string
+    {
+        $addresses = $this->getUserEmailAddressList($user);
+
+        if ($addresses === []) {
+            return null;
+        }
+
+        return $addresses[$index - 1] ?? null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getUserEmailAddressList(User $user): array
+    {
+        /** @var EmailAddressRepository $repo */
+        $repo = $this->entityManager->getRepository('EmailAddress');
+        $data = $repo->getEmailAddressData($user);
+        $list = [];
+
+        if (is_array($data)) {
+            foreach ($data as $item) {
+                $address = null;
+
+                if (is_object($item) && isset($item->emailAddress)) {
+                    $address = (string) $item->emailAddress;
+                }
+                else if (is_array($item) && isset($item['emailAddress'])) {
+                    $address = (string) $item['emailAddress'];
+                }
+
+                $address = trim((string) $address);
+
+                if ($address !== '') {
+                    $list[] = $address;
+                }
+            }
+        }
+
+        if ($list === []) {
+            $primary = trim((string) ($user->get('emailAddress') ?? ''));
+
+            if ($primary !== '') {
+                $list[] = $primary;
+            }
+        }
+
+        return array_values(array_slice($list, 0, 3));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function normalizeAddressList(string $raw): array
+    {
+        $parts = preg_split('/[;,]+/', $raw) ?: [];
+        $out = [];
+
+        foreach ($parts as $part) {
+            $email = trim($part);
+
+            if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $out[] = $email;
+            }
+        }
+
+        return $out;
     }
 
     /**

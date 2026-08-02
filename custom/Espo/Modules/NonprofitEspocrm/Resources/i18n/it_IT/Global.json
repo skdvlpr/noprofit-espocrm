@@ -43,11 +43,15 @@
         "csvIncludeTotals": "Includi riga Totali",
         "xlsxIncludeTotals": "Includi riga Totali"
     },
+    "messages": {
+        "insertFieldHelp": "Inserisci un segnaposto campo come {{field}} o {{link.field}}."
+    },
     "labels": {
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
         "Create MealCount": "Crea Conteggio pasti",
         "Create AssociationMealCount": "Crea Conteggio pasti per Rete",
+        "View on Map": "Vedi sulla mappa",
         "reportingListStatsWeek": "Totali settimana corrente",
         "reportingListStatsMonth": "Mese",
         "reportingListStatsYear": "Anno",

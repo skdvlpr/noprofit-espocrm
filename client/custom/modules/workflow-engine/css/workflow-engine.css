@@ -1,3 +1,8 @@
+/* Above Aurora navbar / modals — core popup z-index (1051) is too low. */
+#popup-notifications-container {
+    z-index: 1400;
+}
+
 .workflow-engine-conditions,
 .workflow-engine-conditions-section,
 .workflow-engine-actions {

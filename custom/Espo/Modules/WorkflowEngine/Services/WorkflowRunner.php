@@ -99,6 +99,17 @@ class WorkflowRunner
             is_string($conditionFormula) ? $conditionFormula : null
         );
 
+        if (!$passed) {
+            $this->log->info(
+                'WorkflowEngine: conditions not met for {name} on {entityType}#{id}',
+                [
+                    'name' => (string) ($definition->get('name') ?? $definition->getId()),
+                    'entityType' => $entity->getEntityType(),
+                    'id' => $entity->getId(),
+                ]
+            );
+        }
+
         if (!$this->conditionStateService->shouldExecute($definition, $entity, $passed)) {
             return;
         }

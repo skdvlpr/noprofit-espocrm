@@ -2,10 +2,9 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     'exports',
     'views/fields/base',
     'ui/select',
-    'google-integration:lib/google-calendar-variable-panel',
-    'google-integration:lib/google-calendar-template-variables',
+    'nonprofit-espocrm:lib/template-variable-inserter',
     'google-integration:lib/google-calendar-color-swatch',
-], function (_exports, _base, _select, VariablePanel, TemplateVariables, ColorSwatch) {
+], function (_exports, _base, _select, Inserter, ColorSwatch) {
     'use strict';
 
     Object.defineProperty(_exports, '__esModule', {value: true});
@@ -534,14 +533,12 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
         }
 
         renderVariablePickers() {
-            const fieldList = this.getInsertableFieldList();
-
             this.$el.find('[data-role="variable-helper"]').each((i, element) => {
                 const $helper = $(element);
                 const $textarea = $helper.closest('.google-calendar-opportunity-date-settings-card')
                     .find('[data-role="descriptionTemplateOverride"]');
 
-                this.renderVariablePicker($helper, $textarea, fieldList);
+                this.renderVariablePicker($helper, $textarea);
             });
 
             this.$el.find('[data-role="variable-helper-location"]').each((i, element) => {
@@ -549,80 +546,45 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 const $input = $helper.closest('.google-calendar-opportunity-date-settings-card')
                     .find('[data-role="location"]');
 
-                this.renderVariablePicker($helper, $input, fieldList);
+                this.renderVariablePicker($helper, $input);
             });
         }
 
-        renderVariablePicker($helper, $textarea, fieldList) {
+        renderVariablePicker($helper, $input) {
             $helper.empty().css({
                 marginTop: '8px',
                 padding: '0',
             });
 
-            $('<button>')
-                .attr('type', 'button')
-                .addClass('btn btn-default btn-sm')
-                .css({
-                    borderRadius: '999px',
-                    paddingLeft: '14px',
-                    paddingRight: '14px',
-                })
-                .text(this.translate('googleCalendarTemplateVariables', 'labels', 'Global'))
-                .on('click', () => {
-                    VariablePanel.open({
-                        stateKey: `${this.model.entityType}:${this.name}`,
-                        anchorEl: $textarea,
-                        fieldList,
-                        ownerView: this,
-                        onSelect: name => this.insertVariable($textarea, name),
-                        translate: (key, category, scope) => this.translate(key, category, scope || this.model.entityType),
-                        title: this.translate('googleCalendarTemplateVariables', 'labels', 'Global'),
-                    });
-                })
-                .appendTo($helper);
-        }
-
-
-        getInsertableFieldList() {
-            return TemplateVariables.buildInsertableFieldList({
-                metadata: this.getMetadata(),
+            Inserter.render({
+                $container: $helper,
                 entityType: this.model.entityType,
+                metadata: this.getMetadata(),
+                language: this.getLanguage(),
                 translate: (key, category, scope) => this.translate(key, category, scope),
-                currentGroupLabel: this.translate('googleCalendarCurrentRecordFields', 'labels', this.model.entityType),
-                hasRelatedLink: (linkName, type) => this.hasActualRelatedRecord(linkName, type),
+                onInsert: token => {
+                    if (!$input.length || !token) {
+                        return;
+                    }
+
+                    const element = $input.get(0);
+                    const value = String($input.val() || '');
+                    const variable = '{{' + token + '}}';
+                    const start = element.selectionStart ?? value.length;
+                    const end = element.selectionEnd ?? start;
+                    const nextValue = value.slice(0, start) + variable + value.slice(end);
+
+                    $input.val(nextValue).trigger('input').trigger('change');
+                    this.model.set(this.name, this.readSettings(), {ui: true});
+
+                    if (typeof element.setSelectionRange === 'function') {
+                        const cursor = start + variable.length;
+                        element.setSelectionRange(cursor, cursor);
+                    }
+
+                    $input.trigger('focus');
+                },
             });
-        }
-
-        hasActualRelatedRecord(linkName, type) {
-            if (type === 'linkMultiple') {
-                const ids = this.model.get(`${linkName}Ids`);
-                return Array.isArray(ids) && ids.length > 0;
-            }
-
-            return !!this.model.get(`${linkName}Id`);
-        }
-
-        insertVariable($input, name) {
-            if (!$input.length || !name) {
-                return;
-            }
-
-            const element = $input.get(0);
-            const value = String($input.val() || '');
-            const variable = `{{${name}}}`;
-            const start = element.selectionStart ?? value.length;
-            const end = element.selectionEnd ?? start;
-            const nextValue = value.slice(0, start) + variable + value.slice(end);
-
-            $input.val(nextValue).trigger('input').trigger('change');
-            this.model.set(this.name, this.readSettings(), {ui: true});
-
-            if (typeof element.setSelectionRange === 'function') {
-                const cursor = start + variable.length;
-                element.setSelectionRange(cursor, cursor);
-            }
-
-            $input.trigger('focus');
         }
 
         getOptionList(values, selected, field) {

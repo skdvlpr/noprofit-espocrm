@@ -61,6 +61,20 @@ body[data-theme-name="SafehouseAurora"]:has(.modal-container.overlaid) .modal-ba
 body[data-theme-name="SafehouseAuroraLight"]:has(.modal-container.overlaid) .modal-backdrop.in:not(.stacked) {
   z-index: 1310 !important;
 }
+/*
+ * Generic modals (View on Map, etc.) default to Bootstrap ~1050 — UNDER Aurora #navbar (1200).
+ * Symptom: map looks “under everything”; close (X) clicks hit the profile/admin menu instead.
+ * Only lift when a non-drawer/non-confirm modal is active, and not during nested-overlaid stacks
+ * (those use 1320/1310 above). Do not raise backdrop for dialog-record-only drawers.
+ */
+body[data-theme-name="SafehouseAurora"]:not(:has(.modal-container.overlaid)):has(.modal.in:not(.dialog-record):not(.dialog-confirm)) .modal.in:not(.dialog-record):not(.dialog-confirm),
+body[data-theme-name="SafehouseAuroraLight"]:not(:has(.modal-container.overlaid)):has(.modal.in:not(.dialog-record):not(.dialog-confirm)) .modal.in:not(.dialog-record):not(.dialog-confirm) {
+  z-index: 1300 !important;
+}
+body[data-theme-name="SafehouseAurora"]:not(:has(.modal-container.overlaid)):has(.modal.in:not(.dialog-record):not(.dialog-confirm)) .modal-backdrop.in:not(.backdrop-confirm):not(.stacked),
+body[data-theme-name="SafehouseAuroraLight"]:not(:has(.modal-container.overlaid)):has(.modal.in:not(.dialog-record):not(.dialog-confirm)) .modal-backdrop.in:not(.backdrop-confirm):not(.stacked) {
+  z-index: 1290 !important;
+}
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;

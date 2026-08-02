@@ -18,7 +18,8 @@
         "ValueSourceFormula": "Formula",
         "RunManual": "Esegui su record",
         "Cron": "Espressione cron",
-        "LastDayOfMonth": "Ultimo giorno del mese"
+        "LastDayOfMonth": "Ultimo giorno del mese",
+        "EditEmailTemplate": "Modifica modello email"
     },
     "fields": {
         "name": "Nome",
@@ -43,10 +44,15 @@
         "modifiedBy": "Modificato da",
         "to": "Destinatario",
         "message": "Messaggio",
+        "emailTemplate": "Modello email",
         "subject": "Oggetto",
         "body": "Corpo",
         "isHtml": "HTML",
-        "email": "Email alternativa",
+        "email": "Email alternativa (legacy)",
+        "emailAddressIndex": "Email utente #",
+        "additionalTo": "To aggiuntivi",
+        "cc": "CC",
+        "bcc": "BCC",
         "createEntityType": "Tipo entità da creare",
         "assignments": "Assegnazioni campi",
         "TargetField": "Campo da impostare",
@@ -65,11 +71,16 @@
         "runManualNeedTargetId": "Inserisci l'ID del record target per eseguire questo workflow manuale.",
         "runManualOnly": "Esegui è disponibile solo con Trigger Manuale.",
         "runManualDone": "Workflow eseguito sul record target.",
-        "schedulingHelp": "Il pianificatore visuale genera un'espressione cron (UTC). Scegli Cron per digitarla manualmente."
+        "schedulingHelp": "Il pianificatore visuale genera un'espressione cron (UTC). Scegli Cron per digitarla manualmente.",
+        "selectEmailTemplateFirst": "Seleziona prima un modello email.",
+        "selectEmailTemplateOrBody": "Seleziona un modello email, oppure inserisci oggetto/corpo.",
+        "emailTemplateLoadFailed": "Impossibile caricare il modello email.",
+        "systemEmailNotConfigured": "L'email di sistema in uscita (Amministrazione → Email in uscita) non è configurata. Le email non possono essere inviate finché non è impostato l'indirizzo From."
     },
     "tooltips": {
         "scheduling": "Con Trigger = Intervallo di tempo scegli Oraria / Giornaliera / Settimanale / Mensile oppure inserisci un cron manualmente.",
-        "recurrenceMode": "Ogni volta: esegue a ogni salvataggio (o tick pianificato) se le condizioni sono vere. Solo la prima volta: dopo un'esecuzione riuscita su un record, non riesegue più su quello stesso record."
+        "recurrenceMode": "Ogni volta: esegue a ogni salvataggio (o tick pianificato) se le condizioni sono vere. Solo la prima volta: dopo un'esecuzione riuscita su un record, non riesegue più su quello stesso record.",
+        "additionalTo": "Indirizzi To aggiuntivi, separati da virgola o punto e virgola. Utile se l'utente assegnato non ha email #1–3."
     },
     "options": {
         "triggerType": {
@@ -109,6 +120,12 @@
         "CreateNotification": "Notifica in-app",
         "SendEmail": "Invia email",
         "assignedUser": "Utente assegnato",
-        "createdBy": "Creato da"
+        "createdBy": "Creato da",
+        "entityEmail": "Email del record",
+        "emailAddressIndex": {
+            "1": "Email #1 (principale)",
+            "2": "Email #2",
+            "3": "Email #3"
+        }
     }
 }

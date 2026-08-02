@@ -41,6 +41,9 @@
         "csvIncludeTotals": "Include totals row",
         "xlsxIncludeTotals": "Include totals row"
     },
+    "messages": {
+        "insertFieldHelp": "Insert a field placeholder as {{field}} or {{link.field}}."
+    },
     "labels": {
         "Create VolunteerEmployee": "Create New",
         "Create Member": "Create New",

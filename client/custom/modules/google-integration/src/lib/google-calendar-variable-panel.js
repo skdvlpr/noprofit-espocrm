@@ -1,3 +1,8 @@
+/***
+ * @deprecated Prefer nonprofit-espocrm:lib/template-variable-inserter (native Segnaposti).
+ * Kept as source for the future TemplateVariablesUI extension (beautiful side panel).
+ * See docs/template-variables-ui-extension.md
+ */
 define('google-integration:lib/google-calendar-variable-panel', [], function () {
     'use strict';
 

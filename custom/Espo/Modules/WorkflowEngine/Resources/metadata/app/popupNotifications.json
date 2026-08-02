@@ -1,0 +1,10 @@
+{
+    "workflowMessage": {
+        "url": "WorkflowPopupNotification",
+        "interval": 5,
+        "useWebSocket": true,
+        "webSocketCategory": "workflowMessage",
+        "portalDisabled": true,
+        "view": "workflow-engine:views/popup-notification"
+    }
+}
