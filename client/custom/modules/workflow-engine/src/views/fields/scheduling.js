@@ -358,19 +358,20 @@ define('workflow-engine:views/fields/scheduling', ['views/fields/base', 'lib!cro
                 return 'cron';
             }
 
-            if (hour === '*' && day === '*' && weekday === '*') {
+            // Match only planner-shaped crons (concrete minute; no "* * * * *").
+            if (minute !== '*' && hour === '*' && day === '*' && weekday === '*') {
                 return 'hourly';
             }
 
-            if (day === '*' && weekday === '*') {
+            if (minute !== '*' && hour !== '*' && day === '*' && weekday === '*') {
                 return 'daily';
             }
 
-            if (day === '*' && weekday !== '*') {
+            if (minute !== '*' && hour !== '*' && day === '*' && weekday !== '*') {
                 return 'weekly';
             }
 
-            if (day !== '*' && weekday === '*') {
+            if (minute !== '*' && hour !== '*' && day !== '*' && weekday === '*') {
                 return 'monthly';
             }
 
