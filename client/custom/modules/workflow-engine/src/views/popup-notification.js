@@ -28,6 +28,54 @@ define('workflow-engine:views/popup-notification', ['views/popup-notification'],
             };
         },
 
+        // Core skips the sound when the popup comes from the first poll after
+        // page load (isFirstCheck). For workflow messages we still want a sound
+        // if the notification is genuinely fresh.
+        onShow: function () {
+            if (this.options.isFirstCheck && !this.isFreshNotification()) {
+                return;
+            }
+
+            this.playSound();
+        },
+
+        isFreshNotification: function () {
+            const createdAt = (this.notificationData || {}).createdAt;
+
+            if (!createdAt) {
+                return false;
+            }
+
+            const createdMs = Date.parse(String(createdAt).replace(' ', 'T') + 'Z');
+
+            if (isNaN(createdMs)) {
+                return false;
+            }
+
+            return Date.now() - createdMs < 120 * 1000;
+        },
+
+        // Core does not handle the browser autoplay policy: Audio.play() may
+        // reject if there was no user gesture yet. Retry once on the next click.
+        playSound: function () {
+            if (!this.getPreferences().get('notificationSound')) {
+                return;
+            }
+
+            const audioElement = new Audio(this.soundPath);
+            audioElement.volume = 0.3;
+
+            const promise = audioElement.play();
+
+            if (promise && typeof promise.catch === 'function') {
+                promise.catch(() => {
+                    document.addEventListener('click', () => {
+                        audioElement.play().catch(() => {});
+                    }, {once: true});
+                });
+            }
+        },
+
         onCancel: function () {
             if (!this.notificationId) {
                 return;

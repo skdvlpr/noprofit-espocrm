@@ -4,8 +4,8 @@
         "weekStart": "Week start",
         "status": "Status",
         "description": "Description",
-        "inviteeUsers": "Invitees",
-        "inviteTeams": "Invite teams",
+        "inviteeUsers": "Volunteers involved",
+        "inviteTeams": "Teams involved",
         "publishedAt": "Published at",
         "assignedUser": "Assigned User",
         "teams": "Teams",
@@ -15,19 +15,19 @@
         "modifiedBy": "Modified By"
     },
     "links": {
-        "slots": "Slots",
+        "slots": "Shifts",
         "tasks": "Tasks",
-        "inviteeUsers": "Invitees",
-        "inviteTeams": "Invite teams",
+        "inviteeUsers": "Volunteers involved",
+        "inviteTeams": "Teams involved",
         "assignedUser": "Assigned User",
         "teams": "Teams"
     },
     "labels": {
-        "ActivityOffer": "Activity Offer",
-        "ActivityOfferPlural": "Activity Offers",
-        "Create ActivityOffer": "Create Activity Offer",
+        "ActivityOffer": "Shift Plan",
+        "ActivityOfferPlural": "Shift Planning",
+        "Create ActivityOffer": "Create Shift Plan",
         "Publish week": "Publish week",
-        "Slots": "Slots",
+        "Slots": "Shifts",
         "Tasks": "Tasks"
     },
     "options": {
@@ -38,11 +38,11 @@
         }
     },
     "tooltips": {
-        "inviteeUsers": "Users who receive Accept/Decline invites when the week is published.",
-        "inviteTeams": "All active members of these teams are invited (merged with Invitees)."
+        "inviteeUsers": "Volunteers who receive the availability request when the week is published.",
+        "inviteTeams": "All active members of these teams are involved (merged with Volunteers involved)."
     },
     "messages": {
-        "publishSuccess": "Week published: {taskCount} tasks, {inviteCount} invites, {notifyCount} notifications.",
-        "publishConfirm": "Publish this week? Tasks and invites will be created for all invitees."
+        "publishSuccess": "Week published: {taskCount} tasks, {inviteCount} requests, {notifyCount} notifications.",
+        "publishConfirm": "Publish this week? Tasks and requests will be created for all involved volunteers."
     }
 }

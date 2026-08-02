@@ -1,18 +1,18 @@
 {
     "fields": {
         "duration": "Durata",
-        "activityOffer": "Offerta attività",
-        "activityOfferSlot": "Slot attività",
-        "myInviteStatus": "Stato invito"
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno",
+        "myInviteStatus": "Mia disponibilità"
     },
     "links": {
-        "activityOffer": "Offerta attività",
-        "activityOfferSlot": "Slot attività",
-        "activityInvites": "Inviti"
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno",
+        "activityInvites": "Disponibilità"
     },
     "labels": {
         "Scheduler": "Pianificatore",
-        "Invites": "Inviti"
+        "Invites": "Disponibilità"
     },
     "messages": {
         "schedulerNeedDatesAndPeople": "Imposta data/ora di inizio e fine (e utente assegnato o collaboratori) per vedere la timeline del pianificatore."

@@ -1,7 +1,7 @@
 {
     "fields": {
         "name": "Name",
-        "activityOffer": "Activity offer",
+        "activityOffer": "Shift plan",
         "dateStart": "Start",
         "dateEnd": "End",
         "duration": "Duration",
@@ -17,13 +17,13 @@
         "sortOrder": "Sort order"
     },
     "links": {
-        "activityOffer": "Activity offer",
+        "activityOffer": "Shift plan",
         "task": "Task"
     },
     "labels": {
-        "ActivityOfferSlot": "Activity Slot",
-        "ActivityOfferSlotPlural": "Activity Slots",
-        "Create ActivityOfferSlot": "Create Slot"
+        "ActivityOfferSlot": "Shift",
+        "ActivityOfferSlotPlural": "Shifts",
+        "Create ActivityOfferSlot": "Create Shift"
     },
     "options": {
         "category": {

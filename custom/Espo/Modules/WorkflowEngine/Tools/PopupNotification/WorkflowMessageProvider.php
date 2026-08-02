@@ -73,6 +73,7 @@ class WorkflowMessageProvider implements Provider
                     'relatedName' => is_string($data->relatedName ?? null)
                         ? $data->relatedName
                         : null,
+                    'createdAt' => $notification->get('createdAt'),
                 ]
             );
 

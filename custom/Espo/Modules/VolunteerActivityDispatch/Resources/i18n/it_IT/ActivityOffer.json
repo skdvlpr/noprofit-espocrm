@@ -4,8 +4,8 @@
         "weekStart": "Inizio settimana",
         "status": "Stato",
         "description": "Descrizione",
-        "inviteeUsers": "Invitati",
-        "inviteTeams": "Team invitati",
+        "inviteeUsers": "Volontari coinvolti",
+        "inviteTeams": "Team coinvolti",
         "publishedAt": "Pubblicato il",
         "assignedUser": "Assegnato a",
         "teams": "Team",
@@ -15,34 +15,34 @@
         "modifiedBy": "Modificato da"
     },
     "links": {
-        "slots": "Slot",
+        "slots": "Turni",
         "tasks": "Attività",
-        "inviteeUsers": "Invitati",
-        "inviteTeams": "Team invitati",
+        "inviteeUsers": "Volontari coinvolti",
+        "inviteTeams": "Team coinvolti",
         "assignedUser": "Assegnato a",
         "teams": "Team"
     },
     "labels": {
-        "ActivityOffer": "Offerta attività",
-        "ActivityOfferPlural": "Offerte attività",
-        "Create ActivityOffer": "Crea offerta attività",
+        "ActivityOffer": "Piano turni",
+        "ActivityOfferPlural": "Pianificazione turni",
+        "Create ActivityOffer": "Crea piano turni",
         "Publish week": "Pubblica settimana",
-        "Slots": "Slot",
+        "Slots": "Turni",
         "Tasks": "Attività"
     },
     "options": {
         "status": {
             "Draft": "Bozza",
-            "Published": "Pubblicata",
-            "Closed": "Chiusa"
+            "Published": "Pubblicato",
+            "Closed": "Chiuso"
         }
     },
     "tooltips": {
-        "inviteeUsers": "Utenti che ricevono l'invito Accetta/Rifiuta alla pubblicazione.",
-        "inviteTeams": "Tutti i membri attivi di questi team vengono invitati (uniti agli Invitati)."
+        "inviteeUsers": "Volontari che ricevono la richiesta di disponibilità alla pubblicazione.",
+        "inviteTeams": "Tutti i membri attivi di questi team vengono coinvolti (uniti ai Volontari coinvolti)."
     },
     "messages": {
-        "publishSuccess": "Settimana pubblicata: {taskCount} attività, {inviteCount} inviti, {notifyCount} notifiche.",
-        "publishConfirm": "Pubblicare questa settimana? Verranno create attività e inviti per tutti gli invitati."
+        "publishSuccess": "Settimana pubblicata: {taskCount} attività, {inviteCount} richieste, {notifyCount} notifiche.",
+        "publishConfirm": "Pubblicare questa settimana? Verranno create attività e richieste per tutti i volontari coinvolti."
     }
 }

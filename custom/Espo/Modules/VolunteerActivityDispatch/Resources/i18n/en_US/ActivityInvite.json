@@ -2,20 +2,20 @@
     "fields": {
         "name": "Name",
         "task": "Task",
-        "user": "User",
+        "user": "Volunteer",
         "status": "Status",
         "respondedAt": "Responded at",
-        "activityOffer": "Activity offer"
+        "activityOffer": "Shift plan"
     },
     "links": {
         "task": "Task",
-        "user": "User",
-        "activityOffer": "Activity offer"
+        "user": "Volunteer",
+        "activityOffer": "Shift plan"
     },
     "labels": {
-        "ActivityInvite": "Activity Invite",
-        "ActivityInvitePlural": "Activity Invites",
-        "Create ActivityInvite": "Create Invite",
+        "ActivityInvite": "Availability",
+        "ActivityInvitePlural": "Availabilities",
+        "Create ActivityInvite": "Create Availability",
         "Accept": "Accept",
         "Decline": "Decline"
     },
@@ -27,7 +27,7 @@
         }
     },
     "messages": {
-        "acceptSuccess": "Invite accepted.",
-        "declineSuccess": "Invite declined."
+        "acceptSuccess": "Availability confirmed.",
+        "declineSuccess": "Availability declined."
     }
 }

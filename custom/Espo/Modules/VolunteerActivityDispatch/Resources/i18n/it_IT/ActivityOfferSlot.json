@@ -1,7 +1,7 @@
 {
     "fields": {
         "name": "Nome",
-        "activityOffer": "Offerta attività",
+        "activityOffer": "Piano turni",
         "dateStart": "Inizio",
         "dateEnd": "Fine",
         "duration": "Durata",
@@ -17,13 +17,13 @@
         "sortOrder": "Ordine"
     },
     "links": {
-        "activityOffer": "Offerta attività",
+        "activityOffer": "Piano turni",
         "task": "Attività"
     },
     "labels": {
-        "ActivityOfferSlot": "Slot attività",
-        "ActivityOfferSlotPlural": "Slot attività",
-        "Create ActivityOfferSlot": "Crea slot"
+        "ActivityOfferSlot": "Turno",
+        "ActivityOfferSlotPlural": "Turni",
+        "Create ActivityOfferSlot": "Crea turno"
     },
     "options": {
         "category": {

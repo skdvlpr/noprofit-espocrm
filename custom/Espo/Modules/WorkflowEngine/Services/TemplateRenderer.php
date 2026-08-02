@@ -31,7 +31,17 @@ class TemplateRenderer
         $template = $this->resolveRelatedPathVariables($entity, $template);
 
         try {
-            return trim($htmlizer->render($entity, $template));
+            // skipInlineAttachmentHandling: keep `?entryPoint=attachment&amp;id=` links
+            // intact so Email::getBodyForSending() can embed images as cid parts.
+            // Without it Htmlizer rewrites them to local `data/upload/...` paths
+            // (a PDF-generation behavior) — dead links in external mail clients.
+            return trim($htmlizer->render(
+                $entity,
+                $template,
+                null,
+                false,
+                true
+            ));
         } catch (Throwable $e) {
             $this->log->warning(
                 'WorkflowEngine template render failed: {message}',

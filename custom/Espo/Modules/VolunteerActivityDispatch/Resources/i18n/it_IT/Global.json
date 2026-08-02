@@ -1,12 +1,12 @@
 {
     "scopeNames": {
-        "ActivityOffer": "Offerta attività",
-        "ActivityOfferSlot": "Slot attività",
-        "ActivityInvite": "Invito attività"
+        "ActivityOffer": "Piano turni",
+        "ActivityOfferSlot": "Turno",
+        "ActivityInvite": "Disponibilità"
     },
     "scopeNamesPlural": {
-        "ActivityOffer": "Offerte attività",
-        "ActivityOfferSlot": "Slot attività",
-        "ActivityInvite": "Inviti attività"
+        "ActivityOffer": "Pianificazione turni",
+        "ActivityOfferSlot": "Turni",
+        "ActivityInvite": "Disponibilità"
     }
 }

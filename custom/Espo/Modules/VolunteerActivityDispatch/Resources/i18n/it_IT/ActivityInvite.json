@@ -2,32 +2,32 @@
     "fields": {
         "name": "Nome",
         "task": "Attività",
-        "user": "Utente",
+        "user": "Volontario",
         "status": "Stato",
         "respondedAt": "Risposto il",
-        "activityOffer": "Offerta attività"
+        "activityOffer": "Piano turni"
     },
     "links": {
         "task": "Attività",
-        "user": "Utente",
-        "activityOffer": "Offerta attività"
+        "user": "Volontario",
+        "activityOffer": "Piano turni"
     },
     "labels": {
-        "ActivityInvite": "Invito attività",
-        "ActivityInvitePlural": "Inviti attività",
-        "Create ActivityInvite": "Crea invito",
+        "ActivityInvite": "Disponibilità",
+        "ActivityInvitePlural": "Disponibilità",
+        "Create ActivityInvite": "Crea disponibilità",
         "Accept": "Accetta",
         "Decline": "Rifiuta"
     },
     "options": {
         "status": {
             "Pending": "In attesa",
-            "Accepted": "Accettato",
-            "Declined": "Rifiutato"
+            "Accepted": "Accettata",
+            "Declined": "Rifiutata"
         }
     },
     "messages": {
-        "acceptSuccess": "Invito accettato.",
-        "declineSuccess": "Invito rifiutato."
+        "acceptSuccess": "Disponibilità confermata.",
+        "declineSuccess": "Disponibilità rifiutata."
     }
 }
