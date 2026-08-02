@@ -34,6 +34,33 @@ body[data-theme-name="SafehouseAurora"] .modal-container.overlaid .modal.dialog-
 body[data-theme-name="SafehouseAuroraLight"] .modal-container.overlaid .modal.dialog-record.in {
   z-index: 1250 !important;
 }
+/*
+ * Dynamic Logic condition builder (AND + Field/OR/… dropdown) inside dialog-record:
+ * Espo Dialog sets modal-body overflow:auto which clips menus; keep visible.
+ */
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-body:has(.dynamic-logic-expression-container),
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-body:has(.dynamic-logic-expression-container) {
+  overflow: visible !important;
+}
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .dynamic-logic-expression-container .dropdown-menu,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .dynamic-logic-expression-container .dropdown-menu {
+  z-index: 1300 !important;
+}
+/*
+ * Nested modals opened FROM a dialog-record drawer (e.g. Dynamic Logic → Add Field)
+ * use the default .modal class (NOT .dialog-record). Aurora raised dialog-record to
+ * 1250/1285 for the side navbar, which buried Add Field (~1050) behind the drawer —
+ * Campo / Field looked like a no-op while $User / AND / OR (no second modal) worked.
+ * Only apply when a container is already .overlaid (true nest), so single drawers stay as above.
+ */
+body[data-theme-name="SafehouseAurora"]:has(.modal-container.overlaid) .modal-container:not(.overlaid) .modal.in,
+body[data-theme-name="SafehouseAuroraLight"]:has(.modal-container.overlaid) .modal-container:not(.overlaid) .modal.in {
+  z-index: 1320 !important;
+}
+body[data-theme-name="SafehouseAurora"]:has(.modal-container.overlaid) .modal-backdrop.in:not(.stacked),
+body[data-theme-name="SafehouseAuroraLight"]:has(.modal-container.overlaid) .modal-backdrop.in:not(.stacked) {
+  z-index: 1310 !important;
+}
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;

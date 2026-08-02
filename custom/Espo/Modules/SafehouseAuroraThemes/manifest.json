@@ -1,13 +1,13 @@
 {
     "name": "SafehouseAuroraThemes",
-    "version": "0.1.0",
+    "version": "0.1.3",
     "acceptableVersions": [
-        ">=9.3.6 <10.0.0"
+        ">=9.3.6 <11.0.0"
     ],
     "php": [
         ">=8.1"
     ],
-    "releaseDate": "2026-06-23",
+    "releaseDate": "2026-08-02",
     "author": "skdvlpr",
     "description": "Safehouse Aurora dark & light themes (frosted glass UI). Bundled with NonprofitEspocrm and installable standalone.",
     "skipBackup": false
