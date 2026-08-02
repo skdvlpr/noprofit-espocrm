@@ -12,6 +12,7 @@ use Espo\Core\Name\Field;
 use Espo\Entities\Notification;
 use Espo\Entities\Team;
 use Espo\Entities\User;
+use Espo\Modules\VolunteerActivityDispatch\Hooks\ActivityInvite\ProtectInviteCreate;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use DateTimeImmutable;
@@ -210,7 +211,9 @@ class PublishService
             'status' => 'Pending',
         ]);
 
-        $this->entityManager->saveEntity($invite);
+        $this->entityManager->saveEntity($invite, [
+            ProtectInviteCreate::SAVE_OPTION => true,
+        ]);
 
         return true;
     }

@@ -11,6 +11,7 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Acl;
 use Espo\Core\Application;
+use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\InjectableFactory;
 use Espo\Core\ORM\EntityManager;
 use Espo\Entities\User;
@@ -140,6 +141,28 @@ if (!in_array($invitee->getId(), $collabIds, true)) {
 }
 
 $ok('Accept synced collaborators');
+
+// Direct ActivityInvite create must be blocked (privilege escalation onto Task.collaborators).
+$rogueInvite = $em->getNewEntity('ActivityInvite');
+$rogueInvite->set([
+    'name' => 'Rogue self-invite',
+    'taskId' => $task->getId(),
+    'userId' => $invitee->getId(),
+    'status' => 'Pending',
+]);
+$blockedCreate = false;
+
+try {
+    $em->saveEntity($rogueInvite);
+} catch (Forbidden $e) {
+    $blockedCreate = true;
+}
+
+if (!$blockedCreate) {
+    $fail('Expected Forbidden when creating ActivityInvite outside PublishService');
+}
+
+$ok('Blocked direct ActivityInvite create');
 
 $respond->decline($invite->getId());
 $task = $em->getEntityById('Task', $task->getId());
