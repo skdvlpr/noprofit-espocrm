@@ -23,12 +23,21 @@ class Installer
         $configWriter = $injectableFactory->create(ConfigWriter::class);
 
         $tabList = $config->get('tabList', []) ?? [];
+        $tabList = array_values(array_filter(
+            $tabList,
+            static fn ($item): bool => $item !== 'ActivityOffer'
+        ));
 
-        if (!in_array('ActivityOffer', $tabList, true)) {
+        $taskPos = array_search('Task', $tabList, true);
+
+        if ($taskPos === false) {
             $tabList[] = 'ActivityOffer';
-            $configWriter->set('tabList', $tabList);
-            $configWriter->save();
+        } else {
+            array_splice($tabList, $taskPos + 1, 0, ['ActivityOffer']);
         }
+
+        $configWriter->set('tabList', $tabList);
+        $configWriter->save();
 
         $this->migrateLegacyPlaceVarchar($container);
 
