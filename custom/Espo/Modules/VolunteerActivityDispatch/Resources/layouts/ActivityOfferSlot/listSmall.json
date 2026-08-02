@@ -1,6 +1,6 @@
 [
-    {"name": "name", "width": 30},
+    {"name": "name", "link": true, "width": 35},
     {"name": "dateStart"},
     {"name": "category"},
-    {"name": "place"}
+    {"name": "placeCity"}
 ]

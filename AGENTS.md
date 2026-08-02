@@ -285,11 +285,14 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 | `edit.json`         | Edit form panels             | NO — Espo derives the edit form from `detail.json` if missing. Only add when the edit form must differ (e.g. exclude read-only/computed fields). |
 | `filters.json`      | Search/filter fields         | YES (modern name) |
 | `search.json`       | Search/filter fields (legacy)| NO — use `filters.json` for new entities |
-| `listSmall.json`    | Relationship panel list      | NO            |
-| `detailSmall.json`  | Quick detail in relationship | NO            |
+| `listSmall.json`    | Relationship panel list      | **YES** when the entity appears in a relationship / bottom panel (e.g. slots under ActivityOffer) |
+| `detailSmall.json`  | Quick detail in relationship | **YES** when the entity is opened/previewed from a relationship panel |
 | `massUpdate.json`   | Mass update fields           | NO            |
 | `sidePanels.json`   | Right side panels in detail  | NO            |
 | `bottomPanels.json` | Bottom relationship panels   | NO            |
+| `kanban.json`       | Kanban board                 | NO — only when the product explicitly needs Kanban for that entity |
+
+**LAY-007 — Ship all necessary views (except Kanban by default):** For every new/custom entity, provide **all layouts the UI will actually use**: at minimum `list` + `detail` + `filters`; if the entity is linked from another record’s relationship panel, also ship `listSmall` (+ `detailSmall` when quick-view/side peek is expected). Do **not** leave relationship panels on an empty default with unclickable rows. **Kanban is opt-in only** — never invent a Kanban layout “for completeness”.
 
 **EMPIRICALLY VERIFIED (9.3.6)**: working entities `Member` and `VolunteerEmployee` ship without `edit.json` and rely on `detail.json`. Adding a custom `edit.json` is fine, but then **every field name and every cell** must be valid — see LAY-003.
 
@@ -813,7 +816,7 @@ After metadata or client change:
 
 **Responsive UI rule:** For all frontend work, always implement adaptive/responsive layouts that remain readable and usable across light/dark themes, desktop/laptop/tablet/mobile widths, and high zoom levels. Avoid hardcoded light-only colors unless there is a strict design requirement.
 
-**UI labeling rule:** User-visible UI text must use translated labels, not code identifiers (camelCase/snake_case). Exceptions are only template placeholders (e.g., `{{dateEnd}}`) and other technically required raw tokens.
+**UI labeling rule (MANDATORY — never regress):** User-visible UI text MUST be human language via i18n (`scopeNames` / `scopeNamesPlural` in `Global.json`, `labels.*`, `Create {EntityType}`, enum `options`, formula-generated names). **FORBIDDEN in UI:** entity type CamelCase (`ActivityOffer`, `WorkflowDefinition`), raw enum keys (`MealDistribution`), snake_case, technical jargon (Espo/native/legacy/JSON) in end-user help. Breadcrumbs, Create buttons, stream text, and auto-names all count. Formula auto-names must use `language\translateOption(...)` (or equivalent), never concatenate raw enum codes. Exceptions: template placeholders (e.g. `{{dateEnd}}`) and other technically required raw tokens hidden from normal users.
 
 **Browser automation policy:** Do not run browser automation by default. Provide
 manual browser QA instructions after implementation, and use browser tools only
@@ -1228,7 +1231,7 @@ Create `Resources/metadata/scopes/{EntityName}.json`. Set `"entity": true`, `"mo
 
 Create directory: `Resources/layouts/{EntityName}/` **NOT** `Resources/metadata/layouts/{EntityName}/`.
 
-Minimum required files: `detail.json`, `list.json`, `filters.json`. `edit.json` is optional (Espo derives the edit form from `detail.json` if absent — see LAY-002).
+Minimum required files: `detail.json`, `list.json`, `filters.json`. Also `listSmall.json` / `detailSmall.json` when the entity is used in relationship panels (LAY-007). `edit.json` is optional (Espo derives the edit form from `detail.json` if absent — see LAY-002). Kanban is opt-in only.
 
 Sanity-check rules to avoid silent breakage:
 - Empty cells in any layout MUST be `false`, never `null` (LAY-003).

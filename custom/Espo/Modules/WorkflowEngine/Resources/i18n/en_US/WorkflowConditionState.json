@@ -1,0 +1,13 @@
+{
+    "labels": {
+        "WorkflowConditionState": "Workflow Condition State",
+        "WorkflowConditionStatePlural": "Workflow Condition States"
+    },
+    "fields": {
+        "name": "Name",
+        "workflowDefinition": "Workflow",
+        "targetEntityType": "Target Entity Type",
+        "targetEntityId": "Target Entity ID",
+        "firedAt": "Fired At"
+    }
+}

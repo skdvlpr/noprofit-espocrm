@@ -1,9 +1,9 @@
 {
     "name": "VolunteerActivityDispatch",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "acceptableVersions": [">=10.0.0 <11.0.0"],
     "php": [">=8.2"],
-    "releaseDate": "2026-07-31",
+    "releaseDate": "2026-08-02",
     "author": "skdvlpr",
     "description": "EspoCRM 10+ extension: volunteer/employee activity dispatch (Task-based weekly offers, RSVP, scheduler UI, optional Google Calendar, ICS fallback).",
     "skipBackup": false

@@ -2,10 +2,10 @@
 # Build VolunteerActivityDispatch extension ZIP (Espo 10+).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="$(jq -r .version "$ROOT/custom/Espo/Modules/VolunteerActivityDispatch/manifest.json")"
+VERSION="$(python3 -c "import json; print(json.load(open('$ROOT/custom/Espo/Modules/VolunteerActivityDispatch/manifest.json'))['version'])")"
 OUT="$ROOT/dist/volunteer-activity-dispatch-v${VERSION}.zip"
 rm -f "$OUT"
-mkdir -p "$ROOT/dist" "$ROOT/build/vad-pkg/files"
+mkdir -p "$ROOT/dist" "$ROOT/build/vad-pkg/files/custom/Espo/Modules/VolunteerActivityDispatch"
 cp "$ROOT/custom/Espo/Modules/VolunteerActivityDispatch/manifest.json" "$ROOT/build/vad-pkg/manifest.json"
 mkdir -p "$ROOT/build/vad-pkg/scripts"
 cat > "$ROOT/build/vad-pkg/scripts/AfterInstall.php" <<'PHP'

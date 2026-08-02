@@ -1,36 +1,114 @@
 {
     "labels": {
-        "WorkflowDefinition": "Definizione workflow",
-        "WorkflowDefinitionPlural": "Definizioni workflow",
+        "WorkflowDefinition": "Workflow",
+        "WorkflowDefinitionPlural": "Workflows",
+        "Create WorkflowDefinition": "Crea Workflow",
         "Definition": "Definizione",
-        "Conditions": "Condizioni",
+        "EntryCriteria": "Criteri di ingresso",
+        "Conditions": "Criteri di ingresso",
         "Actions": "Azioni",
-        "Audit": "Audit"
+        "AllConditions": "Tutte le condizioni (devono essere vere)",
+        "AnyConditions": "Qualsiasi condizione (almeno una)",
+        "AddAction": "Aggiungi azione",
+        "AddFieldAssignment": "Aggiungi campo",
+        "EditAssignment": "Valore campo",
+        "Fields": "Campi",
+        "ValueSourceRaw": "Valore fisso",
+        "ValueSourceField": "Da campo",
+        "ValueSourceFormula": "Formula",
+        "RunManual": "Esegui su record",
+        "Cron": "Espressione cron",
+        "LastDayOfMonth": "Ultimo giorno del mese"
     },
     "fields": {
         "name": "Nome",
         "isActive": "Attivo",
         "targetEntityType": "Entità target",
         "triggerType": "Trigger",
+        "recurrenceMode": "Ricorrenza",
+        "schedulePreset": "Esegui workflow",
+        "scheduleMinute": "Minuto",
+        "scheduleHour": "Ora (UTC)",
+        "scheduleWeekdays": "Giorni della settimana",
+        "scheduleMonthDay": "Giorno del mese",
+        "scheduling": "Pianificazione",
         "executionOrder": "Ordine di esecuzione",
-        "conditionGroup": "Gruppo condizioni",
-        "conditionFormula": "Formula condizione",
+        "conditionGroup": "Criteri di ingresso",
+        "conditionFormula": "Formula condizione (legacy)",
         "actions": "Azioni",
         "description": "Descrizione",
         "createdAt": "Creato il",
         "createdBy": "Creato da",
         "modifiedAt": "Modificato il",
-        "modifiedBy": "Modificato da"
+        "modifiedBy": "Modificato da",
+        "to": "Destinatario",
+        "message": "Messaggio",
+        "subject": "Oggetto",
+        "body": "Corpo",
+        "isHtml": "HTML",
+        "email": "Email alternativa",
+        "createEntityType": "Tipo entità da creare",
+        "assignments": "Assegnazioni campi",
+        "TargetField": "Campo da impostare",
+        "ValueSource": "Origine valore",
+        "SourceField": "Campo sorgente",
+        "Expression": "Formula",
+        "Value": "Valore"
+    },
+    "messages": {
+        "selectTargetEntityTypeFirst": "Seleziona prima l'entità target.",
+        "systemWriteWarning": "I workflow vengono eseguiti come automazione di sistema e possono scrivere campi anche se l'utente non può. Regole errate possono danneggiare i dati — verificare con attenzione.",
+        "selectTargetFieldFirst": "Seleziona il campo da impostare.",
+        "selectSourceFieldFirst": "Seleziona un campo sorgente.",
+        "enterFormulaFirst": "Inserisci un'espressione formula.",
+        "addAtLeastOneAssignment": "Aggiungi almeno un'assegnazione di campo.",
+        "runManualNeedTargetId": "Inserisci l'ID del record target per eseguire questo workflow manuale.",
+        "runManualOnly": "Esegui è disponibile solo con Trigger Manuale.",
+        "runManualDone": "Workflow eseguito sul record target.",
+        "schedulingHelp": "Il pianificatore visuale genera un'espressione cron (UTC). Scegli Cron per digitarla manualmente."
     },
     "tooltips": {
-        "conditionGroup": "Array JSON conditionGroup in stile dynamicLogic Espo. Vuoto = sempre vero.",
-        "conditionFormula": "Formula booleana opzionale (dialetto Espo). Vuoto = ignorata.",
-        "actions": "Array JSON ordinato di azioni. Tipi W2: SendEmail, CreateNotification."
+        "scheduling": "Con Trigger = Intervallo di tempo scegli Oraria / Giornaliera / Settimanale / Mensile oppure inserisci un cron manualmente.",
+        "recurrenceMode": "Ogni volta: esegue a ogni salvataggio (o tick pianificato) se le condizioni sono vere. Solo la prima volta: dopo un'esecuzione riuscita su un record, non riesegue più su quello stesso record."
     },
     "options": {
         "triggerType": {
-            "afterCreate": "Dopo creazione",
-            "afterUpdate": "Dopo modifica"
-        }
+            "manual": "Manuale",
+            "afterCreate": "Creazione record",
+            "afterSave": "Aggiornamento record (include creazione)",
+            "scheduled": "Intervallo di tempo"
+        },
+        "recurrenceMode": {
+            "everyTime": "Ogni volta che le condizioni sono soddisfatte",
+            "onlyFirstTime": "Solo la prima volta che le condizioni sono soddisfatte"
+        },
+        "schedulePreset": {
+            "hourly": "Ogni ora",
+            "daily": "Giornaliero",
+            "weekly": "Settimanale",
+            "monthly": "Mensile",
+            "cron": "Cron (manuale)"
+        },
+        "scheduleWeekdays": {
+            "0": "Dom",
+            "1": "Lun",
+            "2": "Mar",
+            "3": "Mer",
+            "4": "Gio",
+            "5": "Ven",
+            "6": "Sab"
+        },
+        "actions": {
+            "UpdateFields": "Aggiorna campi",
+            "CreateRecord": "Crea record",
+            "CreateNotification": "Notifica in-app",
+            "SendEmail": "Invia email"
+        },
+        "UpdateFields": "Aggiorna campi",
+        "CreateRecord": "Crea record",
+        "CreateNotification": "Notifica in-app",
+        "SendEmail": "Invia email",
+        "assignedUser": "Utente assegnato",
+        "createdBy": "Creato da"
     }
 }

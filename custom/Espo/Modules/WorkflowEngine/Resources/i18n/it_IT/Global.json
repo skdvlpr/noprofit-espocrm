@@ -1,0 +1,10 @@
+{
+    "scopeNames": {
+        "WorkflowDefinition": "Workflow",
+        "WorkflowConditionState": "Stato condizione workflow"
+    },
+    "scopeNamesPlural": {
+        "WorkflowDefinition": "Workflows",
+        "WorkflowConditionState": "Stati condizione workflow"
+    }
+}

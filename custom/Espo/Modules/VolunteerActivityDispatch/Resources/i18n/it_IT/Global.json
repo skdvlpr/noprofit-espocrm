@@ -1,0 +1,12 @@
+{
+    "scopeNames": {
+        "ActivityOffer": "Offerta attività",
+        "ActivityOfferSlot": "Slot attività",
+        "ActivityInvite": "Invito attività"
+    },
+    "scopeNamesPlural": {
+        "ActivityOffer": "Offerte attività",
+        "ActivityOfferSlot": "Slot attività",
+        "ActivityInvite": "Inviti attività"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "WorkflowEngine",
+    "object": true,
+    "layouts": false,
+    "tab": false,
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete"],
+    "aclLevelList": ["all", "team", "own", "no"],
+    "stream": false,
+    "importable": false,
+    "exportable": false,
+    "customizable": false
+}

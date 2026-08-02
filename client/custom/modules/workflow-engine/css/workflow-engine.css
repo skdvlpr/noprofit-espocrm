@@ -1,0 +1,76 @@
+.workflow-engine-conditions,
+.workflow-engine-conditions-section,
+.workflow-engine-actions {
+    max-width: 100%;
+}
+
+.workflow-engine-conditions-help,
+.workflow-engine-actions-help {
+    margin-bottom: 0.75rem;
+}
+
+.workflow-engine-actions-list .list-group-item {
+    margin-bottom: 0.5rem;
+}
+
+/*
+ * Native dynamic-logic builder (AND + dropdown) inside dialog-record:
+ * keep menus above modal chrome; do not invent alternate toolbars.
+ */
+.modal.dialog-record .dynamic-logic-expression-container .btn-group.open > .dropdown-menu,
+.modal .dynamic-logic-expression-container .btn-group.open > .dropdown-menu {
+    z-index: 1060;
+}
+
+.modal.dialog-record .modal-body:has(.dynamic-logic-expression-container) {
+    overflow: visible;
+}
+
+.workflow-engine-schedule {
+    max-width: 40rem;
+}
+
+.workflow-engine-schedule-row {
+    margin-bottom: 0.75rem;
+}
+
+.workflow-engine-schedule-row .control-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.workflow-engine-schedule-human {
+    margin-top: 0.35rem;
+}
+
+.workflow-engine-weekday-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+}
+
+.workflow-engine-weekday {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.workflow-engine-schedule-cron code {
+    font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+    .workflow-engine-conditions-section .pull-right,
+    .workflow-engine-actions-list .pull-right {
+        float: none !important;
+        margin-top: 0.35rem;
+    }
+
+    .workflow-engine-schedule {
+        max-width: 100%;
+    }
+}

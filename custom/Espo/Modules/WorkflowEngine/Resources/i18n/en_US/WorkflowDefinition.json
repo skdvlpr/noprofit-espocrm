@@ -1,36 +1,114 @@
 {
     "labels": {
-        "WorkflowDefinition": "Workflow Definition",
-        "WorkflowDefinitionPlural": "Workflow Definitions",
+        "WorkflowDefinition": "Workflow",
+        "WorkflowDefinitionPlural": "Workflows",
+        "Create WorkflowDefinition": "Create Workflow",
         "Definition": "Definition",
-        "Conditions": "Conditions",
+        "EntryCriteria": "Entry Criteria",
+        "Conditions": "Entry Criteria",
         "Actions": "Actions",
-        "Audit": "Audit"
+        "AllConditions": "All conditions (must be met)",
+        "AnyConditions": "Any conditions (at least one)",
+        "AddAction": "Add action",
+        "AddFieldAssignment": "Add field",
+        "EditAssignment": "Field value",
+        "Fields": "Fields",
+        "ValueSourceRaw": "Raw value",
+        "ValueSourceField": "From field",
+        "ValueSourceFormula": "Formula",
+        "RunManual": "Run on record",
+        "Cron": "Cron expression",
+        "LastDayOfMonth": "Last day of month"
     },
     "fields": {
         "name": "Name",
         "isActive": "Active",
         "targetEntityType": "Target Entity Type",
         "triggerType": "Trigger",
+        "recurrenceMode": "Recurrence",
+        "schedulePreset": "Run workflow",
+        "scheduleMinute": "Minute",
+        "scheduleHour": "Hour (UTC)",
+        "scheduleWeekdays": "Days of week",
+        "scheduleMonthDay": "Day of month",
+        "scheduling": "Schedule",
         "executionOrder": "Execution order",
-        "conditionGroup": "Condition group",
-        "conditionFormula": "Condition formula",
+        "conditionGroup": "Entry Criteria",
+        "conditionFormula": "Condition formula (legacy)",
         "actions": "Actions",
         "description": "Description",
         "createdAt": "Created At",
         "createdBy": "Created By",
         "modifiedAt": "Modified At",
-        "modifiedBy": "Modified By"
+        "modifiedBy": "Modified By",
+        "to": "Recipient",
+        "message": "Message",
+        "subject": "Subject",
+        "body": "Body",
+        "isHtml": "HTML",
+        "email": "Email override",
+        "createEntityType": "Create entity type",
+        "assignments": "Field assignments",
+        "TargetField": "Field to set",
+        "ValueSource": "Value source",
+        "SourceField": "Source field",
+        "Expression": "Formula",
+        "Value": "Value"
+    },
+    "messages": {
+        "selectTargetEntityTypeFirst": "Select a target entity type first.",
+        "systemWriteWarning": "Workflows run as system automation and can write fields even when users cannot. Poor rules can corrupt data — review carefully.",
+        "selectTargetFieldFirst": "Select the field to set.",
+        "selectSourceFieldFirst": "Select a source field.",
+        "enterFormulaFirst": "Enter a formula expression.",
+        "addAtLeastOneAssignment": "Add at least one field assignment.",
+        "runManualNeedTargetId": "Enter the target record ID to run this manual workflow.",
+        "runManualOnly": "Run is available only when Trigger is Manual.",
+        "runManualDone": "Workflow executed on the target record.",
+        "schedulingHelp": "Visual schedule builds a cron expression (UTC). Choose Cron to type an expression manually."
     },
     "tooltips": {
-        "conditionGroup": "Espo dynamicLogic-style conditionGroup JSON array. Empty = always match.",
-        "conditionFormula": "Optional boolean formula (Espo formula dialect). Empty = ignore.",
-        "actions": "Ordered JSON array of actions. W2 types: SendEmail, CreateNotification."
+        "scheduling": "When Trigger is Time Interval, choose Hourly / Daily / Weekly / Monthly or enter a cron expression manually.",
+        "recurrenceMode": "Every time: runs on every save (or schedule tick) where conditions succeed. Only first time: after a successful run for a record, never runs again for that same record."
     },
     "options": {
         "triggerType": {
-            "afterCreate": "After Create",
-            "afterUpdate": "After Update"
-        }
+            "manual": "Manual",
+            "afterCreate": "Record creation",
+            "afterSave": "Record updated (Includes Creation)",
+            "scheduled": "Time Interval"
+        },
+        "recurrenceMode": {
+            "everyTime": "Every time conditions are met",
+            "onlyFirstTime": "Only first time conditions are met"
+        },
+        "schedulePreset": {
+            "hourly": "Hourly",
+            "daily": "Daily",
+            "weekly": "Weekly",
+            "monthly": "Monthly",
+            "cron": "Cron (manual)"
+        },
+        "scheduleWeekdays": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+        },
+        "actions": {
+            "UpdateFields": "Update fields",
+            "CreateRecord": "Create record",
+            "CreateNotification": "In-app notification",
+            "SendEmail": "Send email"
+        },
+        "UpdateFields": "Update fields",
+        "CreateRecord": "Create record",
+        "CreateNotification": "In-app notification",
+        "SendEmail": "Send email",
+        "assignedUser": "Assigned user",
+        "createdBy": "Created by"
     }
 }

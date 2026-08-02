@@ -1,5 +1,40 @@
 {
     "controller": "controllers/record",
     "iconClass": "fas fa-diagram-project",
-    "color": "#8e44ad"
+    "color": "#8e44ad",
+    "dynamicLogic": {
+        "fields": {
+            "recurrenceMode": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "triggerType",
+                            "value": ["afterCreate", "afterSave", "scheduled"]
+                        }
+                    ]
+                }
+            },
+            "scheduling": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "triggerType",
+                            "value": "scheduled"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "detailActionList": [
+        {
+            "name": "runManual",
+            "label": "RunManual",
+            "handler": "workflow-engine:handlers/workflow-definition-actions",
+            "actionFunction": "runManual",
+            "acl": "edit"
+        }
+    ]
 }

@@ -23,6 +23,7 @@ class WorkflowTrigger implements AfterSave
 
     private const INTERNAL_ENTITY_TYPE_LIST = [
         'WorkflowDefinition',
+        'WorkflowConditionState',
         'Notification',
         'Email',
         'Note',
@@ -50,8 +51,11 @@ class WorkflowTrigger implements AfterSave
             return;
         }
 
-        $triggerType = $entity->isNew() ? 'afterCreate' : 'afterUpdate';
+        // Vtiger-like: creation-only OR updated-includes-creation (afterSave).
+        $triggerTypes = $entity->isNew()
+            ? ['afterCreate', 'afterSave']
+            : ['afterSave'];
 
-        $this->workflowRunner->process($entity, $triggerType);
+        $this->workflowRunner->process($entity, $triggerTypes);
     }
 }

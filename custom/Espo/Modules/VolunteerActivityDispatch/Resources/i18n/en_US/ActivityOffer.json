@@ -24,6 +24,7 @@
     },
     "labels": {
         "ActivityOffer": "Activity Offer",
+        "ActivityOfferPlural": "Activity Offers",
         "Create ActivityOffer": "Create Activity Offer",
         "Publish week": "Publish week",
         "Slots": "Slots",

@@ -1,0 +1,11 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "weekStart"}],
+            [{"name": "status"}, {"name": "publishedAt"}],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

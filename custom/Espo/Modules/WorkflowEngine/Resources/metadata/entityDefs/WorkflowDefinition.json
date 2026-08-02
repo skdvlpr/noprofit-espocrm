@@ -10,16 +10,66 @@
             "default": true
         },
         "targetEntityType": {
-            "type": "enum",
+            "type": "varchar",
             "required": true,
-            "view": "views/fields/entity-type",
-            "translation": "Global.scopeNames"
+            "maxLength": 100,
+            "view": "views/fields/entity-type"
         },
         "triggerType": {
             "type": "enum",
             "required": true,
-            "options": ["afterCreate", "afterUpdate"],
+            "options": [
+                "manual",
+                "afterCreate",
+                "afterSave",
+                "scheduled"
+            ],
             "default": "afterCreate"
+        },
+        "recurrenceMode": {
+            "type": "enum",
+            "options": ["everyTime", "onlyFirstTime"],
+            "default": "everyTime",
+            "tooltip": true
+        },
+        "schedulePreset": {
+            "type": "enum",
+            "options": ["hourly", "daily", "weekly", "monthly", "cron"],
+            "default": "daily"
+        },
+        "scheduleMinute": {
+            "type": "enum",
+            "options": [
+                "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"
+            ],
+            "default": "0"
+        },
+        "scheduleHour": {
+            "type": "enum",
+            "options": [
+                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"
+            ],
+            "default": "9"
+        },
+        "scheduleWeekdays": {
+            "type": "multiEnum",
+            "options": ["1", "2", "3", "4", "5", "6", "0"],
+            "default": ["1", "2", "3", "4", "5"]
+        },
+        "scheduleMonthDay": {
+            "type": "enum",
+            "options": [
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+                "21", "22", "23", "24", "25", "26", "27", "28", "last"
+            ],
+            "default": "1"
+        },
+        "scheduling": {
+            "type": "varchar",
+            "view": "workflow-engine:views/fields/scheduling",
+            "tooltip": true
         },
         "executionOrder": {
             "type": "int",
@@ -28,15 +78,15 @@
         },
         "conditionGroup": {
             "type": "jsonArray",
-            "tooltip": true
+            "view": "workflow-engine:views/fields/conditions"
         },
         "conditionFormula": {
-            "type": "text",
-            "tooltip": true
+            "type": "text"
         },
         "actions": {
             "type": "jsonArray",
-            "tooltip": true
+            "view": "workflow-engine:views/fields/actions",
+            "options": ["UpdateFields", "CreateRecord", "CreateNotification", "SendEmail"]
         },
         "description": {
             "type": "text"
@@ -68,6 +118,11 @@
         "modifiedBy": {
             "type": "belongsTo",
             "entity": "User"
+        },
+        "conditionStates": {
+            "type": "hasMany",
+            "entity": "WorkflowConditionState",
+            "foreign": "workflowDefinition"
         }
     },
     "collection": {

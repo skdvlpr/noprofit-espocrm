@@ -1,0 +1,51 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "readOnly": true
+        },
+        "workflowDefinition": {
+            "type": "link",
+            "required": true
+        },
+        "targetEntityType": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100
+        },
+        "targetEntityId": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 17
+        },
+        "firedAt": {
+            "type": "datetime",
+            "required": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "workflowDefinition": {
+            "type": "belongsTo",
+            "entity": "WorkflowDefinition",
+            "foreign": "conditionStates"
+        }
+    },
+    "indexes": {
+        "workflowRecord": {
+            "unique": true,
+            "columns": ["workflowDefinitionId", "targetEntityType", "targetEntityId", "deleted"]
+        }
+    },
+    "collection": {
+        "orderBy": "firedAt",
+        "order": "desc"
+    }
+}

@@ -5,16 +5,16 @@
         "rows": [
             [{"name": "name"}, {"name": "isActive"}],
             [{"name": "targetEntityType"}, {"name": "triggerType"}],
-            [{"name": "executionOrder"}, false],
+            [{"name": "recurrenceMode"}, {"name": "executionOrder"}],
+            [{"name": "scheduling", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]
     },
     {
-        "name": "Conditions",
-        "label": "Conditions",
+        "name": "EntryCriteria",
+        "label": "EntryCriteria",
         "rows": [
-            [{"name": "conditionGroup", "fullWidth": true}],
-            [{"name": "conditionFormula", "fullWidth": true}]
+            [{"name": "conditionGroup", "fullWidth": true}]
         ]
     },
     {
@@ -22,14 +22,6 @@
         "label": "Actions",
         "rows": [
             [{"name": "actions", "fullWidth": true}]
-        ]
-    },
-    {
-        "name": "Audit",
-        "label": "Audit",
-        "rows": [
-            [{"name": "createdAt"}, {"name": "createdBy"}],
-            [{"name": "modifiedAt"}, {"name": "modifiedBy"}]
         ]
     }
 ]

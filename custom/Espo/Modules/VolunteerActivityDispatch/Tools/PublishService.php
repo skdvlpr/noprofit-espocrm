@@ -151,9 +151,10 @@ class PublishService
         }
 
         $descriptionParts = [];
+        $placeLabel = $this->formatPlaceAddress($slot);
 
-        if ($slot->get('place')) {
-            $descriptionParts[] = 'Place: ' . $slot->get('place');
+        if ($placeLabel !== '') {
+            $descriptionParts[] = 'Place: ' . $placeLabel;
         }
 
         if ($offer->get('description')) {
@@ -254,5 +255,23 @@ class PublishService
         }
 
         return $count;
+    }
+
+    private function formatPlaceAddress(\Espo\ORM\Entity $slot): string
+    {
+        $parts = array_filter([
+            trim((string) ($slot->get('placeStreet') ?? '')),
+            trim((string) ($slot->get('placeCity') ?? '')),
+            trim((string) ($slot->get('placeState') ?? '')),
+            trim((string) ($slot->get('placePostalCode') ?? '')),
+            trim((string) ($slot->get('placeCountry') ?? '')),
+        ], static fn (string $v): bool => $v !== '');
+
+        if ($parts !== []) {
+            return implode(', ', $parts);
+        }
+
+        // Legacy varchar column before address migration.
+        return trim((string) ($slot->get('place') ?? ''));
     }
 }

@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "category"}],
+            [{"name": "dateStart"}, {"name": "dateEnd"}],
+            [{"name": "place", "fullWidth": true}],
+            [{"name": "activityOffer"}, {"name": "task"}]
+        ]
+    }
+]

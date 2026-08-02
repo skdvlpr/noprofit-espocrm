@@ -1,12 +1,8 @@
 {
     "labels": {
-        "Workflows": "Workflows",
-        "Workflow Definitions": "Workflow Definitions"
+        "Workflows": "Workflows"
     },
     "descriptions": {
         "workflowDefinitions": "Configure automation rules: triggers, conditions, email and in-app notifications for any entity."
-    },
-    "keywords": {
-        "workflowEngine": "workflow, automation, notification, email, condition, trigger"
     }
 }

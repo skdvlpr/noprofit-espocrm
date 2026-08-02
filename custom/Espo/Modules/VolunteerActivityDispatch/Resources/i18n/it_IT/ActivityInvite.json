@@ -14,6 +14,7 @@
     },
     "labels": {
         "ActivityInvite": "Invito attività",
+        "ActivityInvitePlural": "Inviti attività",
         "Create ActivityInvite": "Crea invito",
         "Accept": "Accetta",
         "Decline": "Rifiuta"

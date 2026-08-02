@@ -22,10 +22,14 @@ class WorkflowRunner
         private EntityManager $entityManager,
         private ConditionEvaluator $conditionEvaluator,
         private ActionExecutor $actionExecutor,
+        private ConditionStateService $conditionStateService,
         private LoggerInterface $log,
     ) {}
 
-    public function process(Entity $entity, string $triggerType): void
+    /**
+     * @param string|string[] $triggerType
+     */
+    public function process(Entity $entity, string|array $triggerType): void
     {
         if (self::$depth >= self::MAX_DEPTH) {
             $this->log->warning(
@@ -39,12 +43,20 @@ class WorkflowRunner
             return;
         }
 
+        $triggerTypes = is_array($triggerType)
+            ? array_values(array_unique(array_filter($triggerType, 'is_string')))
+            : [$triggerType];
+
+        if ($triggerTypes === []) {
+            return;
+        }
+
         $definitions = $this->entityManager
             ->getRDBRepository('WorkflowDefinition')
             ->where([
                 'isActive' => true,
                 'targetEntityType' => $entity->getEntityType(),
-                'triggerType' => $triggerType,
+                'triggerType' => $triggerTypes,
             ])
             ->order('executionOrder')
             ->order('createdAt')
@@ -61,16 +73,33 @@ class WorkflowRunner
         }
     }
 
+    public function runDefinitionOnEntity(Entity $definition, Entity $entity): void
+    {
+        if (self::$depth >= self::MAX_DEPTH) {
+            return;
+        }
+
+        self::$depth++;
+
+        try {
+            $this->runDefinition($definition, $entity);
+        } finally {
+            self::$depth--;
+        }
+    }
+
     private function runDefinition(Entity $definition, Entity $entity): void
     {
         $conditionGroup = $definition->get('conditionGroup');
         $conditionFormula = $definition->get('conditionFormula');
 
-        if (!$this->conditionEvaluator->passes(
+        $passed = $this->conditionEvaluator->passes(
             $entity,
             is_array($conditionGroup) || is_object($conditionGroup) ? $conditionGroup : null,
             is_string($conditionFormula) ? $conditionFormula : null
-        )) {
+        );
+
+        if (!$this->conditionStateService->shouldExecute($definition, $entity, $passed)) {
             return;
         }
 
@@ -80,19 +109,27 @@ class WorkflowRunner
             return;
         }
 
+        $anyOk = false;
+
         foreach ($actions as $action) {
             if (!is_array($action)) {
                 if (is_object($action)) {
-                    $action = (array) $action;
+                    $action = json_decode(json_encode($action), true);
                 } else {
                     continue;
                 }
             }
 
+            if (!is_array($action)) {
+                continue;
+            }
+
             try {
                 $result = $this->actionExecutor->execute($action, $entity);
 
-                if (!($result['ok'] ?? false)) {
+                if ($result['ok'] ?? false) {
+                    $anyOk = true;
+                } else {
                     $this->log->warning(
                         'WorkflowEngine action {type} failed on {definition}: {detail}',
                         [
@@ -108,6 +145,10 @@ class WorkflowRunner
                     ['message' => $e->getMessage()]
                 );
             }
+        }
+
+        if ($anyOk) {
+            $this->conditionStateService->markFired($definition, $entity);
         }
     }
 }

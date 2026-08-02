@@ -24,6 +24,7 @@
     },
     "labels": {
         "ActivityOffer": "Offerta attività",
+        "ActivityOfferPlural": "Offerte attività",
         "Create ActivityOffer": "Crea offerta attività",
         "Publish week": "Pubblica settimana",
         "Slots": "Slot",

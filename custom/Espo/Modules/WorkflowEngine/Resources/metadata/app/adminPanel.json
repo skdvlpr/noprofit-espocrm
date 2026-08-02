@@ -1,15 +1,14 @@
 {
-    "workflowEngine": {
-        "label": "Workflows",
+    "setup": {
         "itemList": [
+            "__APPEND__",
             {
                 "url": "#WorkflowDefinition",
-                "label": "Workflow Definitions",
+                "label": "Workflows",
                 "iconClass": "fas fa-diagram-project",
                 "description": "workflowDefinitions",
                 "tabQuickSearch": true
             }
-        ],
-        "order": 85
+        ]
     }
 }

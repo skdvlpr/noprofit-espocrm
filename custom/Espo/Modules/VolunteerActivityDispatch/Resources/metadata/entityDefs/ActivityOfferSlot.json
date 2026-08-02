@@ -53,8 +53,8 @@
             "isSorted": true
         },
         "place": {
-            "type": "varchar",
-            "maxLength": 255
+            "type": "address",
+            "viewMap": true
         },
         "task": {
             "type": "link",
@@ -86,7 +86,7 @@
     "collection": {
         "orderBy": "dateStart",
         "order": "asc",
-        "textFilterFields": ["name", "place", "category"]
+        "textFilterFields": ["name", "placeCity", "placeStreet", "category"]
     },
     "indexes": {
         "offerDate": {"columns": ["activityOfferId", "dateStart", "deleted"]}

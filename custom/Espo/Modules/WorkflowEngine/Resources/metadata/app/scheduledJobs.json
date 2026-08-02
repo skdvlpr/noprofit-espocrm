@@ -1,0 +1,8 @@
+{
+    "WorkflowEngineRunScheduledWorkflows": {
+        "name": "WorkflowEngine: Run Scheduled Workflows",
+        "jobClassName": "Espo\\Modules\\WorkflowEngine\\Jobs\\RunScheduledWorkflows",
+        "scheduling": "* * * * *",
+        "isSystem": true
+    }
+}

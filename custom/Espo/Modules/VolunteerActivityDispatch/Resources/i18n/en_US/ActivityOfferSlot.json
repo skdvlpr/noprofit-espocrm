@@ -7,6 +7,12 @@
         "duration": "Duration",
         "category": "Category",
         "place": "Place",
+        "placeStreet": "Street",
+        "placeCity": "City",
+        "placeState": "State",
+        "placeCountry": "Country",
+        "placePostalCode": "Postal code",
+        "placeMap": "Map",
         "task": "Task",
         "sortOrder": "Sort order"
     },
@@ -16,6 +22,7 @@
     },
     "labels": {
         "ActivityOfferSlot": "Activity Slot",
+        "ActivityOfferSlotPlural": "Activity Slots",
         "Create ActivityOfferSlot": "Create Slot"
     },
     "options": {

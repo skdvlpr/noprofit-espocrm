@@ -1,6 +1,6 @@
 [
-    {"name": "dateStart"},
     {"name": "category"},
-    {"name": "place"},
+    {"name": "dateStart"},
+    {"name": "placeCity"},
     {"name": "activityOffer"}
 ]
