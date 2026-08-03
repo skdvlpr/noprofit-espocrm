@@ -1,5 +1,8 @@
 {
     "fields": {
+        "lastName": {
+            "required": false
+        },
         "hasVolunteerRole": {
             "type": "bool",
             "notStorable": true,

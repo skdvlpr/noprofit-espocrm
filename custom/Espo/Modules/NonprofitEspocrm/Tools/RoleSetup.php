@@ -84,7 +84,7 @@ class RoleSetup
     ];
 
     /** Bump when Volunteer/Member/Admin ACL must be rewritten on rebuild (prod-safe). */
-    public const ACL_MATRIX_VERSION = '2026-08-03-volunteer-member-readall-v1';
+    public const ACL_MATRIX_VERSION = '2026-08-03-volunteer-member-readall-v2';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -271,8 +271,9 @@ class RoleSetup
     }
 
     /**
-     * Soft-delete Employee/Manager/Desk when unused (no User linked).
-     * Does not remove roles that still have users assigned.
+     * Soft-delete every Role not in {@see CORE_ROLES}.
+     * Unlinks users first so Admin/Volunteer/Member remain the only selectable roles.
+     * Skipped when SAFEHOUSE_EXTRA_ROLES=1 (local staff-role sandbox).
      *
      * @return array<string, string>
      */
@@ -285,34 +286,33 @@ class RoleSetup
             return ['skipped' => 'SAFEHOUSE_EXTRA_ROLES=1'];
         }
 
-        foreach (self::EXTRA_ROLES as $roleName) {
-            /** @var ?Role $role */
-            $role = $em->getRDBRepositoryByClass(Role::class)
-                ->where(['name' => $roleName])
-                ->findOne();
+        $roles = $em->getRDBRepositoryByClass(Role::class)->find();
 
-            if (!$role) {
-                $report[$roleName] = 'absent';
+        foreach ($roles as $role) {
+            $roleName = (string) $role->get('name');
+
+            if (in_array($roleName, self::CORE_ROLES, true)) {
+                $report[$roleName] = 'kept-core';
                 continue;
             }
 
-            $linked = 0;
+            $unlinked = 0;
 
             foreach ($em->getRDBRepository('User')->where(['deleted' => false])->find() as $user) {
                 $roleIds = $user->getLinkMultipleIdList('roles');
 
-                if (in_array($role->getId(), $roleIds, true)) {
-                    $linked++;
+                if (!in_array($role->getId(), $roleIds, true)) {
+                    continue;
                 }
-            }
 
-            if ($linked > 0) {
-                $report[$roleName] = "kept-in-use ($linked users)";
-                continue;
+                $em->getRDBRepository('User')->getRelation($user, 'roles')->unrelate($role);
+                $unlinked++;
             }
 
             $em->removeEntity($role);
-            $report[$roleName] = 'removed';
+            $report[$roleName] = $unlinked > 0
+                ? "removed (unlinked {$unlinked} users)"
+                : 'removed';
         }
 
         return $report;

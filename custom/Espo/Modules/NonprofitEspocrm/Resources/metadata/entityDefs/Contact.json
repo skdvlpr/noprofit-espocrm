@@ -1,5 +1,8 @@
 {
     "fields": {
+        "lastName": {
+            "required": false
+        },
         "contactType": {
             "type": "enum",
             "options": [

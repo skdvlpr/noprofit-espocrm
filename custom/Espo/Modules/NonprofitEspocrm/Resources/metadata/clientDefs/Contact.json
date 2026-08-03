@@ -243,17 +243,6 @@
                         }
                     ]
                 }
-            },
-            "lastName": {
-                "required": {
-                    "conditionGroup": [
-                        {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee", "MemberContact"]
-                        }
-                    ]
-                }
             }
         }
     },

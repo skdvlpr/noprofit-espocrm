@@ -292,6 +292,10 @@ if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
     foreach (['Employee', 'Manager', 'Desk'] as $extraRole) {
         $report("Extra role `$extraRole` provisioned", in_array($extraRole, $roleNames, true));
     }
+} else {
+    foreach (['Employee', 'Manager', 'Desk', 'Can create', 'Can edit', 'Can delete', 'Website'] as $gone) {
+        $report("Non-core role `$gone` absent", !in_array($gone, $roleNames, true));
+    }
 }
 
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();

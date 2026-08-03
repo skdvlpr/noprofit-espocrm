@@ -19,7 +19,7 @@
         },
         "lastName": {
             "type": "varchar",
-            "required": true
+            "required": false
         },
         "birthDate": {
             "type": "date"
