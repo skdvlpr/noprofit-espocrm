@@ -14,6 +14,7 @@ use Espo\Entities\Team;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
+use Espo\Core\ORM\Repository\Option\SaveOption;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -685,7 +686,20 @@ class ShiftPlanningService
      */
     private function getInvites(string $offerId, ?string $userId = null): array
     {
-        $where = ['activityOfferId' => $offerId];
+        $slotIds = array_map(
+            fn (Entity $slot) => $slot->getId(),
+            $this->getSlots($offerId)
+        );
+
+        // Match by offer id OR by slot membership: a slot may have been
+        // re-parented to another plan after invites were created, leaving
+        // invite.activityOfferId stale (would cause UNIQ_SLOT_USER duplicates).
+        $where = [
+            'OR' => array_filter([
+                ['activityOfferId' => $offerId],
+                $slotIds !== [] ? ['activityOfferSlotId' => $slotIds] : null,
+            ]),
+        ];
 
         if ($userId !== null) {
             $where['userId'] = $userId;
@@ -696,7 +710,28 @@ class ShiftPlanningService
             ->where($where)
             ->find();
 
-        return iterator_to_array($collection);
+        $slotIdMap = array_fill_keys($slotIds, true);
+        $invites = [];
+
+        foreach ($collection as $invite) {
+            $slotId = $invite->get('activityOfferSlotId');
+
+            // Skip invites whose slot moved away to another plan.
+            if ($slotId && !isset($slotIdMap[$slotId])) {
+                continue;
+            }
+
+            // Heal a stale offer link (slot belongs to this plan).
+            if ($slotId && $invite->get('activityOfferId') !== $offerId) {
+                $invite->set('activityOfferId', $offerId);
+
+                $this->entityManager->saveEntity($invite, [SaveOption::SILENT => true]);
+            }
+
+            $invites[] = $invite;
+        }
+
+        return $invites;
     }
 
     /**

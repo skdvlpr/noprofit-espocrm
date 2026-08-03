@@ -47,6 +47,7 @@ class Installer
 
         // After rebuild: new columns (activity_offer_slot_id) exist.
         $this->migrateShiftPlanningStatuses($container);
+        $this->normalizeInviteOfferLinks($container);
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
         $this->ensureEmailTemplates($container);
@@ -294,6 +295,43 @@ class Installer
         } catch (\Throwable $e) {
             $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
                 'VolunteerActivityDispatch status migration skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Align invite.activityOfferId with the plan its slot belongs to.
+     * Slots can be re-parented to another plan after invites were created,
+     * which left stale offer links and caused UNIQ_SLOT_USER duplicate-key
+     * failures on saveAvailability.
+     */
+    public function normalizeInviteOfferLinks(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+
+            $invites = $em->getRDBRepository('ActivityInvite')
+                ->where(['activityOfferSlotId!=' => null])
+                ->find();
+
+            foreach ($invites as $invite) {
+                $slot = $em->getEntityById('ActivityOfferSlot', $invite->get('activityOfferSlotId'));
+
+                if (!$slot) {
+                    continue;
+                }
+
+                $slotOfferId = $slot->get('activityOfferId');
+
+                if ($slotOfferId && $invite->get('activityOfferId') !== $slotOfferId) {
+                    $invite->set('activityOfferId', $slotOfferId);
+                    $em->saveEntity($invite, ['skipAll' => true, 'silent' => true]);
+                }
+            }
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'VolunteerActivityDispatch invite link normalization skipped: ' . $e->getMessage()
             );
         }
     }

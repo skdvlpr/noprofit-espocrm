@@ -105,7 +105,7 @@ foreach (['availabilityRequest', 'shiftsConfirmed'] as $kind) {
 // --- fixtures -----------------------------------------------------------------
 
 // Purge leftovers from previous runs.
-foreach ($em->getRDBRepository('ActivityOffer')->where(['name' => 'Smoke Shift Week'])->find() as $old) {
+foreach ($em->getRDBRepository('ActivityOffer')->where(['name' => ['Smoke Shift Week', 'Smoke Shift Week OLD']])->find() as $old) {
     foreach (['ActivityInvite', 'Task', 'ActivityOfferSlot'] as $type) {
         foreach ($em->getRDBRepository($type)->where(['activityOfferId' => $old->getId()])->find() as $e) {
             $em->removeEntity($e, ['skipAll' => true, 'silent' => true]);
@@ -225,11 +225,46 @@ $declare = function ($volunteer, array $slotIds) use ($injectableFactory, $offer
     return $service->saveAvailability($offer->getId(), $slotIds);
 };
 
-$declare($volunteers[0], [
-    $slots['MealPreparation']->getId(),
-    $slots['MealDistribution']->getId(),
-    $slots['Cleaning']->getId(),
+// --- regression: slot re-parented to another plan (stale invite offer link) ----
+// Simulate: vol1 declared availability while the slot belonged to an old plan,
+// then the slot was moved to this plan. saveAvailability must reuse the
+// existing invite (no UNIQ_SLOT_USER duplicate-key 500) and heal the link.
+
+$oldOffer = $em->getNewEntity('ActivityOffer');
+$oldOffer->set(['name' => 'Smoke Shift Week OLD', 'weekStart' => '2026-08-31', 'status' => 'CollectingAvailability']);
+$em->saveEntity($oldOffer, ['skipAll' => true, 'silent' => true]);
+
+$staleInvite = $em->getNewEntity('ActivityInvite');
+$staleInvite->set([
+    'name' => 'stale smoke invite',
+    'userId' => $volunteers[0]->getId(),
+    'activityOfferId' => $oldOffer->getId(),
+    'activityOfferSlotId' => $slots['MealPreparation']->getId(),
+    'status' => 'Available',
 ]);
+$em->saveEntity($staleInvite, ['skipAll' => true, 'silent' => true]);
+
+try {
+    $declare($volunteers[0], [
+        $slots['MealPreparation']->getId(),
+        $slots['MealDistribution']->getId(),
+        $slots['Cleaning']->getId(),
+    ]);
+    ok(true, 'saveAvailability survives stale invite from re-parented slot');
+} catch (\Throwable $e) {
+    ok(false, 'saveAvailability survives stale invite from re-parented slot (' . $e->getMessage() . ')');
+}
+
+$pairInvites = $em->getRDBRepository('ActivityInvite')->where([
+    'activityOfferSlotId' => $slots['MealPreparation']->getId(),
+    'userId' => $volunteers[0]->getId(),
+])->find();
+$pairInvites = iterator_to_array($pairInvites);
+ok(count($pairInvites) === 1, 'exactly one invite per slot+user after save');
+ok(
+    $pairInvites !== [] && $pairInvites[0]->get('activityOfferId') === $offer->getId(),
+    'stale invite offer link healed to current plan'
+);
 $declare($volunteers[1], [
     $slots['MealPreparation']->getId(),
     $slots['Cleaning']->getId(),
@@ -356,6 +391,11 @@ foreach ($em->getRDBRepository('Email')->where(['parentType' => 'ActivityOffer',
     $em->removeEntity($e, ['skipAll' => true, 'silent' => true]);
 }
 $em->removeEntity($em->getEntityById('ActivityOffer', $offer->getId()), ['skipAll' => true, 'silent' => true]);
+
+$oldOfferReloaded = $em->getEntityById('ActivityOffer', $oldOffer->getId());
+if ($oldOfferReloaded) {
+    $em->removeEntity($oldOfferReloaded, ['skipAll' => true, 'silent' => true]);
+}
 
 if ($volunteerRole) {
     $em->getRDBRepository('User')->getRelation($volunteers[0], 'roles')->unrelate($volunteerRole);
