@@ -114,6 +114,23 @@ $ok(
     $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'panels', 'stripeDetails', 'visible', 'conditionGroup', 0, 'value']) === 'Stripe'
 );
 $ok(
+    'refreshFromStripe detail button exists',
+    $metadata->get(['clientDefs', 'PrimaNota', 'menu', 'detail', 'buttons', 1, 'name']) === 'refreshFromStripe'
+        || in_array(
+            'refreshFromStripe',
+            array_column($metadata->get(['clientDefs', 'PrimaNota', 'menu', 'detail', 'buttons']) ?? [], 'name'),
+            true
+        )
+);
+$ok(
+    'refreshFromStripe handler file',
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/handlers/prima-nota/refresh-from-stripe.js')
+);
+$ok(
+    'StripeRefreshService class',
+    class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeRefreshService::class)
+);
+$ok(
     'stripeChargeId UI readOnly via clientDefs when Stripe',
     $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'fields', 'stripeChargeId', 'readOnly', 'conditionGroup', 0, 'value']) === 'Stripe'
 );

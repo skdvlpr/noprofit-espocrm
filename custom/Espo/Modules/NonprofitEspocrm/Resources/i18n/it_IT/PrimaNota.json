@@ -64,7 +64,8 @@
         "PrimaNotaPlural": "Prima nota",
         "Create PrimaNota": "Crea movimento",
         "stripeDetails": "Dettagli Stripe",
-        "copyPaymentData": "Copia dati pagamento"
+        "copyPaymentData": "Copia dati pagamento",
+        "refreshFromStripe": "Aggiorna da Stripe"
     },
     "toolTips": {
         "amount": "L'importo netto e' sempre calcolato: lordo - commissione. Non modificabile.",
@@ -92,7 +93,11 @@
         "partyCreateWithLinkBlocked": "Deseleziona i flag di creazione se e' gia' collegato un soggetto.",
         "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato.",
         "copyPaymentDataCopied": "Dati pagamento copiati negli appunti.",
-        "copyPaymentDataFailed": "Impossibile copiare i dati pagamento."
+        "copyPaymentDataFailed": "Impossibile copiare i dati pagamento.",
+        "refreshFromStripeInProgress": "Aggiornamento stato pagamento da Stripe...",
+        "refreshFromStripeSuccess": "Stato pagamento da Stripe: {status}",
+        "refreshFromStripeFailed": "Impossibile aggiornare lo stato pagamento da Stripe.",
+        "refreshFromStripeNotStripe": "Aggiorna da Stripe e' disponibile solo per i movimenti Stripe."
     },
     "options": {
         "entryType": {

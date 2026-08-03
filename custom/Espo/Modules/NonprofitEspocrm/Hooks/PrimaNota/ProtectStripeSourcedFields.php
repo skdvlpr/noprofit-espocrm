@@ -4,15 +4,20 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Language;
+use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
  * When donationPaymentProvider is Stripe, every Stripe-sourced attribute is locked
- * after create. Operational fields remain editable: assignedUser, teams,
- * modelDClassification, paymentStatus. Ingest create still works (isNew).
+ * after create for normal UI users. Operational fields remain editable: assignedUser,
+ * teams, modelDClassification, paymentStatus. Ingest create still works (isNew).
+ *
+ * Trusted site/API sync users (config safehouseStripeSyncUserNames / Ids) may
+ * overwrite Stripe-sourced attrs so webhook + «Aggiorna da Stripe» keep CRM in sync.
  *
  * Incomplete ingest window: if stripeChargeId is still empty, allow one-time
  * backfill of Stripe-sourced attributes (thank-you raced ahead of BalanceTransaction).
@@ -91,8 +96,11 @@ class ProtectStripeSourcedFields implements BeforeSave
         'stripePayoutPaidAt',
     ];
 
-    public function __construct(Language $language)
-    {
+    public function __construct(
+        Language $language,
+        private User $user,
+        private Config $config,
+    ) {
         $this->language = $language;
     }
 
@@ -107,6 +115,10 @@ class ProtectStripeSourcedFields implements BeforeSave
         }
 
         if (!$this->isStripeProvider($entity)) {
+            return;
+        }
+
+        if ($this->isTrustedStripeSyncUser()) {
             return;
         }
 
@@ -126,6 +138,36 @@ class ProtectStripeSourcedFields implements BeforeSave
 
             throw new BadRequest($this->msg('stripeSourcedReadOnly'));
         }
+    }
+
+    private function isTrustedStripeSyncUser(): bool
+    {
+        $userName = trim((string) $this->user->get('userName'));
+        $userId = trim((string) $this->user->getId());
+
+        /** @var mixed $names */
+        $names = $this->config->get('safehouseStripeSyncUserNames');
+        if (!is_array($names) || $names === []) {
+            $names = ['site_safehouse.community'];
+        }
+
+        foreach ($names as $name) {
+            if (is_string($name) && trim($name) !== '' && $userName === trim($name)) {
+                return true;
+            }
+        }
+
+        /** @var mixed $ids */
+        $ids = $this->config->get('safehouseStripeSyncUserIds');
+        if (is_array($ids)) {
+            foreach ($ids as $id) {
+                if (is_string($id) && trim($id) !== '' && $userId === trim($id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function isIncompleteStripeIngest(Entity $entity): bool

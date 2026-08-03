@@ -30,11 +30,13 @@
         },
         "subjectEmailAddress": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "subjectPhoneNumber": {
             "type": "varchar",
-            "maxLength": 64
+            "maxLength": 64,
+            "audited": true
         },
         "beneficiaryName": {
             "type": "varchar",
@@ -78,22 +80,26 @@
         "amount": {
             "type": "currency",
             "currency": "EUR",
-            "readOnly": true
+            "readOnly": true,
+            "audited": true
         },
         "amountGross": {
             "type": "currency",
-            "currency": "EUR"
+            "currency": "EUR",
+            "audited": true
         },
         "commissionAmount": {
             "type": "currency",
             "currency": "EUR",
-            "default": 0
+            "default": 0,
+            "audited": true
         },
         "commissionPercent": {
             "type": "float",
             "min": 0,
             "max": 100,
-            "default": 0
+            "default": 0,
+            "audited": true
         },
         "amountIn": {
             "type": "currency",
@@ -130,18 +136,21 @@
                 "Other"
             ],
             "default": "Other",
-            "view": "nonprofit-espocrm:views/fields/donation-payment-provider"
+            "view": "nonprofit-espocrm:views/fields/donation-payment-provider",
+            "audited": true
         },
         "donationPaymentReference": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "donationDonorCategory": {
             "type": "enum",
             "options": [
                 "Individual",
                 "Organization"
-            ]
+            ],
+            "audited": true
         },
         "donationFrequency": {
             "type": "enum",
@@ -149,7 +158,8 @@
                 "OneTime",
                 "Recurring"
             ],
-            "default": "OneTime"
+            "default": "OneTime",
+            "audited": true
         },
         "paymentStatus": {
             "type": "enum",
@@ -171,21 +181,25 @@
                 "Refunded": "warning",
                 "Disputed": "danger",
                 "Problematic": "warning"
-            }
+            },
+            "audited": true
         },
         "donationComment": {
             "type": "text"
         },
         "stripePaymentCreatedAt": {
-            "type": "datetime"
+            "type": "datetime",
+            "audited": true
         },
         "stripeChargeId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeBalanceTransactionId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripePaymentMethodType": {
             "type": "enum",
@@ -217,36 +231,44 @@
                 "mb_way": "default",
                 "klarna": "warning",
                 "other": "default"
-            }
+            },
+            "audited": true
         },
         "stripeCardBrand": {
             "type": "varchar",
-            "maxLength": 64
+            "maxLength": 64,
+            "audited": true
         },
         "stripeCardLast4": {
             "type": "varchar",
-            "maxLength": 4
+            "maxLength": 4,
+            "audited": true
         },
         "stripeReceiptUrl": {
-            "type": "url"
+            "type": "url",
+            "audited": true
         },
         "stripeReceiptEmail": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeBillingEmail": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeBillingPhone": {
             "type": "varchar",
-            "maxLength": 64
+            "maxLength": 64,
+            "audited": true
         },
         "stripeFeeDetailsJson": {
             "type": "text"
         },
         "stripeLivemode": {
-            "type": "bool"
+            "type": "bool",
+            "audited": true
         },
         "stripeRadarRiskLevel": {
             "type": "enum",
@@ -260,34 +282,42 @@
                 "normal": "success",
                 "elevated": "warning",
                 "highest": "danger"
-            }
+            },
+            "audited": true
         },
         "stripeStatementDescriptor": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeCustomerId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeSubscriptionId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeInvoiceId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripeInvoiceNumber": {
             "type": "varchar",
-            "maxLength": 64
+            "maxLength": 64,
+            "audited": true
         },
         "stripePayoutId": {
             "type": "varchar",
-            "maxLength": 255
+            "maxLength": 255,
+            "audited": true
         },
         "stripePayoutPaidAt": {
-            "type": "datetime"
+            "type": "datetime",
+            "audited": true
         },
         "modelDClassification": {
             "type": "enum",
@@ -306,7 +336,8 @@
         },
         "transactionDate": {
             "type": "date",
-            "required": true
+            "required": true,
+            "audited": true
         },
         "createdAt": {
             "type": "datetime",

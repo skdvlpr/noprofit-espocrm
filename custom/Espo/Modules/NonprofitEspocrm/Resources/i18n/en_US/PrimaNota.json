@@ -64,7 +64,8 @@
         "PrimaNotaPlural": "Ledger (Prima Nota)",
         "Create PrimaNota": "Create ledger entry",
         "stripeDetails": "Stripe details",
-        "copyPaymentData": "Copy payment data"
+        "copyPaymentData": "Copy payment data",
+        "refreshFromStripe": "Refresh from Stripe"
     },
     "toolTips": {
         "amount": "Net amount is always calculated as gross − commission. Not editable.",
@@ -92,7 +93,11 @@
         "partyCreateWithLinkBlocked": "Clear create flags when a linked party is selected.",
         "partyNameRequired": "Enter a name before creating a linked Account or Contact.",
         "copyPaymentDataCopied": "Payment data copied to clipboard.",
-        "copyPaymentDataFailed": "Could not copy payment data."
+        "copyPaymentDataFailed": "Could not copy payment data.",
+        "refreshFromStripeInProgress": "Refreshing payment status from Stripe...",
+        "refreshFromStripeSuccess": "Payment status from Stripe: {status}",
+        "refreshFromStripeFailed": "Could not refresh payment status from Stripe.",
+        "refreshFromStripeNotStripe": "Refresh from Stripe is only available for Stripe ledger entries."
     },
     "options": {
         "entryType": {
