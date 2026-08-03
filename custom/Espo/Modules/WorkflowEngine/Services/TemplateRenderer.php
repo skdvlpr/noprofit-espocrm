@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Espo\Modules\WorkflowEngine\Services;
 
 use Espo\Core\Htmlizer\Htmlizer;
+use Espo\Modules\NonprofitEspocrm\Tools\EmailTemplate\TemplatePlaceholderHelper;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,7 @@ class TemplateRenderer
     public function __construct(
         private EntityManager $entityManager,
         private LoggerInterface $log,
+        private TemplatePlaceholderHelper $placeholderHelper,
     ) {}
 
     public function render(Entity $entity, string $template, Htmlizer $htmlizer): string
@@ -27,6 +29,7 @@ class TemplateRenderer
             return '';
         }
 
+        $template = $this->placeholderHelper->applyRecordUrls($template, $entity);
         $template = $this->normalizeEmailTemplatePlaceholders($entity, $template);
         $template = $this->resolveRelatedPathVariables($entity, $template);
 
@@ -35,7 +38,7 @@ class TemplateRenderer
             // intact so Email::getBodyForSending() can embed images as cid parts.
             // Without it Htmlizer rewrites them to local `data/upload/...` paths
             // (a PDF-generation behavior) — dead links in external mail clients.
-            return trim($htmlizer->render(
+            $rendered = trim($htmlizer->render(
                 $entity,
                 $template,
                 null,
@@ -48,8 +51,10 @@ class TemplateRenderer
                 ['message' => $e->getMessage()]
             );
 
-            return $template;
+            $rendered = $template;
         }
+
+        return $this->placeholderHelper->clearUnresolvedEntityPlaceholders($rendered);
     }
 
     /**

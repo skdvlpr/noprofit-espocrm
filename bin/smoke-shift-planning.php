@@ -100,7 +100,33 @@ foreach (['availabilityRequest', 'shiftsConfirmed'] as $kind) {
     $tplId = $templateIds[$kind] ?? null;
     $tpl = $tplId ? $em->getEntityById('EmailTemplate', $tplId) : null;
     ok($tpl !== null, "email template provisioned: $kind");
+
+    if ($tpl) {
+        $body = (string) $tpl->get('body');
+        ok(str_contains($body, '{recordUrl}'), "email template $kind uses {recordUrl}");
+        ok(!str_contains($body, '{planUrl}'), "email template $kind no longer uses {planUrl}");
+    }
 }
+
+$recordUrlMeta = $metadata->get(['app', 'emailTemplate', 'placeholders', 'recordUrl', 'className']);
+ok(is_string($recordUrlMeta) && str_contains($recordUrlMeta, 'RecordUrl'), 'app.emailTemplate.placeholders.recordUrl registered');
+
+$helper = $injectableFactory->create(
+    \Espo\Modules\NonprofitEspocrm\Tools\EmailTemplate\TemplatePlaceholderHelper::class
+);
+$dummy = $em->getNewEntity('ActivityOffer');
+$dummy->set('id', 'smokeRecordUrlOffer');
+$url = $helper->urlFor($dummy);
+ok(str_contains($url, '#ActivityOffer/view/smokeRecordUrlOffer'), 'recordUrl helper builds deep link');
+$applied = $helper->applyRecordUrls(
+    'A {recordUrl} B {ActivityOffer.recordUrl} C {Missing.recordUrl} D {ActivityOffer.noSuchField}',
+    $dummy,
+    ['ActivityOffer' => $dummy]
+);
+ok(str_contains($applied, $url) && !str_contains($applied, '{recordUrl}'), 'applyRecordUrls fills {recordUrl}');
+ok(!str_contains($applied, '{Missing.recordUrl}'), 'missing related recordUrl becomes empty');
+$cleaned = $helper->clearUnresolvedEntityPlaceholders($applied);
+ok(!str_contains($cleaned, '{ActivityOffer.noSuchField}'), 'null/unresolved entity placeholders cleared');
 
 // --- fixtures -----------------------------------------------------------------
 

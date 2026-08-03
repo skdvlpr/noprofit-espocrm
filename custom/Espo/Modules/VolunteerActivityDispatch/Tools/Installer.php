@@ -75,39 +75,22 @@ class Installer
                 $ids = [];
             }
 
-            $defs = [
-                ShiftEmailService::KIND_AVAILABILITY_REQUEST => [
-                    'name' => 'Turni — Richiesta disponibilità',
-                    'subject' => 'Nuova pianificazione turni: {ActivityOffer.name}',
-                    'body' => '<p>Ciao {User.firstName},</p>'
-                        . '<p>è aperta la raccolta disponibilità per la pianificazione turni '
-                        . '<strong>{ActivityOffer.name}</strong> (settimana dal {ActivityOffer.weekStart}).</p>'
-                        . '<p>Indica la tua disponibilità aprendo il piano nel CRM:<br>'
-                        . '<a href="{planUrl}">{planUrl}</a></p>'
-                        . '<p>Grazie!</p>',
-                ],
-                ShiftEmailService::KIND_SHIFTS_CONFIRMED => [
-                    'name' => 'Turni — Conferma turni',
-                    'subject' => 'Turni confermati: {ActivityOffer.name}',
-                    'body' => '<p>Ciao {User.firstName},</p>'
-                        . '<p>i tuoi turni per <strong>{ActivityOffer.name}</strong> sono stati confermati:</p>'
-                        . '<p>{shiftList}</p>'
-                        . '<p>Dettagli nel CRM: <a href="{planUrl}">{planUrl}</a></p>',
-                ],
-            ];
-
+            $defs = $this->getShiftEmailTemplateDefs();
             $changed = false;
+            // Bump when default subject/body must be rewritten on existing installs.
+            $contentVersion = '2026-08-03-recordUrl-v1';
+            $storedVersion = (string) ($config->get('vadEmailTemplateContentVersion') ?? '');
+            $refreshBodies = $storedVersion !== $contentVersion;
 
             foreach ($defs as $kind => $def) {
                 $existingId = $ids[$kind] ?? null;
+                $template = $existingId ? $em->getEntityById('EmailTemplate', $existingId) : null;
 
-                if ($existingId && $em->getEntityById('EmailTemplate', $existingId)) {
-                    continue;
+                if (!$template) {
+                    $template = $em->getRDBRepository('EmailTemplate')
+                        ->where(['name' => $def['name']])
+                        ->findOne();
                 }
-
-                $template = $em->getRDBRepository('EmailTemplate')
-                    ->where(['name' => $def['name']])
-                    ->findOne();
 
                 if (!$template) {
                     $template = $em->getNewEntity('EmailTemplate');
@@ -119,15 +102,28 @@ class Installer
                         'oneOff' => false,
                     ]);
                     $em->saveEntity($template, ['skipAll' => true, 'silent' => true]);
+                    $ids[$kind] = $template->getId();
+                    $changed = true;
+
+                    continue;
                 }
 
-                $ids[$kind] = $template->getId();
-                $changed = true;
+                if ($refreshBodies || ($ids[$kind] ?? null) !== $template->getId()) {
+                    $template->set([
+                        'subject' => $def['subject'],
+                        'body' => $def['body'],
+                        'isHtml' => true,
+                    ]);
+                    $em->saveEntity($template, ['skipAll' => true, 'silent' => true]);
+                    $ids[$kind] = $template->getId();
+                    $changed = true;
+                }
             }
 
-            if ($changed) {
+            if ($changed || $refreshBodies) {
                 $configWriter = $injectableFactory->create(ConfigWriter::class);
                 $configWriter->set(ShiftEmailService::CONFIG_KEY, $ids);
+                $configWriter->set('vadEmailTemplateContentVersion', $contentVersion);
                 $configWriter->save();
             }
         } catch (\Throwable $e) {
@@ -135,6 +131,48 @@ class Installer
                 'VolunteerActivityDispatch email template provisioning skipped: ' . $e->getMessage()
             );
         }
+    }
+
+    /**
+     * Default (Italian) bodies for shift-planning emails. Use {recordUrl}
+     * for the plan deep-link; {planUrl} remains accepted as an alias at send time.
+     *
+     * @return array<string, array{name: string, subject: string, body: string}>
+     */
+    private function getShiftEmailTemplateDefs(): array
+    {
+        return [
+            ShiftEmailService::KIND_AVAILABILITY_REQUEST => [
+                'name' => 'Turni — Richiesta disponibilità',
+                'subject' => 'Disponibilità richieste: {ActivityOffer.name}',
+                'body' => '<p>Ciao <strong>{User.firstName}</strong>,</p>'
+                    . '<p>è aperta la <strong>raccolta disponibilità</strong> per la pianificazione turni '
+                    . '<strong>{ActivityOffer.name}</strong>.</p>'
+                    . '<p><strong>Settimana dal:</strong> {ActivityOffer.weekStart}<br>'
+                    . '<strong>Turni in piano:</strong> {slotCount}</p>'
+                    . '<p>{ActivityOffer.description}</p>'
+                    . '<p><strong>Turni previsti:</strong></p>{slotList}'
+                    . '<p>Indica su quali turni sei disponibile (solo le categorie per cui sei abilitato '
+                    . 'risultano selezionabili). Apri il piano nel CRM:</p>'
+                    . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
+                    . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
+                    . '<p>Grazie per il tuo aiuto!<br>Safehouse</p>',
+            ],
+            ShiftEmailService::KIND_SHIFTS_CONFIRMED => [
+                'name' => 'Turni — Conferma turni',
+                'subject' => 'Turni confermati: {ActivityOffer.name}',
+                'body' => '<p>Ciao <strong>{User.firstName}</strong>,</p>'
+                    . '<p>i tuoi turni per <strong>{ActivityOffer.name}</strong> '
+                    . '(settimana dal {ActivityOffer.weekStart}) sono stati <strong>confermati</strong>.</p>'
+                    . '<p><strong>I tuoi turni:</strong></p>{shiftList}'
+                    . '<p>Troverai le relative attività anche nella sezione <strong>Task</strong> del CRM.</p>'
+                    . '<p>Se non puoi più presentarti, avvisa subito l’organizzazione e aggiorna la tua '
+                    . 'disponibilità dal piano:</p>'
+                    . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
+                    . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
+                    . '<p>Grazie!<br>Safehouse</p>',
+            ],
+        ];
     }
 
     /**

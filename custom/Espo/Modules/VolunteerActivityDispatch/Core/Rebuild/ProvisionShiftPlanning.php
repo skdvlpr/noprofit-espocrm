@@ -20,7 +20,7 @@ use Espo\Modules\VolunteerActivityDispatch\Tools\Installer;
  */
 class ProvisionShiftPlanning implements RebuildAction
 {
-    private const PROVISION_VERSION = '2026-08-03-shift-planning-v3';
+    private const PROVISION_VERSION = '2026-08-03-shift-planning-v4';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(

@@ -1,0 +1,8 @@
+{
+    "placeholders": {
+        "recordUrl": {
+            "className": "Espo\\Modules\\NonprofitEspocrm\\Tools\\EmailTemplate\\Placeholders\\RecordUrl",
+            "order": 10
+        }
+    }
+}

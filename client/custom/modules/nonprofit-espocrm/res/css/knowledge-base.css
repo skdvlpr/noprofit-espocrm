@@ -1,0 +1,45 @@
+/* Knowledge Base / Document category tree — larger folder cue + labels.
+   Espo list-tree only shows chevrons + text; we add a folder glyph and bump size. */
+
+#main .categories-container .list-group-tree > .list-group-item > .cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.35rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+#main .categories-container .list-group-tree > .list-group-item > .cell > a.link {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+#main .categories-container .list-group-tree > .list-group-item > .cell > a.link::before {
+  content: "\f07b"; /* fa-folder */
+  font-family: "Font Awesome 5 Free", "Font Awesome 6 Free", FontAwesome;
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-right: 0.45rem;
+  vertical-align: -0.1em;
+  opacity: 0.9;
+  speak: never;
+}
+
+#main .categories-container .list-group-tree > .list-group-item > .cell > a.link.text-bold::before {
+  content: "\f07c"; /* fa-folder-open */
+  font-weight: 400;
+}
+
+#main .categories-container .list-group-tree .fa-chevron-down,
+#main .categories-container .list-group-tree .fa-chevron-right,
+#main .categories-container .list-group-tree .empty-icon {
+  font-size: 0.95rem;
+  width: 1.25rem;
+  text-align: center;
+}
+
+#main .categories-container .list-group-tree > .list-group-item > .cell > a[data-action="create"] {
+  font-size: 1rem;
+}
