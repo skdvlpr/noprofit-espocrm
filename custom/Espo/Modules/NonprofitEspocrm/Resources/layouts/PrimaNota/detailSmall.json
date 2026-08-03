@@ -1,6 +1,7 @@
 [
     {
         "rows": [
+            [{"name": "paymentStatus"}, false],
             [{"name": "subjectParty", "fullWidth": true}],
             [{"name": "subjectName", "fullWidth": true}],
             [{"name": "createSubjectAccount"}, {"name": "createSubjectContact"}],

@@ -1,11 +1,11 @@
 [
+    {"name": "paymentStatus", "width": 12},
     {"name": "transactionDate", "link": true},
     {"name": "description"},
     {"name": "subjectName"},
     {"name": "beneficiaryName"},
     {"name": "entryType"},
     {"name": "amount"},
-    {"name": "paymentStatus"},
     {"name": "modelDClassification"},
     {"name": "internalClassification"},
     {"name": "financing"}

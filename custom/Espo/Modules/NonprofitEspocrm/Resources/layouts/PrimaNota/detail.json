@@ -4,11 +4,17 @@
         "rows": [
             [
                 {
-                    "name": "name"
+                    "name": "paymentStatus"
                 },
                 {
                     "name": "transactionDate"
                 }
+            ],
+            [
+                {
+                    "name": "name"
+                },
+                false
             ],
             [
                 {
@@ -127,12 +133,6 @@
                 {
                     "name": "donationFrequency"
                 }
-            ],
-            [
-                {
-                    "name": "paymentStatus"
-                },
-                false
             ],
             [
                 {

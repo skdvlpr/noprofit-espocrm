@@ -1,45 +1,53 @@
 /* Knowledge Base / Document category tree — larger folder cue + labels.
-   Espo list-tree only shows chevrons + text; we add a folder glyph and bump size. */
+   Espo list-tree has no folder icon in markup (only chevrons + text).
+   Use FA Solid (weight 900): Espo Free ships solid glyphs; Regular (400) often renders blank. */
 
-#main .categories-container .list-group-tree > .list-group-item > .cell {
+body #main .categories-container .list-group-tree > .list-group-item > .cell {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.15rem 0.35rem;
-  padding-top: 0.35rem;
-  padding-bottom: 0.35rem;
+  gap: 0.2rem 0.45rem;
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
 }
 
-#main .categories-container .list-group-tree > .list-group-item > .cell > a.link {
-  font-size: 1.05rem;
-  line-height: 1.45;
-  font-weight: 500;
+body #main .categories-container .list-group-tree > .list-group-item > .cell > a.link {
+  font-size: 1.15rem !important;
+  line-height: 1.5;
+  font-weight: 600;
 }
 
-#main .categories-container .list-group-tree > .list-group-item > .cell > a.link::before {
+body #main .categories-container .list-group-tree > .list-group-item > .cell > a.link::before {
   content: "\f07b"; /* fa-folder */
-  font-family: "Font Awesome 5 Free", "Font Awesome 6 Free", FontAwesome;
-  font-weight: 400;
-  font-size: 1.2rem;
-  margin-right: 0.45rem;
-  vertical-align: -0.1em;
-  opacity: 0.9;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900; /* solid */
+  font-size: 1.35rem;
+  margin-right: 0.5rem;
+  vertical-align: -0.12em;
+  opacity: 0.95;
+  display: inline-block;
   speak: never;
 }
 
-#main .categories-container .list-group-tree > .list-group-item > .cell > a.link.text-bold::before {
+body #main .categories-container .list-group-tree > .list-group-item > .cell > a.link.text-bold::before {
   content: "\f07c"; /* fa-folder-open */
-  font-weight: 400;
+  font-weight: 900;
 }
 
-#main .categories-container .list-group-tree .fa-chevron-down,
-#main .categories-container .list-group-tree .fa-chevron-right,
-#main .categories-container .list-group-tree .empty-icon {
-  font-size: 0.95rem;
-  width: 1.25rem;
+body #main .categories-container .list-group-tree .fa-chevron-down,
+body #main .categories-container .list-group-tree .fa-chevron-right,
+body #main .categories-container .list-group-tree .empty-icon {
+  font-size: 1.05rem !important;
+  width: 1.4rem;
   text-align: center;
 }
 
-#main .categories-container .list-group-tree > .list-group-item > .cell > a[data-action="create"] {
-  font-size: 1rem;
+body #main .categories-container .list-group-tree > .list-group-item > .cell > a[data-action="create"] {
+  font-size: 1.1rem;
+}
+
+/* Nested category chips under the article list (if present) */
+body #main .nested-categories-container .list-group-item,
+body #main .nested-categories-container a {
+  font-size: 1.05rem;
 }
