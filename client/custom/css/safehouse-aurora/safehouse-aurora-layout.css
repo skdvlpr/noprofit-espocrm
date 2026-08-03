@@ -75,13 +75,30 @@ body[data-theme-name="SafehouseAurora"]:not(:has(.modal-container.overlaid)):has
 body[data-theme-name="SafehouseAuroraLight"]:not(:has(.modal-container.overlaid)):has(.modal.in:not(.dialog-record):not(.dialog-confirm)) .modal-backdrop.in:not(.backdrop-confirm):not(.stacked) {
   z-index: 1290 !important;
 }
+/*
+ * Navbar glass: match Espo core Glass — only blur at ≥768px.
+ * Always-on backdrop-filter + .navbar-body overflow:hidden on phone clips/hides
+ * admin ⋮ (.menu-container / fa-ellipsis-v). Stock themes work because they skip blur on xs.
+ */
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
-  -webkit-backdrop-filter: var(--aurora-glass-blur);
-  backdrop-filter: var(--aurora-glass-blur);
   border-bottom: 1px solid var(--aurora-glass-border) !important;
   box-shadow: var(--aurora-glass-shadow) !important;
+}
+@media (min-width: 768px) {
+  body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
+    -webkit-backdrop-filter: var(--aurora-glass-blur);
+    backdrop-filter: var(--aurora-glass-blur);
+  }
+}
+@media (max-width: 767px) {
+  body[data-theme-name="SafehouseAurora"] #navbar > .navbar,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }
 body[data-theme-name="SafehouseAurora"] #navbar > .navbar .navbar-body,
 body[data-theme-name="SafehouseAuroraLight"] #navbar > .navbar .navbar-body,
@@ -97,18 +114,15 @@ body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar > .navb
 /*
  * Side navbar top utility bar (search + actions).
  * Cosmetic only — never set height:auto while core keeps top+bottom (stretches full viewport).
+ * Desktop-only glass/height; on phone let Espo core collapse/layout win so ⋮ stays usable.
  */
 body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
 body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
 body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
 body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
   background: var(--aurora-glass-bg) !important;
-  -webkit-backdrop-filter: var(--aurora-glass-blur);
-  backdrop-filter: var(--aurora-glass-blur);
   border-bottom: 1px solid var(--aurora-glass-border) !important;
   box-shadow: var(--aurora-glass-shadow) !important;
-  height: 34px !important;
-  bottom: auto !important;
   align-items: center;
   box-sizing: border-box;
   /* Keep core padding-right — reserves space for the side rail; shorthand padding broke +/bell/menu. */
@@ -116,6 +130,54 @@ body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-
   padding-bottom: 0;
   padding-left: 12px;
   padding-right: var(--navbar-width) !important;
+}
+@media (min-width: 768px) {
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+    -webkit-backdrop-filter: var(--aurora-glass-blur);
+    backdrop-filter: var(--aurora-glass-blur);
+    height: 34px !important;
+    bottom: auto !important;
+  }
+}
+@media (max-width: 767px) {
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right,
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-menu-opened #navbar .navbar-right {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    /* Do not force desktop height/bottom — restores core phone header strip. */
+    height: auto !important;
+    bottom: auto !important;
+    padding-right: 8px !important;
+    margin-left: 0 !important;
+  }
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container {
+    max-width: min(140px, 32vw);
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  /* Touch targets for + / bell / admin ⋮ */
+  body[data-theme-name="SafehouseAurora"] #navbar .navbar-right > li.menu-container > a,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar .navbar-right > li.menu-container > a,
+  body[data-theme-name="SafehouseAurora"] #navbar .navbar-right > li.quick-create-container > a,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar .navbar-right > li.quick-create-container > a,
+  body[data-theme-name="SafehouseAurora"] #navbar .navbar-right > li.notifications-badge-container > a,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar .navbar-right > li.notifications-badge-container > a {
+    min-width: 34px !important;
+    min-height: 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+  }
+  body[data-theme-name="SafehouseAurora"] #navbar .menu-container .dropdown-menu,
+  body[data-theme-name="SafehouseAuroraLight"] #navbar .menu-container .dropdown-menu {
+    z-index: 1300 !important;
+    max-width: 100vw;
+  }
 }
 body[data-theme-name="SafehouseAurora"][data-navbar='side'] #navbar .navbar-right .global-search-container,
 body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #navbar .navbar-right .global-search-container {

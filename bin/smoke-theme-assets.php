@@ -130,6 +130,17 @@ foreach ($cssAssets as $label => $asset) {
     foreach ($asset['needles'] as $needle) {
         $ok("$label contains $needle", str_contains($body, $needle));
     }
+
+    if ($label === 'layout') {
+        $ok(
+            'layout gates phone navbar (max-width: 767px)',
+            str_contains($body, 'max-width: 767px') || str_contains($body, 'max-width:767px')
+        );
+        $ok(
+            'layout disables backdrop-filter on phone',
+            str_contains($body, 'backdrop-filter: none')
+        );
+    }
 }
 
 // Theme-leak guard: every top-level selector in the globally-appended

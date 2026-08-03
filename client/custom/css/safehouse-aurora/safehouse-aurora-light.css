@@ -555,8 +555,18 @@ body #navbar {
 
 body #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
-  -webkit-backdrop-filter: var(--aurora-glass-blur) !important;
-  backdrop-filter: var(--aurora-glass-blur) !important;
+}
+@media (min-width: 768px) {
+  body #navbar > .navbar {
+    -webkit-backdrop-filter: var(--aurora-glass-blur) !important;
+    backdrop-filter: var(--aurora-glass-blur) !important;
+  }
+}
+@media (max-width: 767px) {
+  body #navbar > .navbar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }
 
 body #navbar > .navbar .navbar-body {
