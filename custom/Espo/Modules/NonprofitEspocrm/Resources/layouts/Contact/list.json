@@ -3,6 +3,7 @@
     {"name": "contactType"},
     {"name": "personnelStatus"},
     {"name": "isOccasional"},
+    {"name": "relatedRecord"},
     {"name": "emailAddress"},
     {"name": "phoneNumber"},
     {"name": "isUser"}

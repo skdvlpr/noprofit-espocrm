@@ -40,6 +40,7 @@
             "type": "varchar",
             "maxLength": 16,
             "trim": true,
+            "isPersonalData": true,
             "validatorClassNameList": [
                 "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
             ]
@@ -79,7 +80,8 @@
             "type": "varchar",
             "maxLength": 8,
             "trim": true,
-            "tooltip": true
+            "tooltip": true,
+            "isPersonalData": true
         },
         "startDate": {
             "type": "date"
@@ -103,7 +105,8 @@
             "type": "text"
         },
         "birthPlace": {
-            "type": "varchar"
+            "type": "varchar",
+            "isPersonalData": true
         },
         "joinDate": {
             "type": "date"

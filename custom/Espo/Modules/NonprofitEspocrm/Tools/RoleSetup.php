@@ -21,20 +21,16 @@ use Espo\ORM\EntityManager;
  * All public methods are idempotent for creates; existing Role rows are left
  * unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1 (dev only).
  *
- * Permission matrix (Task 2.1):
- *   - Admin     : full all / not used by the bootstrap admin user (which has
- *                 isAdmin=true and bypasses roles), but available for
- *                 secondary super-users.
- *   - Employee  : create=yes, read=all, edit=team, delete=own, stream=yes;
- *                 VolunteerEmployee / Member: read only, no create/edit/delete
- *                 (personnel changes go to Manager).
- *   - Manager   : same operational envelope as Employee, plus create/edit
- *                 team-level on VolunteerEmployee and Member; delete=no
- *                 on those entities (lifecycle via status / dates).
- *   - Volunteer : read-mostly; grants/funding (Espo entity type `Opportunity`)
- *                 fully blocked; MealCount.foodCost and MealCount.foodUnitPrice
- *                 hidden via field-level ACL.
- *   - Member    : read/edit own only; cannot create or delete.
+ * Permission matrix (2026-08-03):
+ *   - Admin     : full all
+ *   - Volunteer : read all domain + reporting; field-level hide personal data on
+ *                 Contact/User/VE/Member (name/status/competences/positionsHeld
+ *                 remain visible); write only own Task + ActivityInvite
+ *   - Member    : read all; write nowhere
+ *   - Employee / Manager / Desk : only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev)
+ *
+ * Existing roles are left unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1
+ * or versioned rebuild ProvisionRoleAcl forces overwrite.
  */
 class RoleSetup
 {
@@ -61,7 +57,7 @@ class RoleSetup
     public const TEAMS = [
         self::TEAM_ADMINISTRATION => [
             'description' => 'Safehouse administrative personnel: shared visibility of administrative records.',
-            'roles'       => [self::ROLE_EMPLOYEE, self::ROLE_MANAGER],
+            'roles'       => [self::ROLE_ADMIN],
         ],
         self::TEAM_DIGITAL_DESK => [
             'description' => 'Digital desk (Sportello digitale): group inbox, segnalazioni and leads.',
@@ -72,6 +68,24 @@ class RoleSetup
             'roles'       => [self::ROLE_DESK],
         ],
     ];
+
+    /** Roles always provisioned (production default). */
+    public const CORE_ROLES = [
+        self::ROLE_ADMIN,
+        self::ROLE_VOLUNTEER,
+        self::ROLE_MEMBER,
+    ];
+
+    /** Optional staff roles — only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev). */
+    public const EXTRA_ROLES = [
+        self::ROLE_EMPLOYEE,
+        self::ROLE_MANAGER,
+        self::ROLE_DESK,
+    ];
+
+    /** Bump when Volunteer/Member/Admin ACL must be rewritten on rebuild (prod-safe). */
+    public const ACL_MATRIX_VERSION = '2026-08-03-volunteer-member-readall-v1';
+    public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
      * Map test userName => list of team names they should belong to.
@@ -230,16 +244,75 @@ class RoleSetup
     }
 
     /**
-     * Create or update all canonical roles (Admin, Employee, Manager, Volunteer, Member).
+     * Create or update canonical roles.
      *
-     * @return array<string, string> map role-name => 'created' | 'updated' | 'unchanged'
+     * @param bool $forceOverwrite When true, rewrite existing role matrices
+     *        (used by versioned rebuild ProvisionRoleAcl). Otherwise existing
+     *        roles stay untouched unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1.
+     *
+     * @return array<string, string> map role-name => 'created' | 'updated' | 'unchanged' | 'unchanged-existing'
      */
-    public function provisionRoles(): array
+    public function provisionRoles(bool $forceOverwrite = false): array
     {
+        $force = $forceOverwrite || getenv('SAFEHOUSE_ALLOW_ROLE_OVERWRITE') === '1';
         $report = [];
 
         foreach ($this->roleSpecs() as $name => $spec) {
-            $report[$name] = $this->upsertRole($name, $spec['data'], $spec['fieldData'], $spec['perms']);
+            $report[$name] = $this->upsertRole(
+                $name,
+                $spec['data'],
+                $spec['fieldData'],
+                $spec['perms'],
+                $force
+            );
+        }
+
+        return $report;
+    }
+
+    /**
+     * Soft-delete Employee/Manager/Desk when unused (no User linked).
+     * Does not remove roles that still have users assigned.
+     *
+     * @return array<string, string>
+     */
+    public function pruneNonCoreRoles(): array
+    {
+        $em = $this->entityManager;
+        $report = [];
+
+        if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
+            return ['skipped' => 'SAFEHOUSE_EXTRA_ROLES=1'];
+        }
+
+        foreach (self::EXTRA_ROLES as $roleName) {
+            /** @var ?Role $role */
+            $role = $em->getRDBRepositoryByClass(Role::class)
+                ->where(['name' => $roleName])
+                ->findOne();
+
+            if (!$role) {
+                $report[$roleName] = 'absent';
+                continue;
+            }
+
+            $linked = 0;
+
+            foreach ($em->getRDBRepository('User')->where(['deleted' => false])->find() as $user) {
+                $roleIds = $user->getLinkMultipleIdList('roles');
+
+                if (in_array($role->getId(), $roleIds, true)) {
+                    $linked++;
+                }
+            }
+
+            if ($linked > 0) {
+                $report[$roleName] = "kept-in-use ($linked users)";
+                continue;
+            }
+
+            $em->removeEntity($role);
+            $report[$roleName] = 'removed';
         }
 
         return $report;
@@ -504,19 +577,16 @@ class RoleSetup
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
 
-        $blocked = static fn(): array => [
-            'create' => 'no', 'read' => 'no', 'edit' => 'no', 'delete' => 'no', 'stream' => 'no',
-        ];
-
         $teamCreateOwnDelete = static fn(): array => [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'own', 'stream' => 'all',
         ];
 
         $domainEntities = [
-            'Account', 'AccountWebsite', 'Contact', 'Opportunity',
+            'Account', 'AccountWebsite', 'Contact', 'Opportunity', 'Lead',
             'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'PrimaNota',
             'Intervention', 'FoodParcelRegistration', 'FoodParcelDateLog',
             'Document', 'Meeting', 'Call', 'Task', 'Email', 'Case',
+            'ActivityOffer', 'ActivityOfferSlot', 'ActivityInvite',
             'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
 
@@ -524,7 +594,101 @@ class RoleSetup
         foreach ($domainEntities as $e) {
             $adminData[$e] = $allFull();
         }
-        $adminData['Lead'] = $allFull();
+
+        // Volunteer: read everything; write only own Task + ActivityInvite.
+        $volunteerData = [];
+        foreach ($domainEntities as $e) {
+            $volunteerData[$e] = $readOnlyAll();
+        }
+        $volunteerData['Email'] = [
+            'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $volunteerData['Task'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'own', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $volunteerData['ActivityOffer'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $volunteerData['ActivityOfferSlot'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+        ];
+        $volunteerData['ActivityInvite'] = [
+            'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+        ];
+
+        // Member: read everything; change nothing.
+        $memberData = [];
+        foreach ($domainEntities as $e) {
+            $memberData[$e] = $readOnlyAll();
+        }
+        $memberData['Email'] = [
+            'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $memberData['ActivityInvite'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+        ];
+
+        $pdHide = $this->personalDataFieldLocks();
+
+        $volunteerFieldData = [
+            'Contact' => array_merge($pdHide, [
+                'positionsHeld' => ['read' => 'yes', 'edit' => 'no'],
+            ]),
+            'User' => array_merge($pdHide, [
+                'activityCompetences' => ['read' => 'yes', 'edit' => 'no'],
+            ]),
+            'VolunteerEmployee' => $pdHide,
+            'Member' => array_merge($pdHide, [
+                'positionsHeld' => ['read' => 'yes', 'edit' => 'no'],
+            ]),
+        ];
+
+        $readOnlyPerms = [
+            'assignmentPermission'         => 'no',
+            'userPermission'               => 'all',
+            'messagePermission'            => 'no',
+            'exportPermission'             => 'no',
+            'massUpdatePermission'         => 'no',
+            'auditPermission'              => 'no',
+            'mentionPermission'            => 'team',
+            'userCalendarPermission'       => 'team',
+            'followerManagementPermission' => 'no',
+        ];
+
+        $specs = [
+            self::ROLE_ADMIN => [
+                'data'      => $adminData,
+                'fieldData' => [],
+                'perms'     => [
+                    'assignmentPermission'         => 'all',
+                    'userPermission'               => 'all',
+                    'messagePermission'            => 'all',
+                    'exportPermission'             => 'yes',
+                    'massUpdatePermission'         => 'yes',
+                    'auditPermission'              => 'yes',
+                    'mentionPermission'            => 'yes',
+                    'userCalendarPermission'       => 'all',
+                    'followerManagementPermission' => 'all',
+                ],
+            ],
+            self::ROLE_VOLUNTEER => [
+                'data'      => $volunteerData,
+                'fieldData' => $volunteerFieldData,
+                'perms'     => $readOnlyPerms,
+            ],
+            self::ROLE_MEMBER => [
+                'data'      => $memberData,
+                'fieldData' => [],
+                'perms'     => array_merge($readOnlyPerms, [
+                    'mentionPermission'      => 'no',
+                    'userCalendarPermission' => 'no',
+                ]),
+            ],
+        ];
+
+        if (getenv('SAFEHOUSE_EXTRA_ROLES') !== '1') {
+            return $specs;
+        }
 
         $employeeData = [];
         foreach ($domainEntities as $e) {
@@ -539,21 +703,20 @@ class RoleSetup
         $employeeData['PrimaNota'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
-        $employeeData['Intervention'] = $teamCreateOwnDelete();
-        $employeeData['FoodParcelRegistration'] = $teamCreateOwnDelete();
-        $employeeData['FoodParcelDateLog'] = $teamCreateOwnDelete();
-        // Personnel: ordinary Employee sees directory but does not create/edit/delete rows.
-        $employeeData['VolunteerEmployee'] = [
-            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        $employeeData['VolunteerEmployee'] = $readOnlyAll();
+        $employeeData['Member'] = $readOnlyAll();
+        $employeeData['ActivityOffer'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
         ];
-        $employeeData['Member'] = [
-            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        $employeeData['ActivityOfferSlot'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own',
         ];
-        $employeeData['Lead'] = $teamCreateOwnDelete();
+        $employeeData['ActivityInvite'] = [
+            'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+        ];
 
         /** @var array<string, array<string, string>> $managerData */
         $managerData = json_decode(json_encode($employeeData), true);
-        // Manager (HR): maintain personnel on team scope; no hard delete.
         $managerData['VolunteerEmployee'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
         ];
@@ -563,40 +726,10 @@ class RoleSetup
         $managerData['Lead'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
         ];
-
-        $volunteerData = [];
-        foreach ($domainEntities as $e) {
-            $volunteerData[$e] = $readOnlyAll();
-        }
-        // Grants & Funding entity type is still `Opportunity` (Espo core).
-        $volunteerData['Opportunity'] = $blocked();
-        $volunteerData['Lead'] = $blocked();
-        $volunteerData['Member'] = $blocked();
-        $volunteerData['VolunteerEmployee'] = [
-            'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-        ];
-        $volunteerData['MealCount'] = [
-            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-        ];
-        $volunteerData['AssociationMealCount'] = [
-            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-        ];
-        $volunteerData['PrimaNota'] = [
-            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-        ];
-        $volunteerData['Intervention'] = [
-            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
-        ];
-        $volunteerData['FoodParcelRegistration'] = [
-            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
-        ];
-        $volunteerData['FoodParcelDateLog'] = [
-            'create' => 'yes', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
-        ];
-        $volunteerData['Account'] = $readOnlyAll();
-        $volunteerData['Contact'] = $readOnlyAll();
-        $volunteerData['Document'] = [
-            'create' => 'no', 'read' => 'team', 'edit' => 'own', 'delete' => 'no', 'stream' => 'team',
+        $managerData['ActivityOffer'] = $allFull();
+        $managerData['ActivityOfferSlot'] = $allFull();
+        $managerData['ActivityInvite'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'no',
         ];
 
         $personContactFieldLocks = [
@@ -612,29 +745,15 @@ class RoleSetup
                 'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
                 'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
             ],
-        ];
-
-        $volunteerFieldData = array_merge($personContactFieldLocks, [
-            'MealCount' => [
-                'foodCost'      => ['read' => 'no', 'edit' => 'no'],
-                'foodUnitPrice' => ['read' => 'no', 'edit' => 'no'],
+            'Contact' => [
+                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
+                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
             ],
-        ]);
-
-        $memberData = [];
-        foreach ($domainEntities as $e) {
-            $memberData[$e] = $blocked();
-        }
-        $memberData['Lead'] = $blocked();
-        $memberData['Account']  = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
-        $memberData['Contact']  = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
-        $memberData['Document'] = ['create' => 'no', 'read' => 'own', 'edit' => 'no',  'delete' => 'no', 'stream' => 'own'];
-        $memberData['Member']   = ['create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own'];
+        ];
 
         $deskEntities = [
             'Case', 'Lead', 'Email', 'EmailTemplate', 'Contact', 'Account', 'Document', 'Task',
         ];
-
         $deskData = [];
         foreach ($deskEntities as $entity) {
             $deskData[$entity] = $teamCreateOwnDelete();
@@ -646,99 +765,81 @@ class RoleSetup
             'create' => 'no', 'read' => 'team', 'edit' => 'no', 'delete' => 'no', 'stream' => 'team',
         ];
 
-        return [
-            self::ROLE_ADMIN => [
-                'data'      => $adminData,
-                'fieldData' => [],
-                'perms'     => [
-                    'assignmentPermission'        => 'all',
-                    'userPermission'              => 'all',
-                    'messagePermission'           => 'all',
-                    'exportPermission'            => 'yes',
-                    'massUpdatePermission'        => 'yes',
-                    'auditPermission'             => 'yes',
-                    'mentionPermission'           => 'yes',
-                    'userCalendarPermission'      => 'all',
-                    'followerManagementPermission'=> 'all',
-                ],
-            ],
-            self::ROLE_EMPLOYEE => [
-                'data'      => $employeeData,
-                'fieldData' => $personContactFieldLocks,
-                'perms'     => [
-                    'assignmentPermission'        => 'team',
-                    'userPermission'              => 'team',
-                    'messagePermission'           => 'team',
-                    'exportPermission'            => 'yes',
-                    'massUpdatePermission'        => 'no',
-                    'auditPermission'             => 'no',
-                    'mentionPermission'           => 'all',
-                    'userCalendarPermission'      => 'team',
-                    'followerManagementPermission'=> 'team',
-                ],
-            ],
-            self::ROLE_MANAGER => [
-                'data'      => $managerData,
-                'fieldData' => $personContactFieldLocks,
-                'perms'     => [
-                    'assignmentPermission'        => 'team',
-                    'userPermission'              => 'team',
-                    'messagePermission'           => 'team',
-                    'exportPermission'            => 'yes',
-                    'massUpdatePermission'        => 'no',
-                    'auditPermission'             => 'no',
-                    'mentionPermission'           => 'all',
-                    'userCalendarPermission'      => 'team',
-                    'followerManagementPermission'=> 'team',
-                ],
-            ],
-            self::ROLE_VOLUNTEER => [
-                'data'      => $volunteerData,
-                'fieldData' => $volunteerFieldData,
-                'perms'     => [
-                    'assignmentPermission'        => 'no',
-                    'userPermission'              => 'team',
-                    'messagePermission'           => 'team',
-                    'exportPermission'            => 'no',
-                    'massUpdatePermission'        => 'no',
-                    'auditPermission'             => 'no',
-                    'mentionPermission'           => 'team',
-                    'userCalendarPermission'      => 'team',
-                    'followerManagementPermission'=> 'no',
-                ],
-            ],
-            self::ROLE_MEMBER => [
-                'data'      => $memberData,
-                'fieldData' => $personContactFieldLocks,
-                'perms'     => [
-                    'assignmentPermission'        => 'no',
-                    'userPermission'              => 'no',
-                    'messagePermission'           => 'no',
-                    'exportPermission'            => 'no',
-                    'massUpdatePermission'        => 'no',
-                    'auditPermission'             => 'no',
-                    'mentionPermission'           => 'no',
-                    'userCalendarPermission'      => 'no',
-                    'followerManagementPermission'=> 'no',
-                ],
-            ],
-            self::ROLE_DESK => [
-                'data'      => $deskData,
-                'fieldData' => [],
-                'perms'     => [
-                    'assignmentPermission'         => 'team',
-                    'userPermission'               => 'team',
-                    'messagePermission'            => 'team',
-                    'exportPermission'             => 'no',
-                    'massUpdatePermission'         => 'no',
-                    'auditPermission'              => 'no',
-                    'mentionPermission'            => 'team',
-                    'userCalendarPermission'       => 'team',
-                    'followerManagementPermission' => 'team',
-                    'groupEmailAccountPermission'  => 'team',
-                ],
-            ],
+        $staffPerms = [
+            'assignmentPermission'         => 'team',
+            'userPermission'               => 'team',
+            'messagePermission'            => 'team',
+            'exportPermission'             => 'yes',
+            'massUpdatePermission'         => 'no',
+            'auditPermission'              => 'no',
+            'mentionPermission'            => 'all',
+            'userCalendarPermission'       => 'team',
+            'followerManagementPermission' => 'team',
         ];
+
+        $specs[self::ROLE_EMPLOYEE] = [
+            'data'      => $employeeData,
+            'fieldData' => $personContactFieldLocks,
+            'perms'     => $staffPerms,
+        ];
+        $specs[self::ROLE_MANAGER] = [
+            'data'      => $managerData,
+            'fieldData' => $personContactFieldLocks,
+            'perms'     => $staffPerms,
+        ];
+        $specs[self::ROLE_DESK] = [
+            'data'      => $deskData,
+            'fieldData' => [],
+            'perms'     => array_merge($staffPerms, [
+                'exportPermission'            => 'no',
+                'groupEmailAccountPermission' => 'team',
+            ]),
+        ];
+
+        return $specs;
+    }
+
+    /**
+     * Field-level ACL: hide personal / sensitive attributes (Espo Role.fieldData).
+     * Metadata `isPersonalData` is informational — enforcement is here.
+     *
+     * @return array<string, array{read: string, edit: string}>
+     */
+    private function personalDataFieldLocks(): array
+    {
+        $hide = ['read' => 'no', 'edit' => 'no'];
+        $fields = [
+            'emailAddress',
+            'phoneNumber',
+            'taxCode',
+            'birthDate',
+            'birthPlace',
+            'birthProvince',
+            'address',
+            'addressStreet',
+            'addressCity',
+            'addressState',
+            'addressCountry',
+            'addressPostalCode',
+            'notes',
+            'extra',
+            'description',
+            'memberNotes',
+            'weeklyHours',
+            'monthlyHours',
+            'contractType',
+            'startDate',
+            'endDate',
+            'joinDate',
+            'leaveDate',
+        ];
+
+        $out = [];
+        foreach ($fields as $field) {
+            $out[$field] = $hide;
+        }
+
+        return $out;
     }
 
     /**
@@ -746,8 +847,13 @@ class RoleSetup
      * @param array<string, array<string, array<string, string>>> $fieldData
      * @param array<string, string> $perms
      */
-    private function upsertRole(string $name, array $data, array $fieldData, array $perms): string
-    {
+    private function upsertRole(
+        string $name,
+        array $data,
+        array $fieldData,
+        array $perms,
+        bool $forceOverwrite = false
+    ): string {
         $em = $this->entityManager;
 
         /** @var ?Role $role */
@@ -769,8 +875,9 @@ class RoleSetup
             return 'created';
         }
 
-        // Never silently overwrite live role matrices (prod incident 2026-07-26).
-        if (getenv('SAFEHOUSE_ALLOW_ROLE_OVERWRITE') !== '1') {
+        // Never silently overwrite live role matrices (prod incident 2026-07-26),
+        // unless versioned rebuild / explicit env asks for it.
+        if (!$forceOverwrite) {
             return 'unchanged-existing';
         }
 

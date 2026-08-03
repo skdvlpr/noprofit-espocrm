@@ -23,7 +23,7 @@ use Espo\Tools\LayoutManager\LayoutManager;
 class ProvisionShiftPlanning implements RebuildAction
 {
     /** Bump when new provisioning steps must re-run on production rebuild. */
-    private const PROVISION_VERSION = '2026-08-03-shift-planning-v6';
+    private const PROVISION_VERSION = '2026-08-03-shift-planning-v7';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(

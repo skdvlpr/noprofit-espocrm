@@ -285,8 +285,13 @@ $roleNames = [];
 foreach ($em->getRDBRepository('Role')->find() as $r) {
     $roleNames[] = $r->get('name');
 }
-foreach (['Admin', 'Employee', 'Manager', 'Volunteer', 'Member'] as $expectedRole) {
+foreach (['Admin', 'Volunteer', 'Member'] as $expectedRole) {
     $report("Role `$expectedRole` provisioned", in_array($expectedRole, $roleNames, true));
+}
+if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
+    foreach (['Employee', 'Manager', 'Desk'] as $extraRole) {
+        $report("Extra role `$extraRole` provisioned", in_array($extraRole, $roleNames, true));
+    }
 }
 
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();

@@ -227,6 +227,18 @@ class Installer
                 'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
             ],
         ],
+        // Members: read-only visibility of shift plans (no responses).
+        'Member' => [
+            'ActivityOffer' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+            ],
+            'ActivityOfferSlot' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+            ],
+            'ActivityInvite' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+            ],
+        ],
     ];
 
     public function ensureRoleAccess(Container $container): void

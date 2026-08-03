@@ -12,8 +12,8 @@ require __DIR__ . '/lib/refuse-production.php';
  * 1) Admin API user (`smoke_api_catalog`): catalog, metadata, list routes, schema checks,
  *    `GoogleCalendarDrive` extension metadata (universal Google OAuth2) + ORM DB row check;
  *    `GET Integration/...` is not asserted for API users (Espo: admin UI only, type=admin).
- * 2) Volunteer API user (`smoke_api_volunteer`): `read=own` IDOR (VolunteerEmployee),
- *    `Member` blocked (`read=no`), `MealCount` foreign assignee → 403.
+ * 2) Volunteer API user (`smoke_api_volunteer`): read=all for personnel/reporting;
+ *    field ACL hides Contact.emailAddress; Task.edit=own; MealCount.edit=no.
  *
  * Provisions idempotent API users with `X-Api-Key` auth (Workflow E). Ensures the
  * Volunteer user has a linked `VolunteerEmployee` profile (same pattern as
@@ -496,13 +496,13 @@ if ($foreignVe !== null) {
             'query' => ['select' => 'id,firstName'],
         ]);
         $ok(
-            'Volunteer GET foreign VolunteerEmployee → 403 (read=own IDOR)',
-            $rFor->getStatusCode() === 403,
+            'Volunteer GET foreign VolunteerEmployee → 200 (read=all)',
+            $rFor->getStatusCode() === 200,
             'code=' . $rFor->getStatusCode()
         );
     }
 } else {
-    $ok('Volunteer GET foreign VolunteerEmployee → 403 (read=own IDOR)', false, 'no foreign VE row in DB');
+    $ok('Volunteer GET foreign VolunteerEmployee → 200 (read=all)', true, 'skipped (no foreign VE row)');
 }
 
 $anyMember = $em->getRDBRepository('Member')->limit(0, 1)->findOne();
@@ -511,13 +511,13 @@ if ($anyMember !== null) {
     if (is_string($mid) && $mid !== '') {
         $rMem = $volClient->get('/api/v1/Member/' . $mid, ['query' => ['select' => 'id,firstName']]);
         $ok(
-            'Volunteer GET Member (blocked scope) → 403',
-            $rMem->getStatusCode() === 403,
+            'Volunteer GET Member → 200 (read=all)',
+            $rMem->getStatusCode() === 200,
             'code=' . $rMem->getStatusCode()
         );
     }
 } else {
-    $ok('Volunteer GET Member (blocked scope) → 403', true, 'skipped (no Member rows)');
+    $ok('Volunteer GET Member → 200 (read=all)', true, 'skipped (no Member rows)');
 }
 
 $foreignMc = null;
@@ -536,21 +536,49 @@ if ($foreignMc !== null) {
             'query' => ['select' => 'id,date,adults'],
         ]);
         $ok(
-            'Volunteer GET foreign MealCount → 403 (read=own)',
-            $rMc->getStatusCode() === 403,
+            'Volunteer GET foreign MealCount → 200 (read=all)',
+            $rMc->getStatusCode() === 200,
             'code=' . $rMc->getStatusCode()
         );
     }
 } else {
-    $ok('Volunteer GET foreign MealCount → 403 (read=own)', true, 'skipped (no assigned foreign MealCount)');
+    $ok('Volunteer GET foreign MealCount → 200 (read=all)', true, 'skipped (no assigned foreign MealCount)');
 }
 
 $volBody = json_decode((string) $volClient->get('/api/v1/App/user')->getBody(), true);
 $volAcl = is_array($volBody) ? ($volBody['acl']['table']['VolunteerEmployee'] ?? null) : null;
 $ok(
-    'Volunteer App/user shows VolunteerEmployee.read=own',
-    is_array($volAcl) && ($volAcl['read'] ?? '') === 'own',
+    'Volunteer App/user shows VolunteerEmployee.read=all',
+    is_array($volAcl) && ($volAcl['read'] ?? '') === 'all',
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
+);
+$volContactField = is_array($volBody)
+    ? ($volBody['acl']['fieldTable']['Contact']['emailAddress']['read'] ?? null)
+    : null;
+$ok(
+    'Volunteer field ACL Contact.emailAddress.read=no',
+    $volContactField === 'no',
+    $volContactField === null ? 'missing' : (string) $volContactField
+);
+$volPos = is_array($volBody)
+    ? ($volBody['acl']['fieldTable']['Contact']['positionsHeld']['read'] ?? null)
+    : null;
+$ok(
+    'Volunteer field ACL Contact.positionsHeld.read=yes',
+    $volPos === 'yes' || $volPos === null,
+    $volPos === null ? 'default/yes' : (string) $volPos
+);
+$volTask = is_array($volBody) ? ($volBody['acl']['table']['Task'] ?? null) : null;
+$ok(
+    'Volunteer Task.edit=own',
+    is_array($volTask) && ($volTask['edit'] ?? '') === 'own',
+    is_array($volTask) ? 'edit=' . ($volTask['edit'] ?? '') : 'missing'
+);
+$volMealEdit = is_array($volBody) ? ($volBody['acl']['table']['MealCount']['edit'] ?? null) : null;
+$ok(
+    'Volunteer MealCount.edit=no',
+    $volMealEdit === 'no',
+    $volMealEdit === null ? 'missing' : (string) $volMealEdit
 );
 
 $rIntVol = $volClient->get('/api/v1/Integration/' . GoogleIntegrationInstaller::INTEGRATION_ID);
