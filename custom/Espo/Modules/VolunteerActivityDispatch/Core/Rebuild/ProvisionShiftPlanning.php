@@ -20,7 +20,7 @@ use Espo\Modules\VolunteerActivityDispatch\Tools\Installer;
  */
 class ProvisionShiftPlanning implements RebuildAction
 {
-    private const PROVISION_VERSION = '2026-08-03-shift-planning-v1';
+    private const PROVISION_VERSION = '2026-08-03-shift-planning-v2';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(
@@ -40,6 +40,7 @@ class ProvisionShiftPlanning implements RebuildAction
         $installer->migrateShiftPlanningStatuses($this->container);
         $installer->ensureRoleAccess($this->container);
         $installer->ensureUserCompetencesLayout($this->container, $this->injectableFactory);
+        $installer->ensureEmailTemplates($this->container);
 
         $configWriter = $this->injectableFactory->create(ConfigWriter::class);
         $configWriter->set(self::CONFIG_KEY, self::PROVISION_VERSION);

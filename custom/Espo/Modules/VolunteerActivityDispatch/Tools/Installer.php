@@ -49,6 +49,91 @@ class Installer
         $this->migrateShiftPlanningStatuses($container);
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
+        $this->ensureEmailTemplates($container);
+    }
+
+    /**
+     * Admin-editable email templates for volunteer emails. Created once;
+     * IDs are kept in config (`vadEmailTemplateIds`) so admins may edit
+     * content freely in the Email Templates UI without breaking lookup.
+     */
+    public function ensureEmailTemplates(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+            /** @var Config $config */
+            $config = $container->getByClass(Config::class);
+            /** @var InjectableFactory $injectableFactory */
+            $injectableFactory = $container->getByClass(InjectableFactory::class);
+
+            $ids = $config->get(ShiftEmailService::CONFIG_KEY);
+            $ids = $ids ? json_decode(json_encode($ids), true) : [];
+
+            if (!is_array($ids)) {
+                $ids = [];
+            }
+
+            $defs = [
+                ShiftEmailService::KIND_AVAILABILITY_REQUEST => [
+                    'name' => 'Turni — Richiesta disponibilità',
+                    'subject' => 'Nuova pianificazione turni: {ActivityOffer.name}',
+                    'body' => '<p>Ciao {User.firstName},</p>'
+                        . '<p>è aperta la raccolta disponibilità per la pianificazione turni '
+                        . '<strong>{ActivityOffer.name}</strong> (settimana dal {ActivityOffer.weekStart}).</p>'
+                        . '<p>Indica la tua disponibilità aprendo il piano nel CRM:<br>'
+                        . '<a href="{planUrl}">{planUrl}</a></p>'
+                        . '<p>Grazie!</p>',
+                ],
+                ShiftEmailService::KIND_SHIFTS_CONFIRMED => [
+                    'name' => 'Turni — Conferma turni',
+                    'subject' => 'Turni confermati: {ActivityOffer.name}',
+                    'body' => '<p>Ciao {User.firstName},</p>'
+                        . '<p>i tuoi turni per <strong>{ActivityOffer.name}</strong> sono stati confermati:</p>'
+                        . '<p>{shiftList}</p>'
+                        . '<p>Dettagli nel CRM: <a href="{planUrl}">{planUrl}</a></p>',
+                ],
+            ];
+
+            $changed = false;
+
+            foreach ($defs as $kind => $def) {
+                $existingId = $ids[$kind] ?? null;
+
+                if ($existingId && $em->getEntityById('EmailTemplate', $existingId)) {
+                    continue;
+                }
+
+                $template = $em->getRDBRepository('EmailTemplate')
+                    ->where(['name' => $def['name']])
+                    ->findOne();
+
+                if (!$template) {
+                    $template = $em->getNewEntity('EmailTemplate');
+                    $template->set([
+                        'name' => $def['name'],
+                        'subject' => $def['subject'],
+                        'body' => $def['body'],
+                        'isHtml' => true,
+                        'oneOff' => false,
+                    ]);
+                    $em->saveEntity($template, ['skipAll' => true, 'silent' => true]);
+                }
+
+                $ids[$kind] = $template->getId();
+                $changed = true;
+            }
+
+            if ($changed) {
+                $configWriter = $injectableFactory->create(ConfigWriter::class);
+                $configWriter->set(ShiftEmailService::CONFIG_KEY, $ids);
+                $configWriter->save();
+            }
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'VolunteerActivityDispatch email template provisioning skipped: ' . $e->getMessage()
+            );
+        }
     }
 
     /**

@@ -46,6 +46,7 @@ class ShiftPlanningService
         private Acl $acl,
         private User $user,
         private Language $language,
+        private ShiftEmailService $shiftEmailService,
     ) {}
 
     /**
@@ -87,9 +88,12 @@ class ShiftPlanningService
 
         $notifyCount = $this->notifyUsers($offer, $cohortIds, $message);
 
+        $emailCount = $this->shiftEmailService->sendAvailabilityRequest($offer, $cohortIds);
+
         return [
             'notifyCount' => $notifyCount,
             'slotCount' => count($slots),
+            'emailCount' => $emailCount,
         ];
     }
 
@@ -601,6 +605,7 @@ class ShiftPlanningService
         $this->entityManager->saveEntity($offer);
 
         $notifyCount = 0;
+        $emailCount = 0;
 
         foreach ($shiftsByUser as $userId => $shifts) {
             if ($userId === $this->user->getId()) {
@@ -619,12 +624,15 @@ class ShiftPlanningService
 
             $this->createNotification($offer, $userId, $message);
             $notifyCount++;
+
+            $emailCount += $this->shiftEmailService->sendShiftsConfirmed($offer, $userId, $shiftLines);
         }
 
         return [
             'taskCount' => $taskCount,
             'confirmedCount' => $confirmedCount,
             'notifyCount' => $notifyCount,
+            'emailCount' => $emailCount,
         ];
     }
 

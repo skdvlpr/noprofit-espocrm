@@ -87,6 +87,21 @@ if ($volunteerRole) {
 $tabList = $container->getByClass(\Espo\Core\Utils\Config::class)->get('tabList') ?? [];
 ok(in_array('ActivityOffer', $tabList, true), 'ActivityOffer present in tabList');
 
+// --- email templates (bug #3: volunteer emails) --------------------------------
+
+(new \Espo\Modules\VolunteerActivityDispatch\Tools\Installer())->ensureEmailTemplates($container);
+
+// Config object was cached before the write — reload it for assertions.
+$freshConfig = $injectableFactory->create(\Espo\Core\Utils\Config::class);
+$templateIds = $freshConfig->get(\Espo\Modules\VolunteerActivityDispatch\Tools\ShiftEmailService::CONFIG_KEY);
+$templateIds = $templateIds ? json_decode(json_encode($templateIds), true) : [];
+
+foreach (['availabilityRequest', 'shiftsConfirmed'] as $kind) {
+    $tplId = $templateIds[$kind] ?? null;
+    $tpl = $tplId ? $em->getEntityById('EmailTemplate', $tplId) : null;
+    ok($tpl !== null, "email template provisioned: $kind");
+}
+
 // --- fixtures -----------------------------------------------------------------
 
 // Purge leftovers from previous runs.
@@ -122,6 +137,7 @@ for ($i = 1; $i <= 3; $i++) {
         'lastName' => 'Vol' . $i,
         'type' => 'regular',
         'isActive' => true,
+        'emailAddress' => $userName . '@smoke.example.com',
     ]);
 
     // Volunteer 3 only qualified for MealPreparation.
@@ -129,7 +145,10 @@ for ($i = 1; $i <= 3; $i++) {
         $u->set('activityCompetences', ['MealPreparation']);
     }
 
-    $em->saveEntity($u, ['skipAll' => true, 'silent' => true]);
+    // Normal save (no skipAll): field processing must persist the email
+    // address relation so ShiftEmailService can resolve recipient addresses.
+    $em->saveEntity($u, ['silent' => true]);
+
     $volunteers[] = $u;
 }
 
@@ -191,6 +210,8 @@ $adminService = $injectableFactory->create(
 $res = $adminService->requestAvailability($offer->getId());
 ok($res['slotCount'] === 3, 'requestAvailability slotCount=3');
 ok($res['notifyCount'] === 3, 'requestAvailability notified 3 volunteers');
+ok(array_key_exists('emailCount', $res), 'requestAvailability returns emailCount');
+echo "  availability emails sent: " . ($res['emailCount'] ?? 0) . "\n";
 
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'CollectingAvailability', 'offer -> CollectingAvailability');
@@ -260,6 +281,16 @@ ok(count(array_intersect($prep, $dist)) === 0, 'no volunteer double-booked on ov
 $confirmRes = $adminService->confirm($offer->getId());
 ok($confirmRes['taskCount'] === 3, 'confirm created 3 tasks');
 ok($confirmRes['confirmedCount'] === $assignRes['assignedCount'], 'all assigned got confirmed');
+echo "  confirmation emails sent: " . ($confirmRes['emailCount'] ?? 0) . "\n";
+
+// Local SMTP may be a real relay that rejects test domains — assert
+// consistency (every reported send is stored), not actual delivery.
+$sentEmails = $em->getRDBRepository('Email')->where([
+    'parentType' => 'ActivityOffer',
+    'parentId' => $offer->getId(),
+])->count();
+$reported = ($res['emailCount'] ?? 0) + ($confirmRes['emailCount'] ?? 0);
+ok($sentEmails >= $reported, "stored emails ($sentEmails) cover reported sends ($reported)");
 
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'Confirmed', 'offer -> Confirmed');
@@ -319,6 +350,9 @@ foreach (['ActivityInvite', 'Task', 'ActivityOfferSlot'] as $type) {
     }
 }
 foreach ($em->getRDBRepository('Notification')->where(['relatedType' => 'ActivityOffer', 'relatedId' => $offer->getId()])->find() as $e) {
+    $em->removeEntity($e, ['skipAll' => true, 'silent' => true]);
+}
+foreach ($em->getRDBRepository('Email')->where(['parentType' => 'ActivityOffer', 'parentId' => $offer->getId()])->find() as $e) {
     $em->removeEntity($e, ['skipAll' => true, 'silent' => true]);
 }
 $em->removeEntity($em->getEntityById('ActivityOffer', $offer->getId()), ['skipAll' => true, 'silent' => true]);
