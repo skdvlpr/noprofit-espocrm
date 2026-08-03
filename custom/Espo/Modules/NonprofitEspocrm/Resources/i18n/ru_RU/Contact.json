@@ -7,6 +7,8 @@
         "isUser": "Пользователь",
         "linkedUser": "Пользователь CRM",
         "personnelStatus": "Статус",
+        "isOccasional": "Разовый",
+        "birthProvince": "Провинция рождения",
         "startDate": "Дата начала",
         "endDate": "Дата окончания",
         "contractType": "Тип контракта",
@@ -37,15 +39,25 @@
         "personnelStatus": {
             "Active": "Активен",
             "Inactive": "Неактивен"
+        },
+        "positionsHeld": {
+            "President": "Президент",
+            "VicePresident": "Вице-президент",
+            "Councilor": "Советник",
+            "Treasurer": "Казначей",
+            "Founder": "Основатель"
         }
     },
     "presetFilters": {
         "volunteersEmployees": "Волонтёры / Сотрудники",
+        "volunteersOccasionali": "Разовые волонтёры",
         "associati": "Ассоциаты"
     },
     "tooltips": {
         "isUser": "Да, если привязан пользователь CRM и/или портала.",
-        "linkedUser": "Обычный пользователь Espo (не портал), опционально."
+        "linkedUser": "Обычный пользователь Espo (не портал), опционально.",
+        "isOccasional": "Разовый волонтёр (без постоянного еженедельного участия).",
+        "birthProvince": "Провинция рождения (как в реестре associati/volontari)."
     },
     "messages": {
         "removeRecordConfirmationContactOnly": "Этот контакт связан с пользователем. Будет удалён только Контакт — учётная запись Пользователя останется.",

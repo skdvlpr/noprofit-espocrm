@@ -375,13 +375,8 @@ class Installer
     }
 
     /**
-     * Add the activityCompetences field to the User detail layout (idempotent,
-     * respects admin layout customizations).
-     *
-     * Uses LayoutManager (FileManager + LayoutProvider) — NOT Layout\Service —
-     * because Layout\Service requires the `user` injectable, which is unavailable
-     * during CLI `command.php rebuild` / production deploy. That caused silent
-     * skip + version gate so competences never appeared on User forms in prod.
+     * Ensure User detail Volunteering panel has activityCompetences + isOccasional.
+     * Uses LayoutManager (not Layout\Service) so CLI/prod rebuild works.
      */
     public function ensureUserCompetencesLayout(
         Container $container,
@@ -399,7 +394,18 @@ class Installer
                 throw new \RuntimeException('User detail layout is empty');
             }
 
-            if (str_contains($raw, 'activityCompetences')) {
+            $hasFullPanels = str_contains($raw, 'volunteeringProfile')
+                && str_contains($raw, 'memberProfile');
+
+            if ($hasFullPanels) {
+                return;
+            }
+
+            $hasCompetences = str_contains($raw, 'activityCompetences');
+            $hasOccasional = str_contains($raw, 'isOccasional');
+
+            if ($hasCompetences && $hasOccasional && !$hasFullPanels) {
+                // Prefer NonprofitEspocrm ProvisionUserContactProfile for full panels.
                 return;
             }
 
@@ -409,15 +415,19 @@ class Installer
                 throw new \RuntimeException('User detail layout JSON is not an array');
             }
 
-            $layout[] = (object) [
-                'label' => 'Volunteering',
-                'rows' => [
-                    [
-                        (object) ['name' => 'activityCompetences'],
-                        false,
+            if (!$hasCompetences) {
+                $layout[] = (object) [
+                    'label' => 'Volunteering',
+                    'rows' => [
+                        [
+                            (object) ['name' => 'activityCompetences'],
+                            (object) ['name' => 'isOccasional'],
+                        ],
                     ],
-                ],
-            ];
+                ];
+            } else {
+                $layout = $this->injectIsOccasionalIntoUserLayout($layout);
+            }
 
             $layoutManager->set($layout, 'User', 'detail');
             $layoutManager->save();
@@ -430,6 +440,77 @@ class Installer
                 'VolunteerActivityDispatch User layout provisioning skipped: ' . $e->getMessage()
             );
         }
+    }
+
+    /**
+     * @param array<int, mixed> $layout
+     * @return array<int, mixed>
+     */
+    private function injectIsOccasionalIntoUserLayout(array $layout): array
+    {
+        foreach ($layout as $panelIndex => $panel) {
+            $panelObj = is_array($panel) ? (object) $panel : $panel;
+
+            if (!is_object($panelObj) || !isset($panelObj->rows) || !is_array($panelObj->rows)) {
+                continue;
+            }
+
+            $panelJson = json_encode($panelObj) ?: '';
+
+            if (!str_contains($panelJson, 'activityCompetences')) {
+                continue;
+            }
+
+            if (str_contains($panelJson, 'isOccasional')) {
+                return $layout;
+            }
+
+            foreach ($panelObj->rows as $rowIndex => $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                foreach ($row as $cellIndex => $cell) {
+                    $name = is_object($cell) ? ($cell->name ?? null) : (is_array($cell) ? ($cell['name'] ?? null) : null);
+
+                    if ($name !== 'activityCompetences') {
+                        continue;
+                    }
+
+                    // Put isOccasional in the empty cell next to competences, or append a row.
+                    if (count($row) === 1) {
+                        $row[] = (object) ['name' => 'isOccasional'];
+                    } elseif (isset($row[1]) && ($row[1] === false || $row[1] === null)) {
+                        $row[1] = (object) ['name' => 'isOccasional'];
+                    } else {
+                        $panelObj->rows[] = [
+                            (object) ['name' => 'isOccasional'],
+                            false,
+                        ];
+                        $layout[$panelIndex] = $panelObj;
+
+                        return $layout;
+                    }
+
+                    $panelObj->rows[$rowIndex] = $row;
+                    $layout[$panelIndex] = $panelObj;
+
+                    return $layout;
+                }
+            }
+        }
+
+        $layout[] = (object) [
+            'label' => 'Volunteering',
+            'rows' => [
+                [
+                    (object) ['name' => 'isOccasional'],
+                    false,
+                ],
+            ],
+        ];
+
+        return $layout;
     }
 
     /**

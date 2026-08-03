@@ -53,7 +53,22 @@
             "type": "date"
         },
         "positionsHeld": {
-            "type": "text"
+            "type": "multiEnum",
+            "options": [
+                "President",
+                "VicePresident",
+                "Councilor",
+                "Treasurer",
+                "Founder"
+            ],
+            "displayAsLabel": true,
+            "style": {
+                "President": "danger",
+                "VicePresident": "warning",
+                "Councilor": "info",
+                "Treasurer": "success",
+                "Founder": "primary"
+            }
         },
         "notes": {
             "type": "wysiwyg"

@@ -18,6 +18,13 @@
         "personnelStatus": {
             "Active": "success",
             "Inactive": "danger"
+        },
+        "positionsHeld": {
+            "President": "danger",
+            "VicePresident": "warning",
+            "Councilor": "info",
+            "Treasurer": "success",
+            "Founder": "primary"
         }
     },
     "filterList": [
@@ -26,9 +33,26 @@
             "name": "volunteersEmployees"
         },
         {
+            "name": "volunteersOccasionali"
+        },
+        {
             "name": "associati"
         }
     ],
+    "menu": {
+        "list": {
+            "buttons": [
+                {
+                    "labelTranslation": "Global.labels.reportingEmailExport",
+                    "name": "reportingEmailExport",
+                    "style": "default",
+                    "acl": "read",
+                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
+                    "actionFunction": "send"
+                }
+            ]
+        }
+    },
     "dynamicLogic": {
         "panels": {
             "personnelVolunteerEmployee": {
@@ -55,6 +79,17 @@
             }
         },
         "fields": {
+            "isOccasional": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "contactType",
+                            "value": "Volunteer"
+                        }
+                    ]
+                }
+            },
             "startDate": {
                 "visible": {
                     "conditionGroup": [
@@ -125,9 +160,20 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "equals",
+                            "type": "in",
                             "attribute": "contactType",
-                            "value": "MemberContact"
+                            "value": ["Volunteer", "Employee", "MemberContact"]
+                        }
+                    ]
+                }
+            },
+            "birthProvince": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee", "MemberContact"]
                         }
                     ]
                 }

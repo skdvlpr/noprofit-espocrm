@@ -1,0 +1,35 @@
+{
+    "fields": {
+        "isOccasional": "Разовый",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "weeklyHours": "Часов в неделю",
+        "monthlyHours": "Часов в месяц",
+        "extra": "Дополнительно",
+        "taxCode": "Код налогоплательщика",
+        "birthDate": "Дата рождения",
+        "birthPlace": "Место рождения",
+        "birthProvince": "Провинция рождения",
+        "joinDate": "Дата вступления",
+        "leaveDate": "Дата выхода",
+        "positionsHeld": "Должности",
+        "memberNotes": "Заметки"
+    },
+    "labels": {
+        "Volunteering": "Волонтёрство",
+        "Member": "Ассоциат"
+    },
+    "options": {
+        "positionsHeld": {
+            "President": "Президент",
+            "VicePresident": "Вице-президент",
+            "Councilor": "Советник",
+            "Treasurer": "Казначей",
+            "Founder": "Основатель"
+        }
+    },
+    "tooltips": {
+        "isOccasional": "Разовый волонтёр (без постоянного еженедельного участия). Синхронизируется со связанным Контактом.",
+        "monthlyHours": "Примерно часов в месяц (неделя × 4.33)."
+    }
+}

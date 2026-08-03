@@ -34,7 +34,9 @@
         "CRM": "Main Sections",
         "Rendicontazione": "Reporting",
         "Contatti": "Contacts",
+        "ContattiAll": "All",
         "ContattiVolontariDipendenti": "Volunteers / Employees",
+        "ContattiVolontariOccasionali": "Occasional volunteers",
         "ContattiAssociati": "Members"
     },
     "fields": {

@@ -2,6 +2,7 @@
     {"name": "name", "link": true},
     {"name": "contactType"},
     {"name": "personnelStatus"},
+    {"name": "isOccasional"},
     {"name": "emailAddress"},
     {"name": "phoneNumber"},
     {"name": "isUser"}

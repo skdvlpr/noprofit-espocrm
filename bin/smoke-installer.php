@@ -184,10 +184,19 @@ foreach ($contactsItems as $ci) {
 }
 
 $report('$Contatti group tab present (type=group)', $contactsGroup !== null);
-$report('Contact in Contatti group itemList', in_array('Contact', $contactsItemStrings, true));
+$report(
+    'Contatti group has All URL',
+    in_array('$ContattiAll', $contactsUrlTexts, true),
+    'urls=' . implode(',', $contactsUrlTexts)
+);
 $report(
     'Contatti group has Volunteers/Employees URL filter',
     in_array('$ContattiVolontariDipendenti', $contactsUrlTexts, true),
+    'urls=' . implode(',', $contactsUrlTexts)
+);
+$report(
+    'Contatti group has Occasional volunteers URL filter',
+    in_array('$ContattiVolontariOccasionali', $contactsUrlTexts, true),
     'urls=' . implode(',', $contactsUrlTexts)
 );
 $report(

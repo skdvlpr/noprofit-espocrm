@@ -1,4 +1,9 @@
 {
+    "User": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        }
+    },
     "Contact": {
         "detail": {
             "module": "NonprofitEspocrm"

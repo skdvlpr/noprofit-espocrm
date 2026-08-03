@@ -1,4 +1,10 @@
 {
     "quickViewDefaultNavigation": true,
-    "duplicateCheckFieldList": ["emailAddress", "phoneNumber"]
+    "duplicateCheckFieldList": ["emailAddress", "phoneNumber"],
+    "exportFormatList": [
+        "xlsx",
+        "csv",
+        "xlsx-email",
+        "csv-email"
+    ]
 }

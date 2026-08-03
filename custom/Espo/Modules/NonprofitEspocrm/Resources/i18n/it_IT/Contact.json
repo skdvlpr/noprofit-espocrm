@@ -8,6 +8,8 @@
         "isUser": "È utente",
         "linkedUser": "Utente CRM",
         "personnelStatus": "Stato",
+        "isOccasional": "Occasionale",
+        "birthProvince": "Prov. di nascita",
         "startDate": "Data di inizio",
         "endDate": "Data di fine",
         "contractType": "Tipo contratto",
@@ -46,16 +48,26 @@
             "FixedTerm": "Determinato",
             "Freelance": "Freelance",
             "Other": "Altro"
+        },
+        "positionsHeld": {
+            "President": "Presidente",
+            "VicePresident": "Vicepresidente",
+            "Councilor": "Consigliere",
+            "Treasurer": "Tesoriere",
+            "Founder": "Fondatore"
         }
     },
     "presetFilters": {
         "volunteersEmployees": "Volontari / Dipendenti",
+        "volunteersOccasionali": "Volontari occasionali",
         "associati": "Associati"
     },
     "tooltips": {
         "isUser": "Vero se è collegato un utente CRM e/o un utente portale.",
         "linkedUser": "Utente Espo regolare (non portale), opzionale. Indipendente dall'utente portale.",
-        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33)."
+        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33).",
+        "isOccasional": "Volontario occasionale (senza impegno settimanale regolare).",
+        "birthProvince": "Provincia di nascita (come nel registro soci/volontari)."
     },
     "messages": {
         "removeRecordConfirmationContactOnly": "Questo contatto è collegato a un utente. Verrà eliminato solo il Contatto — l'account Utente resterà.",

@@ -8,6 +8,8 @@
         "isUser": "Is user",
         "linkedUser": "CRM user",
         "personnelStatus": "Status",
+        "isOccasional": "Occasional",
+        "birthProvince": "Birth province",
         "startDate": "Start date",
         "endDate": "End date",
         "contractType": "Contract type",
@@ -46,16 +48,26 @@
             "FixedTerm": "Fixed term",
             "Freelance": "Freelance",
             "Other": "Other"
+        },
+        "positionsHeld": {
+            "President": "President",
+            "VicePresident": "Vice president",
+            "Councilor": "Councilor",
+            "Treasurer": "Treasurer",
+            "Founder": "Founder"
         }
     },
     "presetFilters": {
         "volunteersEmployees": "Volunteers / Employees",
+        "volunteersOccasionali": "Occasional volunteers",
         "associati": "Members"
     },
     "tooltips": {
         "isUser": "True when a CRM user and/or portal user is linked.",
         "linkedUser": "Optional regular (non-portal) Espo user. Independent from portal user.",
-        "monthlyHours": "Approximate monthly hours (weekly × 4.33)."
+        "monthlyHours": "Approximate monthly hours (weekly × 4.33).",
+        "isOccasional": "Occasional volunteer (not a regular weekly commitment).",
+        "birthProvince": "Province of birth (as in the members/volunteers registry)."
     },
     "messages": {
         "removeRecordConfirmationContactOnly": "This contact is linked to a user. Only the Contact will be deleted — the User account will remain.",

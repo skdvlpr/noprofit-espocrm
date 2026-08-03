@@ -1,4 +1,106 @@
 {
+    "fields": {
+        "hasVolunteerRole": {
+            "type": "bool",
+            "notStorable": true,
+            "default": false,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "layoutFiltersDisabled": true
+        },
+        "hasMemberRole": {
+            "type": "bool",
+            "notStorable": true,
+            "default": false,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "layoutFiltersDisabled": true
+        },
+        "isOccasional": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true
+        },
+        "startDate": {
+            "type": "date",
+            "notStorable": true
+        },
+        "endDate": {
+            "type": "date",
+            "notStorable": true
+        },
+        "weeklyHours": {
+            "type": "float",
+            "notStorable": true
+        },
+        "monthlyHours": {
+            "type": "float",
+            "notStorable": true,
+            "readOnly": true,
+            "tooltip": true
+        },
+        "extra": {
+            "type": "text",
+            "notStorable": true
+        },
+        "taxCode": {
+            "type": "varchar",
+            "maxLength": 16,
+            "trim": true,
+            "notStorable": true,
+            "validatorClassNameList": [
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
+            ]
+        },
+        "birthDate": {
+            "type": "date",
+            "notStorable": true,
+            "isPersonalData": true
+        },
+        "birthPlace": {
+            "type": "varchar",
+            "notStorable": true
+        },
+        "joinDate": {
+            "type": "date",
+            "notStorable": true
+        },
+        "leaveDate": {
+            "type": "date",
+            "notStorable": true
+        },
+        "positionsHeld": {
+            "type": "multiEnum",
+            "notStorable": true,
+            "options": [
+                "President",
+                "VicePresident",
+                "Councilor",
+                "Treasurer",
+                "Founder"
+            ],
+            "displayAsLabel": true,
+            "style": {
+                "President": "danger",
+                "VicePresident": "warning",
+                "Councilor": "info",
+                "Treasurer": "success",
+                "Founder": "primary"
+            }
+        },
+        "memberNotes": {
+            "type": "wysiwyg",
+            "notStorable": true
+        },
+        "birthProvince": {
+            "type": "varchar",
+            "maxLength": 8,
+            "trim": true,
+            "notStorable": true
+        }
+    },
     "links": {
         "linkedContacts": {
             "type": "hasMany",

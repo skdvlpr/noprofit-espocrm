@@ -1,14 +1,19 @@
 [
     "contactType",
     "personnelStatus",
+    "isOccasional",
     "relatedRecord",
     "emailAddress",
     "phoneNumber",
     "taxCode",
+    "birthDate",
+    "birthPlace",
+    "birthProvince",
     "isUser",
     "linkedUser",
     "startDate",
     "endDate",
     "joinDate",
-    "leaveDate"
+    "leaveDate",
+    "positionsHeld"
 ]

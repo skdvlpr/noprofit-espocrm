@@ -75,6 +75,10 @@ ok(
     'User detail layout includes activityCompetences'
 );
 ok(
+    str_contains((string) $userDetailLayout, 'isOccasional'),
+    'User detail layout includes isOccasional'
+);
+ok(
     (bool) $metadata->get(['entityDefs', 'User', 'fields', 'activityCompetences']),
     'User.activityCompetences field exists in metadata'
 );

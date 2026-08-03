@@ -1,0 +1,218 @@
+{
+    "recordViews": {
+        "detail": "nonprofit-espocrm:views/user/record/detail",
+        "edit": "nonprofit-espocrm:views/user/record/edit"
+    },
+    "dynamicLogic": {
+        "panels": {
+            "volunteeringProfile": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "memberProfile": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasMemberRole"
+                        }
+                    ]
+                }
+            }
+        },
+        "fields": {
+            "activityCompetences": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "isOccasional": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "startDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "endDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "weeklyHours": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "monthlyHours": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "extra": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasVolunteerRole"
+                        }
+                    ]
+                }
+            },
+            "taxCode": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasMemberRole"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "birthDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasMemberRole"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "birthPlace": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasMemberRole"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "birthProvince": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasMemberRole"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "joinDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasMemberRole"
+                        }
+                    ]
+                }
+            },
+            "leaveDate": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasMemberRole"
+                        }
+                    ]
+                }
+            },
+            "positionsHeld": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasMemberRole"
+                        }
+                    ]
+                }
+            },
+            "memberNotes": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "isTrue",
+                            "attribute": "hasMemberRole"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

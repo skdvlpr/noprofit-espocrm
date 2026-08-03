@@ -23,7 +23,7 @@ use Espo\Tools\LayoutManager\LayoutManager;
 class ProvisionShiftPlanning implements RebuildAction
 {
     /** Bump when new provisioning steps must re-run on production rebuild. */
-    private const PROVISION_VERSION = '2026-08-03-shift-planning-v5';
+    private const PROVISION_VERSION = '2026-08-03-shift-planning-v6';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(
@@ -46,11 +46,11 @@ class ProvisionShiftPlanning implements RebuildAction
         $installer->ensureUserCompetencesLayout($this->container, $this->injectableFactory);
         $installer->ensureEmailTemplates($this->container);
 
-        if (!$this->userDetailLayoutHasCompetences()) {
+        if (!$this->userDetailLayoutReady()) {
             /** @var Log $log */
             $log = $this->container->getByClass(Log::class);
             $log->warning(
-                'VolunteerActivityDispatch provision deferred: User detail layout still missing activityCompetences'
+                'VolunteerActivityDispatch provision deferred: User detail layout missing activityCompetences or isOccasional'
             );
 
             return;
@@ -61,12 +61,12 @@ class ProvisionShiftPlanning implements RebuildAction
         $configWriter->save();
     }
 
-    private function userDetailLayoutHasCompetences(): bool
+    private function userDetailLayoutReady(): bool
     {
         /** @var LayoutManager $layoutManager */
         $layoutManager = $this->injectableFactory->create(LayoutManager::class);
         $raw = (string) ($layoutManager->get('User', 'detail') ?? '');
 
-        return str_contains($raw, 'activityCompetences');
+        return str_contains($raw, 'activityCompetences') && str_contains($raw, 'isOccasional');
     }
 }

@@ -8,6 +8,7 @@
             [{"name": "relatedRecord"}, false],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
             [{"name": "taxCode"}, {"name": "birthDate"}],
+            [{"name": "birthPlace"}, {"name": "birthProvince"}],
             [{"name": "address"}, false],
             [{"name": "description", "fullWidth": true}]
         ]
@@ -17,8 +18,8 @@
         "label": "Volunteer / Employee",
         "rows": [
             [{"name": "startDate"}, {"name": "endDate"}],
-            [{"name": "contractType"}, {"name": "weeklyHours"}],
-            [{"name": "monthlyHours"}, false],
+            [{"name": "isOccasional"}, {"name": "contractType"}],
+            [{"name": "weeklyHours"}, {"name": "monthlyHours"}],
             [{"name": "extra", "fullWidth": true}]
         ]
     },
@@ -26,7 +27,6 @@
         "name": "personnelMember",
         "label": "Member",
         "rows": [
-            [{"name": "birthPlace"}, false],
             [{"name": "joinDate"}, {"name": "leaveDate"}],
             [{"name": "positionsHeld", "fullWidth": true}],
             [{"name": "notes", "fullWidth": true}]

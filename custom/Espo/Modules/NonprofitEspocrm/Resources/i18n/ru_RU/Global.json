@@ -26,7 +26,9 @@
         "CRM": "Главные разделы",
         "Rendicontazione": "Отчётность",
         "Contatti": "Контакты",
+        "ContattiAll": "Все",
         "ContattiVolontariDipendenti": "Волонтёры / Сотрудники",
+        "ContattiVolontariOccasionali": "Разовые волонтёры",
         "ContattiAssociati": "Ассоциаты"
     },
     "labels": {

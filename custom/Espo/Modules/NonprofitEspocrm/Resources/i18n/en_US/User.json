@@ -1,0 +1,35 @@
+{
+    "fields": {
+        "isOccasional": "Occasional",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "weeklyHours": "Weekly hours",
+        "monthlyHours": "Monthly hours",
+        "extra": "Extra",
+        "taxCode": "Fiscal Code",
+        "birthDate": "Date of birth",
+        "birthPlace": "Birth place",
+        "birthProvince": "Birth province",
+        "joinDate": "Join date",
+        "leaveDate": "Leave date",
+        "positionsHeld": "Positions held",
+        "memberNotes": "Notes"
+    },
+    "labels": {
+        "Volunteering": "Volunteering",
+        "Member": "Member"
+    },
+    "options": {
+        "positionsHeld": {
+            "President": "President",
+            "VicePresident": "Vice president",
+            "Councilor": "Councilor",
+            "Treasurer": "Treasurer",
+            "Founder": "Founder"
+        }
+    },
+    "tooltips": {
+        "isOccasional": "Occasional volunteer (not a regular weekly commitment). Synced to the linked Contact.",
+        "monthlyHours": "Approximate monthly hours (weekly × 4.33)."
+    }
+}

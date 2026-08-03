@@ -1,0 +1,35 @@
+{
+    "fields": {
+        "isOccasional": "Occasionale",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "weeklyHours": "Ore settimanali",
+        "monthlyHours": "Ore mensili",
+        "extra": "Extra",
+        "taxCode": "Codice Fiscale",
+        "birthDate": "Data di nascita",
+        "birthPlace": "Luogo di nascita",
+        "birthProvince": "Prov. di nascita",
+        "joinDate": "Data di ingresso",
+        "leaveDate": "Data di uscita",
+        "positionsHeld": "Cariche ricoperte",
+        "memberNotes": "Note"
+    },
+    "labels": {
+        "Volunteering": "Volontariato",
+        "Member": "Associato"
+    },
+    "options": {
+        "positionsHeld": {
+            "President": "Presidente",
+            "VicePresident": "Vicepresidente",
+            "Councilor": "Consigliere",
+            "Treasurer": "Tesoriere",
+            "Founder": "Fondatore"
+        }
+    },
+    "tooltips": {
+        "isOccasional": "Volontario occasionale (senza impegno settimanale regolare). Sincronizzato con il Contatto collegato.",
+        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33)."
+    }
+}

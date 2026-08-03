@@ -116,6 +116,21 @@ class Installer
         return self::ENTITIES_TO_HIDE_DEFAULT;
     }
 
+    /**
+     * Refresh only the Contatti navbar group (All / Vol+Dip / Occasionali / Associati).
+     * Safe to call from rebuild actions — does not touch roles or trigger nested rebuild.
+     */
+    public function refreshContactsNavbar(Container $container): void
+    {
+        $config = $container->getByClass(Config::class);
+        $injectableFactory = $container->getByClass(InjectableFactory::class);
+        $configWriter = $injectableFactory->create(ConfigWriter::class);
+
+        $tabList = $this->reorderContactsNavbarBlock($config->get('tabList', []) ?? []);
+        $configWriter->set('tabList', $tabList);
+        $configWriter->save();
+    }
+
     public function runPostInstall(Container $container): void
     {
         $config = $container->getByClass(Config::class);
@@ -301,12 +316,23 @@ class Installer
             'iconClass' => 'fas fa-id-badge',
             'color' => '#5b9bd4',
             'itemList' => [
-                'Contact',
+                (object) [
+                    'type' => 'url',
+                    'text' => '$ContattiAll',
+                    'url' => '#Contact',
+                    'iconClass' => 'fas fa-address-book',
+                ],
                 (object) [
                     'type' => 'url',
                     'text' => '$ContattiVolontariDipendenti',
                     'url' => '#Contact/list/primaryFilter=volunteersEmployees',
                     'iconClass' => 'fas fa-hands-helping',
+                ],
+                (object) [
+                    'type' => 'url',
+                    'text' => '$ContattiVolontariOccasionali',
+                    'url' => '#Contact/list/primaryFilter=volunteersOccasionali',
+                    'iconClass' => 'fas fa-user-clock',
                 ],
                 (object) [
                     'type' => 'url',

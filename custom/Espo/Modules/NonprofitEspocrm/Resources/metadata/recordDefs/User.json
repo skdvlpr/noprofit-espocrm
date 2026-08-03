@@ -1,0 +1,5 @@
+{
+    "readLoaderClassNameList": [
+        "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\User\\ContactProfileLoader"
+    ]
+}

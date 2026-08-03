@@ -23,6 +23,13 @@
     "status": {
       "Active": "Attivo",
       "Inactive": "Inattivo"
+    },
+    "positionsHeld": {
+      "President": "Presidente",
+      "VicePresident": "Vicepresidente",
+      "Councilor": "Consigliere",
+      "Treasurer": "Tesoriere",
+      "Founder": "Fondatore"
     }
   }
 }

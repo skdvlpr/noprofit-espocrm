@@ -1,6 +1,9 @@
-define('nonprofit-espocrm:views/contact/record/list', ['views/record/list'], function (Dep) {
+define('nonprofit-espocrm:views/contact/record/list', [
+    'views/record/list',
+    'nonprofit-espocrm:lib/reporting-list-export',
+], function (Dep, ReportingListExport) {
 
-    return Dep.extend({
+    return Dep.extend(Object.assign({}, ReportingListExport, {
 
         mandatorySelectAttributeList: [
             'linkedUserId',
@@ -75,7 +78,6 @@ define('nonprofit-espocrm:views/contact/record/list', ['views/record/list'], fun
                 confirmText: this.translate('Remove'),
             });
 
-            // Skip parent's confirm dialog; keep its remove/success handling.
             const originalConfirm = this.confirm;
 
             this.confirm = async () => {};
@@ -111,5 +113,5 @@ define('nonprofit-espocrm:views/contact/record/list', ['views/record/list'], fun
                 this.confirm = originalConfirm;
             }
         },
-    });
+    }));
 });
