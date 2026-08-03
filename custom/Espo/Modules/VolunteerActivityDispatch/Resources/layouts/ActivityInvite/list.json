@@ -1,7 +1,7 @@
 [
     {"name": "name", "link": true},
     {"name": "status"},
-    {"name": "task"},
+    {"name": "activityOfferSlot"},
     {"name": "user"},
     {"name": "respondedAt"}
 ]

@@ -3,22 +3,20 @@ define('volunteer-activity-dispatch:handlers/task/invite-respond', [], function 
     class Handler {
         constructor(view) {
             this.view = view;
-            this._pending = null;
+            this._status = null;
             this._loaded = false;
         }
 
         isAcceptVisible() {
-            return this.isPendingInvite();
+            this.ensureLoaded();
+
+            return this._status === 'Assigned';
         }
 
         isDeclineVisible() {
-            return this.isPendingInvite();
-        }
-
-        isPendingInvite() {
             this.ensureLoaded();
 
-            return this._pending === true;
+            return ['Assigned', 'Confirmed'].includes(this._status);
         }
 
         ensureLoaded() {
@@ -27,6 +25,7 @@ define('volunteer-activity-dispatch:handlers/task/invite-respond', [], function 
             }
 
             this._loaded = true;
+            this._status = null;
 
             Espo.Ajax
                 .getRequest('ActivityInvite', {
@@ -35,20 +34,21 @@ define('volunteer-activity-dispatch:handlers/task/invite-respond', [], function 
                     where: [
                         {type: 'equals', attribute: 'taskId', value: this.view.model.id},
                         {type: 'equals', attribute: 'userId', value: this.view.getUser().id},
-                        {type: 'equals', attribute: 'status', value: 'Pending'},
                     ],
                 })
                 .then(response => {
-                    this._pending = !!(response.list && response.list.length);
+                    this._status = (response.list && response.list.length) ?
+                        response.list[0].status : null;
+
                     this.view.reRender();
                 })
                 .catch(() => {
-                    this._pending = false;
+                    this._status = null;
                 });
         }
 
         accept() {
-            this.respond('Accepted', 'acceptSuccess');
+            this.respond('Confirmed', 'acceptSuccess');
         }
 
         decline() {
@@ -65,7 +65,7 @@ define('volunteer-activity-dispatch:handlers/task/invite-respond', [], function 
                 .postRequest('Task/action/respondInvite', {id: model.id, status: status})
                 .then(() => {
                     Espo.Ui.success(view.translate(messageKey, 'messages', 'ActivityInvite'));
-                    this._pending = false;
+                    this._status = status;
                     model.fetch();
                 })
                 .catch(() => {

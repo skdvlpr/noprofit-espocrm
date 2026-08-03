@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "activityCompetences": "Activity competences"
+    },
+    "labels": {
+        "Volunteering": "Volunteering"
+    },
+    "tooltips": {
+        "activityCompetences": "Shift categories the volunteer is qualified for. Empty = all categories."
+    }
+}

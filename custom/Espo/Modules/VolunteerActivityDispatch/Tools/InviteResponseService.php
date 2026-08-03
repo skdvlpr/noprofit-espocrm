@@ -18,9 +18,8 @@ use DateTimeZone;
  */
 class InviteResponseService
 {
-    public const STATUS_ACCEPTED = 'Accepted';
+    public const STATUS_ACCEPTED = 'Confirmed';
     public const STATUS_DECLINED = 'Declined';
-    public const STATUS_PENDING = 'Pending';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -79,6 +78,11 @@ class InviteResponseService
      */
     private function respond(string $inviteId, string $status): Entity
     {
+        // Legacy client value from the pre-shift-planning flow.
+        if ($status === 'Accepted') {
+            $status = self::STATUS_ACCEPTED;
+        }
+
         if (!in_array($status, [self::STATUS_ACCEPTED, self::STATUS_DECLINED], true)) {
             throw new BadRequest("Invalid status.");
         }

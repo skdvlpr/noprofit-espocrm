@@ -5,32 +5,70 @@
     "boolFilterList": ["onlyMy"],
     "filterList": [
         {"name": "draft"},
-        {"name": "published"}
+        {"name": "open"}
     ],
     "bottomPanels": {
         "detail": [
             {
+                "name": "coverage",
+                "label": "Coverage",
+                "view": "volunteer-activity-dispatch:views/activity-offer/record/panels/coverage",
+                "order": 1
+            },
+            {
                 "name": "slots",
                 "label": "Slots",
                 "view": "views/record/panels/relationship",
-                "order": 1
+                "order": 2
             },
             {
                 "name": "tasks",
                 "label": "Tasks",
                 "view": "views/record/panels/relationship",
-                "order": 2
+                "order": 3
             }
         ]
     },
-    "detailActionList": [
-        {
-            "name": "publish",
-            "label": "Publish week",
-            "handler": "volunteer-activity-dispatch:handlers/activity-offer/publish",
-            "actionFunction": "publish",
-            "acl": "edit",
-            "checkVisibilityFunction": "isPublishVisible"
+    "menu": {
+        "detail": {
+            "buttons": [
+                {
+                    "name": "fillAvailability",
+                    "label": "Fill availability",
+                    "iconHtml": "<span class=\"fas fa-calendar-check fa-sm\"></span>",
+                    "style": "primary",
+                    "handler": "volunteer-activity-dispatch:handlers/activity-offer/shift-actions",
+                    "actionFunction": "fillAvailability",
+                    "checkVisibilityFunction": "isFillAvailabilityVisible"
+                },
+                {
+                    "name": "requestAvailability",
+                    "label": "Request availability",
+                    "iconHtml": "<span class=\"fas fa-paper-plane fa-sm\"></span>",
+                    "acl": "edit",
+                    "handler": "volunteer-activity-dispatch:handlers/activity-offer/shift-actions",
+                    "actionFunction": "requestAvailability",
+                    "checkVisibilityFunction": "isRequestAvailabilityVisible"
+                },
+                {
+                    "name": "autoAssign",
+                    "label": "Auto assign",
+                    "iconHtml": "<span class=\"fas fa-magic fa-sm\"></span>",
+                    "acl": "edit",
+                    "handler": "volunteer-activity-dispatch:handlers/activity-offer/shift-actions",
+                    "actionFunction": "autoAssign",
+                    "checkVisibilityFunction": "isAutoAssignVisible"
+                },
+                {
+                    "name": "confirmPlan",
+                    "label": "Confirm plan",
+                    "iconHtml": "<span class=\"fas fa-check-double fa-sm\"></span>",
+                    "acl": "edit",
+                    "handler": "volunteer-activity-dispatch:handlers/activity-offer/shift-actions",
+                    "actionFunction": "confirmPlan",
+                    "checkVisibilityFunction": "isConfirmPlanVisible"
+                }
+            ]
         }
-    ]
+    }
 }

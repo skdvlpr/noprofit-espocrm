@@ -52,6 +52,12 @@
             "required": true,
             "isSorted": true
         },
+        "requiredCount": {
+            "type": "int",
+            "default": 1,
+            "min": 0,
+            "max": 99
+        },
         "place": {
             "type": "address",
             "viewMap": true
@@ -74,6 +80,11 @@
             "type": "belongsTo",
             "entity": "ActivityOffer",
             "foreign": "slots"
+        },
+        "invites": {
+            "type": "hasMany",
+            "entity": "ActivityInvite",
+            "foreign": "activityOfferSlot"
         },
         "task": {
             "type": "belongsTo",

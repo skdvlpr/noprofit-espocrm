@@ -2,5 +2,6 @@
     {"name": "name", "link": true, "width": 35},
     {"name": "dateStart"},
     {"name": "category"},
+    {"name": "requiredCount"},
     {"name": "placeCity"}
 ]

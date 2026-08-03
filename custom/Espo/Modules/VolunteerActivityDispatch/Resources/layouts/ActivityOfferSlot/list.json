@@ -3,6 +3,7 @@
     {"name": "dateStart"},
     {"name": "dateEnd"},
     {"name": "category"},
+    {"name": "requiredCount"},
     {"name": "placeCity"},
     {"name": "task"}
 ]

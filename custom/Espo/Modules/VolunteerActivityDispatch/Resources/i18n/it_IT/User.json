@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "activityCompetences": "Competenze attività"
+    },
+    "labels": {
+        "Volunteering": "Volontariato"
+    },
+    "tooltips": {
+        "activityCompetences": "Categorie di turno per cui il volontario è abilitato. Vuoto = tutte le categorie."
+    }
+}

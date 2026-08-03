@@ -1,6 +1,6 @@
 {
     "primaryFilterClassNameMap": {
         "draft": "Espo\\Modules\\VolunteerActivityDispatch\\Classes\\Select\\ActivityOffer\\PrimaryFilters\\Draft",
-        "published": "Espo\\Modules\\VolunteerActivityDispatch\\Classes\\Select\\ActivityOffer\\PrimaryFilters\\Published"
+        "open": "Espo\\Modules\\VolunteerActivityDispatch\\Classes\\Select\\ActivityOffer\\PrimaryFilters\\Open"
     }
 }

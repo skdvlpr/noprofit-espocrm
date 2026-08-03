@@ -5,12 +5,14 @@
         "user": "Volunteer",
         "status": "Status",
         "respondedAt": "Responded at",
-        "activityOffer": "Shift plan"
+        "activityOffer": "Shift plan",
+        "activityOfferSlot": "Shift"
     },
     "links": {
         "task": "Task",
         "user": "Volunteer",
-        "activityOffer": "Shift plan"
+        "activityOffer": "Shift plan",
+        "activityOfferSlot": "Shift"
     },
     "labels": {
         "ActivityInvite": "Availability",
@@ -21,9 +23,11 @@
     },
     "options": {
         "status": {
-            "Pending": "Pending",
-            "Accepted": "Accepted",
-            "Declined": "Declined"
+            "Available": "Available",
+            "Assigned": "Assigned",
+            "Confirmed": "Confirmed",
+            "Declined": "Declined",
+            "Cancelled": "Cancelled"
         }
     },
     "messages": {

@@ -39,15 +39,18 @@
         },
         "myInviteStatus": {
             "type": "enum",
-            "options": ["", "Pending", "Accepted", "Declined"],
+            "options": ["", "Available", "Assigned", "Confirmed", "Declined", "Cancelled"],
             "notStorable": true,
             "readOnly": true,
             "displayAsLabel": true,
             "style": {
-                "Pending": "warning",
-                "Accepted": "success",
-                "Declined": "danger"
-            }
+                "Available": "primary",
+                "Assigned": "warning",
+                "Confirmed": "success",
+                "Declined": "danger",
+                "Cancelled": "info"
+            },
+            "translation": "ActivityInvite.options.status"
         }
     },
     "links": {

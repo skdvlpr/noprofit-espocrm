@@ -6,6 +6,7 @@
             [{"name": "name"}, {"name": "activityOffer"}],
             [{"name": "dateStart"}, {"name": "dateEnd"}],
             [{"name": "duration"}, {"name": "category"}],
+            [{"name": "requiredCount"}, false],
             [{"name": "place", "fullWidth": true}],
             [{"name": "sortOrder"}, {"name": "task"}]
         ]

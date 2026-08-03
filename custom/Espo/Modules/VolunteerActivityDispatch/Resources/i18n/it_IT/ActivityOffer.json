@@ -26,23 +26,42 @@
         "ActivityOffer": "Piano turni",
         "ActivityOfferPlural": "Pianificazione turni",
         "Create ActivityOffer": "Crea piano turni",
-        "Publish week": "Pubblica settimana",
+        "Request availability": "Richiedi disponibilità",
+        "Auto assign": "Assegna automaticamente",
+        "Confirm plan": "Conferma turni",
+        "Fill availability": "Indica disponibilità",
+        "Coverage": "Copertura turni",
+        "coverageAvailable": "Disponibili",
+        "coverageAssigned": "Assegnati",
+        "coverageVolunteers": "Volontari assegnati",
+        "coverageUncovered": "Turno scoperto",
         "Slots": "Turni",
         "Tasks": "Attività"
     },
     "options": {
         "status": {
             "Draft": "Bozza",
-            "Published": "Pubblicato",
+            "CollectingAvailability": "Raccolta disponibilità",
+            "Planned": "Pianificato",
+            "Confirmed": "Confermato",
             "Closed": "Chiuso"
         }
     },
     "tooltips": {
-        "inviteeUsers": "Volontari che ricevono la richiesta di disponibilità alla pubblicazione.",
+        "inviteeUsers": "Volontari che ricevono la richiesta di disponibilità.",
         "inviteTeams": "Tutti i membri attivi di questi team vengono coinvolti (uniti ai Volontari coinvolti)."
     },
     "messages": {
-        "publishSuccess": "Settimana pubblicata: {taskCount} attività, {inviteCount} richieste, {notifyCount} notifiche.",
-        "publishConfirm": "Pubblicare questa settimana? Verranno create attività e richieste per tutti i volontari coinvolti."
+        "requestAvailabilityConfirm": "Aprire la raccolta disponibilità e avvisare i volontari coinvolti?",
+        "requestAvailabilitySuccess": "Richiesta inviata a {notifyCount} volontari per {slotCount} turni.",
+        "autoAssignSuccess": "Assegnazione automatica completata: {assignedCount} nuove assegnazioni.",
+        "autoAssignUncovered": "Turni scoperti: {list}",
+        "confirmPlanConfirm": "Confermare i turni? Verranno create le attività e avvisati i volontari.",
+        "confirmPlanSuccess": "Piano confermato: {taskCount} attività, {confirmedCount} turni assegnati, {notifyCount} notifiche.",
+        "availabilityRequestNotification": "Nuova pianificazione turni «{name}» (settimana dal {weekStart}): indica la tua disponibilità.",
+        "shiftsConfirmedNotification": "Turni confermati per «{name}»: {shifts}",
+        "availabilitySaved": "Disponibilità salvata. Grazie!",
+        "availabilityNotOpen": "La raccolta disponibilità non è aperta per questo piano.",
+        "availabilityDisallowedHint": "I turni disattivati richiedono competenze non presenti nel tuo profilo."
     }
 }

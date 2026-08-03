@@ -44,6 +44,216 @@ class Installer
         /** @var DataManager $dataManager */
         $dataManager = $container->getByClass(DataManager::class);
         $dataManager->rebuild();
+
+        // After rebuild: new columns (activity_offer_slot_id) exist.
+        $this->migrateShiftPlanningStatuses($container);
+        $this->ensureUserCompetencesLayout($container, $injectableFactory);
+        $this->ensureRoleAccess($container);
+    }
+
+    /**
+     * Scope-level access for this module's entities per canonical role.
+     * Only these three scope keys are (re)written; everything else in the
+     * role is left untouched. Applied additively and idempotently.
+     */
+    private const ROLE_SCOPE_DATA = [
+        'Admin' => [
+            'ActivityOffer' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all', 'stream' => 'all',
+            ],
+            'ActivityOfferSlot' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
+            ],
+            'ActivityInvite' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
+            ],
+        ],
+        'Manager' => [
+            'ActivityOffer' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all', 'stream' => 'all',
+            ],
+            'ActivityOfferSlot' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
+            ],
+            'ActivityInvite' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'no',
+            ],
+        ],
+        'Employee' => [
+            'ActivityOffer' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
+            ],
+            'ActivityOfferSlot' => [
+                'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own',
+            ],
+            'ActivityInvite' => [
+                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+            ],
+        ],
+        // Volunteers: open plans from notifications, view shifts, respond to
+        // own invites. Writing goes through cohort-gated service endpoints.
+        'Volunteer' => [
+            'ActivityOffer' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+            ],
+            'ActivityOfferSlot' => [
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+            ],
+            'ActivityInvite' => [
+                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+            ],
+        ],
+    ];
+
+    public function ensureRoleAccess(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+
+            $changed = false;
+
+            foreach (self::ROLE_SCOPE_DATA as $roleName => $scopeData) {
+                $role = $em->getRDBRepository('Role')
+                    ->where(['name' => $roleName])
+                    ->findOne();
+
+                if (!$role) {
+                    continue;
+                }
+
+                $data = $role->get('data');
+                $data = $data ? json_decode(json_encode($data), true) : [];
+
+                if (!is_array($data)) {
+                    $data = [];
+                }
+
+                foreach ($scopeData as $scope => $access) {
+                    if (($data[$scope] ?? null) === $access) {
+                        continue;
+                    }
+
+                    $data[$scope] = $access;
+                    $changed = true;
+                }
+
+                $role->set('data', $data);
+                $em->saveEntity($role, ['skipAll' => true, 'silent' => true]);
+            }
+
+            if ($changed) {
+                $container->getByClass(DataManager::class)->clearCache();
+            }
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'VolunteerActivityDispatch role access provisioning skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * One-shot migration to the weekly shift-planning model (v0.3):
+     * - ActivityOffer: Published -> Confirmed (tasks/invites were already created).
+     * - ActivityInvite: Pending -> Assigned, Accepted -> Confirmed.
+     * - Backfill invite.activityOfferSlot from the task the invite pointed to.
+     */
+    public function migrateShiftPlanningStatuses(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+
+            $offers = $em->getRDBRepository('ActivityOffer')
+                ->where(['status' => 'Published'])
+                ->find();
+
+            foreach ($offers as $offer) {
+                $offer->set('status', 'Confirmed');
+                $em->saveEntity($offer, ['skipAll' => true, 'silent' => true]);
+            }
+
+            $statusMap = [
+                'Pending' => 'Assigned',
+                'Accepted' => 'Confirmed',
+            ];
+
+            $invites = $em->getRDBRepository('ActivityInvite')
+                ->where(['status' => array_keys($statusMap)])
+                ->find();
+
+            foreach ($invites as $invite) {
+                $invite->set('status', $statusMap[$invite->get('status')]);
+                $em->saveEntity($invite, ['skipAll' => true, 'silent' => true]);
+            }
+
+            $orphanInvites = $em->getRDBRepository('ActivityInvite')
+                ->where([
+                    'activityOfferSlotId' => null,
+                    'taskId!=' => null,
+                ])
+                ->find();
+
+            foreach ($orphanInvites as $invite) {
+                $slot = $em->getRDBRepository('ActivityOfferSlot')
+                    ->where(['taskId' => $invite->get('taskId')])
+                    ->findOne();
+
+                if (!$slot) {
+                    continue;
+                }
+
+                $invite->set('activityOfferSlotId', $slot->getId());
+                $em->saveEntity($invite, ['skipAll' => true, 'silent' => true]);
+            }
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'VolunteerActivityDispatch status migration skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Add the activityCompetences field to the User detail layout (idempotent,
+     * respects admin layout customizations).
+     */
+    public function ensureUserCompetencesLayout(
+        Container $container,
+        InjectableFactory $injectableFactory
+    ): void {
+        try {
+            $layoutService = $injectableFactory->create(\Espo\Tools\Layout\Service::class);
+
+            $layout = $layoutService->getOriginal('User', 'detail');
+
+            if (is_string($layout)) {
+                $layout = json_decode($layout);
+            }
+
+            if (!is_array($layout)) {
+                return;
+            }
+
+            if (str_contains(json_encode($layout) ?: '', 'activityCompetences')) {
+                return;
+            }
+
+            $layout[] = (object) [
+                'label' => 'Volunteering',
+                'rows' => [
+                    [
+                        (object) ['name' => 'activityCompetences'],
+                        false,
+                    ],
+                ],
+            ];
+
+            $layoutService->update('User', 'detail', null, $layout);
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'VolunteerActivityDispatch User layout provisioning skipped: ' . $e->getMessage()
+            );
+        }
     }
 
     /**

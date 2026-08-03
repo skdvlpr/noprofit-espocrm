@@ -5,8 +5,10 @@
             "readOnly": true
         },
         "task": {
-            "type": "link",
-            "required": true
+            "type": "link"
+        },
+        "activityOfferSlot": {
+            "type": "link"
         },
         "user": {
             "type": "link",
@@ -15,13 +17,15 @@
         },
         "status": {
             "type": "enum",
-            "options": ["Pending", "Accepted", "Declined"],
-            "default": "Pending",
+            "options": ["Available", "Assigned", "Confirmed", "Declined", "Cancelled"],
+            "default": "Available",
             "displayAsLabel": true,
             "style": {
-                "Pending": "warning",
-                "Accepted": "success",
-                "Declined": "danger"
+                "Available": "primary",
+                "Assigned": "warning",
+                "Confirmed": "success",
+                "Declined": "danger",
+                "Cancelled": "info"
             },
             "audited": true
         },
@@ -44,6 +48,11 @@
             "entity": "Task",
             "foreign": "activityInvites"
         },
+        "activityOfferSlot": {
+            "type": "belongsTo",
+            "entity": "ActivityOfferSlot",
+            "foreign": "invites"
+        },
         "user": {
             "type": "belongsTo",
             "entity": "User"
@@ -64,6 +73,10 @@
         "taskUser": {
             "type": "unique",
             "columns": ["taskId", "userId", "deleted"]
+        },
+        "slotUser": {
+            "type": "unique",
+            "columns": ["activityOfferSlotId", "userId", "deleted"]
         },
         "userStatus": {"columns": ["userId", "status", "deleted"]}
     }

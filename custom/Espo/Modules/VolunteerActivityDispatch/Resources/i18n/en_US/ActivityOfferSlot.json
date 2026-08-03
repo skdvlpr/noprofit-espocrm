@@ -6,6 +6,8 @@
         "dateEnd": "End",
         "duration": "Duration",
         "category": "Category",
+        "requiredCount": "Volunteers required",
+        "invites": "Availabilities",
         "place": "Place",
         "placeStreet": "Street",
         "placeCity": "City",

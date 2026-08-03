@@ -6,6 +6,8 @@
         "dateEnd": "Fine",
         "duration": "Durata",
         "category": "Categoria",
+        "requiredCount": "Volontari richiesti",
+        "invites": "Disponibilità",
         "place": "Luogo",
         "placeStreet": "Via",
         "placeCity": "Città",

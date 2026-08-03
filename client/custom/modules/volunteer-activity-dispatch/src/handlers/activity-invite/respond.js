@@ -5,15 +5,25 @@ define('volunteer-activity-dispatch:handlers/activity-invite/respond', [], funct
             this.view = view;
         }
 
-        isPendingForMe() {
+        isMine() {
             const model = this.view.model;
-            const userId = this.view.getUser().id;
 
-            if (!model || model.get('status') !== 'Pending') {
+            if (!model) {
                 return false;
             }
 
-            return model.get('userId') === userId || this.view.getUser().isAdmin();
+            return model.get('userId') === this.view.getUser().id ||
+                this.view.getUser().isAdmin();
+        }
+
+        isAcceptVisible() {
+            return this.isMine() &&
+                this.view.model.get('status') === 'Assigned';
+        }
+
+        isDeclineVisible() {
+            return this.isMine() &&
+                ['Available', 'Assigned', 'Confirmed'].includes(this.view.model.get('status'));
         }
 
         accept() {

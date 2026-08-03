@@ -5,12 +5,14 @@
         "user": "Volontario",
         "status": "Stato",
         "respondedAt": "Risposto il",
-        "activityOffer": "Piano turni"
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno"
     },
     "links": {
         "task": "Attività",
         "user": "Volontario",
-        "activityOffer": "Piano turni"
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno"
     },
     "labels": {
         "ActivityInvite": "Disponibilità",
@@ -21,9 +23,11 @@
     },
     "options": {
         "status": {
-            "Pending": "In attesa",
-            "Accepted": "Accettata",
-            "Declined": "Rifiutata"
+            "Available": "Disponibile",
+            "Assigned": "Assegnato",
+            "Confirmed": "Confermato",
+            "Declined": "Rifiutato",
+            "Cancelled": "Annullato"
         }
     },
     "messages": {

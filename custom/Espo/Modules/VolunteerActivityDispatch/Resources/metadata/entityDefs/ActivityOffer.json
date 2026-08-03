@@ -11,12 +11,14 @@
         },
         "status": {
             "type": "enum",
-            "options": ["Draft", "Published", "Closed"],
+            "options": ["Draft", "CollectingAvailability", "Planned", "Confirmed", "Closed"],
             "default": "Draft",
             "displayAsLabel": true,
             "style": {
                 "Draft": "default",
-                "Published": "success",
+                "CollectingAvailability": "warning",
+                "Planned": "primary",
+                "Confirmed": "success",
                 "Closed": "info"
             },
             "audited": true
