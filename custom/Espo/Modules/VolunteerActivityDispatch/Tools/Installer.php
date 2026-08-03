@@ -377,26 +377,36 @@ class Installer
     /**
      * Add the activityCompetences field to the User detail layout (idempotent,
      * respects admin layout customizations).
+     *
+     * Uses LayoutManager (FileManager + LayoutProvider) — NOT Layout\Service —
+     * because Layout\Service requires the `user` injectable, which is unavailable
+     * during CLI `command.php rebuild` / production deploy. That caused silent
+     * skip + version gate so competences never appeared on User forms in prod.
      */
     public function ensureUserCompetencesLayout(
         Container $container,
         InjectableFactory $injectableFactory
     ): void {
         try {
-            $layoutService = $injectableFactory->create(\Espo\Tools\Layout\Service::class);
+            /** @var \Espo\Tools\LayoutManager\LayoutManager $layoutManager */
+            $layoutManager = $injectableFactory->create(
+                \Espo\Tools\LayoutManager\LayoutManager::class
+            );
 
-            $layout = $layoutService->getOriginal('User', 'detail');
+            $raw = $layoutManager->get('User', 'detail');
 
-            if (is_string($layout)) {
-                $layout = json_decode($layout);
+            if ($raw === null || $raw === '') {
+                throw new \RuntimeException('User detail layout is empty');
             }
+
+            if (str_contains($raw, 'activityCompetences')) {
+                return;
+            }
+
+            $layout = json_decode($raw);
 
             if (!is_array($layout)) {
-                return;
-            }
-
-            if (str_contains(json_encode($layout) ?: '', 'activityCompetences')) {
-                return;
+                throw new \RuntimeException('User detail layout JSON is not an array');
             }
 
             $layout[] = (object) [
@@ -409,7 +419,12 @@ class Installer
                 ],
             ];
 
-            $layoutService->update('User', 'detail', null, $layout);
+            $layoutManager->set($layout, 'User', 'detail');
+            $layoutManager->save();
+
+            /** @var \Espo\Core\DataManager $dataManager */
+            $dataManager = $container->getByClass(DataManager::class);
+            $dataManager->updateCacheTimestamp();
         } catch (\Throwable $e) {
             $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
                 'VolunteerActivityDispatch User layout provisioning skipped: ' . $e->getMessage()

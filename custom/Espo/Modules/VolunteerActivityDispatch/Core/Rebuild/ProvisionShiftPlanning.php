@@ -7,7 +7,9 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Rebuild\RebuildAction;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
+use Espo\Core\Utils\Log;
 use Espo\Modules\VolunteerActivityDispatch\Tools\Installer;
+use Espo\Tools\LayoutManager\LayoutManager;
 
 /**
  * One-shot provisioning on rebuild, version-gated via config.
@@ -20,7 +22,8 @@ use Espo\Modules\VolunteerActivityDispatch\Tools\Installer;
  */
 class ProvisionShiftPlanning implements RebuildAction
 {
-    private const PROVISION_VERSION = '2026-08-03-shift-planning-v4';
+    /** Bump when new provisioning steps must re-run on production rebuild. */
+    private const PROVISION_VERSION = '2026-08-03-shift-planning-v5';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(
@@ -43,8 +46,27 @@ class ProvisionShiftPlanning implements RebuildAction
         $installer->ensureUserCompetencesLayout($this->container, $this->injectableFactory);
         $installer->ensureEmailTemplates($this->container);
 
+        if (!$this->userDetailLayoutHasCompetences()) {
+            /** @var Log $log */
+            $log = $this->container->getByClass(Log::class);
+            $log->warning(
+                'VolunteerActivityDispatch provision deferred: User detail layout still missing activityCompetences'
+            );
+
+            return;
+        }
+
         $configWriter = $this->injectableFactory->create(ConfigWriter::class);
         $configWriter->set(self::CONFIG_KEY, self::PROVISION_VERSION);
         $configWriter->save();
+    }
+
+    private function userDetailLayoutHasCompetences(): bool
+    {
+        /** @var LayoutManager $layoutManager */
+        $layoutManager = $this->injectableFactory->create(LayoutManager::class);
+        $raw = (string) ($layoutManager->get('User', 'detail') ?? '');
+
+        return str_contains($raw, 'activityCompetences');
     }
 }

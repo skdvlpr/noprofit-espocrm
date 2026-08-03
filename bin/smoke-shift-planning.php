@@ -62,6 +62,23 @@ ok(is_file($handlerFile), 'shift-actions.js handler file exists');
 $stale = $metadata->get(['clientDefs', 'ActivityOffer', 'detailActionList']);
 ok(empty($stale), 'stale detailActionList removed from clientDefs');
 
+// --- User activityCompetences layout (prod rebuild must inject without Layout\Service) ---
+
+(new \Espo\Modules\VolunteerActivityDispatch\Tools\Installer())
+    ->ensureUserCompetencesLayout($container, $injectableFactory);
+
+$userDetailLayout = $injectableFactory
+    ->create(\Espo\Tools\LayoutManager\LayoutManager::class)
+    ->get('User', 'detail') ?? '';
+ok(
+    str_contains((string) $userDetailLayout, 'activityCompetences'),
+    'User detail layout includes activityCompetences'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'User', 'fields', 'activityCompetences']),
+    'User.activityCompetences field exists in metadata'
+);
+
 $itLabels = json_decode((string) file_get_contents(__DIR__
     . '/../custom/Espo/Modules/VolunteerActivityDispatch/Resources/i18n/it_IT/ActivityOffer.json'), true);
 
