@@ -56,5 +56,9 @@
         "isUser": "Vero se è collegato un utente CRM e/o un utente portale.",
         "linkedUser": "Utente Espo regolare (non portale), opzionale. Indipendente dall'utente portale.",
         "monthlyHours": "Ore mensili approssimative (settimanali × 4,33)."
+    },
+    "messages": {
+        "removeRecordConfirmationContactOnly": "Questo contatto è collegato a un utente. Verrà eliminato solo il Contatto — l'account Utente resterà.",
+        "removeSelectedRecordsConfirmationContactOnly": "Almeno un contatto selezionato è collegato a un utente. Verranno eliminati solo i Contatti — gli account Utente collegati resteranno."
     }
 }

@@ -1,0 +1,6 @@
+[
+    {"name": "name", "link": true, "width": 35},
+    {"name": "contactType"},
+    {"name": "personnelStatus"},
+    {"name": "emailAddress", "notSortable": true}
+]

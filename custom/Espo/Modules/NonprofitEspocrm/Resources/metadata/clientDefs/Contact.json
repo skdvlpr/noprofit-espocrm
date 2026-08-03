@@ -1,6 +1,10 @@
 {
     "color": "#5b9bd4",
     "iconClass": "fas fa-id-badge",
+    "recordViews": {
+        "detail": "nonprofit-espocrm:views/contact/record/detail",
+        "list": "nonprofit-espocrm:views/contact/record/list"
+    },
     "styleMap": {
         "contactType": {
             "HelpSeeker": "primary",
@@ -51,17 +55,6 @@
             }
         },
         "fields": {
-            "personnelStatus": {
-                "visible": {
-                    "conditionGroup": [
-                        {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee", "MemberContact"]
-                        }
-                    ]
-                }
-            },
             "startDate": {
                 "visible": {
                     "conditionGroup": [

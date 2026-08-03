@@ -56,5 +56,9 @@
         "isUser": "True when a CRM user and/or portal user is linked.",
         "linkedUser": "Optional regular (non-portal) Espo user. Independent from portal user.",
         "monthlyHours": "Approximate monthly hours (weekly × 4.33)."
+    },
+    "messages": {
+        "removeRecordConfirmationContactOnly": "This contact is linked to a user. Only the Contact will be deleted — the User account will remain.",
+        "removeSelectedRecordsConfirmationContactOnly": "At least one selected contact is linked to a user. Only Contact records will be deleted — linked User accounts will remain."
     }
 }

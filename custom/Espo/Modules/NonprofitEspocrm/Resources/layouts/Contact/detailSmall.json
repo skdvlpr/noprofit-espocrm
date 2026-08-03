@@ -3,7 +3,7 @@
         "label": "",
         "rows": [
             [{"name": "name", "fullWidth": true}],
-            [{"name": "contactType", "fullWidth": true}],
+            [{"name": "contactType"}, {"name": "personnelStatus"}],
             [{"name": "relatedRecord", "fullWidth": true}],
             [{"name": "emailAddress", "fullWidth": true}],
             [{"name": "phoneNumber", "fullWidth": true}],

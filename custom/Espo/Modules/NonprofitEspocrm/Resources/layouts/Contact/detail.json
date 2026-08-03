@@ -2,9 +2,10 @@
     {
         "label": "Overview",
         "rows": [
-            [{"name": "name"}, {"name": "contactType"}],
+            [{"name": "name"}, false],
+            [{"name": "contactType"}, {"name": "personnelStatus"}],
             [{"name": "firstName"}, {"name": "lastName"}],
-            [{"name": "relatedRecord"}, {"name": "personnelStatus"}],
+            [{"name": "relatedRecord"}, false],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
             [{"name": "taxCode"}, {"name": "birthDate"}],
             [{"name": "address"}, false],

@@ -9,6 +9,15 @@
         "list": {
             "module": "NonprofitEspocrm"
         },
+        "listSmall": {
+            "module": "NonprofitEspocrm"
+        },
+        "listForAccount": {
+            "module": "NonprofitEspocrm"
+        },
+        "listSelect": {
+            "module": "NonprofitEspocrm"
+        },
         "filters": {
             "module": "NonprofitEspocrm"
         },

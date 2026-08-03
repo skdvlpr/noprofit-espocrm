@@ -1,0 +1,18 @@
+[
+    {
+        "name": "name",
+        "link": true,
+        "view": "crm:views/contact/fields/name-for-account"
+    },
+    {"name": "contactType"},
+    {"name": "personnelStatus"},
+    {
+        "name": "accountRole",
+        "width": 20,
+        "notSortable": true
+    },
+    {
+        "name": "emailAddress",
+        "width": 25
+    }
+]
