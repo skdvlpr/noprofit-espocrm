@@ -12,6 +12,8 @@ use Espo\Core\Utils\Language;
 use Espo\Entities\Notification;
 use Espo\Entities\Team;
 use Espo\Entities\User;
+use Espo\Modules\VolunteerActivityDispatch\Hooks\ActivityInvite\ProtectInviteMutation;
+use Espo\Modules\VolunteerActivityDispatch\Hooks\ActivityOffer\ProtectPlanStatus;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use DateTimeImmutable;
@@ -79,7 +81,7 @@ class ShiftPlanningService
 
         $offer->set('status', self::STATUS_COLLECTING);
         $offer->set('publishedAt', $this->nowString());
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         $message = $this->translateMessage('availabilityRequestNotification', [
             'name' => (string) $offer->get(Field::NAME),
@@ -219,7 +221,7 @@ class ShiftPlanningService
                         'respondedAt' => $this->nowString(),
                     ]);
 
-                    $this->entityManager->saveEntity($new);
+                    $this->entityManager->saveEntity($new, $this->inviteSaveOptions());
                     $availableCount++;
 
                     continue;
@@ -228,7 +230,7 @@ class ShiftPlanningService
                 if (in_array($invite->get('status'), [self::INVITE_DECLINED, self::INVITE_CANCELLED], true)) {
                     $invite->set('status', self::INVITE_AVAILABLE);
                     $invite->set('respondedAt', $this->nowString());
-                    $this->entityManager->saveEntity($invite);
+                    $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
                 }
 
                 $availableCount++;
@@ -249,7 +251,7 @@ class ShiftPlanningService
             if (in_array($invite->get('status'), [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED], true)) {
                 $invite->set('status', self::INVITE_DECLINED);
                 $invite->set('respondedAt', $this->nowString());
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
 
                 $this->syncTaskCollaborator($invite, false);
                 $withdrawnCount++;
@@ -494,7 +496,7 @@ class ShiftPlanningService
                 }
 
                 $invite->set('status', self::INVITE_ASSIGNED);
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
 
                 $load[$userId] = ($load[$userId] ?? 0) + 1;
                 $busyIntervals[$userId][] = [
@@ -508,7 +510,7 @@ class ShiftPlanningService
         }
 
         $offer->set('status', self::STATUS_PLANNED);
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         // Recompute uncovered after assignment.
         $uncovered = [];
@@ -584,7 +586,7 @@ class ShiftPlanningService
                 }
 
                 $invite->set('taskId', $task->getId());
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
                 $confirmedCount++;
 
                 if (!in_array($userId, $collaboratorIds, true)) {
@@ -602,7 +604,7 @@ class ShiftPlanningService
         }
 
         $offer->set('status', self::STATUS_CONFIRMED);
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         $notifyCount = 0;
         $emailCount = 0;
@@ -637,6 +639,22 @@ class ShiftPlanningService
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function inviteSaveOptions(): array
+    {
+        return [ProtectInviteMutation::SAVE_OPTION => true];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function offerSaveOptions(): array
+    {
+        return [ProtectPlanStatus::SAVE_OPTION => true];
+    }
 
     /**
      * @throws NotFound

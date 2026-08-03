@@ -3,7 +3,7 @@
     "actionList": ["read", "create", "edit", "delete"],
     "levelList": ["all", "team", "own", "no"],
     "read": "own",
-    "create": "yes",
+    "create": "no",
     "edit": "own",
     "delete": "no"
 }
