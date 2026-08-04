@@ -1,0 +1,41 @@
+{
+    "fields": {
+        "name": "Name",
+        "task": "Task",
+        "user": "Volunteer",
+        "status": "Status",
+        "respondedAt": "Responded at",
+        "activityOffer": "Shift plan",
+        "activityOfferSlot": "Shift",
+        "comment": "Comment"
+    },
+    "links": {
+        "task": "Task",
+        "user": "Volunteer",
+        "activityOffer": "Shift plan",
+        "activityOfferSlot": "Shift"
+    },
+    "labels": {
+        "ActivityInvite": "Availability",
+        "ActivityInvitePlural": "Availabilities",
+        "Create ActivityInvite": "Create Availability",
+        "Accept": "Accept",
+        "Decline": "Decline"
+    },
+    "options": {
+        "status": {
+            "Available": "Available",
+            "Assigned": "Assigned",
+            "Confirmed": "Confirmed",
+            "Declined": "Declined",
+            "Cancelled": "Cancelled"
+        }
+    },
+    "messages": {
+        "acceptSuccess": "Availability confirmed.",
+        "declineSuccess": "Availability declined."
+    },
+    "tooltips": {
+        "comment": "Optional note for the organizers when declaring availability."
+    }
+}

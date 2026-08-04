@@ -1,3 +1,0 @@
-{
-    "beforeSaveCustomScript": "if (name == null || name == '') {\n    $categoryLabel = language\\translateOption(category, 'category', 'ActivityOfferSlot');\n    name = string\\concatenate($categoryLabel, ' · ', datetime\\format(dateStart));\n}\n"
-}

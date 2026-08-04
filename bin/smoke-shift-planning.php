@@ -3,7 +3,7 @@
 require __DIR__ . '/lib/refuse-production.php';
 
 /**
- * Smoke test of the VolunteerActivityDispatch shift planning lifecycle.
+ * Smoke test of shift planning lifecycle (merged into NonprofitEspocrm).
  *
  * Verifies:
  *   - clientDefs: lifecycle actions exposed as visible header buttons
@@ -56,7 +56,7 @@ foreach (['fillAvailability', 'requestAvailability', 'autoAssign', 'confirmPlan'
 }
 
 $handlerFile = __DIR__
-    . '/../client/custom/modules/volunteer-activity-dispatch/src/handlers/activity-offer/shift-actions.js';
+    . '/../client/custom/modules/nonprofit-espocrm/src/handlers/activity-offer/shift-actions.js';
 ok(is_file($handlerFile), 'shift-actions.js handler file exists');
 
 $stale = $metadata->get(['clientDefs', 'ActivityOffer', 'detailActionList']);
@@ -64,7 +64,7 @@ ok(empty($stale), 'stale detailActionList removed from clientDefs');
 
 // --- User activityCompetences layout (prod rebuild must inject without Layout\Service) ---
 
-(new \Espo\Modules\VolunteerActivityDispatch\Tools\Installer())
+(new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())
     ->ensureUserCompetencesLayout($container, $injectableFactory);
 
 $userDetailLayout = $injectableFactory
@@ -84,7 +84,7 @@ ok(
 );
 
 $itLabels = json_decode((string) file_get_contents(__DIR__
-    . '/../custom/Espo/Modules/VolunteerActivityDispatch/Resources/i18n/it_IT/ActivityOffer.json'), true);
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/ActivityOffer.json'), true);
 
 foreach (['Fill availability', 'Request availability', 'Auto assign', 'Confirm plan'] as $label) {
     ok(isset($itLabels['labels'][$label]), "it_IT label present: $label");
@@ -92,7 +92,7 @@ foreach (['Fill availability', 'Request availability', 'Auto assign', 'Confirm p
 
 // --- role access (bug #2: volunteer access to plans) --------------------------
 
-(new \Espo\Modules\VolunteerActivityDispatch\Tools\Installer())->ensureRoleAccess($container);
+(new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())->ensureRoleAccess($container);
 
 $volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
 ok($volunteerRole !== null, 'canonical Volunteer role exists');
@@ -105,19 +105,27 @@ if ($volunteerRole) {
     ok(($roleData['ActivityInvite']['read'] ?? null) === 'own', 'Volunteer role: ActivityInvite read=own');
 }
 
-$tabList = $container->getByClass(\Espo\Core\Utils\Config::class)->get('tabList') ?? [];
+$tabConfig = $container->getByClass(\Espo\Core\Utils\Config::class);
+$tabWriter = $injectableFactory->create(\Espo\Core\Utils\Config\ConfigWriter::class);
+$tabList = (new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())
+    ->ensureActivityOfferTab($tabConfig->get('tabList') ?? []);
+$tabWriter->set('tabList', $tabList);
+$tabWriter->save();
+
+$tabList = $injectableFactory->create(\Espo\Core\Utils\Config::class)->get('tabList') ?? [];
 ok(in_array('ActivityOffer', $tabList, true), 'ActivityOffer present in tabList');
+ok(in_array('ActivityOfferSlot', $tabList, true), 'ActivityOfferSlot present in tabList');
 
 // --- email templates (bug #3: volunteer emails) --------------------------------
 
-(new \Espo\Modules\VolunteerActivityDispatch\Tools\Installer())->ensureEmailTemplates($container);
+(new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())->ensureEmailTemplates($container);
 
 // Config object was cached before the write — reload it for assertions.
 $freshConfig = $injectableFactory->create(\Espo\Core\Utils\Config::class);
-$templateIds = $freshConfig->get(\Espo\Modules\VolunteerActivityDispatch\Tools\ShiftEmailService::CONFIG_KEY);
+$templateIds = $freshConfig->get(\Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService::CONFIG_KEY);
 $templateIds = $templateIds ? json_decode(json_encode($templateIds), true) : [];
 
-foreach (['availabilityRequest', 'shiftsConfirmed'] as $kind) {
+foreach (['availabilityRequest', 'shiftsConfirmed', 'adminDigest'] as $kind) {
     $tplId = $templateIds[$kind] ?? null;
     $tpl = $tplId ? $em->getEntityById('EmailTemplate', $tplId) : null;
     ok($tpl !== null, "email template provisioned: $kind");
@@ -126,8 +134,74 @@ foreach (['availabilityRequest', 'shiftsConfirmed'] as $kind) {
         $body = (string) $tpl->get('body');
         ok(str_contains($body, '{recordUrl}'), "email template $kind uses {recordUrl}");
         ok(!str_contains($body, '{planUrl}'), "email template $kind no longer uses {planUrl}");
+        ok(str_contains($body, 'Safe House') || str_contains($body, '{brandName}') || str_contains($body, '{logoHtml}'),
+            "email template $kind brands Safe House");
+        ok(!preg_match('/Safehouse|safe house/i', str_replace(['Safe House', '{brandName}'], '', $body)),
+            "email template $kind has no forbidden Safehouse spelling");
     }
 }
+
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'weekSlots']),
+    'ActivityOffer.weekSlots field exists'
+);
+ok(
+    !$metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'weekSlots', 'required']),
+    'ActivityOffer.weekSlots is not required on plan create'
+);
+ok(
+    (bool) $metadata->get(['clientDefs', 'ActivityOfferSlot', 'createDisabled']),
+    'ActivityOfferSlot list createDisabled'
+);
+ok(
+    (bool) $metadata->get(['scopes', 'ActivityOfferSlot', 'tab']),
+    'ActivityOfferSlot navbar tab enabled'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/create-week-slots.js'),
+    'create-week-slots modal exists'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/panels/slots.js'),
+    'slots relationship panel exists'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'conditions']),
+    'ActivityOfferSlot.conditions field exists'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityInvite', 'fields', 'comment']),
+    'ActivityInvite.comment field exists'
+);
+
+$coverageJs = file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/panels/coverage.js');
+ok(
+    is_string($coverageJs) && !str_contains($coverageJs, "action: 'fillAvailability'"),
+    'coverage panel no longer duplicates Fill availability button'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/fields/week-slots.js'),
+    'week-slots field view exists'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/res/templates/site/footer.tpl'),
+    'custom site footer template exists'
+);
+ok(
+    str_contains(
+        (string) file_get_contents(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/lib/init.js'),
+        'gomercato.it'
+    ),
+    'footer init.js injects GoMercato branding'
+);
+ok(
+    str_contains(
+        (string) file_get_contents(__DIR__ . '/../html/main.html'),
+        'gomercato.it'
+    ),
+    'html/main.html includes GoMercato footer'
+);
 
 $recordUrlMeta = $metadata->get(['app', 'emailTemplate', 'placeholders', 'recordUrl', 'className']);
 ok(is_string($recordUrlMeta) && str_contains($recordUrlMeta, 'RecordUrl'), 'app.emailTemplate.placeholders.recordUrl registered');
@@ -207,6 +281,104 @@ $offer->set([
 ]);
 $em->saveEntity($offer, ['skipAll' => true, 'silent' => true]);
 
+// --- weekly generator (WhatsApp-style syncWeekSlots) ---------------------------
+
+$weekOffer = $em->getNewEntity('ActivityOffer');
+$weekOffer->set([
+    'name' => 'Smoke Week Generator',
+    'weekStart' => '2026-09-07',
+    'status' => 'Draft',
+]);
+$em->saveEntity($weekOffer, ['skipAll' => true, 'silent' => true]);
+
+$weekSync = $injectableFactory->create(
+    \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class
+)->addWeekSlots($weekOffer->getId(), [
+    [
+        'dayOfWeek' => 'Monday',
+        'category' => 'MealPreparation',
+        'timeStart' => '10:30',
+        'timeEnd' => '12:30',
+        'requiredCount' => 2,
+        'conditions' => ['Portare grembiule', 'Arrivo 10 min prima'],
+    ],
+    [
+        'dayOfWeek' => 'Wednesday',
+        'category' => 'MealPreparation',
+        'timeStart' => '11:30',
+        'timeEnd' => '14:30',
+        'requiredCount' => 1,
+        'conditions' => [],
+    ],
+], [
+    'uniqueAddress' => true,
+    'placeStreet' => 'via Trivero 12',
+    'placeCity' => 'Torino',
+]);
+ok($weekSync['slotCount'] === 2, 'addWeekSlots created 2 slots');
+ok(($weekSync['createdCount'] ?? 0) === 2, 'addWeekSlots createdCount=2');
+
+$weekSlots = iterator_to_array(
+    $em->getRDBRepository('ActivityOfferSlot')->where(['activityOfferId' => $weekOffer->getId()])->order('dateStart')->find()
+);
+ok(count($weekSlots) === 2, 'DB has 2 week-generator slots');
+ok(($weekSlots[0]->get('status') ?? '') === 'Draft', 'new slots default to Draft');
+ok(
+    str_contains((string) $weekSlots[0]->get('name'), 'via Trivero')
+        || str_contains((string) $weekSlots[0]->get('placeStreet'), 'via Trivero'),
+    'batch unique address copied onto generated slots'
+);
+ok(
+    ($weekSlots[0]->get('conditions') === ['Portare grembiule', 'Arrivo 10 min prima'])
+        || (is_array($weekSlots[0]->get('conditions')) && count($weekSlots[0]->get('conditions')) === 2),
+    'conditions stored on generated slot'
+);
+ok($weekSlots[0]->get('dateStart') === '2026-09-07 10:30:00' || str_starts_with((string) $weekSlots[0]->get('dateStart'), '2026-09-07'),
+    'Monday maps to weekStart date');
+
+$allDaySync = $injectableFactory->create(
+    \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class
+)->addWeekSlots($weekOffer->getId(), [
+    [
+        'dayOfWeek' => 'Friday',
+        'category' => 'Cleaning',
+        'isAllDay' => true,
+        'timeStart' => '10:30',
+        'timeEnd' => '12:30',
+        'requiredCount' => 1,
+        'conditions' => [],
+    ],
+]);
+ok($allDaySync['slotCount'] === 3, 'second addWeekSlots batch appends (total 3)');
+ok(($allDaySync['createdCount'] ?? 0) === 1, 'second batch createdCount=1');
+$allDaySlot = $em->getRDBRepository('ActivityOfferSlot')
+    ->where(['activityOfferId' => $weekOffer->getId(), 'isAllDay' => true])
+    ->findOne();
+ok($allDaySlot && (bool) $allDaySlot->get('isAllDay'), 'isAllDay flag stored');
+ok($allDaySlot && str_contains((string) $allDaySlot->get('dateStart'), '00:00'), 'isAllDay starts at 00:00');
+ok($allDaySlot && $allDaySlot->get('category') === 'Cleaning', 'per-row category stored');
+
+// Auto-name formula (via save without skipAll)
+$nameOffer = $em->getNewEntity('ActivityOffer');
+$nameOffer->set([
+    'weekStart' => '2026-09-07',
+    'status' => 'Draft',
+]);
+$em->saveEntity($nameOffer);
+ok(
+    (string) $nameOffer->get('name') === '07.09.2026 - 13.09.2026',
+    'auto name from weekStart–weekEnd'
+);
+$em->removeEntity($nameOffer, ['skipAll' => true, 'silent' => true]);
+
+$weekSlots = iterator_to_array(
+    $em->getRDBRepository('ActivityOfferSlot')->where(['activityOfferId' => $weekOffer->getId()])->find()
+);
+foreach ($weekSlots as $ws) {
+    $em->removeEntity($ws, ['skipAll' => true, 'silent' => true]);
+}
+$em->removeEntity($weekOffer, ['skipAll' => true, 'silent' => true]);
+
 // linkMultiple is processed by the record service, not the ORM — relate directly.
 foreach ($volunteers as $u) {
     $em->getRDBRepository('ActivityOffer')->getRelation($offer, 'inviteeUsers')->relate($u);
@@ -229,6 +401,7 @@ foreach ($slotDefs as [$cat, $start, $end, $req]) {
         'dateEnd' => $end,
         'requiredCount' => $req,
         'name' => $cat . ' smoke',
+        'status' => 'Published',
     ]);
     $em->saveEntity($s, ['skipAll' => true, 'silent' => true]);
     $slots[$cat] = $s;
@@ -251,7 +424,7 @@ if ($volunteerRole) {
 // --- lifecycle ----------------------------------------------------------------
 
 $adminService = $injectableFactory->create(
-    \Espo\Modules\VolunteerActivityDispatch\Tools\ShiftPlanningService::class
+    \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class
 );
 
 $res = $adminService->requestAvailability($offer->getId());
@@ -263,13 +436,13 @@ echo "  availability emails sent: " . ($res['emailCount'] ?? 0) . "\n";
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'CollectingAvailability', 'offer -> CollectingAvailability');
 
-$declare = function ($volunteer, array $slotIds) use ($injectableFactory, $offer) {
+$declare = function ($volunteer, array $slotIds, ?string $comment = null) use ($injectableFactory, $offer) {
     $service = $injectableFactory->createWith(
-        \Espo\Modules\VolunteerActivityDispatch\Tools\ShiftPlanningService::class,
+        \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class,
         ['user' => $volunteer]
     );
 
-    return $service->saveAvailability($offer->getId(), $slotIds);
+    return $service->saveAvailability($offer->getId(), $slotIds, $comment);
 };
 
 // --- regression: slot re-parented to another plan (stale invite offer link) ----
@@ -324,7 +497,7 @@ $r3 = $declare($volunteers[2], [
 ok($r3['availableCount'] === 1, 'competence filter: vol3 only MealPreparation accepted');
 
 $grid = $injectableFactory->createWith(
-    \Espo\Modules\VolunteerActivityDispatch\Tools\ShiftPlanningService::class,
+    \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class,
     ['user' => $volunteers[2]]
 )->availabilityGrid($offer->getId());
 
@@ -408,7 +581,7 @@ if ($confirmedInvite) {
     $declineUser = $em->getEntityById('User', $declineUserId);
 
     $respondService = $injectableFactory->createWith(
-        \Espo\Modules\VolunteerActivityDispatch\Tools\InviteResponseService::class,
+        \Espo\Modules\NonprofitEspocrm\Tools\InviteResponseService::class,
         ['user' => $declineUser]
     );
     $respondService->decline($confirmedInvite->getId());

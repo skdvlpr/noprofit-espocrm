@@ -9,8 +9,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -31,8 +40,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -51,8 +69,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -61,8 +88,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -71,8 +107,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -81,8 +126,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -91,8 +145,17 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "hasVolunteerRole"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasVolunteerRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -110,6 +173,10 @@
                                 {
                                     "type": "isTrue",
                                     "attribute": "hasMemberRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
                                 }
                             ]
                         }
@@ -129,6 +196,10 @@
                                 {
                                     "type": "isTrue",
                                     "attribute": "hasMemberRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
                                 }
                             ]
                         }
@@ -148,6 +219,10 @@
                                 {
                                     "type": "isTrue",
                                     "attribute": "hasMemberRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
                                 }
                             ]
                         }
@@ -167,6 +242,10 @@
                                 {
                                     "type": "isTrue",
                                     "attribute": "hasMemberRole"
+                                },
+                                {
+                                    "type": "isTrue",
+                                    "attribute": "hasEmployeeRole"
                                 }
                             ]
                         }

@@ -3,8 +3,6 @@
     "duplicateCheckFieldList": ["emailAddress", "phoneNumber"],
     "exportFormatList": [
         "xlsx",
-        "csv",
-        "xlsx-email",
-        "csv-email"
+        "csv"
     ]
 }

@@ -340,3 +340,17 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
         font-size: 11px;
     }
 }
+
+/* Aggiungi turni / week-slots editor — keep Bootstrap rows aligned inside modal panels */
+.week-slots-editor .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.week-slots-editor .cell.form-group {
+    margin-bottom: 0.75em;
+}
+
+.dialog-record .field[data-name="weekSlots"] .week-slots-editor .panel {
+    margin-bottom: 0.75em;
+}

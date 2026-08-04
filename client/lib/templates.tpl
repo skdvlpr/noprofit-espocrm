@@ -1300,7 +1300,15 @@ res/templates/site/footer.tpl
     title="Powered by EspoCRM"
     rel="noopener" target="_blank"
     tabindex="-1"
->EspoCRM, Inc.</a></p>
+>EspoCRM, Inc.</a>
+|
+<a
+    href="https://gomercato.it/"
+    title="Super powered by GoMercato.it"
+    rel="noopener" target="_blank"
+    tabindex="-1"
+>Super powered by GoMercato.it</a>
+🚀</p>
 
 _delimiter_shwduix1h1
 res/templates/settings/fields/dashboard-layout/edit.tpl

@@ -28,9 +28,13 @@
                 {
                     "name": "dateStart"
                 },
+                false
+            ],
+            [
                 {
-                    "name": "dateCompleted"
-                }
+                    "name": "duration"
+                },
+                false
             ],
             [
                 {
@@ -39,6 +43,12 @@
                 {
                     "name": "assignedUser"
                 }
+            ],
+            [
+                {
+                    "name": "dateCompleted"
+                },
+                false
             ],
             [
                 {

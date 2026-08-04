@@ -1,0 +1,20 @@
+{
+    "actionList": [
+        "read",
+        "create",
+        "edit",
+        "delete",
+        "stream"
+    ],
+    "levelList": [
+        "all",
+        "team",
+        "own",
+        "no"
+    ],
+    "read": "team",
+    "create": "yes",
+    "edit": "team",
+    "delete": "team",
+    "stream": "all"
+}

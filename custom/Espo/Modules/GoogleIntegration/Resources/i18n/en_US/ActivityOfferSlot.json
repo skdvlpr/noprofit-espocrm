@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": "Save in Google Calendar",
+        "googleCalendarDateSourceList": "Google Calendar Dates",
+        "googleCalendarEventSettings": "Google event settings by date",
+        "googleCalendarId": "Google Calendar",
+        "googleCalendarTemplate": "Calendar template",
+        "googleCalendarReminderMode": "Google reminder mode",
+        "googleCalendarReminders": "Google reminders",
+        "googleCalendarDescriptionTemplateOverride": "Event description",
+        "googleCalendarLocation": "Location",
+        "googleCalendarVisibility": "Visibility",
+        "googleCalendarTransparency": "Availability",
+        "googleCalendarColorId": "Color"
+    },
+    "labels": {
+        "Google Calendar": "Google Calendar",
+        "googleCalendarPerDateSettingsHelp": "Configure Google Calendar options separately for each selected date.",
+        "googleCalendarTemplateSelectHelp": "Choose a template to fill the fields below. You can edit any value before saving.",
+        "googleCalendarReminderNotice": "You can save this record to Google Calendar with or without Google reminders.",
+        "googleCalendarRoutingHintTitle": "Google calendar routing (per selected date)",
+        "googleCalendarRoutingHintPrimary": "Events go to your Google primary calendar.",
+        "googleCalendarRoutingHintUserPick": "Choose a calendar below (admin enabled user pick for this date).",
+        "googleCalendarRoutingHintAutoDedicated": "Events go to shared entity calendar {calendarName} (when admin enabled auto-create).",
+        "googleCalendarTemplateVariables": "Insert record field",
+        "googleCalendarTemplateVariableSearch": "Search fields",
+        "googleCalendarCurrentRecordFields": "Current record fields",
+        "googleCalendarRelatedRecordFields": "Related record fields",
+        "googleCalendarExternalRecordFields": "External fields ({relation})",
+        "googleCalendarNoVariables": "No fields match the search.",
+        "googleCalendarDateMain": "Start date",
+        "googleCalendarDateEnd": "End date",
+        "googleCalendarDatePresentation": "Presentation date",
+        "googleCalendarDateClose": "Close date",
+        "googleCalendarTemplateLoadFailed": "Could not load calendar templates. Run Rebuild or reinstall Google Integration."
+    },
+    "options": {
+        "googleCalendarReminderMode": {
+            "none": "No reminder",
+            "default": "Use calendar defaults",
+            "custom": "Custom reminders"
+        },
+        "googleCalendarReminders": {
+            "popup": "Notification",
+            "email": "Email",
+            "minutes": "minutes before",
+            "hours": "hours before",
+            "days": "days before",
+            "weeks": "weeks before"
+        },
+        "googleCalendarVisibility": {
+            "default": "Default",
+            "private": "Private",
+            "public": "Public"
+        },
+        "googleCalendarTransparency": {
+            "opaque": "Busy",
+            "transparent": "Available"
+        },
+        "googleCalendarColorId": {
+            "": "Default",
+            "1": "Lavender",
+            "2": "Sage",
+            "3": "Grape",
+            "4": "Flamingo",
+            "5": "Banana",
+            "6": "Tangerine",
+            "7": "Peacock",
+            "8": "Graphite",
+            "9": "Blueberry",
+            "10": "Basil",
+            "11": "Tomato"
+        }
+    }
+}

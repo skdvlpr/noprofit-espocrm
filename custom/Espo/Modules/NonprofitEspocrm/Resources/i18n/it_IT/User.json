@@ -13,7 +13,8 @@
         "joinDate": "Data di ingresso",
         "leaveDate": "Data di uscita",
         "positionsHeld": "Cariche ricoperte",
-        "memberNotes": "Note"
+        "memberNotes": "Note",
+        "activityCompetences": "Competenze attività"
     },
     "labels": {
         "Volunteering": "Volontariato",
@@ -30,6 +31,7 @@
     },
     "tooltips": {
         "isOccasional": "Volontario occasionale (senza impegno settimanale regolare). Sincronizzato con il Contatto collegato.",
-        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33)."
+        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33).",
+        "activityCompetences": "Categorie di turno per cui il volontario è abilitato. Vuoto = tutte le categorie."
     }
 }

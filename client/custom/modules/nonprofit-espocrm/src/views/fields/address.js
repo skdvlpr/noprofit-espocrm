@@ -206,7 +206,7 @@ define('nonprofit-espocrm:views/fields/address', [
 
             const autocomplete = new google.maps.places.Autocomplete(input, {
                 fields: ['address_components', 'formatted_address'],
-                types: ['address'],
+                // No types filter: allow streets and localities (e.g. city names).
             });
 
             autocomplete.addListener('place_changed', () => {

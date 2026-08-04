@@ -21,13 +21,14 @@ use Espo\ORM\EntityManager;
  * All public methods are idempotent for creates; existing Role rows are left
  * unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1 (dev only).
  *
- * Permission matrix (2026-08-03):
+ * Permission matrix (2026-08-04):
  *   - Admin     : full all
  *   - Volunteer : read all domain + reporting; field-level hide personal data on
  *                 Contact/User/VE/Member (name/status/competences/positionsHeld
  *                 remain visible); write only own Task + ActivityInvite
+ *   - Employee  : same ACL as Volunteer (IT label Dipendente); Contact sync → contactType=Employee
  *   - Member    : read all; write nowhere
- *   - Employee / Manager / Desk : only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev)
+ *   - Manager / Desk : only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev)
  *
  * Existing roles are left unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1
  * or versioned rebuild ProvisionRoleAcl forces overwrite.
@@ -73,18 +74,18 @@ class RoleSetup
     public const CORE_ROLES = [
         self::ROLE_ADMIN,
         self::ROLE_VOLUNTEER,
+        self::ROLE_EMPLOYEE,
         self::ROLE_MEMBER,
     ];
 
     /** Optional staff roles — only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev). */
     public const EXTRA_ROLES = [
-        self::ROLE_EMPLOYEE,
         self::ROLE_MANAGER,
         self::ROLE_DESK,
     ];
 
-    /** Bump when Volunteer/Member/Admin ACL must be rewritten on rebuild (prod-safe). */
-    public const ACL_MATRIX_VERSION = '2026-08-03-volunteer-member-readall-v2';
+    /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
+    public const ACL_MATRIX_VERSION = '2026-08-04-employee-volunteer-acl-v1';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -676,6 +677,12 @@ class RoleSetup
                 'fieldData' => $volunteerFieldData,
                 'perms'     => $readOnlyPerms,
             ],
+            // Employee (Dipendente): identical ACL to Volunteer.
+            self::ROLE_EMPLOYEE => [
+                'data'      => $volunteerData,
+                'fieldData' => $volunteerFieldData,
+                'perms'     => $readOnlyPerms,
+            ],
             self::ROLE_MEMBER => [
                 'data'      => $memberData,
                 'fieldData' => [],
@@ -690,33 +697,33 @@ class RoleSetup
             return $specs;
         }
 
-        $employeeData = [];
+        $employeeStaffData = [];
         foreach ($domainEntities as $e) {
-            $employeeData[$e] = $teamCreateOwnDelete();
+            $employeeStaffData[$e] = $teamCreateOwnDelete();
         }
-        $employeeData['MealCount'] = [
+        $employeeStaffData['MealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
-        $employeeData['AssociationMealCount'] = [
+        $employeeStaffData['AssociationMealCount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
-        $employeeData['PrimaNota'] = [
+        $employeeStaffData['PrimaNota'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
-        $employeeData['VolunteerEmployee'] = $readOnlyAll();
-        $employeeData['Member'] = $readOnlyAll();
-        $employeeData['ActivityOffer'] = [
+        $employeeStaffData['VolunteerEmployee'] = $readOnlyAll();
+        $employeeStaffData['Member'] = $readOnlyAll();
+        $employeeStaffData['ActivityOffer'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
         ];
-        $employeeData['ActivityOfferSlot'] = [
+        $employeeStaffData['ActivityOfferSlot'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own',
         ];
-        $employeeData['ActivityInvite'] = [
+        $employeeStaffData['ActivityInvite'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
         ];
 
         /** @var array<string, array<string, string>> $managerData */
-        $managerData = json_decode(json_encode($employeeData), true);
+        $managerData = json_decode(json_encode($employeeStaffData), true);
         $managerData['VolunteerEmployee'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
         ];
@@ -777,11 +784,7 @@ class RoleSetup
             'followerManagementPermission' => 'team',
         ];
 
-        $specs[self::ROLE_EMPLOYEE] = [
-            'data'      => $employeeData,
-            'fieldData' => $personContactFieldLocks,
-            'perms'     => $staffPerms,
-        ];
+        // Employee stays Volunteer-equivalent (CORE); do not overwrite with staff ACL.
         $specs[self::ROLE_MANAGER] = [
             'data'      => $managerData,
             'fieldData' => $personContactFieldLocks,

@@ -93,8 +93,10 @@ $assert('User detail has volunteeringProfile', str_contains($userDetail, 'volunt
 $assert('User detail has memberProfile', str_contains($userDetail, 'memberProfile'));
 
 $volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
+$employeeRole = $em->getRDBRepository('Role')->where(['name' => 'Employee'])->findOne();
 $memberRole = $em->getRDBRepository('Role')->where(['name' => 'Member'])->findOne();
 $assert('Volunteer role exists', $volunteerRole !== null);
+$assert('Employee role exists', $employeeRole !== null);
 $assert('Member role exists', $memberRole !== null);
 
 $created = [];
@@ -211,6 +213,51 @@ try {
         $assert(
             'Member User delete → Contact Inactive',
             $memFresh !== null && $memFresh->get('personnelStatus') === 'Inactive'
+        );
+    }
+
+    // --- Employee role user (Dipendente) ---
+    $empUser = $em->getNewEntity('User');
+    $empUser->set([
+        'userName' => 'smoke_emp_' . $suffix,
+        'firstName' => 'Smoke',
+        'lastName' => 'Employee',
+        'type' => 'regular',
+        'isActive' => true,
+        'startDate' => date('Y-m-d', strtotime('-14 days')),
+        'weeklyHours' => 20,
+        'emailAddress' => 'smoke.emp.' . $suffix . '@example.com',
+    ]);
+    if ($employeeRole) {
+        $empUser->set('rolesIds', [$employeeRole->getId()]);
+        $empUser->set('rolesNames', (object) [$employeeRole->getId() => 'Employee']);
+    }
+    $em->saveEntity($empUser);
+    $created[] = $empUser;
+
+    $empContact = null;
+    foreach ($em->getRDBRepository('Contact')->where(['linkedUserId' => $empUser->getId()])->find() as $c) {
+        $empContact = $c;
+        break;
+    }
+    $assert('Employee role creates Contact', $empContact !== null);
+    $assert(
+        'Employee Contact type',
+        $empContact !== null && $empContact->get('contactType') === 'Employee',
+        $empContact ? (string) $empContact->get('contactType') : ''
+    );
+    $assert(
+        'Employee Contact startDate synced',
+        $empContact !== null && $empContact->get('startDate') === $empUser->get('startDate')
+    );
+    if ($empContact) {
+        $created[] = $empContact;
+
+        $em->removeEntity($empUser);
+        $empFresh = $em->getEntityById('Contact', $empContact->getId());
+        $assert(
+            'Employee User delete → Contact Inactive',
+            $empFresh !== null && $empFresh->get('personnelStatus') === 'Inactive'
         );
     }
 } catch (Throwable $e) {

@@ -1,0 +1,14 @@
+[
+    {"name": "name", "link": true},
+    {"name": "activityOffer"},
+    {"name": "status"},
+    {"name": "dayOfWeek"},
+    {"name": "dateStart"},
+    {"name": "dateEnd"},
+    {"name": "isAllDay"},
+    {"name": "category"},
+    {"name": "requiredCount"},
+    {"name": "placeCity"},
+    {"name": "conditions"},
+    {"name": "task"}
+]

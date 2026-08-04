@@ -1,0 +1,4 @@
+/* Google Places dropdown must sit above Espo/Bootstrap modals (z-index ~1050). */
+.pac-container {
+    z-index: 20000 !important;
+}

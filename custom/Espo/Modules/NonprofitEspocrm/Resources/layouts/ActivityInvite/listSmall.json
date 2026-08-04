@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "status"},
+    {"name": "user"},
+    {"name": "activityOfferSlot"},
+    {"name": "respondedAt"}
+]

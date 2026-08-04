@@ -14,7 +14,10 @@
         "Case": "Intake record",
         "Intervention": "Intervention",
         "PrimaNota": "Ledger Entry",
-        "FoodParcelRegistration": "Food Parcel Registration"
+        "FoodParcelRegistration": "Food Parcel Registration",
+        "ActivityOffer": "Shift Plan",
+        "ActivityOfferSlot": "Volunteer shift",
+        "ActivityInvite": "Availability"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -27,7 +30,10 @@
         "Case": "Intake records",
         "Intervention": "Interventions",
         "PrimaNota": "Ledger (Prima Nota)",
-        "FoodParcelRegistration": "Food Parcel Registrations"
+        "FoodParcelRegistration": "Food Parcel Registrations",
+        "ActivityOffer": "Shift Planning",
+        "ActivityOfferSlot": "Volunteer shifts",
+        "ActivityInvite": "Availabilities"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",
@@ -35,9 +41,11 @@
         "Rendicontazione": "Reporting",
         "Contatti": "Contacts",
         "ContattiAll": "All",
-        "ContattiVolontariDipendenti": "Volunteers / Employees",
+        "ContattiVolontari": "Volunteers",
         "ContattiVolontariOccasionali": "Occasional volunteers",
-        "ContattiAssociati": "Members"
+        "ContattiDipendenti": "Employees",
+        "ContattiAssociati": "Members",
+        "ContattiVolontariDipendenti": "Volunteers / Employees"
     },
     "fields": {
         "csvIncludeTotals": "Include totals row",
@@ -61,7 +69,7 @@
         "reportingListStatsSelection": "Filtered selection totals",
         "reportingListStatsTitle": "Reporting totals",
         "reportingExportIncludeTotals": "Include totals row",
-        "reportingExportTotalsLabel": "Totals",
+        "reportingExportTotalsLabel": "Total",
         "reportingEmailExport": "Send export via email",
         "reportingEmailExportSuccess": "Export email sent",
         "reportingEmailExportBody": "{scope} export is attached.",
@@ -80,6 +88,15 @@
         "period": {
             "month": "Current month",
             "year": "Current year"
+        },
+        "dayOfWeek": {
+            "Monday": "Monday",
+            "Tuesday": "Tuesday",
+            "Wednesday": "Wednesday",
+            "Thursday": "Thursday",
+            "Friday": "Friday",
+            "Saturday": "Saturday",
+            "Sunday": "Sunday"
         }
     },
     "themes": {

@@ -110,6 +110,63 @@ try {
         (string) $colleague->get('personnelStatus')
     );
 
+    $volActive = $em->getNewEntity('Contact');
+    $volActive->set([
+        'firstName' => 'Smoke',
+        'lastName' => 'VolActive',
+        'contactType' => 'Volunteer',
+        'personnelStatus' => null,
+        'startDate' => date('Y-m-d', strtotime('-5 days')),
+        'endDate' => null,
+    ]);
+    $em->saveEntity($volActive);
+    $created[] = $volActive;
+    $assert(
+        'Volunteer with valid dates and null status → Active',
+        $volActive->get('personnelStatus') === 'Active',
+        (string) $volActive->get('personnelStatus')
+    );
+
+    $volFuture = $em->getNewEntity('Contact');
+    $volFuture->set([
+        'firstName' => 'Smoke',
+        'lastName' => 'VolFuture',
+        'contactType' => 'Volunteer',
+        'personnelStatus' => 'Active',
+        'startDate' => date('Y-m-d', strtotime('+10 days')),
+    ]);
+    $em->saveEntity($volFuture);
+    $created[] = $volFuture;
+    $assert(
+        'Volunteer with future startDate → Inactive',
+        $volFuture->get('personnelStatus') === 'Inactive',
+        (string) $volFuture->get('personnelStatus')
+    );
+
+    $memberOk = $em->getNewEntity('Contact');
+    $memberOk->set([
+        'firstName' => 'Smoke',
+        'lastName' => 'MemOk',
+        'contactType' => 'MemberContact',
+        'personnelStatus' => '',
+        'joinDate' => date('Y-m-d', strtotime('-30 days')),
+        'leaveDate' => null,
+    ]);
+    $em->saveEntity($memberOk);
+    $created[] = $memberOk;
+    $assert(
+        'MemberContact with valid joinDate and empty status → Active',
+        $memberOk->get('personnelStatus') === 'Active',
+        (string) $memberOk->get('personnelStatus')
+    );
+
+    $formulaPath = __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/export/modals/export.js';
+    $exportJs = is_file($formulaPath) ? (string) file_get_contents($formulaPath) : '';
+    $assert(
+        'export modal setup calls Dep.prototype.setup',
+        str_contains($exportJs, 'Dep.prototype.setup.call(this)')
+    );
+
     $user = $em->getNewEntity('User');
     $user->set([
         'userName' => 'smoke_contact_inactive_' . substr(md5((string) microtime(true)), 0, 8),

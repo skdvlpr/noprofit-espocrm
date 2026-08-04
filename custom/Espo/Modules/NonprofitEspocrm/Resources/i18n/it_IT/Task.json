@@ -1,11 +1,17 @@
 {
     "fields": {
-        "category": "Categoria"
+        "category": "Categoria",
+        "duration": "Durata",
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno",
+        "myInviteStatus": "Mia disponibilità"
     },
     "labels": {
         "Task": "Task",
         "Tasks": "Task",
-        "Create Task": "Crea Task"
+        "Create Task": "Crea Task",
+        "Scheduler": "Pianificatore",
+        "Invites": "Disponibilità"
     },
     "options": {
         "category": {
@@ -28,5 +34,13 @@
             "Activities": "Attività",
             "OnCallAvailability": "Reperibilità"
         }
+    },
+    "links": {
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno",
+        "activityInvites": "Disponibilità"
+    },
+    "messages": {
+        "schedulerNeedDatesAndPeople": "Imposta data/ora di inizio e fine (e utente assegnato o collaboratori) per vedere la timeline del pianificatore."
     }
 }

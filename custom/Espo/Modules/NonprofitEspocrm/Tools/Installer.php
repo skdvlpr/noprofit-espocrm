@@ -8,6 +8,7 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisioner;
+use Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller;
 
 /**
  * Shared post-install / provisioning logic invoked from both extension
@@ -161,6 +162,9 @@ class Installer
         $tabList = $this->reorderCaseBeforeReportingGroup($tabList);
         $tabList = $this->reorderSupportNavbarBlock($tabList);
 
+        $shiftPlanningInstaller = new ShiftPlanningInstaller();
+        $tabList = $shiftPlanningInstaller->ensureActivityOfferTab($tabList);
+
         $quickCreateList = $this->removeEntitiesFromList($quickCreateList, self::entitiesToHide());
 
         if (!in_array(self::LEAD_NAV_TAB, $quickCreateList, true)) {
@@ -190,7 +194,11 @@ class Installer
         $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\FoodParcel\FoodParcelPdfService::class)
             ->provisionTemplate();
 
+        $shiftPlanningInstaller->migrateLegacyPlaceVarchar($container);
+
         $container->getByClass(DataManager::class)->rebuild();
+
+        $shiftPlanningInstaller->postRebuildProvision($container, $injectableFactory);
     }
 
     /**
@@ -324,8 +332,8 @@ class Installer
                 ],
                 (object) [
                     'type' => 'url',
-                    'text' => '$ContattiVolontariDipendenti',
-                    'url' => '#Contact/list/primaryFilter=volunteersEmployees',
+                    'text' => '$ContattiVolontari',
+                    'url' => '#Contact/list/primaryFilter=volunteers',
                     'iconClass' => 'fas fa-hands-helping',
                 ],
                 (object) [
@@ -333,6 +341,12 @@ class Installer
                     'text' => '$ContattiVolontariOccasionali',
                     'url' => '#Contact/list/primaryFilter=volunteersOccasionali',
                     'iconClass' => 'fas fa-user-clock',
+                ],
+                (object) [
+                    'type' => 'url',
+                    'text' => '$ContattiDipendenti',
+                    'url' => '#Contact/list/primaryFilter=employees',
+                    'iconClass' => 'fas fa-user-tie',
                 ],
                 (object) [
                     'type' => 'url',

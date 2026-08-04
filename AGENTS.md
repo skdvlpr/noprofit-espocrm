@@ -786,10 +786,11 @@ This repo ships **independent** extensions:
 | --------- | ------- | -------- | ----- |
 | SafehouseCrm | `custom/Espo/Modules/NonprofitEspocrm/` | (core overrides only if needed) | `bin/build.sh` |
 | GoogleIntegration | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
-| VolunteerActivityDispatch | `custom/Espo/Modules/VolunteerActivityDispatch/` | `client/custom/modules/volunteer-activity-dispatch/` | `bin/build-volunteer-activity-dispatch.sh` |
 | WorkflowEngine (planned) | `custom/Espo/Modules/WorkflowEngine/` | `client/custom/modules/workflow-engine/` | `bin/build-workflow-engine.sh` |
 
-**RULE:** Do not bundle GoogleIntegration / VolunteerActivityDispatch / WorkflowEngine inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm → optional dispatch/workflows ZIPs. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
+**VolunteerActivityDispatch:** merged into **NonprofitEspocrm** (2026-08-04). Shift planning PHP/JS live under `NonprofitEspocrm` / `nonprofit-espocrm:` AMD. Do **not** recreate a separate VAD extension. On environments that still have the old Extension Manager package, deploy SafehouseCrm first, rebuild, then uninstall the orphan VAD package.
+
+**RULE:** Do not bundle GoogleIntegration / WorkflowEngine inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm → optional workflows ZIPs. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
 
 **GoogleIntegration frontend rule:** edit only
 `client/custom/modules/google-integration/`. Do not mirror runtime JS/templates
@@ -884,9 +885,9 @@ If `gh` cannot access the draft: **stop and ask** for clone URL or local path be
 - Cover: matching/non-matching conditions, email/notification side effects, recursion guard, ACL on definitions
 - Append executor logs to the Notion epic every milestone; one phase (W0→W5) per user turn unless user says continue
 
-### WF-006 — Relationship to VolunteerActivityDispatch
+### WF-006 — Relationship to shift planning (NonprofitEspocrm)
 
-ActivityOffer P1 uses in-app `Notification` only. Prefer **WorkflowEngine rules** for “email cohort on publish” / richer notify once W2 exists, instead of one-off mail code inside dispatch — unless product needs tight coupling.
+ActivityOffer / shift planning ships inside **NonprofitEspocrm**. Prefer **WorkflowEngine rules** for richer cohort email once W2 exists, instead of growing one-off mail code — unless product needs tight coupling.
 
 ## SECTION 27 — GOOGLE CALENDAR EXPORT / REMINDERS (GCal-\*)
 

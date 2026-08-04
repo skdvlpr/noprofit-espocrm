@@ -1,0 +1,91 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "category"
+                }
+            ],
+            [
+                {
+                    "name": "dayOfWeek"
+                },
+                {
+                    "name": "isAllDay"
+                }
+            ],
+            [
+                {
+                    "name": "dateStart"
+                },
+                {
+                    "name": "dateEnd"
+                }
+            ],
+            [
+                {
+                    "name": "duration"
+                },
+                {
+                    "name": "requiredCount"
+                }
+            ],
+            [
+                {
+                    "name": "status"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "place",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "conditions",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "activityOffer"
+                },
+                {
+                    "name": "task"
+                }
+            ]
+        ]
+    },
+    {
+        "name": "GoogleCalendar",
+        "label": "Google Calendar",
+        "rows": [
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
+            ]
+        ]
+    }
+]

@@ -1,0 +1,41 @@
+{
+    "fields": {
+        "name": "Nome",
+        "task": "Attività",
+        "user": "Volontario",
+        "status": "Stato",
+        "respondedAt": "Risposto il",
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno",
+        "comment": "Commento"
+    },
+    "links": {
+        "task": "Attività",
+        "user": "Volontario",
+        "activityOffer": "Piano turni",
+        "activityOfferSlot": "Turno"
+    },
+    "labels": {
+        "ActivityInvite": "Disponibilità",
+        "ActivityInvitePlural": "Disponibilità",
+        "Create ActivityInvite": "Crea disponibilità",
+        "Accept": "Accetta",
+        "Decline": "Rifiuta"
+    },
+    "options": {
+        "status": {
+            "Available": "Disponibile",
+            "Assigned": "Assegnato",
+            "Confirmed": "Confermato",
+            "Declined": "Rifiutato",
+            "Cancelled": "Annullato"
+        }
+    },
+    "messages": {
+        "acceptSuccess": "Disponibilità confermata.",
+        "declineSuccess": "Disponibilità rifiutata."
+    },
+    "tooltips": {
+        "comment": "Nota opzionale per gli organizzatori quando indichi la disponibilità."
+    }
+}

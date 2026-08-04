@@ -15,22 +15,47 @@ use Espo\Tools\Export\Processor\Params;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * Wraps a core export {@see Processor} and appends a DB-consistent totals row
- * for Safehouse reporting entities (MealCount, later AssociationMealCount).
+ * Wraps a core export {@see Processor} and appends a totals row when requested.
  *
- * Behaviour:
- *  - Non-reporting entity, or totals turned off → pass through untouched.
- *  - Reporting entity → buffer the (already ACL/column filtered) collection,
- *    sum the profile's numeric attributes that are actually being exported, and
- *    append a synthetic totals entity so the core processor formats it natively.
- *
- * The totals therefore always match exactly what was exported (same filters,
- * same field-level ACL, same selected columns) without re-querying.
+ * When totals are on:
+ * - Injects a first column {@see self::TOTALS_MARKER_ATTRIBUTE} with CRM-language
+ *   "Total" / "Totale" on the totals row (empty on data rows).
+ * - Puts the record count under the name/text column.
+ * - Sums only typed int/float/currency/decimal columns (never varchar-with-digits).
  */
 abstract class AbstractTotalsProcessor implements Processor
 {
-    /** Export param toggled from the export modal (default on for reporting). */
+    /** Export param toggled from the export modal. */
     public const PARAM_INCLUDE_TOTALS = 'includeTotals';
+
+    /**
+     * Synthetic first-column attribute for the Total caption.
+     * Not an entityDefs field — processors treat it as a plain string cell.
+     */
+    public const TOTALS_MARKER_ATTRIBUTE = '__exportTotalsLabel';
+
+    /** Pastel fill for the XLSX totals row / Total column (light sage). */
+    public const TOTALS_ROW_FILL_RGB = 'E8F0E9';
+
+    /** @var list<string> */
+    private const NUMERIC_FIELD_TYPES = [
+        FieldType::INT,
+        FieldType::FLOAT,
+        FieldType::CURRENCY,
+        FieldType::DECIMAL,
+    ];
+
+    /** @var list<string> */
+    private const TEXT_FIELD_TYPES = [
+        FieldType::VARCHAR,
+        FieldType::TEXT,
+        FieldType::ENUM,
+        FieldType::PERSON_NAME,
+        FieldType::EMAIL,
+        FieldType::PHONE,
+        FieldType::URL,
+        FieldType::WYSIWYG,
+    ];
 
     public function __construct(
         protected ReportingProfileRegistry $profileRegistry,
@@ -43,39 +68,123 @@ abstract class AbstractTotalsProcessor implements Processor
 
     public function process(Params $params, Collection $collection): StreamInterface
     {
-        $profile = $this->profileRegistry->getProfile($params->getEntityType());
+        $profile = $this->resolveProfile($params);
 
-        if ($profile === null || !$this->isTotalsRequested($params)) {
+        if ($profile === null || !$this->shouldAppendTotals($params)) {
             return $this->getInnerProcessor()->process($params, $collection);
         }
 
-        // A totals row needs a text caption cell. A caption written into a
-        // numeric/date column is coerced away by that column's value formatter
-        // (int -> 0, date -> blank), so resolve a type-safe target first and,
-        // as a last resort, inject the label column so the row is always
-        // identifiable. This keeps CSV and XLSX behaviour identical.
-        [$params, $labelAttribute] = $this->resolveLabelTarget($profile, $params);
+        [$params, $countAttribute] = $this->resolveCountTarget($profile, $params);
+        $params = $this->injectTotalsMarkerColumn($params);
 
-        $effectiveCollection = $this->buildCollectionWithTotals($profile, $params, $labelAttribute, $collection);
+        $effectiveCollection = $this->buildCollectionWithTotals(
+            $profile,
+            $params,
+            $countAttribute,
+            $collection
+        );
 
         return $this->getInnerProcessor()->process($params, $effectiveCollection);
     }
 
+    private function resolveProfile(Params $params): ?ReportingEntityProfile
+    {
+        $registered = $this->profileRegistry->getProfile($params->getEntityType());
+
+        if ($registered !== null) {
+            return $registered;
+        }
+
+        if (!$this->isExplicitTotalsOn($params)) {
+            return null;
+        }
+
+        return $this->buildGenericProfile($params);
+    }
+
+    private function buildGenericProfile(Params $params): ReportingEntityProfile
+    {
+        $entityType = $params->getEntityType();
+        $entityDefs = $this->entityManager->getDefs()->getEntity($entityType);
+        $attributeList = $params->getAttributeList();
+
+        $sumAttributes = [];
+
+        foreach ($attributeList as $attribute) {
+            if ($attribute === self::TOTALS_MARKER_ATTRIBUTE) {
+                continue;
+            }
+
+            if (!$entityDefs->hasField($attribute)) {
+                continue;
+            }
+
+            $type = $entityDefs->getField($attribute)->getType();
+
+            if (in_array($type, self::NUMERIC_FIELD_TYPES, true)) {
+                $sumAttributes[] = $attribute;
+            }
+        }
+
+        $labelAttribute = $this->resolveGenericLabelAttribute($entityDefs, $attributeList);
+
+        return new ReportingEntityProfile(
+            $entityType,
+            'createdAt',
+            $sumAttributes,
+            $sumAttributes,
+            $labelAttribute,
+        );
+    }
+
     /**
-     * @return array{Params, string} Possibly column-augmented params and the
-     *     attribute that will carry the "Totals" caption.
+     * @param list<string> $attributeList
      */
-    private function resolveLabelTarget(ReportingEntityProfile $profile, Params $params): array
+    private function resolveGenericLabelAttribute(
+        \Espo\ORM\Defs\EntityDefs $entityDefs,
+        array $attributeList
+    ): string {
+        foreach (['name', 'firstName', 'title', 'subject'] as $candidate) {
+            if (
+                in_array($candidate, $attributeList, true)
+                && $entityDefs->hasField($candidate)
+                && $this->isTextAttribute($entityDefs, $candidate)
+            ) {
+                return $candidate;
+            }
+        }
+
+        foreach ($attributeList as $attribute) {
+            if ($attribute === self::TOTALS_MARKER_ATTRIBUTE) {
+                continue;
+            }
+
+            if ($this->isTextAttribute($entityDefs, $attribute)) {
+                return $attribute;
+            }
+        }
+
+        if ($entityDefs->hasField('name')) {
+            return 'name';
+        }
+
+        return $attributeList[0] ?? 'id';
+    }
+
+    /**
+     * Attribute that receives the record count on the totals row.
+     *
+     * @return array{Params, string}
+     */
+    private function resolveCountTarget(ReportingEntityProfile $profile, Params $params): array
     {
         $attributeList = $params->getAttributeList();
         $entityDefs = $this->entityManager->getDefs()->getEntity($profile->entityType);
 
-        // 1. Configured label attribute (e.g. name) is already exported.
         if (in_array($profile->totalsLabelAttribute, $attributeList, true)) {
             return [$params, $profile->totalsLabelAttribute];
         }
 
-        // 2. Reuse the first exported text column — no extra column needed.
         foreach ($attributeList as $attribute) {
             if (in_array($attribute, $profile->exportTotalAttributes, true)) {
                 continue;
@@ -86,7 +195,6 @@ abstract class AbstractTotalsProcessor implements Processor
             }
         }
 
-        // 3. Only numeric/date columns selected: inject the label column up front.
         $labelAttribute = $profile->totalsLabelAttribute;
 
         $params = $params->withAttributeList([$labelAttribute, ...$attributeList]);
@@ -100,6 +208,25 @@ abstract class AbstractTotalsProcessor implements Processor
         return [$params, $labelAttribute];
     }
 
+    private function injectTotalsMarkerColumn(Params $params): Params
+    {
+        $attributeList = $params->getAttributeList();
+
+        if (in_array(self::TOTALS_MARKER_ATTRIBUTE, $attributeList, true)) {
+            return $params;
+        }
+
+        $params = $params->withAttributeList([self::TOTALS_MARKER_ATTRIBUTE, ...$attributeList]);
+
+        $fieldList = $params->getFieldList();
+
+        if ($fieldList !== null && !in_array(self::TOTALS_MARKER_ATTRIBUTE, $fieldList, true)) {
+            $params = $params->withFieldList([self::TOTALS_MARKER_ATTRIBUTE, ...$fieldList]);
+        }
+
+        return $params;
+    }
+
     private function isTextAttribute(\Espo\ORM\Defs\EntityDefs $entityDefs, string $attribute): bool
     {
         if (!$entityDefs->hasField($attribute)) {
@@ -108,23 +235,38 @@ abstract class AbstractTotalsProcessor implements Processor
 
         return in_array(
             $entityDefs->getField($attribute)->getType(),
-            [FieldType::VARCHAR, FieldType::TEXT],
+            self::TEXT_FIELD_TYPES,
             true
         );
+    }
+
+    private function shouldAppendTotals(Params $params): bool
+    {
+        if ($this->profileRegistry->getProfile($params->getEntityType()) !== null) {
+            return $this->isTotalsRequested($params);
+        }
+
+        return $this->isExplicitTotalsOn($params);
     }
 
     private function isTotalsRequested(Params $params): bool
     {
         $value = $params->getParam(self::PARAM_INCLUDE_TOTALS);
 
-        // Default: on for reporting entities (incl. API exports without the flag).
         return $value === null ? true : (bool) $value;
+    }
+
+    private function isExplicitTotalsOn(Params $params): bool
+    {
+        $value = $params->getParam(self::PARAM_INCLUDE_TOTALS);
+
+        return $value === true || $value === 1 || $value === '1' || $value === 'true';
     }
 
     private function buildCollectionWithTotals(
         ReportingEntityProfile $profile,
         Params $params,
-        string $labelAttribute,
+        string $countAttribute,
         Collection $collection,
     ): Collection {
         $sums = array_fill_keys($profile->exportTotalAttributes, 0.0);
@@ -133,6 +275,7 @@ abstract class AbstractTotalsProcessor implements Processor
         $entities = [];
 
         foreach ($collection as $entity) {
+            $entity->set(self::TOTALS_MARKER_ATTRIBUTE, '');
             $entities[] = $entity;
 
             foreach ($profile->exportTotalAttributes as $attribute) {
@@ -145,7 +288,13 @@ abstract class AbstractTotalsProcessor implements Processor
             }
         }
 
-        $totalsEntity = $this->buildTotalsEntity($profile, $labelAttribute, $sums, $hasValue);
+        $totalsEntity = $this->buildTotalsEntity(
+            $profile,
+            $countAttribute,
+            $sums,
+            $hasValue,
+            count($entities)
+        );
 
         return new BufferedExportCollection($entities, $totalsEntity);
     }
@@ -156,14 +305,13 @@ abstract class AbstractTotalsProcessor implements Processor
      */
     private function buildTotalsEntity(
         ReportingEntityProfile $profile,
-        string $labelAttribute,
+        string $countAttribute,
         array $sums,
         array $hasValue,
+        int $recordCount,
     ): Entity {
         $entity = $this->entityManager->getNewEntity($profile->entityType);
 
-        // Strip field defaults (e.g. foodUnitPrice = 1.5) so only summed columns
-        // and the label appear in the totals row.
         foreach ($entity->getAttributeList() as $attribute) {
             $entity->clear($attribute);
         }
@@ -172,7 +320,6 @@ abstract class AbstractTotalsProcessor implements Processor
         $defaultCurrency = (string) ($this->config->get('defaultCurrency') ?: 'EUR');
 
         foreach ($profile->exportTotalAttributes as $attribute) {
-            // Only render a total where at least one exported row contributed.
             if (!($hasValue[$attribute] ?? false)) {
                 continue;
             }
@@ -192,17 +339,37 @@ abstract class AbstractTotalsProcessor implements Processor
             }
         }
 
-        if ($labelAttribute !== '') {
-            $entity->set($labelAttribute, $this->getTotalsLabel());
+        // Caption is applied in format-specific post-process (Entity::set ignores
+        // unknown attributes). Keep the marker attribute empty on the entity.
+        $entity->set(self::TOTALS_MARKER_ATTRIBUTE, '');
+
+        if ($countAttribute !== '' && $countAttribute !== self::TOTALS_MARKER_ATTRIBUTE) {
+            $entity->set($countAttribute, $this->getTotalsRecordCount($recordCount));
         }
 
         return $entity;
     }
 
-    protected function getTotalsLabel(): string
+    /** CRM-language caption for the Total column (last row). */
+    protected function getTotalsCaption(): string
     {
         $label = $this->language->translateLabel('reportingExportTotalsLabel', 'labels', 'Global');
 
-        return $label === 'reportingExportTotalsLabel' ? 'Totals' : $label;
+        if ($label === 'reportingExportTotalsLabel') {
+            return 'Total';
+        }
+
+        return $label;
+    }
+
+    /** Record count shown under the name/text column of the totals row. */
+    protected function getTotalsRecordCount(int $recordCount): string
+    {
+        return (string) $recordCount;
+    }
+
+    protected function isTotalsRequestedForParams(Params $params): bool
+    {
+        return $this->shouldAppendTotals($params) && $this->resolveProfile($params) !== null;
     }
 }

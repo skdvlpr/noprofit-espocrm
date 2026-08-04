@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "saveToGoogleCalendar": "Сохранить в Google Calendar",
+        "googleCalendarDateSourceList": "Даты Google Calendar",
+        "googleCalendarEventSettings": "Настройки событий Google по датам",
+        "googleCalendarId": "Календарь Google",
+        "googleCalendarTemplate": "Шаблон календаря",
+        "googleCalendarReminderMode": "Режим напоминаний Google",
+        "googleCalendarReminders": "Напоминания Google",
+        "googleCalendarDescriptionTemplateOverride": "Описание события",
+        "googleCalendarLocation": "Место",
+        "googleCalendarVisibility": "Видимость",
+        "googleCalendarTransparency": "Занятость",
+        "googleCalendarColorId": "Цвет"
+    },
+    "labels": {
+        "Google Calendar": "Google Calendar",
+        "googleCalendarPerDateSettingsHelp": "Настраивайте параметры Google Calendar отдельно для каждой выбранной даты.",
+        "googleCalendarTemplateSelectHelp": "Выберите шаблон — поля ниже заполнятся автоматически. Перед сохранением их можно изменить.",
+        "googleCalendarReminderNotice": "Можно сохранить запись в Google Calendar с напоминаниями или без них.",
+        "googleCalendarRoutingHintTitle": "Маршрутизация Google Calendar (по выбранным датам)",
+        "googleCalendarRoutingHintPrimary": "События попадут в основной календарь Google.",
+        "googleCalendarRoutingHintUserPick": "Выберите календарь ниже (админ включил выбор пользователя для этой даты).",
+        "googleCalendarRoutingHintAutoDedicated": "События попадут в общий календарь сущности {calendarName} (если админ включил автосоздание).",
+        "googleCalendarTemplateVariables": "Вставить поле записи",
+        "googleCalendarTemplateVariableSearch": "Поиск полей",
+        "googleCalendarCurrentRecordFields": "Поля текущей записи",
+        "googleCalendarRelatedRecordFields": "Поля связанных записей",
+        "googleCalendarExternalRecordFields": "Внешние поля ({relation})",
+        "googleCalendarNoVariables": "Переменные не найдены",
+        "googleCalendarDateMain": "Дата начала",
+        "googleCalendarDateEnd": "Дата окончания",
+        "googleCalendarDatePresentation": "Дата подачи",
+        "googleCalendarDateClose": "Дата закрытия",
+        "googleCalendarTemplateLoadFailed": "Не удалось загрузить шаблоны календаря. Выполните Rebuild."
+    },
+    "options": {
+        "googleCalendarReminderMode": {
+            "none": "Без напоминания",
+            "default": "По умолчанию календаря",
+            "custom": "Свои напоминания"
+        },
+        "googleCalendarReminders": {
+            "popup": "Уведомление",
+            "email": "Email",
+            "minutes": "минут до",
+            "hours": "часов до",
+            "days": "дней до",
+            "weeks": "недель до"
+        },
+        "googleCalendarVisibility": {
+            "default": "По умолчанию",
+            "private": "Приватная",
+            "public": "Публичная"
+        },
+        "googleCalendarTransparency": {
+            "opaque": "Занят",
+            "transparent": "Свободен"
+        },
+        "googleCalendarColorId": {
+            "": "По умолчанию",
+            "1": "Лаванда",
+            "2": "Шалфей",
+            "3": "Виноград",
+            "4": "Фламинго",
+            "5": "Банан",
+            "6": "Мандарин",
+            "7": "Павлин",
+            "8": "Графит",
+            "9": "Черника",
+            "10": "Базилик",
+            "11": "Томат"
+        }
+    }
+}

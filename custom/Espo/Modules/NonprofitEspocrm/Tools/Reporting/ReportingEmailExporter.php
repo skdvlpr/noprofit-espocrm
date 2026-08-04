@@ -61,15 +61,11 @@ class ReportingEmailExporter
             throw new BadRequest('Entity type is required.');
         }
 
-        if (!$this->profileRegistry->isReportingEntity($entityType)) {
-            throw new BadRequest('Entity type is not a reporting entity.');
-        }
-
         if (!$this->acl->check($entityType, Table::ACTION_READ)) {
             throw new Forbidden();
         }
 
-        $requestFormat = $data['format'] ?? 'csv-email';
+        $requestFormat = $data['format'] ?? 'xlsx-email';
 
         if (!is_string($requestFormat)) {
             throw new BadRequest('Invalid export format.');
@@ -126,10 +122,16 @@ class ReportingEmailExporter
             $email->addBccAddress($address);
         }
 
+        $fromAddress = (string) ($this->config->get('outboundEmailFromAddress') ?: '');
+
         $email
             ->setSubject($subject)
             ->setBody($body)
             ->setIsHtml(false);
+
+        if ($fromAddress !== '') {
+            $email->setFromAddress($fromAddress);
+        }
 
         $sender = $this->emailSender->create()->withAttachments([$attachment]);
 
@@ -142,9 +144,11 @@ class ReportingEmailExporter
         try {
             $sender->send($email);
         } catch (SendingError $e) {
+            // Keep the attachment for retry/debug; surface SMTP failure to the UI.
             throw $e;
         }
 
+        // Soft-delete the temp export file only after a successful send.
         $this->entityManager->removeEntity($attachment);
     }
 
@@ -172,7 +176,7 @@ class ReportingEmailExporter
 
         $includeTotals = array_key_exists('includeTotals', $rawParams)
             ? (bool) $rawParams['includeTotals']
-            : true;
+            : $this->profileRegistry->isReportingEntity($entityType);
 
         return $params->withParam('includeTotals', $includeTotals);
     }

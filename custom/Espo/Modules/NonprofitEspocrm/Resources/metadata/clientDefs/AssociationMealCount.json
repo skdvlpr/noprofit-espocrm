@@ -3,20 +3,6 @@
     "recordViews": {
         "list": "nonprofit-espocrm:views/association-meal-count/list"
     },
-    "menu": {
-        "list": {
-            "buttons": [
-                {
-                    "labelTranslation": "Global.labels.reportingEmailExport",
-                    "name": "reportingEmailExport",
-                    "style": "default",
-                    "acl": "read",
-                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
-                    "actionFunction": "send"
-                }
-            ]
-        }
-    },
     "color": "#8e44ad",
     "iconClass": "fas fa-building"
 }

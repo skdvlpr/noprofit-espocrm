@@ -219,28 +219,42 @@ try {
 
     $ok('routes.json reporting/email-export registered', in_array('/NonprofitEspocrm/reporting/email-export', $routePaths, true));
 
-    foreach (['MealCount', 'AssociationMealCount'] as $entityType) {
-        $clientDefsPath = "custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/{$entityType}.json";
-        $clientDefs = is_readable($clientDefsPath)
-            ? json_decode(file_get_contents($clientDefsPath), true)
-            : null;
-        $buttons = $clientDefs['menu']['list']['buttons'] ?? [];
-        $hasEmailButton = false;
+    $globalDefsPath = 'custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/Global.json';
+    $globalDefs = is_readable($globalDefsPath)
+        ? json_decode(file_get_contents($globalDefsPath), true)
+        : null;
+    $globalButtons = $globalDefs['menu']['list']['buttons'] ?? [];
+    $hasGlobalEmailButton = false;
 
-        foreach ($buttons as $button) {
-            if (($button['name'] ?? '') === 'reportingEmailExport') {
-                $hasEmailButton = true;
-                break;
-            }
+    foreach ($globalButtons as $button) {
+        if (($button['name'] ?? '') === 'reportingEmailExport') {
+            $hasGlobalEmailButton = true;
+            break;
         }
-
-        $ok("$entityType list menu reportingEmailExport button", $hasEmailButton);
     }
+
+    $ok('Global list menu reportingEmailExport (all entities)', $hasGlobalEmailButton);
 
     $ok(
         'reporting export modal JS exists',
         is_readable('client/custom/modules/nonprofit-espocrm/src/views/export/modals/export.js')
     );
+
+    // Account (non-reporting): email export must send, never download-only path.
+    try {
+        $exporter = $injectableFactory->create(ReportingEmailExporter::class);
+        $exporter->send([
+            'entityType' => 'Account',
+            'format' => 'xlsx-email',
+            'params' => [
+                'emailTo' => $recipient,
+                'includeTotals' => true,
+            ],
+        ]);
+        $ok('Account XLSX email export sent', true, "to=$recipient");
+    } catch (Throwable $e) {
+        $ok('Account XLSX email export sent', false, $e->getMessage());
+    }
 } finally {
     foreach ($created as $entity) {
         $em->removeEntity($entity);

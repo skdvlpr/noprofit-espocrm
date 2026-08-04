@@ -12,6 +12,15 @@
             "layoutMassUpdateDisabled": true,
             "layoutFiltersDisabled": true
         },
+        "hasEmployeeRole": {
+            "type": "bool",
+            "notStorable": true,
+            "default": false,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "layoutFiltersDisabled": true
+        },
         "hasMemberRole": {
             "type": "bool",
             "notStorable": true,
@@ -102,6 +111,31 @@
             "maxLength": 8,
             "trim": true,
             "notStorable": true
+        },
+        "activityCompetences": {
+            "type": "multiEnum",
+            "translation": "ActivityOfferSlot.options.category",
+            "options": [
+                "MealPreparation",
+                "MealDistribution",
+                "Administrative",
+                "LegalDesk",
+                "DigitalDesk",
+                "Reception",
+                "ListeningDesk",
+                "MarketCollection",
+                "Cleaning",
+                "NightReceptionManagement",
+                "ProjectDevelopment",
+                "GrantsAndFundingManagement",
+                "Fundraising",
+                "EventOrganization",
+                "Secretariat",
+                "ServicesAndSupport",
+                "Activities",
+                "OnCallAvailability"
+            ],
+            "tooltip": true
         }
     },
     "links": {
@@ -109,6 +143,13 @@
             "type": "hasMany",
             "entity": "Contact",
             "foreign": "linkedUser",
+            "layoutRelationshipsDisabled": true
+        },
+        "activityOffersAsInvitee": {
+            "type": "hasMany",
+            "entity": "ActivityOffer",
+            "foreign": "inviteeUsers",
+            "relationName": "activityOfferInviteeUser",
             "layoutRelationshipsDisabled": true
         }
     }

@@ -7,12 +7,13 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOption;
 
 /**
- * Sync User volunteering / member profile fields ↔ linked Contact.
+ * Sync User volunteering / member / employee profile fields ↔ linked Contact.
  * Contact is source of truth after save; User form fields are staging mirrors.
  */
 class UserContactProfileSync
 {
     public const ROLE_VOLUNTEER = 'Volunteer';
+    public const ROLE_EMPLOYEE = 'Employee';
     public const ROLE_MEMBER = 'Member';
 
     /** @var list<string> */
@@ -51,7 +52,7 @@ class UserContactProfileSync
     ) {}
 
     /**
-     * @return array{hasVolunteerRole: bool, hasMemberRole: bool}
+     * @return array{hasVolunteerRole: bool, hasEmployeeRole: bool, hasMemberRole: bool}
      */
     public function resolveRoleFlags(Entity $user): array
     {
@@ -59,6 +60,7 @@ class UserContactProfileSync
 
         return [
             'hasVolunteerRole' => in_array(self::ROLE_VOLUNTEER, $names, true),
+            'hasEmployeeRole' => in_array(self::ROLE_EMPLOYEE, $names, true),
             'hasMemberRole' => in_array(self::ROLE_MEMBER, $names, true),
         ];
     }
@@ -113,6 +115,7 @@ class UserContactProfileSync
     {
         $flags = $this->resolveRoleFlags($user);
         $user->set('hasVolunteerRole', $flags['hasVolunteerRole']);
+        $user->set('hasEmployeeRole', $flags['hasEmployeeRole']);
         $user->set('hasMemberRole', $flags['hasMemberRole']);
     }
 
@@ -139,9 +142,10 @@ class UserContactProfileSync
     {
         $flags = $this->resolveRoleFlags($user);
         $hasVolunteer = $flags['hasVolunteerRole'];
+        $hasEmployee = $flags['hasEmployeeRole'];
         $hasMember = $flags['hasMemberRole'];
 
-        if (!$hasVolunteer && !$hasMember) {
+        if (!$hasVolunteer && !$hasEmployee && !$hasMember) {
             return;
         }
 
@@ -150,7 +154,7 @@ class UserContactProfileSync
 
         foreach ($contacts as $contact) {
             $found = true;
-            $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasMember);
+            $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasEmployee, $hasMember);
             $this->entityManager->saveEntity($contact, [
                 SaveOption::SKIP_ALL => true,
             ]);
@@ -167,7 +171,7 @@ class UserContactProfileSync
             'personnelStatus' => 'Active',
             'linkedUserId' => $user->getId(),
             'assignedUserId' => $user->getId(),
-            'contactType' => $hasVolunteer ? 'Volunteer' : 'MemberContact',
+            'contactType' => $this->resolveContactType($hasVolunteer, $hasEmployee, $hasMember),
         ]);
 
         $email = $user->get('emailAddress');
@@ -180,32 +184,59 @@ class UserContactProfileSync
             $contact->set('phoneNumber', $phone);
         }
 
-        $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasMember);
+        $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasEmployee, $hasMember);
         $this->entityManager->saveEntity($contact);
+    }
+
+    private function resolveContactType(bool $hasVolunteer, bool $hasEmployee, bool $hasMember): string
+    {
+        if ($hasVolunteer) {
+            return 'Volunteer';
+        }
+
+        if ($hasEmployee) {
+            return 'Employee';
+        }
+
+        if ($hasMember) {
+            return 'MemberContact';
+        }
+
+        return 'Other';
     }
 
     private function writeProfileToContact(
         Entity $user,
         Entity $contact,
         bool $hasVolunteer,
+        bool $hasEmployee,
         bool $hasMember
     ): void {
         $type = trim((string) ($contact->get('contactType') ?? ''));
+        $desired = $this->resolveContactType($hasVolunteer, $hasEmployee, $hasMember);
 
         if ($type === '') {
-            $contact->set('contactType', $hasVolunteer ? 'Volunteer' : 'MemberContact');
-            $type = (string) $contact->get('contactType');
-        } elseif ($hasVolunteer && $type === 'MemberContact') {
+            $contact->set('contactType', $desired);
+            $type = $desired;
+        } elseif ($hasVolunteer && in_array($type, ['MemberContact', 'Employee'], true)) {
             $contact->set('contactType', 'Volunteer');
             $type = 'Volunteer';
-        } elseif ($hasMember && !$hasVolunteer && !in_array($type, ['MemberContact'], true)) {
+        } elseif ($hasEmployee && !$hasVolunteer && $type === 'MemberContact') {
+            $contact->set('contactType', 'Employee');
+            $type = 'Employee';
+        } elseif ($hasMember && !$hasVolunteer && !$hasEmployee && $type !== 'MemberContact') {
             $contact->set('contactType', 'MemberContact');
             $type = 'MemberContact';
         }
 
-        if ($hasVolunteer || in_array($type, ['Volunteer', 'Employee'], true)) {
+        if ($hasVolunteer || $hasEmployee || in_array($type, ['Volunteer', 'Employee'], true)) {
             foreach (self::VOLUNTEER_FIELDS as $field) {
                 if (!$user->has($field)) {
+                    continue;
+                }
+
+                // Occasional flag is Volunteer-only.
+                if ($field === 'isOccasional' && !$hasVolunteer && $type !== 'Volunteer') {
                     continue;
                 }
 

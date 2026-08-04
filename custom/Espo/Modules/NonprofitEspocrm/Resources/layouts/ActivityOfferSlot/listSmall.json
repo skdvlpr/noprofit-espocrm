@@ -1,0 +1,9 @@
+[
+    {"name": "name", "link": true, "width": 28},
+    {"name": "status"},
+    {"name": "dayOfWeek"},
+    {"name": "dateStart"},
+    {"name": "category"},
+    {"name": "requiredCount"},
+    {"name": "placeCity"}
+]

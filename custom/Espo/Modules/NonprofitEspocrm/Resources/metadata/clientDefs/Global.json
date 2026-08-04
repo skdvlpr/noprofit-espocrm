@@ -1,0 +1,18 @@
+{
+    "menu": {
+        "list": {
+            "buttons": [
+                "__APPEND__",
+                {
+                    "labelTranslation": "Global.labels.reportingEmailExport",
+                    "name": "reportingEmailExport",
+                    "style": "default",
+                    "acl": "read",
+                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
+                    "actionFunction": "send",
+                    "index": 50
+                }
+            ]
+        }
+    }
+}

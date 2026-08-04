@@ -15,7 +15,10 @@
         "Case": "Segnalazione",
         "Intervention": "Intervento",
         "PrimaNota": "Prima nota",
-        "FoodParcelRegistration": "Registrazione pacco spesa"
+        "FoodParcelRegistration": "Registrazione pacco spesa",
+        "ActivityOffer": "Piano turni",
+        "ActivityOfferSlot": "Turno volontario",
+        "ActivityInvite": "Disponibilità"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -29,7 +32,10 @@
         "Case": "Segnalazioni",
         "Intervention": "Interventi",
         "PrimaNota": "Prima nota",
-        "FoodParcelRegistration": "Registrazioni pacco spesa"
+        "FoodParcelRegistration": "Registrazioni pacco spesa",
+        "ActivityOffer": "Pianificazione turni",
+        "ActivityOfferSlot": "Turni volontari",
+        "ActivityInvite": "Disponibilità"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",
@@ -37,9 +43,11 @@
         "Rendicontazione": "Rendicontazione",
         "Contatti": "Contatti",
         "ContattiAll": "Tutti",
-        "ContattiVolontariDipendenti": "Volontari / Dipendenti",
+        "ContattiVolontari": "Volontari",
         "ContattiVolontariOccasionali": "Volontari occasionali",
-        "ContattiAssociati": "Associati"
+        "ContattiDipendenti": "Dipendenti",
+        "ContattiAssociati": "Associati",
+        "ContattiVolontariDipendenti": "Volontari / Dipendenti"
     },
     "fields": {
         "csvIncludeTotals": "Includi riga Totali",
@@ -61,7 +69,7 @@
         "reportingListStatsSelection": "Totali selezione filtrata",
         "reportingListStatsTitle": "Totali rendicontazione",
         "reportingExportIncludeTotals": "Includi riga Totali",
-        "reportingExportTotalsLabel": "Totali",
+        "reportingExportTotalsLabel": "Totale",
         "reportingEmailExport": "Invia export via email",
         "reportingEmailExportSuccess": "Email export inviata",
         "reportingEmailExportBody": "In allegato l'export {scope}.",
@@ -79,6 +87,15 @@
         "period": {
             "month": "Mese corrente",
             "year": "Anno corrente"
+        },
+        "dayOfWeek": {
+            "Monday": "Lunedì",
+            "Tuesday": "Martedì",
+            "Wednesday": "Mercoledì",
+            "Thursday": "Giovedì",
+            "Friday": "Venerdì",
+            "Saturday": "Sabato",
+            "Sunday": "Domenica"
         }
     },
     "themes": {

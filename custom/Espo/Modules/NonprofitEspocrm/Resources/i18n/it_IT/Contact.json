@@ -58,9 +58,11 @@
         }
     },
     "presetFilters": {
-        "volunteersEmployees": "Volontari / Dipendenti",
+        "volunteers": "Volontari",
         "volunteersOccasionali": "Volontari occasionali",
-        "associati": "Associati"
+        "employees": "Dipendenti",
+        "associati": "Associati",
+        "volunteersEmployees": "Volontari / Dipendenti"
     },
     "tooltips": {
         "isUser": "Vero se è collegato un utente CRM e/o un utente portale.",

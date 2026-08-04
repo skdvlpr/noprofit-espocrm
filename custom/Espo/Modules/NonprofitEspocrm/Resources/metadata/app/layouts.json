@@ -224,6 +224,12 @@
         },
         "massUpdate": {
             "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsEdit": {
+            "module": "NonprofitEspocrm"
         }
     },
     "Case": {

@@ -13,6 +13,7 @@ final class SafehouseCalendarDateSourceDefaults
         'VolunteerEmployee:main' => 'Start',
         'VolunteerEmployee:endDate' => 'End',
         'Member:main' => 'Member',
+        'ActivityOfferSlot:main' => 'Shift',
         'GCalSmokeAllDay:main' => 'All-day',
         'GCalSmokeDateTime:main' => 'DateTime',
         'GCalSmokeTwinDate:primaryDate' => 'Primary',
@@ -62,6 +63,16 @@ final class SafehouseCalendarDateSourceDefaults
                 'label' => self::CANONICAL_LABELS['Member:main'],
                 'allDay' => true,
                 'sortOrder' => 70,
+            ],
+            [
+                'name' => 'Shift planner — slot',
+                'targetEntityType' => 'ActivityOfferSlot',
+                'dateField' => 'dateStart',
+                'endDateField' => 'dateEnd',
+                'sourceDateType' => 'main',
+                'label' => self::CANONICAL_LABELS['ActivityOfferSlot:main'],
+                'allDay' => false,
+                'sortOrder' => 25,
             ],
         ];
     }

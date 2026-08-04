@@ -48,6 +48,14 @@
             ],
             [
                 {
+                    "name": "activityOffer"
+                },
+                {
+                    "name": "activityOfferSlot"
+                }
+            ],
+            [
+                {
                     "name": "description",
                     "fullWidth": true
                 }

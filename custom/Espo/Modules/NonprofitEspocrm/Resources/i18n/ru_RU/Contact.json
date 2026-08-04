@@ -49,9 +49,11 @@
         }
     },
     "presetFilters": {
-        "volunteersEmployees": "Волонтёры / Сотрудники",
+        "volunteers": "Волонтёры",
         "volunteersOccasionali": "Разовые волонтёры",
-        "associati": "Ассоциаты"
+        "employees": "Сотрудники",
+        "associati": "Ассоциаты",
+        "volunteersEmployees": "Волонтёры / Сотрудники"
     },
     "tooltips": {
         "isUser": "Да, если привязан пользователь CRM и/или портала.",

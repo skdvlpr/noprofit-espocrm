@@ -1,0 +1,190 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "trim": true
+        },
+        "activityOffer": {
+            "type": "link",
+            "required": true
+        },
+        "dateStart": {
+            "type": "datetime",
+            "required": true,
+            "view": "crm:views/meeting/fields/date-start"
+        },
+        "dateEnd": {
+            "type": "datetime",
+            "required": true,
+            "view": "crm:views/meeting/fields/date-end",
+            "after": "dateStart"
+        },
+        "duration": {
+            "type": "duration",
+            "start": "dateStart",
+            "end": "dateEnd",
+            "options": [
+                900,
+                1800,
+                3600,
+                7200,
+                10800,
+                14400,
+                28800,
+                86400
+            ],
+            "default": 3600,
+            "notStorable": true
+        },
+        "category": {
+            "type": "enum",
+            "options": [
+                "MealPreparation",
+                "MealDistribution",
+                "Administrative",
+                "LegalDesk",
+                "DigitalDesk",
+                "Reception",
+                "ListeningDesk",
+                "MarketCollection",
+                "Cleaning",
+                "NightReceptionManagement",
+                "ProjectDevelopment",
+                "GrantsAndFundingManagement",
+                "Fundraising",
+                "EventOrganization",
+                "Secretariat",
+                "ServicesAndSupport",
+                "Activities",
+                "OnCallAvailability"
+            ],
+            "required": true,
+            "isSorted": true
+        },
+        "requiredCount": {
+            "type": "int",
+            "default": 1,
+            "min": 0,
+            "max": 99
+        },
+        "place": {
+            "type": "address",
+            "viewMap": true,
+            "view": "nonprofit-espocrm:views/fields/address"
+        },
+        "task": {
+            "type": "link",
+            "readOnly": true
+        },
+        "sortOrder": {
+            "type": "int",
+            "default": 0
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "Draft",
+                "Published",
+                "Covered",
+                "Cancelled"
+            ],
+            "default": "Draft",
+            "displayAsLabel": true,
+            "style": {
+                "Draft": "default",
+                "Published": "primary",
+                "Covered": "success",
+                "Cancelled": "danger"
+            },
+            "audited": true
+        },
+        "conditions": {
+            "type": "array",
+            "maxItemLength": 200,
+            "displayAsList": true,
+            "tooltip": true,
+            "maxCount": 5,
+            "noEmptyString": true
+        },
+        "dayOfWeek": {
+            "type": "enum",
+            "options": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
+            "translation": "Global.options.dayOfWeek"
+        },
+        "isAllDay": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true
+        }
+    },
+    "links": {
+        "activityOffer": {
+            "type": "belongsTo",
+            "entity": "ActivityOffer",
+            "foreign": "slots"
+        },
+        "invites": {
+            "type": "hasMany",
+            "entity": "ActivityInvite",
+            "foreign": "activityOfferSlot"
+        },
+        "task": {
+            "type": "belongsTo",
+            "entity": "Task",
+            "foreign": "activityOfferSlot"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "collection": {
+        "orderBy": "dateStart",
+        "order": "asc",
+        "textFilterFields": [
+            "name",
+            "placeCity",
+            "placeStreet",
+            "category"
+        ]
+    },
+    "indexes": {
+        "offerDate": {
+            "columns": [
+                "activityOfferId",
+                "dateStart",
+                "deleted"
+            ]
+        }
+    }
+}

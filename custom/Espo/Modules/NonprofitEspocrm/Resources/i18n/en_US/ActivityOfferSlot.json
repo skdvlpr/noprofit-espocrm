@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "name": "Name",
+        "activityOffer": "Shift plan",
+        "dateStart": "Start",
+        "dateEnd": "End",
+        "duration": "Duration",
+        "category": "Category",
+        "requiredCount": "Volunteers required",
+        "invites": "Availabilities",
+        "place": "Place",
+        "placeStreet": "Street",
+        "placeCity": "City",
+        "placeState": "State",
+        "placeCountry": "Country",
+        "placePostalCode": "Postal code",
+        "placeMap": "Map",
+        "task": "Task",
+        "sortOrder": "Sort order",
+        "conditions": "Additional conditions",
+        "dayOfWeek": "Day",
+        "isAllDay": "All day",
+        "status": "Status"
+    },
+    "links": {
+        "activityOffer": "Shift plan",
+        "task": "Task"
+    },
+    "labels": {
+        "ActivityOfferSlot": "Volunteer shift",
+        "ActivityOfferSlotPlural": "Volunteer shifts",
+        "Create ActivityOfferSlot": "Create Shift"
+    },
+    "options": {
+        "status": {
+            "Draft": "Draft",
+            "Published": "Published",
+            "Covered": "Covered",
+            "Cancelled": "Cancelled"
+        },
+        "category": {
+            "MealPreparation": "Meal preparation",
+            "MealDistribution": "Meal distribution",
+            "Administrative": "Administrative",
+            "LegalDesk": "Legal desk",
+            "DigitalDesk": "Digital desk",
+            "Reception": "Reception",
+            "ListeningDesk": "Listening desk",
+            "MarketCollection": "Market collection",
+            "Cleaning": "Cleaning",
+            "NightReceptionManagement": "Night reception management",
+            "ProjectDevelopment": "Project development",
+            "GrantsAndFundingManagement": "Grants & funding management",
+            "Fundraising": "Fundraising",
+            "EventOrganization": "Event organization",
+            "Secretariat": "Secretariat",
+            "ServicesAndSupport": "Services & support",
+            "Activities": "Activities",
+            "OnCallAvailability": "On-call availability"
+        },
+        "dayOfWeek": {
+            "Monday": "Monday",
+            "Tuesday": "Tuesday",
+            "Wednesday": "Wednesday",
+            "Thursday": "Thursday",
+            "Friday": "Friday",
+            "Saturday": "Saturday",
+            "Sunday": "Sunday"
+        }
+    },
+    "tooltips": {
+        "conditions": "Up to 5 free-text conditions for this shift.",
+        "isAllDay": "All-day shift: time selection is disabled."
+    }
+}

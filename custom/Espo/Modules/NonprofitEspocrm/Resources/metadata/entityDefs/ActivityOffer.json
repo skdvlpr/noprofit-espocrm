@@ -1,0 +1,190 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": false,
+            "trim": true,
+            "readOnly": true,
+            "tooltip": true
+        },
+        "weekStart": {
+            "type": "date",
+            "required": true
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "Draft",
+                "CollectingAvailability",
+                "Planned",
+                "Confirmed",
+                "Closed"
+            ],
+            "default": "Draft",
+            "displayAsLabel": true,
+            "style": {
+                "Draft": "default",
+                "CollectingAvailability": "warning",
+                "Planned": "primary",
+                "Confirmed": "success",
+                "Closed": "info"
+            },
+            "audited": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "inviteeUsers": {
+            "type": "linkMultiple",
+            "view": "views/fields/link-multiple",
+            "tooltip": true
+        },
+        "inviteTeams": {
+            "type": "linkMultiple",
+            "tooltip": true
+        },
+        "publishedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        },
+        "category": {
+            "type": "enum",
+            "options": [
+                "MealPreparation",
+                "MealDistribution",
+                "Administrative",
+                "LegalDesk",
+                "DigitalDesk",
+                "Reception",
+                "ListeningDesk",
+                "MarketCollection",
+                "Cleaning",
+                "NightReceptionManagement",
+                "ProjectDevelopment",
+                "GrantsAndFundingManagement",
+                "Fundraising",
+                "EventOrganization",
+                "Secretariat",
+                "ServicesAndSupport",
+                "Activities",
+                "OnCallAvailability"
+            ],
+            "required": false,
+            "isSorted": true,
+            "tooltip": true
+        },
+        "uniqueAddress": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true
+        },
+        "place": {
+            "type": "address",
+            "viewMap": true,
+            "view": "nonprofit-espocrm:views/fields/address"
+        },
+        "weekSlots": {
+            "type": "jsonArray",
+            "notStorable": true,
+            "layoutListDisabled": true,
+            "layoutFiltersDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "view": "nonprofit-espocrm:views/activity-offer/fields/week-slots",
+            "required": false
+        }
+    },
+    "links": {
+        "slots": {
+            "type": "hasMany",
+            "entity": "ActivityOfferSlot",
+            "foreign": "activityOffer"
+        },
+        "tasks": {
+            "type": "hasMany",
+            "entity": "Task",
+            "foreign": "activityOffer"
+        },
+        "inviteeUsers": {
+            "type": "hasMany",
+            "entity": "User",
+            "foreign": "activityOffersAsInvitee",
+            "relationName": "activityOfferInviteeUser",
+            "layoutRelationshipsDisabled": true
+        },
+        "inviteTeams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "foreign": "activityOffersAsInviteTeam",
+            "relationName": "activityOfferInviteTeam",
+            "layoutRelationshipsDisabled": true
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        }
+    },
+    "collection": {
+        "orderBy": "weekStart",
+        "order": "desc",
+        "textFilterFields": [
+            "name",
+            "description"
+        ]
+    },
+    "indexes": {
+        "weekStart": {
+            "columns": [
+                "weekStart",
+                "deleted"
+            ]
+        },
+        "status": {
+            "columns": [
+                "status",
+                "deleted"
+            ]
+        }
+    },
+    "optimisticConcurrencyControl": true,
+    "statusField": "status"
+}

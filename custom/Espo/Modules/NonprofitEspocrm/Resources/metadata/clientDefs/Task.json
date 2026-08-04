@@ -1,3 +1,57 @@
 {
-    "color": "#67aec0"
+    "color": "#67aec0",
+    "bottomPanels": {
+        "detail": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "nonprofit-espocrm:views/task/record/panels/scheduler",
+                "order": 1
+            },
+            {
+                "name": "activityInvites",
+                "label": "Invites",
+                "view": "views/record/panels/relationship",
+                "order": 2
+            }
+        ],
+        "edit": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "nonprofit-espocrm:views/task/record/panels/scheduler",
+                "order": 1
+            }
+        ],
+        "editSmall": [
+            {
+                "name": "scheduler",
+                "label": "Scheduler",
+                "view": "nonprofit-espocrm:views/task/record/panels/scheduler",
+                "order": 1
+            }
+        ]
+    },
+    "detailActionList": [
+        {
+            "name": "acceptInvite",
+            "label": "Accept",
+            "labelTranslation": "ActivityInvite.labels.Accept",
+            "handler": "nonprofit-espocrm:handlers/task/invite-respond",
+            "actionFunction": "accept",
+            "checkVisibilityFunction": "isAcceptVisible",
+            "iconClass": "fas fa-check",
+            "style": "success"
+        },
+        {
+            "name": "declineInvite",
+            "label": "Decline",
+            "labelTranslation": "ActivityInvite.labels.Decline",
+            "handler": "nonprofit-espocrm:handlers/task/invite-respond",
+            "actionFunction": "decline",
+            "checkVisibilityFunction": "isDeclineVisible",
+            "iconClass": "fas fa-times",
+            "style": "danger"
+        }
+    ]
 }

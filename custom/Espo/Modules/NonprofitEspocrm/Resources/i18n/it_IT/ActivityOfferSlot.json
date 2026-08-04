@@ -1,0 +1,75 @@
+{
+    "fields": {
+        "name": "Nome",
+        "activityOffer": "Piano turni",
+        "dateStart": "Inizio",
+        "dateEnd": "Fine",
+        "duration": "Durata",
+        "category": "Categoria",
+        "requiredCount": "Volontari richiesti",
+        "invites": "Disponibilità",
+        "place": "Luogo",
+        "placeStreet": "Via",
+        "placeCity": "Città",
+        "placeState": "Provincia",
+        "placeCountry": "Paese",
+        "placePostalCode": "CAP",
+        "placeMap": "Mappa",
+        "task": "Attività",
+        "sortOrder": "Ordine",
+        "conditions": "Condizioni aggiuntive",
+        "dayOfWeek": "Giorno",
+        "isAllDay": "Tutto il giorno",
+        "status": "Stato"
+    },
+    "links": {
+        "activityOffer": "Piano turni",
+        "task": "Attività"
+    },
+    "labels": {
+        "ActivityOfferSlot": "Turno volontario",
+        "ActivityOfferSlotPlural": "Turni volontari",
+        "Create ActivityOfferSlot": "Crea turno"
+    },
+    "options": {
+        "status": {
+            "Draft": "Bozza",
+            "Published": "Pubblicato",
+            "Covered": "Coperto",
+            "Cancelled": "Annullato"
+        },
+        "category": {
+            "MealPreparation": "Preparazione pasti",
+            "MealDistribution": "Distribuzione pasti",
+            "Administrative": "Amministrativo",
+            "LegalDesk": "Sportello legale",
+            "DigitalDesk": "Sportello digitale",
+            "Reception": "Accoglienza",
+            "ListeningDesk": "Sportello di ascolto",
+            "MarketCollection": "Recupero eccedenze",
+            "Cleaning": "Pulizie",
+            "NightReceptionManagement": "Gestione accoglienza notturna",
+            "ProjectDevelopment": "Sviluppo progetti",
+            "GrantsAndFundingManagement": "Gestione fondi e finanziamenti",
+            "Fundraising": "Fundraising",
+            "EventOrganization": "Organizzazione eventi",
+            "Secretariat": "Segreteria",
+            "ServicesAndSupport": "Servizi e supporto",
+            "Activities": "Attività",
+            "OnCallAvailability": "Disponibilità on-call"
+        },
+        "dayOfWeek": {
+            "Monday": "Lunedì",
+            "Tuesday": "Martedì",
+            "Wednesday": "Mercoledì",
+            "Thursday": "Giovedì",
+            "Friday": "Venerdì",
+            "Saturday": "Sabato",
+            "Sunday": "Domenica"
+        }
+    },
+    "tooltips": {
+        "conditions": "Fino a 5 condizioni a testo libero per questo turno.",
+        "isAllDay": "Turno per tutto il giorno: la selezione dell’orario è disabilitata."
+    }
+}

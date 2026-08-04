@@ -7,6 +7,7 @@ use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Json;
 use Espo\Core\Utils\Language;
 use Espo\Entities\Preferences;
+use Espo\Modules\NonprofitEspocrm\Tools\Export\Support\AbstractTotalsProcessor;
 use Espo\ORM\Entity;
 use Espo\Tools\Export\Collection;
 use Espo\Tools\Export\Format\Xlsx\FieldHelper;
@@ -116,6 +117,14 @@ class LabeledCsvProcessor implements ProcessorInterface
             );
         }
 
+        if ($fieldData->getType() === FieldType::BOOL) {
+            return $this->language->translate(
+                ((bool) $value) ? 'Yes' : 'No',
+                'labels',
+                'Global'
+            );
+        }
+
         return $value;
     }
 
@@ -138,6 +147,10 @@ class LabeledCsvProcessor implements ProcessorInterface
 
     private function translateLabel(string $entityType, string $name): string
     {
+        if ($name === AbstractTotalsProcessor::TOTALS_MARKER_ATTRIBUTE) {
+            return '';
+        }
+
         $label = $name;
 
         $fieldData = $this->fieldHelper->getData($entityType, $name);

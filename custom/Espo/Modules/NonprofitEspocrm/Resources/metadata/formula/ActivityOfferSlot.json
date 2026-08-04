@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (name == null || name == '') {\n    $categoryLabel = language\\translateOption(category, 'category', 'ActivityOfferSlot');\n    $datePart = datetime\\format(dateStart, 'DD.MM.YYYY');\n    $placePart = '';\n    if (placeStreet != null && placeStreet != '') {\n        $placePart = placeStreet;\n    } else if (placeCity != null && placeCity != '') {\n        $placePart = placeCity;\n    }\n    if ($placePart != '') {\n        name = string\\concatenate($categoryLabel, ' | ', $datePart, ' | ', $placePart);\n    } else {\n        name = string\\concatenate($categoryLabel, ' | ', $datePart);\n    }\n}\n"
+}

@@ -58,9 +58,11 @@
         }
     },
     "presetFilters": {
-        "volunteersEmployees": "Volunteers / Employees",
+        "volunteers": "Volunteers",
         "volunteersOccasionali": "Occasional volunteers",
-        "associati": "Members"
+        "employees": "Employees",
+        "associati": "Members",
+        "volunteersEmployees": "Volunteers / Employees"
     },
     "tooltips": {
         "isUser": "True when a CRM user and/or portal user is linked.",

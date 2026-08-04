@@ -18,17 +18,20 @@ define('nonprofit-espocrm:lib/reporting-list-export', [
         /**
          * Opens the native export modal with an email format pre-selected.
          *
-         * @param {string} [defaultFormat='csv-email']
+         * @param {string} [defaultFormat='xlsx-email']
          */
-        openReportingEmailExport(defaultFormat = 'csv-email') {
-            this.export(null, null, null, {defaultFormat: defaultFormat});
+        openReportingEmailExport(defaultFormat = 'xlsx-email') {
+            this.export(null, null, null, {
+                defaultFormat: defaultFormat,
+                emailOnly: true,
+            });
         },
 
         /**
          * @param {Object<string,*>} [data]
          * @param {string} [url]
          * @param {string[]} [fieldList]
-         * @param {{defaultFormat?: string}} [options]
+         * @param {{defaultFormat?: string, emailOnly?: boolean}} [options]
          */
         export(data, url, fieldList, options) {
             options = options || {};
@@ -52,6 +55,8 @@ define('nonprofit-espocrm:lib/reporting-list-export', [
             const modalOptions = {
                 scope: this.entityType,
                 defaultFormat: options.defaultFormat,
+                emailOnly: !!options.emailOnly ||
+                    (options.defaultFormat && String(options.defaultFormat).endsWith('-email')),
             };
 
             if (fieldList) {

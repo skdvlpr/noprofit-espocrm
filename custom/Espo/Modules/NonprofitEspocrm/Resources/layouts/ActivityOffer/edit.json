@@ -1,0 +1,29 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "name"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "weekStart"},
+                false
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ]
+        ]
+    },
+    {
+        "label": "Cohort",
+        "rows": [
+            [
+                {"name": "inviteeUsers", "fullWidth": true}
+            ],
+            [
+                {"name": "inviteTeams", "fullWidth": true}
+            ]
+        ]
+    }
+]

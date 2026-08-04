@@ -26,7 +26,9 @@
         "googleCalendarAdminCalendarTemplatesTitle": "Calendar templates",
         "googleCalendarAdminCalendarTemplatesHelp": "Event description, reminders, and colors per entity type.",
         "googleCalendarAutoCreateNoDedicatedWarning": "Auto-create is on, but no Calendar Date Source uses Auto dedicated calendar routing. Events will stay on the primary calendar until you set routing on at least one date source.",
-        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named CRM - {entity label}. You must also set Google calendar routing to Auto dedicated on each Calendar Date Source row."
+        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named CRM - {entity label}. You must also set Google calendar routing to Auto dedicated on each Calendar Date Source row.",
+        "googleCalendarCrmScopesTitle": "Entities currently on the CRM calendar",
+        "googleCalendarCrmScopesHelp": "Read-only union of core calendar entities and active Calendar Date Sources (from any extension). Configure sources below."
     },
     "help": {
         "GoogleCalendarDrive": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret."

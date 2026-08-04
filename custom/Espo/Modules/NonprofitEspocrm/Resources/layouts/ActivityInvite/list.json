@@ -1,0 +1,10 @@
+[
+    {"name": "name", "link": true},
+    {"name": "status"},
+    {"name": "user"},
+    {"name": "activityOffer"},
+    {"name": "activityOfferSlot"},
+    {"name": "respondedAt"},
+    {"name": "task"},
+    {"name": "comment"}
+]

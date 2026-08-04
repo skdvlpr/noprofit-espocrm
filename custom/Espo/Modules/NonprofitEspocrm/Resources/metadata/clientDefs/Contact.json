@@ -30,29 +30,18 @@
     "filterList": [
         "portalUsers",
         {
-            "name": "volunteersEmployees"
+            "name": "volunteers"
         },
         {
             "name": "volunteersOccasionali"
         },
         {
+            "name": "employees"
+        },
+        {
             "name": "associati"
         }
     ],
-    "menu": {
-        "list": {
-            "buttons": [
-                {
-                    "labelTranslation": "Global.labels.reportingEmailExport",
-                    "name": "reportingEmailExport",
-                    "style": "default",
-                    "acl": "read",
-                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
-                    "actionFunction": "send"
-                }
-            ]
-        }
-    },
     "dynamicLogic": {
         "panels": {
             "personnelVolunteerEmployee": {

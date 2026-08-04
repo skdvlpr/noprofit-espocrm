@@ -27,9 +27,11 @@
         "Rendicontazione": "Отчётность",
         "Contatti": "Контакты",
         "ContattiAll": "Все",
-        "ContattiVolontariDipendenti": "Волонтёры / Сотрудники",
+        "ContattiVolontari": "Волонтёры",
         "ContattiVolontariOccasionali": "Разовые волонтёры",
-        "ContattiAssociati": "Ассоциаты"
+        "ContattiDipendenti": "Сотрудники",
+        "ContattiAssociati": "Ассоциаты",
+        "ContattiVolontariDipendenti": "Волонтёры / Сотрудники"
     },
     "labels": {
         "Create VolunteerEmployee": "Создать новый",

@@ -59,6 +59,23 @@
                 <h4 class="gi-section__title">{{calendarConfigTitle}}</h4>
                 <p class="gi-section__lead">{{calendarConfigHelp}}</p>
             </div>
+            {{#if crmCalendarScopes.length}}
+            <div class="gi-crm-calendar-scopes" style="margin-bottom: 1em;">
+                <div class="small text-muted" style="margin-bottom: 0.35em;">
+                    {{crmCalendarScopesTitle}}
+                </div>
+                <ul class="list-unstyled" style="margin: 0; padding-left: 0;">
+                    {{#each crmCalendarScopes}}
+                    <li style="padding: 0.15em 0;">
+                        <span class="fas fa-check text-success" style="margin-right: 0.4em;"></span>
+                        {{label}}
+                        <span class="text-muted small">({{entityType}})</span>
+                    </li>
+                    {{/each}}
+                </ul>
+                <p class="text-muted small" style="margin-top: 0.5em;">{{crmCalendarScopesHelp}}</p>
+            </div>
+            {{/if}}
             <div class="gi-nav-grid" role="navigation" aria-label="{{calendarConfigTitle}}">
                 {{#each calendarNavItems}}
                 <a

@@ -1,9 +1,7 @@
 {
     "formatList": [
         "xlsx",
-        "csv",
-        "xlsx-email",
-        "csv-email"
+        "csv"
     ],
     "formatDefs": {
         "csv": {
@@ -24,6 +22,9 @@
         },
         "xlsx": {
             "processorClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\TotalsProcessor",
+            "cellValuePreparatorClassNameMap": {
+                "bool": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\CellValuePreparators\\Boolean"
+            },
             "params": {
                 "fields": {
                     "lite": {
@@ -123,6 +124,9 @@
             "processorClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\TotalsProcessor",
             "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "fileExtension": "xlsx",
+            "cellValuePreparatorClassNameMap": {
+                "bool": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\CellValuePreparators\\Boolean"
+            },
             "params": {
                 "fields": {
                     "lite": {

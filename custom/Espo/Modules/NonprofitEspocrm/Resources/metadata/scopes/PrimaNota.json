@@ -17,9 +17,7 @@
     "importable": true,
     "exportFormatList": [
         "xlsx",
-        "csv",
-        "xlsx-email",
-        "csv-email"
+        "csv"
     ],
     "customizable": true,
     "color": "#27ae60",

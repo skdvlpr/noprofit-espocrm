@@ -760,18 +760,6 @@
         }
     },
     "menu": {
-        "list": {
-            "buttons": [
-                {
-                    "labelTranslation": "Global.labels.reportingEmailExport",
-                    "name": "reportingEmailExport",
-                    "style": "default",
-                    "acl": "read",
-                    "handler": "nonprofit-espocrm:handlers/reporting/email-export",
-                    "actionFunction": "send"
-                }
-            ]
-        },
         "detail": {
             "buttons": [
                 {

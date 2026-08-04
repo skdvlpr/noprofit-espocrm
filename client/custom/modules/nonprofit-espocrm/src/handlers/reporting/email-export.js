@@ -10,12 +10,12 @@ define('nonprofit-espocrm:handlers/reporting/email-export', [], function () {
             const listView = this.resolveRecordListView();
 
             if (typeof listView.openReportingEmailExport === 'function') {
-                listView.openReportingEmailExport('csv-email');
+                listView.openReportingEmailExport('xlsx-email');
 
                 return;
             }
 
-            Espo.Ui.error('Reporting export is not available on this view.');
+            Espo.Ui.error('Email export is not available on this view.');
         }
 
         /**

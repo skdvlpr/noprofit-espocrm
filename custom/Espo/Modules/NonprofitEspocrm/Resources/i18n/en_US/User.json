@@ -13,7 +13,8 @@
         "joinDate": "Join date",
         "leaveDate": "Leave date",
         "positionsHeld": "Positions held",
-        "memberNotes": "Notes"
+        "memberNotes": "Notes",
+        "activityCompetences": "Activity competences"
     },
     "labels": {
         "Volunteering": "Volunteering",
@@ -30,6 +31,7 @@
     },
     "tooltips": {
         "isOccasional": "Occasional volunteer (not a regular weekly commitment). Synced to the linked Contact.",
-        "monthlyHours": "Approximate monthly hours (weekly × 4.33)."
+        "monthlyHours": "Approximate monthly hours (weekly × 4.33).",
+        "activityCompetences": "Shift categories the volunteer is qualified for. Empty = all categories."
     }
 }

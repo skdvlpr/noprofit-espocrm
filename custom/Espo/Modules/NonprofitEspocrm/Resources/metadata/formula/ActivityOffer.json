@@ -1,0 +1,3 @@
+{
+    "beforeSaveCustomScript": "if (weekStart != null) {\n    $end = datetime\\addDays(weekStart, 6);\n    $startFmt = datetime\\format(weekStart, 'DD.MM.YYYY');\n    $endFmt = datetime\\format($end, 'DD.MM.YYYY');\n    name = string\\concatenate($startFmt, ' - ', $endFmt);\n}\n"
+}

@@ -1,0 +1,26 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [
+                {"name": "name"},
+                {"name": "status"}
+            ],
+            [
+                {"name": "user"},
+                {"name": "activityOfferSlot"}
+            ],
+            [
+                {"name": "activityOffer"},
+                {"name": "respondedAt"}
+            ],
+            [
+                {"name": "task"},
+                false
+            ],
+            [
+                {"name": "comment", "fullWidth": true}
+            ]
+        ]
+    }
+]

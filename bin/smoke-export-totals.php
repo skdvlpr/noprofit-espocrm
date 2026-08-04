@@ -110,17 +110,20 @@ $runExport = function (string $format, ?array $fieldList = null) use ($container
     return $contents;
 };
 
-// CSV: last non-empty line should carry the totals label and summed values.
+// CSV: first column empty header; last row starts with Totale/Total + count + sums.
 try {
     $csv = $runExport('csv');
     $lines = array_values(array_filter(array_map('trim', explode("\n", $csv)), fn ($l) => $l !== ''));
     $lastLine = end($lines);
+    $recordCount = max(0, count($lines) - 2); // header + totals
 
-    $hasLabel = str_contains($csv, 'Totali') || str_contains($csv, 'Totals');
+    $hasCaption = (bool) preg_match('/(^|,)"?(Totale|Total)"?(,|$)/', $lastLine);
+    $hasCount = $recordCount === 0
+        || preg_match('/(^|,)"?' . preg_quote((string) $recordCount, '/') . '"?(,|$)/', $lastLine) === 1;
 
-    $hasLabel
-        ? $pass[] = "csv totals row present: $lastLine"
-        : $fail[] = "csv totals row missing. last line: $lastLine";
+    $hasCaption && $hasCount
+        ? $pass[] = "csv totals row has Total caption + count $recordCount: $lastLine"
+        : $fail[] = "csv totals missing caption/count. last line: $lastLine";
 
     $firstLine = $lines[0] ?? '';
     $hasTranslatedHeader = str_contains($firstLine, 'Adults')
@@ -129,27 +132,35 @@ try {
     $hasTranslatedHeader
         ? $pass[] = "csv header uses translated labels: $firstLine"
         : $fail[] = "csv header still raw attribute names: $firstLine";
+
+    // Marker column is first: header cell empty (leading comma or empty first field).
+    $startsWithEmptyMarker = str_starts_with($firstLine, ',') || str_starts_with($firstLine, '"",');
+    $startsWithEmptyMarker
+        ? $pass[] = 'csv first column is empty Total marker header'
+        : $fail[] = "csv missing empty Total marker column: $firstLine";
 } catch (\Throwable $e) {
     $fail[] = 'csv export threw: ' . $e->getMessage();
 }
 
 // CSV (Bug 1 regression): export ONLY sum columns (no name, no non-sum column).
-// The totals row must still carry an identifying caption.
 try {
     $csv = $runExport('csv', ['adults', 'minors', 'totalMeals']);
     $lines = array_values(array_filter(array_map('trim', explode("\n", $csv)), fn ($l) => $l !== ''));
     $lastLine = end($lines);
+    $recordCount = max(0, count($lines) - 2);
 
-    $hasLabel = str_contains($csv, 'Totali') || str_contains($csv, 'Totals');
+    $hasCaption = (bool) preg_match('/(^|,)"?(Totale|Total)"?(,|$)/', $lastLine);
+    $hasCount = $recordCount === 0
+        || preg_match('/(^|,)"?' . preg_quote((string) $recordCount, '/') . '"?(,|$)/', $lastLine) === 1;
 
-    $hasLabel
-        ? $pass[] = "csv sum-only totals caption present: $lastLine"
-        : $fail[] = "csv sum-only totals caption missing. last line: $lastLine";
+    $hasCaption && $hasCount
+        ? $pass[] = "csv sum-only totals caption+count ($recordCount): $lastLine"
+        : $fail[] = "csv sum-only totals missing. last line: $lastLine";
 } catch (\Throwable $e) {
     $fail[] = 'csv sum-only export threw: ' . $e->getMessage();
 }
 
-// XLSX: load the produced workbook and assert the last row is the totals row.
+// XLSX: last NON-EMPTY row = totals (caption + count + sums), pastel + bold on THAT row.
 try {
     $xlsx = $runExport('xlsx');
 
@@ -161,23 +172,187 @@ try {
     $rows = $sheet->toArray(null, true, false, false);
     @unlink($tmp);
 
-    $lastRow = array_values(array_filter(
+    $findLastNonEmpty = static function (array $rows): array {
+        for ($i = count($rows) - 1; $i >= 0; $i--) {
+            $joined = implode('', array_map(static fn ($v) => (string) $v, $rows[$i] ?? []));
+            if ($joined !== '') {
+                return [$i + 1, $rows[$i]]; // 1-based sheet row
+            }
+        }
+
+        return [0, []];
+    };
+
+    [$totalsSheetRow, $lastRow] = $findLastNonEmpty($rows);
+    $joined = implode('|', array_map('strval', $lastRow ?: []));
+    $nonEmptyCount = count(array_filter(
         $rows,
         fn ($r) => implode('', array_map('strval', $r)) !== ''
     ));
-    $lastRow = end($lastRow);
+    $recordCount = max(0, $nonEmptyCount - 2);
 
-    $joined = implode('|', array_map('strval', $lastRow ?: []));
+    $hasCaption = in_array('Totale', array_map('strval', $lastRow ?: []), true)
+        || in_array('Total', array_map('strval', $lastRow ?: []), true);
+    $hasCount = $recordCount === 0 || in_array((string) $recordCount, array_map('strval', $lastRow ?: []), true);
+    $firstCell = (string) ($lastRow[0] ?? '');
 
-    $hasLabel = str_contains($joined, 'Totali') || str_contains($joined, 'Totals');
-    $hasSum = in_array('127', array_map('strval', $lastRow ?: []), true)
-        || in_array('191', array_map('strval', $lastRow ?: []), true);
+    $fillRgb = strtoupper((string) $sheet->getStyle('A' . $totalsSheetRow)
+        ->getFill()
+        ->getStartColor()
+        ->getRGB());
+    $isBold = (bool) $sheet->getStyle('A' . $totalsSheetRow)->getFont()->getBold();
+    $colBBold = (bool) $sheet->getStyle('B' . $totalsSheetRow)->getFont()->getBold();
+    $expectedFill = 'E8F0E9';
 
-    $hasLabel && $hasSum
-        ? $pass[] = "xlsx totals row present: $joined"
-        : $fail[] = "xlsx totals row missing/incomplete: $joined";
+    // Phantom row after totals must NOT be the styled one.
+    $phantomRow = $totalsSheetRow + 1;
+    $phantomFill = strtoupper((string) $sheet->getStyle('A' . $phantomRow)
+        ->getFill()
+        ->getStartColor()
+        ->getRGB());
+
+    $hasCaption && $hasCount && ($firstCell === 'Totale' || $firstCell === 'Total')
+        ? $pass[] = "xlsx totals row present on sheet row $totalsSheetRow: $joined"
+        : $fail[] = "xlsx totals missing/incomplete on row $totalsSheetRow: $joined";
+
+    $fillRgb === $expectedFill
+        ? $pass[] = "xlsx totals row pastel fill $fillRgb"
+        : $fail[] = "xlsx totals row fill = $fillRgb (expected $expectedFill)";
+
+    $isBold && $colBBold
+        ? $pass[] = 'xlsx totals row is bold (marker + count cells)'
+        : $fail[] = "xlsx totals bold marker=$isBold countCol=$colBBold";
+
+    $phantomFill !== $expectedFill
+        ? $pass[] = 'xlsx phantom row after totals is not pastel-styled'
+        : $fail[] = "xlsx wrongly styled phantom row $phantomRow with $phantomFill";
 } catch (\Throwable $e) {
     $fail[] = 'xlsx export threw: ' . $e->getMessage();
+}
+
+// Generic entity (Contact): includeTotals=true must append Total caption + count.
+try {
+    /** @var Export $export */
+    $export = $injectableFactory->create(ExportFactory::class)->create();
+
+    $params = ExportParams::create('Contact')
+        ->withFormat('csv')
+        ->withParam('includeTotals', true)
+        ->withFieldList(['name', 'weeklyHours', 'monthlyHours']);
+
+    $result = $export->setParams($params)->run();
+    /** @var ?Attachment $attachment */
+    $attachment = $em->getEntityById(Attachment::ENTITY_TYPE, $result->getAttachmentId());
+
+    if (!$attachment) {
+        throw new RuntimeException('No attachment for Contact export.');
+    }
+
+    /** @var FileStorageManager $fsm */
+    $fsm = $injectableFactory->create(FileStorageManager::class);
+    $csv = $fsm->getContents($attachment);
+    $em->removeEntity($attachment);
+
+    $lines = array_values(array_filter(array_map('trim', explode("\n", $csv)), fn ($l) => $l !== ''));
+    $lastLine = end($lines) ?: '';
+    $recordCount = max(0, count($lines) - 2);
+
+    $hasCaption = (bool) preg_match('/(^|,)"?(Totale|Total)"?(,|$)/', $lastLine);
+    $hasCount = $recordCount === 0
+        || preg_match('/(^|,)"?' . preg_quote((string) $recordCount, '/') . '"?(,|$)/', $lastLine) === 1;
+
+    $hasCaption && $hasCount
+        ? $pass[] = "Contact csv generic totals Total+$recordCount present"
+        : $fail[] = 'Contact csv generic totals missing: ' . substr($csv, -200);
+} catch (\Throwable $e) {
+    $fail[] = 'Contact csv export threw: ' . $e->getMessage();
+}
+
+// Account XLSX: Total column + style on correct row (user regression).
+try {
+    /** @var Export $export */
+    $export = $injectableFactory->create(ExportFactory::class)->create();
+
+    $params = ExportParams::create('Account')
+        ->withFormat('xlsx')
+        ->withParam('includeTotals', true)
+        ->withFieldList(['name', 'type', 'billingAddressCity']);
+
+    $result = $export->setParams($params)->run();
+    /** @var ?Attachment $attachment */
+    $attachment = $em->getEntityById(Attachment::ENTITY_TYPE, $result->getAttachmentId());
+
+    if (!$attachment) {
+        throw new RuntimeException('No attachment for Account export.');
+    }
+
+    /** @var FileStorageManager $fsm */
+    $fsm = $injectableFactory->create(FileStorageManager::class);
+    $xlsx = $fsm->getContents($attachment);
+    $em->removeEntity($attachment);
+
+    $tmp = tempnam(sys_get_temp_dir(), 'espo-account-xlsx') . '.xlsx';
+    file_put_contents($tmp, $xlsx);
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+    $sheet = $spreadsheet->getActiveSheet();
+    @unlink($tmp);
+
+    $rows = $sheet->toArray(null, true, false, false);
+    $totalsRowIdx = 0;
+    $totalsRow = [];
+
+    for ($i = count($rows) - 1; $i >= 0; $i--) {
+        if (implode('', array_map('strval', $rows[$i])) !== '') {
+            $totalsRowIdx = $i + 1;
+            $totalsRow = $rows[$i];
+            break;
+        }
+    }
+
+    $first = (string) ($totalsRow[0] ?? '');
+    $fill = strtoupper((string) $sheet->getStyle('A' . $totalsRowIdx)->getFill()->getStartColor()->getRGB());
+    $bold = (bool) $sheet->getStyle('A' . $totalsRowIdx)->getFont()->getBold();
+
+    ($first === 'Totale' || $first === 'Total') && $fill === 'E8F0E9' && $bold
+        ? $pass[] = "Account xlsx totals OK row=$totalsRowIdx caption=$first"
+        : $fail[] = "Account xlsx totals bad row=$totalsRowIdx first=$first fill=$fill bold=" . ($bold ? '1' : '0');
+} catch (\Throwable $e) {
+    $fail[] = 'Account xlsx export threw: ' . $e->getMessage();
+}
+
+// Bool cells must use CRM language labels (not Excel BOOL / OS locale).
+try {
+    $boolClass = $metadata->get([
+        'app', 'export', 'formatDefs', 'xlsx', 'cellValuePreparatorClassNameMap', 'bool',
+    ]);
+    $expectedBool = 'Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\Xlsx\\CellValuePreparators\\Boolean';
+
+    $boolClass === $expectedBool
+        ? $pass[] = 'xlsx bool preparator overridden for CRM language'
+        : $fail[] = "xlsx bool preparator = $boolClass";
+
+    $formatList = $metadata->get(['app', 'export', 'formatList']) ?? [];
+    $emailFormatsInDownload = array_intersect(['xlsx-email', 'csv-email'], $formatList);
+
+    $emailFormatsInDownload === []
+        ? $pass[] = 'app.export.formatList has no email formats (download-safe)'
+        : $fail[] = 'app.export.formatList still includes email formats: ' . implode(',', $emailFormatsInDownload);
+
+    $globalEmailBtn = $metadata->get(['clientDefs', 'Global', 'menu', 'list', 'buttons']) ?? [];
+    $hasGlobalEmail = false;
+
+    foreach ($globalEmailBtn as $btn) {
+        if (($btn['name'] ?? null) === 'reportingEmailExport') {
+            $hasGlobalEmail = true;
+            break;
+        }
+    }
+
+    $hasGlobalEmail
+        ? $pass[] = 'Global list menu has reportingEmailExport for all entities'
+        : $fail[] = 'Global list menu missing reportingEmailExport';
+} catch (\Throwable $e) {
+    $fail[] = 'metadata export checks threw: ' . $e->getMessage();
 }
 
 echo "\n=== smoke-export-totals ===\n";

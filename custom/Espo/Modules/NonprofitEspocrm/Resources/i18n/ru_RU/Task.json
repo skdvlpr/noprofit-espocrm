@@ -1,27 +1,11 @@
 {
     "fields": {
-        "category": "Категория"
+        "duration": "Длительность"
     },
-    "options": {
-        "category": {
-            "MealPreparation": "Подготовка питания",
-            "MealDistribution": "Раздача питания",
-            "Administrative": "Административная",
-            "LegalDesk": "Юридическая консультация",
-            "DigitalDesk": "Цифровая консультация",
-            "Reception": "Приём / размещение",
-            "ListeningDesk": "Консультация / выслушивание",
-            "MarketCollection": "Сбор на рынке",
-            "Cleaning": "Уборка",
-            "NightReceptionManagement": "Ночное управление приёмом",
-            "ProjectDevelopment": "Проектная деятельность",
-            "GrantsAndFundingManagement": "Гранты и поиск финансирования",
-            "Fundraising": "Сбор средств",
-            "EventOrganization": "Организация мероприятий",
-            "Secretariat": "Секретариат",
-            "ServicesAndSupport": "Услуги и сопровождение",
-            "Activities": "Деятельность",
-            "OnCallAvailability": "Дежурство"
-        }
+    "labels": {
+        "Scheduler": "Планировщик"
+    },
+    "messages": {
+        "schedulerNeedDatesAndPeople": "Укажите дату/время начала и конца (и назначенного пользователя или collaborators), чтобы увидеть timeline."
     }
 }

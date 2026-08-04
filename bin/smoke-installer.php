@@ -190,13 +190,18 @@ $report(
     'urls=' . implode(',', $contactsUrlTexts)
 );
 $report(
-    'Contatti group has Volunteers/Employees URL filter',
-    in_array('$ContattiVolontariDipendenti', $contactsUrlTexts, true),
+    'Contatti group has Volunteers URL filter',
+    in_array('$ContattiVolontari', $contactsUrlTexts, true),
     'urls=' . implode(',', $contactsUrlTexts)
 );
 $report(
     'Contatti group has Occasional volunteers URL filter',
     in_array('$ContattiVolontariOccasionali', $contactsUrlTexts, true),
+    'urls=' . implode(',', $contactsUrlTexts)
+);
+$report(
+    'Contatti group has Employees URL filter',
+    in_array('$ContattiDipendenti', $contactsUrlTexts, true),
     'urls=' . implode(',', $contactsUrlTexts)
 );
 $report(
@@ -285,15 +290,15 @@ $roleNames = [];
 foreach ($em->getRDBRepository('Role')->find() as $r) {
     $roleNames[] = $r->get('name');
 }
-foreach (['Admin', 'Volunteer', 'Member'] as $expectedRole) {
+foreach (['Admin', 'Volunteer', 'Employee', 'Member'] as $expectedRole) {
     $report("Role `$expectedRole` provisioned", in_array($expectedRole, $roleNames, true));
 }
 if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
-    foreach (['Employee', 'Manager', 'Desk'] as $extraRole) {
+    foreach (['Manager', 'Desk'] as $extraRole) {
         $report("Extra role `$extraRole` provisioned", in_array($extraRole, $roleNames, true));
     }
 } else {
-    foreach (['Employee', 'Manager', 'Desk', 'Can create', 'Can edit', 'Can delete', 'Website'] as $gone) {
+    foreach (['Manager', 'Desk', 'Can create', 'Can edit', 'Can delete', 'Website'] as $gone) {
         $report("Non-core role `$gone` absent", !in_array($gone, $roleNames, true));
     }
 }
