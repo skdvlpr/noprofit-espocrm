@@ -76,7 +76,8 @@
         "paymentStatus": "Inviato = conteggiato nei totali/cassa (inserimenti manuali e Stripe dopo accredito in banca). Pianificato = pagamento Stripe riuscito ma non ancora versato sul conto. Rimborsato/Contestato/Annullato/Problematico = esclusi dai totali."
     },
     "messages": {
-        "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare assegnatario, team, classificazione modello D e stato pagamento.",
+        "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe sono in sola lettura; puoi modificare assegnatario, team e classificazione modello D.",
+        "stripePaymentStatusReadOnly": "Lo stato pagamento dei movimenti Stripe viene aggiornato solo dai webhook del sito.",
         "grossRequired": "L'importo lordo e' obbligatorio. Il netto viene calcolato automaticamente.",
         "commissionExceedsGross": "La commissione non puo' superare l'importo lordo.",
         "stripeManualCreateBlocked": "La piattaforma Stripe puo' essere impostata solo dall'ingest donazioni del sito. Per i movimenti manuali scegli un'altra piattaforma.",

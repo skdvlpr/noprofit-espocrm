@@ -76,7 +76,8 @@
         "paymentStatus": "Inviato = counted in cash/totals (manual entries and Stripe after bank payout). Pianificato = Stripe charge settled but not yet paid out to the bank. Refunded/Disputed/Cancelled/Problematic = excluded from totals."
     },
     "messages": {
-        "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can change assigned user, teams, Model D classification, and payment status.",
+        "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields are read-only; you can change assigned user, teams, and Model D classification.",
+        "stripePaymentStatusReadOnly": "Payment status for Stripe ledger entries is updated by website webhooks only.",
         "grossRequired": "Gross amount (lordo) is required. Net is calculated automatically.",
         "commissionExceedsGross": "Commission cannot exceed gross amount (lordo).",
         "stripeManualCreateBlocked": "Stripe platform can only be set by website donation ingest. Choose another payment platform for manual ledger entries.",

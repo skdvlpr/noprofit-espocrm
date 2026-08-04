@@ -18,14 +18,18 @@ require __DIR__ . '/lib/refuse-production.php';
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Core\ApplicationUser;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Utils\Metadata;
+use Espo\Entities\User;
 use Espo\ORM\Repository\Option\SaveOption;
 
 $app = new Application();
 $app->setupSystemUser();
 $container = $app->getContainer();
 $em = $container->get('entityManager');
+/** @var ApplicationUser $applicationUser */
+$applicationUser = $container->getByClass(ApplicationUser::class);
 /** @var Metadata $metadata */
 $metadata = $container->get('metadata');
 
@@ -230,9 +234,19 @@ $ok(
 $protectStripeHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php';
 $protectStripeHookSrc = is_file($protectStripeHookPath) ? (string) file_get_contents($protectStripeHookPath) : '';
 $ok(
-    'paymentStatus not Stripe-locked (webhook can update)',
+    'paymentStatus not in money-lock list (dedicated status hook)',
     $protectStripeHookSrc !== ''
         && ! preg_match("/'paymentStatus'/", $protectStripeHookSrc)
+        && str_contains($protectStripeHookSrc, 'NO_GAP_FILL_ATTRIBUTES')
+        && str_contains($protectStripeHookSrc, 'actorMaySettleIncompleteIngest')
+);
+$protectStatusHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripePaymentStatus.php';
+$protectStatusHookSrc = is_file($protectStatusHookPath) ? (string) file_get_contents($protectStatusHookPath) : '';
+$ok(
+    'paymentStatus server-locked for non-API Stripe updates',
+    $protectStatusHookSrc !== ''
+        && str_contains($protectStatusHookSrc, 'stripePaymentStatusReadOnly')
+        && str_contains($protectStatusHookSrc, 'isApi()')
 );
 $ok(
     'refuse-production guard exists',
@@ -462,7 +476,59 @@ try {
 }
 $ok('Stripe money edit → BadRequest', $stripeMoneyBlocked);
 
-// Incomplete Stripe ingest (no charge id): allow settlement backfill once
+// Incomplete Stripe ingest (no charge id): interactive users stay locked; API/system may settle.
+$incompleteInteractive = $em->getNewEntity('PrimaNota');
+$incompleteInteractive->set([
+    'description' => 'Smoke Stripe incomplete interactive lock',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-INCOMPLETE-UI-' . date('His'),
+    'amountGross' => 5.0,
+    'amountGrossCurrency' => 'EUR',
+    'commissionAmount' => 0,
+    'commissionAmountCurrency' => 'EUR',
+    'commissionPercent' => 0,
+    'amount' => 5.0,
+    'amountCurrency' => 'EUR',
+    'transactionDate' => date('Y-m-d'),
+]);
+$em->saveEntity($incompleteInteractive, [SaveOption::SKIP_ALL => true]);
+$created[] = $incompleteInteractive;
+
+$regularActor = $em->getNewEntity(User::ENTITY_TYPE);
+$regularActor->set([
+    'id' => 'smoke-prima-nota-regular',
+    'userName' => 'smoke_prima_nota_regular',
+    'type' => User::TYPE_REGULAR,
+    'isActive' => true,
+]);
+$applicationUser->setUser($regularActor);
+
+$incompleteInteractive = $em->getEntityById('PrimaNota', $incompleteInteractive->getId());
+$interactiveMoneyBlocked = false;
+try {
+    $incompleteInteractive->set('amountGross', 9999.0);
+    $incompleteInteractive->set('amountGrossCurrency', 'EUR');
+    $em->saveEntity($incompleteInteractive);
+} catch (BadRequest $e) {
+    $interactiveMoneyBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
+}
+$ok('incomplete Stripe + regular user money edit → BadRequest', $interactiveMoneyBlocked);
+
+$incompleteInteractive = $em->getEntityById('PrimaNota', $incompleteInteractive->getId());
+$interactiveSubjectBlocked = false;
+try {
+    $incompleteInteractive->set('subjectName', 'Hacker Rename Incomplete');
+    $em->saveEntity($incompleteInteractive);
+} catch (BadRequest $e) {
+    $interactiveSubjectBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
+}
+$ok('incomplete Stripe + regular user subject edit → BadRequest', $interactiveSubjectBlocked);
+
+$app->setupSystemUser();
+
+// Incomplete Stripe ingest (no charge id): system/API settlement backfill once
 $incomplete = $em->getNewEntity('PrimaNota');
 $incomplete->set([
     'description' => 'Smoke Stripe incomplete backfill',
@@ -495,7 +561,7 @@ $incomplete->set([
 $em->saveEntity($incomplete);
 $incomplete = $em->getEntityById('PrimaNota', $incomplete->getId());
 $ok(
-    'incomplete Stripe row allows fee backfill',
+    'incomplete Stripe row allows system/API fee backfill',
     abs((float) $incomplete->get('commissionAmount') - 0.33) < 0.001
         && abs((float) $incomplete->get('amount') - 4.67) < 0.001
         && $incomplete->get('stripeChargeId') === 'ch_smoke_backfill'
@@ -508,6 +574,32 @@ try {
     $incompleteLocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('after backfill Stripe money edit → BadRequest', $incompleteLocked);
+
+// Gap fill must not reopen money when charge id is set but gross is empty.
+$gapMoney = $em->getNewEntity('PrimaNota');
+$gapMoney->set([
+    'description' => 'Smoke Stripe gap-fill money lock',
+    'entryType' => 'Income',
+    'internalClassification' => 'Donation',
+    'donationPaymentProvider' => 'Stripe',
+    'donationPaymentReference' => 'SMOKE-STRIPE-GAP-MONEY-' . date('His'),
+    'amount' => 0,
+    'amountCurrency' => 'EUR',
+    'transactionDate' => date('Y-m-d'),
+    'stripeChargeId' => 'ch_smoke_gap_money',
+]);
+$em->saveEntity($gapMoney, [SaveOption::SKIP_ALL => true]);
+$created[] = $gapMoney;
+$gapMoney = $em->getEntityById('PrimaNota', $gapMoney->getId());
+$gapMoneyBlocked = false;
+try {
+    $gapMoney->set('amountGross', 42.0);
+    $gapMoney->set('amountGrossCurrency', 'EUR');
+    $em->saveEntity($gapMoney);
+} catch (BadRequest $e) {
+    $gapMoneyBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
+}
+$ok('gap-fill must not allow empty→value money write', $gapMoneyBlocked);
 
 $stripeSubjectBlocked = false;
 try {
@@ -534,6 +626,28 @@ $stripe->set('modelDClassification', 'C');
 $em->saveEntity($stripe);
 $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
 $ok('Stripe modelDClassification still editable', $stripe->get('modelDClassification') === 'C');
+
+// Interactive (non-API) users must not flip Stripe paymentStatus — Inviato-only dashlets depend on it.
+$stripeStatusBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    $stripe->set('paymentStatus', 'Refunded');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeStatusBlocked = $isBadRequestMsg(
+        $e->getMessage(),
+        'stripePaymentStatusReadOnly',
+        'Payment status for Stripe',
+        'Lo stato pagamento dei movimenti Stripe'
+    );
+}
+$ok('Stripe paymentStatus edit by interactive user → BadRequest', $stripeStatusBlocked);
+
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$stripe->set('paymentStatus', 'Refunded');
+$em->saveEntity($stripe, [SaveOption::SKIP_ALL => true]);
+$stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+$ok('Stripe paymentStatus update via SKIP_ALL (webhook retry) allowed', $stripe->get('paymentStatus') === 'Refunded');
 
 $formulaPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/formula/PrimaNota.json';
 $formulaScript = (string) ((json_decode((string) file_get_contents($formulaPath), true) ?: [])['beforeSaveCustomScript'] ?? '');
