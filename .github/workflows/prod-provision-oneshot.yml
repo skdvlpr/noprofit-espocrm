@@ -1,0 +1,94 @@
+name: Prod provision after deploy (oneshot)
+
+# Explicit operator-triggered post-deploy: Installer (tabs/roles/shift planning),
+# prune orphan VolunteerActivityDispatch trees, rebuild, send Account export email.
+# Approved by user request 2026-08-04 (deploy + migrations + Proton test mail).
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${DEPLOY_SSH_PORT:-22}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Run Installer + prune VAD + send Account export
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_SSH_PORT:-22}" -i ~/.ssh/deploy_key \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" "DEPLOY_PATH='${DEPLOY_PATH}' bash -se" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          test -f data/config.php
+
+          echo "== Prune orphan VolunteerActivityDispatch (merged into NonprofitEspocrm) =="
+          rm -rf custom/Espo/Modules/VolunteerActivityDispatch \
+                 client/custom/modules/volunteer-activity-dispatch \
+                 || true
+
+          echo "== Installer::runPostInstall (tabs, roles, shift planning) =="
+          php -r '
+          require "bootstrap.php";
+          use Espo\Core\Application;
+          use Espo\Modules\NonprofitEspocrm\Tools\Installer;
+          $app = new Application();
+          $app->setupSystemUser();
+          (new Installer())->runPostInstall($app->getContainer());
+          echo "Installer OK\n";
+          '
+
+          echo "== Rebuild =="
+          php command.php rebuild
+
+          echo "== Send Account XLSX export to kokshse196@proton.me =="
+          php -r '
+          require "bootstrap.php";
+          use Espo\Core\Application;
+          use Espo\Core\InjectableFactory;
+          use Espo\Core\Utils\Language;
+          use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingEmailExporter;
+          $app = new Application();
+          $app->setupSystemUser();
+          $c = $app->getContainer();
+          $lang = $c->getByClass(Language::class);
+          if (method_exists($lang, "setLanguage")) { $lang->setLanguage("it_IT"); }
+          $cfg = $c->get("config");
+          echo "smtp=" . $cfg->get("smtpServer") . ":" . $cfg->get("smtpPort") . "\n";
+          echo "from=" . $cfg->get("outboundEmailFromAddress") . "\n";
+          $ex = $c->getByClass(InjectableFactory::class)->create(ReportingEmailExporter::class);
+          $ex->send([
+            "entityType" => "Account",
+            "format" => "xlsx-email",
+            "params" => [
+              "emailTo" => "kokshse196@proton.me",
+              "includeTotals" => true,
+              "title" => false,
+              "lite" => false,
+            ],
+          ]);
+          echo "Account export email SENT\n";
+          '
+
+          echo "== Done =="
+          REMOTE
