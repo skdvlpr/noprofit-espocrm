@@ -1,4 +1,37 @@
-/* Google Places dropdown must sit above Espo/Bootstrap modals (z-index ~1050). */
+/* Google Places dropdown must sit above Espo/Bootstrap + Aurora modals/navbar.
+ * Aurora raises dialog-record to ~1285 and side-menu to ~2160; pac must clear those.
+ * pac-container is appended to <body> by the Maps JS API.
+ */
 .pac-container {
-    z-index: 20000 !important;
+    z-index: 30000 !important;
+    pointer-events: auto !important;
+    /* Solid readable surface on dark Aurora (API default can look "missing") */
+    background-color: #ffffff !important;
+    color: #222222 !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.pac-container .pac-item,
+.pac-container .pac-item-query {
+    color: #222222 !important;
+}
+
+.pac-container .pac-item:hover,
+.pac-container .pac-item-selected {
+    background-color: #f0f0f0 !important;
+}
+
+.pac-container .pac-matched {
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+/* Address / week-slots editors inside drawers: do not clip floating UI chrome.
+ * (pac itself is body-level; this still helps map links and focus rings.) */
+.modal.dialog-record .modal-body:has(.field[data-name="address"]),
+.modal.dialog-record .modal-body:has(.field[data-name="place"]),
+.modal.dialog-record .modal-body:has(.field[data-name="batchPlaceField"]),
+.modal.dialog-record .modal-body:has(.week-slots-editor) {
+    overflow: visible !important;
 }

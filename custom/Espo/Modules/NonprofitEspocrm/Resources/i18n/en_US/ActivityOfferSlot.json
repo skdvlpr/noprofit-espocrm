@@ -32,12 +32,10 @@
         "Create ActivityOfferSlot": "Create Shift"
     },
     "options": {
-        "status": {
-            "Draft": "Draft",
-            "Published": "Published",
-            "Covered": "Covered",
-            "Cancelled": "Cancelled"
-        },
+            "status": {
+                "Published": "Published",
+                "Covered": "Covered"
+            },
         "category": {
             "MealPreparation": "Meal preparation",
             "MealDistribution": "Meal distribution",

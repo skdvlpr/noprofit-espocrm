@@ -10,12 +10,15 @@ require __DIR__ . '/lib/refuse-production.php';
  * Smoke: reporting email export (Task 7.3.6 / 7.4.2).
  *
  * Sends CSV/XLSX exports via ReportingEmailExporter for all reporting entities.
- * On DDEV, Mailpit captures outbound mail (SMTP port 1025 inside web container).
+ * Temporarily retargets the system Group Email Account SMTP to DDEV Mailpit
+ * for capture only — restores Aruba/real SMTP in finally. Interactive Espo
+ * mail keeps using the instance-configured Group Email Account.
  *
  * Usage: ddev exec php bin/smoke-mealcount-email-export.php
  */
 
 include __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/lib/mailpit-smtp-for-smoke.php';
 
 use Espo\Core\Application;
 use Espo\Core\InjectableFactory;
@@ -40,28 +43,36 @@ $config = $container->get('config');
 /** @var InjectableFactory $injectableFactory */
 $injectableFactory = $container->getByClass(InjectableFactory::class);
 
+// Clear Admin system smtp* if a previous Mailpit helper left them set —
+// EmailSender uses Group Email Account when smtpServer is empty.
 $configWriter = $injectableFactory->create(ConfigWriter::class);
-$smtpBackup = [
+$configSmtpBackup = [
     'smtpServer' => $config->get('smtpServer'),
     'smtpPort' => $config->get('smtpPort'),
     'smtpAuth' => $config->get('smtpAuth'),
     'smtpSecurity' => $config->get('smtpSecurity'),
     'smtpUsername' => $config->get('smtpUsername'),
-    'outboundEmailFromAddress' => $config->get('outboundEmailFromAddress'),
-    'outboundEmailFromName' => $config->get('outboundEmailFromName'),
+    'smtpPassword' => $config->get('smtpPassword'),
 ];
-
 $configWriter->setMultiple([
-    'smtpServer' => '127.0.0.1',
-    'smtpPort' => 1025,
+    'smtpServer' => null,
+    'smtpPort' => null,
     'smtpAuth' => false,
     'smtpSecurity' => null,
     'smtpUsername' => null,
-    'outboundEmailFromAddress' => 'smoke@nonprofit-espocrm.test',
-    'outboundEmailFromName' => 'Safehouse Smoke',
+    'smtpPassword' => null,
 ]);
 $configWriter->save();
 $config->update();
+
+$mailpitArmed = safehouse_mailpit_smoke_arm($em, $config);
+$ok(
+    'Mailpit armed on system Group Email Account',
+    $mailpitArmed['account'] !== null,
+    $mailpitArmed['account']
+        ? (string) $mailpitArmed['account']->get('emailAddress')
+        : 'no Active InboundEmail for outboundEmailFromAddress — set Group Email SMTP'
+);
 
 $created = [];
 $prefix = 'SMOKE-Email-' . date('Ymd') . '-';
@@ -80,6 +91,13 @@ $crmRecipientEmail = $crmRecipientUser ? trim((string) $crmRecipientUser->get('e
 echo "ReportingEmailExporter\n";
 
 try {
+    if ($mailpitArmed['account'] === null) {
+        throw new RuntimeException(
+            'Cannot smoke email export: system Group Email Account missing for '
+            . (string) $config->get('outboundEmailFromAddress')
+        );
+    }
+
     $exporter = $injectableFactory->create(ReportingEmailExporter::class);
 
     $mealCount = $em->getNewEntity('MealCount');
@@ -260,9 +278,26 @@ try {
         $em->removeEntity($entity);
     }
 
+    safehouse_mailpit_smoke_disarm($em, $mailpitArmed);
+
     $writer = $injectableFactory->create(ConfigWriter::class);
 
-    foreach ($smtpBackup as $key => $value) {
+    foreach ($configSmtpBackup as $key => $value) {
+        // Prefer leaving Admin system SMTP empty so UI uses Group Email Account.
+        // Only restore a non-Mailpit host if the instance had a real one.
+        if ($key === 'smtpServer' && ($value === '127.0.0.1' || $value === 'localhost')) {
+            $writer->set($key, null);
+            continue;
+        }
+        if (in_array($key, ['smtpPort', 'smtpAuth', 'smtpSecurity', 'smtpUsername', 'smtpPassword'], true)
+            && ($configSmtpBackup['smtpServer'] === '127.0.0.1'
+                || $configSmtpBackup['smtpServer'] === 'localhost'
+                || $configSmtpBackup['smtpServer'] === null
+                || $configSmtpBackup['smtpServer'] === '')
+        ) {
+            $writer->set($key, $key === 'smtpAuth' ? false : null);
+            continue;
+        }
         $writer->set($key, $value);
     }
 

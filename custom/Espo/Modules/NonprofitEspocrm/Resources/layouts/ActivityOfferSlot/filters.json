@@ -1,14 +1,14 @@
 [
-    {"name": "name"},
-    {"name": "activityOffer"},
-    {"name": "status"},
-    {"name": "category"},
-    {"name": "dayOfWeek"},
-    {"name": "dateStart"},
-    {"name": "dateEnd"},
-    {"name": "isAllDay"},
-    {"name": "requiredCount"},
-    {"name": "placeCity"},
-    {"name": "task"},
-    {"name": "createdAt"}
+    "name",
+    "activityOffer",
+    "status",
+    "category",
+    "dayOfWeek",
+    "dateStart",
+    "dateEnd",
+    "isAllDay",
+    "requiredCount",
+    "placeCity",
+    "task",
+    "createdAt"
 ]

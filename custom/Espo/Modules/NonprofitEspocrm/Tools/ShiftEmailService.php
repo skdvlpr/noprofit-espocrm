@@ -53,24 +53,27 @@ class ShiftEmailService
 
     /**
      * @param string[] $userIds
+     * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    public function sendAvailabilityRequest(Entity $offer, array $userIds): int
+    public function sendAvailabilityRequest(Entity $offer, array $userIds): array
     {
         return $this->sendTemplated(self::KIND_AVAILABILITY_REQUEST, $offer, $userIds, []);
     }
 
     /**
      * @param string[] $shiftLines
+     * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    public function sendShiftsConfirmed(Entity $offer, string $userId, array $shiftLines): int
+    public function sendShiftsConfirmed(Entity $offer, string $userId, array $shiftLines): array
     {
         return $this->sendTemplated(self::KIND_SHIFTS_CONFIRMED, $offer, [$userId], $shiftLines);
     }
 
     /**
      * @param string[] $digestLines
+     * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    public function sendAdminDigest(Entity $offer, string $userId, array $digestLines): int
+    public function sendAdminDigest(Entity $offer, string $userId, array $digestLines): array
     {
         return $this->sendTemplated(self::KIND_ADMIN_DIGEST, $offer, [$userId], $digestLines);
     }
@@ -83,8 +86,9 @@ class ShiftEmailService
     /**
      * @param string[] $userIds
      * @param string[] $shiftLines
+     * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    private function sendTemplated(string $kind, Entity $offer, array $userIds, array $shiftLines): int
+    private function sendTemplated(string $kind, Entity $offer, array $userIds, array $shiftLines): array
     {
         $template = $this->getTemplate($kind);
 
@@ -93,7 +97,11 @@ class ShiftEmailService
                 "Shift planning: email template '$kind' is not provisioned — emails skipped."
             );
 
-            return 0;
+            return [
+                'sent' => 0,
+                'skipped' => array_values($userIds),
+                'failed' => [],
+            ];
         }
 
         $from = $this->config->get('outboundEmailFromAddress');
@@ -103,7 +111,11 @@ class ShiftEmailService
                 'Shift planning: system outbound email address is not configured — emails skipped.'
             );
 
-            return 0;
+            return [
+                'sent' => 0,
+                'skipped' => array_values($userIds),
+                'failed' => [],
+            ];
         }
 
         $processor = $this->injectableFactory->create(Processor::class);
@@ -123,18 +135,26 @@ class ShiftEmailService
         ];
 
         $sent = 0;
+        $skipped = [];
+        $failed = [];
 
         foreach ($userIds as $userId) {
             /** @var ?User $recipient */
             $recipient = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
 
             if (!$recipient || !$recipient->get('isActive')) {
+                $skipped[] = $userId . ' (inactive/missing)';
                 continue;
             }
 
             $address = $this->getPrimaryEmailAddress($recipient);
 
             if ($address === '') {
+                $skipped[] = (string) ($recipient->get('userName') ?? $userId) . ' (no email)';
+                $this->log->warning(
+                    'Shift planning: skip email for user {userId} — no address',
+                    ['userId' => $userId]
+                );
                 continue;
             }
 
@@ -175,7 +195,17 @@ class ShiftEmailService
 
                 $this->emailSender->send($email);
                 $sent++;
+
+                $this->log->info(
+                    'Shift planning: email sent kind={kind} to={address} user={userId}',
+                    [
+                        'kind' => $kind,
+                        'address' => $address,
+                        'userId' => $userId,
+                    ]
+                );
             } catch (Throwable $e) {
+                $failed[] = $address . ' (' . $e->getMessage() . ')';
                 $this->log->warning(
                     'Shift planning: email to {address} failed: {message}',
                     ['address' => $address, 'message' => $e->getMessage()]
@@ -183,7 +213,11 @@ class ShiftEmailService
             }
         }
 
-        return $sent;
+        return [
+            'sent' => $sent,
+            'skipped' => $skipped,
+            'failed' => $failed,
+        ];
     }
 
     /**

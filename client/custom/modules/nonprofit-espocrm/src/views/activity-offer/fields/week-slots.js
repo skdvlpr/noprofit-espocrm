@@ -49,9 +49,15 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
         editTemplateContent: `
             <div class="week-slots-editor">
                 {{#each rows}}
-                    <div class="panel panel-default week-slot-row" data-index="{{@index}}"
-                         style="margin-bottom: 1em;">
-                        <div class="panel-body" style="padding: 12px 15px;">
+                    <div class="panel panel-default week-slot-row" data-index="{{@index}}">
+                        {{#unless isOnly}}
+                            <button type="button" class="btn btn-link btn-sm week-slot-remove"
+                                    data-action="removeRow" title="{{../removeText}}"
+                                    aria-label="{{../removeText}}">
+                                <span class="fas fa-times"></span>
+                            </button>
+                        {{/unless}}
+                        <div class="panel-body">
                             <div class="row">
                                 <div class="cell col-sm-3 form-group">
                                     <label class="control-label">{{../dayText}}</label>
@@ -86,15 +92,9 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                 </div>
                                 <div class="cell col-sm-3 form-group">
                                     <label class="control-label">{{../allDayText}}</label>
-                                    <div class="field" style="display:flex;align-items:center;gap:8px;min-height:34px;">
+                                    <div class="field week-slot-allday">
                                         <input type="checkbox" data-name="isAllDay"
                                                {{#if isAllDay}}checked{{/if}}>
-                                        {{#unless isOnly}}
-                                            <button type="button" class="btn btn-default btn-sm"
-                                                    data-action="removeRow" title="{{../removeText}}">
-                                                <span class="fas fa-times"></span>
-                                            </button>
-                                        {{/unless}}
                                     </div>
                                 </div>
                             </div>
@@ -109,14 +109,13 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                                 <span class="none-value">{{../noneText}}</span>
                                             {{/if}}
                                         {{else}}
-                                            <textarea
-                                                class="form-control auto-height"
-                                                data-name="placeStreet"
-                                                rows="1"
-                                                placeholder="{{../streetPlaceholder}}"
-                                                style="resize: none;"
-                                            >{{placeStreet}}</textarea>
-                                            <div class="row" style="margin-top: 0.35em; margin-left: 0; margin-right: 0;">
+                                            <input type="text"
+                                                   class="form-control"
+                                                   data-name="placeStreet"
+                                                   value="{{placeStreet}}"
+                                                   placeholder="{{../streetPlaceholder}}"
+                                                   autocomplete="off">
+                                            <div class="row week-slot-place-row">
                                                 <div class="col-sm-4 col-xs-4">
                                                     <input type="text" class="form-control"
                                                            data-name="placeCity"
@@ -136,11 +135,10 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                                            placeholder="{{../postalCodePlaceholder}}">
                                                 </div>
                                             </div>
-                                            <input type="text" class="form-control"
+                                            <input type="text" class="form-control week-slot-country"
                                                    data-name="placeCountry"
                                                    value="{{placeCountry}}"
-                                                   placeholder="{{../countryPlaceholder}}"
-                                                   style="margin-top: 0.35em;">
+                                                   placeholder="{{../countryPlaceholder}}">
                                         {{/if}}
                                     </div>
                                 </div>
@@ -177,13 +175,12 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="cell col-sm-12 form-group" style="margin-bottom: 0;">
+                                <div class="cell col-sm-12 form-group week-slot-conditions">
                                     <label class="control-label">{{../conditionsText}}</label>
                                     <div class="field">
                                         <div class="conditions-list">
                                             {{#each conditions}}
-                                                <div class="input-group" style="margin-bottom: 0.35em;"
-                                                     data-cond-index="{{@index}}">
+                                                <div class="input-group" data-cond-index="{{@index}}">
                                                     <input type="text" class="form-control" data-name="condition"
                                                            maxlength="200" value="{{this}}">
                                                     <span class="input-group-btn">
@@ -197,7 +194,7 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                         </div>
                                         {{#if canAddCondition}}
                                             <button type="button" class="btn btn-link btn-sm"
-                                                    data-action="addCondition" style="padding-left: 0;">
+                                                    data-action="addCondition">
                                                 <span class="fas fa-plus"></span> {{../addConditionText}}
                                             </button>
                                         {{/if}}
@@ -454,6 +451,14 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
             const autocomplete = new google.maps.places.Autocomplete(input, {
                 fields: ['address_components', 'formatted_address'],
                 // No types filter: allow streets and localities (e.g. city names).
+            });
+
+            input.addEventListener('focus', () => {
+                setTimeout(() => {
+                    document.querySelectorAll('.pac-container').forEach(el => {
+                        el.style.zIndex = '30000';
+                    });
+                }, 0);
             });
 
             autocomplete.addListener('place_changed', () => {

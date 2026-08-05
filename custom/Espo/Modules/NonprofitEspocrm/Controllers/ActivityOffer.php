@@ -89,6 +89,22 @@ class ActivityOffer extends Record
     }
 
     /**
+     * Cohort competenze / response / assignment stats for organizers.
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function getActionVolunteerStats(Request $request): stdClass
+    {
+        $id = $request->getQueryParam('id');
+
+        if (!$id || !is_string($id)) {
+            throw new BadRequest("No id.");
+        }
+
+        return (object) $this->createService()->volunteerStats($id);
+    }
+
+    /**
      * Append a batch of weekly shifts (mass create from Turni panel).
      *
      * @throws BadRequest|Forbidden|NotFound|Error

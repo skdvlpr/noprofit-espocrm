@@ -209,6 +209,15 @@ define('nonprofit-espocrm:views/fields/address', [
                 // No types filter: allow streets and localities (e.g. city names).
             });
 
+            // Keep pac dropdown above Aurora drawers (CSS + runtime bump).
+            input.addEventListener('focus', () => {
+                setTimeout(() => {
+                    document.querySelectorAll('.pac-container').forEach(el => {
+                        el.style.zIndex = '30000';
+                    });
+                }, 0);
+            });
+
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
 

@@ -48,6 +48,17 @@
         "Slots": "Turni",
         "Tasks": "Attività personali",
         "PersonalTasks": "Attività personali",
+        "VolunteerStats": "Match volontari",
+        "volunteerStatsVolunteer": "Volontario",
+        "volunteerStatsCompetences": "Competenze",
+        "volunteerStatsEligible": "Turni idonei",
+        "volunteerStatsResponded": "Hanno risposto",
+        "volunteerStatsGaps": "Può coprire buchi",
+        "volunteerStatsMatch": "Assegnati / idonei",
+        "volunteerStatsCohort": "Volontari coinvolti",
+        "volunteerStatsAssignedPeople": "Persone assegnate",
+        "volunteerStatsUncoveredSlots": "Scoperti / turni",
+        "volunteerStatsCoveredSlots": "Turni coperti",
         "Cohort": "Coinvolti",
         "Weekly shifts": "Turni settimanali",
         "Add shifts": "Aggiungi turni",
@@ -94,7 +105,9 @@
     },
     "messages": {
         "requestAvailabilityConfirm": "Aprire la raccolta disponibilità e avvisare i volontari coinvolti?",
-        "requestAvailabilitySuccess": "Richiesta inviata a {notifyCount} volontari per {slotCount} turni.",
+        "requestAvailabilitySuccess": "Richiesta per {slotCount} turni: {emailCount} email a {cohortCount} coinvolti ({notifyCount} notifiche in-app; chi ha inviato non riceve notifica in-app).",
+        "requestAvailabilityEmailFailed": "Email non inviate: {list}",
+        "requestAvailabilityEmailSkipped": "Email saltate: {list}",
         "autoAssignSuccess": "Assegnazione automatica completata: {assignedCount} nuove assegnazioni.",
         "autoAssignUncovered": "Turni scoperti: {list}",
         "confirmPlanConfirm": "Confermare i turni? Verranno create le attività e avvisati i volontari.",
@@ -105,6 +118,7 @@
         "availabilityNotOpen": "La raccolta disponibilità non è aperta per questo piano.",
         "availabilityDisallowedHint": "I turni disattivati richiedono competenze non presenti nel tuo profilo.",
         "addShiftsSuccess": "Aggiunti {createdCount} turno/i. Il piano ora ha {slotCount} turno/i.",
-        "addShiftsOnlyDraft": "I turni si possono aggiungere solo in Bozza o durante la raccolta disponibilità."
+        "addShiftsOnlyDraft": "I turni si possono aggiungere solo in Bozza o durante la raccolta disponibilità.",
+        "coverageUncoveredSummary": "{count} turno/i ancora scoperti."
     }
 }

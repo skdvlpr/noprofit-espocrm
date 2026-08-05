@@ -21,7 +21,8 @@ use Psr\Http\Message\StreamInterface;
  * - Injects a first column {@see self::TOTALS_MARKER_ATTRIBUTE} with CRM-language
  *   "Total" / "Totale" on the totals row (empty on data rows).
  * - Puts the record count under the name/text column.
- * - Sums only typed int/float/currency/decimal columns (never varchar-with-digits).
+ * - Sums every typed numeric column in the export extraction
+ *   (int/float/currency/decimal/… — never varchar-with-digits).
  */
 abstract class AbstractTotalsProcessor implements Processor
 {
@@ -34,15 +35,18 @@ abstract class AbstractTotalsProcessor implements Processor
      */
     public const TOTALS_MARKER_ATTRIBUTE = '__exportTotalsLabel';
 
-    /** Pastel fill for the XLSX totals row / Total column (light sage). */
-    public const TOTALS_ROW_FILL_RGB = 'E8F0E9';
+    /** Light yellow fill for the XLSX totals row only (not the Totale column). */
+    public const TOTALS_ROW_FILL_RGB = 'FFF2CC';
 
     /** @var list<string> */
     private const NUMERIC_FIELD_TYPES = [
         FieldType::INT,
         FieldType::FLOAT,
         FieldType::CURRENCY,
+        FieldType::CURRENCY_CONVERTED,
         FieldType::DECIMAL,
+        FieldType::NUMBER,
+        FieldType::AUTOINCREMENT,
     ];
 
     /** @var list<string> */
@@ -76,11 +80,13 @@ abstract class AbstractTotalsProcessor implements Processor
 
         [$params, $countAttribute] = $this->resolveCountTarget($profile, $params);
         $params = $this->injectTotalsMarkerColumn($params);
+        $sumAttributes = $this->resolveSumAttributesFromExport($params);
 
         $effectiveCollection = $this->buildCollectionWithTotals(
             $profile,
             $params,
             $countAttribute,
+            $sumAttributes,
             $collection
         );
 
@@ -105,27 +111,9 @@ abstract class AbstractTotalsProcessor implements Processor
     private function buildGenericProfile(Params $params): ReportingEntityProfile
     {
         $entityType = $params->getEntityType();
-        $entityDefs = $this->entityManager->getDefs()->getEntity($entityType);
         $attributeList = $params->getAttributeList();
-
-        $sumAttributes = [];
-
-        foreach ($attributeList as $attribute) {
-            if ($attribute === self::TOTALS_MARKER_ATTRIBUTE) {
-                continue;
-            }
-
-            if (!$entityDefs->hasField($attribute)) {
-                continue;
-            }
-
-            $type = $entityDefs->getField($attribute)->getType();
-
-            if (in_array($type, self::NUMERIC_FIELD_TYPES, true)) {
-                $sumAttributes[] = $attribute;
-            }
-        }
-
+        $sumAttributes = $this->resolveSumAttributesFromExport($params);
+        $entityDefs = $this->entityManager->getDefs()->getEntity($entityType);
         $labelAttribute = $this->resolveGenericLabelAttribute($entityDefs, $attributeList);
 
         return new ReportingEntityProfile(
@@ -135,6 +123,40 @@ abstract class AbstractTotalsProcessor implements Processor
             $sumAttributes,
             $labelAttribute,
         );
+    }
+
+    /**
+     * Numeric fields present in this export extraction (fieldList when set,
+     * otherwise attributeList). Profile allow-lists are intentionally ignored:
+     * when totals are on, every typed numeric column in the export is summed.
+     *
+     * @return list<string>
+     */
+    private function resolveSumAttributesFromExport(Params $params): array
+    {
+        $entityDefs = $this->entityManager->getDefs()->getEntity($params->getEntityType());
+        $candidates = $params->getFieldList() ?? $params->getAttributeList();
+        $sumAttributes = [];
+
+        foreach ($candidates as $name) {
+            if ($name === self::TOTALS_MARKER_ATTRIBUTE) {
+                continue;
+            }
+
+            if (!$entityDefs->hasField($name)) {
+                continue;
+            }
+
+            $type = $entityDefs->getField($name)->getType();
+
+            if (!in_array($type, self::NUMERIC_FIELD_TYPES, true)) {
+                continue;
+            }
+
+            $sumAttributes[] = $name;
+        }
+
+        return $sumAttributes;
     }
 
     /**
@@ -180,13 +202,14 @@ abstract class AbstractTotalsProcessor implements Processor
     {
         $attributeList = $params->getAttributeList();
         $entityDefs = $this->entityManager->getDefs()->getEntity($profile->entityType);
+        $sumAttributes = $this->resolveSumAttributesFromExport($params);
 
         if (in_array($profile->totalsLabelAttribute, $attributeList, true)) {
             return [$params, $profile->totalsLabelAttribute];
         }
 
         foreach ($attributeList as $attribute) {
-            if (in_array($attribute, $profile->exportTotalAttributes, true)) {
+            if (in_array($attribute, $sumAttributes, true)) {
                 continue;
             }
 
@@ -267,10 +290,11 @@ abstract class AbstractTotalsProcessor implements Processor
         ReportingEntityProfile $profile,
         Params $params,
         string $countAttribute,
+        array $sumAttributes,
         Collection $collection,
     ): Collection {
-        $sums = array_fill_keys($profile->exportTotalAttributes, 0.0);
-        $hasValue = array_fill_keys($profile->exportTotalAttributes, false);
+        $sums = array_fill_keys($sumAttributes, 0.0);
+        $hasValue = array_fill_keys($sumAttributes, false);
 
         $entities = [];
 
@@ -278,7 +302,7 @@ abstract class AbstractTotalsProcessor implements Processor
             $entity->set(self::TOTALS_MARKER_ATTRIBUTE, '');
             $entities[] = $entity;
 
-            foreach ($profile->exportTotalAttributes as $attribute) {
+            foreach ($sumAttributes as $attribute) {
                 $value = $entity->get($attribute);
 
                 if (is_numeric($value)) {
@@ -291,6 +315,7 @@ abstract class AbstractTotalsProcessor implements Processor
         $totalsEntity = $this->buildTotalsEntity(
             $profile,
             $countAttribute,
+            $sumAttributes,
             $sums,
             $hasValue,
             count($entities)
@@ -300,12 +325,14 @@ abstract class AbstractTotalsProcessor implements Processor
     }
 
     /**
+     * @param list<string> $sumAttributes
      * @param array<string, float> $sums
      * @param array<string, bool> $hasValue
      */
     private function buildTotalsEntity(
         ReportingEntityProfile $profile,
         string $countAttribute,
+        array $sumAttributes,
         array $sums,
         array $hasValue,
         int $recordCount,
@@ -319,7 +346,7 @@ abstract class AbstractTotalsProcessor implements Processor
         $entityDefs = $this->entityManager->getDefs()->getEntity($profile->entityType);
         $defaultCurrency = (string) ($this->config->get('defaultCurrency') ?: 'EUR');
 
-        foreach ($profile->exportTotalAttributes as $attribute) {
+        foreach ($sumAttributes as $attribute) {
             if (!($hasValue[$attribute] ?? false)) {
                 continue;
             }
@@ -328,13 +355,16 @@ abstract class AbstractTotalsProcessor implements Processor
                 ? $entityDefs->getField($attribute)->getType()
                 : null;
 
-            if ($fieldType === FieldType::INT) {
+            if ($fieldType === FieldType::INT || $fieldType === FieldType::AUTOINCREMENT) {
                 $entity->set($attribute, (int) round($sums[$attribute]));
             } else {
                 $entity->set($attribute, $sums[$attribute]);
             }
 
-            if ($fieldType === FieldType::CURRENCY) {
+            if (
+                $fieldType === FieldType::CURRENCY
+                || $fieldType === FieldType::CURRENCY_CONVERTED
+            ) {
                 $entity->set($attribute . 'Currency', $defaultCurrency);
             }
         }

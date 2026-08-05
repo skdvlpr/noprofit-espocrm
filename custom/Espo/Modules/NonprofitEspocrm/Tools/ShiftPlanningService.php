@@ -220,10 +220,10 @@ class ShiftPlanningService
                 ? "{$categoryLabel} | {$this->formatDateIt($date)} | {$placePart}"
                 : "{$categoryLabel} | {$this->formatDateIt($date)}";
 
-            $slotStatus = trim((string) ($row['status'] ?? 'Draft'));
+            $slotStatus = trim((string) ($row['status'] ?? 'Published'));
 
-            if (!in_array($slotStatus, ['Draft', 'Published', 'Covered', 'Cancelled'], true)) {
-                $slotStatus = 'Draft';
+            if (!in_array($slotStatus, ['Published', 'Covered'], true)) {
+                $slotStatus = 'Published';
             }
 
             $payload = array_merge($place, [
@@ -318,12 +318,15 @@ class ShiftPlanningService
 
         $notifyCount = $this->notifyUsers($offer, $cohortIds, $message);
 
-        $emailCount = $this->shiftEmailService->sendAvailabilityRequest($offer, $cohortIds);
+        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, $cohortIds);
 
         return [
+            'cohortCount' => count($cohortIds),
             'notifyCount' => $notifyCount,
             'slotCount' => count($slots),
-            'emailCount' => $emailCount,
+            'emailCount' => (int) ($emailResult['sent'] ?? 0),
+            'emailSkipped' => $emailResult['skipped'] ?? [],
+            'emailFailed' => $emailResult['failed'] ?? [],
         ];
     }
 
@@ -362,7 +365,7 @@ class ShiftPlanningService
         $slotList = [];
 
         foreach ($this->getSlots($offerId) as $slot) {
-            $slotStatus = (string) ($slot->get('status') ?? 'Draft');
+            $slotStatus = (string) ($slot->get('status') ?? 'Published');
 
             if (!in_array($slotStatus, ['Published', 'Covered'], true)) {
                 continue;
@@ -621,6 +624,202 @@ class ShiftPlanningService
     }
 
     /**
+     * Cohort volunteer analysis for organizers: competenze match, responses,
+     * assignments, and uncovered shifts each person could still fill.
+     *
+     * @return array<string, mixed>
+     * @throws Forbidden|NotFound
+     */
+    public function volunteerStats(string $offerId): array
+    {
+        $offer = $this->getOffer($offerId);
+
+        if (!$this->acl->check($offer, Acl\Table::ACTION_READ)) {
+            throw new Forbidden("No read access to ActivityOffer.");
+        }
+
+        $cohortIds = $this->resolveCohortUserIds($offer);
+        $slots = $this->getSlots($offerId);
+        $userNames = $this->loadUserNames($offerId);
+
+        $invitesByUser = [];
+
+        foreach ($this->getInvites($offerId) as $invite) {
+            $userId = (string) $invite->get('userId');
+            $invitesByUser[$userId][] = $invite;
+        }
+
+        $slotMeta = [];
+        $uncoveredSlotIds = [];
+
+        foreach ($slots as $slot) {
+            $slotId = $slot->getId();
+            $required = (int) ($slot->get('requiredCount') ?? 1);
+            $assigned = 0;
+
+            foreach ($invitesByUser as $userInvites) {
+                foreach ($userInvites as $invite) {
+                    if ((string) $invite->get('activityOfferSlotId') !== $slotId) {
+                        continue;
+                    }
+
+                    if (in_array(
+                        (string) $invite->get('status'),
+                        [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED],
+                        true
+                    )) {
+                        $assigned++;
+                    }
+                }
+            }
+
+            $isCovered = $assigned >= $required;
+
+            if (!$isCovered) {
+                $uncoveredSlotIds[$slotId] = true;
+            }
+
+            $category = (string) ($slot->get('category') ?? '');
+
+            $slotMeta[$slotId] = [
+                'id' => $slotId,
+                'name' => (string) ($slot->get(Field::NAME) ?? ''),
+                'category' => $category,
+                'categoryLabel' => $this->language->translateOption(
+                    $category,
+                    'category',
+                    'ActivityOfferSlot'
+                ),
+                'isCovered' => $isCovered,
+            ];
+        }
+
+        $volunteers = [];
+        $respondedPeople = 0;
+        $assignedPeople = 0;
+
+        foreach ($cohortIds as $userId) {
+            /** @var ?User $user */
+            $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
+
+            if (!$user) {
+                continue;
+            }
+
+            $competences = $this->getUserCompetences($user);
+            $competenceLabels = array_map(
+                fn (string $code): string => $this->language->translateOption(
+                    $code,
+                    'category',
+                    'ActivityOfferSlot'
+                ),
+                $competences
+            );
+
+            $eligibleSlots = [];
+
+            foreach ($slotMeta as $meta) {
+                $allowed = $competences === []
+                    || in_array($meta['category'], $competences, true);
+
+                if (!$allowed) {
+                    continue;
+                }
+
+                $eligibleSlots[] = [
+                    'id' => $meta['id'],
+                    'name' => $meta['categoryLabel'] !== ''
+                        ? $meta['categoryLabel']
+                        : $meta['name'],
+                    'isCovered' => $meta['isCovered'],
+                ];
+            }
+
+            $availableCount = 0;
+            $assignedCount = 0;
+            $declinedCount = 0;
+            $responded = false;
+
+            foreach ($invitesByUser[$userId] ?? [] as $invite) {
+                $status = (string) $invite->get('status');
+
+                if ($status === self::INVITE_CANCELLED) {
+                    continue;
+                }
+
+                $responded = true;
+
+                if ($status === self::INVITE_AVAILABLE) {
+                    $availableCount++;
+                } elseif (in_array($status, [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED], true)) {
+                    $assignedCount++;
+                } elseif ($status === self::INVITE_DECLINED) {
+                    $declinedCount++;
+                }
+            }
+
+            if ($responded) {
+                $respondedPeople++;
+            }
+
+            if ($assignedCount > 0) {
+                $assignedPeople++;
+            }
+
+            $fillableGaps = 0;
+
+            foreach ($eligibleSlots as $eligible) {
+                if (!$eligible['isCovered']) {
+                    $fillableGaps++;
+                }
+            }
+
+            $eligibleCount = count($eligibleSlots);
+            $matchLabel = $eligibleCount === 0
+                ? '0%'
+                : (string) (int) round(100 * $assignedCount / max(1, $eligibleCount)) . '%';
+
+            $volunteers[] = [
+                'id' => $userId,
+                'name' => $userNames[$userId] ?? $user->get(Field::NAME) ?? $userId,
+                'competences' => $competences,
+                'competenceLabels' => $competenceLabels,
+                'eligibleSlots' => $eligibleSlots,
+                'responded' => $responded,
+                'availableCount' => $availableCount,
+                'assignedCount' => $assignedCount,
+                'declinedCount' => $declinedCount,
+                'fillableGaps' => $fillableGaps,
+                'matchLabel' => $matchLabel,
+            ];
+        }
+
+        usort(
+            $volunteers,
+            static function (array $a, array $b): int {
+                return ($b['fillableGaps'] <=> $a['fillableGaps'])
+                    ?: ($b['assignedCount'] <=> $a['assignedCount'])
+                    ?: strcasecmp((string) $a['name'], (string) $b['name']);
+            }
+        );
+
+        $slotCount = count($slotMeta);
+        $uncoveredSlots = count($uncoveredSlotIds);
+
+        return [
+            'summary' => [
+                'cohortSize' => count($volunteers),
+                'respondedCount' => $respondedPeople,
+                'assignedPeople' => $assignedPeople,
+                'slotCount' => $slotCount,
+                'uncoveredSlots' => $uncoveredSlots,
+                'coveredSlots' => max(0, $slotCount - $uncoveredSlots),
+            ],
+            'volunteers' => $volunteers,
+        ];
+    }
+
+    /**
      * Greedy fair auto-assignment.
      *
      * @return array{assignedCount: int, uncovered: string[]}
@@ -634,7 +833,13 @@ class ShiftPlanningService
             throw new BadRequest("Auto-assignment requires an open plan.");
         }
 
-        $slots = $this->getPublishedSlots($offerId);
+        // Assignment targets: Published (not yet Covered). Busy intervals must
+        // still consider Covered slots so re-runs do not double-book volunteers.
+        $allSlots = $this->getSlots($offerId);
+        $slots = array_values(array_filter(
+            $allSlots,
+            static fn (Entity $slot): bool => $slot->get('status') === 'Published'
+        ));
 
         $invitesBySlot = [];
         $load = [];
@@ -657,11 +862,11 @@ class ShiftPlanningService
 
         $slotById = [];
 
-        foreach ($slots as $slot) {
+        foreach ($allSlots as $slot) {
             $slotById[$slot->getId()] = $slot;
         }
 
-        // Pre-fill busy intervals from existing assignments.
+        // Pre-fill busy intervals from existing assignments (all slots).
         foreach ($invitesBySlot as $slotId => $invites) {
             foreach ($invites as $invite) {
                 if (!in_array($invite->get('status'), [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED], true)) {
@@ -775,20 +980,13 @@ class ShiftPlanningService
         $offer->set('status', self::STATUS_PLANNED);
         $this->entityManager->saveEntity($offer);
 
-        // Recompute uncovered after assignment; mark fully covered shifts.
+        $this->syncSlotCoverageStatuses($offerId);
+
         $uncovered = [];
 
         foreach ($this->coverage($offerId)['slots'] as $row) {
             if (!$row['isCovered']) {
                 $uncovered[] = (string) $row['name'];
-                continue;
-            }
-
-            $slotEntity = $this->entityManager->getEntityById('ActivityOfferSlot', (string) $row['id']);
-
-            if ($slotEntity && $slotEntity->get('status') === 'Published') {
-                $slotEntity->set('status', 'Covered');
-                $this->entityManager->saveEntity($slotEntity);
             }
         }
 
@@ -883,6 +1081,8 @@ class ShiftPlanningService
         $offer->set('status', self::STATUS_CONFIRMED);
         $this->entityManager->saveEntity($offer);
 
+        $this->syncSlotCoverageStatuses($offerId);
+
         $notifyCount = 0;
         $emailCount = 0;
 
@@ -899,13 +1099,15 @@ class ShiftPlanningService
             $this->createNotification($offer, $userId, $message);
             $notifyCount++;
 
-            $emailCount += $this->shiftEmailService->sendShiftsConfirmed($offer, $userId, $shiftLines);
+            $emailResult = $this->shiftEmailService->sendShiftsConfirmed($offer, $userId, $shiftLines);
+            $emailCount += (int) ($emailResult['sent'] ?? 0);
         }
 
         $adminId = (string) ($offer->get('assignedUserId') ?? '');
 
         if ($adminId !== '' && $adminDigestLines !== []) {
-            $emailCount += $this->shiftEmailService->sendAdminDigest($offer, $adminId, $adminDigestLines);
+            $emailResult = $this->shiftEmailService->sendAdminDigest($offer, $adminId, $adminDigestLines);
+            $emailCount += (int) ($emailResult['sent'] ?? 0);
         }
 
         return [
@@ -961,7 +1163,43 @@ class ShiftPlanningService
     }
 
     /**
-     * Shifts that can receive availability invites (Published only).
+     * Keep slot status in sync with staffing:
+     * Published → Covered when assignedCount >= requiredCount,
+     * Covered → Published when staffing drops below required.
+     */
+    public function syncSlotCoverageStatuses(string $offerId): void
+    {
+        foreach ($this->coverage($offerId)['slots'] as $row) {
+            $slotId = (string) ($row['id'] ?? '');
+
+            if ($slotId === '') {
+                continue;
+            }
+
+            $slotEntity = $this->entityManager->getEntityById('ActivityOfferSlot', $slotId);
+
+            if (!$slotEntity) {
+                continue;
+            }
+
+            $status = (string) ($slotEntity->get('status') ?? 'Published');
+            $isCovered = !empty($row['isCovered']);
+
+            if ($isCovered && $status === 'Published') {
+                $slotEntity->set('status', 'Covered');
+                $this->entityManager->saveEntity($slotEntity);
+                continue;
+            }
+
+            if (!$isCovered && $status === 'Covered') {
+                $slotEntity->set('status', 'Published');
+                $this->entityManager->saveEntity($slotEntity);
+            }
+        }
+    }
+
+    /**
+     * Shifts that can receive availability invites / auto-assignment (Published only).
      *
      * @return Entity[]
      */

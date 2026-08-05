@@ -334,6 +334,18 @@ EspoCRM module loader reads layouts from `Resources/layouts/`. Files in `Resourc
 
 File: `Resources/layouts/{EntityName}/filters.json` (modern). Older entities may still ship `search.json` — both are read but `filters.json` is preferred.
 
+**CORRECT — flat array of field name strings** (Espo 9.x / 10.x search “Aggiungi Campo” / Add Field):
+
+```
+[
+  "mealDate",
+  "mealType",
+  "assignedUser"
+]
+```
+
+**PROHIBITED — object items** (causes `[object Object]` in the Add Field dropdown):
+
 ```
 [
   { "name": "mealDate" },
@@ -341,11 +353,46 @@ File: `Resources/layouts/{EntityName}/filters.json` (modern). Older entities may
 ]
 ```
 
-Note: in 9.x the modern `filters.json` is a flat array of fields. The older `search.json` envelope (`{"filterList": [...], "boolFilterList": [...], ...}`) is still accepted for backwards compatibility but should not be used for new code.
+**How to prevent / verify:**
+
+1. New and edited `filters.json` MUST be a JSON array of strings only (`jq 'map(type) | unique'` → `["string"]`).
+2. After change: Rebuild + Clear Cache; hard-refresh list; open search → **Aggiungi Campo** — every item must be a translated field label, never `[object Object]`.
+3. If Admin → Layout Manager customized Filters for that entity, reset/remove the DB override so the module file is used again.
+4. Working references: `MealCount/filters.json`, `Member/filters.json`, `PrimaNota/filters.json`.
+
+The older `search.json` envelope (`{"filterList": [...], "boolFilterList": [...], ...}`) is still accepted for backwards compatibility but should not be used for new code.
 
 ### LAY-006 — After layout changes
 
 Always run: **Admin → Repair → Rebuild → Clear Cache** Browser hard-refresh (Ctrl+Shift+R) required to see frontend changes.
+
+### LAY-008 — Field coverage across views (mandatory)
+
+For every custom / heavily customized entity:
+
+| View | Requirement |
+| ---- | ----------- |
+| `detail.json` | **All** user-facing fields the record owns (grouped in panels). Source of truth for full edit when `edit.json` is absent. |
+| `edit.json` | Optional; if present, must not omit fields that users need to set. Prefer deriving from `detail.json`. |
+| `detailSmall.json` | Same fields as detail (or the full meaningful subset) for side/relationship peek — same size/shape as small edit. Do **not** leave side peek with a near-empty form. |
+| `list.json` / `listSmall.json` | **Not** every field. Include the **primary** columns users need to scan **plus every `status` / lifecycle enum** that exists on the entity. |
+
+Checklist before shipping an entity: open Create/Edit, Detail, and side Small view — confirm no important field is missing; open List — confirm name/key columns + status are visible and clickable (`"link": true` on a primary column).
+
+### LAY-009 — Status fields always colored in UI
+
+Every enum used as a **status / lifecycle** field MUST define `style` (or `styleMap`) in `entityDefs` so list/detail badges are colored (e.g. `primary` / `success` / `warning` / `danger` / `info` / `default`). Never ship a status that renders as plain unstyled text in list or detail.
+
+Verify in **both** Safehouse Aurora Light and Aurora Dark (badge contrast readable).
+
+### LAY-010 — UI change QA (Espo docs + both Aurora themes)
+
+When changing layouts, client views, CSS, or list/search UI:
+
+1. Cross-check behaviour against [EspoCRM documentation](https://docs.espocrm.com/) for the feature (layouts, dynamic logic, export, themes).
+2. Manually verify the same screen in **Aurora Light** and **Aurora Dark** (Safehouse themes) — contrast, badges, borders, modals, Places dropdowns.
+3. Rebuild + `appTimestamp` bump (`bin/dev-rebuild.sh`); normal refresh after timestamp change.
+4. For filter layouts: confirm Aggiungi Campo labels (LAY-005). For status: confirm colors (LAY-009).
 
 ## SECTION 6 — FORMULA ENGINE RULES (FRM-\*)
 
@@ -1274,6 +1321,7 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 | **Symptom**                                                   | **Most likely cause**                                                                                                                                |
 | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "Create" button click shows the list with `Nessun dato` instead of a form | JS error `Cannot read properties of null (reading 'view') at convertDetailLayout` — there is a `null` cell in `detail.json`/`edit.json`. Replace with `false`. Open DevTools → Console to confirm. |
+| List search **Aggiungi Campo** shows `[object Object]` | `filters.json` used `{"name":"field"}` objects instead of plain `"field"` strings (LAY-005). Convert to a string array; rebuild; reset Layout Manager override if present. |
 | List rows are not clickable (cannot open record)              | `list.json` has no column with `"link": true` (LAY-004).                                                                                             |
 | Layout empty/not loading                                      | Layouts placed in `Resources/metadata/layouts/` instead of `Resources/layouts/`.                                                                     |
 | Fields unnamed in UI                                          | Missing `i18n` entry for that field.                                                                                                                 |
@@ -1288,7 +1336,7 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 
 - **ENT**: `entityDefs` + `scopes` (entity:true, module set) = minimum to exist | `type:"Base"` is OPTIONAL
 - **FLD**: `currency` ≠ `float` | `notStorable` for computed | `FieldValidator` for regex
-- **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG | empty cells = `false` not `null` | first list column needs `"link": true` | `edit.json` is OPTIONAL — falls back to `detail.json`
+- **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG | empty cells = `false` not `null` | first list column needs `"link": true` | `edit.json` is OPTIONAL — falls back to `detail.json` | `filters.json` = **string array only** (objects → `[object Object]`) | detail/detailSmall = full fields; list = key + status | status enums need `style` | UI QA in Aurora Light **and** Dark + Espo docs
 - **DEF**: static → `"default"` key | dynamic → formula `beforeSaveCustomScript` (don't combine with `required:true` for the same field)
 - **FRM**: `Resources/metadata/formula/{E}.json` | key: `beforeSaveCustomScript` | math via `+ - * /` operators (NOT `add()/multiply()`) | `datetime\today()` (NOT `date\today()`) | `entity\isNew()` (NOT bare `isNew()`) | always check `data/logs/espo-{date}.log` after save
 - **ACL**: `aclDefs` BEFORE testing | `dynamicLogic` ≠ security

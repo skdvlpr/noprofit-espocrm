@@ -1,42 +1,45 @@
 define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/record/panels/bottom'], function (Dep) {
 
     /**
-     * Organizer coverage table: required / available / assigned per shift,
-     * with a warning marker on uncovered shifts.
+     * Organizer coverage table — staffing-focused columns only.
      */
     return Dep.extend({
 
         templateContent: `
             <div class="coverage-panel">
                 {{#if hasData}}
-                    <div class="list" style="overflow-x: auto;">
-                        <table class="table table-condensed coverage-table" style="min-width: 920px;">
+                    <div class="list activity-offer-panel-scroll">
+                        <table class="table table-condensed coverage-table">
                             <thead>
                                 <tr>
-                                    <th style="white-space: nowrap;">{{shiftText}}</th>
-                                    <th style="white-space: nowrap;">{{whenText}}</th>
-                                    <th style="white-space: nowrap;">{{placeText}}</th>
-                                    <th style="white-space: nowrap;">{{conditionsText}}</th>
-                                    <th class="text-center" style="white-space: nowrap;">{{requiredText}}</th>
-                                    <th class="text-center" style="white-space: nowrap;">{{availableText}}</th>
-                                    <th class="text-center" style="white-space: nowrap;">{{assignedText}}</th>
-                                    <th style="white-space: nowrap;">{{volunteersText}}</th>
+                                    <th>{{shiftText}}</th>
+                                    <th>{{whenText}}</th>
+                                    <th class="text-center">{{requiredText}}</th>
+                                    <th class="text-center">{{availableText}}</th>
+                                    <th class="text-center">{{assignedText}}</th>
+                                    <th>{{volunteersText}}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{#each rows}}
-                                    <tr>
-                                        <td>{{name}}</td>
+                                    <tr class="{{#unless isCovered}}coverage-row-uncovered{{/unless}}">
+                                        <td>
+                                            <div class="coverage-shift-name">{{name}}</div>
+                                            {{#if conditionsLabel}}
+                                                <div class="text-muted small coverage-shift-meta"
+                                                     title="{{conditionsLabel}}">{{conditionsLabel}}</div>
+                                            {{/if}}
+                                        </td>
                                         <td class="text-muted" style="white-space: nowrap;">{{when}}</td>
-                                        <td class="small">{{placeLabel}}</td>
-                                        <td class="small">{{conditionsLabel}}</td>
                                         <td class="text-center">{{requiredCount}}</td>
                                         <td class="text-center">{{availableCount}}</td>
                                         <td class="text-center">
                                             {{#if isCovered}}
                                                 <span class="label label-success">{{assignedCount}}</span>
                                             {{else}}
-                                                <span class="label label-danger" title="{{../uncoveredText}}">{{assignedCount}} ⚠</span>
+                                                <span class="label label-danger" title="{{../uncoveredText}}">
+                                                    {{assignedCount}} ⚠
+                                                </span>
                                             {{/if}}
                                         </td>
                                         <td class="small">{{assignedNames}}</td>
@@ -45,6 +48,11 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
                             </tbody>
                         </table>
                     </div>
+                    {{#if uncoveredCount}}
+                        <div class="text-danger small margin-top">
+                            {{uncoveredSummary}}
+                        </div>
+                    {{/if}}
                 {{else}}
                     <div class="text-muted">{{noDataText}}</div>
                 {{/if}}
@@ -55,10 +63,11 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
             return {
                 hasData: this.rows.length > 0,
                 rows: this.rows,
+                uncoveredCount: this.uncoveredCount,
+                uncoveredSummary: this.translate('coverageUncoveredSummary', 'messages', 'ActivityOffer')
+                    .replace('{count}', String(this.uncoveredCount)),
                 shiftText: this.translate('ActivityOfferSlot', 'scopeNames'),
                 whenText: this.translate('dateStart', 'fields', 'ActivityOfferSlot'),
-                placeText: this.translate('place', 'fields', 'ActivityOfferSlot'),
-                conditionsText: this.translate('conditions', 'fields', 'ActivityOfferSlot'),
                 requiredText: this.translate('requiredCount', 'fields', 'ActivityOfferSlot'),
                 availableText: this.translate('coverageAvailable', 'labels', 'ActivityOffer'),
                 assignedText: this.translate('coverageAssigned', 'labels', 'ActivityOffer'),
@@ -72,11 +81,45 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
             Dep.prototype.setup.call(this);
 
             this.rows = [];
+            this.uncoveredCount = 0;
             this.buttonList = [];
+            this._fetchTimer = null;
 
-            this.listenTo(this.model, 'sync', () => this.fetchCoverage());
+            this.listenTo(this.model, 'sync', () => this.scheduleFetch());
+            this.listenTo(
+                this.model,
+                'change:contactsIds change:teamsIds change:status',
+                () => this.scheduleFetch()
+            );
+            this.listenTo(
+                this.model,
+                [
+                    'update-related:slots',
+                    'update-related:tasks',
+                    'update-related:coverage',
+                    'update-related:invites',
+                    'after:relate',
+                    'after:unrelate',
+                    'after:related-change:slots',
+                    'after:related-change:tasks',
+                    'after:related-change:invites',
+                    'update-all',
+                ].join(' '),
+                () => this.scheduleFetch()
+            );
 
             this.fetchCoverage();
+        },
+
+        scheduleFetch: function () {
+            if (this._fetchTimer) {
+                clearTimeout(this._fetchTimer);
+            }
+
+            this._fetchTimer = setTimeout(() => {
+                this._fetchTimer = null;
+                this.fetchCoverage();
+            }, 120);
         },
 
         fetchCoverage: function () {
@@ -87,19 +130,21 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
             Espo.Ajax
                 .getRequest('ActivityOffer/action/coverage', {id: this.model.id})
                 .then(data => {
+                    this.uncoveredCount = data.uncoveredCount || 0;
                     this.rows = (data.slots || []).map(slot => {
+                        const conditions = (slot.conditions || []).join('; ');
+
                         return {
-                            name: slot.name || slot.categoryLabel,
+                            name: slot.categoryLabel || slot.name,
                             when: this.formatWhen(slot.dateStart, slot.dateEnd),
-                            placeLabel: slot.placeLabel || '',
-                            conditionsLabel: (slot.conditions || []).join('; '),
+                            conditionsLabel: conditions,
                             requiredCount: slot.requiredCount,
                             availableCount: slot.availableCount,
                             assignedCount: slot.assignedCount,
                             isCovered: slot.isCovered,
                             assignedNames: (slot.assigned || [])
                                 .map(u => u.name)
-                                .join(', '),
+                                .join(', ') || '—',
                         };
                     });
 

@@ -12,8 +12,10 @@ use Espo\Tools\Export\Format\Xlsx\Processor as CoreXlsxProcessor;
 use Espo\Tools\Export\Processor;
 use Espo\Tools\Export\Processor\Params;
 use GuzzleHttp\Psr7\Utils;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
@@ -21,7 +23,7 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
 /**
- * XLSX export with totals row styling.
+ * XLSX export with totals row styling + visible cell borders.
  *
  * Core PhpSpreadsheet applies number-format styles one row past the last data
  * row (empty phantom row). We therefore locate the last non-empty row before
@@ -29,6 +31,8 @@ use RuntimeException;
  */
 class TotalsProcessor extends AbstractTotalsProcessor
 {
+    private const BORDER_RGB = 'A8B5A8';
+
     public function __construct(
         ReportingProfileRegistry $profileRegistry,
         EntityManager $entityManager,
@@ -48,18 +52,18 @@ class TotalsProcessor extends AbstractTotalsProcessor
     {
         $stream = parent::process($params, $collection);
 
-        if (!$this->isTotalsRequestedForParams($params)) {
-            return $stream;
-        }
-
+        // Lite (OpenSpout) path has limited styling.
         if ($params->getParam('lite')) {
             return $stream;
         }
 
-        return $this->styleTotalsSheet($stream);
+        return $this->styleSheet(
+            $stream,
+            $this->isTotalsRequestedForParams($params)
+        );
     }
 
-    private function styleTotalsSheet(StreamInterface $stream): StreamInterface
+    private function styleSheet(StreamInterface $stream, bool $withTotals): StreamInterface
     {
         $contents = (string) $stream;
 
@@ -84,51 +88,68 @@ class TotalsProcessor extends AbstractTotalsProcessor
             $spreadsheet = IOFactory::load($xlsxPath);
             $sheet = $spreadsheet->getActiveSheet();
 
-            $totalsRow = $this->findLastNonEmptyRow($sheet);
+            $lastRow = $this->findLastNonEmptyRow($sheet);
 
-            if ($totalsRow < 2) {
+            if ($lastRow < 1) {
                 @unlink($xlsxPath);
 
                 return $stream;
             }
 
-            $highestColumn = $sheet->getHighestDataColumn($totalsRow);
-            $headerRow = $this->findHeaderRow($sheet, $totalsRow);
+            $headerRow = $this->findHeaderRow($sheet, $lastRow);
+            $highestColumn = $sheet->getHighestDataColumn($lastRow);
 
-            $this->normalizeTotalsMarkerHeader($sheet, $headerRow);
+            if ($withTotals) {
+                $this->normalizeTotalsMarkerHeader($sheet, $headerRow);
 
-            // Entity::set ignores unknown attributes — stamp Total caption here.
-            $sheet->setCellValueExplicit(
-                'A' . $totalsRow,
-                $this->getTotalsCaption(),
-                \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-            );
+                $sheet->setCellValueExplicit(
+                    'A' . $lastRow,
+                    $this->getTotalsCaption(),
+                    DataType::TYPE_STRING
+                );
 
-            $pastel = [
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => self::TOTALS_ROW_FILL_RGB],
-                ],
-            ];
+                // Style only the totals row (light yellow + bold) — not column A.
+                $sheet->getStyle('A' . $lastRow . ':' . $highestColumn . $lastRow)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => self::TOTALS_ROW_FILL_RGB],
+                    ],
+                ]);
+            }
 
-            // Paint the Total column (first column) from header through totals.
-            $sheet->getStyle('A' . $headerRow . ':A' . $totalsRow)->applyFromArray($pastel);
+            // Visible borders on every cell in the used export table
+            // (header → last data/totals row, all columns including Total marker).
+            $tableStart = $headerRow;
+            $sheet->getStyle('A' . $tableStart . ':' . $highestColumn . $lastRow)
+                ->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => self::BORDER_RGB],
+                        ],
+                    ],
+                ]);
 
-            // Bold + pastel on the totals data row (caption, count, sums).
-            $sheet->getStyle('A' . $totalsRow . ':' . $highestColumn . $totalsRow)->applyFromArray([
-                'font' => ['bold' => true],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => self::TOTALS_ROW_FILL_RGB],
-                ],
-            ]);
+            // Title / timestamp rows above the table (when present).
+            if ($headerRow > 1) {
+                $sheet->getStyle('A1:' . $highestColumn . ($headerRow - 1))
+                    ->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => self::BORDER_RGB],
+                            ],
+                        ],
+                    ]);
+            }
 
             return $this->writeSpreadsheetStream($spreadsheet, $xlsxPath);
         } catch (\Throwable $e) {
             @unlink($xlsxPath);
 
             throw new RuntimeException(
-                'Failed to style export totals row: ' . $e->getMessage(),
+                'Failed to style export sheet: ' . $e->getMessage(),
                 0,
                 $e
             );
@@ -156,10 +177,9 @@ class TotalsProcessor extends AbstractTotalsProcessor
         return 1;
     }
 
-    private function findHeaderRow(Worksheet $sheet, int $totalsRow): int
+    private function findHeaderRow(Worksheet $sheet, int $lastRow): int
     {
-        // Prefer row 1; if title block is present, header is usually row 3.
-        for ($row = 1; $row < $totalsRow; $row++) {
+        for ($row = 1; $row < $lastRow; $row++) {
             $value = $sheet->getCell('A' . $row)->getValue();
 
             if ($value === self::TOTALS_MARKER_ATTRIBUTE || $value === '' || $value === null) {
@@ -168,11 +188,6 @@ class TotalsProcessor extends AbstractTotalsProcessor
                 if ($b !== null && $b !== '') {
                     return $row;
                 }
-            }
-
-            if (is_string($value) && $value !== '' && $value !== self::TOTALS_MARKER_ATTRIBUTE) {
-                // Could be title — keep scanning for marker / ID header nearby.
-                continue;
             }
         }
 

@@ -7,7 +7,7 @@ require __DIR__ . '/lib/refuse-production.php';
  *
  * Verifies:
  *   - clientDefs: lifecycle actions exposed as visible header buttons
- *     (menu.detail.buttons) with existing handler file
+ *     (detailButtonList) with existing handler file
  *   - i18n: it_IT labels for the lifecycle actions
  *   - requestAvailability: status -> CollectingAvailability, cohort notified
  *   - availabilityGrid + saveAvailability: competence filtering
@@ -48,19 +48,27 @@ function ok(bool $cond, string $label): void
 
 // --- metadata: visible lifecycle buttons -------------------------------------
 
-$buttons = $metadata->get(['clientDefs', 'ActivityOffer', 'menu', 'detail', 'buttons']) ?? [];
+$buttons = $metadata->get(['clientDefs', 'ActivityOffer', 'detailButtonList']) ?? [];
 $buttonNames = array_map(fn ($item) => is_object($item) ? ($item->name ?? '') : ($item['name'] ?? ''), $buttons);
 
 foreach (['fillAvailability', 'requestAvailability', 'autoAssign', 'confirmPlan'] as $name) {
-    ok(in_array($name, $buttonNames, true), "clientDefs menu.detail.buttons has $name");
+    ok(in_array($name, $buttonNames, true), "clientDefs detailButtonList has $name");
 }
 
 $handlerFile = __DIR__
     . '/../client/custom/modules/nonprofit-espocrm/src/handlers/activity-offer/shift-actions.js';
 ok(is_file($handlerFile), 'shift-actions.js handler file exists');
 
-$stale = $metadata->get(['clientDefs', 'ActivityOffer', 'detailActionList']);
-ok(empty($stale), 'stale detailActionList removed from clientDefs');
+$detailJs = __DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/detail.js';
+ok(is_readable($detailJs), 'ActivityOffer detail view exists');
+ok(
+    str_contains((string) file_get_contents($detailJs), 'detailButtonList'),
+    'detail view loads detailButtonList as header buttons'
+);
+
+$legacyMenu = $metadata->get(['clientDefs', 'ActivityOffer', 'menu', 'detail', 'buttons']);
+ok(empty($legacyMenu), 'legacy menu.detail.buttons removed (ignored by Espo 10)');
 
 // --- User activityCompetences layout (prod rebuild must inject without Layout\Service) ---
 
@@ -169,6 +177,18 @@ ok(
     (bool) $metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'conditions']),
     'ActivityOfferSlot.conditions field exists'
 );
+
+$slotStatusOpts = $metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'options']) ?? [];
+ok($slotStatusOpts === ['Published', 'Covered'], 'ActivityOfferSlot status options Published/Covered only');
+ok(
+    ($metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'default']) ?? '') === 'Published',
+    'ActivityOfferSlot status default Published'
+);
+ok(
+    in_array('Draft', $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'status', 'options']) ?? [], true),
+    'ActivityOffer plan still has Draft status'
+);
+
 ok(
     (bool) $metadata->get(['entityDefs', 'ActivityInvite', 'fields', 'comment']),
     'ActivityInvite.comment field exists'
@@ -180,6 +200,52 @@ ok(
     is_string($coverageJs) && !str_contains($coverageJs, "action: 'fillAvailability'"),
     'coverage panel no longer duplicates Fill availability button'
 );
+
+$planningPanels = $metadata->get(['clientDefs', 'ActivityOffer', 'planningPanels', 'detail']) ?? [];
+$planningNames = array_map(static fn ($p) => $p['name'] ?? '', $planningPanels);
+ok(in_array('coverage', $planningNames, true), 'planningPanels includes coverage');
+ok(in_array('volunteerStats', $planningNames, true), 'planningPanels includes volunteerStats');
+ok(!in_array('slots', $planningNames, true), 'slots not duplicated in planningPanels');
+ok(!in_array('tasks', $planningNames, true), 'tasks not duplicated in planningPanels');
+
+$bottomPanels = $metadata->get(['clientDefs', 'ActivityOffer', 'bottomPanels', 'detail']) ?? [];
+$bottomNames = array_map(static fn ($p) => $p['name'] ?? '', $bottomPanels);
+ok(in_array('slots', $bottomNames, true), 'bottomPanels includes slots');
+ok(in_array('tasks', $bottomNames, true), 'bottomPanels includes tasks');
+ok(!in_array('coverage', $bottomNames, true), 'coverage moved out of bottomPanels');
+ok(!in_array('volunteerStats', $bottomNames, true), 'volunteerStats moved to planningPanels');
+
+$detailJs = file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/detail.js');
+ok(
+    is_string($detailJs) && str_contains($detailJs, 'createPlanningView'),
+    'ActivityOffer detail creates planning view'
+);
+
+$volunteerStatsJs = __DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/panels/volunteer-stats.js';
+ok(is_readable($volunteerStatsJs), 'volunteer-stats panel view exists');
+
+$reportingCss = file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css');
+ok(
+    is_string($reportingCss)
+        && str_contains($reportingCss, 'activity-offer-planning-top')
+        && str_contains($reportingCss, 'activity-offer-bottom-full')
+        && str_contains($reportingCss, 'font-size: 16px')
+        && str_contains($reportingCss, 'actions-btn-group'),
+    'reporting-stats has ActivityOffer planning/full-bottom CSS'
+);
+
+$auroraLayoutCss = file_get_contents(__DIR__
+    . '/../client/custom/css/safehouse-aurora/safehouse-aurora-layout.css');
+ok(
+    is_string($auroraLayoutCss)
+        && str_contains($auroraLayoutCss, 'modal.dialog-record .modal-dialog')
+        && str_contains($auroraLayoutCss, 'detail .panel .list'),
+    'Aurora layout has phone dialog + detail panel list scroll'
+);
+
 ok(
     is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/fields/week-slots.js'),
     'week-slots field view exists'
@@ -322,7 +388,7 @@ $weekSlots = iterator_to_array(
     $em->getRDBRepository('ActivityOfferSlot')->where(['activityOfferId' => $weekOffer->getId()])->order('dateStart')->find()
 );
 ok(count($weekSlots) === 2, 'DB has 2 week-generator slots');
-ok(($weekSlots[0]->get('status') ?? '') === 'Draft', 'new slots default to Draft');
+ok(($weekSlots[0]->get('status') ?? '') === 'Published', 'new slots default to Published');
 ok(
     str_contains((string) $weekSlots[0]->get('name'), 'via Trivero')
         || str_contains((string) $weekSlots[0]->get('placeStreet'), 'via Trivero'),
@@ -430,7 +496,9 @@ $adminService = $injectableFactory->create(
 $res = $adminService->requestAvailability($offer->getId());
 ok($res['slotCount'] === 3, 'requestAvailability slotCount=3');
 ok($res['notifyCount'] === 3, 'requestAvailability notified 3 volunteers');
+ok(($res['cohortCount'] ?? 0) === 3, 'requestAvailability cohortCount=3');
 ok(array_key_exists('emailCount', $res), 'requestAvailability returns emailCount');
+ok(array_key_exists('emailFailed', $res), 'requestAvailability returns emailFailed');
 echo "  availability emails sent: " . ($res['emailCount'] ?? 0) . "\n";
 
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
@@ -517,6 +585,29 @@ ok($covBySlot['MealPreparation']['availableCount'] === 3, 'coverage: 3 available
 ok($covBySlot['MealDistribution']['availableCount'] === 1, 'coverage: 1 available on MealDistribution');
 ok($cov['uncoveredCount'] === 3, 'coverage: all uncovered before assignment');
 
+$vStats = $adminService->volunteerStats($offer->getId());
+ok(($vStats['summary']['cohortSize'] ?? 0) === 3, 'volunteerStats cohortSize=3');
+ok(($vStats['summary']['respondedCount'] ?? 0) === 3, 'volunteerStats all responded');
+ok(count($vStats['volunteers'] ?? []) === 3, 'volunteerStats returns 3 volunteer rows');
+$vol3Stats = null;
+foreach ($vStats['volunteers'] as $row) {
+    if (($row['id'] ?? '') === $volunteers[2]->getId()) {
+        $vol3Stats = $row;
+        break;
+    }
+}
+ok($vol3Stats !== null, 'volunteerStats includes vol3');
+ok(
+    is_array($vol3Stats['eligibleSlots'] ?? null)
+        && count(array_filter(
+            $vol3Stats['eligibleSlots'],
+            static fn ($s) => ($s['name'] ?? '') === 'Meal preparation'
+                || str_contains((string) ($s['name'] ?? ''), 'Meal')
+                || ($s['id'] ?? '') === $slots['MealPreparation']->getId()
+        )) >= 1,
+    'volunteerStats vol3 eligible includes MealPreparation'
+);
+
 $assignRes = $adminService->autoAssign($offer->getId());
 ok($assignRes['assignedCount'] >= 4, 'autoAssign made >=4 assignments');
 ok($assignRes['uncovered'] === [], 'autoAssign covered all slots');
@@ -524,6 +615,13 @@ ok($assignRes['uncovered'] === [], 'autoAssign covered all slots');
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'Planned', 'offer -> Planned');
 
+foreach (['MealPreparation', 'MealDistribution', 'Cleaning'] as $cat) {
+    $slotAfter = $em->getEntityById('ActivityOfferSlot', $slots[$cat]->getId());
+    ok(
+        ($slotAfter->get('status') ?? '') === 'Covered',
+        "autoAssign flips $cat slot Published → Covered"
+    );
+}
 $cov2 = $adminService->coverage($offer->getId());
 $assignedNames = [];
 foreach ($cov2['slots'] as $row) {

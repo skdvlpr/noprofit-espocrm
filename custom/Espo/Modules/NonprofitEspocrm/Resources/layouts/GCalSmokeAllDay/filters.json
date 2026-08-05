@@ -1,4 +1,4 @@
 [
-    {"name": "eventDate"},
-    {"name": "assignedUser"}
+    "eventDate",
+    "assignedUser"
 ]

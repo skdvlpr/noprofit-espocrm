@@ -1060,6 +1060,7 @@ body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-c
 body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)),
 body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) {
   position: relative;
+  /* Shell stays visible for glass ::before; table scroll is restored on .list below. */
   overflow: visible !important;
   box-sizing: border-box;
   margin-left: 0 !important;
@@ -1070,6 +1071,64 @@ body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-conta
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   box-shadow: none !important;
+}
+/*
+ * Native Espo: .list { overflow-x: auto; overflow-y: hidden }.
+ * Aurora glass shell forced overflow:visible on .list too, so wide tables spilled
+ * outside the panel on phone. Restore core scroll on the table host only.
+ */
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)) > .list,
+body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel > .list,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel > .list {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+/* Phone: keep list glass shell from letting wide tables paint outside the viewport */
+@media (max-width: 767px) {
+  body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAurora"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-main-column > .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAurora"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .nested-categories-container + .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAurora"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAuroraLight"] #content #main > .row > .left-container + .list-container:not(:has(.list-kanban)),
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container.list-container-panel,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container.list-container-panel {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .panel .list,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .panel .list {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-dialog,
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-dialog {
+    margin: 8px auto;
+    width: calc(100% - 16px);
+    max-width: 100%;
+  }
+
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-body,
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-body {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 body[data-theme-name="SafehouseAurora"] #content #main .list-group.list-group-panel::before,
 body[data-theme-name="SafehouseAuroraLight"] #content #main .list-group.list-group-panel::before,

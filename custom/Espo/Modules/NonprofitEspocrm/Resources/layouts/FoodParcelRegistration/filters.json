@@ -1,5 +1,5 @@
 [
-    {"name": "contact"},
-    {"name": "taxCode"},
-    {"name": "assignedUser"}
+    "contact",
+    "taxCode",
+    "assignedUser"
 ]

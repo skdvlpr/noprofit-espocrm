@@ -1,5 +1,5 @@
 [
-    {"name": "primaryDate"},
-    {"name": "reviewDate"},
-    {"name": "assignedUser"}
+    "primaryDate",
+    "reviewDate",
+    "assignedUser"
 ]

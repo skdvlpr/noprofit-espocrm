@@ -50,13 +50,39 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                 Espo.Ajax
                     .postRequest('ActivityOffer/action/requestAvailability', {id: view.model.id})
                     .then(response => {
-                        const msg = view
+                        let msg = view
                             .translate('requestAvailabilitySuccess', 'messages', 'ActivityOffer')
+                            .replace('{cohortCount}', String(response.cohortCount ?? 0))
+                            .replace('{emailCount}', String(response.emailCount ?? 0))
                             .replace('{notifyCount}', String(response.notifyCount ?? 0))
                             .replace('{slotCount}', String(response.slotCount ?? 0));
 
-                        Espo.Ui.success(msg);
-                        view.model.fetch();
+                        const failed = response.emailFailed || [];
+                        const skipped = response.emailSkipped || [];
+
+                        if (failed.length || skipped.length) {
+                            const parts = [];
+
+                            if (failed.length) {
+                                parts.push(
+                                    view.translate('requestAvailabilityEmailFailed', 'messages', 'ActivityOffer')
+                                        .replace('{list}', failed.join('; '))
+                                );
+                            }
+
+                            if (skipped.length) {
+                                parts.push(
+                                    view.translate('requestAvailabilityEmailSkipped', 'messages', 'ActivityOffer')
+                                        .replace('{list}', skipped.join('; '))
+                                );
+                            }
+
+                            Espo.Ui.warning(msg + '\n' + parts.join('\n'));
+                        } else {
+                            Espo.Ui.success(msg);
+                        }
+
+                        this.refreshPlan(view);
                     })
                     .catch(() => {});
             });
@@ -86,7 +112,7 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                         Espo.Ui.success(msg);
                     }
 
-                    view.model.fetch();
+                    this.refreshPlan(view);
                 })
                 .catch(() => {});
         }
@@ -113,7 +139,7 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                             .replace('{notifyCount}', String(response.notifyCount ?? 0));
 
                         Espo.Ui.success(msg);
-                        view.model.fetch();
+                        this.refreshPlan(view);
                     })
                     .catch(() => {});
             });
@@ -129,10 +155,16 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                     modal.render();
 
                     view.listenToOnce(modal, 'saved', () => {
-                        view.model.fetch();
+                        this.refreshPlan(view);
                     });
                 }
             );
+        }
+
+        refreshPlan(view) {
+            view.model.trigger('update-related:coverage');
+            view.model.trigger('update-related:slots');
+            view.model.fetch();
         }
     }
 

@@ -58,37 +58,24 @@ jobs:
           echo "Installer OK\n";
           '
 
-          echo "== Rebuild =="
-          php command.php rebuild
-
-          echo "== Send Account XLSX export to kokshse196@proton.me =="
+          echo "== Knowledge Base guides upsert (it_IT) =="
           php -r '
           require "bootstrap.php";
           use Espo\Core\Application;
           use Espo\Core\InjectableFactory;
-          use Espo\Core\Utils\Language;
-          use Espo\Modules\NonprofitEspocrm\Tools\Reporting\ReportingEmailExporter;
+          use Espo\Modules\NonprofitEspocrm\Tools\KnowledgeBaseGuidesSeeder;
           $app = new Application();
           $app->setupSystemUser();
-          $c = $app->getContainer();
-          $lang = $c->getByClass(Language::class);
-          if (method_exists($lang, "setLanguage")) { $lang->setLanguage("it_IT"); }
-          $cfg = $c->get("config");
-          echo "smtp=" . $cfg->get("smtpServer") . ":" . $cfg->get("smtpPort") . "\n";
-          echo "from=" . $cfg->get("outboundEmailFromAddress") . "\n";
-          $ex = $c->getByClass(InjectableFactory::class)->create(ReportingEmailExporter::class);
-          $ex->send([
-            "entityType" => "Account",
-            "format" => "xlsx-email",
-            "params" => [
-              "emailTo" => "kokshse196@proton.me",
-              "includeTotals" => true,
-              "title" => false,
-              "lite" => false,
-            ],
-          ]);
-          echo "Account export email SENT\n";
+          $result = $app->getContainer()->getByClass(InjectableFactory::class)
+              ->create(KnowledgeBaseGuidesSeeder::class)->run();
+          echo "KB created=" . count($result["created"]) . " updated=" . count($result["updated"]) . "\n";
+          foreach (array_merge($result["created"], $result["updated"]) as $n) {
+              echo " - $n\n";
+          }
           '
+
+          echo "== Rebuild =="
+          php command.php rebuild
 
           echo "== Done =="
           REMOTE

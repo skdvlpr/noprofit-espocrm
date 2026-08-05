@@ -48,6 +48,17 @@
         "Slots": "Shifts",
         "Tasks": "Personal tasks",
         "PersonalTasks": "Personal tasks",
+        "VolunteerStats": "Volunteer match",
+        "volunteerStatsVolunteer": "Volunteer",
+        "volunteerStatsCompetences": "Skills",
+        "volunteerStatsEligible": "Eligible shifts",
+        "volunteerStatsResponded": "Responded",
+        "volunteerStatsGaps": "Can cover gaps",
+        "volunteerStatsMatch": "Assigned / eligible",
+        "volunteerStatsCohort": "Volunteers involved",
+        "volunteerStatsAssignedPeople": "People assigned",
+        "volunteerStatsUncoveredSlots": "Uncovered / shifts",
+        "volunteerStatsCoveredSlots": "Shifts covered",
         "Cohort": "Cohort",
         "Weekly shifts": "Weekly shifts",
         "Add shifts": "Add shifts",
@@ -94,7 +105,9 @@
     },
     "messages": {
         "requestAvailabilityConfirm": "Open availability collection and notify the involved volunteers?",
-        "requestAvailabilitySuccess": "Request sent to {notifyCount} volunteers for {slotCount} shifts.",
+        "requestAvailabilitySuccess": "Request for {slotCount} shifts: {emailCount} emails to {cohortCount} involved ({notifyCount} in-app notifications; the sender is not notified in-app).",
+        "requestAvailabilityEmailFailed": "Emails failed: {list}",
+        "requestAvailabilityEmailSkipped": "Emails skipped: {list}",
         "autoAssignSuccess": "Auto-assignment done: {assignedCount} new assignments.",
         "autoAssignUncovered": "Uncovered shifts: {list}",
         "confirmPlanConfirm": "Confirm the shifts? Tasks will be created and volunteers notified.",
@@ -105,6 +118,7 @@
         "availabilityNotOpen": "Availability collection is not open for this plan.",
         "availabilityDisallowedHint": "Disabled shifts require competences not present in your profile.",
         "addShiftsSuccess": "Added {createdCount} shift(s). Plan now has {slotCount} shift(s).",
-        "addShiftsOnlyDraft": "Shifts can only be added while the plan is Draft or collecting availability."
+        "addShiftsOnlyDraft": "Shifts can only be added while the plan is Draft or collecting availability.",
+        "coverageUncoveredSummary": "{count} shift(s) still need more volunteers."
     }
 }

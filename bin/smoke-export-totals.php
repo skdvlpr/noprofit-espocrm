@@ -70,6 +70,56 @@ $xlsxClass === $expectedXlsx
     ? $pass[] = "xlsx processorClassName overridden"
     : $fail[] = "xlsx processorClassName = $xlsxClass (expected $expectedXlsx)";
 
+// filters.json must be string arrays (Aggiungi Campo [object Object] regression).
+$filtersRoot = 'custom/Espo/Modules/NonprofitEspocrm/Resources/layouts';
+$badFilters = [];
+foreach (glob($filtersRoot . '/*/filters.json') ?: [] as $filtersPath) {
+    $decoded = json_decode((string) file_get_contents($filtersPath), true);
+    if (!is_array($decoded)) {
+        $badFilters[] = $filtersPath . ' (invalid JSON)';
+        continue;
+    }
+    foreach ($decoded as $item) {
+        if (!is_string($item)) {
+            $badFilters[] = $filtersPath;
+            break;
+        }
+    }
+}
+$badFilters === []
+    ? $pass[] = 'all module filters.json are string arrays'
+    : $fail[] = 'object-style filters.json (causes [object Object]): ' . implode(', ', $badFilters);
+
+// Export filename: {ddMMyyyy}-{HHmm}-Export-{EntityType}.ext
+try {
+    /** @var \Espo\Tools\Export\Factory $exportFactory */
+    $exportFactory = $injectableFactory->create(
+        \Espo\Modules\NonprofitEspocrm\Tools\Export\Factory::class
+    );
+    /** @var Export $export */
+    $export = $exportFactory->create();
+    $params = ExportParams::create('ActivityOfferSlot')
+        ->withFormat('xlsx')
+        ->withParam('includeTotals', true)
+        ->withFieldList(['name', 'status']);
+    $result = $export->setParams($params)->run();
+    /** @var ?Attachment $attachment */
+    $attachment = $em->getEntityById(Attachment::ENTITY_TYPE, $result->getAttachmentId());
+    $name = $attachment ? (string) $attachment->get('name') : '';
+    if ($attachment) {
+        $em->removeEntity($attachment);
+    }
+    $nameOk = (bool) preg_match(
+        '/^\d{8}-\d{4}-Export-ActivityOfferSlot\.xlsx$/',
+        $name
+    );
+    $nameOk
+        ? $pass[] = "export filename pattern OK: $name"
+        : $fail[] = "export filename bad: $name (expected ddMMyyyy-HHmm-Export-ActivityOfferSlot.xlsx)";
+} catch (\Throwable $e) {
+    $fail[] = 'export filename check threw: ' . $e->getMessage();
+}
+
 // Provider summary must be an array of scalars (field-ACL graceful, no throw).
 $provider = $injectableFactory->create(MealCountStatsProvider::class);
 $summary = $provider->getSummary();
@@ -202,7 +252,7 @@ try {
         ->getRGB());
     $isBold = (bool) $sheet->getStyle('A' . $totalsSheetRow)->getFont()->getBold();
     $colBBold = (bool) $sheet->getStyle('B' . $totalsSheetRow)->getFont()->getBold();
-    $expectedFill = 'E8F0E9';
+    $expectedFill = 'FFF2CC';
 
     // Phantom row after totals must NOT be the styled one.
     $phantomRow = $totalsSheetRow + 1;
@@ -216,7 +266,7 @@ try {
         : $fail[] = "xlsx totals missing/incomplete on row $totalsSheetRow: $joined";
 
     $fillRgb === $expectedFill
-        ? $pass[] = "xlsx totals row pastel fill $fillRgb"
+        ? $pass[] = "xlsx totals row yellow fill $fillRgb"
         : $fail[] = "xlsx totals row fill = $fillRgb (expected $expectedFill)";
 
     $isBold && $colBBold
@@ -226,6 +276,30 @@ try {
     $phantomFill !== $expectedFill
         ? $pass[] = 'xlsx phantom row after totals is not pastel-styled'
         : $fail[] = "xlsx wrongly styled phantom row $phantomRow with $phantomFill";
+
+    // Visible borders on involved cells (header + data + totals).
+    $leftBorder = $sheet->getStyle('A' . $totalsSheetRow)
+        ->getBorders()
+        ->getLeft()
+        ->getBorderStyle();
+
+    $headerProbeRow = 1;
+    for ($r = 1; $r < $totalsSheetRow; $r++) {
+        $probe = implode('', array_map('strval', $rows[$r - 1] ?? []));
+        if ($probe !== '') {
+            $headerProbeRow = $r;
+            break;
+        }
+    }
+    $headerLeftBorder = $sheet->getStyle('B' . $headerProbeRow)
+        ->getBorders()
+        ->getLeft()
+        ->getBorderStyle();
+
+    $leftBorder === \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+        && $headerLeftBorder === \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+        ? $pass[] = "xlsx thin borders on totals + header (rows $headerProbeRow/$totalsSheetRow)"
+        : $fail[] = "xlsx missing thin borders totals=$leftBorder header=$headerLeftBorder";
 } catch (\Throwable $e) {
     $fail[] = 'xlsx export threw: ' . $e->getMessage();
 }
@@ -313,11 +387,113 @@ try {
     $fill = strtoupper((string) $sheet->getStyle('A' . $totalsRowIdx)->getFill()->getStartColor()->getRGB());
     $bold = (bool) $sheet->getStyle('A' . $totalsRowIdx)->getFont()->getBold();
 
-    ($first === 'Totale' || $first === 'Total') && $fill === 'E8F0E9' && $bold
+    ($first === 'Totale' || $first === 'Total') && $fill === 'FFF2CC' && $bold
         ? $pass[] = "Account xlsx totals OK row=$totalsRowIdx caption=$first"
         : $fail[] = "Account xlsx totals bad row=$totalsRowIdx first=$first fill=$fill bold=" . ($bold ? '1' : '0');
+
+    // Totale column (header/data) must NOT be yellow — only the totals row.
+    $headerFill = strtoupper((string) $sheet->getStyle('A1')->getFill()->getStartColor()->getRGB());
+    $headerFill !== 'FFF2CC'
+        ? $pass[] = 'Account xlsx Totale column header not yellow-filled'
+        : $fail[] = "Account xlsx wrongly yellow-filled header A1=$headerFill";
 } catch (\Throwable $e) {
     $fail[] = 'Account xlsx export threw: ' . $e->getMessage();
+}
+
+// PrimaNota: currency `amount` (Importo netto) must be summed when totals on.
+try {
+    /** @var Export $export */
+    $export = $injectableFactory->create(ExportFactory::class)->create();
+
+    $params = ExportParams::create('PrimaNota')
+        ->withFormat('xlsx')
+        ->withParam('includeTotals', true)
+        ->withFieldList(['name', 'amount', 'amountGross', 'commissionAmount']);
+
+    $result = $export->setParams($params)->run();
+    /** @var ?Attachment $attachment */
+    $attachment = $em->getEntityById(Attachment::ENTITY_TYPE, $result->getAttachmentId());
+
+    if (!$attachment) {
+        throw new RuntimeException('No attachment for PrimaNota export.');
+    }
+
+    /** @var FileStorageManager $fsm */
+    $fsm = $injectableFactory->create(FileStorageManager::class);
+    $xlsx = $fsm->getContents($attachment);
+    $em->removeEntity($attachment);
+
+    $tmp = tempnam(sys_get_temp_dir(), 'espo-pn-xlsx') . '.xlsx';
+    file_put_contents($tmp, $xlsx);
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+    $sheet = $spreadsheet->getActiveSheet();
+    @unlink($tmp);
+
+    $rows = $sheet->toArray(null, true, false, false);
+    $header = null;
+    $totalsRow = null;
+    $dataSumAmount = 0.0;
+    $amountCol = null;
+
+    foreach ($rows as $idx => $row) {
+        $joined = implode('', array_map('strval', $row));
+        if ($joined === '') {
+            continue;
+        }
+        if ($header === null) {
+            $header = $row;
+            foreach ($row as $ci => $label) {
+                $lab = (string) $label;
+                // IT or EN label for amount / empty marker col 0
+                if ($ci > 0 && (
+                    stripos($lab, 'netto') !== false
+                    || stripos($lab, 'Net amount') !== false
+                    || $lab === 'Amount'
+                    || stripos($lab, 'Importo netto') !== false
+                )) {
+                    $amountCol = $ci;
+                }
+            }
+            continue;
+        }
+        $first = (string) ($row[0] ?? '');
+        if ($first === 'Totale' || $first === 'Total') {
+            $totalsRow = $row;
+            break;
+        }
+        if ($amountCol !== null && is_numeric($row[$amountCol] ?? null)) {
+            $dataSumAmount += (float) $row[$amountCol];
+        }
+    }
+
+    $fill = '';
+    $totalsSheetRow = 0;
+    for ($i = count($rows) - 1; $i >= 0; $i--) {
+        if (implode('', array_map('strval', $rows[$i])) !== '') {
+            $totalsSheetRow = $i + 1;
+            $fill = strtoupper((string) $sheet->getStyle('A' . $totalsSheetRow)
+                ->getFill()->getStartColor()->getRGB());
+            break;
+        }
+    }
+
+    $totalsAmount = $amountCol !== null && $totalsRow
+        ? (float) ($totalsRow[$amountCol] ?? 0)
+        : null;
+
+    $amountCol !== null
+        ? $pass[] = "PrimaNota xlsx found amount column index $amountCol"
+        : $fail[] = 'PrimaNota xlsx could not locate amount (Importo netto) column';
+
+    $totalsRow !== null && $fill === 'FFF2CC'
+        ? $pass[] = "PrimaNota xlsx totals yellow row=$totalsSheetRow"
+        : $fail[] = "PrimaNota xlsx totals style bad fill=$fill hasTotals=" . ($totalsRow ? '1' : '0');
+
+    $amountCol !== null && $totalsAmount !== null && abs($totalsAmount - $dataSumAmount) < 0.021
+        ? $pass[] = "PrimaNota xlsx amount summed ($totalsAmount == data $dataSumAmount)"
+        : $fail[] = "PrimaNota xlsx amount NOT summed totals=$totalsAmount dataSum=$dataSumAmount";
+} catch (\Throwable $e) {
+    $fail[] = 'PrimaNota xlsx export threw: ' . $e->getMessage();
 }
 
 // Bool cells must use CRM language labels (not Excel BOOL / OS locale).

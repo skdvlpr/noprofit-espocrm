@@ -341,16 +341,375 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
     }
 }
 
-/* Aggiungi turni / week-slots editor — keep Bootstrap rows aligned inside modal panels */
+/* Aggiungi turni / week-slots editor — card chrome, equal control heights, corner remove */
 .week-slots-editor .row {
     margin-left: 0;
     margin-right: 0;
+}
+
+.week-slots-editor .week-slot-row {
+    position: relative;
+    margin-bottom: 0.85em;
+}
+
+.week-slots-editor .week-slot-row > .panel-body {
+    padding: 12px 15px;
+    padding-top: 28px; /* room for corner remove control */
+}
+
+.week-slots-editor .week-slot-remove {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 2;
+    padding: 4px 8px;
+    line-height: 1;
+    color: var(--text-muted-color, #888);
+    text-decoration: none !important;
+}
+
+.week-slots-editor .week-slot-remove:hover,
+.week-slots-editor .week-slot-remove:focus {
+    color: var(--brand-danger, #d9534f);
 }
 
 .week-slots-editor .cell.form-group {
     margin-bottom: 0.75em;
 }
 
+.week-slots-editor .week-slot-conditions {
+    margin-bottom: 0;
+}
+
+.week-slots-editor .week-slot-allday {
+    display: flex;
+    align-items: center;
+    min-height: var(--week-slot-control-height, 34px);
+}
+
+.week-slots-editor .week-slot-place-row {
+    margin-top: 0.35em;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.week-slots-editor .week-slot-country {
+    margin-top: 0.35em;
+}
+
+.week-slots-editor .conditions-list .input-group {
+    margin-bottom: 0.35em;
+}
+
+.week-slots-editor .week-slot-conditions .btn-link {
+    padding-left: 0;
+}
+
+/* Unify select / text / number / time / input-group heights inside shift cards */
+.week-slots-editor .form-control,
+.week-slots-editor select.form-control,
+.week-slots-editor input.form-control,
+.week-slots-editor textarea.form-control {
+    height: var(--week-slot-control-height, 34px);
+    min-height: var(--week-slot-control-height, 34px);
+    box-sizing: border-box;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    line-height: 1.4;
+    resize: none;
+}
+
+.week-slots-editor .input-group .form-control {
+    height: var(--week-slot-control-height, 34px);
+}
+
+.week-slots-editor .input-group-btn .btn {
+    height: var(--week-slot-control-height, 34px);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    box-sizing: border-box;
+}
+
 .dialog-record .field[data-name="weekSlots"] .week-slots-editor .panel {
     margin-bottom: 0.75em;
 }
+
+/* ActivityOffer detail — full-width planning band above Overview */
+.detail[data-scope="ActivityOffer"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full,
+.detail[data-scope="ActivityOffer"] .record-grid {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top {
+    margin: 0 0 1.1em;
+    padding: 0;
+    display: block;
+    clear: both;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel {
+    display: block;
+    float: none;
+    width: 100% !important;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0.85em;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel:last-child {
+    margin-bottom: 0;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-heading,
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-body {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Overview | side: stretch side panel to match Overview height */
+.detail[data-scope="ActivityOffer"] .record-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin-bottom: 1.1em;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .left {
+    flex: 1 1 0;
+    min-width: 0;
+    float: none;
+    width: auto;
+    max-width: none;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side {
+    flex: 0 0 280px;
+    float: none;
+    width: 280px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel,
+.detail[data-scope="ActivityOffer"] .record-grid > .side .side-panel-container,
+.detail[data-scope="ActivityOffer"] .record-grid > .side .panels-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 100%;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel.panel-default,
+.detail[data-scope="ActivityOffer"] .record-grid > .side .panel {
+    flex: 1 1 auto;
+    min-height: 100%;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side .panel > .panel-body {
+    flex: 1 1 auto;
+}
+
+/* Turni / Attività / Stream — full content width under the grid */
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full {
+    display: block;
+    clear: both;
+    width: 100%;
+    margin: 0 0 1em;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full > .panel {
+    display: block;
+    float: none;
+    width: 100% !important;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-panel-scroll,
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top .list,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list,
+.detail[data-scope="ActivityOffer"] .bottom .panel .list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+@media (max-width: 991px) {
+    .detail[data-scope="ActivityOffer"] .record-grid > .side {
+        flex: 1 1 100%;
+        width: 100%;
+        margin-top: 0.75em;
+    }
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-table,
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table {
+    width: 100%;
+    min-width: 720px;
+    margin-bottom: 0;
+    table-layout: auto;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table th,
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table td.small {
+    white-space: normal;
+    min-width: 120px;
+    max-width: 280px;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-shift-name {
+    font-weight: 600;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-shift-meta {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-row-uncovered > td:first-child {
+    border-left: 3px solid var(--brand-danger, #d9534f);
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-summary {
+    margin: 0 0 0.85em;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card {
+    background: var(--panel-bg, var(--gray-lighter, rgba(127, 127, 127, 0.14)));
+    border: 1px solid var(--panel-border-color, var(--border-color, rgba(127, 127, 127, 0.25)));
+    color: var(--text-color, inherit);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 0.75em;
+    min-height: 64px;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card-value {
+    font-size: 1.35em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card-label {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+    color: inherit;
+}
+
+/* Phone / narrow — keep planning band usable, wrap actions, stack week-slot cards */
+@media (max-width: 767px) {
+    .detail[data-scope="ActivityOffer"] .coverage-table,
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-table {
+        min-width: 520px;
+        font-size: 12px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .coverage-shift-meta {
+        max-width: 160px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .detail-button-container .actions-btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-width: 100%;
+    }
+
+    .detail[data-scope="ActivityOffer"] .detail-button-container .btn {
+        margin-bottom: 0;
+    }
+
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-card {
+        min-height: 56px;
+        padding: 8px 10px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-card-value {
+        font-size: 1.15em;
+    }
+
+    .detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-body,
+    .detail[data-scope="ActivityOffer"] .bottom > .panel > .panel-body {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* Relationship lists inside planning (Turni / Attività) */
+    .detail[data-scope="ActivityOffer"] .activity-offer-planning-top .panel .list > table,
+    .detail[data-scope="ActivityOffer"] .bottom .panel .list > table {
+        min-width: 480px;
+    }
+
+    /* Aggiungi turni modal — full-width stacked fields, larger touch targets */
+    .dialog-record .week-slots-editor .cell.form-group {
+        margin-bottom: 0.65em;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-row > .panel-body {
+        padding: 12px 12px;
+        padding-top: 30px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-remove {
+        min-width: 36px;
+        min-height: 36px;
+        top: 2px;
+        right: 2px;
+    }
+
+    .dialog-record .week-slots-editor .form-control,
+    .dialog-record .week-slots-editor select.form-control,
+    .dialog-record .week-slots-editor input.form-control {
+        height: 40px;
+        min-height: 40px;
+        font-size: 16px; /* avoid iOS zoom on focus */
+    }
+
+    .dialog-record .week-slots-editor .input-group-btn .btn {
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-allday {
+        min-height: 40px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-place-row > [class*="col-"] {
+        margin-bottom: 0.35em;
+    }
+}
+
+@media (max-width: 575px) {
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-summary > [class*="col-"] {
+        width: 50%;
+        float: left;
+    }
+}
+

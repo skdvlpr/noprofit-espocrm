@@ -32,12 +32,10 @@
         "Create ActivityOfferSlot": "Crea turno"
     },
     "options": {
-        "status": {
-            "Draft": "Bozza",
-            "Published": "Pubblicato",
-            "Covered": "Coperto",
-            "Cancelled": "Annullato"
-        },
+            "status": {
+                "Published": "Pubblicato",
+                "Covered": "Coperto"
+            },
         "category": {
             "MealPreparation": "Preparazione pasti",
             "MealDistribution": "Distribuzione pasti",

@@ -17,7 +17,7 @@
             "name": "open"
         }
     ],
-    "bottomPanels": {
+    "planningPanels": {
         "detail": [
             {
                 "name": "coverage",
@@ -26,18 +26,33 @@
                 "order": 1
             },
             {
+                "name": "volunteerStats",
+                "label": "VolunteerStats",
+                "view": "nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats",
+                "order": 2
+            }
+        ]
+    },
+    "bottomPanels": {
+        "detail": [
+            {
                 "name": "slots",
                 "label": "Slots",
                 "view": "nonprofit-espocrm:views/activity-offer/record/panels/slots",
-                "order": 2
+                "order": 1,
+                "create": true,
+                "select": false,
+                "orderBy": "dateStart",
+                "orderDirection": "asc"
             },
             {
                 "name": "tasks",
                 "label": "PersonalTasks",
                 "view": "nonprofit-espocrm:views/activity-offer/record/panels/tasks",
-                "order": 3,
+                "order": 2,
                 "create": true,
-                "select": true
+                "select": true,
+                "createDisabled": false
             }
         ]
     },
@@ -56,46 +71,42 @@
             "createDisabled": false
         }
     },
-    "menu": {
-        "detail": {
-            "buttons": [
-                {
-                    "name": "fillAvailability",
-                    "label": "Fill availability",
-                    "iconHtml": "<span class=\"fas fa-calendar-check fa-sm\"></span>",
-                    "style": "primary",
-                    "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
-                    "actionFunction": "fillAvailability",
-                    "checkVisibilityFunction": "isFillAvailabilityVisible"
-                },
-                {
-                    "name": "requestAvailability",
-                    "label": "Request availability",
-                    "iconHtml": "<span class=\"fas fa-paper-plane fa-sm\"></span>",
-                    "acl": "edit",
-                    "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
-                    "actionFunction": "requestAvailability",
-                    "checkVisibilityFunction": "isRequestAvailabilityVisible"
-                },
-                {
-                    "name": "autoAssign",
-                    "label": "Auto assign",
-                    "iconHtml": "<span class=\"fas fa-magic fa-sm\"></span>",
-                    "acl": "edit",
-                    "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
-                    "actionFunction": "autoAssign",
-                    "checkVisibilityFunction": "isAutoAssignVisible"
-                },
-                {
-                    "name": "confirmPlan",
-                    "label": "Confirm plan",
-                    "iconHtml": "<span class=\"fas fa-check-double fa-sm\"></span>",
-                    "acl": "edit",
-                    "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
-                    "actionFunction": "confirmPlan",
-                    "checkVisibilityFunction": "isConfirmPlanVisible"
-                }
-            ]
+    "detailButtonList": [
+        {
+            "name": "fillAvailability",
+            "label": "Fill availability",
+            "iconClass": "fas fa-calendar-check",
+            "style": "primary",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "fillAvailability",
+            "checkVisibilityFunction": "isFillAvailabilityVisible"
+        },
+        {
+            "name": "requestAvailability",
+            "label": "Request availability",
+            "iconClass": "fas fa-paper-plane",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "requestAvailability",
+            "checkVisibilityFunction": "isRequestAvailabilityVisible"
+        },
+        {
+            "name": "autoAssign",
+            "label": "Auto assign",
+            "iconClass": "fas fa-magic",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "autoAssign",
+            "checkVisibilityFunction": "isAutoAssignVisible"
+        },
+        {
+            "name": "confirmPlan",
+            "label": "Confirm plan",
+            "iconClass": "fas fa-check-double",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "confirmPlan",
+            "checkVisibilityFunction": "isConfirmPlanVisible"
         }
-    }
+    ]
 }

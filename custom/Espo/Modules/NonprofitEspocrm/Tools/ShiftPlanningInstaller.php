@@ -77,6 +77,7 @@ class ShiftPlanningInstaller
         $configWriter->save();
 
         $this->migrateShiftPlanningStatuses($container);
+        $this->migrateSlotStatusesPublishedCovered($container);
         $this->normalizeInviteOfferLinks($container);
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
@@ -331,6 +332,31 @@ class ShiftPlanningInstaller
         } catch (\Throwable $e) {
             $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
                 'NonprofitEspocrm role access provisioning skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.
+     * Plan-level ActivityOffer.Draft is unchanged.
+     */
+    public function migrateSlotStatusesPublishedCovered(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+
+            // Raw SQL: after Draft is removed from entityDefs enum options, ORM
+            // where/find may miss or refuse legacy values still stored in DB.
+            $pdo = $em->getPDO();
+            $pdo->exec(
+                "UPDATE activity_offer_slot"
+                . " SET status = 'Published'"
+                . " WHERE status IN ('Draft', 'Cancelled')"
+            );
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'NonprofitEspocrm slot status migration skipped: ' . $e->getMessage()
             );
         }
     }

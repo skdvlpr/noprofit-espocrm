@@ -1,5 +1,5 @@
 [
-    {"name": "dateStart"},
-    {"name": "dateEnd"},
-    {"name": "assignedUser"}
+    "dateStart",
+    "dateEnd",
+    "assignedUser"
 ]

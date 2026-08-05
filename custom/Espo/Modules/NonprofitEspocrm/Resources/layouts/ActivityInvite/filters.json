@@ -1,10 +1,10 @@
 [
-    {"name": "name"},
-    {"name": "status"},
-    {"name": "user"},
-    {"name": "activityOffer"},
-    {"name": "activityOfferSlot"},
-    {"name": "task"},
-    {"name": "respondedAt"},
-    {"name": "createdAt"}
+    "name",
+    "status",
+    "user",
+    "activityOffer",
+    "activityOfferSlot",
+    "task",
+    "respondedAt",
+    "createdAt"
 ]

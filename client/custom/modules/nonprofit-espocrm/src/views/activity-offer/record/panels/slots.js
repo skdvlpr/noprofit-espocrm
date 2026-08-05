@@ -5,6 +5,32 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
     return Dep.extend({
 
         /**
+         * After relationship list is ready: keep Coverage / Match in sync when
+         * related shifts are created, edited, or removed (Espo fires
+         * after:related-change on collection change; collection sync covers
+         * create/delete refreshes).
+         */
+        setupLast: function () {
+            Dep.prototype.setupLast.call(this);
+
+            if (!this.collection) {
+                return;
+            }
+
+            this._planningSyncSeen = false;
+
+            this.listenTo(this.collection, 'sync', () => {
+                if (!this._planningSyncSeen) {
+                    this._planningSyncSeen = true;
+
+                    return;
+                }
+
+                this.model.trigger('update-related:coverage');
+            });
+        },
+
+        /**
          * “+” opens the WhatsApp-style mass-create modal instead of
          * the single-record create form.
          */
@@ -36,7 +62,6 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
                     this.collection.fetch();
                     this.model.trigger('update-related:slots');
                     this.model.trigger('after:relate');
-                    // Refresh coverage panel if present.
                     this.model.trigger('update-related:coverage');
                 });
             });

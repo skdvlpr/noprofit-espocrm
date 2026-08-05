@@ -7,16 +7,14 @@ require __DIR__ . '/lib/refuse-production.php';
 
 
 /**
- * Configure Espo outbound SMTP for DDEV Mailpit (SMTP inside web container).
+ * Clear Admin "system SMTP" (config smtp*) so Espo uses the Group Email Account
+ * matching outboundEmailFromAddress — same path as "Send Test Email".
  *
- * Does NOT send mail — only writes config via ConfigWriter.
+ * Mailpit is for smokes only (bin/smoke-*-email*.php temporarily retargets the
+ * group account). Do not permanently point interactive Espo at Mailpit.
  *
  * Usage:
  *   ddev exec php bin/setup-mailpit-smtp.php
- *
- * Mailpit web UI (after sending from Espo):
- *   https://nonprofit-espocrm.ddev.site:8026
- *   or: ddev mailpit
  */
 
 include __DIR__ . '/../bootstrap.php';
@@ -39,8 +37,8 @@ $fromAddress = $config->get('outboundEmailFromAddress') ?: 'noreply@nonprofit-es
 $fromName = $config->get('outboundEmailFromName') ?: 'Safehouse CRM';
 
 $configWriter->setMultiple([
-    'smtpServer' => '127.0.0.1',
-    'smtpPort' => 1025,
+    'smtpServer' => null,
+    'smtpPort' => null,
     'smtpAuth' => false,
     'smtpSecurity' => null,
     'smtpUsername' => null,
@@ -51,10 +49,19 @@ $configWriter->setMultiple([
 $configWriter->save();
 $config->update();
 
-echo "Mailpit SMTP configured for DDEV:\n";
-echo "  smtpServer: 127.0.0.1\n";
-echo "  smtpPort:   1025 (SMTP — not 8025/8026 web UI)\n";
-echo "  smtpAuth:   false\n";
-echo "  from:       {$fromName} <{$fromAddress}>\n";
-echo "\nOpen Mailpit: https://nonprofit-espocrm.ddev.site:8026\n";
-echo "Or run: ddev mailpit\n";
+$em = $container->get('entityManager');
+$group = $em->getRDBRepository('InboundEmail')
+    ->where(['status' => 'Active', 'useSmtp' => true, 'emailAddress' => $fromAddress])
+    ->findOne();
+
+echo "System SMTP config cleared (interactive mail uses Group Email Account).\n";
+echo "  outbound from: {$fromName} <{$fromAddress}>\n";
+if ($group) {
+    echo "  Group Email SMTP host: " . (string) $group->get('smtpHost')
+        . ':' . (string) $group->get('smtpPort') . "\n";
+} else {
+    echo "  WARNING: no Active InboundEmail with useSmtp for {$fromAddress}\n";
+    echo "  Configure Admin → Group Email Accounts SMTP (e.g. Aruba).\n";
+}
+echo "\nSmokes capture mail via temporary Mailpit retarget (not this script).\n";
+echo "Mailpit UI (smoke traffic only): https://nonprofit-espocrm.ddev.site:8026\n";

@@ -8,7 +8,6 @@ use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Mail\EmailSender;
 use Espo\Core\Mail\Exceptions\SendingError;
-use Espo\Core\Mail\SmtpParams;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Language;
 use Espo\Entities\Attachment;
@@ -135,12 +134,10 @@ class ReportingEmailExporter
 
         $sender = $this->emailSender->create()->withAttachments([$attachment]);
 
-        $smtpParams = $this->resolveSystemSmtpParams();
-
-        if ($smtpParams !== null) {
-            $sender = $sender->withSmtpParams($smtpParams);
-        }
-
+        // Use Espo's system sending account (Group Email SMTP matching
+        // outboundEmailFromAddress) — same path as Admin "Send Test Email".
+        // Do NOT force config.php smtpServer (often Mailpit on DDEV); smokes
+        // temporarily retarget the group account to Mailpit instead.
         try {
             $sender->send($email);
         } catch (SendingError $e) {
@@ -358,27 +355,6 @@ class ReportingEmailExporter
         }
 
         return array_values(array_unique($list));
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    private function resolveSystemSmtpParams(): ?array
-    {
-        $server = $this->config->get('smtpServer');
-
-        if (!$server) {
-            return null;
-        }
-
-        return SmtpParams::create($server, (int) $this->config->get('smtpPort'))
-            ->withAuth((bool) $this->config->get('smtpAuth'))
-            ->withUsername($this->config->get('smtpUsername'))
-            ->withPassword($this->config->get('smtpPassword'))
-            ->withSecurity($this->config->get('smtpSecurity') ?: null)
-            ->withFromAddress($this->config->get('outboundEmailFromAddress'))
-            ->withFromName($this->config->get('outboundEmailFromName'))
-            ->toArray();
     }
 
     /**

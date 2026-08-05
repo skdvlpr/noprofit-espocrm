@@ -3,7 +3,8 @@ define('nonprofit-espocrm:views/activity-offer/record/detail-bottom', [
 ], function (Dep) {
 
     /**
-     * Native Stream stays last (below coverage / shifts / personal tasks).
+     * Bottom under Overview: Shifts + Personal tasks, then Stream last.
+     * Coverage / volunteer match live in the full-width planning band above.
      */
     return Dep.extend({
 

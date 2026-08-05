@@ -101,18 +101,14 @@
         "status": {
             "type": "enum",
             "options": [
-                "Draft",
                 "Published",
-                "Covered",
-                "Cancelled"
+                "Covered"
             ],
-            "default": "Draft",
+            "default": "Published",
             "displayAsLabel": true,
             "style": {
-                "Draft": "default",
                 "Published": "primary",
-                "Covered": "success",
-                "Cancelled": "danger"
+                "Covered": "success"
             },
             "audited": true
         },
