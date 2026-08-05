@@ -5,14 +5,17 @@
             "readOnly": true
         },
         "task": {
-            "type": "link"
+            "type": "link",
+            "readOnly": true
         },
         "activityOfferSlot": {
-            "type": "link"
+            "type": "link",
+            "readOnly": true
         },
         "user": {
             "type": "link",
             "required": true,
+            "readOnly": true,
             "view": "views/fields/user"
         },
         "status": {
@@ -25,6 +28,7 @@
                 "Cancelled"
             ],
             "default": "Available",
+            "readOnly": true,
             "displayAsLabel": true,
             "style": {
                 "Available": "primary",

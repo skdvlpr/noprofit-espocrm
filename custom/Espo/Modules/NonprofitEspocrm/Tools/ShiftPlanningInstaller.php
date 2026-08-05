@@ -237,7 +237,7 @@ class ShiftPlanningInstaller
                 'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
             ],
             'ActivityInvite' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
+                'create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
             ],
         ],
         'Manager' => [

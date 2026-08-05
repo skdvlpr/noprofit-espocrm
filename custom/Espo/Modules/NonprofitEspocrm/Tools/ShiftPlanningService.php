@@ -12,6 +12,8 @@ use Espo\Core\Utils\Language;
 use Espo\Entities\Notification;
 use Espo\Entities\Team;
 use Espo\Entities\User;
+use Espo\Modules\NonprofitEspocrm\Hooks\ActivityInvite\ProtectInviteMutation;
+use Espo\Modules\NonprofitEspocrm\Hooks\ActivityOffer\ProtectPlanStatus;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\Core\ORM\Repository\Option\SaveOption;
@@ -309,7 +311,7 @@ class ShiftPlanningService
 
         $offer->set('status', self::STATUS_COLLECTING);
         $offer->set('publishedAt', $this->nowString());
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         $message = $this->translateMessage('availabilityRequestNotification', [
             'name' => (string) $offer->get(Field::NAME),
@@ -476,7 +478,7 @@ class ShiftPlanningService
                         'comment' => $commentValue ?? '',
                     ]);
 
-                    $this->entityManager->saveEntity($new);
+                    $this->entityManager->saveEntity($new, $this->inviteSaveOptions());
                     $availableCount++;
 
                     continue;
@@ -491,7 +493,7 @@ class ShiftPlanningService
                     $invite->set('comment', $commentValue);
                 }
 
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
                 $availableCount++;
 
                 continue;
@@ -515,7 +517,7 @@ class ShiftPlanningService
                     $invite->set('comment', $commentValue);
                 }
 
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
 
                 $this->syncTaskCollaborator($invite, false);
                 $withdrawnCount++;
@@ -964,7 +966,7 @@ class ShiftPlanningService
                 }
 
                 $invite->set('status', self::INVITE_ASSIGNED);
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
 
                 $load[$userId] = ($load[$userId] ?? 0) + 1;
                 $busyIntervals[$userId][] = [
@@ -978,7 +980,7 @@ class ShiftPlanningService
         }
 
         $offer->set('status', self::STATUS_PLANNED);
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         $this->syncSlotCoverageStatuses($offerId);
 
@@ -1057,7 +1059,7 @@ class ShiftPlanningService
                 }
 
                 $invite->set('taskId', $task->getId());
-                $this->entityManager->saveEntity($invite);
+                $this->entityManager->saveEntity($invite, $this->inviteSaveOptions());
                 $confirmedCount++;
 
                 if (!in_array($userId, $collaboratorIds, true)) {
@@ -1079,7 +1081,7 @@ class ShiftPlanningService
         }
 
         $offer->set('status', self::STATUS_CONFIRMED);
-        $this->entityManager->saveEntity($offer);
+        $this->entityManager->saveEntity($offer, $this->offerSaveOptions());
 
         $this->syncSlotCoverageStatuses($offerId);
 
@@ -1119,6 +1121,22 @@ class ShiftPlanningService
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function inviteSaveOptions(): array
+    {
+        return [ProtectInviteMutation::SAVE_OPTION => true];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function offerSaveOptions(): array
+    {
+        return [ProtectPlanStatus::SAVE_OPTION => true];
+    }
 
     /**
      * @throws NotFound
@@ -1255,7 +1273,10 @@ class ShiftPlanningService
             if ($slotId && $invite->get('activityOfferId') !== $offerId) {
                 $invite->set('activityOfferId', $offerId);
 
-                $this->entityManager->saveEntity($invite, [SaveOption::SILENT => true]);
+                $this->entityManager->saveEntity($invite, array_merge(
+                    [SaveOption::SILENT => true],
+                    $this->inviteSaveOptions()
+                ));
             }
 
             $invites[] = $invite;

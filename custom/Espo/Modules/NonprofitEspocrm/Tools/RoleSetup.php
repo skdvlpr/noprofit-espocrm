@@ -595,6 +595,10 @@ class RoleSetup
         foreach ($domainEntities as $e) {
             $adminData[$e] = $allFull();
         }
+        // Invites are created only via ShiftPlanningService::saveAvailability.
+        $adminData['ActivityInvite'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'all', 'stream' => 'all',
+        ];
 
         // Volunteer: read everything; write only own Task + ActivityInvite.
         $volunteerData = [];
