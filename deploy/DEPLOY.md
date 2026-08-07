@@ -100,6 +100,7 @@ Three independent extension ZIPs are built from this repository:
 | --- | --- | --- |
 | `google-integration-v0.1.0.zip` | `GoogleCalendarDrive` | Google OAuth2, Calendar/Drive |
 | `nonprofit-espocrm-v0.1.0.zip` | `NonprofitEspocrm` | Nonprofit CRM entities, navbar, roles — **includes bundled `SafehouseAuroraThemes` + CSS/fonts** |
+| `bug-tracker-v1.1.0.zip` | `BugTracker` | Optional: floating bug report + admin settings (also shippable via tree rsync + Installer oneshot) |
 | `safehouse-aurora-themes-v0.1.0.zip` | `SafehouseAuroraThemes` | Aurora themes only (stock Espo without NonprofitEspocrm) |
 
 ### Production / full Safehouse stack
@@ -109,10 +110,16 @@ Install via **Administration → Extensions → Upload** (or CLI
 
 1. `google-integration-v0.1.0.zip`
 2. `nonprofit-espocrm-v0.1.0.zip`
+3. (optional) `bug-tracker-v1.1.0.zip` — or rely on CD rsync of `custom/Espo/Modules/BugTracker` + `client/custom/modules/bug-tracker` and run BugTracker `Tools\Installer` via the prod provision oneshot
 
 Do **not** install `safehouse-aurora-themes-v0.1.0.zip` on the same instance.
 NonprofitEspocrm already ships the themes module and assets; a second install
 attempts to register the same extension and is unsupported.
+
+Maintenance CLIs (`bin/smoke-*`, `seed-*`, `migrate-*`, …) are **excluded from
+rsync** and must not be executed on production (see `bin/README.PRODUCTION.txt`).
+Post-deploy use GitHub Actions **Prod provision after deploy (oneshot)** for
+Installer / KB / BugTracker / bin quarantine.
 
 ### Standalone `safehouse-aurora-themes` ZIP
 

@@ -97,7 +97,9 @@ jobs:
             for f in bin/smoke-*.php bin/seed-*.php bin/migrate-*.php bin/test-*.php \
                      bin/cleanup-*.php bin/provision-*.php bin/setup-*.php \
                      bin/import-*.php bin/export-*.php bin/qa-*.php bin/print-*.php \
-                     bin/_tmp-*.php; do
+                     bin/reorder-*.php bin/rollback-*.php bin/set-prima-nota-*.php \
+                     bin/_tmp-*.php bin/lib/GcalTestFixtures.php bin/lib/mailpit-smtp-for-smoke.php; do
+              [[ -e "$f" ]] || continue
               base=$(basename "$f")
               echo "Quarantine $f"
               mv -f "$f" "bin/_quarantine/$base" || true

@@ -26,7 +26,12 @@ bin/import-*.php
 bin/export-*.php
 bin/qa-*.php
 bin/print-*.php
+bin/reorder-*.php
+bin/rollback-*.php
+bin/set-prima-nota-*.php
 bin/_tmp-*.php
+bin/lib/GcalTestFixtures.php
+bin/lib/mailpit-smtp-for-smoke.php
 
 # Build / dev artifacts
 /dist/
