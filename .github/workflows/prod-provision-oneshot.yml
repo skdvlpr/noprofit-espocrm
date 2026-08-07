@@ -74,6 +74,75 @@ jobs:
           }
           '
 
+          echo "== BugTracker Installer (tab, ACL, templates) =="
+          php -r '
+          require "bootstrap.php";
+          use Espo\Core\Application;
+          use Espo\Modules\BugTracker\Tools\Installer as BugTrackerInstaller;
+          $app = new Application();
+          $app->setupSystemUser();
+          if (!class_exists(BugTrackerInstaller::class)) {
+              fwrite(STDERR, "BugTracker Installer missing — module not deployed?\n");
+              exit(1);
+          }
+          (new BugTrackerInstaller())->runPostInstall($app->getContainer());
+          echo "BugTracker Installer OK\n";
+          '
+
+          echo "== Prod bin hygiene (list + quarantine maintenance leftovers) =="
+          mkdir -p bin/_quarantine
+          if [[ -d bin ]]; then
+            ls -la bin || true
+            shopt -s nullglob
+            for f in bin/smoke-*.php bin/seed-*.php bin/migrate-*.php bin/test-*.php \
+                     bin/cleanup-*.php bin/provision-*.php bin/setup-*.php \
+                     bin/import-*.php bin/export-*.php bin/qa-*.php bin/print-*.php \
+                     bin/_tmp-*.php; do
+              base=$(basename "$f")
+              echo "Quarantine $f"
+              mv -f "$f" "bin/_quarantine/$base" || true
+            done
+            shopt -u nullglob
+            if [[ ! -f bin/README.PRODUCTION.txt ]]; then
+              printf '%s\n' "See repo bin/README.PRODUCTION.txt — no smoke/seed/migrate CLIs on production." > bin/README.PRODUCTION.txt
+            fi
+            echo "Remaining bin PHP:"
+            ls -la bin/*.php bin/lib 2>/dev/null || true
+            echo "Quarantine:"
+            ls -la bin/_quarantine 2>/dev/null || true
+          fi
+
+          echo "== Security snapshot (read-only) =="
+          php -r '
+          require "bootstrap.php";
+          use Espo\Core\Application;
+          use Espo\Core\Utils\Config;
+          use Espo\Core\Utils\Metadata;
+          $app = new Application();
+          $app->setupSystemUser();
+          $c = $app->getContainer();
+          $config = $c->getByClass(Config::class);
+          $meta = $c->getByClass(Metadata::class);
+          $meta->init(true);
+          echo "siteUrl=" . $config->get("siteUrl") . "\n";
+          echo "theme=" . $config->get("theme") . "\n";
+          echo "bugTrackerEnabled=" . json_encode($config->get("bugTrackerEnabled")) . "\n";
+          echo "BugReport.scope.entity=" . json_encode($meta->get(["scopes","BugReport","entity"])) . "\n";
+          echo "ActivityOffer.scope.entity=" . json_encode($meta->get(["scopes","ActivityOffer","entity"])) . "\n";
+          $tab = $config->get("tabList") ?? [];
+          $hasBug = false;
+          $walk = function ($list) use (&$walk, &$hasBug) {
+              foreach ((array)$list as $item) {
+                  if ($item === "BugReport") { $hasBug = true; return; }
+                  if (is_object($item) && isset($item->itemList)) $walk($item->itemList);
+                  if (is_array($item) && isset($item["itemList"])) $walk($item["itemList"]);
+              }
+          };
+          $walk($tab);
+          echo "tabList.hasBugReport=" . ($hasBug ? "1" : "0") . "\n";
+          echo "outboundEmailFromAddress=" . json_encode($config->get("outboundEmailFromAddress")) . "\n";
+          '
+
           echo "== Rebuild =="
           php command.php rebuild
 
