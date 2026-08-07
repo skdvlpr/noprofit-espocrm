@@ -1,7 +1,6 @@
 [
     {
-        "name": "Overview",
-        "label": "Overview",
+        "label": "",
         "rows": [
             [{"name": "logDate"}, false],
             [{"name": "entryRegistration"}, {"name": "exitRegistration"}],

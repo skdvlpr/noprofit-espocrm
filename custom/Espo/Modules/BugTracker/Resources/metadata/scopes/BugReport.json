@@ -1,0 +1,27 @@
+{
+    "entity": true,
+    "type": "Base",
+    "module": "BugTracker",
+    "object": true,
+    "layouts": true,
+    "tab": true,
+    "acl": true,
+    "aclActionList": [
+        "read",
+        "create",
+        "edit",
+        "delete"
+    ],
+    "aclLevelList": [
+        "all",
+        "team",
+        "own",
+        "no"
+    ],
+    "stream": false,
+    "importable": true,
+    "exportable": true,
+    "customizable": false,
+    "color": "#c0392b",
+    "iconClass": "fas fa-bug"
+}

@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "number"},
+    {"name": "status"},
+    {"name": "type"},
+    {"name": "priority"}
+]

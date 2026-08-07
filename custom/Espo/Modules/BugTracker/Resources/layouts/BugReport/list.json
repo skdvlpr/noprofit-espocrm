@@ -1,0 +1,24 @@
+[
+    {
+        "name": "name",
+        "link": true
+    },
+    {
+        "name": "status"
+    },
+    {
+        "name": "pageTitle"
+    },
+    {
+        "name": "pageUrl"
+    },
+    {
+        "name": "createdBy"
+    },
+    {
+        "name": "createdAt"
+    },
+    {
+        "name": "assignedUser"
+    }
+]

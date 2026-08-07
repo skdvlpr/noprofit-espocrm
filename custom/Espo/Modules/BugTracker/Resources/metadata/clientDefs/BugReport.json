@@ -1,0 +1,8 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-bug",
+    "color": "#c0392b",
+    "modalViews": {
+        "edit": "bug-tracker:views/modals/report-bug"
+    }
+}

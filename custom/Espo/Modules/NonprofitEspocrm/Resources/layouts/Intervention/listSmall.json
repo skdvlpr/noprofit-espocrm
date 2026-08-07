@@ -1,0 +1,6 @@
+[
+    {"name": "interventionDate", "link": true},
+    {"name": "department"},
+    {"name": "description"},
+    {"name": "interventionCount"}
+]

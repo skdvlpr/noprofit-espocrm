@@ -1,0 +1,68 @@
+/* BugTracker floating action button */
+
+.bug-tracker-fab {
+    position: fixed;
+    z-index: 1050;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #c0392b;
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bug-tracker-fab:hover,
+.bug-tracker-fab:focus {
+    background: #a93226;
+    transform: scale(1.06);
+    outline: none;
+    box-shadow: 0 0.45rem 1.15rem rgba(0, 0, 0, 0.34);
+}
+
+.bug-tracker-fab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.bug-tracker-fab .fas {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* Keep clear of mobile nav / safe areas */
+@supports (padding: max(0px)) {
+    .bug-tracker-fab {
+        right: max(1.25rem, env(safe-area-inset-right));
+        bottom: max(1.25rem, env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 576px) {
+    .bug-tracker-fab {
+        right: 0.85rem;
+        bottom: 0.85rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+}
+
+/* Dark theme: slightly softer red so it stays readable on dark chrome */
+body.theme-dark .bug-tracker-fab,
+html.theme-dark .bug-tracker-fab {
+    background: #e74c3c;
+}
+
+body.theme-dark .bug-tracker-fab:hover,
+body.theme-dark .bug-tracker-fab:focus,
+html.theme-dark .bug-tracker-fab:hover,
+html.theme-dark .bug-tracker-fab:focus {
+    background: #c0392b;
+}

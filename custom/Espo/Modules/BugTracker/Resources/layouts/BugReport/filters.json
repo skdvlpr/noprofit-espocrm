@@ -1,0 +1,17 @@
+[
+    {
+        "name": "status"
+    },
+    {
+        "name": "createdAt"
+    },
+    {
+        "name": "createdBy"
+    },
+    {
+        "name": "assignedUser"
+    },
+    {
+        "name": "pageUrl"
+    }
+]

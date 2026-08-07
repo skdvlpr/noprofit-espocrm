@@ -1,0 +1,36 @@
+{
+    "fields": {
+        "bugTrackerEnabled": {
+            "type": "bool",
+            "default": true,
+            "tooltip": true
+        },
+        "bugTrackerDefaultAssignedUser": {
+            "type": "link",
+            "entity": "User",
+            "tooltip": true
+        },
+        "bugTrackerTechnicianUser": {
+            "type": "link",
+            "entity": "User",
+            "tooltip": true
+        },
+        "bugTrackerTechnicianEmail": {
+            "type": "varchar",
+            "maxLength": 255,
+            "tooltip": true
+        },
+        "bugTrackerNotifyEmailTemplate": {
+            "type": "link",
+            "entity": "EmailTemplate",
+            "createButton": true,
+            "tooltip": true
+        },
+        "bugTrackerClosedEmailTemplate": {
+            "type": "link",
+            "entity": "EmailTemplate",
+            "createButton": true,
+            "tooltip": true
+        }
+    }
+}

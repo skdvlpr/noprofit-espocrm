@@ -1,0 +1,22 @@
+{
+    "labels": {
+        "Bug Tracker": "Bug Tracker",
+        "bugTracker": "Enable the floating report button, default assignee, technician notifications, and email templates."
+    },
+    "fields": {
+        "bugTrackerEnabled": "Enable Bug Tracker",
+        "bugTrackerDefaultAssignedUser": "Default assigned user",
+        "bugTrackerTechnicianUser": "Technician account",
+        "bugTrackerTechnicianEmail": "Technician email",
+        "bugTrackerNotifyEmailTemplate": "New bug email template",
+        "bugTrackerClosedEmailTemplate": "Closed bug email template"
+    },
+    "tooltips": {
+        "bugTrackerEnabled": "When disabled, the floating bug button is hidden and new reports cannot be created.",
+        "bugTrackerDefaultAssignedUser": "Assigned to new bug reports when the reporter does not pick an assignee.",
+        "bugTrackerTechnicianUser": "CRM user notified about new bugs (and used as assignee fallback).",
+        "bugTrackerTechnicianEmail": "Primary address for new-bug notifications. Falls back to the technician account email.",
+        "bugTrackerNotifyEmailTemplate": "Template sent to the technician when a bug is reported. Use Create to add a new template.",
+        "bugTrackerClosedEmailTemplate": "Template sent to the reporter when a bug is closed (if they have an email)."
+    }
+}

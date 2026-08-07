@@ -1,0 +1,14 @@
+{
+    "misc": {
+        "itemList": [
+            "__APPEND__",
+            {
+                "url": "#Admin/bugTracker",
+                "label": "Bug Tracker",
+                "iconClass": "fas fa-bug",
+                "description": "bugTracker",
+                "recordView": "bug-tracker:views/admin/bug-tracker"
+            }
+        ]
+    }
+}

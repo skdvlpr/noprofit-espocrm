@@ -1,0 +1,22 @@
+{
+    "params": {
+        "bugTrackerEnabled": {
+            "level": "default"
+        },
+        "bugTrackerDefaultAssignedUserId": {
+            "level": "admin"
+        },
+        "bugTrackerTechnicianUserId": {
+            "level": "admin"
+        },
+        "bugTrackerTechnicianEmail": {
+            "level": "admin"
+        },
+        "bugTrackerNotifyEmailTemplateId": {
+            "level": "admin"
+        },
+        "bugTrackerClosedEmailTemplateId": {
+            "level": "admin"
+        }
+    }
+}

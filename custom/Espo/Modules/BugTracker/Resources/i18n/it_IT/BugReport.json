@@ -1,0 +1,40 @@
+{
+    "fields": {
+        "name": "Titolo (auto)",
+        "description": "Descrizione",
+        "status": "Stato",
+        "pageUrl": "URL pagina",
+        "pageTitle": "Titolo pagina",
+        "screenshots": "Screenshot",
+        "screenshotsClearedAt": "Screenshot eliminati il",
+        "createdAt": "Creato il",
+        "modifiedAt": "Modificato il",
+        "createdBy": "Segnalato da",
+        "modifiedBy": "Modificato da",
+        "assignedUser": "Assegnato a",
+        "teams": "Team"
+    },
+    "links": {
+        "createdBy": "Segnalato da",
+        "assignedUser": "Assegnato a",
+        "teams": "Team"
+    },
+    "labels": {
+        "Create BugReport": "Segnala un bug",
+        "ReportBug": "Segnala un bug",
+        "BugReport": "Segnalazione bug",
+        "BugReportPlural": "Segnalazioni bug"
+    },
+    "options": {
+        "status": {
+            "New": "Nuovo",
+            "Open": "Aperto",
+            "InProgress": "In corso",
+            "Closed": "Chiuso"
+        }
+    },
+    "messages": {
+        "reportSubmitted": "Grazie — la segnalazione è stata inviata.",
+        "fabTooltip": "Segnala un bug su questa pagina"
+    }
+}

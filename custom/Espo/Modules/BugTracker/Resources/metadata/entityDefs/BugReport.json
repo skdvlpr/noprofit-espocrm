@@ -1,0 +1,121 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": false,
+            "trim": true,
+            "maxLength": 255,
+            "readOnly": true,
+            "tooltip": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "status": {
+            "type": "enum",
+            "options": [
+                "New",
+                "Open",
+                "InProgress",
+                "Closed"
+            ],
+            "default": "New",
+            "style": {
+                "New": "primary",
+                "Open": "info",
+                "InProgress": "warning",
+                "Closed": "success"
+            }
+        },
+        "pageUrl": {
+            "type": "url",
+            "maxLength": 2000
+        },
+        "pageTitle": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "screenshots": {
+            "type": "attachmentMultiple",
+            "accept": [
+                "image/*"
+            ],
+            "maxCount": 10,
+            "previewSize": "medium"
+        },
+        "screenshotsClearedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true,
+            "view": "views/fields/user"
+        },
+        "assignedUser": {
+            "type": "link",
+            "view": "views/fields/assigned-user"
+        },
+        "teams": {
+            "type": "linkMultiple",
+            "view": "views/fields/teams"
+        }
+    },
+    "links": {
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "assignedUser": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "teams": {
+            "type": "hasMany",
+            "entity": "Team",
+            "relationName": "entityTeam",
+            "layoutRelationshipsDisabled": true
+        }
+    },
+    "collection": {
+        "orderBy": "createdAt",
+        "order": "desc",
+        "textFilterFields": [
+            "name",
+            "description",
+            "pageUrl",
+            "pageTitle"
+        ]
+    },
+    "indexes": {
+        "status": {
+            "columns": [
+                "status",
+                "deleted"
+            ]
+        },
+        "createdAt": {
+            "columns": [
+                "createdAt",
+                "deleted"
+            ]
+        }
+    }
+}

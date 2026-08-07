@@ -1,0 +1,22 @@
+[
+    {
+        "label": "General",
+        "rows": [
+            [{"name": "bugTrackerEnabled"}, false]
+        ]
+    },
+    {
+        "label": "Assignment",
+        "rows": [
+            [{"name": "bugTrackerDefaultAssignedUser"}, {"name": "bugTrackerTechnicianUser"}],
+            [{"name": "bugTrackerTechnicianEmail"}, false]
+        ]
+    },
+    {
+        "label": "Email",
+        "rows": [
+            [{"name": "bugTrackerNotifyEmailTemplate"}, false],
+            [{"name": "bugTrackerClosedEmailTemplate"}, false]
+        ]
+    }
+]

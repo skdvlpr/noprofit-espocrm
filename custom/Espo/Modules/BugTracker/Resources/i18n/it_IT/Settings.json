@@ -1,0 +1,22 @@
+{
+    "labels": {
+        "Bug Tracker": "Bug Tracker",
+        "bugTracker": "Attiva il pulsante flottante, l’assegnatario predefinito, le notifiche al tecnico e i template email."
+    },
+    "fields": {
+        "bugTrackerEnabled": "Abilita Bug Tracker",
+        "bugTrackerDefaultAssignedUser": "Utente assegnato predefinito",
+        "bugTrackerTechnicianUser": "Account tecnico",
+        "bugTrackerTechnicianEmail": "Email tecnico",
+        "bugTrackerNotifyEmailTemplate": "Template email nuovo bug",
+        "bugTrackerClosedEmailTemplate": "Template email bug chiuso"
+    },
+    "tooltips": {
+        "bugTrackerEnabled": "Se disabilitato, il pulsante flottante è nascosto e non si possono creare nuove segnalazioni.",
+        "bugTrackerDefaultAssignedUser": "Assegnato alle nuove segnalazioni se non viene scelto un assegnatario.",
+        "bugTrackerTechnicianUser": "Utente CRM avvisato dei nuovi bug (e usato come assegnatario di riserva).",
+        "bugTrackerTechnicianEmail": "Indirizzo principale per le notifiche di nuovi bug. In assenza, usa l’email dell’account tecnico.",
+        "bugTrackerNotifyEmailTemplate": "Template inviato al tecnico quando viene segnalato un bug. Usa Crea per aggiungerne uno nuovo.",
+        "bugTrackerClosedEmailTemplate": "Template inviato a chi ha segnalato il bug quando viene chiuso (se ha un’email)."
+    }
+}

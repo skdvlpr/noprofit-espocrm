@@ -1,0 +1,14 @@
+{
+    "name": "BugTracker",
+    "version": "1.1.0",
+    "acceptableVersions": [
+        ">=10.0.0 <11.0.0"
+    ],
+    "php": [
+        ">=8.2"
+    ],
+    "releaseDate": "2026-08-06",
+    "author": "skdvlpr",
+    "description": "Standalone EspoCRM bug tracker: floating report button, admin settings, technician/reporter emails, auto-name, screenshot cleanup on close.",
+    "skipBackup": false
+}

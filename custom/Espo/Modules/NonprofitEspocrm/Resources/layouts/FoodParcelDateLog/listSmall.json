@@ -1,3 +1,5 @@
 [
-    {"name": "logDate", "link": true}
+    {"name": "logDate", "link": true},
+    {"name": "entryRegistration"},
+    {"name": "exitRegistration"}
 ]

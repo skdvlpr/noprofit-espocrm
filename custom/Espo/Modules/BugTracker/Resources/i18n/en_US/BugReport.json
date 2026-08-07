@@ -1,0 +1,40 @@
+{
+    "fields": {
+        "name": "Title (auto)",
+        "description": "Description",
+        "status": "Status",
+        "pageUrl": "Page URL",
+        "pageTitle": "Page title",
+        "screenshots": "Screenshots",
+        "screenshotsClearedAt": "Screenshots cleared at",
+        "createdAt": "Created at",
+        "modifiedAt": "Modified at",
+        "createdBy": "Reported by",
+        "modifiedBy": "Modified by",
+        "assignedUser": "Assigned user",
+        "teams": "Teams"
+    },
+    "links": {
+        "createdBy": "Reported by",
+        "assignedUser": "Assigned user",
+        "teams": "Teams"
+    },
+    "labels": {
+        "Create BugReport": "Report a bug",
+        "ReportBug": "Report a bug",
+        "BugReport": "Bug Report",
+        "BugReportPlural": "Bug Reports"
+    },
+    "options": {
+        "status": {
+            "New": "New",
+            "Open": "Open",
+            "InProgress": "In progress",
+            "Closed": "Closed"
+        }
+    },
+    "messages": {
+        "reportSubmitted": "Thank you — your bug report was submitted.",
+        "fabTooltip": "Report a bug on this page"
+    }
+}

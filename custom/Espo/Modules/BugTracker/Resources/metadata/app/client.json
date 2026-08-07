@@ -1,0 +1,10 @@
+{
+    "scriptList": [
+        "__APPEND__",
+        "client/custom/modules/bug-tracker/lib/init.js"
+    ],
+    "cssList": [
+        "__APPEND__",
+        "client/custom/modules/bug-tracker/css/bug-tracker.css"
+    ]
+}

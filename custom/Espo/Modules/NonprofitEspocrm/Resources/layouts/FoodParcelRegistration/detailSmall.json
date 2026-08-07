@@ -2,33 +2,14 @@
     {
         "label": "",
         "rows": [
-            [
-                {"name": "name", "fullWidth": true}
-            ],
-            [
-                {"name": "contact", "fullWidth": true}
-            ],
-            [
-                {"name": "taxCode"},
-                {"name": "birthPlace"}
-            ],
-            [
-                {"name": "phone"},
-                false
-            ],
-            [
-                {"name": "address", "fullWidth": true}
-            ],
-            [
-                {"name": "household", "fullWidth": true}
-            ],
-            [
-                {"name": "notes", "fullWidth": true}
-            ],
-            [
-                {"name": "assignedUser"},
-                {"name": "teams"}
-            ]
+            [{"name": "name"}, {"name": "contact"}],
+            [{"name": "taxCode"}, {"name": "birthPlace"}],
+            [{"name": "phone"}, {"name": "household"}],
+            [{"name": "address", "fullWidth": true}],
+            [{"name": "notes", "fullWidth": true}],
+            [{"name": "entryDates", "fullWidth": true}],
+            [{"name": "exitDates", "fullWidth": true}],
+            [{"name": "assignedUser"}, {"name": "teams"}]
         ]
     }
 ]

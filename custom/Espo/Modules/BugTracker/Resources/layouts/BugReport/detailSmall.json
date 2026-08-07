@@ -1,0 +1,24 @@
+[
+    {
+        "rows": [
+            [
+                {
+                    "name": "pageUrl",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "screenshots",
+                    "fullWidth": true
+                }
+            ]
+        ]
+    }
+]
