@@ -70,6 +70,16 @@ class SafehouseGoogleCalendarProvisioner
                 ->findOne();
 
             if ($existing !== null) {
+                // Migrate: volunteer shifts must not depend on CDS for CRM calendar display.
+                if (
+                    ($source['targetEntityType'] ?? '') === 'ActivityOfferSlot' &&
+                    array_key_exists('calendarViewEnabled', $source) &&
+                    (bool) $existing->get('calendarViewEnabled') !== (bool) $source['calendarViewEnabled']
+                ) {
+                    $existing->set('calendarViewEnabled', (bool) $source['calendarViewEnabled']);
+                    $entityManager->saveEntity($existing);
+                }
+
                 continue;
             }
 

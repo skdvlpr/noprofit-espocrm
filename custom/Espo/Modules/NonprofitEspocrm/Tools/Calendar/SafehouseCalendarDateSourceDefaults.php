@@ -73,6 +73,9 @@ final class SafehouseCalendarDateSourceDefaults
                 'label' => self::CANONICAL_LABELS['ActivityOfferSlot:main'],
                 'allDay' => false,
                 'sortOrder' => 25,
+                // CRM calendar uses native Espo (scopes.calendar + calendarEntityList).
+                // CDS stays for optional Google export routing only.
+                'calendarViewEnabled' => false,
             ],
         ];
     }

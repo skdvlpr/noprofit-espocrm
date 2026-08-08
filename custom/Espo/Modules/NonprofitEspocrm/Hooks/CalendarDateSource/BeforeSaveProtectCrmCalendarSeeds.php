@@ -8,8 +8,10 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Keep Safehouse CRM-calendar seeds active + visible. Users hide entities via
- * the Calendar view filter, not by disabling the date source.
+ * Keep Safehouse CRM/Google seeds healthy:
+ * - ActivityOfferSlot: isActive stays on (Google export optional); calendarViewEnabled
+ *   stays off so CRM calendar uses native Espo (no GoogleIntegration dependency).
+ * - Other Safehouse seeds: keep both active for CRM calendar via CDS when needed.
  *
  * @implements BeforeSave<Entity>
  */
@@ -19,11 +21,25 @@ class BeforeSaveProtectCrmCalendarSeeds implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if (!$this->isSafehouseSeed($entity)) {
+        $seed = $this->findSeed($entity);
+
+        if ($seed === null) {
             return;
         }
 
-        // Soft-deleted rows cannot be "saved" back here; remove is blocked separately.
+        $target = (string) ($seed['targetEntityType'] ?? '');
+
+        if ($target === 'ActivityOfferSlot') {
+            if ($entity->isAttributeChanged('isActive') && $entity->get('isActive') === false) {
+                $entity->set('isActive', true);
+            }
+
+            // Native Espo calendar owns CRM display for shifts.
+            $entity->set('calendarViewEnabled', false);
+
+            return;
+        }
+
         if ($entity->isAttributeChanged('isActive') && $entity->get('isActive') === false) {
             $entity->set('isActive', true);
         }
@@ -33,13 +49,16 @@ class BeforeSaveProtectCrmCalendarSeeds implements BeforeSave
         }
     }
 
-    private function isSafehouseSeed(Entity $entity): bool
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function findSeed(Entity $entity): ?array
     {
         $target = trim((string) $entity->get('targetEntityType'));
         $sourceDateType = trim((string) $entity->get('sourceDateType'));
 
         if ($target === '' || $sourceDateType === '') {
-            return false;
+            return null;
         }
 
         foreach (SafehouseCalendarDateSourceDefaults::sources() as $seed) {
@@ -47,10 +66,10 @@ class BeforeSaveProtectCrmCalendarSeeds implements BeforeSave
                 (string) ($seed['targetEntityType'] ?? '') === $target &&
                 (string) ($seed['sourceDateType'] ?? '') === $sourceDateType
             ) {
-                return true;
+                return $seed;
             }
         }
 
-        return false;
+        return null;
     }
 }

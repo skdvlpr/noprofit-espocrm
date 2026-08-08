@@ -82,12 +82,45 @@ class ShiftPlanningInstaller
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
         $this->ensureEmailTemplates($container);
+        $this->ensureActivityOfferSlotNativeCalendar($container, $injectableFactory);
         $this->ensureSlotCrmCalendarDateSource($container, $injectableFactory);
     }
 
     /**
-     * Keep ActivityOfferSlot on the CRM calendar (CDS isActive + calendarViewEnabled).
-     * Google routing stays optional and is not modified here.
+     * Volunteer shifts on Espo CRM calendar via native calendarEntityList + scopes.calendar.
+     * Does not require GoogleIntegration.
+     */
+    private function ensureActivityOfferSlotNativeCalendar(
+        Container $container,
+        InjectableFactory $injectableFactory
+    ): void {
+        /** @var Config $config */
+        $config = $container->getByClass(Config::class);
+        /** @var ConfigWriter $configWriter */
+        $configWriter = $injectableFactory->create(ConfigWriter::class);
+
+        $list = $config->get('calendarEntityList') ?? [];
+        if (!is_array($list)) {
+            $list = [];
+        }
+
+        $list = array_values(array_filter(
+            array_map(static fn ($v) => is_string($v) ? $v : null, $list),
+            static fn ($v) => $v !== null && $v !== ''
+        ));
+
+        if (in_array('ActivityOfferSlot', $list, true)) {
+            return;
+        }
+
+        $list[] = 'ActivityOfferSlot';
+        $configWriter->set('calendarEntityList', $list);
+        $configWriter->save();
+    }
+
+    /**
+     * Optional Google export CDS for ActivityOfferSlot (calendarViewEnabled=false).
+     * CRM calendar display uses native Espo — see ensureActivityOfferSlotNativeCalendar.
      */
     private function ensureSlotCrmCalendarDateSource(
         Container $container,

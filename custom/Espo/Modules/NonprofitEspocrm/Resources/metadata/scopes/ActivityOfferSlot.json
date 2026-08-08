@@ -10,6 +10,7 @@
     "stream": false,
     "importable": false,
     "customizable": true,
+    "calendar": true,
     "statusField": "status",
     "color": "#f39c12",
     "iconClass": "fas fa-clock"
