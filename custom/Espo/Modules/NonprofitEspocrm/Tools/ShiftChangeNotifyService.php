@@ -78,6 +78,7 @@ class ShiftChangeNotifyService
         private EntityManager $entityManager,
         private JobSchedulerFactory $jobSchedulerFactory,
         private ShiftEmailService $shiftEmailService,
+        private ShiftCoverageSyncService $shiftCoverageSyncService,
         private Language $language,
         private Log $log,
     ) {}
@@ -1029,48 +1030,7 @@ class ShiftChangeNotifyService
     private function syncSlotCoverageStatusesInline(string $offerId): void
     {
         try {
-            foreach ($this->entityManager
-                ->getRDBRepository('ActivityOfferSlot')
-                ->where(['activityOfferId' => $offerId])
-                ->find() as $slot
-            ) {
-                $required = (int) ($slot->get('requiredCount') ?? 1);
-                $assigned = 0;
-
-                foreach ($this->entityManager
-                    ->getRDBRepository('ActivityInvite')
-                    ->where([
-                        'activityOfferSlotId' => $slot->getId(),
-                        'status' => ['Assigned', 'Confirmed'],
-                    ])
-                    ->find() as $invite
-                ) {
-                    $assigned++;
-                }
-
-                $isCovered = $assigned >= $required && $required > 0;
-                $status = (string) ($slot->get('status') ?? 'Published');
-
-                if ($status === 'Completed') {
-                    continue;
-                }
-
-                if ($isCovered && $status === 'Published') {
-                    $slot->set('status', 'Covered');
-                    $this->entityManager->saveEntity($slot, [
-                        StatusGuard::SKIP_OPTION => true,
-                        self::SKIP_SCHEDULE_NOTIFY => true,
-                        self::SKIP_PLAN_UPDATE_NOTIFY => true,
-                    ]);
-                } elseif (!$isCovered && $status === 'Covered') {
-                    $slot->set('status', 'Published');
-                    $this->entityManager->saveEntity($slot, [
-                        StatusGuard::SKIP_OPTION => true,
-                        self::SKIP_SCHEDULE_NOTIFY => true,
-                        self::SKIP_PLAN_UPDATE_NOTIFY => true,
-                    ]);
-                }
-            }
+            $this->shiftCoverageSyncService->sync($offerId);
         } catch (Throwable $e) {
             $this->log->warning(
                 'Shift coverage sync after schedule change failed: {message}',

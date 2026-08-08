@@ -46,6 +46,23 @@
             "type": "datetime",
             "readOnly": true
         },
+        "isFullyStaffed": {
+            "type": "bool",
+            "default": false,
+            "readOnly": true,
+            "tooltip": true,
+            "view": "nonprofit-espocrm:views/activity-offer/fields/is-fully-staffed"
+        },
+        "autoConfirmWhenFullyStaffed": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true,
+            "view": "nonprofit-espocrm:views/activity-offer/fields/auto-confirm-when-fully-staffed"
+        },
+        "fullyStaffedNotifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
         "description": {
             "type": "text"
         },

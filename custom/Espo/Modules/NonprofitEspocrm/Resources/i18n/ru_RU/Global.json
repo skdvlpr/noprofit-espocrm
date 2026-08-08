@@ -10,7 +10,10 @@
         "VolunteerEmployee": "Сотрудники / Волонтеры",
         "Member": "Участники",
         "MealCount": "Учет питания",
-        "Case": "Обращение"
+        "Case": "Обращение",
+        "GCalSmokeAllDay": "Тест GCal (весь день)",
+        "GCalSmokeDateTime": "Тест GCal (дата/время)",
+        "GCalSmokeTwinDate": "Тест GCal (две даты)"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -19,7 +22,10 @@
         "VolunteerEmployee": "Сотрудники / Волонтеры",
         "Member": "Участники",
         "MealCount": "Учет питания",
-        "Case": "Обращения"
+        "Case": "Обращения",
+        "GCalSmokeAllDay": "Тесты GCal (весь день)",
+        "GCalSmokeDateTime": "Тесты GCal (дата/время)",
+        "GCalSmokeTwinDate": "Тесты GCal (две даты)"
     },
     "navbarTabs": {
         "mainSections": "Главные разделы",

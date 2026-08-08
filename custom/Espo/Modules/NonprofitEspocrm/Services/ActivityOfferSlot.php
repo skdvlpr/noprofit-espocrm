@@ -5,6 +5,8 @@ namespace Espo\Modules\NonprofitEspocrm\Services;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Select\SelectBuilderFactory;
+use Espo\Core\Utils\Metadata;
+use Espo\ORM\EntityManager;
 use Espo\ORM\Query\Select;
 use RuntimeException;
 
@@ -12,11 +14,18 @@ use RuntimeException;
  * Legacy calendar hook: ActivityOfferSlot has no assignedUser/users attendees.
  * Native Espo calendar base query would filter assignedUserId and hide all shifts.
  * This query uses ACL only so shifts appear on the CRM calendar without GoogleIntegration.
+ *
+ * SELECT column list must match Meeting/Call/Task (incl. app.calendar.additionalAttributeList)
+ * or UNION ALL in Calendar\Service fails with MySQL cardinality 1222.
  */
 class ActivityOfferSlot
 {
+    private const ENTITY_TYPE = 'ActivityOfferSlot';
+
     public function __construct(
         private SelectBuilderFactory $selectBuilderFactory,
+        private Metadata $metadata,
+        private EntityManager $entityManager,
     ) {}
 
     public function getCalenderQuery(
@@ -30,14 +39,14 @@ class ActivityOfferSlot
 
         $builder = $this->selectBuilderFactory
             ->create()
-            ->from('ActivityOfferSlot');
+            ->from(self::ENTITY_TYPE);
 
         if (!$skipAcl) {
             $builder->withStrictAccessControl();
         }
 
         $select = [
-            ['"ActivityOfferSlot"', 'scope'],
+            ['"' . self::ENTITY_TYPE . '"', 'scope'],
             'id',
             'name',
             ['dateStart', 'dateStart'],
@@ -49,6 +58,17 @@ class ActivityOfferSlot
             ['null', 'parentId'],
             'createdAt',
         ];
+
+        $seed = $this->entityManager->getNewEntity(self::ENTITY_TYPE);
+        $additionalAttributeList = $this->metadata->get(
+            ['app', 'calendar', 'additionalAttributeList']
+        ) ?? [];
+
+        foreach ($additionalAttributeList as $attribute) {
+            $select[] = $seed->hasAttribute($attribute)
+                ? [$attribute, $attribute]
+                : ['null', $attribute];
+        }
 
         try {
             return $builder

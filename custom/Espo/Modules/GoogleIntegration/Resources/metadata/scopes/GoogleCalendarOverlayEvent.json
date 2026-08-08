@@ -7,6 +7,6 @@
     "importable": false,
     "exportable": false,
     "acl": true,
-    "aclActionList": ["read", "create", "edit", "delete"],
+    "aclActionList": ["read"],
     "aclLevelList": ["all", "team", "own", "no"]
 }

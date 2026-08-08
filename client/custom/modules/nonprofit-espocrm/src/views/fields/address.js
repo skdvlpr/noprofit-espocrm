@@ -10,43 +10,22 @@ define('nonprofit-espocrm:views/fields/address', [
     'views/fields/address',
 ], function (Dep) {
 
-    /** @type {Promise<void>|null} */
-    let placesLoaderPromise = null;
-
     const loadGooglePlaces = (apiKey) => {
-        if (window.google && window.google.maps && window.google.maps.places) {
+        if (window.SafehouseGooglePlaces && typeof window.SafehouseGooglePlaces.ensure === 'function') {
+            return window.SafehouseGooglePlaces.ensure(apiKey);
+        }
+
+        if (window.google && window.google.maps && window.google.maps.places
+            && typeof window.google.maps.places.Autocomplete === 'function'
+        ) {
             return Promise.resolve();
         }
 
-        if (placesLoaderPromise) {
-            return placesLoaderPromise;
+        if (window.google && window.google.maps && window.google.maps.importLibrary) {
+            return window.google.maps.importLibrary('places');
         }
 
-        placesLoaderPromise = new Promise((resolve, reject) => {
-            const callbackName = '__nonprofitEspocrmPlacesLoaded';
-
-            window[callbackName] = () => {
-                delete window[callbackName];
-                resolve();
-            };
-
-            const script = document.createElement('script');
-            script.async = true;
-            script.defer = true;
-            script.onerror = () => {
-                placesLoaderPromise = null;
-                reject(new Error('Google Maps Places script failed to load'));
-            };
-            script.src = 'https://maps.googleapis.com/maps/api/js?'
-                + 'key=' + encodeURIComponent(apiKey)
-                + '&libraries=places,marker'
-                + '&callback=' + callbackName
-                + '&loading=async';
-
-            document.head.appendChild(script);
-        });
-
-        return placesLoaderPromise;
+        return Promise.reject(new Error('SafehouseGooglePlaces loader missing'));
     };
 
     const componentValue = (components, type, useShort = false) => {
@@ -209,14 +188,22 @@ define('nonprofit-espocrm:views/fields/address', [
                 // No types filter: allow streets and localities (e.g. city names).
             });
 
-            // Keep pac dropdown above Aurora drawers (CSS + runtime bump).
-            input.addEventListener('focus', () => {
-                setTimeout(() => {
+            const bump = () => {
+                if (window.SafehouseGooglePlaces && window.SafehouseGooglePlaces.bumpPacZIndex) {
+                    window.SafehouseGooglePlaces.bumpPacZIndex();
+                }
+                else {
                     document.querySelectorAll('.pac-container').forEach(el => {
                         el.style.zIndex = '30000';
                     });
-                }, 0);
+                }
+            };
+
+            input.addEventListener('focus', () => {
+                setTimeout(bump, 0);
+                setTimeout(bump, 100);
             });
+            input.addEventListener('input', () => setTimeout(bump, 0));
 
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();

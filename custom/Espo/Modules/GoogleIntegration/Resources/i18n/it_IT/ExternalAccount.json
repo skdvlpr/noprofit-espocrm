@@ -18,26 +18,28 @@
         }
     },
     "labels": {
-        "calendarSyncModeHelp": "La sincronizzazione automatica del calendario e' disattivata. Usa **Aggiungi a Google Calendar** sui record per esportare manualmente. La visualizzazione degli eventi Google nel calendario CRM e' un'impostazione separata (quando disponibile).",
+        "calendarSyncModeHelp": "La sincronizzazione automatica del calendario resta **disattivata**. Esporta gli eventi con **Aggiungi a Google Calendar** sul singolo record. La visualizzazione degli eventi Google personali nel calendario CRM usa il selettore multiplo sopra (separato dall'instradamento export).",
         "googleAccountProfileMissing": "Connesso con un'autorizzazione precedente. Ricollega questo account Google per mostrare email, nome e avatar.",
         "reconnectGoogleAccount": "Ricollega account Google",
         "googleConnectWarningTitle": "Prima di collegare Google",
-        "googleConnectWarningText": "Questa app **non** e' stata verificata da Google. Durante il collegamento, Google mostrera' una schermata di avviso *\"app non verificata\"* — clicca su **Avanzate**, poi su **Vai a (nome app) (non sicuro)** per continuare. Collegati solo se comprendi e accetti questo rischio. Questa integrazione e' **solo per uso interno Safehouse** — non collegare account che non gestisci personalmente.",
+        "googleConnectWarningText": "Google mostrera' un avviso *\"app non verificata\"* perche' questa integrazione CRM **non** e' pubblicata nel programma di verifica pubblica di Google.\n\n**E' normale per Safehouse CRM.** Continuare con Avanzate → Vai a (app) (non sicuro) ha senso **solo** per questa applicazione Safehouse configurata dalla tua organizzazione.\n\nSe **un altro** sito o app mostra un avviso simile (app non verificata / Avanzate) quando colleghi Google, consideralo un segnale di allarme: meglio **non** collegarti, oppure fallo solo a tuo rischio.\n\nDurante Connetti: clicca **Avanzate**, poi **Vai a (nome app) (non sicuro)**, quindi autorizza l'accesso. Collega solo account che gestisci tu.",
         "googleConnectRiskCheckboxLabel": "Ho letto questo avviso e comprendo i rischi",
         "googleConnectRiskCheckboxRequired": "Seleziona \"Ho letto questo avviso e comprendo i rischi\" prima di collegare.",
-        "oauthSafetyAckHint": "Connetti / Ricollega restano disabilitati finche' non selezioni questa casella. Dopo la connessione la casella si blocca fino alla disconnessione.",
+        "oauthSafetyAckHint": "Connetti / Ricollega restano disabilitati finche' non selezioni questa casella. **Non** serve attivare **Abilitato** prima. Dopo la connessione la casella si blocca fino alla disconnessione.",
         "googleCalendarUserSettings": "Preferenze Google Calendar",
-        "overlayCalendarIdListHelp": "Scegli quali calendari Google personali mostrare nel calendario CRM. I calendari creati dal CRM non compaiono qui. Predefinito: solo il calendario principale. Gli eventi piu' vecchi di 1 mese vengono eliminati automaticamente.",
-        "googleCalendarNamingPatternHelp": "Il nome del calendario includera' prefisso/suffisso admin (sola lettura)."
+        "overlayCalendarIdListHelp": "Scegli quali calendari Google **personali** mostrare nel calendario CRM. I calendari creati dal CRM non compaiono qui. Predefinito: solo il calendario principale. Gli eventi overlay piu' vecchi di 1 mese vengono eliminati automaticamente.",
+        "calendarRoutingDescPrimary": "Tutti gli export manuali vanno nel tuo calendario Google **principale**. Il CRM **non** crea un calendario dedicato. Prefisso admin `{prefix}` / suffisso `{suffix}` non vengono usati in questa modalita'.",
+        "calendarRoutingDescUserPick": "Su ogni record scegli un calendario Google esistente oppure ne crei uno. Quando il CRM propone un nome per un nuovo calendario, usa il pattern admin, es. **{exampleName}** (prefisso `{prefix}`, etichetta tipo record, suffisso `{suffix}`; le parti vuote vengono omesse).",
+        "calendarRoutingDescAutoDedicated": "**Predefinito consigliato.** Il CRM crea o riusa un calendario Google dedicato per tipo di record, con nome come **{exampleName}** (prefisso admin `{prefix}` + etichetta tipo es. `{entityLabel}` + suffisso `{suffix}`). Prefisso/suffisso vuoti vengono omessi."
     },
     "messages": {
         "googleConnectRiskCheckboxRequired": "Seleziona \"Ho letto questo avviso e comprendo i rischi\" prima di collegare."
     },
     "help": {
-        "GoogleCalendarDrive": "Usa **Connetti** per autorizzare Google. Se gia' connesso: **Ricollega** cambia account; **Disconnetti** cancella i token (come spegnere **Abilitato** e **Salva**). Dopo la connessione verifica email/nome/avatar e clicca **Salva**. L'export calendario e' solo manuale (**Aggiungi a Google Calendar** sul record)."
+        "GoogleCalendarDrive": "**Come collegare**\n1. Leggi l'avviso e seleziona la casella di conferma.\n2. Clicca **Connetti** (Abilitato puo' restare spento fino dopo OAuth).\n3. In Google: Avanzate → Vai all'app (non sicuro) → autorizza.\n4. Verifica email / nome / avatar, attiva **Abilitato**, clicca **Salva**.\n\n**Se gia' connesso:** **Ricollega** cambia account Google; **Disconnetti** cancella i token (come spegnere Abilitato + Salva).\n\n**Calendario:** l'export e' solo manuale (**Aggiungi a Google Calendar** sui record). Preferisci **Calendario dedicato (automatico)** cosi' i calendari creati dal CRM seguono prefisso/suffisso admin. Usa **Calendari da mostrare nel CRM** per vedere eventi Google personali nel calendario CRM."
     },
     "tooltips": {
-        "calendarRoutingMode": "Calendario principale = il tuo calendario Google principale per tutti gli export. Scelgo io il calendario = scegli (o crea) un calendario su ogni record. Calendario dedicato (automatico) = il CRM crea/riusa automaticamente un calendario per tipo di entita'.",
+        "calendarRoutingMode": "Principale = sempre il tuo calendario Google principale. Scelgo io = scegli/crea su ogni record. Dedicato (automatico) = il CRM crea/riusa un calendario per tipo di entita' con prefisso/suffisso admin.",
         "overlayCalendarIdList": "Calendari personali da mostrare nel calendario CRM. I calendari gestiti dal CRM non sono selezionabili."
     }
 }

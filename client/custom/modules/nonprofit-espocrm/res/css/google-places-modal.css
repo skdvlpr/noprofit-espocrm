@@ -29,11 +29,23 @@
 
 /* Address / week-slots editors inside drawers: do not clip floating UI chrome.
  * (pac itself is body-level; this still helps map links and focus rings.) */
+.modal.dialog-record .modal-dialog,
+.modal.dialog-record .modal-content,
+.modal.dialog-record .modal-body,
 .modal.dialog-record .modal-body:has(.field[data-name="address"]),
 .modal.dialog-record .modal-body:has(.field[data-name="place"]),
 .modal.dialog-record .modal-body:has(.field[data-name="batchPlaceField"]),
 .modal.dialog-record .modal-body:has(.week-slots-editor) {
     overflow: visible !important;
+}
+
+.week-slot-view-map {
+    margin-top: 6px;
+}
+
+.week-slot-view-map a {
+    user-select: none;
+    cursor: pointer;
 }
 
 /*

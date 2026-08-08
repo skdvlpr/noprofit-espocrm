@@ -24,11 +24,14 @@
         "CalendarTemplate": "Template calendario",
         "CalendarTemplatePlural": "Template calendario",
         "CalendarDateSource": "Origine data calendario",
-        "CalendarDateSourcePlural": "Origini date calendario"
+        "CalendarDateSourcePlural": "Origini date calendario",
+        "GoogleCalendarOverlayEvent": "Evento Google Calendar",
+        "GoogleCalendarOverlayEventPlural": "Eventi Google Calendar"
     },
     "scopeNamesPlural": {
         "CalendarTemplate": "Template calendario",
-        "CalendarDateSource": "Origini date calendario"
+        "CalendarDateSource": "Origini date calendario",
+        "GoogleCalendarOverlayEvent": "Eventi Google Calendar"
     },
     "messages": {
         "googleCalendarIntegrationDisabled": "L'integrazione Google Calendar è disattivata. Attivala in Amministrazione → Integrazioni oppure deseleziona Salva in Google Calendar."

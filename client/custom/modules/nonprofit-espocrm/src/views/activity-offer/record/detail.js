@@ -23,17 +23,36 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
 
         lifecycleFetching: false,
 
+        liveRefreshTimerId: null,
+
+        /** Poll interval while the plan detail is open (ms). */
+        liveRefreshIntervalMs: 4000,
+
         // Banner uses distinct action names so Espo handleAction does not bind them
         // to detailButtonList handler items named sendPendingUpdate / extend*.
         events: {
             'click [data-action="bannerSendPendingUpdate"]': function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if (!this.getAcl().checkModel(this.model, 'edit')) {
+                    Espo.Ui.error(this.translate('Access denied'));
+
+                    return;
+                }
+
                 this.actionSendPendingUpdate();
             },
             'click [data-action="bannerExtendPendingUpdate"]': function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if (!this.getAcl().checkModel(this.model, 'edit')) {
+                    Espo.Ui.error(this.translate('Access denied'));
+
+                    return;
+                }
+
                 this.actionExtendPendingUpdate();
             },
         },
@@ -70,6 +89,10 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
 
             this.listenTo(this.model, 'update-related:slots update-related:coverage', () => {
                 this.refreshOfferLifecycleState();
+            });
+
+            this.listenTo(this, 'after:render', () => {
+                this.startLiveRefresh();
             });
         },
 
@@ -108,14 +131,52 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
             Dep.prototype.afterRender.call(this);
             this.afterRenderPlaceDescriptionLayout();
             this.startPendingUpdateCountdown();
+            this.startLiveRefresh();
         },
 
         onRemove: function () {
             this.clearPendingUpdateCountdown();
             this.clearLifecycleFetchTimer();
+            this.clearLiveRefresh();
 
             if (Dep.prototype.onRemove) {
                 Dep.prototype.onRemove.call(this);
+            }
+        },
+
+        /**
+         * Keep yellow banner + coverage/match tables fresh without F5.
+         * Slot AfterSave may write pendingNotify* silently after the first response.
+         */
+        startLiveRefresh: function () {
+            this.clearLiveRefresh();
+
+            if (!this.model || !this.model.id || this.type !== this.TYPE_DETAIL) {
+                return;
+            }
+
+            this.liveRefreshTimerId = window.setInterval(() => {
+                if (!this.isRendered() || !this.model || !this.model.id || this.lifecycleFetching) {
+                    return;
+                }
+
+                this.lifecycleFetching = true;
+
+                this.model.fetch()
+                    .then(() => {
+                        this.model.trigger('update-related:coverage');
+                        this.updatePendingUpdateBanner();
+                    })
+                    .finally(() => {
+                        this.lifecycleFetching = false;
+                    });
+            }, this.liveRefreshIntervalMs);
+        },
+
+        clearLiveRefresh: function () {
+            if (this.liveRefreshTimerId) {
+                window.clearInterval(this.liveRefreshTimerId);
+                this.liveRefreshTimerId = null;
             }
         },
 
@@ -123,10 +184,14 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
             const status = this.model.get('status');
             const kind = this.model.get('pendingNotifyKind');
             const show = status === 'Updated' && !!kind;
+            const canEditPendingUpdate = !!(
+                this.getAcl && this.getAcl().checkModel(this.model, 'edit')
+            );
 
             if (!show) {
                 return {
                     showPendingUpdateBanner: false,
+                    canEditPendingUpdate: false,
                     pendingUpdateBannerText: '',
                     pendingUpdateCountdown: '',
                 };
@@ -138,6 +203,7 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
 
             return {
                 showPendingUpdateBanner: true,
+                canEditPendingUpdate: canEditPendingUpdate,
                 pendingUpdateBannerText: this.translate(msgKey, 'messages', 'ActivityOffer'),
                 pendingUpdateCountdown: this.formatPendingUpdateCountdown(),
             };

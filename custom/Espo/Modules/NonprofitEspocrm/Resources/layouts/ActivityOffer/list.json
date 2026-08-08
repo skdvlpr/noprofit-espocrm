@@ -2,6 +2,7 @@
     {"name": "name", "link": true},
     {"name": "weekStart"},
     {"name": "status"},
+    {"name": "isFullyStaffed"},
     {"name": "publishedAt"},
     {"name": "assignedUser"}
 ]

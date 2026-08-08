@@ -14,7 +14,19 @@
     "SafehouseCrmCompletePastActivityOfferSlots": {
         "name": "Complete past volunteer shifts",
         "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\CompletePastActivityOfferSlots",
-        "scheduling": "*/15 * * * *",
+        "scheduling": "*/10 * * * *",
+        "isSystem": true
+    },
+    "SafehouseCrmReconcileFullyStaffedPlans": {
+        "name": "Reconcile shift-plan availability coverage",
+        "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\ReconcileFullyStaffedPlans",
+        "scheduling": "*/5 * * * *",
+        "isSystem": true
+    },
+    "SafehouseCrmSubmitPushReminders": {
+        "name": "Send Push Reminders",
+        "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\SubmitPushReminders",
+        "scheduling": "*/2 * * * *",
         "isSystem": true
     }
 }

@@ -9,6 +9,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
     const OAUTH_SAFETY_ACK_KEY = 'googleIntegrationOAuthSafetyAck';
 
     const ROUTING_OPTIONS = ['primary', 'user_pick', 'auto_dedicated'];
+    const DEFAULT_ROUTING_MODE = 'auto_dedicated';
 
     class GoogleIntegrationExternalAccountOauth2View extends _parent.default {
         template = 'google-integration:external-account/oauth2';
@@ -16,6 +17,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         connectInProgress = false;
         oauthSafetyAck = false;
         calendarFieldsReady = false;
+        googleCalendarNamePrefix = 'CRM';
+        googleCalendarNameSuffix = '';
 
         data() {
             const connected = !!this.isConnected;
@@ -31,6 +34,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 oauthSafetyAck: this.oauthSafetyAck,
                 oauthSafetyAckLocked: connected,
                 showCalendarSettings: connected && this.model.get('enabled'),
+                calendarRoutingModeHelp: this.buildCalendarRoutingModeHelp(),
+                calendarSyncModeHelp: this.translate('calendarSyncModeHelp', 'labels', 'ExternalAccount'),
             };
         }
 
@@ -43,14 +48,24 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 this.reRender();
             });
 
+            this.listenTo(this.model, 'change:calendarRoutingMode', () => {
+                this.refreshRoutingHelpDom();
+            });
+
             this.listenToOnce(this.model, 'sync', () => {
                 this.initOauthSafetyAck();
                 this.ensureCalendarUserFields();
             });
+
+            this.loadCalendarNamingConfig();
         }
 
         afterRender() {
             super.afterRender();
+
+            // Core oauth2 hides `.data-panel` when Enabled=false. Our Connect UI
+            // uses `.oauth-connect-panel` instead; still unhide any leftover.
+            this.$el.find('.oauth-connect-panel, .data-panel').removeClass('hidden');
 
             this.$el.find('[data-name="oauthSafetyAck"]').off('change.oauthSafety')
                 .on('change.oauthSafety', e => {
@@ -67,6 +82,85 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 });
 
             this.syncConnectButtons();
+            this.refreshRoutingHelpDom();
+        }
+
+        loadCalendarNamingConfig() {
+            if (!this.id) {
+                return;
+            }
+
+            Espo.Ajax.getRequest('ExternalAccount/action/getOAuth2Info?id=' + encodeURIComponent(this.id))
+                .then(info => {
+                    if (!info) {
+                        return;
+                    }
+
+                    if (typeof info.googleCalendarNamePrefix === 'string') {
+                        this.googleCalendarNamePrefix = info.googleCalendarNamePrefix;
+                    }
+
+                    if (typeof info.googleCalendarNameSuffix === 'string') {
+                        this.googleCalendarNameSuffix = info.googleCalendarNameSuffix;
+                    }
+
+                    this.refreshRoutingHelpDom();
+                })
+                .catch(() => {
+                    // Keep CRM / empty defaults.
+                });
+        }
+
+        buildCalendarNameExample(entityLabel) {
+            const parts = [
+                String(this.googleCalendarNamePrefix || '').trim(),
+                String(entityLabel || '').trim(),
+                String(this.googleCalendarNameSuffix || '').trim(),
+            ].filter(part => part !== '');
+
+            return parts.join('-') || entityLabel || 'CRM';
+        }
+
+        buildCalendarRoutingModeHelp() {
+            const mode = this.model.get('calendarRoutingMode') || DEFAULT_ROUTING_MODE;
+            const entityLabel = this.translate('Meeting', 'scopeNames') || 'Meeting';
+            const exampleName = this.buildCalendarNameExample(entityLabel);
+            const prefix = String(this.googleCalendarNamePrefix || '').trim() || '—';
+            const suffix = String(this.googleCalendarNameSuffix || '').trim() || '—';
+
+            const keyMap = {
+                primary: 'calendarRoutingDescPrimary',
+                user_pick: 'calendarRoutingDescUserPick',
+                auto_dedicated: 'calendarRoutingDescAutoDedicated',
+            };
+            const key = keyMap[mode] || keyMap.auto_dedicated;
+
+            let text = this.translate(key, 'labels', 'ExternalAccount') || '';
+
+            text = text
+                .replace(/\{exampleName\}/g, exampleName)
+                .replace(/\{entityLabel\}/g, entityLabel)
+                .replace(/\{prefix\}/g, prefix)
+                .replace(/\{suffix\}/g, suffix);
+
+            return text;
+        }
+
+        refreshRoutingHelpDom() {
+            if (!this.isRendered()) {
+                return;
+            }
+
+            const $help = this.$el.find('[data-name="calendarRoutingModeHelp"]');
+
+            if (!$help.length) {
+                return;
+            }
+
+            const markdown = this.buildCalendarRoutingModeHelp();
+            const html = this.getHelper().transformMarkdownText(markdown).toString();
+
+            $help.html(html);
         }
 
         initOauthSafetyAck() {
@@ -124,7 +218,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             fields.calendarRoutingMode = {
                 type: 'enum',
                 options: ROUTING_OPTIONS,
-                default: 'primary',
+                default: DEFAULT_ROUTING_MODE,
             };
             fields.overlayCalendarIdList = {
                 type: 'multiEnum',
@@ -134,8 +228,10 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
             this.model.defs.fields = fields;
 
-            if (!this.model.get('calendarRoutingMode')) {
-                this.model.set('calendarRoutingMode', 'primary', {silent: true});
+            const currentMode = this.model.get('calendarRoutingMode');
+
+            if (!currentMode || !ROUTING_OPTIONS.includes(currentMode)) {
+                this.model.set('calendarRoutingMode', DEFAULT_ROUTING_MODE, {silent: true});
             }
 
             if (!this.model.has('overlayCalendarIdList') || this.model.get('overlayCalendarIdList') == null) {
@@ -153,6 +249,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             if (this.isConnected) {
                 this.loadOverlayCalendarOptions();
             }
+
+            this.refreshRoutingHelpDom();
         }
 
         loadOverlayCalendarOptions() {

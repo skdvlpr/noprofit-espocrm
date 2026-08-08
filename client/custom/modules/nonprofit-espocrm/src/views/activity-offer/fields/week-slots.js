@@ -139,6 +139,10 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                                                    data-name="placeCountry"
                                                    value="{{placeCountry}}"
                                                    placeholder="{{../countryPlaceholder}}">
+                                            <div class="week-slot-view-map">
+                                                <a href="#" class="small" data-action="viewPlaceMap"
+                                                   data-index="{{@index}}">{{../viewMapText}}</a>
+                                            </div>
                                         {{/if}}
                                     </div>
                                 </div>
@@ -271,6 +275,7 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                 statePlaceholder: this.translate('State'),
                 postalCodePlaceholder: this.translate('PostalCode'),
                 countryPlaceholder: this.translate('Country'),
+                viewMapText: this.translate('View on Map'),
             };
         },
 
@@ -291,10 +296,11 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                 this.rows = [this.defaultRow('Monday')];
             }
 
+            // Do NOT reRender on place* changes — that destroys Google Places Autocomplete
+            // while the user is typing / picking a suggestion (batch address field writes place*).
             this.listenTo(
                 this.model,
-                'change:uniqueAddress change:placeStreet change:placeCity change:placeState ' +
-                'change:placePostalCode change:placeCountry change:category change:weekStart',
+                'change:uniqueAddress change:category change:weekStart',
                 () => {
                     if (this.mode === 'edit') {
                         this.reRender();
@@ -315,6 +321,10 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
 
                 this.captureFromDom();
 
+                if (name && name.indexOf('place') === 0) {
+                    this.updateViewMapLinks();
+                }
+
                 if (name === 'isAllDay') {
                     this.applyAllDay(index, !!e.currentTarget.checked);
                     this.reRender();
@@ -332,6 +342,11 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                 if ((name === 'timeStart' || name === 'timeEnd') && !this.rows[index].isAllDay) {
                     this.reRender();
                 }
+            });
+
+            this.$el.find('.week-slot-row').on('input', '[data-name^="place"]', () => {
+                this.captureFromDom();
+                this.updateViewMapLinks();
             });
 
             this.$el.find('[data-action="addRow"]').on('click', () => this.actionAddRow());
@@ -372,7 +387,19 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                 this.actionAddCondition(index);
             });
 
+            this.$el.find('[data-action="viewPlaceMap"]').on('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+
+                this.actionViewPlaceMap(index);
+            });
+
+            // Bind after layout settles inside the modal (pac needs a live input).
             this.initGooglePlacesOnDayCards();
+            window.setTimeout(() => this.initGooglePlacesOnDayCards(), 50);
+            window.setTimeout(() => this.initGooglePlacesOnDayCards(), 250);
         },
 
         initGooglePlacesOnDayCards: function () {
@@ -383,10 +410,18 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
             const apiKey = this.getConfig().get('googleMapsApiKey');
 
             if (!apiKey) {
+                console.warn('[week-slots] googleMapsApiKey is empty — Places disabled');
+
                 return;
             }
 
-            this.loadGooglePlaces(apiKey)
+            const loader = window.SafehouseGooglePlaces;
+
+            const ensure = loader && typeof loader.ensure === 'function'
+                ? loader.ensure(apiKey)
+                : this.loadGooglePlacesFallback(apiKey);
+
+            ensure
                 .then(() => {
                     this.$el.find('.week-slot-row').each((i, el) => {
                         this.setupPlacesAutocompleteForRow($(el));
@@ -397,40 +432,18 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
                 });
         },
 
-        loadGooglePlaces: function (apiKey) {
-            if (window.google && window.google.maps && window.google.maps.places) {
+        loadGooglePlacesFallback: function (apiKey) {
+            if (window.google && window.google.maps && window.google.maps.places
+                && typeof window.google.maps.places.Autocomplete === 'function'
+            ) {
                 return Promise.resolve();
             }
 
-            if (window.__vadWeekSlotsPlacesPromise) {
-                return window.__vadWeekSlotsPlacesPromise;
+            if (window.google && window.google.maps && window.google.maps.importLibrary) {
+                return window.google.maps.importLibrary('places');
             }
 
-            window.__vadWeekSlotsPlacesPromise = new Promise((resolve, reject) => {
-                const callbackName = '__vadWeekSlotsPlacesLoaded';
-
-                window[callbackName] = () => {
-                    delete window[callbackName];
-                    resolve();
-                };
-
-                const script = document.createElement('script');
-                script.async = true;
-                script.defer = true;
-                script.onerror = () => {
-                    window.__vadWeekSlotsPlacesPromise = null;
-                    reject(new Error('Google Maps Places script failed to load'));
-                };
-                script.src = 'https://maps.googleapis.com/maps/api/js?'
-                    + 'key=' + encodeURIComponent(apiKey)
-                    + '&libraries=places,marker'
-                    + '&callback=' + callbackName
-                    + '&loading=async';
-
-                document.head.appendChild(script);
-            });
-
-            return window.__vadWeekSlotsPlacesPromise;
+            return Promise.reject(new Error('SafehouseGooglePlaces loader missing'));
         },
 
         setupPlacesAutocompleteForRow: function ($row) {
@@ -442,7 +455,9 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
 
             const input = $street.get(0);
 
-            if (!input || !window.google || !google.maps || !google.maps.places) {
+            if (!input || !window.google || !google.maps || !google.maps.places
+                || typeof google.maps.places.Autocomplete !== 'function'
+            ) {
                 return;
             }
 
@@ -450,16 +465,25 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
 
             const autocomplete = new google.maps.places.Autocomplete(input, {
                 fields: ['address_components', 'formatted_address'],
-                // No types filter: allow streets and localities (e.g. city names).
             });
 
-            input.addEventListener('focus', () => {
-                setTimeout(() => {
+            const bump = () => {
+                if (window.SafehouseGooglePlaces && window.SafehouseGooglePlaces.bumpPacZIndex) {
+                    window.SafehouseGooglePlaces.bumpPacZIndex();
+                }
+                else {
                     document.querySelectorAll('.pac-container').forEach(el => {
                         el.style.zIndex = '30000';
                     });
-                }, 0);
+                }
+            };
+
+            input.addEventListener('focus', () => {
+                window.setTimeout(bump, 0);
+                window.setTimeout(bump, 100);
             });
+            input.addEventListener('input', () => window.setTimeout(bump, 0));
+            input.addEventListener('keydown', () => window.setTimeout(bump, 0));
 
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
@@ -470,12 +494,75 @@ define('nonprofit-espocrm:views/activity-offer/fields/week-slots', ['views/field
 
                 this.fillDayCardAddressFromComponents($row, place.address_components);
                 this.captureFromDom();
+                this.updateViewMapLinks();
             });
 
             this.once('remove', () => {
                 if (google.maps.event) {
                     google.maps.event.clearInstanceListeners(autocomplete);
                 }
+            });
+
+            this.updateViewMapLinks();
+        },
+
+        updateViewMapLinks: function () {
+            this.captureFromDom();
+
+            this.$el.find('.week-slot-row').each((i, el) => {
+                const $row = $(el);
+                const index = parseInt($row.attr('data-index'), 10);
+                const row = this.rows[index] || {};
+                const hasPlace = !!(
+                    (row.placeStreet || '').trim()
+                    || (row.placeCity || '').trim()
+                    || (row.placePostalCode || '').trim()
+                );
+                const $link = $row.find('[data-action="viewPlaceMap"]');
+
+                if (!$link.length) {
+                    return;
+                }
+
+                $link.toggleClass('text-muted', !hasPlace);
+                $link.css('pointer-events', hasPlace ? '' : 'none');
+            });
+        },
+
+        actionViewPlaceMap: function (index) {
+            this.captureFromDom();
+
+            const row = this.rows[index];
+
+            if (!row) {
+                return;
+            }
+
+            const hasPlace = !!(
+                (row.placeStreet || '').trim()
+                || (row.placeCity || '').trim()
+                || (row.placePostalCode || '').trim()
+            );
+
+            if (!hasPlace) {
+                Espo.Ui.warning(this.translate('enterAddressForMap', 'messages', 'ActivityOffer'));
+
+                return;
+            }
+
+            this.model.set({
+                placeStreet: row.placeStreet || null,
+                placeCity: row.placeCity || null,
+                placeState: row.placeState || null,
+                placePostalCode: row.placePostalCode || null,
+                placeCountry: row.placeCountry || null,
+            }, {silent: true});
+
+            this.createView('mapDialog', 'views/modals/view-map', {
+                model: this.model,
+                field: 'place',
+            }, view => {
+                view.render();
             });
         },
 

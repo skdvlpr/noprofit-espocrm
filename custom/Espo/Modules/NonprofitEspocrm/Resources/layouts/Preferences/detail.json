@@ -3,6 +3,10 @@
         "name": "overview",
         "rows": [
             [
+                {"name": "webPushEnabled"},
+                false
+            ],
+            [
                 {"name": "timeZone"},
                 {"name": "dateFormat"}
             ]
@@ -56,6 +60,10 @@
         "name": "notifications",
         "rows": [
             [
+                {"name": "webPushEnabled"},
+                false
+            ],
+            [
                 {"name": "receiveAssignmentEmailNotifications"},
                 {"name": "receiveMentionEmailNotifications"}
             ],
@@ -74,10 +82,6 @@
             [
                 {"name": "notificationGrouping"},
                 {"name": "notificationSound"}
-            ],
-            [
-                {"name": "webPushEnabled"},
-                false
             ]
         ]
     }

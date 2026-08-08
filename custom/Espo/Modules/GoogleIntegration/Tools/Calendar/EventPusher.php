@@ -427,23 +427,14 @@ class EventPusher
     }
 
     /**
-     * Per-user ExternalAccount.calendarRoutingMode (B) takes priority over the per-source
-     * CalendarDateSource.calendarRoutingMode configured by the administrator. Falls back to
-     * the source mode (then Primary) when the user has not chosen an override.
+     * Routing is per-user only (External Accounts). CalendarDateSource admin UI no longer
+     * exposes calendarRoutingMode — ignore any legacy source value.
      *
      * @param ?array<string, mixed> $source
      */
     private function resolveEffectiveRoutingMode(?array $source): string
     {
-        $sourceMode = CalendarRoutingMode::PRIMARY;
-
-        if ($source !== null) {
-            $sourceMode = CalendarRoutingMode::normalize(
-                is_string($source['calendarRoutingMode'] ?? null) ? $source['calendarRoutingMode'] : null
-            );
-        }
-
-        return $this->resolveUserCalendarRoutingMode() ?? $sourceMode;
+        return $this->resolveUserCalendarRoutingMode() ?? CalendarRoutingMode::AUTO_DEDICATED;
     }
 
     private function resolveUserCalendarRoutingMode(): ?string

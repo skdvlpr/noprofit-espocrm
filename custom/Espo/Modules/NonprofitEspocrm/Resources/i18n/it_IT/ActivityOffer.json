@@ -24,7 +24,10 @@
         "placeMap": "Mappa",
         "weekSlots": "Turni settimanali",
         "pendingNotifyKind": "Tipo aggiornamento in sospeso",
-        "pendingNotifyAt": "Invio aggiornamento previsto"
+        "pendingNotifyAt": "Invio aggiornamento previsto",
+        "isFullyStaffed": "Disponibilità sufficienti",
+        "autoConfirmWhenFullyStaffed": "Assegna + conferma automaticamente quando ci sono abbastanza disponibili",
+        "fullyStaffedNotifiedAt": "Notifica disponibilità sufficienti inviata il"
     },
     "links": {
         "slots": "Turni",
@@ -59,6 +62,8 @@
         "volunteerStatsVolunteer": "Volontario",
         "volunteerStatsCompetences": "Competenze",
         "volunteerStatsEligible": "Turni idonei",
+        "slotPersonSingular": "persona",
+        "slotPersonPlural": "persone",
         "volunteerStatsResponded": "Hanno risposto",
         "volunteerStatsGaps": "Può coprire buchi",
         "volunteerStatsMatch": "Assegnati / idonei",
@@ -114,9 +119,12 @@
         "inviteTeams": "Tutti i membri attivi di questi team vengono coinvolti (uniti ai Volontari coinvolti).",
         "uniqueAddress": "Se attivo, lo stesso luogo viene usato per tutti i turni di questo lotto.",
         "weekSlots": "Aggiungi da 1 a 7 turni per lotto. Usa + nel pannello Turni per un altro lotto.",
-        "name": "Compilato automaticamente dalla data di inizio settimana."
+        "name": "Compilato automaticamente dalla data di inizio settimana.",
+        "isFullyStaffed": "Si attiva automaticamente quando ogni turno attivo ha abbastanza volontari che hanno indicato la propria disponibilità (stato Disponibile). Solo lettura per tutti. Non è lo stesso di Coperto (Coperto = già assegnati).",
+        "autoConfirmWhenFullyStaffed": "Impostato dal creatore del piano in creazione/modifica. Quando ci sono abbastanza disponibilità, il sistema prima assegna le persone ai turni e poi conferma il piano inviando le email di conferma ai volontari."
     },
     "messages": {
+        "enterAddressForMap": "Inserisci prima via o città, poi apri la mappa.",
         "requestAvailabilityConfirm": "Aprire la raccolta disponibilità e avvisare i volontari coinvolti?",
         "requestAvailabilitySuccess": "Richiesta per {slotCount} turni: {emailCount} email a {cohortCount} coinvolti ({notifyCount} notifiche in-app; chi ha inviato non riceve notifica in-app).",
         "requestAvailabilityEmailFailed": "Email non inviate: {list}",
@@ -141,6 +149,8 @@
         "scheduleChangeNotification": "Il turno «{slot}» del piano «{name}» (settimana dal {weekStart}) ha cambiato luogo/orario — riconferma la disponibilità.",
         "planUpdatedNotification": "Il piano turni «{name}» è stato aggiornato ({changes}). Controlla i dettagli.",
         "shiftsConfirmedNotification": "Turni confermati per «{name}»: {shifts}",
+        "weekFullyStaffedNotification": "Piano turni «{name}» (settimana dal {weekStart}): ci sono abbastanza volontari che hanno indicato la propria disponibilità per ogni turno attivo.",
+        "autoConfirmWhenFullyStaffedHelp": "Se attivo: non appena ogni turno ha abbastanza persone Disponibili, il sistema esegue in automatico (1) assegnazione e (2) conferma con email ai volontari. Se spento, ricevi solo l’avviso e assegni/confermi tu.",
         "shiftCancelledNotification": "Turni annullati nel piano «{name}»: {shifts}",
         "availabilitySaved": "Disponibilità salvata. Grazie!",
         "availabilityNotOpen": "La raccolta disponibilità non è aperta per questo piano.",

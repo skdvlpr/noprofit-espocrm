@@ -18,7 +18,10 @@
         "FoodParcelRegistration": "Registrazione pacco spesa",
         "ActivityOffer": "Piano turni",
         "ActivityOfferSlot": "Turno volontario",
-        "ActivityInvite": "Disponibilità"
+        "ActivityInvite": "Disponibilità",
+        "GCalSmokeAllDay": "Test GCal (tutto il giorno)",
+        "GCalSmokeDateTime": "Test GCal (data/ora)",
+        "GCalSmokeTwinDate": "Test GCal (due date)"
     },
     "scopeNamesPlural": {
         "Lead": "Lead",
@@ -35,7 +38,10 @@
         "FoodParcelRegistration": "Registrazioni pacco spesa",
         "ActivityOffer": "Pianificazione turni",
         "ActivityOfferSlot": "Turni volontari",
-        "ActivityInvite": "Disponibilità"
+        "ActivityInvite": "Disponibilità",
+        "GCalSmokeAllDay": "Test GCal (tutto il giorno)",
+        "GCalSmokeDateTime": "Test GCal (data/ora)",
+        "GCalSmokeTwinDate": "Test GCal (due date)"
     },
     "navbarTabs": {
         "mainSections": "Sezioni Principali",

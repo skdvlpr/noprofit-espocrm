@@ -70,20 +70,30 @@ class GetOverlayEvents implements Action
 
         foreach ($collection as $entity) {
             $id = (string) $entity->getId();
+            $htmlLink = $entity->get('htmlLink');
+            $calendarId = $entity->get('googleCalendarId');
+
             $row = [
                 'id' => $id,
                 'calendarEventKey' => $id,
                 'scope' => OverlaySyncRunner::ENTITY_TYPE,
                 'name' => (string) $entity->get('name'),
                 'status' => null,
+                'htmlLink' => is_string($htmlLink) ? $htmlLink : null,
+                'googleCalendarId' => is_string($calendarId) ? $calendarId : null,
+                'googleEventId' => is_string($entity->get('googleEventId'))
+                    ? (string) $entity->get('googleEventId')
+                    : null,
             ];
 
             if ($entity->get('isAllDay') || $entity->get('dateStartDate')) {
                 $row['dateStartDate'] = (string) $entity->get('dateStartDate');
                 $row['dateEndDate'] = (string) ($entity->get('dateEndDate') ?: $entity->get('dateStartDate'));
+                $row['isAllDay'] = true;
             } else {
                 $row['dateStart'] = (string) $entity->get('dateStart');
                 $row['dateEnd'] = (string) ($entity->get('dateEnd') ?: $entity->get('dateStart'));
+                $row['isAllDay'] = false;
             }
 
             $list[] = $row;

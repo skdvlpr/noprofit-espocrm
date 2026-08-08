@@ -52,6 +52,7 @@
             <div class="activity-offer-pending-update-text">{{pendingUpdateBannerText}}</div>
             <div class="activity-offer-pending-update-timer text-muted">{{pendingUpdateCountdown}}</div>
         </div>
+        {{#if canEditPendingUpdate}}
         <div class="activity-offer-pending-update-actions btn-group" role="group">
             <button
                 type="button"
@@ -64,6 +65,7 @@
                 data-action="bannerSendPendingUpdate"
             >{{translate 'Send update now' scope='ActivityOffer' category='labels'}}</button>
         </div>
+        {{/if}}
     </div>
     {{/if}}
 

@@ -9,6 +9,7 @@ use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Record\ReadParams;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\IdParser;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
@@ -86,6 +87,13 @@ class ExternalAccount extends BaseExternalAccount
         }
 
         $result->redirectUri = RedirectUri::build($this->config);
+
+        // Prefix/suffix for External Account routing help (non-secret admin naming).
+        [$prefix, $suffix] = $this->injectableFactory
+            ->create(CalendarProvisioner::class)
+            ->getPrefixSuffix();
+        $result->googleCalendarNamePrefix = $prefix;
+        $result->googleCalendarNameSuffix = $suffix;
 
         return $result;
     }

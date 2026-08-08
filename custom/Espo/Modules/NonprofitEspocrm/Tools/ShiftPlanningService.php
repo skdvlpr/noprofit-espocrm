@@ -79,6 +79,7 @@ class ShiftPlanningService
         private Language $language,
         private ShiftEmailService $shiftEmailService,
         private ShiftChangeNotifyService $shiftChangeNotifyService,
+        private ShiftCoverageSyncService $shiftCoverageSyncService,
     ) {}
 
     /**
@@ -542,6 +543,11 @@ class ShiftPlanningService
                 $withdrawnCount++;
             }
         }
+
+        // Always recompute plan-level "enough availability" after the grid save.
+        // Relying only on ActivityInvite AfterSave misses unchanged-status saves
+        // and removeEntity withdraws.
+        $this->syncSlotCoverageStatuses($offerId);
 
         return [
             'availableCount' => $availableCount,
@@ -1391,42 +1397,11 @@ class ShiftPlanningService
      * Keep slot status in sync with staffing:
      * Published → Covered when assignedCount >= requiredCount,
      * Covered → Published when staffing drops below required.
+     * Then refresh plan-level isFullyStaffed and notify the week creator once.
      */
     public function syncSlotCoverageStatuses(string $offerId): void
     {
-        foreach ($this->coverage($offerId)['slots'] as $row) {
-            $slotId = (string) ($row['id'] ?? '');
-
-            if ($slotId === '') {
-                continue;
-            }
-
-            $slotEntity = $this->entityManager->getEntityById('ActivityOfferSlot', $slotId);
-
-            if (!$slotEntity) {
-                continue;
-            }
-
-            $status = (string) ($slotEntity->get('status') ?? 'Published');
-            $isCovered = !empty($row['isCovered']);
-
-            // Coverage flip must not enqueue plan-update / schedule notify jobs.
-            $coverageSaveOpts = [
-                ShiftChangeNotifyService::SKIP_SCHEDULE_NOTIFY => true,
-                ShiftChangeNotifyService::SKIP_PLAN_UPDATE_NOTIFY => true,
-            ];
-
-            if ($isCovered && $status === 'Published') {
-                $slotEntity->set('status', 'Covered');
-                $this->saveEntityAllowStatus($slotEntity, $coverageSaveOpts);
-                continue;
-            }
-
-            if (!$isCovered && $status === 'Covered') {
-                $slotEntity->set('status', 'Published');
-                $this->saveEntityAllowStatus($slotEntity, $coverageSaveOpts);
-            }
-        }
+        $this->shiftCoverageSyncService->sync($offerId);
     }
 
     /**

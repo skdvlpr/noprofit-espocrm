@@ -82,8 +82,84 @@ class ShiftPlanningInstaller
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
         $this->ensureEmailTemplates($container);
+        $this->ensureCompletePastSlotsScheduling($container);
+        $this->ensureReconcileFullyStaffedScheduling($container);
         $this->ensureActivityOfferSlotNativeCalendar($container, $injectableFactory);
         $this->ensureSlotCrmCalendarDateSource($container, $injectableFactory);
+    }
+
+    /**
+     * Keep CompletePastActivityOfferSlots cron every 10 minutes on existing installs
+     * (metadata alone does not rewrite ScheduledJob.scheduling).
+     */
+    private function ensureCompletePastSlotsScheduling(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+            $jobName = 'SafehouseCrmCompletePastActivityOfferSlots';
+            $wanted = '*/' . '10 * * * *';
+
+            $job = $em->getRDBRepository('ScheduledJob')
+                ->where(['job' => $jobName])
+                ->findOne();
+
+            if (!$job) {
+                return;
+            }
+
+            if ((string) $job->get('scheduling') === $wanted) {
+                return;
+            }
+
+            $job->set('scheduling', $wanted);
+            $em->saveEntity($job, ['skipAll' => true, 'silent' => true]);
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'CompletePast slots scheduling update skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Keep ReconcileFullyStaffedPlans at every 5 minutes on existing installs.
+     */
+    private function ensureReconcileFullyStaffedScheduling(Container $container): void
+    {
+        try {
+            /** @var \Espo\ORM\EntityManager $em */
+            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
+            $jobName = 'SafehouseCrmReconcileFullyStaffedPlans';
+            $wanted = '*/' . '5 * * * *';
+
+            $job = $em->getRDBRepository('ScheduledJob')
+                ->where(['job' => $jobName])
+                ->findOne();
+
+            if (!$job) {
+                $job = $em->getNewEntity('ScheduledJob');
+                $job->set([
+                    'name' => 'Reconcile shift-plan availability coverage',
+                    'job' => $jobName,
+                    'status' => 'Active',
+                    'scheduling' => $wanted,
+                ]);
+                $em->saveEntity($job, ['skipAll' => true, 'silent' => true]);
+
+                return;
+            }
+
+            if ((string) $job->get('scheduling') === $wanted) {
+                return;
+            }
+
+            $job->set('scheduling', $wanted);
+            $em->saveEntity($job, ['skipAll' => true, 'silent' => true]);
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'Reconcile fully-staffed scheduling update skipped: ' . $e->getMessage()
+            );
+        }
     }
 
     /**
@@ -164,7 +240,7 @@ class ShiftPlanningInstaller
             $defs = $this->getShiftEmailTemplateDefs();
             $changed = false;
             // Bump when default subject/body must be rewritten on existing installs.
-            $contentVersion = '2026-08-06-cancel-v1';
+            $contentVersion = '2026-08-08-fully-staffed-v3';
             $storedVersion = (string) ($config->get('vadEmailTemplateContentVersion') ?? '');
             $refreshBodies = $storedVersion !== $contentVersion;
 
@@ -228,7 +304,8 @@ class ShiftPlanningInstaller
     private function getShiftEmailTemplateDefs(): array
     {
         $brand = ShiftEmailService::BRAND_NAME;
-        $signOff = '{logoHtml}<p>Grazie!<br><strong>{brandName}</strong></p>';
+        // logoHtml already includes logo + brand name — do not repeat {logoHtml}/{brandName}.
+        $signOff = '<p>Grazie!<br><strong>' . $brand . '</strong></p>';
 
         return [
             ShiftEmailService::KIND_AVAILABILITY_REQUEST => [
@@ -299,6 +376,23 @@ class ShiftPlanningInstaller
                     . '<p><strong>Turni annullati:</strong></p>{shiftList}'
                     . '<p>Non è più necessario presentarti a questi turni. '
                     . 'Per dettagli apri il piano nel CRM:</p>'
+                    . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
+                    . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
+                    . $signOff,
+            ],
+            ShiftEmailService::KIND_WEEK_FULLY_STAFFED => [
+                'name' => 'Turni — Disponibilità sufficienti',
+                'subject' => 'Disponibilità sufficienti: {ActivityOffer.name}',
+                'body' => '{logoHtml}'
+                    . '<p>Ciao <strong>{User.firstName}</strong>,</p>'
+                    . '<p>per il piano turni <strong>{ActivityOffer.name}</strong> '
+                    . '(settimana dal {ActivityOffer.weekStart}) ci sono ora '
+                    . '<strong>abbastanza volontari che hanno indicato la propria disponibilità</strong> '
+                    . 'per tutti i turni attivi.</p>'
+                    . '<p><strong>Turni previsti:</strong></p>{slotList}'
+                    . '<p>Puoi assegnare e confermare i turni manualmente, oppure — se hai attivato '
+                    . 'l’opzione <strong>assegna e conferma automaticamente</strong> — '
+                    . 'il sistema assegna le persone e invia le email di conferma da solo.</p>'
                     . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
                     . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
                     . $signOff,

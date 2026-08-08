@@ -6,7 +6,7 @@ use Espo\Core\Job\JobDataLess;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService;
 
 /**
- * Every 15 minutes: ActivityOfferSlot with dateEnd in the past → status Completed.
+ * Every 10 minutes: ActivityOfferSlot with dateEnd in the past → status Completed.
  * No volunteer notifications (status-only system transition).
  */
 class CompletePastActivityOfferSlots implements JobDataLess

@@ -372,9 +372,9 @@ $ok(
 $rCalendarDateSourceListLayout = $client->get('/api/v1/CalendarDateSource/layout/list');
 $calendarDateSourceListLayout = json_decode((string) $rCalendarDateSourceListLayout->getBody());
 $ok(
-    'CalendarDateSource list layout has calendarRoutingMode',
+    'CalendarDateSource list layout has no calendarRoutingMode (External Account only)',
     $rCalendarDateSourceListLayout->getStatusCode() === 200
-        && $layoutHasField($calendarDateSourceListLayout, 'calendarRoutingMode'),
+        && !$layoutHasField($calendarDateSourceListLayout, 'calendarRoutingMode'),
     'code=' . $rCalendarDateSourceListLayout->getStatusCode()
 );
 $ok(
@@ -552,9 +552,10 @@ $ok(
         && str_contains($adminEditTpl, 'gi-credentials')
 );
 $ok(
-    'Admin CRM scope chips omit entity-code clutter',
-    str_contains($adminEditTpl, 'gi-crm-scope-chip__label')
+    'Admin calendar config uses nav cards (no entity-code chip clutter)',
+    str_contains($adminEditTpl, 'gi-nav-card__title')
         && !str_contains($adminEditTpl, '({{entityType}})')
+        && !str_contains($adminEditTpl, 'gi-crm-scope-chip__label')
 );
 $ok(
     'Admin help CSS hides images (screenshots are KB-only)',
@@ -1345,13 +1346,19 @@ $ok(
         && str_contains($oauth2Js, "forOverlay: '1'")
 );
 $ok(
-    'EventPusher prefers ExternalAccount calendarRoutingMode',
+    'EventPusher uses ExternalAccount calendarRoutingMode (source routing ignored)',
     str_contains(
         (string) file_get_contents(
             dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php'
         ),
         'resolveUserCalendarRoutingMode'
     )
+        && str_contains(
+            (string) file_get_contents(
+                dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php'
+            ),
+            'ignore any legacy source value'
+        )
 );
 
 $adminEditTpl = (string) file_get_contents(
@@ -1390,6 +1397,16 @@ $ok(
     $metadata->get(['scopes', 'GoogleCalendarOverlayEvent', 'entity']) === true
 );
 $ok(
+    'GoogleCalendarOverlayEvent UI create/edit/delete disabled',
+    ($metadata->get(['clientDefs', 'GoogleCalendarOverlayEvent', 'createDisabled']) === true)
+        && ($metadata->get(['clientDefs', 'GoogleCalendarOverlayEvent', 'editDisabled']) === true)
+        && ($metadata->get(['clientDefs', 'GoogleCalendarOverlayEvent', 'deleteDisabled']) === true)
+        && is_file(
+            dirname(__DIR__) .
+            '/custom/Espo/Modules/GoogleIntegration/Hooks/GoogleCalendarOverlayEvent/BeforeSave.php'
+        )
+);
+$ok(
     'overlay-events route registered',
     (static function () use ($metadata): bool {
         $routes = $metadata->get(['app', 'routes']) ?? [];
@@ -1420,6 +1437,52 @@ $ok(
     'calendar.js merges overlay-events',
     str_contains($calendarJs, 'overlay-events')
         && str_contains($calendarJs, 'GoogleCalendarOverlayEvent')
+);
+$routesJson = (string) file_get_contents(
+    dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Resources/routes.json'
+);
+$ok(
+    'overlay-sync on-demand route + syncForUser + calendar button',
+    str_contains($routesJson, 'overlay-sync')
+        && method_exists(
+            \Espo\Modules\GoogleIntegration\Tools\Calendar\OverlaySyncRunner::class,
+            'syncForUser'
+        )
+        && class_exists(\Espo\Modules\GoogleIntegration\Tools\Calendar\Api\PostOverlaySync::class)
+        && str_contains($calendarJs, 'syncGoogleOverlay')
+        && str_contains($calendarJs, 'overlay-sync')
+        && is_file(
+            dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Resources/i18n/it_IT/Calendar.json'
+        )
+);
+$ok(
+    'overlay click modal + available-events + ownership filters',
+    str_contains($calendarJs, 'openOverlayEventModal')
+        && str_contains($calendarJs, 'ownershipFilter')
+        && str_contains($calendarJs, 'available-events')
+        && str_contains($routesJson, 'available-events')
+        && class_exists(\Espo\Modules\GoogleIntegration\Tools\Calendar\Api\GetCalendarAvailable::class)
+        && is_file(
+            dirname(__DIR__) .
+            '/client/custom/modules/google-integration/src/views/calendar/modals/overlay-event.js'
+        )
+        && str_contains(
+            (string) file_get_contents(
+                dirname(__DIR__) .
+                '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/Api/GetOverlayEvents.php'
+            ),
+            'htmlLink'
+        )
+);
+$ok(
+    'PrimaNota filters include paymentStatus',
+    str_contains(
+        (string) file_get_contents(
+            dirname(__DIR__) .
+            '/custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/PrimaNota/filters.json'
+        ),
+        'paymentStatus'
+    )
 );
 
 $ok(

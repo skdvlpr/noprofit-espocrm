@@ -144,7 +144,11 @@ define('nonprofit-espocrm:views/activity-offer/modals/create-week-slots', [
                 },
                 seedEmpty: true,
             }, view => {
-                view.render();
+                view.render().then(() => {
+                    if (typeof view.initGooglePlacesOnDayCards === 'function') {
+                        window.setTimeout(() => view.initGooglePlacesOnDayCards(), 100);
+                    }
+                });
             });
         },
 

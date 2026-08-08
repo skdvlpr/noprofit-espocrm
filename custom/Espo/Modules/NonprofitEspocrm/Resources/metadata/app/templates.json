@@ -1,0 +1,6 @@
+{
+    "reminderPush": {
+        "scopeList": ["Meeting", "Call", "Task"],
+        "module": "NonprofitEspocrm"
+    }
+}

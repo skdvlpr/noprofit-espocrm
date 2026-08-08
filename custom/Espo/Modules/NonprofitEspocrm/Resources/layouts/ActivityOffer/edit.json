@@ -16,6 +16,14 @@
         ]
     },
     {
+        "label": "Staffing automation",
+        "rows": [
+            [
+                {"name": "autoConfirmWhenFullyStaffed", "fullWidth": true}
+            ]
+        ]
+    },
+    {
         "label": "Cohort",
         "rows": [
             [

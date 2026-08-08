@@ -11,6 +11,10 @@
                 {"name": "publishedAt"}
             ],
             [
+                {"name": "isFullyStaffed"},
+                {"name": "autoConfirmWhenFullyStaffed"}
+            ],
+            [
                 {"name": "description", "fullWidth": true}
             ]
         ]

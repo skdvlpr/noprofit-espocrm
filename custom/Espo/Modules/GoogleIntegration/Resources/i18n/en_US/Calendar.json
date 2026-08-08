@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "googleOverlaySyncNow": "Fetch Google events now",
+        "googleOverlaySyncNowTitle": "Fetch events from Google into the CRM calendar now. Automatic update runs every 15 minutes.",
+        "googleOverlaySyncNowHint": "Automatic Google update every 15 minutes",
+        "googleOverlayEventModalTitle": "Google calendar event",
+        "googleOverlayEventWhen": "When",
+        "googleOverlayEventOpenInGoogle": "Open in Google",
+        "googleOverlayEventOpenHint": "This event comes from Google. It is read-only in the CRM.",
+        "googleOverlayEventNoLinkHint": "No Google link is available for this event.",
+        "ownershipFilterLabel": "Record filter",
+        "ownershipFilterMy": "My records",
+        "ownershipFilterAvailable": "Available",
+        "ownershipFilterTeam": "My team(s)",
+        "ownershipFilterMyTitle": "Show only your calendar events",
+        "ownershipFilterAvailableTitle": "Show all calendar events you are allowed to read",
+        "ownershipFilterTeamTitle": "Show calendar events for users in your team(s)"
+    },
+    "messages": {
+        "googleOverlaySyncNowRunning": "Fetching Google events…",
+        "googleOverlaySyncNowSuccess": "Google events updated.",
+        "googleOverlaySyncNowFailed": "Could not fetch Google events. Connect and enable Google under External Accounts, and select calendars to show in CRM."
+    }
+}

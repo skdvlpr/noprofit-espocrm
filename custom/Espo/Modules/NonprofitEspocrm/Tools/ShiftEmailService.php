@@ -7,6 +7,7 @@ use Espo\Core\Mail\EmailSender;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Language;
 use Espo\Core\Utils\Log;
+use Espo\Entities\Attachment;
 use Espo\Entities\Email;
 use Espo\Entities\EmailTemplate;
 use Espo\Entities\User;
@@ -40,8 +41,11 @@ class ShiftEmailService
     public const KIND_ADMIN_DIGEST = 'adminDigest';
     public const KIND_PLAN_UPDATED = 'planUpdated';
     public const KIND_SHIFT_CANCELLED = 'shiftCancelled';
+    public const KIND_WEEK_FULLY_STAFFED = 'weekFullyStaffed';
 
     public const BRAND_NAME = 'Safe House';
+
+    private const LOGO_ATTACHMENT_NAME = 'safehouse-email-logo.png';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -107,6 +111,16 @@ class ShiftEmailService
     public function sendShiftCancelled(Entity $offer, string $userId, array $shiftLines): array
     {
         return $this->sendTemplated(self::KIND_SHIFT_CANCELLED, $offer, [$userId], $shiftLines);
+    }
+
+    /**
+     * Week plan creator: every active shift has enough Assigned+Confirmed people.
+     *
+     * @return array{sent: int, skipped: string[], failed: string[]}
+     */
+    public function sendWeekFullyStaffed(Entity $offer, string $userId): array
+    {
+        return $this->sendTemplated(self::KIND_WEEK_FULLY_STAFFED, $offer, [$userId], []);
     }
 
     public function formatConfirmedShiftLine(Entity $slot): string
@@ -297,7 +311,15 @@ class ShiftEmailService
             }
         }
 
-        $line .= ' · ' . $required . ' ' . ($required === 1 ? 'posto' : 'posti');
+        $personLabel = $required === 1
+            ? $this->language->translate('slotPersonSingular', 'labels', 'ActivityOffer')
+            : $this->language->translate('slotPersonPlural', 'labels', 'ActivityOffer');
+
+        if ($personLabel === 'slotPersonSingular' || $personLabel === 'slotPersonPlural') {
+            $personLabel = $required === 1 ? 'persona' : 'persone';
+        }
+
+        $line .= ' · ' . $required . ' ' . $personLabel;
 
         if ($place !== '') {
             $line .= ' · ' . $place;
@@ -328,16 +350,69 @@ class ShiftEmailService
 
     private function logoHtml(): string
     {
-        $siteUrl = rtrim((string) ($this->config->get('siteUrl') ?? ''), '/');
-        $logoUrl = $siteUrl . '/client/custom/modules/nonprofit-espocrm/img/safe-house-logo.png';
+        $attachmentId = $this->ensureLogoAttachmentId();
+
+        $img = $attachmentId !== null
+            // Espo converts ?entryPoint=attachment&id=… → cid:{id}@espo on send (works in Mailpit/Gmail).
+            ? '<img src="?entryPoint=attachment&amp;id='
+                . htmlspecialchars($attachmentId, ENT_QUOTES, 'UTF-8')
+                . '" alt="Safe House" width="64" height="64" '
+                . 'style="display:block;border:0;outline:none;text-decoration:none;">'
+            : '';
 
         return '<div style="margin:0 0 16px 0;">'
-            . '<img src="' . htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') . '" '
-            . 'alt="Safe House" width="64" height="64" '
-            . 'style="display:block;border:0;outline:none;text-decoration:none;">'
+            . $img
             . '<div style="font-weight:700;font-size:16px;margin-top:8px;color:#1a1a1a;">'
             . self::BRAND_NAME
             . '</div></div>';
+    }
+
+    /**
+     * Persist logo once as Inline Attachment so outbound mail embeds it via CID
+     * (remote https://… URLs often fail in Mailpit / some clients).
+     */
+    private function ensureLogoAttachmentId(): ?string
+    {
+        $existing = $this->entityManager
+            ->getRDBRepository(Attachment::ENTITY_TYPE)
+            ->where([
+                'name' => self::LOGO_ATTACHMENT_NAME,
+                'role' => Attachment::ROLE_INLINE_ATTACHMENT,
+                'deleted' => false,
+            ])
+            ->findOne();
+
+        if ($existing) {
+            return $existing->getId();
+        }
+
+        $path = dirname(__DIR__, 5)
+            . '/client/custom/modules/nonprofit-espocrm/img/safe-house-logo.png';
+
+        if (!is_readable($path)) {
+            $this->log->warning('Shift planning: logo file missing at {path}', ['path' => $path]);
+
+            return null;
+        }
+
+        $contents = file_get_contents($path);
+
+        if ($contents === false || $contents === '') {
+            return null;
+        }
+
+        /** @var Attachment $attachment */
+        $attachment = $this->entityManager->getRDBRepositoryByClass(Attachment::class)->getNew();
+        $attachment
+            ->setName(self::LOGO_ATTACHMENT_NAME)
+            ->setType('image/png')
+            ->setRole(Attachment::ROLE_INLINE_ATTACHMENT)
+            ->setSize(strlen($contents))
+            ->setContents($contents);
+
+        $this->entityManager->saveEntity($attachment);
+
+        return $attachment->getId();
     }
 
     private function formatDateTime(string $value, bool $timeOnlyIfSameDay = false): string

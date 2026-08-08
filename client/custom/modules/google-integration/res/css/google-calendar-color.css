@@ -17,6 +17,66 @@
   vertical-align: middle;
 }
 
+/* Calendar toolbar: ownership filter + Google overlay sync */
+.gi-calendar-toolbar__left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.gi-ownership-filter .btn.active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.gi-overlay-sync-group .btn .fas {
+  margin-right: 0.35em;
+}
+
+.gi-overlay-sync-label {
+  white-space: nowrap;
+}
+
+.gi-overlay-sync-hint {
+  margin-top: 2px;
+  line-height: 1.3;
+  font-size: 11px;
+}
+
+.gi-calendar-toolbar .date-title {
+  text-align: center;
+}
+
+.gi-overlay-event-modal .gi-overlay-event-row {
+  margin-bottom: 12px;
+}
+
+.gi-overlay-event-modal .gi-overlay-event-label {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.gi-overlay-event-modal .gi-overlay-event-note {
+  margin: 12px 0 0;
+}
+
+@media (max-width: 767px) {
+  .gi-calendar-toolbar__left {
+    width: 100%;
+  }
+
+  .gi-overlay-sync-label {
+    font-size: 12px;
+  }
+
+  .gi-calendar-toolbar .date-title {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+}
+
 .selectize-dropdown .option[class*='google-calendar-color-opt-']::before,
 .selectize-dropdown [data-selectable][class*='google-calendar-color-opt-']::before,
 .selectize-input .item[class*='google-calendar-color-opt-']::before,

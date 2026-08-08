@@ -24,10 +24,13 @@
         "CalendarTemplate": "Шаблон календаря",
         "CalendarTemplatePlural": "Шаблоны календаря",
         "CalendarDateSource": "Источник дат календаря",
-        "CalendarDateSourcePlural": "Источники дат календаря"
+        "CalendarDateSourcePlural": "Источники дат календаря",
+        "GoogleCalendarOverlayEvent": "Событие Google Календаря",
+        "GoogleCalendarOverlayEventPlural": "События Google Календаря"
     },
     "scopeNamesPlural": {
         "CalendarTemplate": "Шаблоны календаря",
-        "CalendarDateSource": "Источники дат календаря"
+        "CalendarDateSource": "Источники дат календаря",
+        "GoogleCalendarOverlayEvent": "События Google Календаря"
     }
 }

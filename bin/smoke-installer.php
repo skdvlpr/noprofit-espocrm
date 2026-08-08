@@ -331,6 +331,33 @@ if ($websiteApiUser) {
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();
 $report('Team `Administration` provisioned', $adminTeam !== null);
 
+$volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
+$volunteerAcl = json_decode(json_encode($volunteerRole?->get('data') ?? new \stdClass()), true) ?? [];
+$report(
+    'Volunteer ACL: ExternalAccount create=yes (Google connect)',
+    ($volunteerAcl['ExternalAccount']['create'] ?? null) === 'yes'
+);
+$report(
+    'Volunteer ACL: Meeting create=yes (own CRM calendar)',
+    ($volunteerAcl['Meeting']['create'] ?? null) === 'yes'
+);
+$report(
+    'Volunteer ACL: Call create=yes',
+    ($volunteerAcl['Call']['create'] ?? null) === 'yes'
+);
+$report(
+    'Volunteer ACL: Task create=yes',
+    ($volunteerAcl['Task']['create'] ?? null) === 'yes'
+);
+$report(
+    'Volunteer ACL: Opportunity create=no (no Funds write)',
+    ($volunteerAcl['Opportunity']['create'] ?? null) === 'no'
+);
+$report(
+    'Volunteer userCalendarPermission=own',
+    ($volunteerRole?->get('userCalendarPermission') ?? null) === 'own'
+);
+
 $metadata = $container->getByClass(\Espo\Core\Utils\Metadata::class);
 $metadata->init(true);
 foreach (['SafehouseAurora', 'SafehouseAuroraLight'] as $themeName) {

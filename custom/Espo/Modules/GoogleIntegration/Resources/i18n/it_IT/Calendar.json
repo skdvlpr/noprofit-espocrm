@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "googleOverlaySyncNow": "Aggiorna eventi Google ora",
+        "googleOverlaySyncNowTitle": "Scarica ora gli eventi da Google nel calendario CRM. L'aggiornamento automatico avviene ogni 15 minuti.",
+        "googleOverlaySyncNowHint": "Aggiornamento automatico Google ogni 15 minuti",
+        "googleOverlayEventModalTitle": "Evento Google Calendar",
+        "googleOverlayEventWhen": "Quando",
+        "googleOverlayEventOpenInGoogle": "Apri in Google",
+        "googleOverlayEventOpenHint": "Questo evento proviene da Google. In CRM è solo in lettura.",
+        "googleOverlayEventNoLinkHint": "Nessun link Google disponibile per questo evento.",
+        "ownershipFilterLabel": "Filtro record",
+        "ownershipFilterMy": "I miei",
+        "ownershipFilterAvailable": "Disponibili",
+        "ownershipFilterTeam": "Il mio team",
+        "ownershipFilterMyTitle": "Mostra solo i tuoi eventi del calendario",
+        "ownershipFilterAvailableTitle": "Mostra tutti gli eventi del calendario che puoi leggere",
+        "ownershipFilterTeamTitle": "Mostra gli eventi del calendario degli utenti del tuo team"
+    },
+    "messages": {
+        "googleOverlaySyncNowRunning": "Aggiornamento eventi Google in corso…",
+        "googleOverlaySyncNowSuccess": "Eventi Google aggiornati.",
+        "googleOverlaySyncNowFailed": "Impossibile aggiornare gli eventi Google. Collega e abilita Google in Account esterni e scegli i calendari da mostrare nel CRM."
+    }
+}

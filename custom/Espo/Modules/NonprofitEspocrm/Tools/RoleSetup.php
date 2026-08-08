@@ -92,11 +92,10 @@ class RoleSetup
     /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
     /**
      * Bump when role specs change so ProvisionRoleAcl rewrites matrices on rebuild.
-     * 2026-08-08-v3: Website must override baseline Volunteer field locks on
-     * Contact/Account email+phone (baselineRoleId=Volunteer otherwise blocks
-     * Stripe party match → payment_intent.succeeded 502).
+     * 2026-08-08-v4: Volunteer/Employee/Member get ExternalAccount (Google connect)
+     * + own Meeting/Call/Task create; Opportunity stays read-only.
      */
-    public const ACL_MATRIX_VERSION = '2026-08-08-website-contact-channels-v3';
+    public const ACL_MATRIX_VERSION = '2026-08-08-volunteer-calendar-external-v4';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -703,7 +702,8 @@ class RoleSetup
             $adminData[$e] = $allFull();
         }
 
-        // Volunteer: read everything; write only own Task + ActivityInvite.
+        // Volunteer: read domain; own CRM calendar (Meeting/Call/Task); Google ExternalAccount;
+        // ActivityInvite own; never create Opportunity / Funds.
         $volunteerData = [];
         foreach ($domainEntities as $e) {
             $volunteerData[$e] = $readOnlyAll();
@@ -711,8 +711,17 @@ class RoleSetup
         $volunteerData['Email'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
         ];
-        $volunteerData['Task'] = [
-            'create' => 'no', 'read' => 'all', 'edit' => 'own', 'delete' => 'no', 'stream' => 'all',
+        $ownCalendar = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
+        ];
+        $volunteerData['Meeting'] = $ownCalendar;
+        $volunteerData['Call'] = $ownCalendar;
+        $volunteerData['Task'] = $ownCalendar;
+        $volunteerData['ExternalAccount'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own',
+        ];
+        $volunteerData['Opportunity'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
         $volunteerData['ActivityOffer'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
@@ -724,13 +733,22 @@ class RoleSetup
             'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
         ];
 
-        // Member: read everything; change nothing.
+        // Member: read domain; own calendar + Google connect (same personal tools as Volunteer).
         $memberData = [];
         foreach ($domainEntities as $e) {
             $memberData[$e] = $readOnlyAll();
         }
         $memberData['Email'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
+        ];
+        $memberData['Meeting'] = $ownCalendar;
+        $memberData['Call'] = $ownCalendar;
+        $memberData['Task'] = $ownCalendar;
+        $memberData['ExternalAccount'] = [
+            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own',
+        ];
+        $memberData['Opportunity'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
         $memberData['ActivityInvite'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
@@ -796,20 +814,25 @@ class RoleSetup
             self::ROLE_VOLUNTEER => [
                 'data'      => $volunteerData,
                 'fieldData' => $volunteerFieldData,
-                'perms'     => $readOnlyPerms,
+                'perms'     => array_merge($readOnlyPerms, [
+                    // Own Meeting/Call/Task on CRM calendar + Google External Account.
+                    'userCalendarPermission' => 'own',
+                ]),
             ],
             // Employee (Dipendente): identical ACL to Volunteer.
             self::ROLE_EMPLOYEE => [
                 'data'      => $volunteerData,
                 'fieldData' => $volunteerFieldData,
-                'perms'     => $readOnlyPerms,
+                'perms'     => array_merge($readOnlyPerms, [
+                    'userCalendarPermission' => 'own',
+                ]),
             ],
             self::ROLE_MEMBER => [
                 'data'      => $memberData,
                 'fieldData' => [],
                 'perms'     => array_merge($readOnlyPerms, [
                     'mentionPermission'      => 'no',
-                    'userCalendarPermission' => 'no',
+                    'userCalendarPermission' => 'own',
                 ]),
             ],
             // Always provisioned: donation-site API sync (Stripe refresh / PrimaNota ingest).

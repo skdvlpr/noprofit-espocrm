@@ -1,0 +1,24 @@
+{
+    "labels": {
+        "googleOverlaySyncNow": "Обновить события Google сейчас",
+        "googleOverlaySyncNowTitle": "Сейчас загрузить события из Google в календарь CRM. Автообновление запускается каждые 15 минут.",
+        "googleOverlaySyncNowHint": "Автообновление Google каждые 15 минут",
+        "googleOverlayEventModalTitle": "Событие Google Календаря",
+        "googleOverlayEventWhen": "Когда",
+        "googleOverlayEventOpenInGoogle": "Открыть в Google",
+        "googleOverlayEventOpenHint": "Это событие из Google. В CRM оно только для чтения.",
+        "googleOverlayEventNoLinkHint": "Ссылка на событие в Google недоступна.",
+        "ownershipFilterLabel": "Фильтр записей",
+        "ownershipFilterMy": "Мои",
+        "ownershipFilterAvailable": "Доступные",
+        "ownershipFilterTeam": "Моя команда",
+        "ownershipFilterMyTitle": "Показать только ваши события календаря",
+        "ownershipFilterAvailableTitle": "Показать все события календаря, которые вам разрешено читать",
+        "ownershipFilterTeamTitle": "Показать события календаря пользователей вашей команды"
+    },
+    "messages": {
+        "googleOverlaySyncNowRunning": "Загрузка событий Google…",
+        "googleOverlaySyncNowSuccess": "События Google обновлены.",
+        "googleOverlaySyncNowFailed": "Не удалось загрузить события Google. Подключите и включите Google во Внешних аккаунтах и выберите календари для показа в CRM."
+    }
+}

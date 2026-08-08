@@ -3,7 +3,6 @@
     {"name": "targetEntityType"},
     {"name": "dateField"},
     {"name": "sourceDateType"},
-    {"name": "calendarRoutingMode"},
     {"name": "isActive"},
     {"name": "calendarViewEnabled"},
     {"name": "sortOrder"}

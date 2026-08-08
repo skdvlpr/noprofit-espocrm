@@ -17,7 +17,10 @@
         "FoodParcelRegistration": "Food Parcel Registration",
         "ActivityOffer": "Shift Plan",
         "ActivityOfferSlot": "Volunteer shift",
-        "ActivityInvite": "Availability"
+        "ActivityInvite": "Availability",
+        "GCalSmokeAllDay": "GCal test (all day)",
+        "GCalSmokeDateTime": "GCal test (date/time)",
+        "GCalSmokeTwinDate": "GCal test (two dates)"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
@@ -33,7 +36,10 @@
         "FoodParcelRegistration": "Food Parcel Registrations",
         "ActivityOffer": "Shift Planning",
         "ActivityOfferSlot": "Volunteer shifts",
-        "ActivityInvite": "Availabilities"
+        "ActivityInvite": "Availabilities",
+        "GCalSmokeAllDay": "GCal tests (all day)",
+        "GCalSmokeDateTime": "GCal tests (date/time)",
+        "GCalSmokeTwinDate": "GCal tests (two dates)"
     },
     "navbarTabs": {
         "mainSections": "Main Sections",

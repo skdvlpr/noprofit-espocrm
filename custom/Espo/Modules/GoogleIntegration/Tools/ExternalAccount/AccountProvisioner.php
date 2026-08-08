@@ -36,6 +36,7 @@ class AccountProvisioner
             $entity = $this->entityManager->getNewEntity(ExternalAccountEntity::ENTITY_TYPE);
             $entity->set(Attribute::ID, $canonicalId);
             $entity->set('enabled', false);
+            $entity->set('calendarRoutingMode', 'auto_dedicated');
             $this->copyLegacyDataIfNeeded($entity, $userId);
             $this->entityManager->saveEntity($entity);
         }
@@ -55,6 +56,7 @@ class AccountProvisioner
             $fresh = $this->entityManager->getNewEntity(ExternalAccountEntity::ENTITY_TYPE);
             $fresh->set(Attribute::ID, $canonicalId);
             $fresh->set('enabled', false);
+            $fresh->set('calendarRoutingMode', 'auto_dedicated');
             $this->copyLegacyDataIfNeeded($fresh, $userId);
             $this->entityManager->saveEntity($fresh);
         }

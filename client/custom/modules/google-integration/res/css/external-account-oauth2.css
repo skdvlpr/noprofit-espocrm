@@ -1,0 +1,142 @@
+/**
+ * Google External Account (user OAuth) — stacked, aligned layout.
+ * Loaded via GoogleIntegration app client.cssList.
+ */
+.gi-ea-oauth2 {
+    --gi-ea-gap: 16px;
+    --gi-ea-radius: 8px;
+    --gi-ea-pad: 16px 18px;
+    max-width: 920px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.gi-ea-oauth2 *,
+.gi-ea-oauth2 *::before,
+.gi-ea-oauth2 *::after {
+    box-sizing: border-box;
+}
+
+.gi-ea-oauth2__toolbar {
+    margin-bottom: var(--gi-ea-gap);
+}
+
+.gi-ea-oauth2__stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gi-ea-gap);
+    align-items: stretch;
+}
+
+.gi-ea-oauth2 .gi-ea-panel {
+    margin: 0;
+    border-radius: var(--gi-ea-radius);
+    overflow: hidden;
+}
+
+.gi-ea-oauth2 .gi-ea-panel > .panel-heading {
+    padding: 12px 18px;
+}
+
+.gi-ea-oauth2 .gi-ea-panel > .panel-heading .panel-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.gi-ea-oauth2 .gi-ea-panel > .panel-body {
+    padding: var(--gi-ea-pad);
+}
+
+.gi-ea-oauth2 .gi-ea-help {
+    margin: 0;
+    padding: var(--gi-ea-pad);
+    border-radius: var(--gi-ea-radius);
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+    background: var(--gray-bg, #f7f7f7);
+}
+
+.gi-ea-oauth2 .gi-ea-help p:last-child {
+    margin-bottom: 0;
+}
+
+.gi-ea-oauth2 .gi-ea-cell {
+    margin-bottom: 14px;
+}
+
+.gi-ea-oauth2 .gi-ea-cell:last-child {
+    margin-bottom: 0;
+}
+
+.gi-ea-oauth2 .gi-ea-cell > .control-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.gi-ea-oauth2 .gi-ea-cell > .field {
+    width: 100%;
+}
+
+.gi-ea-oauth2 .gi-ea-cell > .field .form-control,
+.gi-ea-oauth2 .gi-ea-cell > .field select {
+    width: 100%;
+    max-width: 100%;
+}
+
+.gi-ea-oauth2 .gi-ea-routing-help {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--info-bg, rgba(52, 152, 219, 0.08));
+    border: 1px solid var(--info-border, rgba(52, 152, 219, 0.22));
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.gi-ea-oauth2 .gi-ea-routing-help p:last-child {
+    margin-bottom: 0;
+}
+
+.gi-ea-oauth2 .gi-ea-connect {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.gi-ea-oauth2 .gi-ea-profile .media {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gi-ea-oauth2 .gi-ea-muted {
+    margin: 10px 0 0;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.gi-ea-oauth2 .oauth-safety-ack-label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 500;
+}
+
+@media (max-width: 767px) {
+    .gi-ea-oauth2 {
+        max-width: 100%;
+    }
+
+    .gi-ea-oauth2__toolbar .btn-group {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .gi-ea-oauth2__toolbar .btn {
+        flex: 1 1 auto;
+    }
+}

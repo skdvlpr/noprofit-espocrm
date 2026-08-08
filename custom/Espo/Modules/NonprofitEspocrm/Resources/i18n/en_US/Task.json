@@ -14,7 +14,7 @@
         "notifyChannelList": {
             "Email": "Email",
             "InApp": "In-app",
-            "Push": "Push"
+            "Push": "Push Notification"
         },
         "category": {
             "MealPreparation": "Meal preparation",

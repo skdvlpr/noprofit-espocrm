@@ -1,29 +1,37 @@
-<div class="button-container">
-    <div class="btn-group">
-        <button class="btn btn-primary btn-xs-wide" data-action="save">{{translate 'Save'}}</button>
-        <button class="btn btn-default btn-xs-wide" data-action="cancel">{{translate 'Cancel'}}</button>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-sm-6">
-        <div>
-            <div class="cell form-group" data-name="enabled">
-                <label
-                    class="control-label"
-                    data-name="enabled"
-                >{{translate 'enabled' scope='Integration' category='fields'}}</label>
-                <div class="field" data-name="enabled">{{{enabled}}}</div>
-            </div>
+<div class="gi-ea-oauth2">
+    <div class="button-container gi-ea-oauth2__toolbar">
+        <div class="btn-group">
+            <button class="btn btn-primary btn-xs-wide" data-action="save">{{translate 'Save'}}</button>
+            <button class="btn btn-default btn-xs-wide" data-action="cancel">{{translate 'Cancel'}}</button>
         </div>
+    </div>
 
-        <div class="panel panel-warning oauth-safety-panel margin-bottom">
+    <div class="gi-ea-oauth2__stack">
+        {{#if helpText}}
+        <div class="gi-ea-help well" role="note">
+            {{complexText helpText}}
+        </div>
+        {{/if}}
+
+        <section class="panel panel-default gi-ea-panel" aria-label="{{translate 'enabled' scope='Integration' category='fields'}}">
+            <div class="panel-body">
+                <div class="gi-ea-cell cell form-group" data-name="enabled">
+                    <label
+                        class="control-label"
+                        data-name="enabled"
+                    >{{translate 'enabled' scope='Integration' category='fields'}}</label>
+                    <div class="field" data-name="enabled">{{{enabled}}}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel panel-warning oauth-safety-panel gi-ea-panel">
             <div class="panel-heading">
                 <h4 class="panel-title">{{translate 'googleConnectWarningTitle' scope='ExternalAccount' category='labels'}}</h4>
             </div>
             <div class="panel-body">
                 <div class="oauth-safety-body">{{complexText oauthSafetyBody}}</div>
-                <label class="checkbox oauth-safety-ack-label" style="display:block;margin-top:12px;">
+                <label class="checkbox oauth-safety-ack-label">
                     <input
                         type="checkbox"
                         data-name="oauthSafetyAck"
@@ -32,13 +40,17 @@
                     >
                     {{translate 'googleConnectRiskCheckboxLabel' scope='ExternalAccount' category='labels'}}
                 </label>
-                <p class="text-muted small" style="margin-top:8px;margin-bottom:0;">
+                <p class="text-muted small gi-ea-muted">
                     {{translate 'oauthSafetyAckHint' scope='ExternalAccount' category='labels'}}
                 </p>
             </div>
-        </div>
+        </section>
 
-        <div class="data-panel">
+        {{!--
+          Do NOT use class "data-panel": Espo core oauth2 afterRender hides
+          .data-panel when Enabled is unchecked.
+        --}}
+        <div class="gi-ea-connect oauth-connect-panel">
             <button
                 type="button"
                 class="btn btn-danger {{#if isConnected}}hidden{{/if}} {{#unless oauthSafetyAck}}disabled{{/unless}}"
@@ -49,7 +61,7 @@
                 class="connected-label label label-success {{#unless isConnected}}hidden{{/unless}}"
             >{{translate 'Connected' scope='ExternalAccount'}}</span>
             {{#if isConnected}}
-            <div class="btn-group margin-top" role="group">
+            <div class="btn-group" role="group">
                 <button
                     type="button"
                     class="btn btn-default btn-xs-wide {{#unless oauthSafetyAck}}disabled{{/unless}}"
@@ -64,8 +76,9 @@
             </div>
             {{/if}}
         </div>
+
         {{#if showGoogleAccountProfile}}
-        <div class="panel panel-default margin-top">
+        <section class="panel panel-default gi-ea-panel gi-ea-profile">
             <div class="panel-body">
                 <div class="media">
                     {{#if googleAccountPicture}}
@@ -84,10 +97,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
         {{else}}
             {{#if googleAccountProfileMissing}}
-            <div class="alert alert-warning margin-top">
+            <div class="alert alert-warning">
                 <div>{{translate 'googleAccountProfileMissing' scope='ExternalAccount' category='labels'}}</div>
                 <button
                     type="button"
@@ -100,12 +113,12 @@
         {{/if}}
 
         {{#if showCalendarSettings}}
-        <div class="panel panel-default margin-top">
+        <section class="panel panel-default gi-ea-panel">
             <div class="panel-heading">
                 <h4 class="panel-title">{{translate 'googleCalendarUserSettings' scope='ExternalAccount' category='labels'}}</h4>
             </div>
             <div class="panel-body">
-                <div class="cell form-group" data-name="calendarRoutingMode">
+                <div class="gi-ea-cell cell form-group" data-name="calendarRoutingMode">
                     <label class="control-label">
                         {{translate 'calendarRoutingMode' scope='ExternalAccount' category='fields'}}
                         <span
@@ -114,8 +127,12 @@
                         ></span>
                     </label>
                     <div class="field" data-name="calendarRoutingMode">{{{calendarRoutingMode}}}</div>
+                    <div
+                        class="gi-ea-routing-help"
+                        data-name="calendarRoutingModeHelp"
+                    >{{complexText calendarRoutingModeHelp}}</div>
                 </div>
-                <div class="cell form-group" data-name="overlayCalendarIdList">
+                <div class="gi-ea-cell cell form-group" data-name="overlayCalendarIdList">
                     <label class="control-label">
                         {{translate 'overlayCalendarIdList' scope='ExternalAccount' category='fields'}}
                         <span
@@ -124,23 +141,15 @@
                         ></span>
                     </label>
                     <div class="field" data-name="overlayCalendarIdList">{{{overlayCalendarIdList}}}</div>
-                    <p class="help-block text-muted small">
+                    <p class="help-block text-muted small gi-ea-muted">
                         {{translate 'overlayCalendarIdListHelp' scope='ExternalAccount' category='labels'}}
                     </p>
                 </div>
+                <p class="help-block text-muted small gi-ea-muted">
+                    {{complexText calendarSyncModeHelp}}
+                </p>
             </div>
-        </div>
-        {{/if}}
-
-        {{#if isConnected}}
-        <p class="help-block text-muted small margin-top">{{translate 'calendarSyncModeHelp' scope='ExternalAccount' category='labels'}}</p>
-        {{/if}}
-    </div>
-    <div class="col-sm-6">
-        {{#if helpText}}
-        <div class="well">
-            {{complexText helpText}}
-        </div>
+        </section>
         {{/if}}
     </div>
 </div>

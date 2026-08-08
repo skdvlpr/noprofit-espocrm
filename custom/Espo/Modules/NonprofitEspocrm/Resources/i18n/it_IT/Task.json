@@ -21,7 +21,7 @@
         "notifyChannelList": {
             "Email": "Email",
             "InApp": "In-app",
-            "Push": "Push"
+            "Push": "Notifica push"
         },
         "category": {
             "MealPreparation": "Preparazione pasti",

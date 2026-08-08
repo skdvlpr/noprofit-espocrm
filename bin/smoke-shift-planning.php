@@ -133,7 +133,14 @@ $freshConfig = $injectableFactory->create(\Espo\Core\Utils\Config::class);
 $templateIds = $freshConfig->get(\Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService::CONFIG_KEY);
 $templateIds = $templateIds ? json_decode(json_encode($templateIds), true) : [];
 
-foreach (['availabilityRequest', 'shiftsConfirmed', 'adminDigest'] as $kind) {
+foreach ([
+    'availabilityRequest',
+    'shiftsConfirmed',
+    'adminDigest',
+    'planUpdated',
+    'shiftCancelled',
+    'weekFullyStaffed',
+] as $kind) {
     $tplId = $templateIds[$kind] ?? null;
     $tpl = $tplId ? $em->getEntityById('EmailTemplate', $tplId) : null;
     ok($tpl !== null, "email template provisioned: $kind");
@@ -148,6 +155,39 @@ foreach (['availabilityRequest', 'shiftsConfirmed', 'adminDigest'] as $kind) {
             "email template $kind has no forbidden Safehouse spelling");
     }
 }
+
+$emailService = $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService::class);
+$slotStub = $em->getNewEntity('ActivityOfferSlot');
+$slotStub->set([
+    'category' => 'MealPreparation',
+    'dateStart' => '2026-08-10 10:30:00',
+    'dateEnd' => '2026-08-10 12:30:00',
+    'requiredCount' => 1,
+    'placeStreet' => 'Via Test',
+    'placeCity' => 'Torino',
+]);
+$line1 = $emailService->formatConfirmedShiftLine($slotStub);
+ok(
+    str_contains($line1, 'persona') || str_contains($line1, 'person'),
+    'slot line uses person/persona (not posto)'
+);
+ok(!str_contains($line1, 'posto') && !str_contains($line1, 'posti'), 'slot line has no posto/posti');
+$slotStub->set('requiredCount', 2);
+$line2 = $emailService->formatConfirmedShiftLine($slotStub);
+ok(
+    str_contains($line2, 'persone') || str_contains($line2, 'people'),
+    'slot line plural uses people/persone'
+);
+
+$ref = new ReflectionClass($emailService);
+$logoMethod = $ref->getMethod('logoHtml');
+$logoMethod->setAccessible(true);
+$logoHtml = (string) $logoMethod->invoke($emailService);
+ok(
+    str_contains($logoHtml, 'entryPoint=attachment') && str_contains($logoHtml, 'id='),
+    'logoHtml uses inline attachment entryPoint (CID on send)'
+);
+ok(!str_contains($logoHtml, 'safe-house-logo.png'), 'logoHtml does not use remote static PNG URL');
 
 ok(
     (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'weekSlots']),
@@ -256,6 +296,30 @@ ok(
     'week-slots field view exists'
 );
 ok(
+    str_contains(
+        (string) file_get_contents(
+            __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/fields/week-slots.js'
+        ),
+        'SafehouseGooglePlaces'
+    )
+        && str_contains(
+            (string) file_get_contents(
+                __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/fields/week-slots.js'
+            ),
+            'viewPlaceMap'
+        )
+        && is_file(
+            __DIR__ . '/../client/custom/modules/nonprofit-espocrm/lib/google-places-loader.js'
+        )
+        && str_contains(
+            (string) file_get_contents(
+                __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/app/client.json'
+            ),
+            'google-places-loader.js'
+        ),
+    'Aggiungi turni Google Places loader + View on Map'
+);
+ok(
     is_file(__DIR__ . '/../client/custom/res/templates/site/footer.tpl'),
     'custom site footer template exists'
 );
@@ -294,10 +358,53 @@ ok(!str_contains($applied, '{Missing.recordUrl}'), 'missing related recordUrl be
 $cleaned = $helper->clearUnresolvedEntityPlaceholders($applied);
 ok(!str_contains($cleaned, '{ActivityOffer.noSuchField}'), 'null/unresolved entity placeholders cleared');
 
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'isFullyStaffed']),
+    'ActivityOffer.isFullyStaffed field exists'
+);
+ok(
+    (bool) ($metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'isFullyStaffed', 'readOnly']) ?? false),
+    'ActivityOffer.isFullyStaffed is readOnly'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'autoConfirmWhenFullyStaffed']),
+    'ActivityOffer.autoConfirmWhenFullyStaffed field exists'
+);
+ok(
+    !($metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'autoConfirmWhenFullyStaffed', 'readOnly']) ?? false),
+    'ActivityOffer.autoConfirmWhenFullyStaffed is editable by creator'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'fullyStaffedNotifiedAt']),
+    'ActivityOffer.fullyStaffedNotifiedAt field exists'
+);
+ok(
+    ($metadata->get(['app', 'scheduledJobs', 'SafehouseCrmCompletePastActivityOfferSlots', 'scheduling']) ?? '')
+        === '*/10 * * * *',
+    'CompletePastActivityOfferSlots scheduling is every 10 minutes'
+);
+ok(
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Jobs/AutoConfirmFullyStaffedPlan.php'),
+    'AutoConfirmFullyStaffedPlan job exists'
+);
+ok(
+    str_contains(
+        (string) file_get_contents(
+            __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftCoverageSyncService.php'
+        ),
+        "'Available'"
+    ),
+    'isFullyStaffed counts Available invites'
+);
+
 // --- fixtures -----------------------------------------------------------------
 
 // Purge leftovers from previous runs.
-foreach ($em->getRDBRepository('ActivityOffer')->where(['name' => ['Smoke Shift Week', 'Smoke Shift Week OLD']])->find() as $old) {
+foreach ($em->getRDBRepository('ActivityOffer')->where(['name' => [
+    'Smoke Shift Week',
+    'Smoke Shift Week OLD',
+    'Smoke Week Generator',
+]])->find() as $old) {
     foreach (['ActivityInvite', 'Task', 'ActivityOfferSlot'] as $type) {
         foreach ($em->getRDBRepository($type)->where(['activityOfferId' => $old->getId()])->find() as $e) {
             $em->removeEntity($e, ['skipAll' => true, 'silent' => true]);
@@ -913,6 +1020,40 @@ ok(str_contains($detailTpl, 'showPendingUpdateBanner'), 'detail.tpl has pending-
 ok(
     str_contains($detailTpl, 'bannerSendPendingUpdate'),
     'detail.tpl banner Send-now uses distinct data-action'
+);
+ok(
+    str_contains($detailTpl, 'canEditPendingUpdate'),
+    'detail.tpl gates banner update buttons with canEditPendingUpdate'
+);
+$detailJsSrc = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/detail.js');
+ok(
+    str_contains($detailJsSrc, 'canEditPendingUpdate')
+        && str_contains($detailJsSrc, "checkModel(this.model, 'edit')"),
+    'detail.js sets canEditPendingUpdate from ACL edit'
+);
+ok(
+    str_contains($detailJsSrc, 'startLiveRefresh')
+        && str_contains($detailJsSrc, 'liveRefreshIntervalMs'),
+    'detail.js polls for live banner/coverage refresh'
+);
+ok(
+    str_contains(
+        (string) file_get_contents(
+            __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php'
+        ),
+        'hanno indicato la propria disponibilità'
+    ),
+    'weekFullyStaffed email uses indicato (not salvato)'
+);
+ok(
+    !str_contains(
+        (string) file_get_contents(
+            __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php'
+        ),
+        "\$signOff = '{logoHtml}"
+    ),
+    'email signOff does not repeat logoHtml (no double Safe House)'
 );
 $clientCssList = $metadata->get(['app', 'client', 'cssList']) ?? [];
 ok(

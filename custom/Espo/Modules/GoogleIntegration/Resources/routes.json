@@ -80,6 +80,16 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetOverlayEvents"
     },
     {
+        "route": "/GoogleIntegration/calendar/overlay-sync",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PostOverlaySync"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/available-events",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetCalendarAvailable"
+    },
+    {
         "route": "/GoogleIntegration/calendar/entity-event-links/:entityType/:id",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetEntityEventLinks"

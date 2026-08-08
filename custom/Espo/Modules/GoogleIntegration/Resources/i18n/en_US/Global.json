@@ -24,11 +24,14 @@
         "CalendarTemplate": "Calendar Template",
         "CalendarTemplatePlural": "Calendar Templates",
         "CalendarDateSource": "Calendar Date Source",
-        "CalendarDateSourcePlural": "Calendar Date Sources"
+        "CalendarDateSourcePlural": "Calendar Date Sources",
+        "GoogleCalendarOverlayEvent": "Google calendar event",
+        "GoogleCalendarOverlayEventPlural": "Google calendar events"
     },
     "scopeNamesPlural": {
         "CalendarTemplate": "Calendar Templates",
-        "CalendarDateSource": "Calendar Date Sources"
+        "CalendarDateSource": "Calendar Date Sources",
+        "GoogleCalendarOverlayEvent": "Google calendar events"
     },
     "messages": {
         "googleCalendarIntegrationDisabled": "Google Calendar integration is disabled. Turn it on under Administration → Integrations, or uncheck Save in Google Calendar."
