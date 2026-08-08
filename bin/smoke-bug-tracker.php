@@ -190,6 +190,72 @@ try {
         'attachment entity removed',
         $em->getEntityById(Attachment::ENTITY_TYPE, $attachmentId) === null
     );
+
+    // Regression: closing a bug with a foreign Attachment id must NOT destroy
+    // that file (Espo LinkCheck only requires READ; FieldProcessing reparents
+    // HAS_CHILDREN attachments before cleanup runs).
+    $foreign = $em->getRDBRepositoryByClass(Attachment::class)->getNew();
+    $foreign->set([
+        'name' => 'bug-tracker-foreign-smoke.png',
+        'type' => 'image/png',
+        'role' => Attachment::ROLE_ATTACHMENT,
+        'field' => 'documents',
+        'relatedType' => 'Document',
+        'parentType' => 'Document',
+        'parentId' => 'smoke-foreign-parent',
+        'contents' => base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ),
+    ]);
+    $em->saveEntity($foreign);
+    $foreignId = $foreign->getId();
+    $check('foreign attachment created', is_string($foreignId) && $foreignId !== '');
+
+    $poisoned = $em->getNewEntity('BugReport');
+    $poisoned->set([
+        'description' => 'Automated smoke — foreign screenshot id must be ignored.',
+        'status' => 'Closed',
+        'pageUrl' => 'https://example.test/smoke-bug-tracker-foreign',
+        'pageTitle' => 'Smoke foreign',
+        'screenshotsIds' => [$foreignId],
+        'assignedUserId' => $user ? $user->getId() : null,
+    ]);
+    $em->saveEntity($poisoned);
+    $poisonedId = $poisoned->getId();
+    $check('poisoned BugReport created', is_string($poisonedId) && $poisonedId !== '');
+
+    $foreignAfter = $em->getEntityById(Attachment::ENTITY_TYPE, $foreignId);
+    $check('foreign attachment not destroyed on close', $foreignAfter !== null);
+    if ($foreignAfter) {
+        $check(
+            'foreign attachment parent unchanged',
+            $foreignAfter->get('parentType') === 'Document' &&
+                $foreignAfter->get('parentId') === 'smoke-foreign-parent'
+        );
+        $check(
+            'foreign attachment field unchanged',
+            $foreignAfter->get('field') === 'documents'
+        );
+    }
+
+    $poisonedIds = $poisoned->getLinkMultipleIdList('screenshots') ?: [];
+    $check(
+        'foreign id not kept as screenshot',
+        !in_array($foreignId, $poisonedIds, true),
+        json_encode($poisonedIds) ?: ''
+    );
+
+    try {
+        $em->removeEntity($poisoned);
+    } catch (Throwable $e) {
+    }
+    $foreignLeftover = $em->getEntityById(Attachment::ENTITY_TYPE, $foreignId);
+    if ($foreignLeftover) {
+        try {
+            $em->removeEntity($foreignLeftover);
+        } catch (Throwable $e) {
+        }
+    }
 } catch (Throwable $e) {
     $check('lifecycle', false, $e->getMessage());
 } finally {
