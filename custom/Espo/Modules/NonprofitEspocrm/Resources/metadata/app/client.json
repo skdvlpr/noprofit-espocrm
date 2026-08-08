@@ -5,7 +5,8 @@
         "client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css",
         "client/custom/modules/nonprofit-espocrm/res/css/knowledge-base.css",
         "client/custom/modules/nonprofit-espocrm/res/css/google-places-modal.css",
-        "client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css"
+        "client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css",
+        "client/custom/modules/nonprofit-espocrm/res/css/prima-nota-bulk-pull.css"
     ],
     "scriptList": [
         "__APPEND__",

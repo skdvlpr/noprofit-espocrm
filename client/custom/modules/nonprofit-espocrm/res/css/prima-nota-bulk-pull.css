@@ -1,0 +1,236 @@
+/* PrimaNota bulk-pull modal — avoid Espo .checkbox absolute offsets */
+.dialog .bulk-pull-modal {
+    padding: 4px 2px 8px;
+}
+
+.dialog .bulk-pull-hint {
+    margin: 0 0 1rem;
+    color: var(--text-muted-color, #71717a);
+    line-height: 1.45;
+}
+
+.dialog .bulk-pull-section {
+    margin: 0 0 1.15rem;
+}
+
+.dialog .bulk-pull-section:last-child {
+    margin-bottom: 0;
+}
+
+.dialog .bulk-pull-section-title {
+    margin: 0 0 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted-color, #71717a);
+}
+
+.dialog .bulk-pull-options {
+    display: flex;
+    gap: 0.5rem 0.75rem;
+}
+
+.dialog .bulk-pull-options-stack {
+    flex-direction: column;
+}
+
+.dialog .bulk-pull-options-grid {
+    flex-wrap: wrap;
+}
+
+.dialog .bulk-pull-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0.45rem 0.65rem;
+    min-height: 2.1rem;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+    border-radius: 10px;
+    background: var(--panel-bg, transparent);
+    cursor: pointer;
+    font-weight: 500;
+    line-height: 1.2;
+    user-select: none;
+}
+
+.dialog .bulk-pull-option.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.dialog .bulk-pull-option input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    pointer-events: none;
+}
+
+.dialog .bulk-pull-option-box {
+    flex: 0 0 auto;
+    width: 1.05rem;
+    height: 1.05rem;
+    border: 1.5px solid var(--gray-text-color, #a1a1aa);
+    border-radius: 4px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.dialog .bulk-pull-option-box.is-radio {
+    border-radius: 999px;
+}
+
+.dialog .bulk-pull-option input:checked + .bulk-pull-option-box {
+    border-color: #dc2626;
+    background:
+        linear-gradient(#dc2626, #dc2626) center / 0.55rem 0.55rem no-repeat,
+        transparent;
+}
+
+.dialog .bulk-pull-option input:checked + .bulk-pull-option-box.is-radio {
+    background:
+        radial-gradient(circle at center, #dc2626 0 0.28rem, transparent 0.3rem);
+}
+
+.dialog .bulk-pull-option input:focus-visible + .bulk-pull-option-box {
+    outline: 2px solid rgba(220, 38, 38, 0.45);
+    outline-offset: 2px;
+}
+
+.dialog .bulk-pull-option-text {
+    color: var(--text-color, inherit);
+}
+
+.dialog .bulk-pull-soon {
+    margin-left: 0.25rem;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--text-muted-color, #71717a);
+}
+
+.dialog .bulk-pull-note {
+    margin: 0.65rem 0 0;
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    border-left: 3px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--text-color, inherit);
+    font-size: 0.92rem;
+    line-height: 1.4;
+}
+
+.dialog .bulk-pull-date {
+    margin-top: 0.75rem;
+}
+
+.dialog .bulk-pull-date[hidden],
+.dialog .bulk-pull-form[hidden],
+.dialog .bulk-pull-progress[hidden] {
+    display: none !important;
+}
+
+.dialog .bulk-pull-date-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+}
+
+.dialog .bulk-pull-date-input {
+    max-width: 14rem;
+}
+
+.dialog .bulk-pull-progress-title {
+    margin: 0 0 0.85rem;
+    font-weight: 600;
+    color: var(--text-color, inherit);
+}
+
+.dialog .bulk-pull-progress-hint {
+    margin: 0.75rem 0 0;
+    color: var(--text-muted-color, #71717a);
+}
+
+.dialog .bulk-pull-log {
+    margin-top: 1rem;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--gray-bg, rgba(127, 127, 127, 0.08));
+}
+
+.dialog .bulk-pull-log-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+}
+
+.dialog .bulk-pull-log-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted-color, #71717a);
+}
+
+.dialog .bulk-pull-log-copy {
+    flex: 0 0 auto;
+}
+
+.dialog .bulk-pull-log-body {
+    margin: 0;
+    padding: 0.55rem 0.7rem;
+    max-height: 11rem;
+    overflow: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-color, inherit);
+    background: transparent;
+}
+
+.dialog .bulk-pull-progress-track {
+    position: relative;
+    width: 100%;
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(127, 127, 127, 0.22);
+}
+
+.dialog .bulk-pull-progress-indeterminate {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 38%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #f59e0b, #dc2626);
+    animation: bulk-pull-indeterminate 1.15s ease-in-out infinite;
+}
+
+@keyframes bulk-pull-indeterminate {
+    0% {
+        transform: translateX(-120%);
+    }
+    100% {
+        transform: translateX(320%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialog .bulk-pull-progress-indeterminate {
+        left: 0;
+        width: 100%;
+        animation: none;
+        opacity: 0.85;
+    }
+}

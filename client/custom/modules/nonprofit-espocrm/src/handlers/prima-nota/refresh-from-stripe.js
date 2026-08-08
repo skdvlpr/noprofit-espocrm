@@ -65,7 +65,12 @@ define('nonprofit-espocrm:handlers/prima-nota/refresh-from-stripe', [], function
                         );
                     }
 
-                    if (reason && reason !== 'payout_paid' && reason !== 'already_inviato') {
+                    if (
+                        reason &&
+                        reason !== 'payout_paid' &&
+                        reason !== 'manual_payout_paid' &&
+                        reason !== 'already_inviato'
+                    ) {
                         msg = msg + ' (' + reason + ')';
                     }
 

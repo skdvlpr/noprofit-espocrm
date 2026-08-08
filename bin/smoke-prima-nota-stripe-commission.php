@@ -130,6 +130,33 @@ $ok(
     'StripeRefreshService class',
     class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeRefreshService::class)
 );
+$ok(
+    'StripeBulkPullService class',
+    class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeBulkPullService::class)
+);
+$ok(
+    'bulkPull list menu button',
+    in_array(
+        'bulkPullFromProviders',
+        array_column($metadata->get(['clientDefs', 'PrimaNota', 'menu', 'list', 'buttons']) ?? [], 'name'),
+        true
+    )
+);
+$ok(
+    'bulkPull handler file',
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/handlers/prima-nota/bulk-pull.js')
+);
+$ok(
+    'bulkPull modal file',
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/prima-nota/modals/bulk-pull.js')
+);
+$ok(
+    'PrimaNota controller has bulkPullFromProviders',
+    str_contains(
+        file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Controllers/PrimaNota.php') ?: '',
+        'postActionBulkPullFromProviders'
+    )
+);
 
 $listInlineEdit = file_get_contents(
     __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/record/list-inline-edit.js'

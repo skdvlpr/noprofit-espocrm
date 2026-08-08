@@ -760,6 +760,19 @@
         }
     },
     "menu": {
+        "list": {
+            "buttons": [
+                {
+                    "name": "bulkPullFromProviders",
+                    "labelTranslation": "PrimaNota.labels.bulkPullFromProviders",
+                    "style": "default",
+                    "acl": "create",
+                    "handler": "nonprofit-espocrm:handlers/prima-nota/bulk-pull",
+                    "actionFunction": "open",
+                    "iconClass": "fas fa-cloud-download-alt"
+                }
+            ]
+        },
         "detail": {
             "buttons": [
                 {
