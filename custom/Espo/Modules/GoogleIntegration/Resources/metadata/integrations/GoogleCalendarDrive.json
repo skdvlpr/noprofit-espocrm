@@ -35,7 +35,8 @@
         },
         "googleCalendarAutoCreateEnabled": {
             "type": "bool",
-            "default": false
+            "default": false,
+            "tooltip": true
         },
         "googleCalendarNamePrefix": {
             "type": "varchar",

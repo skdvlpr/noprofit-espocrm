@@ -109,7 +109,6 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
         setup() {
             this.headerText = this.translate('bulkPullFromProviders', 'labels', 'PrimaNota');
             this.clientLogLines = [];
-            this.heartbeatTimer = null;
             this.providerOptions = [
                 {id: 'Stripe', label: 'Stripe', enabled: true, checked: true},
                 {id: 'Satispay', label: 'Satispay', enabled: false, checked: false},
@@ -145,10 +144,6 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
             this.$el.find('[data-action="copyLog"]').on('click', () => this.copyLog());
             this.syncFromDateVisibility();
             this.setProgressVisible(false);
-        },
-
-        onRemove() {
-            this.stopHeartbeat();
         },
 
         syncFromDateVisibility() {
@@ -192,6 +187,19 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
             }
         },
 
+        setProgressStage(title, hint) {
+            const $title = this.$el.find('[data-name="progressTitle"]');
+            const $hint = this.$el.find('[data-name="progressHint"]');
+
+            if ($title.length && title) {
+                $title.text(title);
+            }
+
+            if ($hint.length && hint != null) {
+                $hint.text(hint);
+            }
+        },
+
         mergeServerLog(response) {
             const serverLog = response && response.log ? response.log : [];
 
@@ -212,25 +220,19 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
             }
         },
 
-        startHeartbeat() {
-            this.stopHeartbeat();
+        appendStageLog(messageKey, replacements) {
+            let msg = this.translate(messageKey, 'messages', 'PrimaNota');
+            const map = replacements || {};
 
-            let seconds = 0;
+            Object.keys(map).forEach(key => {
+                msg = msg.replace('{' + key + '}', String(map[key]));
+            });
 
-            this.heartbeatTimer = setInterval(() => {
-                seconds += 15;
-                this.appendLog(
-                    this.translate('bulkPullStillWorking', 'messages', 'PrimaNota')
-                        .replace('{seconds}', String(seconds))
-                );
-            }, 15000);
-        },
-
-        stopHeartbeat() {
-            if (this.heartbeatTimer) {
-                clearInterval(this.heartbeatTimer);
-                this.heartbeatTimer = null;
-            }
+            this.appendLog(msg);
+            this.setProgressStage(
+                this.translate('bulkPullInProgress', 'messages', 'PrimaNota'),
+                msg
+            );
         },
 
         copyLog() {
@@ -276,45 +278,120 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
             $ta.remove();
         },
 
-        buildSuccessMessage(response) {
-            const created = response && response.created != null ? Number(response.created) : 0;
-            const updated = response && response.updated != null ? Number(response.updated) : 0;
-            const skipped = response && response.skipped != null ? Number(response.skipped) : 0;
-            const failed = response && response.failed != null ? Number(response.failed) : 0;
-            const duplicate = response && response.duplicate != null ? Number(response.duplicate) : 0;
-            const markedInviato = response && response.markedInviato != null
+        emptyTotals() {
+            return {
+                created: 0,
+                updated: 0,
+                duplicate: 0,
+                skipped: 0,
+                failed: 0,
+                markedInviato: 0,
+                statusRefreshed: 0,
+                scanned: 0,
+                truncated: false,
+                unsupportedProviders: [],
+                skippedCurrencies: [],
+            };
+        },
+
+        addTotals(totals, response) {
+            totals.created += response && response.created != null ? Number(response.created) : 0;
+            totals.updated += response && response.updated != null ? Number(response.updated) : 0;
+            totals.duplicate += response && response.duplicate != null ? Number(response.duplicate) : 0;
+            totals.skipped += response && response.skipped != null ? Number(response.skipped) : 0;
+            totals.failed += response && response.failed != null ? Number(response.failed) : 0;
+            totals.markedInviato += response && response.markedInviato != null
                 ? Number(response.markedInviato)
                 : 0;
-            const skippedCurrencies = response && response.skippedCurrencies
-                ? response.skippedCurrencies
-                : [];
+            totals.statusRefreshed += response && response.statusRefreshed != null
+                ? Number(response.statusRefreshed)
+                : 0;
+            totals.scanned += response && response.scanned != null ? Number(response.scanned) : 0;
+            // Keep truncated from the latest batch (true only if more remain unprocessed).
+            totals.truncated = !!(response && response.truncated);
 
-            let msg = this.translate('bulkPullSuccess', 'messages', 'PrimaNota')
-                .replace('{created}', String(created))
-                .replace('{updated}', String(updated + duplicate))
-                .replace('{skipped}', String(skipped))
-                .replace('{failed}', String(failed));
-
-            if (markedInviato > 0) {
-                msg = msg + ' ' + this.translate('bulkPullMarkedInviato', 'messages', 'PrimaNota')
-                    .replace('{count}', String(markedInviato));
+            if (response && response.unsupportedProviders) {
+                response.unsupportedProviders.forEach(p => {
+                    if (totals.unsupportedProviders.indexOf(p) === -1) {
+                        totals.unsupportedProviders.push(p);
+                    }
+                });
             }
 
-            if (response && response.truncated) {
+            if (response && response.skippedCurrencies) {
+                response.skippedCurrencies.forEach(c => {
+                    if (totals.skippedCurrencies.indexOf(c) === -1) {
+                        totals.skippedCurrencies.push(c);
+                    }
+                });
+            }
+        },
+
+        buildSuccessMessage(totals) {
+            let msg = this.translate('bulkPullSuccess', 'messages', 'PrimaNota')
+                .replace('{created}', String(totals.created))
+                .replace('{updated}', String(totals.updated + totals.duplicate))
+                .replace('{skipped}', String(totals.skipped))
+                .replace('{failed}', String(totals.failed));
+
+            if (totals.markedInviato > 0) {
+                msg = msg + ' ' + this.translate('bulkPullMarkedInviato', 'messages', 'PrimaNota')
+                    .replace('{count}', String(totals.markedInviato));
+            }
+
+            if (totals.truncated) {
                 msg = msg + ' ' + this.translate('bulkPullTruncated', 'messages', 'PrimaNota');
             }
 
-            if (response && response.unsupportedProviders && response.unsupportedProviders.length) {
+            if (totals.unsupportedProviders.length) {
                 msg = msg + ' ' + this.translate('bulkPullUnsupported', 'messages', 'PrimaNota')
-                    .replace('{list}', response.unsupportedProviders.join(', '));
+                    .replace('{list}', totals.unsupportedProviders.join(', '));
             }
 
-            if (skippedCurrencies.length) {
+            if (totals.skippedCurrencies.length) {
                 msg = msg + ' ' + this.translate('bulkPullSkippedCurrencies', 'messages', 'PrimaNota')
-                    .replace('{list}', skippedCurrencies.join(', '));
+                    .replace('{list}', totals.skippedCurrencies.join(', '));
             }
 
-            return {msg: msg, failed: failed};
+            return {msg: msg, failed: totals.failed};
+        },
+
+        requestBatch(payload, batchNumber) {
+            this.appendStageLog('bulkPullStageRequest', {batch: batchNumber});
+            this.appendStageLog('bulkPullStageScan', {});
+
+            return Espo.Ajax.postRequest('PrimaNota/action/bulkPullFromProviders', payload, {
+                timeout: 0,
+            });
+        },
+
+        summarizeBatch(response, batchNumber) {
+            const scanned = response && response.scanned != null ? Number(response.scanned) : 0;
+            const created = response && response.created != null ? Number(response.created) : 0;
+            const updated = response && response.updated != null ? Number(response.updated) : 0;
+            const duplicate = response && response.duplicate != null ? Number(response.duplicate) : 0;
+            const skipped = response && response.skipped != null ? Number(response.skipped) : 0;
+            const failed = response && response.failed != null ? Number(response.failed) : 0;
+            const markedInviato = response && response.markedInviato != null
+                ? Number(response.markedInviato)
+                : 0;
+            const payouts = response && response.statusRefreshed != null
+                ? Number(response.statusRefreshed)
+                : 0;
+
+            this.appendStageLog('bulkPullStageReceived', {count: scanned});
+            this.appendStageLog('bulkPullStageStatuses', {});
+            this.appendStageLog('bulkPullStageStatusesDone', {
+                count: markedInviato,
+                payouts: payouts,
+            });
+            this.appendStageLog('bulkPullStageBatchDone', {
+                batch: batchNumber,
+                created: created,
+                updated: updated + duplicate,
+                skipped: skipped,
+                failed: failed,
+            });
         },
 
         actionRun() {
@@ -355,60 +432,104 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
                 }
             }
 
+            const chunkSize = 25;
+            const maxBatches = 20;
+            let startingAfter = null;
+            const payloadBase = {
+                providers: providers,
+                currencies: currencies,
+                mode: mode,
+                fromDate: fromDate,
+                maxItems: chunkSize,
+            };
+
             this.disableButton('run');
             this.disableButton('cancel');
             this.clientLogLines = [];
             this.setProgressVisible(true);
+            this.setProgressStage(
+                this.translate('bulkPullInProgress', 'messages', 'PrimaNota'),
+                this.translate('bulkPullProgressHint', 'messages', 'PrimaNota')
+            );
             this.appendLog(this.translate('bulkPullLogClientStart', 'messages', 'PrimaNota'));
             this.appendLog(
                 'REQUEST providers=' + providers.join(',') +
                 ' currencies=' + currencies.join(',') +
                 ' mode=' + mode +
-                (fromDate ? ' fromDate=' + fromDate : '')
+                (fromDate ? ' fromDate=' + fromDate : '') +
+                ' chunkSize=' + chunkSize
             );
             Espo.Ui.notify(this.translate('bulkPullInProgress', 'messages', 'PrimaNota'));
-            this.startHeartbeat();
 
-            Espo.Ajax.postRequest('PrimaNota/action/bulkPullFromProviders', {
-                providers: providers,
-                currencies: currencies,
-                mode: mode,
-                fromDate: fromDate,
-                maxItems: 200,
-            }, {
-                timeout: 0,
-            })
-                .then(response => {
-                    this.stopHeartbeat();
-                    this.appendLog('RESPONSE ok from CRM');
-                    this.mergeServerLog(response);
-                    this.appendLog(this.translate('bulkPullLogRefreshingList', 'messages', 'PrimaNota'));
+            const totals = this.emptyTotals();
+            let batch = 1;
 
-                    const summary = this.buildSuccessMessage(response);
+            const runNext = () => {
+                const payload = Object.assign({}, payloadBase);
 
-                    // Close only after list refresh so rows appear without Ctrl+R.
-                    this.trigger('done', response, (refreshError) => {
-                        Espo.Ui.notify(false);
+                if (startingAfter) {
+                    payload.startingAfter = startingAfter;
+                }
 
-                        if (refreshError) {
-                            this.appendLog('LIST refresh ERROR: ' + String(refreshError));
-                        }
-                        else {
-                            this.appendLog(this.translate('bulkPullLogListRefreshed', 'messages', 'PrimaNota'));
+                return this.requestBatch(payload, batch)
+                    .then(response => {
+                        this.mergeServerLog(response);
+                        this.summarizeBatch(response, batch);
+                        this.addTotals(totals, response);
+
+                        const next = response && response.nextStartingAfter
+                            ? String(response.nextStartingAfter)
+                            : '';
+                        const truncated = !!(response && response.truncated);
+                        const continueMore = truncated && next !== '' && batch < maxBatches;
+
+                        if (continueMore) {
+                            startingAfter = next;
                         }
 
-                        if (summary.failed > 0) {
-                            Espo.Ui.warning(summary.msg);
-                        }
-                        else {
-                            Espo.Ui.success(summary.msg);
+                        // Refresh list after each batch so rows appear progressively.
+                        return new Promise(resolve => {
+                            this.appendStageLog('bulkPullStageRefreshingList', {});
+                            this.trigger('done', response, (refreshError) => {
+                                if (refreshError) {
+                                    this.appendLog('LIST refresh ERROR: ' + String(refreshError));
+                                }
+                                else {
+                                    this.appendStageLog('bulkPullStageListRefreshed', {});
+                                }
+
+                                resolve({continueMore: continueMore});
+                            });
+                        });
+                    })
+                    .then(state => {
+                        if (state && state.continueMore) {
+                            batch += 1;
+                            this.appendStageLog('bulkPullStageNextBatch', {});
+
+                            return runNext();
                         }
 
-                        this.close();
+                        return null;
                     });
+            };
+
+            runNext()
+                .then(() => {
+                    Espo.Ui.notify(false);
+
+                    const summary = this.buildSuccessMessage(totals);
+
+                    if (summary.failed > 0) {
+                        Espo.Ui.warning(summary.msg);
+                    }
+                    else {
+                        Espo.Ui.success(summary.msg);
+                    }
+
+                    this.close();
                 })
                 .catch(xhr => {
-                    this.stopHeartbeat();
                     Espo.Ui.notify(false);
 
                     let message = this.translate('bulkPullFailed', 'messages', 'PrimaNota');
@@ -425,18 +546,16 @@ define('nonprofit-espocrm:views/prima-nota/modals/bulk-pull', ['views/modal'], f
                     }
 
                     this.appendLog('RESPONSE error: ' + message);
-                    this.appendLog(this.translate('bulkPullLogRefreshingList', 'messages', 'PrimaNota'));
+                    this.appendStageLog('bulkPullStageRefreshingList', {});
 
-                    // Partial import may already be in CRM — refresh list anyway.
                     this.trigger('done', null, () => {
                         this.enableButton('run');
                         this.enableButton('cancel');
-                        // Keep progress + log visible so user can copy; hide spinner track.
                         this.$el.find('.bulk-pull-progress-track').prop('hidden', true);
-                        this.$el.find('[data-name="progressTitle"]')
-                            .text(this.translate('bulkPullFinishedWithError', 'messages', 'PrimaNota'));
-                        this.$el.find('[data-name="progressHint"]')
-                            .text(message);
+                        this.setProgressStage(
+                            this.translate('bulkPullFinishedWithError', 'messages', 'PrimaNota'),
+                            message
+                        );
                         Espo.Ui.error(message);
                     });
                 });

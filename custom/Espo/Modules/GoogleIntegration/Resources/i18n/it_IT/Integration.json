@@ -7,7 +7,14 @@
         "googleCalendarDescriptionTemplateCall": "Template descrizione chiamata",
         "googleCalendarDescriptionTemplateTask": "Template descrizione compito",
         "googleCalendarDescriptionTemplateOpportunity": "Template descrizione opportunità",
-        "googleCalendarAutoCreateEnabled": "Crea automaticamente calendari Google dedicati"
+        "googleCalendarAutoCreateEnabled": "Crea automaticamente calendari Google dedicati",
+        "googleCalendarNamePrefix": "Prefisso nome calendario CRM",
+        "googleCalendarNameSuffix": "Suffisso nome calendario CRM"
+    },
+    "tooltips": {
+        "googleCalendarNamePrefix": "Prefisso opzionale per i calendari creati dal CRM. Predefinito: CRM. Formato nome: {prefisso}-{etichettaEntita}-{suffisso} (le parti vuote omettono il trattino).",
+        "googleCalendarNameSuffix": "Suffisso opzionale per i calendari creati dal CRM. Vuoto di default.",
+        "googleCalendarAutoCreateEnabled": "Se attivo, l'instradamento auto_dedicated puo' creare calendari con il prefisso/suffisso sopra. Gli utenti scelgono comunque l'instradamento negli Account esterni."
     },
     "labels": {
         "googleCalendarTemplateVariables": "Inserisci campo del record",
@@ -26,10 +33,7 @@
         "googleCalendarAdminCalendarTemplatesTitle": "Template calendario",
         "googleCalendarAdminCalendarTemplatesHelp": "Descrizione evento, promemoria e colori per tipo entità.",
         "googleCalendarAutoCreateNoDedicatedWarning": "La creazione automatica è attiva, ma nessuna Origine data usa l'instradamento Calendario dedicato automatico. Gli eventi restano sul calendario principale finché non imposti l'instradamento su almeno un'origine.",
-        "googleCalendarAutoCreateHelp": "Consente all'instradamento auto_dedicated di creare/trovare calendari CRM - {etichetta entità}. Devi anche impostare Instradamento calendario Google = Calendario dedicato automatico su ogni riga Origine data.",
-        "googleCalendarCrmScopesTitle": "Visibili solo nel calendario CRM",
-        "googleCalendarCrmScopesHelp": "Elenco in sola lettura delle entità che compaiono nel calendario Espo del CRM. Non è Google Calendar.",
-        "googleCalendarCrmScopesGoogleNote": "Per esportazione Google, promemoria e campi data, apri Origini date calendario con il pulsante verde sotto."
+        "googleCalendarAutoCreateHelp": "Consente all'instradamento auto_dedicated di creare/trovare calendari CRM - {etichetta entità}. Devi anche impostare Instradamento calendario Google = Calendario dedicato automatico su ogni riga Origine data."
     },
     "help": {
         "GoogleCalendarDrive": "Spunta **Abilitato** per mostrare **Client ID** e **Client Secret** (Espo li nasconde se l’integrazione è disattivata). Copia il campo di sola lettura **Redirect URI** in questa pagina nella [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (credenziali **Applicazione web**). Deve coincidere esattamente (stesso host di **Amministrazione → Impostazioni → Site URL**). OAuth 2.0 per **Google Calendar** e **Google Drive** (`drive.file`). Abilita **Google Calendar API** e **Google Drive API**. Collegamento da **Account esterni personali** dopo Client ID / Secret.\n\nScreenshot passo-passo: **Knowledge Base → Google Calendar — collegare il proprio account**."

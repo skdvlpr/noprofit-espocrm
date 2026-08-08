@@ -66,11 +66,18 @@ class PrimaNota extends Record
             }
         }
 
+        $startingAfter = isset($data->startingAfter) && is_string($data->startingAfter)
+            ? trim($data->startingAfter)
+            : null;
+        if ($startingAfter === '') {
+            $startingAfter = null;
+        }
+
         /** @var StripeBulkPullService $service */
         $service = $this->injectableFactory->create(StripeBulkPullService::class);
 
         @set_time_limit(600);
 
-        return $service->pull($providers, $mode, $fromDate, $maxItems, $currencies);
+        return $service->pull($providers, $mode, $fromDate, $maxItems, $currencies, $startingAfter);
     }
 }

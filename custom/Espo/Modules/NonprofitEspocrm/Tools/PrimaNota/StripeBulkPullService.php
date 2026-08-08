@@ -49,6 +49,7 @@ class StripeBulkPullService
         ?string $fromDate = null,
         int $maxItems = 200,
         ?array $currencies = null,
+        ?string $startingAfter = null,
     ): stdClass {
         if (!$this->acl->check('PrimaNota', Table::ACTION_CREATE) ||
             !$this->acl->check('PrimaNota', Table::ACTION_EDIT)
@@ -91,6 +92,11 @@ class StripeBulkPullService
 
         $maxItems = max(1, min(500, $maxItems));
 
+        $startingAfter = is_string($startingAfter) ? trim($startingAfter) : null;
+        if ($startingAfter === '') {
+            $startingAfter = null;
+        }
+
         $siteUrl = rtrim(trim((string) $this->config->get('safehouseDonationSiteUrl')), '/');
         $token = trim((string) $this->config->get('safehouseCrmSyncToken'));
 
@@ -101,13 +107,17 @@ class StripeBulkPullService
         }
 
         $url = $siteUrl . '/api/internal/prima-nota/bulk-pull';
-        $payload = Json::encode([
+        $body = [
             'providers' => $providers,
             'currencies' => $currencyList,
             'mode' => $mode,
             'fromDate' => $fromDate,
             'maxItems' => $maxItems,
-        ]);
+        ];
+        if ($startingAfter !== null) {
+            $body['startingAfter'] = $startingAfter;
+        }
+        $payload = Json::encode($body);
 
         $options = new HttpClient\Options(
             protocols: [HttpClient\Protocol::https, HttpClient\Protocol::http],
@@ -219,6 +229,9 @@ class StripeBulkPullService
                 : [],
             'errors' => is_object($site) && isset($site->errors) ? $site->errors : [],
             'log' => is_object($site) && isset($site->log) ? $site->log : [],
+            'nextStartingAfter' => is_object($site) && isset($site->nextStartingAfter)
+                ? (string) $site->nextStartingAfter
+                : null,
             'site' => $site,
         ];
     }

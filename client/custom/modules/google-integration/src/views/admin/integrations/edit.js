@@ -27,7 +27,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
         setup() {
             this.ensureStylesheet();
-            this.crmCalendarScopes = [];
 
             this.addActionHandler('save', () => this.save());
             this.addActionHandler('cancel', () => this.actionCancel());
@@ -93,46 +92,7 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
                     this.createFieldView(fields[name].type, name, undefined, fields[name]);
                 });
-                await this.loadCrmCalendarScopes();
             })());
-        }
-
-        async loadCrmCalendarScopes() {
-            const coreList = this.getConfig().get('calendarEntityList') || [];
-            const entitySet = {};
-
-            (Array.isArray(coreList) ? coreList : []).forEach(entityType => {
-                if (entityType) {
-                    entitySet[entityType] = true;
-                }
-            });
-
-            try {
-                const response = await Espo.Ajax.getRequest('CalendarDateSource', {
-                    select: 'targetEntityType,calendarViewEnabled,isActive',
-                    maxSize: 200,
-                });
-                const list = Array.isArray(response.list) ? response.list : [];
-
-                list.forEach(row => {
-                    if (!row.isActive || !row.calendarViewEnabled || !row.targetEntityType) {
-                        return;
-                    }
-
-                    entitySet[row.targetEntityType] = true;
-                });
-            } catch (e) {
-                // Keep core list only.
-            }
-
-            this.crmCalendarScopes = Object.keys(entitySet)
-                .sort((a, b) => a.localeCompare(b))
-                .map(entityType => ({
-                    entityType: entityType,
-                    label: this.translate(entityType, 'scopeNamesPlural') ||
-                        this.translate(entityType, 'scopeNames') ||
-                        entityType,
-                }));
         }
 
         ensureStylesheet() {
@@ -184,22 +144,6 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                 calendarConfigTitle: this.translate('googleCalendarAdminConfigTitle', 'labels', 'Integration'),
                 calendarConfigHelp: this.translate('googleCalendarAdminConfigHelp', 'labels', 'Integration'),
                 calendarNavItems: this.getCalendarNavItems(),
-                crmCalendarScopes: this.crmCalendarScopes || [],
-                crmCalendarScopesTitle: this.translate(
-                    'googleCalendarCrmScopesTitle',
-                    'labels',
-                    'Integration'
-                ),
-                crmCalendarScopesHelp: this.translate(
-                    'googleCalendarCrmScopesHelp',
-                    'labels',
-                    'Integration'
-                ),
-                crmCalendarScopesGoogleNote: this.translate(
-                    'googleCalendarCrmScopesGoogleNote',
-                    'labels',
-                    'Integration'
-                ),
             };
         }
 

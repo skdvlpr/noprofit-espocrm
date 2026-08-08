@@ -11,8 +11,8 @@
         "googleCalendarNamePrefix": "CRM calendar name prefix",
         "googleCalendarNameSuffix": "CRM calendar name suffix"
     },
-    "toolTips": {
-        "googleCalendarNamePrefix": "Optional prefix for calendars created by CRM. Default CRM. Name format: {prefix}-{entityLabel}-{suffix} (empty parts omit the dash).",
+    "tooltips": {
+        "googleCalendarNamePrefix": "Optional prefix for calendars created by CRM. Default: CRM. Name format: {prefix}-{entityLabel}-{suffix} (empty parts omit the dash).",
         "googleCalendarNameSuffix": "Optional suffix for calendars created by CRM. Empty by default.",
         "googleCalendarAutoCreateEnabled": "When enabled, auto_dedicated routing may create calendars named with the prefix/suffix above. Users still choose routing on External Accounts."
     },
@@ -33,10 +33,7 @@
         "googleCalendarAdminCalendarTemplatesTitle": "Calendar templates",
         "googleCalendarAdminCalendarTemplatesHelp": "Event description, reminders, and colors per entity type.",
         "googleCalendarAutoCreateNoDedicatedWarning": "Auto-create is on, but no Calendar Date Source uses Auto dedicated calendar routing. Events will stay on the primary calendar until you set routing on at least one date source.",
-        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named {prefix}-{entity label}-{suffix}. Users choose Primary / User pick / Auto dedicated on their External Account.",
-        "googleCalendarCrmScopesTitle": "Visible in the CRM calendar only",
-        "googleCalendarCrmScopesHelp": "Read-only list of entity types that appear in the Espo CRM Calendar. This is not Google Calendar.",
-        "googleCalendarCrmScopesGoogleNote": "For Google export, reminders and date fields, open Calendar date sources with the green button below."
+        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named {prefix}-{entity label}-{suffix}. Users choose Primary / User pick / Auto dedicated on their External Account."
     },
     "help": {
         "GoogleCalendarDrive": "Check **Enabled** first — **Client ID** and **Client Secret** stay hidden while the integration is off (Espo default). Copy the read-only **Redirect URI** field on this page into [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (**Web application** credentials). It must match exactly (same host as **Administration → Settings → Site URL**). OAuth 2.0 for per-user **Google Calendar** and **Google Drive** (`drive.file`). Enable **Google Calendar API** and **Google Drive API**. Users connect from **Personal External Accounts** after you save Client ID / Client Secret.\n\nStep-by-step screenshots: **Knowledge Base → Google Calendar — connect your account**."

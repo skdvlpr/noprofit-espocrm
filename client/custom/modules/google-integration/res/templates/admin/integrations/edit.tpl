@@ -68,32 +68,6 @@
                 <p class="gi-section__lead">{{calendarConfigHelp}}</p>
             </div>
 
-            {{#if crmCalendarScopes.length}}
-            <div class="gi-crm-calendar-scopes">
-                <div class="gi-crm-calendar-scopes__head">
-                    <span class="gi-crm-calendar-scopes__badge" aria-hidden="true">
-                        <span class="fas fa-calendar-check"></span>
-                    </span>
-                    <div class="gi-crm-calendar-scopes__titles">
-                        <div class="gi-crm-calendar-scopes__title">{{crmCalendarScopesTitle}}</div>
-                        <p class="gi-crm-calendar-scopes__help">{{crmCalendarScopesHelp}}</p>
-                    </div>
-                </div>
-                <ul class="gi-crm-calendar-scopes__grid">
-                    {{#each crmCalendarScopes}}
-                    <li class="gi-crm-scope-chip" title="{{entityType}}">
-                        <span class="gi-crm-scope-chip__check fas fa-check" aria-hidden="true"></span>
-                        <span class="gi-crm-scope-chip__label">{{label}}</span>
-                    </li>
-                    {{/each}}
-                </ul>
-                <p class="gi-crm-calendar-scopes__google-note">
-                    <span class="fas fa-info-circle" aria-hidden="true"></span>
-                    <span>{{crmCalendarScopesGoogleNote}}</span>
-                </p>
-            </div>
-            {{/if}}
-
             <div class="gi-nav-grid" role="navigation" aria-label="{{calendarConfigTitle}}">
                 {{#each calendarNavItems}}
                 <a
