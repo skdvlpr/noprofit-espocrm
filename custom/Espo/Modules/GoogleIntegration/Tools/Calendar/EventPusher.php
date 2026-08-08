@@ -399,13 +399,7 @@ class EventPusher
      */
     private function resolveCalendarId(Entity $entity, ?array $source): string
     {
-        $mode = CalendarRoutingMode::PRIMARY;
-
-        if ($source !== null) {
-            $mode = CalendarRoutingMode::normalize(
-                is_string($source['calendarRoutingMode'] ?? null) ? $source['calendarRoutingMode'] : null
-            );
-        }
+        $mode = $this->resolveEffectiveRoutingMode($source);
 
         if ($mode === CalendarRoutingMode::USER_PICK) {
             $entityCalendarId = trim((string) ($entity->get('googleCalendarId') ?? ''));
@@ -430,6 +424,52 @@ class EventPusher
         }
 
         return self::DEFAULT_CALENDAR_ID;
+    }
+
+    /**
+     * Per-user ExternalAccount.calendarRoutingMode (B) takes priority over the per-source
+     * CalendarDateSource.calendarRoutingMode configured by the administrator. Falls back to
+     * the source mode (then Primary) when the user has not chosen an override.
+     *
+     * @param ?array<string, mixed> $source
+     */
+    private function resolveEffectiveRoutingMode(?array $source): string
+    {
+        $sourceMode = CalendarRoutingMode::PRIMARY;
+
+        if ($source !== null) {
+            $sourceMode = CalendarRoutingMode::normalize(
+                is_string($source['calendarRoutingMode'] ?? null) ? $source['calendarRoutingMode'] : null
+            );
+        }
+
+        return $this->resolveUserCalendarRoutingMode() ?? $sourceMode;
+    }
+
+    private function resolveUserCalendarRoutingMode(): ?string
+    {
+        $userId = $this->pushUser()->getId();
+
+        if (!is_string($userId) || $userId === '') {
+            return null;
+        }
+
+        $account = $this->entityManager->getEntityById(
+            'ExternalAccount',
+            Installer::INTEGRATION_ID . '__' . $userId
+        );
+
+        if ($account === null) {
+            return null;
+        }
+
+        $mode = $account->get('calendarRoutingMode');
+
+        if (!is_string($mode) || !CalendarRoutingMode::isValid($mode)) {
+            return null;
+        }
+
+        return $mode;
     }
 
     /**

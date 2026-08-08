@@ -36,6 +36,18 @@
         "googleCalendarAutoCreateEnabled": {
             "type": "bool",
             "default": false
+        },
+        "googleCalendarNamePrefix": {
+            "type": "varchar",
+            "maxLength": 100,
+            "default": "CRM",
+            "tooltip": true
+        },
+        "googleCalendarNameSuffix": {
+            "type": "varchar",
+            "maxLength": 100,
+            "default": "",
+            "tooltip": true
         }
     },
     "params": {

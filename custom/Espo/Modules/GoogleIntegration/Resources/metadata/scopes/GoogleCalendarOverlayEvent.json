@@ -1,0 +1,12 @@
+{
+    "entity": true,
+    "object": true,
+    "tab": false,
+    "module": "GoogleIntegration",
+    "stream": false,
+    "importable": false,
+    "exportable": false,
+    "acl": true,
+    "aclActionList": ["read", "create", "edit", "delete"],
+    "aclLevelList": ["all", "team", "own", "no"]
+}

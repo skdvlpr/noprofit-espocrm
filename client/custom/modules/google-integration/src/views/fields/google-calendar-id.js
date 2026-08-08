@@ -25,6 +25,10 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             this.createNewCalendar = false;
             this.newCalendarName = '';
             this.createInProgress = false;
+            // Admin-only Integrations → Google prefix/suffix (C). Not user-editable here —
+            // shown as a read-only naming preview only.
+            this.calendarNamePrefix = 'CRM';
+            this.calendarNameSuffix = '';
         }
 
         setupOptions() {
@@ -131,6 +135,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .text(this.translateLabelKey('googleCalendarCreateNewHelp'));
 
             $nameRow.append($input, $createBtn, $help);
+            this.renderNamingPatternHelp($nameRow);
             $wrap.append($checkLabel, $nameRow);
             this.$el.append($wrap);
 
@@ -156,7 +161,30 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             const entityType = this.model.entityType || this.entityType || '';
             const entityLabel = this.translate(entityType, 'scopeNames') || entityType || 'Calendar';
 
-            return 'CRM - ' + entityLabel;
+            return this.buildNamingPatternPreview(entityLabel);
+        }
+
+        /**
+         * Mirrors CalendarProvisioner::buildCalendarName — `{prefix}-{label}-{suffix}`,
+         * dropping empty parts. Prefix/suffix come from Admin → Integrations → Google and
+         * are not editable here.
+         */
+        buildNamingPatternPreview(label) {
+            const parts = [this.calendarNamePrefix, label, this.calendarNameSuffix]
+                .map(part => (part || '').trim())
+                .filter(part => part !== '');
+
+            return parts.join('-');
+        }
+
+        renderNamingPatternHelp($nameRow) {
+            $nameRow.find('.google-calendar-naming-pattern-help').remove();
+
+            const $help = $('<p>')
+                .addClass('help-block text-muted small google-calendar-naming-pattern-help')
+                .text(this.translateLabelKey('googleCalendarNamingPatternHelp'));
+
+            $nameRow.append($help);
         }
 
         syncCreateNewUiState() {
@@ -329,6 +357,14 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             Espo.Ajax.getRequest('GoogleIntegration/calendar/google-calendars')
                 .then(data => {
                     this.calendarLoadPending = false;
+
+                    if (typeof data.namePrefix === 'string') {
+                        this.calendarNamePrefix = data.namePrefix;
+                    }
+
+                    if (typeof data.nameSuffix === 'string') {
+                        this.calendarNameSuffix = data.nameSuffix;
+                    }
 
                     const list = Array.isArray(data.list) ? data.list : [];
                     this.calendarOptionList = list.length

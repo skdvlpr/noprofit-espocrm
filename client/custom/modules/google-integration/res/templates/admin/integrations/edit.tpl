@@ -46,7 +46,17 @@
                         data-name="redirectUri"
                     >{{translate 'redirectUri' scope='Integration' category='fields'}}</label>
                     <div class="field" data-name="redirectUri">
-                        <input type="text" class="form-control" readonly value="{{redirectUri}}">
+                        <div class="input-group">
+                            <input type="text" class="form-control" readonly value="{{redirectUri}}" data-name="redirectUriInput">
+                            <span class="input-group-btn">
+                                <button
+                                    type="button"
+                                    class="btn btn-default"
+                                    data-action="copyRedirectUri"
+                                    title="{{translate 'Copy'}}"
+                                ><span class="fas fa-copy"></span> {{translate 'Copy'}}</button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

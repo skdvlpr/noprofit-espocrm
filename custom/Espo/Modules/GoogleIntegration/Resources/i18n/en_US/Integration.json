@@ -7,7 +7,14 @@
         "googleCalendarDescriptionTemplateCall": "Call Description Template",
         "googleCalendarDescriptionTemplateTask": "Task Description Template",
         "googleCalendarDescriptionTemplateOpportunity": "Opportunity Description Template",
-        "googleCalendarAutoCreateEnabled": "Auto-create dedicated Google calendars"
+        "googleCalendarAutoCreateEnabled": "Auto-create dedicated Google calendars",
+        "googleCalendarNamePrefix": "CRM calendar name prefix",
+        "googleCalendarNameSuffix": "CRM calendar name suffix"
+    },
+    "toolTips": {
+        "googleCalendarNamePrefix": "Optional prefix for calendars created by CRM. Default CRM. Name format: {prefix}-{entityLabel}-{suffix} (empty parts omit the dash).",
+        "googleCalendarNameSuffix": "Optional suffix for calendars created by CRM. Empty by default.",
+        "googleCalendarAutoCreateEnabled": "When enabled, auto_dedicated routing may create calendars named with the prefix/suffix above. Users still choose routing on External Accounts."
     },
     "labels": {
         "googleCalendarTemplateVariables": "Insert record field",
@@ -26,7 +33,7 @@
         "googleCalendarAdminCalendarTemplatesTitle": "Calendar templates",
         "googleCalendarAdminCalendarTemplatesHelp": "Event description, reminders, and colors per entity type.",
         "googleCalendarAutoCreateNoDedicatedWarning": "Auto-create is on, but no Calendar Date Source uses Auto dedicated calendar routing. Events will stay on the primary calendar until you set routing on at least one date source.",
-        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named CRM - {entity label}. You must also set Google calendar routing to Auto dedicated on each Calendar Date Source row.",
+        "googleCalendarAutoCreateHelp": "Allows auto_dedicated routing to create/find calendars named {prefix}-{entity label}-{suffix}. Users choose Primary / User pick / Auto dedicated on their External Account.",
         "googleCalendarCrmScopesTitle": "Visible in the CRM calendar only",
         "googleCalendarCrmScopesHelp": "Read-only list of entity types that appear in the Espo CRM Calendar. This is not Google Calendar.",
         "googleCalendarCrmScopesGoogleNote": "For Google export, reminders and date fields, open Calendar date sources with the green button below."

@@ -137,7 +137,9 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             }
 
             const enabled = !!this.model.get('saveToGoogleCalendar');
-            const showCalendarPicker = enabled && this.isUserPickEnabledForSelection();
+            // Always offer a calendar picker (incl. "create new calendar") once export is on —
+            // not only for explicit user_pick routing sources. See product spec (B).
+            const showCalendarPicker = enabled;
 
             this.toggleField('saveToGoogleCalendar', true);
             this.toggleField('googleCalendarDateSourceList', enabled);

@@ -774,8 +774,8 @@ $customName = $calendarProvisioner->resolveDedicatedCalendarName([
 ]);
 $entityLabel = $calendarProvisioner->resolveEntityLabel('Opportunity');
 $ok(
-    'auto_dedicated default uses CRM - {entity label} (not date label)',
-    str_starts_with($presentationName, 'CRM - ')
+    'auto_dedicated default uses {prefix}-{entity label} (not date label)',
+    (str_starts_with($presentationName, 'CRM-') || str_starts_with($presentationName, 'CRM - '))
         && !str_contains(strtolower($presentationName), 'presentation')
         && ($entityLabel === '' || str_contains($presentationName, $entityLabel)),
     "name=$presentationName entityLabel=$entityLabel"
@@ -1324,6 +1324,138 @@ try {
 } catch (Throwable $e) {
     $ok('EventRemover ORM smoke', false, $e->getMessage());
 }
+
+echo "\nConsent gate + EA routing + overlay + naming\n";
+
+$ok(
+    'oauth2.tpl has Google connect safety panel',
+    str_contains($oauth2Tpl, 'oauth-safety-panel')
+        && str_contains($oauth2Tpl, 'googleConnectWarningTitle')
+        && str_contains($oauth2Tpl, 'oauthSafetyAck')
+);
+$ok(
+    'oauth2.js gates Connect on safety ack',
+    str_contains($oauth2Js, 'oauthSafetyAck')
+        && str_contains($oauth2Js, 'googleConnectRiskCheckboxRequired')
+);
+$ok(
+    'oauth2.js creates calendarRoutingMode + overlayCalendarIdList fields',
+    str_contains($oauth2Js, 'calendarRoutingMode')
+        && str_contains($oauth2Js, 'overlayCalendarIdList')
+        && str_contains($oauth2Js, "forOverlay: '1'")
+);
+$ok(
+    'EventPusher prefers ExternalAccount calendarRoutingMode',
+    str_contains(
+        (string) file_get_contents(
+            dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php'
+        ),
+        'resolveUserCalendarRoutingMode'
+    )
+);
+
+$adminEditTpl = (string) file_get_contents(
+    dirname(__DIR__) . '/client/custom/modules/google-integration/res/templates/admin/integrations/edit.tpl'
+);
+$adminEditJs = (string) file_get_contents(
+    dirname(__DIR__) . '/client/custom/modules/google-integration/src/views/admin/integrations/edit.js'
+);
+$ok(
+    'admin integrations edit has Copy callback button',
+    str_contains($adminEditTpl, 'copyRedirectUri')
+        && str_contains($adminEditJs, 'actionCopyRedirectUri')
+);
+
+$gcalMeta = $metadata->get(['integrations', 'GoogleCalendarDrive', 'fields']) ?? [];
+$ok(
+    'admin googleCalendarNamePrefix default CRM',
+    ($gcalMeta['googleCalendarNamePrefix']['default'] ?? null) === 'CRM'
+);
+$ok(
+    'admin googleCalendarNameSuffix field exists',
+    isset($gcalMeta['googleCalendarNameSuffix'])
+);
+
+$provisionerPhp = (string) file_get_contents(
+    dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarProvisioner.php'
+);
+$ok(
+    'CalendarProvisioner buildCalendarName uses hyphen join',
+    str_contains($provisionerPhp, "implode('-', \$parts)")
+        && str_contains($provisionerPhp, 'isCrmCalendarName')
+);
+
+$ok(
+    'GoogleCalendarOverlayEvent entity registered',
+    $metadata->get(['scopes', 'GoogleCalendarOverlayEvent', 'entity']) === true
+);
+$ok(
+    'overlay-events route registered',
+    (static function () use ($metadata): bool {
+        $routes = $metadata->get(['app', 'routes']) ?? [];
+        // routes may live outside metadata — check file
+        return true;
+    })()
+        && str_contains(
+            (string) file_get_contents(
+                dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Resources/routes.json'
+            ),
+            'overlay-events'
+        )
+);
+$ok(
+    'OverlaySyncRunner + SyncOverlayCalendars job exist',
+    class_exists(\Espo\Modules\GoogleIntegration\Tools\Calendar\OverlaySyncRunner::class)
+        && class_exists(\Espo\Modules\GoogleIntegration\Jobs\SyncOverlayCalendars::class)
+);
+$ok(
+    'overlay retention is 30 days',
+    \Espo\Modules\GoogleIntegration\Tools\Calendar\OverlaySyncRunner::RETENTION_DAYS === 30
+);
+
+$calendarJs = (string) file_get_contents(
+    dirname(__DIR__) . '/client/custom/modules/google-integration/src/views/calendar/calendar.js'
+);
+$ok(
+    'calendar.js merges overlay-events',
+    str_contains($calendarJs, 'overlay-events')
+        && str_contains($calendarJs, 'GoogleCalendarOverlayEvent')
+);
+
+$ok(
+    'GetGoogleCalendars marks/filters CRM calendars for overlay',
+    str_contains(
+        (string) file_get_contents(
+            dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/Api/GetGoogleCalendars.php'
+        ),
+        'isCrmCalendar'
+    )
+        && str_contains(
+            (string) file_get_contents(
+                dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/Tools/Calendar/Api/GetGoogleCalendars.php'
+            ),
+            'forOverlay'
+        )
+);
+
+/** @var \Espo\Core\InjectableFactory $injectableFactory */
+$injectableFactory = $container->getByClass(\Espo\Core\InjectableFactory::class);
+$calendarProvisioner = $injectableFactory->create(
+    \Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner::class
+);
+$ok(
+    'buildCalendarName CRM-Meeting (default prefix)',
+    $calendarProvisioner->buildCalendarName('Meeting') === 'CRM-Meeting'
+        || str_starts_with($calendarProvisioner->buildCalendarName('Meeting'), 'CRM-')
+);
+$ok(
+    'isCrmCalendarName detects CRM-Meeting',
+    $calendarProvisioner->isCrmCalendarName('CRM-Meeting') === true
+);
+$ok(
+    'isCrmCalendarName allows personal calendar',
+    $calendarProvisioner->isCrmCalendarName('Personal') === false
+);
 
 echo "\n=== " . ($fail === 0 ? 'ALL PASS' : "$fail FAILURE(S)") . " ===\n";
 exit($fail === 0 ? 0 : 1);

@@ -1,0 +1,93 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255
+        },
+        "user": {
+            "type": "link",
+            "required": true,
+            "readOnly": true
+        },
+        "googleCalendarId": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255,
+            "readOnly": true
+        },
+        "googleEventId": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 255,
+            "readOnly": true
+        },
+        "dateStart": {
+            "type": "datetime"
+        },
+        "dateEnd": {
+            "type": "datetime"
+        },
+        "dateStartDate": {
+            "type": "date"
+        },
+        "dateEndDate": {
+            "type": "date"
+        },
+        "isAllDay": {
+            "type": "bool",
+            "default": false
+        },
+        "htmlLink": {
+            "type": "url",
+            "dbType": "text",
+            "readOnly": true
+        },
+        "lastSyncedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "user": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "indexes": {
+        "userEvent": {
+            "unique": true,
+            "columns": ["userId", "googleCalendarId", "googleEventId"]
+        },
+        "userDateStart": {
+            "columns": ["userId", "dateStart"]
+        },
+        "userDateEnd": {
+            "columns": ["userId", "dateEnd"]
+        }
+    }
+}

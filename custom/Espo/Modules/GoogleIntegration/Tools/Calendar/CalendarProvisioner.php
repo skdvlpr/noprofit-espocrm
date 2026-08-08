@@ -22,6 +22,9 @@ use RuntimeException;
 class CalendarProvisioner
 {
     private const DATA_MAP_KEY = 'calendarIdMap';
+    /** Legacy hardcoded prefix, kept for CRM-calendar detection on pre-existing calendars. */
+    private const LEGACY_PREFIX = 'CRM';
+    private const DEFAULT_PREFIX = 'CRM';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -77,7 +80,88 @@ class CalendarProvisioner
         $entityType = trim((string) ($source['targetEntityType'] ?? ''));
         $entityLabel = $this->resolveEntityLabel($entityType);
 
-        return 'CRM - ' . ($entityLabel !== '' ? $entityLabel : 'Calendar');
+        return $this->buildCalendarName($entityLabel !== '' ? $entityLabel : 'Calendar');
+    }
+
+    /**
+     * Formats `{prefix}-{label}-{suffix}` using the admin-configured
+     * Integrations → Google → prefix/suffix, stripping dangling separators when
+     * prefix and/or suffix are empty.
+     */
+    public function buildCalendarName(string $label): string
+    {
+        [$prefix, $suffix] = $this->getPrefixSuffix();
+
+        $parts = array_values(array_filter(
+            [$prefix, trim($label), $suffix],
+            static fn (string $part): bool => $part !== ''
+        ));
+
+        return implode('-', $parts);
+    }
+
+    /**
+     * Detects Google calendars that were created/named by this CRM (current prefix/suffix,
+     * or the legacy hardcoded "CRM - " / "CRM-" prefixes). Used to exclude CRM
+     * calendars from the personal overlay picker so CRM ↔ Google display never loops.
+     */
+    public function isCrmCalendarName(string $name): bool
+    {
+        $name = trim($name);
+
+        if ($name === '') {
+            return false;
+        }
+
+        if (str_starts_with($name, self::LEGACY_PREFIX . ' - ') ||
+            str_starts_with($name, self::LEGACY_PREFIX . '-')
+        ) {
+            return true;
+        }
+
+        [$prefix, $suffix] = $this->getPrefixSuffix();
+
+        if ($prefix === '' && $suffix === '') {
+            return false;
+        }
+
+        if ($prefix !== '') {
+            $withDash = $prefix . '-';
+            $withSpaced = $prefix . ' - ';
+
+            if (!str_starts_with($name, $withDash) && !str_starts_with($name, $withSpaced)) {
+                return false;
+            }
+        }
+
+        if ($suffix !== '') {
+            $withDash = '-' . $suffix;
+            $withSpaced = ' - ' . $suffix;
+
+            if (!str_ends_with($name, $withDash) && !str_ends_with($name, $withSpaced)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array{0: string, 1: string} [prefix, suffix]
+     */
+    public function getPrefixSuffix(): array
+    {
+        $integration = $this->entityManager->getEntityById('Integration', Installer::INTEGRATION_ID);
+
+        $rawPrefix = $integration?->get('googleCalendarNamePrefix');
+        $rawSuffix = $integration?->get('googleCalendarNameSuffix');
+
+        // Integration rows created before C shipped have no stored value — fall back to the
+        // metadata default instead of silently going empty.
+        $prefix = $rawPrefix === null ? self::DEFAULT_PREFIX : trim((string) $rawPrefix);
+        $suffix = is_string($rawSuffix) ? trim($rawSuffix) : '';
+
+        return [$prefix, $suffix];
     }
 
     public function resolveEntityLabel(string $entityType): string

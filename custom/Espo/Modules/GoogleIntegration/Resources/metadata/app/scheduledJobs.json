@@ -4,5 +4,11 @@
         "jobClassName": "Espo\\Modules\\GoogleIntegration\\Jobs\\SyncCalendar",
         "scheduling": "*/5 * * * *",
         "isSystem": true
+    },
+    "GoogleIntegrationSyncOverlayCalendars": {
+        "name": "Google Calendar Overlay Sync",
+        "jobClassName": "Espo\\Modules\\GoogleIntegration\\Jobs\\SyncOverlayCalendars",
+        "scheduling": "*/15 * * * *",
+        "isSystem": true
     }
 }

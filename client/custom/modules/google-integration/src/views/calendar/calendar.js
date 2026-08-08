@@ -1,12 +1,30 @@
 define('google-integration:views/calendar/calendar', ['crm:views/calendar/calendar'], function (Dep) {
     'use strict';
 
+    const OVERLAY_SCOPE = 'GoogleCalendarOverlayEvent';
+
     return Dep.extend({
         setup() {
             Dep.prototype.setup.call(this);
 
             this.dateSourceEntityList = [];
             this.loadDateSourceEntityList();
+            this.ensureOverlayScope();
+        },
+
+        ensureOverlayScope() {
+            // Overlay is served via dedicated API (filtered by current user), not record ACL.
+            if (!this.scopeList.includes(OVERLAY_SCOPE)) {
+                this.scopeList.push(OVERLAY_SCOPE);
+            }
+
+            if (!this.enabledScopeList.includes(OVERLAY_SCOPE)) {
+                this.enabledScopeList.push(OVERLAY_SCOPE);
+            }
+
+            this.colors[OVERLAY_SCOPE] = this.colors[OVERLAY_SCOPE]
+                || this.getMetadata().get(['clientDefs', OVERLAY_SCOPE, 'color'])
+                || '#5c6bc0';
         },
 
         loadDateSourceEntityList() {
@@ -45,6 +63,8 @@ define('google-integration:views/calendar/calendar', ['crm:views/calendar/calend
                         }
                     });
 
+                    this.ensureOverlayScope();
+
                     if (this.header && this.getView('modeButtons')) {
                         this.getView('modeButtons').scopeList = this.scopeList;
                         this.getView('modeButtons').reRender();
@@ -75,9 +95,12 @@ define('google-integration:views/calendar/calendar', ['crm:views/calendar/calend
 
         fetchEvents(from, to, callback) {
             const scopeList = this.enabledScopeList.filter(scope => this.getAcl().checkScope(scope));
+            const crmScopes = scopeList.filter(scope => scope !== OVERLAY_SCOPE);
+            const wantOverlay = scopeList.includes(OVERLAY_SCOPE);
 
-            if (!scopeList.length) {
+            if (!crmScopes.length && !wantOverlay) {
                 callback([]);
+
                 return;
             }
 
@@ -85,23 +108,43 @@ define('google-integration:views/calendar/calendar', ['crm:views/calendar/calend
                 Espo.Ui.notifyWait();
             }
 
-            Espo.Ajax.getRequest('GoogleIntegration/calendar/crm-events', {
-                from: from,
-                to: to,
-                scopeList: scopeList.join(','),
-            })
-                .then(data => {
-                    const events = this.convertToFcEvents(data || []);
+            const requests = [];
+
+            if (crmScopes.length) {
+                requests.push(
+                    Espo.Ajax.getRequest('GoogleIntegration/calendar/crm-events', {
+                        from: from,
+                        to: to,
+                        scopeList: crmScopes.join(','),
+                    }).catch(() => [])
+                );
+            } else {
+                requests.push(Promise.resolve([]));
+            }
+
+            if (wantOverlay) {
+                requests.push(
+                    Espo.Ajax.getRequest('GoogleIntegration/calendar/overlay-events', {
+                        from: from,
+                        to: to,
+                    }).catch(() => [])
+                );
+            } else {
+                requests.push(Promise.resolve([]));
+            }
+
+            Promise.all(requests)
+                .then(results => {
+                    const merged = []
+                        .concat(results[0] || [])
+                        .concat(results[1] || []);
+                    const events = this.convertToFcEvents(merged);
                     callback(events);
                     Espo.Ui.notify(false);
                 })
                 .catch(() => {
                     Dep.prototype.fetchEvents.call(this, from, to, callback);
                 });
-
-            this.fetching = true;
-            this.suppressLoadingAlert = false;
-            setTimeout(() => this.fetching = false, 50);
         },
     });
 });

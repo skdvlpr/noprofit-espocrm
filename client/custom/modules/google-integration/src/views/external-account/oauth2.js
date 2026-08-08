@@ -6,20 +6,31 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
     const OAUTH_MESSAGE_TYPE = 'googleIntegrationOAuthCallback';
     const OAUTH_STATE_STORAGE_KEY = 'googleIntegrationOAuthState';
+    const OAUTH_SAFETY_ACK_KEY = 'googleIntegrationOAuthSafetyAck';
+
+    const ROUTING_OPTIONS = ['primary', 'user_pick', 'auto_dedicated'];
 
     class GoogleIntegrationExternalAccountOauth2View extends _parent.default {
         template = 'google-integration:external-account/oauth2';
 
         connectInProgress = false;
+        oauthSafetyAck = false;
+        calendarFieldsReady = false;
 
         data() {
+            const connected = !!this.isConnected;
+
             return {
                 ...super.data(),
                 showGoogleAccountProfile: this.shouldShowGoogleAccountProfile(),
                 googleAccountEmail: this.model.get('googleAccountEmail'),
                 googleAccountName: this.model.get('googleAccountName') || this.model.get('googleAccountEmail'),
                 googleAccountPicture: this.model.get('googleAccountPicture'),
-                googleAccountProfileMissing: this.isConnected && !this.model.get('googleAccountEmail'),
+                googleAccountProfileMissing: connected && !this.model.get('googleAccountEmail'),
+                oauthSafetyBody: this.translate('googleConnectWarningText', 'labels', 'ExternalAccount'),
+                oauthSafetyAck: this.oauthSafetyAck,
+                oauthSafetyAckLocked: connected,
+                showCalendarSettings: connected && this.model.get('enabled'),
             };
         }
 
@@ -31,14 +42,181 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             this.listenTo(this.model, 'change:enabled', () => {
                 this.reRender();
             });
+
+            this.listenToOnce(this.model, 'sync', () => {
+                this.initOauthSafetyAck();
+                this.ensureCalendarUserFields();
+            });
+        }
+
+        afterRender() {
+            super.afterRender();
+
+            this.$el.find('[data-name="oauthSafetyAck"]').off('change.oauthSafety')
+                .on('change.oauthSafety', e => {
+                    if (this.isConnected) {
+                        e.preventDefault();
+                        this.$el.find('[data-name="oauthSafetyAck"]').prop('checked', true);
+
+                        return;
+                    }
+
+                    this.oauthSafetyAck = !!e.currentTarget.checked;
+                    this.persistOauthSafetyAck(this.oauthSafetyAck);
+                    this.syncConnectButtons();
+                });
+
+            this.syncConnectButtons();
+        }
+
+        initOauthSafetyAck() {
+            if (this.isConnected) {
+                this.oauthSafetyAck = true;
+                this.persistOauthSafetyAck(true);
+
+                return;
+            }
+
+            this.oauthSafetyAck = this.readOauthSafetyAck();
+        }
+
+        readOauthSafetyAck() {
+            try {
+                return sessionStorage.getItem(this.oauthSafetyStorageKey()) === '1';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        persistOauthSafetyAck(value) {
+            try {
+                if (value) {
+                    sessionStorage.setItem(this.oauthSafetyStorageKey(), '1');
+                } else {
+                    sessionStorage.removeItem(this.oauthSafetyStorageKey());
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        oauthSafetyStorageKey() {
+            return OAUTH_SAFETY_ACK_KEY + ':' + String(this.id || '');
+        }
+
+        syncConnectButtons() {
+            const allow = !!this.oauthSafetyAck;
+            const $buttons = this.$el.find('[data-action="connect"]');
+
+            $buttons.prop('disabled', !allow);
+            $buttons.toggleClass('disabled', !allow);
+        }
+
+        ensureCalendarUserFields() {
+            if (this.calendarFieldsReady || this.integration !== 'GoogleCalendarDrive') {
+                return;
+            }
+
+            this.calendarFieldsReady = true;
+
+            const fields = this.model.defs.fields || {};
+
+            fields.calendarRoutingMode = {
+                type: 'enum',
+                options: ROUTING_OPTIONS,
+                default: 'primary',
+            };
+            fields.overlayCalendarIdList = {
+                type: 'multiEnum',
+                options: ['primary'],
+                translation: 'ExternalAccount.options.overlayCalendarIdList',
+            };
+
+            this.model.defs.fields = fields;
+
+            if (!this.model.get('calendarRoutingMode')) {
+                this.model.set('calendarRoutingMode', 'primary', {silent: true});
+            }
+
+            if (!this.model.has('overlayCalendarIdList') || this.model.get('overlayCalendarIdList') == null) {
+                this.model.set('overlayCalendarIdList', ['primary'], {silent: true});
+            }
+
+            this.createFieldView('enum', 'calendarRoutingMode', false, {
+                options: ROUTING_OPTIONS,
+            });
+
+            this.createFieldView('multiEnum', 'overlayCalendarIdList', false, {
+                options: ['primary'],
+            });
+
+            if (this.isConnected) {
+                this.loadOverlayCalendarOptions();
+            }
+        }
+
+        loadOverlayCalendarOptions() {
+            Espo.Ajax.getRequest('GoogleIntegration/calendar/google-calendars', {forOverlay: '1'})
+                .then(response => {
+                    const list = (response && response.list) ? response.list : [];
+                    const options = ['primary'];
+                    const translated = {
+                        primary: this.translate('primary', 'options', 'ExternalAccount')
+                            || this.translate('calendarRoutingMode', 'options', 'ExternalAccount')
+                            || 'Primary calendar',
+                    };
+
+                    // Prefer human label for primary when Google marks one.
+                    list.forEach(row => {
+                        if (row && row.primary && row.summary) {
+                            translated.primary = String(row.summary) + ' (primary)';
+                        }
+                    });
+
+                    list.forEach(row => {
+                        const id = String((row && row.id) || '');
+
+                        if (!id || id === 'primary' || options.includes(id)) {
+                            return;
+                        }
+
+                        if (row.isCrmCalendar) {
+                            return;
+                        }
+
+                        options.push(id);
+                        translated[id] = row.summary || id;
+                    });
+
+                    const fieldView = this.getView('overlayCalendarIdList');
+
+                    if (fieldView) {
+                        fieldView.params = fieldView.params || {};
+                        fieldView.params.options = options;
+                        fieldView.translatedOptions = translated;
+
+                        if (typeof fieldView.reRender === 'function') {
+                            fieldView.reRender();
+                        }
+                    }
+                })
+                .catch(() => {
+                    // Keep primary-only fallback.
+                });
         }
 
         setConnected() {
+            this.oauthSafetyAck = true;
+            this.persistOauthSafetyAck(true);
             super.setConnected();
+            this.ensureCalendarUserFields();
+            this.loadOverlayCalendarOptions();
             this.reRender();
         }
 
         setNotConnected() {
+            this.oauthSafetyAck = false;
+            this.persistOauthSafetyAck(false);
             super.setNotConnected();
             this.reRender();
         }
@@ -77,6 +255,13 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
          * Manual export only: no background calendarSyncMode UI (forced to none server-side).
          */
         connect() {
+            if (!this.oauthSafetyAck) {
+                Espo.Ui.error(this.translate('googleConnectRiskCheckboxRequired', 'messages', 'ExternalAccount')
+                    || this.translate('googleConnectRiskCheckboxRequired', 'labels', 'ExternalAccount'));
+
+                return;
+            }
+
             if (this.connectInProgress) {
                 return;
             }

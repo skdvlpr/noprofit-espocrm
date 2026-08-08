@@ -1,0 +1,6 @@
+{
+    "controller": "controllers/record",
+    "boolFilterList": ["onlyMy"],
+    "iconClass": "fas fa-calendar-alt",
+    "color": "#5c6bc0"
+}

@@ -1,0 +1,19 @@
+{
+    "fields": {
+        "name": "Nome",
+        "user": "Utente",
+        "googleCalendarId": "ID calendario Google",
+        "googleEventId": "ID evento Google",
+        "dateStart": "Inizio",
+        "dateEnd": "Fine",
+        "dateStartDate": "Data inizio",
+        "dateEndDate": "Data fine",
+        "isAllDay": "Tutto il giorno",
+        "htmlLink": "Link Google",
+        "lastSyncedAt": "Ultima sincronizzazione"
+    },
+    "labels": {
+        "GoogleCalendarOverlayEvent": "Evento calendario Google",
+        "GoogleCalendarOverlayEventPlural": "Eventi calendario Google"
+    }
+}

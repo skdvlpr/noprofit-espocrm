@@ -1,6 +1,8 @@
 {
     "fields": {
-        "calendarSyncMode": "Calendar background sync"
+        "calendarSyncMode": "Calendar background sync",
+        "calendarRoutingMode": "Google calendar routing",
+        "overlayCalendarIdList": "Calendars to show in CRM"
     },
     "options": {
         "calendarSyncMode": {
@@ -8,14 +10,34 @@
             "bidirectional": "Two-way (CRM ↔ Google)",
             "crmToGoogle": "CRM → Google only",
             "googleToCrm": "Google → CRM only"
+        },
+        "calendarRoutingMode": {
+            "primary": "Primary calendar",
+            "user_pick": "I pick the calendar per record",
+            "auto_dedicated": "Dedicated calendar (auto)"
         }
     },
     "labels": {
         "calendarSyncModeHelp": "Background calendar sync is off. Use **Add to Google Calendar** on records to export manually. Showing Google events inside the CRM calendar is a separate preference (when available).",
         "googleAccountProfileMissing": "Connected with an older authorization. Reconnect this Google account to show its email, name and avatar.",
-        "reconnectGoogleAccount": "Reconnect Google account"
+        "reconnectGoogleAccount": "Reconnect Google account",
+        "googleConnectWarningTitle": "Before connecting Google",
+        "googleConnectWarningText": "This app has **not** been verified by Google. During Connect, Google will show an *\"unverified app\"* warning screen — click **Advanced**, then **Go to (app name) (unsafe)** to continue. Only connect if you understand and accept this risk. This integration is for **internal Safehouse use only** — do not connect accounts you do not manage yourself.",
+        "googleConnectRiskCheckboxLabel": "I have read this warning and understand the risks",
+        "googleConnectRiskCheckboxRequired": "Check \"I have read this warning and understand the risks\" before connecting.",
+        "oauthSafetyAckHint": "Connect / Reconnect stay disabled until this box is checked. After you connect, the checkbox locks until you disconnect.",
+        "googleCalendarUserSettings": "Google Calendar preferences",
+        "overlayCalendarIdListHelp": "Choose which personal Google calendars to show inside the CRM calendar. CRM-created calendars are never listed here. Default is the primary calendar only. Events older than 1 month are removed automatically.",
+        "googleCalendarNamingPatternHelp": "Calendar name will include the admin prefix/suffix (read-only)."
+    },
+    "messages": {
+        "googleConnectRiskCheckboxRequired": "Check \"I have read this warning and understand the risks\" before connecting."
     },
     "help": {
         "GoogleCalendarDrive": "Use **Connect** to authorize Google. While connected: **Reconnect** switches account; **Disconnect** clears tokens (same as turning off **Enabled** + **Save**). After connecting, verify email/name/avatar, then **Save**. Calendar export is manual only (per-record **Add to Google Calendar**)."
+    },
+    "tooltips": {
+        "calendarRoutingMode": "Primary calendar = your main Google calendar for all exports. I pick the calendar per record = choose (or create) a calendar on each record. Dedicated calendar (auto) = CRM creates/reuses one calendar per entity type automatically.",
+        "overlayCalendarIdList": "Personal calendars to overlay into the CRM calendar. CRM-managed calendars cannot be selected."
     }
 }

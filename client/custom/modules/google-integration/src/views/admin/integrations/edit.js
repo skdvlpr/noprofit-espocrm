@@ -31,6 +31,7 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
 
             this.addActionHandler('save', () => this.save());
             this.addActionHandler('cancel', () => this.actionCancel());
+            this.addActionHandler('copyRedirectUri', () => this.actionCopyRedirectUri());
 
             this.integration = this.options.integration;
             this.helpText = null;
@@ -200,6 +201,45 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                     'Integration'
                 ),
             };
+        }
+
+        actionCopyRedirectUri() {
+            const value = String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback';
+            const $input = this.$el.find('[data-name="redirectUriInput"]');
+
+            if ($input.length) {
+                $input.val(value);
+            }
+
+            const done = () => Espo.Ui.success(this.translate('Copied to clipboard'));
+
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                navigator.clipboard.writeText(value).then(done).catch(() => {
+                    this.fallbackCopyRedirectUri(value, done);
+                });
+
+                return;
+            }
+
+            this.fallbackCopyRedirectUri(value, done);
+        }
+
+        fallbackCopyRedirectUri(value, done) {
+            const $tmp = $('<textarea>')
+                .css({position: 'fixed', left: '-9999px'})
+                .val(value)
+                .appendTo(document.body);
+
+            $tmp[0].select();
+
+            try {
+                document.execCommand('copy');
+                done();
+            } catch (e) {
+                Espo.Ui.error(this.translate('Error occurred'));
+            }
+
+            $tmp.remove();
         }
 
         afterRender() {

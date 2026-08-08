@@ -75,6 +75,11 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetCrmDateSourceEvents"
     },
     {
+        "route": "/GoogleIntegration/calendar/overlay-events",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetOverlayEvents"
+    },
+    {
         "route": "/GoogleIntegration/calendar/entity-event-links/:entityType/:id",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetEntityEventLinks"

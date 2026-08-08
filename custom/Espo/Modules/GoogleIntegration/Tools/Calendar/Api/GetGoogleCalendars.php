@@ -9,6 +9,7 @@ use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\AllowedEntityTypesProvider;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateCapableEntityTypesProvider;
 use Throwable;
 
@@ -18,7 +19,8 @@ class GetGoogleCalendars implements Action
         private Acl $acl,
         private GoogleClientProvider $googleClientProvider,
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
-        private DateCapableEntityTypesProvider $dateCapableEntityTypesProvider
+        private DateCapableEntityTypesProvider $dateCapableEntityTypesProvider,
+        private CalendarProvisioner $calendarProvisioner
     ) {}
 
     public function process(Request $request): Response
@@ -44,9 +46,15 @@ class GetGoogleCalendars implements Action
                     continue;
                 }
 
+                $summary = (string) ($item['summary'] ?? $id);
+                $isCrm = $this->calendarProvisioner->isCrmCalendarName($summary);
+                $isPrimary = !empty($item['primary']);
+
                 $list[] = [
                     'id' => $id,
-                    'summary' => (string) ($item['summary'] ?? $id),
+                    'summary' => $summary,
+                    'isCrmCalendar' => $isCrm,
+                    'primary' => $isPrimary,
                 ];
             }
         } catch (Forbidden) {
@@ -58,22 +66,38 @@ class GetGoogleCalendars implements Action
             $errorMessage = $e->getMessage();
         }
 
+        [$namePrefix, $nameSuffix] = $this->calendarProvisioner->getPrefixSuffix();
+
+        $forOverlay = $request->getQueryParam('forOverlay') === '1'
+            || $request->getQueryParam('forOverlay') === 'true';
+
+        if ($forOverlay) {
+            $list = array_values(array_filter(
+                $list,
+                static fn (array $row): bool => empty($row['isCrmCalendar'])
+            ));
+        }
+
         if (!$connected) {
             return ResponseComposer::json([
-                'list' => [['id' => 'primary', 'summary' => 'primary']],
+                'list' => [['id' => 'primary', 'summary' => 'primary', 'isCrmCalendar' => false, 'primary' => true]],
                 'connected' => false,
                 'errorReason' => $errorReason,
                 'errorMessage' => $errorMessage,
+                'namePrefix' => $namePrefix,
+                'nameSuffix' => $nameSuffix,
             ]);
         }
 
         if ($list === []) {
-            $list[] = ['id' => 'primary', 'summary' => 'primary'];
+            $list[] = ['id' => 'primary', 'summary' => 'primary', 'isCrmCalendar' => false, 'primary' => true];
         }
 
         return ResponseComposer::json([
             'list' => $list,
             'connected' => true,
+            'namePrefix' => $namePrefix,
+            'nameSuffix' => $nameSuffix,
         ]);
     }
 

@@ -1,0 +1,13 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "isAllDay"}],
+            [{"name": "dateStart"}, {"name": "dateEnd"}],
+            [{"name": "dateStartDate"}, {"name": "dateEndDate"}],
+            [{"name": "googleCalendarId"}, {"name": "googleEventId"}],
+            [{"name": "htmlLink"}, false],
+            [{"name": "user"}, {"name": "lastSyncedAt"}]
+        ]
+    }
+]
