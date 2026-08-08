@@ -130,6 +130,30 @@ $ok(
     'StripeRefreshService class',
     class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeRefreshService::class)
 );
+
+$listInlineEdit = file_get_contents(
+    __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/record/list-inline-edit.js'
+) ?: '';
+$ok(
+    'PrimaNota list inline edit locks online-payment sourced fields',
+    str_contains($listInlineEdit, '_isOnlinePaymentFieldLocked')
+        && str_contains($listInlineEdit, 'paymentStatus')
+        && str_contains($listInlineEdit, 'Stripe')
+);
+$ok(
+    'Stripe refresh handler reports snapshot field count',
+    str_contains(
+        file_get_contents(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/handlers/prima-nota/refresh-from-stripe.js') ?: '',
+        'snapshotFieldCount'
+    )
+);
+$ok(
+    'StripeRefreshService returns snapshotSynced',
+    str_contains(
+        file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/PrimaNota/StripeRefreshService.php') ?: '',
+        'snapshotSynced'
+    )
+);
 $ok(
     'stripeChargeId UI readOnly via clientDefs when Stripe',
     $metadata->get(['clientDefs', 'PrimaNota', 'dynamicLogic', 'fields', 'stripeChargeId', 'readOnly', 'conditionGroup', 0, 'value']) === 'Stripe'

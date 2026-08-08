@@ -45,6 +45,26 @@ define('nonprofit-espocrm:handlers/prima-nota/refresh-from-stripe', [], function
                     let msg = this.view.translate('refreshFromStripeSuccess', 'messages', 'PrimaNota')
                         .replace('{status}', status);
 
+                    const fieldCount = response && response.snapshotFieldCount != null
+                        ? Number(response.snapshotFieldCount)
+                        : 0;
+                    const snapshotSynced = response && response.snapshotSynced === true;
+
+                    if (snapshotSynced && fieldCount > 0) {
+                        msg = msg + ' ' + this.view.translate(
+                            'refreshFromStripeSnapshotOk',
+                            'messages',
+                            'PrimaNota'
+                        ).replace('{count}', String(fieldCount));
+                    }
+                    else if (response && response.snapshotSynced === false) {
+                        msg = msg + ' ' + this.view.translate(
+                            'refreshFromStripeSnapshotSkipped',
+                            'messages',
+                            'PrimaNota'
+                        );
+                    }
+
                     if (reason && reason !== 'payout_paid' && reason !== 'already_inviato') {
                         msg = msg + ' (' + reason + ')';
                     }

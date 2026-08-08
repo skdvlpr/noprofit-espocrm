@@ -141,10 +141,23 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             if (fieldDefs.readOnly) {
                 return false;
             }
+            if (fieldDefs.inlineEditDisabled) {
+                return false;
+            }
             if (fieldDefs.notStorable) {
                 return false;
             }
             if (!EDITABLE_TYPES.has(fieldDefs.type)) {
+                return false;
+            }
+
+            // Online-payment rows: provider-sourced attrs are system-owned
+            // (detail dynamicLogic alone does not stop list double-click).
+            if (this._isOnlinePaymentFieldLocked(model, fieldName)) {
+                return false;
+            }
+
+            if (this._isDynamicLogicReadOnly(model, fieldName)) {
                 return false;
             }
 
@@ -163,6 +176,74 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             }
 
             return true;
+        },
+
+        /**
+         * Providers that own settlement/status data (Stripe now; Satispay/etc. later).
+         * Manual / empty provider rows stay list-editable.
+         */
+        _onlinePaymentProviders: function () {
+            return ['Stripe', 'Satispay', 'Revolut', 'BankTransfer', 'BankApp'];
+        },
+
+        _onlinePaymentLockedFields: function () {
+            return [
+                'amount', 'amountCurrency', 'amountGross', 'amountGrossCurrency',
+                'commissionAmount', 'commissionAmountCurrency', 'commissionPercent',
+                'amountIn', 'amountInCurrency', 'amountOut', 'amountOutCurrency',
+                'entryType', 'transactionDate', 'internalClassification',
+                'description', 'name',
+                'donationPaymentProvider', 'donationPaymentReference',
+                'donationDonorCategory', 'donationFrequency', 'donationComment',
+                'paymentStatus', 'financingId',
+                'subjectName', 'subjectPartyId', 'subjectPartyType',
+                'subjectEmailAddress', 'subjectPhoneNumber',
+                'beneficiaryName', 'beneficiaryPartyId', 'beneficiaryPartyType',
+                'beneficiaryEmailAddress', 'beneficiaryPhoneNumber',
+                'stripePaymentCreatedAt', 'stripeChargeId', 'stripeBalanceTransactionId',
+                'stripePaymentMethodType', 'stripeCardBrand', 'stripeCardLast4',
+                'stripeReceiptUrl', 'stripeReceiptEmail', 'stripeBillingEmail',
+                'stripeBillingPhone', 'stripeFeeDetailsJson', 'stripeLivemode',
+                'stripeRadarRiskLevel', 'stripeStatementDescriptor',
+                'stripeCustomerId', 'stripeSubscriptionId',
+                'stripeInvoiceId', 'stripeInvoiceNumber',
+                'stripePayoutId', 'stripePayoutPaidAt',
+            ];
+        },
+
+        _isOnlinePaymentFieldLocked: function (model, fieldName) {
+            if (this.scope !== 'PrimaNota') {
+                return false;
+            }
+
+            var provider = String(model.get('donationPaymentProvider') || '');
+            if (!provider || this._onlinePaymentProviders().indexOf(provider) === -1) {
+                return false;
+            }
+
+            return this._onlinePaymentLockedFields().indexOf(fieldName) !== -1;
+        },
+
+        /**
+         * Honour clientDefs.dynamicLogic.fields.{name}.readOnly when present.
+         */
+        _isDynamicLogicReadOnly: function (model, fieldName) {
+            var logic = this.getMetadata().get(
+                ['clientDefs', this.scope, 'dynamicLogic', 'fields', fieldName, 'readOnly']
+            );
+
+            if (!logic || !logic.conditionGroup || !logic.conditionGroup.length) {
+                return false;
+            }
+
+            // Minimal equals-only evaluator (PrimaNota locks use type=equals).
+            return logic.conditionGroup.every(function (cond) {
+                if (!cond || cond.type !== 'equals') {
+                    return false;
+                }
+
+                return String(model.get(cond.attribute) || '') === String(cond.value || '');
+            });
         },
 
         _getFieldView: function (modelId, fieldName) {

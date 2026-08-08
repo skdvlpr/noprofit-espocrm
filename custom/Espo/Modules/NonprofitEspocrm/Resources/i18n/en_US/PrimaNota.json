@@ -94,8 +94,10 @@
         "partyNameRequired": "Enter a name before creating a linked Account or Contact.",
         "copyPaymentDataCopied": "Payment data copied to clipboard.",
         "copyPaymentDataFailed": "Could not copy payment data.",
-        "refreshFromStripeInProgress": "Refreshing payment status from Stripe...",
+        "refreshFromStripeInProgress": "Refreshing full payment snapshot from Stripe...",
         "refreshFromStripeSuccess": "Payment status from Stripe: {status}",
+        "refreshFromStripeSnapshotOk": "Updated {count} Stripe-sourced field(s) on this record.",
+        "refreshFromStripeSnapshotSkipped": "Stripe settlement snapshot was not re-applied (missing PaymentIntent or sync error — check logs).",
         "refreshFromStripeFailed": "Could not refresh payment status from Stripe.",
         "refreshFromStripeNotStripe": "Refresh from Stripe is only available for Stripe ledger entries.",
         "refreshFromStripeNotConfigured": "Donation site sync is not configured. Ask an admin to set the site URL and sync token."

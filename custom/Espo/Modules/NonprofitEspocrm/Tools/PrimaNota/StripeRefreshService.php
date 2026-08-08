@@ -16,8 +16,9 @@ use Espo\ORM\EntityManager;
 use stdClass;
 
 /**
- * Asks the donation site to re-read Stripe and update PrimaNota.paymentStatus.
- * Stripe secrets stay on the site; CRM only holds site URL + shared sync token.
+ * Asks the donation site to re-read Stripe and update the full PrimaNota snapshot
+ * (settlement/enrichment fields + paymentStatus). Stripe secrets stay on the site;
+ * CRM only holds site URL + shared sync token.
  */
 class StripeRefreshService
 {
@@ -128,12 +129,23 @@ class StripeRefreshService
         $site = $decoded ?? (object) [];
         $reason = is_object($site) && isset($site->reason) ? (string) $site->reason : '';
         $applyError = is_object($site) && isset($site->applyError) ? (string) $site->applyError : '';
+        $snapshotSynced = is_object($site) && isset($site->snapshotSynced)
+            ? (bool) $site->snapshotSynced
+            : false;
+        $snapshotFieldCount = is_object($site) && isset($site->snapshotFieldCount)
+            ? (int) $site->snapshotFieldCount
+            : 0;
 
         return (object) [
             'id' => $id,
             'paymentStatus' => $entity->get('paymentStatus'),
             'stripePayoutId' => $entity->get('stripePayoutId'),
             'stripePayoutPaidAt' => $entity->get('stripePayoutPaidAt'),
+            'amount' => $entity->get('amount'),
+            'amountGross' => $entity->get('amountGross'),
+            'commissionAmount' => $entity->get('commissionAmount'),
+            'snapshotSynced' => $snapshotSynced,
+            'snapshotFieldCount' => $snapshotFieldCount,
             'reason' => $reason !== '' ? $reason : null,
             'applyError' => $applyError !== '' ? $applyError : null,
             'site' => $site,

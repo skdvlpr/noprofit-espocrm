@@ -94,8 +94,10 @@
         "partyNameRequired": "Inserisci un nome prima di creare Account o Contatto collegato.",
         "copyPaymentDataCopied": "Dati pagamento copiati negli appunti.",
         "copyPaymentDataFailed": "Impossibile copiare i dati pagamento.",
-        "refreshFromStripeInProgress": "Aggiornamento stato pagamento da Stripe...",
+        "refreshFromStripeInProgress": "Aggiornamento completo del pagamento da Stripe...",
         "refreshFromStripeSuccess": "Stato pagamento da Stripe: {status}",
+        "refreshFromStripeSnapshotOk": "Aggiornati {count} campi provenienti da Stripe su questo record.",
+        "refreshFromStripeSnapshotSkipped": "Lo snapshot Stripe non e' stato riapplicato (PaymentIntent mancante o errore sync - controlla i log).",
         "refreshFromStripeFailed": "Impossibile aggiornare lo stato pagamento da Stripe.",
         "refreshFromStripeNotStripe": "Aggiorna da Stripe e' disponibile solo per i movimenti Stripe.",
         "refreshFromStripeNotConfigured": "Sincronizzazione con il sito donazioni non configurata. Chiedi a un admin di impostare URL e token di sync."
