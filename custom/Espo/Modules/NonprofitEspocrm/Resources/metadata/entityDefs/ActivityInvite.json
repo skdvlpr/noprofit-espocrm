@@ -26,6 +26,7 @@
             ],
             "default": "Available",
             "displayAsLabel": true,
+            "view": "nonprofit-espocrm:views/fields/enum-status-badge",
             "style": {
                 "Available": "primary",
                 "Assigned": "warning",

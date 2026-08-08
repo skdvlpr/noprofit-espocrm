@@ -194,6 +194,11 @@ define('google-integration:views/admin/integrations/edit', ['exports', 'views/ad
                     'labels',
                     'Integration'
                 ),
+                crmCalendarScopesGoogleNote: this.translate(
+                    'googleCalendarCrmScopesGoogleNote',
+                    'labels',
+                    'Integration'
+                ),
             };
         }
 

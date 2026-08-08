@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "targetEntityType"},
+    {"name": "dateField"},
+    {"name": "sourceDateType"},
+    {"name": "isActive"}
+]

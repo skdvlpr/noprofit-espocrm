@@ -1,0 +1,20 @@
+{
+  "name": "Safehouse CRM",
+  "short_name": "Safehouse",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#c0392b",
+  "icons": [
+    {
+      "src": "/client/img/favicon-196.png",
+      "sizes": "196x196",
+      "type": "image/png"
+    },
+    {
+      "src": "/client/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

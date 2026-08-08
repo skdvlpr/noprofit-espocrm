@@ -32,5 +32,14 @@
                 {"name": "exitDates", "fullWidth": true}
             ]
         ]
+    },
+    {
+        "label": "System",
+        "rows": [
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
+            ]
+        ]
     }
 ]

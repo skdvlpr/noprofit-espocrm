@@ -19,6 +19,9 @@
         "assignedUser": "Assegnato a",
         "teams": "Team"
     },
+    "tooltips": {
+        "screenshots": "Puoi allegare più immagini (seleziona più file insieme oppure clicca di nuovo sulla graffetta)."
+    },
     "labels": {
         "Create BugReport": "Segnala un bug",
         "ReportBug": "Segnala un bug",

@@ -29,13 +29,35 @@
     "labels": {
         "ActivityOfferSlot": "Turno volontario",
         "ActivityOfferSlotPlural": "Turni volontari",
-        "Create ActivityOfferSlot": "Crea turno"
+        "Create ActivityOfferSlot": "Crea turno",
+        "slotStaffing": "Assegnati e candidati",
+        "slotAssigned": "Volontari assegnati",
+        "slotCandidates": "Candidati (disponibili)",
+        "resendInvite": "Reinvia invito",
+        "Cancel shift": "Annulla turno"
+    },
+    "messages": {
+        "slotNoneAssigned": "Nessun volontario assegnato a questo turno.",
+        "slotNoneCandidates": "Nessun candidato disponibile su questo turno.",
+        "resendInviteTooltip": "Reinvia notifica ed email di richiesta disponibilità a questa persona.",
+        "confirmResendInvite": "Reinviare l’invito di disponibilità a {name}?",
+        "resendInviteDone": "Invito reinviato a {name} (email inviate: {emailSent}).",
+        "cancelSlotConfirm": "Annullare questo turno? Verranno avvisati i volontari Assegnati/Confermati. Chi ha solo indicato disponibilità non riceve notifiche.",
+        "cancelSlotSuccess": "Turno annullato. Avvisate {notifyCount} persone ({emailCount} email).",
+        "cancelSlotPlanClosed": "Tutti i turni sono terminali — il piano settimanale è stato finalizzato automaticamente ({status})."
+    },
+    "tooltips": {
+        "dayOfWeek": "Cambiando il giorno, le date reali di inizio/fine si ricalcolano dall’inizio settimana del piano, mantenendo gli stessi orari.",
+        "conditions": "Fino a 5 condizioni a testo libero per questo turno.",
+        "isAllDay": "Turno per tutto il giorno: la selezione dell’orario è disabilitata."
     },
     "options": {
-            "status": {
-                "Published": "Pubblicato",
-                "Covered": "Coperto"
-            },
+        "status": {
+            "Published": "Pubblicato",
+            "Covered": "Coperto",
+            "Completed": "Completato",
+            "Cancelled": "Annullato"
+        },
         "category": {
             "MealPreparation": "Preparazione pasti",
             "MealDistribution": "Distribuzione pasti",
@@ -65,9 +87,5 @@
             "Saturday": "Sabato",
             "Sunday": "Domenica"
         }
-    },
-    "tooltips": {
-        "conditions": "Fino a 5 condizioni a testo libero per questo turno.",
-        "isAllDay": "Turno per tutto il giorno: la selezione dell’orario è disabilitata."
     }
 }

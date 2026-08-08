@@ -24,8 +24,14 @@
                     "name": "assignedUser"
                 },
                 {
-                    "name": "birthDate"
+                    "name": "teams"
                 }
+            ],
+            [
+                {
+                    "name": "birthDate"
+                },
+                false
             ],
             [
                 {

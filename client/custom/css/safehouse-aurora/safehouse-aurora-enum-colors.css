@@ -258,3 +258,38 @@ body[data-theme-name="SafehouseAuroraLight"] .label-state.label-info {
   background-color: var(--state-info-bg) !important;
   color: var(--state-info-text) !important;
 }
+
+/*
+ * Soft pill fill on the closed selectize control for styled enums
+ * (status fields in edit forms — complements displayAsLabel badges).
+ */
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-danger),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-danger),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.danger),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.danger) {
+  background-color: var(--state-danger-bg) !important;
+}
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-info),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-info),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.info),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.info) {
+  background-color: var(--state-info-bg) !important;
+}
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-warning),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-warning),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.warning),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.warning) {
+  background-color: var(--state-warning-bg) !important;
+}
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-success),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-success),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.success),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.success) {
+  background-color: var(--state-success-bg) !important;
+}
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.text-primary),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.text-primary),
+body[data-theme-name="SafehouseAurora"] .selectize-control.single > .selectize-input:has(> .item.primary),
+body[data-theme-name="SafehouseAuroraLight"] .selectize-control.single > .selectize-input:has(> .item.primary) {
+  background-color: var(--state-primary-bg) !important;
+}

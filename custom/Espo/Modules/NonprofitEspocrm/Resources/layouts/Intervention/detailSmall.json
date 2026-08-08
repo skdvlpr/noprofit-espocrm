@@ -17,6 +17,14 @@
                 {"name": "parent", "fullWidth": true}
             ],
             [
+                {"name": "account"},
+                {"name": "contact"}
+            ],
+            [
+                {"name": "lead"},
+                false
+            ],
+            [
                 {"name": "locationAddress", "fullWidth": true}
             ],
             [

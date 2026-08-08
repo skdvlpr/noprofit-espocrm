@@ -24,7 +24,7 @@ class ProvisionShiftPlanning implements RebuildAction
 {
     /** Bump when new provisioning steps must re-run on production rebuild. */
     /** Bump on merge into NonprofitEspocrm so provision re-runs once. */
-    private const PROVISION_VERSION = '2026-08-05-slot-status-published-covered-v1';
+    private const PROVISION_VERSION = '2026-08-05-slot-crm-calendar-cds-v1';
     private const CONFIG_KEY = 'vadProvisionVersion';
 
     public function __construct(

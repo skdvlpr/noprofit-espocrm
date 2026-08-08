@@ -236,6 +236,138 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
     }
 }
 
+.food-parcel-pdf-preview {
+    width: 100%;
+}
+
+.food-parcel-pdf-frame {
+    width: 100%;
+    min-height: 640px;
+    border: 1px solid var(--panel-default-border, #ddd);
+    border-radius: var(--border-radius, 4px);
+    background: var(--panel-bg, #fff);
+}
+
+/* Email list — mobile-friendly (Android narrow screens) */
+@media (max-width: 767px) {
+    body .page[data-scope="Email"] .row > .left-container,
+    body .page[data-scope="Email"] .row > .list-container {
+        width: 100%;
+        max-width: 100%;
+        float: none;
+    }
+
+    body .page[data-scope="Email"] .row > .left-container {
+        margin-bottom: 12px;
+    }
+
+    body .page[data-scope="Email"] .list-container {
+        overflow-x: hidden;
+    }
+
+    body .page[data-scope="Email"] .list-container .table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="fromEmailAddress"],
+    body .page[data-scope="Email"] .list-container .table td[data-name="fromString"] {
+        max-width: 28%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="name"] {
+        max-width: 42%;
+        word-break: break-word;
+    }
+
+    body .page[data-scope="Email"] .list-container .table td[data-name="dateSent"] {
+        max-width: 30%;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    body .page[data-scope="Email"] .list-container .table thead th[data-name="dateSent"],
+    body .page[data-scope="Email"] .list-container .table thead th[data-name="fromEmailAddress"] {
+        font-size: 11px;
+    }
+}
+
+/* Prima Nota: income green, expense red — same tokens as Conteggio pasti accent */
+.safehouse-reporting-stats-value--income {
+    color: var(--sh-reporting-income-color);
+    font-weight: 600;
+}
+
+.safehouse-reporting-stats-value--expense {
+    color: var(--sh-reporting-expense-color);
+    font-weight: 600;
+}
+
+.safehouse-reporting-stats-value--balance {
+    color: var(--text-color, inherit);
+    font-weight: 600;
+}
+
+.prima-nota-amount-in,
+.prima-nota-amount-in .field,
+.prima-nota-amount-in a {
+    color: var(--sh-reporting-income-color) !important;
+    font-weight: 600;
+}
+
+.prima-nota-amount-out,
+.prima-nota-amount-out .field,
+.prima-nota-amount-out a {
+    color: var(--sh-reporting-expense-color) !important;
+    font-weight: 600;
+}
+
+/* Entry type dropdown — Entrata / Uscita */
+select.prima-nota-entry-type-income,
+.field.prima-nota-entry-type-income select,
+.prima-nota-entry-type-income select {
+    color: var(--sh-reporting-income-color);
+    border-color: color-mix(in srgb, var(--sh-reporting-income-color) 50%, transparent);
+    background-color: color-mix(in srgb, var(--sh-reporting-income-color) 14%, transparent);
+    font-weight: 600;
+}
+
+select.prima-nota-entry-type-expense,
+.field.prima-nota-entry-type-expense select,
+.prima-nota-entry-type-expense select {
+    color: var(--sh-reporting-expense-color);
+    border-color: color-mix(in srgb, var(--sh-reporting-expense-color) 50%, transparent);
+    background-color: color-mix(in srgb, var(--sh-reporting-expense-color) 14%, transparent);
+    font-weight: 600;
+}
+
+select.prima-nota-entry-type-income option[value="Income"],
+select.prima-nota-entry-type-expense option[value="Income"] {
+    color: var(--sh-reporting-income-color);
+    background-color: var(--panel-bg, #1a1a1a);
+}
+
+select.prima-nota-entry-type-income option[value="Expense"],
+select.prima-nota-entry-type-expense option[value="Expense"] {
+    color: var(--sh-reporting-expense-color);
+    background-color: var(--panel-bg, #1a1a1a);
+}
+
+@supports not (background: color-mix(in srgb, #000 10%, transparent)) {
+    select.prima-nota-entry-type-income,
+    .field.prima-nota-entry-type-income select {
+        background-color: rgba(101, 163, 13, 0.12);
+    }
+
+    select.prima-nota-entry-type-expense,
+    .field.prima-nota-entry-type-expense select {
+        background-color: rgba(220, 38, 38, 0.12);
+    }
+}
+
 .fundraising-progress-field {
     margin: 4px 0 8px;
 }
@@ -433,6 +565,488 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
 .dialog-record .field[data-name="weekSlots"] .week-slots-editor .panel {
     margin-bottom: 0.75em;
 }
+
+/* ActivityOffer detail — full-width planning band above Overview */
+.detail[data-scope="ActivityOffer"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full,
+.detail[data-scope="ActivityOffer"] .record-grid {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top {
+    margin: 0 0 1.1em;
+    padding: 0;
+    display: block;
+    clear: both;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel {
+    display: block;
+    float: none;
+    width: 100% !important;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0.85em;
+    box-sizing: border-box;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel:last-child {
+    margin-bottom: 0;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-heading,
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-body {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/*
+ * Overview | side equal height (Espo 10 uses CSS Grid on .record-grid).
+ * Keep display:grid — do not override to flex (breaks 66/33 columns).
+ * Grid stretch sizes .left/.side; flex fills the side glass panel to that height.
+ */
+.detail[data-scope="ActivityOffer"] .record-grid {
+    align-items: stretch;
+    margin-bottom: 1.1em;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .left,
+.detail[data-scope="ActivityOffer"] .record-grid > .side {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    min-width: 0;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .left > .middle,
+.detail[data-scope="ActivityOffer"] .record-grid > .left > .extra {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Side panels are direct children of .side (see record/side.tpl) */
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 0;
+    min-height: 0;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel + .panel {
+    margin-top: var(--panel-gap, 0.85em);
+    flex: 0 1 auto;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel:first-child {
+    flex: 1 1 auto;
+}
+
+.detail[data-scope="ActivityOffer"] .record-grid > .side > .panel > .panel-body {
+    flex: 1 1 auto;
+}
+
+@media (max-width: 991px) {
+    .detail[data-scope="ActivityOffer"] .record-grid > .side > .panel {
+        flex: 0 1 auto;
+    }
+
+    .detail[data-scope="ActivityOffer"] .record-grid > .side > .panel:first-child {
+        flex: 0 1 auto;
+    }
+}
+
+/* Turni / Attività / Stream — full content width under the grid */
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full {
+    display: block;
+    clear: both;
+    width: 100%;
+    margin: 0 0 1em;
+}
+
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full > .panel {
+    display: block;
+    float: none;
+    width: 100% !important;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+}
+
+/*
+ * Horizontal scroll for wide tables. Note: overflow-x:auto + overflow-y:visible
+ * computes to overflow-y:auto (CSS), which clips native <select> / menus.
+ * Default: allow horizontal scroll; while inline-editing, force visible.
+ */
+.detail[data-scope="ActivityOffer"] .activity-offer-panel-scroll,
+.detail[data-scope="ActivityOffer"] .activity-offer-planning-top .list,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list,
+.detail[data-scope="ActivityOffer"] .bottom .panel .list {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+.detail[data-scope="ActivityOffer"] .bottom .panel .list-container.list-container-panel,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list-container.list-container-panel {
+    overflow: visible;
+}
+
+.detail[data-scope="ActivityOffer"] .bottom .panel .list .btn-group.open,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list .btn-group.open {
+    position: relative;
+    z-index: 20;
+}
+
+.detail[data-scope="ActivityOffer"] .bottom .panel .list .dropdown-menu,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list .dropdown-menu {
+    z-index: 1060;
+}
+
+/* Inline-edit enum <select> / open menus must escape list overflow clipping */
+.detail[data-scope="ActivityOffer"] .bottom .panel:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .panel:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .bottom .panel .list-container:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list-container:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .bottom .panel .list:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list:has(.sh-editing),
+.detail[data-scope="ActivityOffer"] .bottom .panel .list:has(.sh-editing) > table,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list:has(.sh-editing) > table {
+    overflow: visible !important;
+}
+
+.detail[data-scope="ActivityOffer"] .bottom .panel .list td.cell.sh-editing,
+.detail[data-scope="ActivityOffer"] .activity-offer-bottom-full .list td.cell.sh-editing {
+    overflow: visible !important;
+    z-index: 30;
+}
+
+.slot-staffing-panel .slot-staffing-heading {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    font-size: 0.92em;
+}
+
+.slot-staffing-panel .slot-staffing-section + .slot-staffing-section {
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+}
+
+.slot-staffing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.slot-staffing-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.55rem 0.65rem;
+    text-align: left;
+    padding: 0.4rem 0.55rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+    background: var(--gray-subtle, rgba(127, 127, 127, 0.08));
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.slot-staffing-avatar-link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    line-height: 0;
+}
+
+.slot-staffing-card img.slot-staffing-avatar,
+.slot-staffing-card img.avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.slot-staffing-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(127, 127, 127, 0.25);
+    color: inherit;
+    opacity: 0.85;
+    font-size: 0.85em;
+}
+
+.slot-staffing-card-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    min-width: 0;
+}
+
+.slot-staffing-name {
+    display: inline;
+    font-size: 0.88em;
+    font-weight: 600;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.slot-staffing-status {
+    font-size: 0.7em;
+    white-space: nowrap;
+}
+
+.slot-staffing-resend {
+    margin-left: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 575px) {
+    .slot-staffing-grid {
+        gap: 0.35rem;
+    }
+
+    .slot-staffing-card {
+        padding: 0.35rem 0.45rem;
+    }
+
+    .slot-staffing-resend {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+.web-push-field .web-push-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.web-push-field .web-push-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    align-items: center;
+}
+
+.web-push-field .web-push-checklist-box {
+    margin-bottom: 0;
+}
+
+.web-push-field .web-push-checklist-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1.2rem;
+}
+
+.web-push-field .margin-top-sm {
+    margin-top: 0.4rem;
+}
+
+@media (max-width: 575px) {
+    .slot-staffing-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .slot-staffing-card {
+        min-height: 6.5rem;
+        padding: 0.55rem 0.35rem;
+    }
+}
+
+
+@media (max-width: 991px) {
+    .detail[data-scope="ActivityOffer"] .record-grid > .side {
+        width: 100%;
+        margin-top: 0.75em;
+    }
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-table,
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table {
+    width: 100%;
+    min-width: 720px;
+    margin-bottom: 0;
+    table-layout: auto;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table th,
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-table td.small {
+    white-space: normal;
+    min-width: 120px;
+    max-width: 280px;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-shift-name {
+    font-weight: 600;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-table td.coverage-conditions {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-width: 160px;
+    max-width: 360px;
+    vertical-align: top;
+    color: var(--text-muted-color, inherit);
+    font-size: 0.92em;
+}
+
+.detail[data-scope="ActivityOffer"] .coverage-row-uncovered > td:first-child {
+    border-left: 3px solid var(--brand-danger, #d9534f);
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-summary {
+    margin: 0 0 0.85em;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card {
+    background: var(--panel-bg, var(--gray-lighter, rgba(127, 127, 127, 0.14)));
+    border: 1px solid var(--panel-border-color, var(--border-color, rgba(127, 127, 127, 0.25)));
+    color: var(--text-color, inherit);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 0.75em;
+    min-height: 64px;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card-value {
+    font-size: 1.35em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.detail[data-scope="ActivityOffer"] .volunteer-stats-card-label {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+    color: inherit;
+}
+
+/* Phone / narrow — keep planning band usable, wrap actions, stack week-slot cards */
+@media (max-width: 767px) {
+    .detail[data-scope="ActivityOffer"] .coverage-table,
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-table {
+        min-width: 520px;
+        font-size: 12px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .coverage-table td.coverage-conditions {
+        min-width: 120px;
+        max-width: 220px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .detail-button-container .actions-btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-width: 100%;
+    }
+
+    .detail[data-scope="ActivityOffer"] .detail-button-container .btn {
+        margin-bottom: 0;
+    }
+
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-card {
+        min-height: 56px;
+        padding: 8px 10px;
+    }
+
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-card-value {
+        font-size: 1.15em;
+    }
+
+    .detail[data-scope="ActivityOffer"] .activity-offer-planning-top > .panel > .panel-body,
+    .detail[data-scope="ActivityOffer"] .bottom > .panel > .panel-body {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* Relationship lists inside planning (Turni / Attività) */
+    .detail[data-scope="ActivityOffer"] .activity-offer-planning-top .panel .list > table,
+    .detail[data-scope="ActivityOffer"] .bottom .panel .list > table {
+        min-width: 480px;
+    }
+
+    /* Aggiungi turni modal — full-width stacked fields, larger touch targets */
+    .dialog-record .week-slots-editor .cell.form-group {
+        margin-bottom: 0.65em;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-row > .panel-body {
+        padding: 12px 12px;
+        padding-top: 30px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-remove {
+        min-width: 36px;
+        min-height: 36px;
+        top: 2px;
+        right: 2px;
+    }
+
+    .dialog-record .week-slots-editor .form-control,
+    .dialog-record .week-slots-editor select.form-control,
+    .dialog-record .week-slots-editor input.form-control {
+        height: 40px;
+        min-height: 40px;
+        font-size: 16px; /* avoid iOS zoom on focus */
+    }
+
+    .dialog-record .week-slots-editor .input-group-btn .btn {
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-allday {
+        min-height: 40px;
+    }
+
+    .dialog-record .week-slots-editor .week-slot-place-row > [class*="col-"] {
+        margin-bottom: 0.35em;
+    }
+}
+
+@media (max-width: 575px) {
+    .detail[data-scope="ActivityOffer"] .volunteer-stats-summary > [class*="col-"] {
+        width: 50%;
+        float: left;
+    }
+}
+
 
 /* ActivityOffer detail — full-width planning band above Overview */
 .detail[data-scope="ActivityOffer"] {

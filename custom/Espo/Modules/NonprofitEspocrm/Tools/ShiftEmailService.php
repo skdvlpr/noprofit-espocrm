@@ -38,6 +38,8 @@ class ShiftEmailService
     public const KIND_AVAILABILITY_REQUEST = 'availabilityRequest';
     public const KIND_SHIFTS_CONFIRMED = 'shiftsConfirmed';
     public const KIND_ADMIN_DIGEST = 'adminDigest';
+    public const KIND_PLAN_UPDATED = 'planUpdated';
+    public const KIND_SHIFT_CANCELLED = 'shiftCancelled';
 
     public const BRAND_NAME = 'Safe House';
 
@@ -78,6 +80,35 @@ class ShiftEmailService
         return $this->sendTemplated(self::KIND_ADMIN_DIGEST, $offer, [$userId], $digestLines);
     }
 
+    /**
+     * Soft plan change (description / conditions / category / requiredCount).
+     *
+     * @param string[] $userIds
+     * @param string[] $changeLines human-readable field labels
+     * @return array{sent: int, skipped: string[], failed: string[]}
+     */
+    public function sendPlanUpdated(Entity $offer, array $userIds, array $changeLines): array
+    {
+        return $this->sendTemplated(
+            self::KIND_PLAN_UPDATED,
+            $offer,
+            $userIds,
+            $changeLines,
+            ['{changeList}' => $this->linesToHtml($changeLines)]
+        );
+    }
+
+    /**
+     * Shift(s) cancelled or deleted after staffing (Assigned/Confirmed).
+     *
+     * @param string[] $shiftLines
+     * @return array{sent: int, skipped: string[], failed: string[]}
+     */
+    public function sendShiftCancelled(Entity $offer, string $userId, array $shiftLines): array
+    {
+        return $this->sendTemplated(self::KIND_SHIFT_CANCELLED, $offer, [$userId], $shiftLines);
+    }
+
     public function formatConfirmedShiftLine(Entity $slot): string
     {
         return $this->formatSlotLine($slot, true);
@@ -86,10 +117,16 @@ class ShiftEmailService
     /**
      * @param string[] $userIds
      * @param string[] $shiftLines
+     * @param array<string, string> $extraTokens
      * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    private function sendTemplated(string $kind, Entity $offer, array $userIds, array $shiftLines): array
-    {
+    private function sendTemplated(
+        string $kind,
+        Entity $offer,
+        array $userIds,
+        array $shiftLines,
+        array $extraTokens = []
+    ): array {
         $template = $this->getTemplate($kind);
 
         if (!$template) {
@@ -126,13 +163,14 @@ class ShiftEmailService
         $slotListHtml = $this->linesToHtml($slotLines);
         $shiftListHtml = $this->linesToHtml($shiftLines);
 
-        $extra = [
+        $extra = array_merge([
             '{shiftList}' => $shiftListHtml,
             '{slotList}' => $slotListHtml,
             '{slotCount}' => (string) count($slots),
             '{logoHtml}' => $this->logoHtml(),
             '{brandName}' => self::BRAND_NAME,
-        ];
+            '{changeList}' => '',
+        ], $extraTokens);
 
         $sent = 0;
         $skipped = [];

@@ -1,5 +1,31 @@
 {
     "fields": {
-        "notificationSound": "Suono notifiche"
+        "notificationSound": "Suono notifica",
+        "webPushEnabled": "Notifiche push del browser"
+    },
+    "labels": {
+        "webPushStatusOn": "Attive su questo dispositivo",
+        "webPushStatusOff": "Disattivate",
+        "webPushCheckPermissions": "Verifica permessi",
+        "webPushOpenSettings": "Guida ai permessi",
+        "webPushChecklistTitle": "Sistema i permessi, poi riprova",
+        "webPushSendTest": "Invia push di test",
+        "webPushDelaySeconds": "Ritardo (secondi)"
+    },
+    "tooltips": {
+        "webPushEnabled": "Canale opzionale, separato dalle notifiche in-app (campanella) e dalle email. Lo attivi solo per il tuo utente. Abilitando registri questo browser per le push; le in-app restano indipendenti.",
+        "webPushHelp": "Le push non sono le notifiche in-app. Usa «Verifica permessi» per controllare browser/sistema. La checklist compare solo se la verifica fallisce.",
+        "webPushSendTest": "Invia una vera push a questo dispositivo. Il ritardo opzionale serve per ridurre la finestra prima (0 = subito, max 300)."
+    },
+    "messages": {
+        "webPushUnsupported": "Questo browser non supporta le Web Push.",
+        "webPushEnableFailed": "Impossibile attivare le push del browser.",
+        "webPushEnabledOk": "Push del browser attivate su questo dispositivo.",
+        "webPushPermissionsOk": "I permessi di notifica risultano a posto.",
+        "webPushPermissionsBad": "I permessi non sono pronti. Segui la checklist sotto.",
+        "webPushTestSent": "Push di test inviata ({sent}). Controlla le notifiche OS / browser.",
+        "webPushTestScheduled": "Push di test tra {seconds}s — riduci il browser e attendi.",
+        "webPushTestFailed": "Push di test fallita (nessuna subscription attiva). Attiva prima le push.",
+        "webPushTestInvalidDelay": "Il ritardo deve essere tra 0 e 300 secondi."
     }
 }

@@ -1,17 +1,138 @@
 [
     {
+        "label": "Overview",
         "rows": [
-            [{"name": "paymentStatus"}, false],
-            [{"name": "subjectParty", "fullWidth": true}],
-            [{"name": "subjectName", "fullWidth": true}],
-            [{"name": "createSubjectAccount"}, {"name": "createSubjectContact"}],
-            [{"name": "subjectEmailAddress"}, {"name": "subjectPhoneNumber"}],
-            [{"name": "beneficiaryParty", "fullWidth": true}],
-            [{"name": "beneficiaryName", "fullWidth": true}],
-            [{"name": "createBeneficiaryAccount"}, {"name": "createBeneficiaryContact"}],
-            [{"name": "beneficiaryEmailAddress"}, {"name": "beneficiaryPhoneNumber"}],
-            [{"name": "entryType"}, {"name": "amount"}],
-            [{"name": "modelDClassification", "fullWidth": true}]
+            [
+                {"name": "paymentStatus"},
+                {"name": "transactionDate"}
+            ],
+            [
+                {"name": "name"},
+                false
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ],
+            [
+                {"name": "subjectParty", "fullWidth": true}
+            ],
+            [
+                {"name": "subjectName", "fullWidth": true}
+            ],
+            [
+                {"name": "createSubjectAccount"},
+                {"name": "createSubjectContact"}
+            ],
+            [
+                {"name": "subjectEmailAddress"},
+                {"name": "subjectPhoneNumber"}
+            ],
+            [
+                {"name": "beneficiaryParty", "fullWidth": true}
+            ],
+            [
+                {"name": "beneficiaryName", "fullWidth": true}
+            ],
+            [
+                {"name": "createBeneficiaryAccount"},
+                {"name": "createBeneficiaryContact"}
+            ],
+            [
+                {"name": "beneficiaryEmailAddress"},
+                {"name": "beneficiaryPhoneNumber"}
+            ],
+            [
+                {"name": "financing"},
+                false
+            ],
+            [
+                {"name": "entryType"},
+                {"name": "amount"}
+            ],
+            [
+                {"name": "amountIn"},
+                {"name": "amountOut"}
+            ],
+            [
+                {"name": "amountGross"},
+                {"name": "commissionAmount"}
+            ],
+            [
+                {"name": "commissionPercent"},
+                false
+            ],
+            [
+                {"name": "modelDClassification", "fullWidth": true}
+            ],
+            [
+                {"name": "internalClassification", "fullWidth": true}
+            ],
+            [
+                {"name": "donationPaymentProvider"},
+                {"name": "donationPaymentReference"}
+            ],
+            [
+                {"name": "donationDonorCategory"},
+                {"name": "donationFrequency"}
+            ],
+            [
+                {"name": "donationComment", "fullWidth": true}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
+            ]
+        ]
+    },
+    {
+        "name": "stripeDetails",
+        "label": "Stripe details",
+        "rows": [
+            [
+                {"name": "stripePaymentCreatedAt"},
+                {"name": "stripeLivemode"}
+            ],
+            [
+                {"name": "stripeChargeId"},
+                {"name": "stripeBalanceTransactionId"}
+            ],
+            [
+                {"name": "stripePaymentMethodType"},
+                {"name": "stripeCustomerId"}
+            ],
+            [
+                {"name": "stripeSubscriptionId"},
+                {"name": "stripeInvoiceId"}
+            ],
+            [
+                {"name": "stripeInvoiceNumber"},
+                false
+            ],
+            [
+                {"name": "stripePayoutId"},
+                {"name": "stripePayoutPaidAt"}
+            ],
+            [
+                {"name": "stripeCardBrand"},
+                {"name": "stripeCardLast4"}
+            ],
+            [
+                {"name": "stripeReceiptEmail"},
+                {"name": "stripeBillingEmail"}
+            ],
+            [
+                {"name": "stripeBillingPhone"},
+                {"name": "stripeRadarRiskLevel"}
+            ],
+            [
+                {"name": "stripeReceiptUrl", "fullWidth": true}
+            ],
+            [
+                {"name": "stripeStatementDescriptor", "fullWidth": true}
+            ],
+            [
+                {"name": "stripeFeeDetailsJson", "fullWidth": true}
+            ]
         ]
     }
 ]

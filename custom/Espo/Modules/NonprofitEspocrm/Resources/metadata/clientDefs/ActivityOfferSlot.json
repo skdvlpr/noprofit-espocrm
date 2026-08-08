@@ -2,5 +2,42 @@
     "controller": "controllers/record",
     "iconClass": "fas fa-clock",
     "color": "#f39c12",
-    "createDisabled": true
+    "createDisabled": true,
+    "recordViews": {
+        "detail": "nonprofit-espocrm:views/activity-offer-slot/record/detail"
+    },
+    "detailButtonList": [
+        {
+            "name": "cancelSlot",
+            "label": "Cancel shift",
+            "iconClass": "fas fa-ban",
+            "style": "danger",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer-slot/slot-actions",
+            "actionFunction": "cancelSlot",
+            "checkVisibilityFunction": "isCancelSlotVisible"
+        }
+    ],
+    "sidePanels": {
+        "detail": [
+            {
+                "name": "slotStaffing",
+                "label": "Staffing",
+                "labelTranslation": "ActivityOfferSlot.labels.slotStaffing",
+                "view": "nonprofit-espocrm:views/activity-offer-slot/record/panels/staffing",
+                "order": 5,
+                "sticked": false
+            }
+        ],
+        "detailSmall": [
+            {
+                "name": "slotStaffing",
+                "label": "Staffing",
+                "labelTranslation": "ActivityOfferSlot.labels.slotStaffing",
+                "view": "nonprofit-espocrm:views/activity-offer-slot/record/panels/staffing",
+                "order": 5,
+                "sticked": false
+            }
+        ]
+    }
 }

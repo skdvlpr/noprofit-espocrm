@@ -3,14 +3,8 @@
         "name": "Overview",
         "label": "Overview",
         "rows": [
-            [{"name": "account"}, {"name": "date"}],
-            [{"name": "portionCount"}, false]
-        ]
-    },
-    {
-        "name": "Description",
-        "label": "Description",
-        "rows": [
+            [{"name": "name"}, {"name": "account"}],
+            [{"name": "date"}, {"name": "portionCount"}],
             [{"name": "description", "fullWidth": true}]
         ]
     },

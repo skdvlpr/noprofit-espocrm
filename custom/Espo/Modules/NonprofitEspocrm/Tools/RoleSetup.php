@@ -43,6 +43,11 @@ class RoleSetup
     public const ROLE_MEMBER    = 'Member';
     /** Sportello desk staff: Case / Lead / Email intake with team-scoped group mailboxes. */
     public const ROLE_DESK      = 'Desk';
+    /**
+     * Public website API user (`site_safehouse.community`): create + read + edit
+     * donation/party entities (settlement backfill, paymentStatus); no delete.
+     */
+    public const ROLE_WEBSITE   = 'Website';
 
     public const TEAM_ADMINISTRATION = 'Administration';
     public const TEAM_DIGITAL_DESK = 'Sportello digitale';
@@ -85,8 +90,34 @@ class RoleSetup
     ];
 
     /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
-    public const ACL_MATRIX_VERSION = '2026-08-04-employee-volunteer-acl-v1';
+    /**
+     * Bump when role specs change so ProvisionRoleAcl rewrites matrices on rebuild.
+     * 2026-08-08-v3: Website must override baseline Volunteer field locks on
+     * Contact/Account email+phone (baselineRoleId=Volunteer otherwise blocks
+     * Stripe party match → payment_intent.succeeded 502).
+     */
+    public const ACL_MATRIX_VERSION = '2026-08-08-website-contact-channels-v3';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
+
+    /**
+     * API userNames that must receive the Website role (donation site sync).
+     *
+     * @var list<string>
+     */
+    public const WEBSITE_API_USER_NAMES = [
+        'website',
+        'site_safehouse.community',
+    ];
+
+    /**
+     * Trusted Stripe sync actors (ProtectStripeSourcedFields bypass).
+     *
+     * @var list<string>
+     */
+    public const STRIPE_SYNC_USER_NAMES = [
+        'website',
+        'site_safehouse.community',
+    ];
 
     /**
      * Map test userName => list of team names they should belong to.
@@ -268,6 +299,61 @@ class RoleSetup
             );
         }
 
+        foreach ($this->ensureWebsiteApiRoleAssignments() as $userName => $status) {
+            $report['website-api:' . $userName] = $status;
+        }
+
+        return $report;
+    }
+
+    /**
+     * Attach Website role to known donation-site API users (create/read/edit PrimaNota).
+     * Without this, Stripe refresh/webhooks get "No edit access" and status stays Planned.
+     *
+     * @return array<string, string> userName => created|already|missing-user|missing-role
+     */
+    public function ensureWebsiteApiRoleAssignments(): array
+    {
+        $em = $this->entityManager;
+        $report = [];
+
+        $websiteRole = $em->getRDBRepositoryByClass(Role::class)
+            ->where(['name' => self::ROLE_WEBSITE])
+            ->findOne();
+
+        if (!$websiteRole) {
+            foreach (self::WEBSITE_API_USER_NAMES as $userName) {
+                $report[$userName] = 'missing-role';
+            }
+
+            return $report;
+        }
+
+        foreach (self::WEBSITE_API_USER_NAMES as $userName) {
+            $user = $em->getRDBRepositoryByClass(User::class)
+                ->where([
+                    'userName' => $userName,
+                    'type' => 'api',
+                    'deleted' => false,
+                ])
+                ->findOne();
+
+            if (!$user) {
+                $report[$userName] = 'missing-user';
+                continue;
+            }
+
+            $roleIds = $user->getLinkMultipleIdList('roles');
+
+            if (in_array($websiteRole->getId(), $roleIds, true)) {
+                $report[$userName] = 'already';
+                continue;
+            }
+
+            $em->getRDBRepository('User')->getRelation($user, 'roles')->relate($websiteRole);
+            $report[$userName] = 'linked';
+        }
+
         return $report;
     }
 
@@ -294,6 +380,27 @@ class RoleSetup
 
             if (in_array($roleName, self::CORE_ROLES, true)) {
                 $report[$roleName] = 'kept-core';
+                continue;
+            }
+
+            // Website is an API integration role (site sync / Stripe refresh), not a UI staff role.
+            if ($roleName === self::ROLE_WEBSITE) {
+                $report[$roleName] = 'kept-api';
+                continue;
+            }
+
+            // Keep any role still linked to a type=api user.
+            $linkedToApi = false;
+
+            foreach ($em->getRDBRepository('User')->where(['type' => 'api', 'deleted' => false])->find() as $apiUser) {
+                if (in_array($role->getId(), $apiUser->getLinkMultipleIdList('roles'), true)) {
+                    $linkedToApi = true;
+                    break;
+                }
+            }
+
+            if ($linkedToApi) {
+                $report[$roleName] = 'kept-api-user';
                 continue;
             }
 
@@ -656,6 +763,20 @@ class RoleSetup
             'followerManagementPermission' => 'no',
         ];
 
+        $blocked = static fn(): array => [
+            'create' => 'no', 'read' => 'no', 'edit' => 'no', 'delete' => 'no', 'stream' => 'no',
+        ];
+        $websiteCreateReadEdit = static fn(): array => [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no',
+        ];
+        $websiteData = [];
+        foreach ($domainEntities as $e) {
+            $websiteData[$e] = $blocked();
+        }
+        foreach (['Account', 'Contact', 'Opportunity', 'PrimaNota', 'Lead', 'Case'] as $e) {
+            $websiteData[$e] = $websiteCreateReadEdit();
+        }
+
         $specs = [
             self::ROLE_ADMIN => [
                 'data'      => $adminData,
@@ -690,6 +811,25 @@ class RoleSetup
                     'mentionPermission'      => 'no',
                     'userCalendarPermission' => 'no',
                 ]),
+            ],
+            // Always provisioned: donation-site API sync (Stripe refresh / PrimaNota ingest).
+            // fieldData must explicitly allow Contact/Account channels: Espo baselineRole
+            // (Volunteer) hides personal fields with read/edit=no, and empty Website
+            // fieldData does not override that merge — party email where then 400s.
+            self::ROLE_WEBSITE => [
+                'data'      => $websiteData,
+                'fieldData' => $this->websiteContactChannelFieldAllows(),
+                'perms'     => [
+                    'assignmentPermission'         => 'all',
+                    'userPermission'               => 'no',
+                    'messagePermission'            => 'no',
+                    'exportPermission'             => 'no',
+                    'massUpdatePermission'         => 'no',
+                    'auditPermission'              => 'no',
+                    'mentionPermission'            => 'no',
+                    'userCalendarPermission'       => 'no',
+                    'followerManagementPermission' => 'no',
+                ],
             ],
         ];
 
@@ -843,6 +983,28 @@ class RoleSetup
         }
 
         return $out;
+    }
+
+    /**
+     * Website API: allow donor channel fields used by donation ingest / party match.
+     * Must be explicit so they win over baseline Volunteer personal-data locks.
+     *
+     * @return array<string, array<string, array{read: string, edit: string}>>
+     */
+    private function websiteContactChannelFieldAllows(): array
+    {
+        $allow = ['read' => 'yes', 'edit' => 'yes'];
+
+        $channels = [
+            'emailAddress' => $allow,
+            'phoneNumber' => $allow,
+        ];
+
+        return [
+            'Contact' => $channels,
+            'Account' => $channels,
+            'Lead' => $channels,
+        ];
     }
 
     /**

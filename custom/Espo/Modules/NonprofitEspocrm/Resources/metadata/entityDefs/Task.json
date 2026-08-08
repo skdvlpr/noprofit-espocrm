@@ -80,12 +80,20 @@
             }
         },
         "activityOffer": {
-            "type": "link",
-            "readOnly": true
+            "type": "link"
         },
         "activityOfferSlot": {
-            "type": "link",
-            "readOnly": true
+            "type": "link"
+        },
+        "notifyChannelList": {
+            "type": "multiEnum",
+            "options": [
+                "Email",
+                "InApp",
+                "Push"
+            ],
+            "default": [],
+            "tooltip": true
         },
         "myInviteStatus": {
             "type": "enum",
@@ -119,7 +127,7 @@
         "activityOfferSlot": {
             "type": "belongsTo",
             "entity": "ActivityOfferSlot",
-            "foreign": "task"
+            "foreign": "tasks"
         },
         "activityInvites": {
             "type": "hasMany",

@@ -9,11 +9,7 @@ define('nonprofit-espocrm:views/activity-offer/record/place-description-layout',
 
         setupPlaceDescriptionLayout: function () {
             this.listenTo(this.model, 'change:uniqueAddress', () => {
-                // dynamicLogic shows/hides place after the attribute change.
                 this.syncPlaceDescriptionLayout();
-                window.setTimeout(() => this.syncPlaceDescriptionLayout(), 0);
-                window.setTimeout(() => this.syncPlaceDescriptionLayout(), 100);
-                window.setTimeout(() => this.syncPlaceDescriptionLayout(), 300);
             });
         },
 

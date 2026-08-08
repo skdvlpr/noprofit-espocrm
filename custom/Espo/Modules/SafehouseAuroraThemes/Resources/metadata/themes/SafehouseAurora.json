@@ -3,6 +3,7 @@
     "stylesheetIframe": "client/css/espo/glass-iframe.css",
     "stylesheetIframeFallback": "client/css/espo/hazyblue-iframe.css",
     "logo": "client/img/logo.svg",
+    "screenWidthXs": 992,
     "textColor": "#e5e5e5",
     "chartGridColor": "#404040",
     "chartTickColor": "#737373",

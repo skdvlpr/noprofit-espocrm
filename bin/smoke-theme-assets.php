@@ -78,6 +78,11 @@ $themes = [
     'SafehouseAuroraLight' => $metadata->get(['themes', 'SafehouseAuroraLight', 'stylesheet']),
 ];
 
+foreach (['SafehouseAurora', 'SafehouseAuroraLight'] as $themeName) {
+    $xs = $metadata->get(['themes', $themeName, 'screenWidthXs']);
+    $ok("$themeName screenWidthXs is 992", (int) $xs === 992, 'got=' . var_export($xs, true));
+}
+
 $client = new Client([
     'base_uri' => $siteUrl,
     'http_errors' => false,
@@ -133,8 +138,13 @@ foreach ($cssAssets as $label => $asset) {
 
     if ($label === 'layout') {
         $ok(
-            'layout gates phone navbar (max-width: 767px)',
-            str_contains($body, 'max-width: 767px') || str_contains($body, 'max-width:767px')
+            'layout gates phone navbar (max-width: 991px)',
+            str_contains($body, 'max-width: 991px') || str_contains($body, 'max-width:991px')
+        );
+        $ok(
+            'layout forces side→top hamburger below 991px',
+            str_contains($body, 'Side navbar phone layout')
+                || str_contains($body, 'navbar-body:not(.in)')
         );
         $ok(
             'layout disables backdrop-filter on phone',

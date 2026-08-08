@@ -64,7 +64,33 @@ $scriptList = $client['scriptList'] ?? [];
 
 $check('scope entity=true', ($scope['entity'] ?? false) === true);
 $check('module BugTracker', ($scope['module'] ?? null) === 'BugTracker');
+$check('scope stream=true', ($scope['stream'] ?? false) === true);
+$check('scope statusField=status', ($scope['statusField'] ?? null) === 'status');
 $check('name readOnly', ($fields['name']['readOnly'] ?? false) === true);
+$check('status displayAsLabel', ($fields['status']['displayAsLabel'] ?? false) === true);
+$check('status audited', ($fields['status']['audited'] ?? false) === true);
+$check('description audited', ($fields['description']['audited'] ?? false) === true);
+$check(
+    'screenshots attachmentMultiple',
+    ($fields['screenshots']['type'] ?? null) === 'attachmentMultiple'
+);
+$check(
+    'screenshots maxCount >= 2',
+    (int) ($fields['screenshots']['maxCount'] ?? 0) >= 2
+);
+$check(
+    'pageUrl readOnlyAfterCreate',
+    ($fields['pageUrl']['readOnlyAfterCreate'] ?? false) === true
+);
+$check(
+    'screenshots readOnlyAfterCreate',
+    ($fields['screenshots']['readOnlyAfterCreate'] ?? false) === true
+);
+$statusStyle = $fields['status']['style'] ?? [];
+$check('status New=danger', ($statusStyle['New'] ?? null) === 'danger');
+$check('status Open=info', ($statusStyle['Open'] ?? null) === 'info');
+$check('status InProgress=warning', ($statusStyle['InProgress'] ?? null) === 'warning');
+$check('status Closed=success', ($statusStyle['Closed'] ?? null) === 'success');
 $check('settings bugTrackerEnabled', isset($settingsFields['bugTrackerEnabled']));
 $check('settings technician email', isset($settingsFields['bugTrackerTechnicianEmail']));
 $check('settings notify template', isset($settingsFields['bugTrackerNotifyEmailTemplate']));
@@ -174,6 +200,35 @@ try {
         ]);
         $em->saveEntity($attachment, ['silent' => true]);
     }
+
+    // Locked fields after create
+    $locked = false;
+    try {
+        $bug = $em->getEntityById('BugReport', $bugId);
+        $bug->set('pageTitle', 'should-not-stick');
+        $em->saveEntity($bug);
+    } catch (Throwable $e) {
+        $locked = true;
+    }
+    $check('pageTitle locked after create', $locked);
+    $bug = $em->getEntityById('BugReport', $bugId);
+    $check(
+        'pageTitle unchanged',
+        $bug && (string) $bug->get('pageTitle') === 'Smoke page'
+    );
+
+    // Editable fields + stream audit notes
+    $bug->set('description', 'Automated smoke — updated description.');
+    $bug->set('status', 'Open');
+    $em->saveEntity($bug);
+
+    $noteCount = $em->getRDBRepository('Note')
+        ->where([
+            'parentType' => 'BugReport',
+            'parentId' => $bugId,
+        ])
+        ->count();
+    $check('stream notes after field changes', $noteCount > 0, "count={$noteCount}");
 
     $bug = $em->getEntityById('BugReport', $bugId);
     $bug->set('status', 'Closed');

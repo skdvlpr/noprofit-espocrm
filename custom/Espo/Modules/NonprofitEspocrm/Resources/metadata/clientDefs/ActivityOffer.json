@@ -49,10 +49,7 @@
                 "name": "tasks",
                 "label": "PersonalTasks",
                 "view": "nonprofit-espocrm:views/activity-offer/record/panels/tasks",
-                "order": 2,
-                "create": true,
-                "select": true,
-                "createDisabled": false
+                "order": 2
             }
         ]
     },
@@ -65,10 +62,7 @@
             "orderDirection": "asc"
         },
         "tasks": {
-            "create": true,
-            "select": true,
-            "view": "nonprofit-espocrm:views/activity-offer/record/panels/tasks",
-            "createDisabled": false
+            "view": "nonprofit-espocrm:views/activity-offer/record/panels/tasks"
         }
     },
     "detailButtonList": [
@@ -107,6 +101,36 @@
             "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
             "actionFunction": "confirmPlan",
             "checkVisibilityFunction": "isConfirmPlanVisible"
+        },
+        {
+            "name": "sendPendingUpdate",
+            "label": "Send update now",
+            "iconClass": "fas fa-bell",
+            "style": "warning",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "sendPendingUpdate",
+            "checkVisibilityFunction": "isSendPendingUpdateVisible"
+        },
+        {
+            "name": "closePlan",
+            "label": "Close plan",
+            "iconClass": "fas fa-lock",
+            "style": "default",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "closePlan",
+            "checkVisibilityFunction": "isClosePlanVisible"
+        },
+        {
+            "name": "cancelAll",
+            "label": "Cancel all",
+            "iconClass": "fas fa-ban",
+            "style": "danger",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "cancelAll",
+            "checkVisibilityFunction": "isCancelAllVisible"
         }
     ]
 }

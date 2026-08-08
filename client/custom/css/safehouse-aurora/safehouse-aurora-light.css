@@ -37,7 +37,7 @@
   --brand-danger: #f87171;
   --brand-success: #65a30d;
   --brand-warning: #d97706;
-  --brand-info: #71717a;
+  --brand-info: #4f46e5;
 
   --btn-primary-bg: #ef4444;
   --btn-primary-border: #dc2626;
@@ -47,9 +47,9 @@
   --btn-primary-active-bg: #b91c1c;
   --btn-primary-active-border: #991b1b;
 
-  --state-primary-bg: rgba(239, 68, 68, 0.12);
-  --state-primary-border: rgba(239, 68, 68, 0.28);
-  --state-primary-text: #b91c1c;
+  --state-primary-bg: rgba(37, 99, 235, 0.12);
+  --state-primary-border: rgba(37, 99, 235, 0.24);
+  --state-primary-text: #1d4ed8;
 
   --input-border-focus: #ef4444;
   --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
@@ -125,7 +125,7 @@
   --enum-text-success: #15803d;
   --enum-text-warning: #c2410c;
   --enum-text-danger: #dc2626;
-  --enum-text-info: #52525b;
+  --enum-text-info: #4338ca;
   --enum-active-default-bg: #e4e4e7;
   --enum-active-default-text: #3f3f46;
 
@@ -135,7 +135,7 @@
   --sh-enum-stripe-warning: #fb923c;
   --sh-enum-stripe-success: #4ade80;
   --sh-enum-stripe-danger: #f87171;
-  --sh-enum-stripe-info: #a1a1aa;
+  --sh-enum-stripe-info: #818cf8;
 
   --state-default-bg: #e4e4e7;
   --state-default-text: #3f3f46;
@@ -152,9 +152,9 @@
   --state-warning-bg: rgba(217, 119, 6, 0.16);
   --state-warning-text: #b45309;
   --state-warning-border: rgba(217, 119, 6, 0.28);
-  --state-info-bg: #e4e4e7;
-  --state-info-text: #52525b;
-  --state-info-border: #d4d4d8;
+  --state-info-bg: rgba(99, 102, 241, 0.14);
+  --state-info-text: #4338ca;
+  --state-info-border: rgba(99, 102, 241, 0.32);
   --enum-active-primary-bg: rgba(239, 68, 68, 0.18);
   --enum-active-primary-text: #b91c1b;
   --enum-active-success-bg: rgba(101, 163, 13, 0.16);
@@ -163,8 +163,8 @@
   --enum-active-warning-text: #b45309;
   --enum-active-danger-bg: rgba(220, 38, 38, 0.14);
   --enum-active-danger-text: #dc2626;
-  --enum-active-info-bg: #e4e4e7;
-  --enum-active-info-text: #3f3f46;
+  --enum-active-info-bg: rgba(99, 102, 241, 0.16);
+  --enum-active-info-text: #3730a3;
 
   --fc-page-bg-color: transparent;
   --fc-today-bg-color: rgba(239, 68, 68, 0.08);
@@ -556,13 +556,13 @@ body #navbar {
 body #navbar > .navbar {
   background: var(--aurora-glass-bg) !important;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   body #navbar > .navbar {
     -webkit-backdrop-filter: var(--aurora-glass-blur) !important;
     backdrop-filter: var(--aurora-glass-blur) !important;
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   body #navbar > .navbar {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;

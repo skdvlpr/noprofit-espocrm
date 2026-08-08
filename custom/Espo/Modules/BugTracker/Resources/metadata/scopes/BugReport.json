@@ -10,7 +10,8 @@
         "read",
         "create",
         "edit",
-        "delete"
+        "delete",
+        "stream"
     ],
     "aclLevelList": [
         "all",
@@ -18,7 +19,9 @@
         "own",
         "no"
     ],
-    "stream": false,
+    "stream": true,
+    "statusField": "status",
+    "statusFieldLocked": true,
     "importable": true,
     "exportable": true,
     "customizable": false,

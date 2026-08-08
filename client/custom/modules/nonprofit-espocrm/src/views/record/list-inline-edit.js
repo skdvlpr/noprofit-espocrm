@@ -56,7 +56,7 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
                 '.list-row td.cell.sh-editable { cursor: pointer; transition: background-color 0.15s; }',
                 '.list-row td.cell.sh-editable:hover { background-color: var(--table-hover-bg, rgba(0,0,0,0.03)); }',
                 '.list-row td.cell.sh-editing { background-color: var(--table-active-bg, rgba(0,0,0,0.06));' +
-                    ' position: relative; z-index: 10; overflow: visible; }',
+                    ' position: relative; z-index: 10; overflow: visible !important; }',
                 '.list-row td.cell.sh-editing select.form-control,' +
                     '.list-row td.cell.sh-editing input.form-control {' +
                     ' height: auto; padding: 2px 8px; font-size: inherit; min-width: 80px; }',
@@ -64,6 +64,10 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
                 '.list-row td.cell.sh-editing select.form-control option {' +
                     ' background: var(--form-element-bg-color, var(--secondary-bg-color, #fff));' +
                     ' color: var(--form-element-color, var(--text-color, #333)); }',
+                /* overflow-x:auto forces overflow-y:auto and clips native <select> */
+                '.list:has(.sh-editing), .list-container:has(.sh-editing),' +
+                    '.panel:has(.sh-editing), .panel-body:has(.sh-editing) {' +
+                    ' overflow: visible !important; }',
             ].join('\n');
 
             document.head.appendChild(style);
@@ -206,6 +210,7 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             };
 
             $cell.addClass('sh-editing');
+            this._unlockOverflowAncestors($cell);
 
             fieldView.setMode('edit');
 
@@ -217,6 +222,58 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             promise.then(function () {
                 this._afterEditRender();
             }.bind(this));
+        },
+
+        /**
+         * Native <select> popups are clipped by any ancestor with overflow != visible.
+         * Temporarily force visible up to the panel (restore on finish).
+         */
+        _unlockOverflowAncestors: function ($cell) {
+            var restored = [];
+            var el = $cell && $cell[0] ? $cell[0].parentElement : null;
+            var stopAt = this.$el && this.$el[0] ? this.$el[0].closest('.panel') : null;
+
+            while (el && el !== document.body) {
+                var style = window.getComputedStyle(el);
+                var ox = style.overflowX;
+                var oy = style.overflowY;
+
+                if ((ox && ox !== 'visible') || (oy && oy !== 'visible')) {
+                    restored.push({
+                        el: el,
+                        overflow: el.style.overflow,
+                        overflowX: el.style.overflowX,
+                        overflowY: el.style.overflowY,
+                    });
+                    el.style.overflow = 'visible';
+                    el.style.overflowX = 'visible';
+                    el.style.overflowY = 'visible';
+                }
+
+                if (stopAt && el === stopAt) {
+                    break;
+                }
+
+                el = el.parentElement;
+            }
+
+            if (this._ilEdit) {
+                this._ilEdit.overflowRestores = restored;
+            }
+        },
+
+        _restoreOverflowAncestors: function () {
+            if (!this._ilEdit || !this._ilEdit.overflowRestores) {
+                return;
+            }
+
+            this._ilEdit.overflowRestores.forEach(function (item) {
+                item.el.style.overflow = item.overflow;
+                item.el.style.overflowX = item.overflowX;
+                item.el.style.overflowY = item.overflowY;
+            });
+
+            this._ilEdit.overflowRestores = null;
         },
 
         _afterEditRender: function () {
@@ -232,6 +289,22 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
 
                 if ($input.is('input[type="text"], input[type="number"]')) {
                     $input[0].select();
+                }
+
+                // Size native select so options paint inside the cell/panel, not clipped.
+                if ($input.is('select') && !$input.attr('size')) {
+                    var optionCount = Math.min($input.find('option').length || 1, 8);
+                    $input.attr('size', optionCount);
+                    $input.css({
+                        height: 'auto',
+                        minHeight: (optionCount * 1.6) + 'em',
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        zIndex: 40,
+                        minWidth: Math.max($cell.outerWidth() || 120, 120) + 'px',
+                    });
+                    $cell.css({ minHeight: (optionCount * 1.6) + 'em' });
                 }
             }
 
@@ -311,7 +384,9 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             var state = this._ilEdit;
 
             $(document).off('mousedown.sh-ile-away');
+            this._restoreOverflowAncestors();
             state.$cell.removeClass('sh-editing');
+            state.$cell.css({ minHeight: '' });
             state.$cell.find('input, select, textarea').off('.sh-ile-cell');
 
             state.fieldView.setMode(state.origMode);

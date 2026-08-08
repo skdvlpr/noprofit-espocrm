@@ -25,20 +25,14 @@
                 {"name": "totalMeals"}
             ],
             [
-                {"name": "description"}
-            ]
-        ],
-        "style": "default",
-        "label": ""
-    },
-    {
-        "rows": [
+                {"name": "description", "fullWidth": true}
+            ],
             [
-                {"name": "streamUpdatedAt"}
+                {"name": "assignedUser"},
+                {"name": "teams"}
             ]
         ],
         "style": "default",
-        "noteStyle": "info",
         "label": ""
     }
 ]

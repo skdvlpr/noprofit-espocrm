@@ -41,10 +41,8 @@ define('nonprofit-espocrm:views/activity-offer/modals/create-week-slots', [
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <div class="row">
-                                <div class="cell col-sm-12 form-group" data-name="weekSlots">
-                                    <div class="field" data-name="weekSlots"></div>
-                                </div>
+                            <div class="cell form-group" data-name="weekSlots">
+                                <div class="field" data-name="weekSlots"></div>
                             </div>
                         </div>
                     </div>

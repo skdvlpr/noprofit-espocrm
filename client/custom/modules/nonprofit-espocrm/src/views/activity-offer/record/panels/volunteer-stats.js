@@ -12,7 +12,7 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
                 {{#if hasSummary}}
                     <div class="volunteer-stats-summary row">
                         {{#each summaryCards}}
-                            <div class="col-sm-4 col-xs-6">
+                            <div class="col-sm-3 col-xs-6">
                                 <div class="volunteer-stats-card">
                                     <div class="volunteer-stats-card-value {{className}}">{{value}}</div>
                                     <div class="volunteer-stats-card-label">{{label}}</div>
@@ -58,14 +58,14 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
                                         <td class="text-center">{{availableCount}}</td>
                                         <td class="text-center">
                                             {{#if assignedCount}}
-                                                <span class="label label-success">{{assignedCount}}</span>
+                                                <span class="label label-primary">{{assignedCount}}</span>
                                             {{else}}
                                                 0
                                             {{/if}}
                                         </td>
                                         <td class="text-center">
                                             {{#if fillableGaps}}
-                                                <span class="label label-default">{{fillableGaps}}</span>
+                                                <span class="label label-warning">{{fillableGaps}}</span>
                                             {{else}}
                                                 0
                                             {{/if}}
@@ -112,43 +112,13 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
             this.rows = [];
             this.summaryCards = [];
             this.buttonList = [];
-            this._fetchTimer = null;
 
-            this.listenTo(this.model, 'sync', () => this.scheduleFetch());
-            this.listenTo(
-                this.model,
-                'change:contactsIds change:teamsIds change:status',
-                () => this.scheduleFetch()
-            );
-            this.listenTo(
-                this.model,
-                [
-                    'update-related:slots',
-                    'update-related:tasks',
-                    'update-related:coverage',
-                    'update-related:invites',
-                    'after:relate',
-                    'after:unrelate',
-                    'after:related-change:slots',
-                    'after:related-change:tasks',
-                    'after:related-change:invites',
-                    'update-all',
-                ].join(' '),
-                () => this.scheduleFetch()
-            );
+            this.listenTo(this.model, 'sync', () => this.fetchStats());
+            this.listenTo(this.model, 'update-related:slots update-related:coverage', () => {
+                this.fetchStats();
+            });
 
             this.fetchStats();
-        },
-
-        scheduleFetch: function () {
-            if (this._fetchTimer) {
-                clearTimeout(this._fetchTimer);
-            }
-
-            this._fetchTimer = setTimeout(() => {
-                this._fetchTimer = null;
-                this.fetchStats();
-            }, 120);
         },
 
         fetchStats: function () {
@@ -160,29 +130,27 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
                 .getRequest('ActivityOffer/action/volunteerStats', {id: this.model.id})
                 .then(data => {
                     const summary = data.summary || {};
-                    const cohortSize = summary.cohortSize || 0;
-                    const respondedCount = summary.respondedCount || 0;
-                    const slotCount = summary.slotCount || 0;
-                    const coveredSlots = summary.coveredSlots != null
-                        ? summary.coveredSlots
-                        : Math.max(0, slotCount - (summary.uncoveredSlots || 0));
 
-                    // Cohort size alone is redundant with Hanno risposto "N / total".
                     this.summaryCards = [
                         {
-                            value: respondedCount + ' / ' + cohortSize,
+                            value: summary.cohortSize || 0,
+                            label: this.translate('volunteerStatsCohort', 'labels', 'ActivityOffer'),
+                            className: '',
+                        },
+                        {
+                            value: summary.respondedCount || 0,
                             label: this.translate('volunteerStatsResponded', 'labels', 'ActivityOffer'),
-                            className: respondedCount ? 'text-success' : '',
+                            className: summary.respondedCount ? 'text-success' : '',
                         },
                         {
                             value: summary.assignedPeople || 0,
                             label: this.translate('volunteerStatsAssignedPeople', 'labels', 'ActivityOffer'),
-                            className: summary.assignedPeople ? 'text-success' : '',
+                            className: summary.assignedPeople ? 'text-primary' : '',
                         },
                         {
-                            value: coveredSlots + ' / ' + slotCount,
-                            label: this.translate('volunteerStatsCoveredSlots', 'labels', 'ActivityOffer'),
-                            className: (summary.uncoveredSlots || 0) ? 'text-warning' : 'text-success',
+                            value: (summary.uncoveredSlots || 0) + ' / ' + (summary.slotCount || 0),
+                            label: this.translate('volunteerStatsUncoveredSlots', 'labels', 'ActivityOffer'),
+                            className: summary.uncoveredSlots ? 'text-danger' : 'text-success',
                         },
                     ];
 

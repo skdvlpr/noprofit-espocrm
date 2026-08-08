@@ -1,0 +1,10 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [{"name": "user"}, {"name": "createdAt"}],
+            [{"name": "userAgent", "fullWidth": true}],
+            [{"name": "endpoint", "fullWidth": true}]
+        ]
+    }
+]

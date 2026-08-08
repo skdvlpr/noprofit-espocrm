@@ -31,8 +31,59 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
             return ['CollectingAvailability', 'Planned'].includes(this.status()) && this.canEdit();
         }
 
+        isClosePlanVisible() {
+            const status = this.status();
+
+            return status
+                && status !== 'Draft'
+                && status !== 'Closed'
+                && status !== 'Completed'
+                && this.canEdit();
+        }
+
+        isCancelAllVisible() {
+            const status = this.status();
+
+            return status
+                && status !== 'Draft'
+                && status !== 'Closed'
+                && status !== 'Completed'
+                && this.canEdit();
+        }
+
+        isSendPendingUpdateVisible() {
+            return this.status() === 'Updated' && this.canEdit() &&
+                !!this.view.model.get('pendingNotifyKind');
+        }
+
         isFillAvailabilityVisible() {
             return ['CollectingAvailability', 'Planned'].includes(this.status());
+        }
+
+        extendPendingUpdate() {
+            const view = this.view;
+
+            if (!this.isSendPendingUpdateVisible()) {
+                return;
+            }
+
+            Espo.Ui.notify('...');
+
+            Espo.Ajax
+                .postRequest('ActivityOffer/action/extendPendingUpdate', {
+                    id: view.model.id,
+                    minutes: 5,
+                })
+                .then(response => {
+                    const minutes = response.extendedMinutes ?? 5;
+                    const msg = view
+                        .translate('extendPendingUpdateSuccess', 'messages', 'ActivityOffer')
+                        .replace('{minutes}', String(minutes));
+
+                    Espo.Ui.success(msg);
+                    this.refreshPlan(view);
+                })
+                .catch(() => {});
         }
 
         requestAvailability() {
@@ -134,7 +185,6 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                     .then(response => {
                         const msg = view
                             .translate('confirmPlanSuccess', 'messages', 'ActivityOffer')
-                            .replace('{taskCount}', String(response.taskCount ?? 0))
                             .replace('{confirmedCount}', String(response.confirmedCount ?? 0))
                             .replace('{notifyCount}', String(response.notifyCount ?? 0));
 
@@ -142,6 +192,111 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                         this.refreshPlan(view);
                     })
                     .catch(() => {});
+            });
+        }
+
+        closePlan() {
+            const view = this.view;
+
+            Espo.Ui.confirm(
+                view.translate('closePlanConfirm', 'messages', 'ActivityOffer'),
+                {
+                    confirmText: view.translate('Close plan', 'labels', 'ActivityOffer'),
+                    cancelText: view.translate('Cancel'),
+                }
+            ).then(() => {
+                Espo.Ui.notify('...');
+
+                Espo.Ajax
+                    .postRequest('ActivityOffer/action/closePlan', {id: view.model.id})
+                    .then(() => {
+                        Espo.Ui.success(view.translate('closePlanSuccess', 'messages', 'ActivityOffer'));
+                        this.refreshPlan(view);
+                    })
+                    .catch(() => {});
+            });
+        }
+
+        cancelAll() {
+            const view = this.view;
+
+            Espo.Ui.confirm(
+                view.translate('cancelAllConfirm', 'messages', 'ActivityOffer'),
+                {
+                    confirmText: view.translate('Cancel all', 'labels', 'ActivityOffer'),
+                    cancelText: view.translate('Cancel'),
+                }
+            ).then(() => {
+                Espo.Ui.notify('...');
+
+                Espo.Ajax
+                    .postRequest('ActivityOffer/action/cancelAll', {id: view.model.id})
+                    .then(response => {
+                        const msg = view
+                            .translate('cancelAllSuccess', 'messages', 'ActivityOffer')
+                            .replace('{cancelledCount}', String(response.cancelledCount ?? 0))
+                            .replace('{notifyCount}', String(response.notifyCount ?? 0))
+                            .replace('{emailCount}', String(response.emailCount ?? 0));
+
+                        Espo.Ui.success(msg);
+                        this.refreshPlan(view);
+                    })
+                    .catch(() => {});
+            });
+        }
+
+        sendPendingUpdate() {
+            const view = this.view;
+
+            if (!view.model || !view.model.id) {
+                return;
+            }
+
+            // Stale UI: banner visible but server already finalized.
+            if (view.model.get('status') !== 'Updated' || !view.model.get('pendingNotifyKind')) {
+                this.refreshPlan(view);
+
+                return;
+            }
+
+            Espo.Ui.confirm(
+                view.translate('sendPendingUpdateConfirm', 'messages', 'ActivityOffer'),
+                {
+                    confirmText: view.translate('Send update now', 'labels', 'ActivityOffer'),
+                    cancelText: view.translate('Cancel'),
+                    confirmStyle: 'warning',
+                    backdrop: true,
+                }
+            ).then(() => {
+                Espo.Ui.notify('...');
+
+                Espo.Ajax
+                    .postRequest('ActivityOffer/action/sendPendingUpdate', {id: view.model.id})
+                    .then(response => {
+                        if (response.alreadySent) {
+                            Espo.Ui.success(
+                                view.translate('sendPendingUpdateSoftSuccess', 'messages', 'ActivityOffer')
+                            );
+                            this.refreshPlan(view);
+
+                            return;
+                        }
+
+                        const kind = response.kind || '';
+                        const key = kind === 'hard'
+                            ? 'sendPendingUpdateHardSuccess'
+                            : 'sendPendingUpdateSoftSuccess';
+
+                        Espo.Ui.success(view.translate(key, 'messages', 'ActivityOffer'));
+                        this.refreshPlan(view);
+                    })
+                    .catch(xhr => {
+                        const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) ||
+                            view.translate('Error occurred', 'messages');
+
+                        Espo.Ui.error(msg);
+                        this.refreshPlan(view);
+                    });
             });
         }
 
@@ -162,9 +317,22 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
         }
 
         refreshPlan(view) {
+            if (!view || !view.model) {
+                return;
+            }
+
             view.model.trigger('update-related:coverage');
             view.model.trigger('update-related:slots');
-            view.model.fetch();
+
+            view.model.fetch().then(() => {
+                if (typeof view.updatePendingUpdateBanner === 'function') {
+                    view.updatePendingUpdateBanner();
+                }
+
+                if (typeof view.startPendingUpdateCountdown === 'function') {
+                    view.startPendingUpdateCountdown();
+                }
+            });
         }
     }
 

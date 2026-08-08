@@ -14,6 +14,9 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                 {{#unless canRespond}}
                     <div class="alert alert-warning">{{notOpenText}}</div>
                 {{/unless}}
+                {{#if canRespond}}
+                    <div class="alert alert-info">{{notFinalHint}}</div>
+                {{/if}}
                 {{#if description}}
                     <p class="text-muted">{{description}}</p>
                 {{/if}}
@@ -82,6 +85,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                 groups: this.groups,
                 hasDisallowed: this.hasDisallowed,
                 notOpenText: this.translate('availabilityNotOpen', 'messages', 'ActivityOffer'),
+                notFinalHint: this.translate('availabilityNotFinalHint', 'messages', 'ActivityOffer'),
                 disallowedText: this.translate('availabilityDisallowedHint', 'messages', 'ActivityOffer'),
                 placeText: this.translate('place', 'fields', 'ActivityOfferSlot'),
                 conditionsText: this.translate('conditions', 'fields', 'ActivityOfferSlot'),
@@ -154,6 +158,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                 }
 
                 const checked = ['Available', 'Assigned', 'Confirmed'].includes(slot.myStatus);
+                const volunteerLabel = this.volunteerFacingStatusLabel(slot.myStatus);
 
                 groupMap[key].slots.push({
                     id: slot.id,
@@ -164,9 +169,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                     requiredCount: slot.requiredCount,
                     checked: checked,
                     enabled: this.gridData.canRespond && slot.allowed,
-                    statusLabel: slot.myStatus && slot.myStatus !== 'Available' ?
-                        this.getLanguage().translateOption(slot.myStatus, 'status', 'ActivityInvite') :
-                        null,
+                    statusLabel: volunteerLabel,
                     statusStyle: statusStyleMap[slot.myStatus] || 'default',
                     placeText: this.translate('place', 'fields', 'ActivityOfferSlot'),
                     conditionsText: this.translate('conditions', 'fields', 'ActivityOfferSlot'),
@@ -175,6 +178,21 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
             });
 
             this.groups = Object.keys(groupMap).map(key => groupMap[key]);
+        },
+
+        /**
+         * Volunteer-facing labels: Assigned is not final until Confirm email.
+         */
+        volunteerFacingStatusLabel: function (status) {
+            if (!status || status === 'Available') {
+                return null;
+            }
+
+            if (status === 'Assigned') {
+                return this.translate('pendingConfirmation', 'labels', 'ActivityOffer');
+            }
+
+            return this.getLanguage().translateOption(status, 'status', 'ActivityInvite');
         },
 
         formatDay: function (dateStart) {

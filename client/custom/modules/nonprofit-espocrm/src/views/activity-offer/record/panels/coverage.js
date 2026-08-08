@@ -83,43 +83,13 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
             this.rows = [];
             this.uncoveredCount = 0;
             this.buttonList = [];
-            this._fetchTimer = null;
 
-            this.listenTo(this.model, 'sync', () => this.scheduleFetch());
-            this.listenTo(
-                this.model,
-                'change:contactsIds change:teamsIds change:status',
-                () => this.scheduleFetch()
-            );
-            this.listenTo(
-                this.model,
-                [
-                    'update-related:slots',
-                    'update-related:tasks',
-                    'update-related:coverage',
-                    'update-related:invites',
-                    'after:relate',
-                    'after:unrelate',
-                    'after:related-change:slots',
-                    'after:related-change:tasks',
-                    'after:related-change:invites',
-                    'update-all',
-                ].join(' '),
-                () => this.scheduleFetch()
-            );
+            this.listenTo(this.model, 'sync', () => this.fetchCoverage());
+            this.listenTo(this.model, 'update-related:slots update-related:coverage', () => {
+                this.fetchCoverage();
+            });
 
             this.fetchCoverage();
-        },
-
-        scheduleFetch: function () {
-            if (this._fetchTimer) {
-                clearTimeout(this._fetchTimer);
-            }
-
-            this._fetchTimer = setTimeout(() => {
-                this._fetchTimer = null;
-                this.fetchCoverage();
-            }, 120);
         },
 
         fetchCoverage: function () {

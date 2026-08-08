@@ -2,22 +2,29 @@
     {
         "rows": [
             [
-                {
-                    "name": "pageUrl",
-                    "fullWidth": true
-                }
+                {"name": "name"},
+                {"name": "status"}
             ],
             [
-                {
-                    "name": "description",
-                    "fullWidth": true
-                }
+                {"name": "pageTitle"},
+                false
             ],
             [
-                {
-                    "name": "screenshots",
-                    "fullWidth": true
-                }
+                {"name": "pageUrl", "fullWidth": true}
+            ],
+            [
+                {"name": "description", "fullWidth": true}
+            ],
+            [
+                {"name": "screenshots", "fullWidth": true}
+            ],
+            [
+                {"name": "assignedUser"},
+                {"name": "teams"}
+            ],
+            [
+                {"name": "screenshotsClearedAt"},
+                false
             ]
         ]
     }

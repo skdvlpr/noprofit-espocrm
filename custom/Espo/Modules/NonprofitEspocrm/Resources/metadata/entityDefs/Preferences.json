@@ -1,0 +1,10 @@
+{
+    "fields": {
+        "webPushEnabled": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true,
+            "view": "nonprofit-espocrm:views/preferences/fields/web-push-enabled"
+        }
+    }
+}

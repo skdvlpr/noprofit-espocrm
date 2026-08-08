@@ -72,10 +72,6 @@
             "viewMap": true,
             "view": "nonprofit-espocrm:views/fields/address"
         },
-        "task": {
-            "type": "link",
-            "readOnly": true
-        },
         "sortOrder": {
             "type": "int",
             "default": 0
@@ -102,13 +98,18 @@
             "type": "enum",
             "options": [
                 "Published",
-                "Covered"
+                "Covered",
+                "Completed",
+                "Cancelled"
             ],
             "default": "Published",
             "displayAsLabel": true,
+            "view": "nonprofit-espocrm:views/fields/enum-status-badge",
             "style": {
                 "Published": "primary",
-                "Covered": "success"
+                "Covered": "success",
+                "Completed": "info",
+                "Cancelled": "danger"
             },
             "audited": true
         },
@@ -131,7 +132,8 @@
                 "Saturday",
                 "Sunday"
             ],
-            "translation": "Global.options.dayOfWeek"
+            "translation": "Global.options.dayOfWeek",
+            "tooltip": true
         },
         "isAllDay": {
             "type": "bool",
@@ -150,8 +152,8 @@
             "entity": "ActivityInvite",
             "foreign": "activityOfferSlot"
         },
-        "task": {
-            "type": "belongsTo",
+        "tasks": {
+            "type": "hasMany",
             "entity": "Task",
             "foreign": "activityOfferSlot"
         },

@@ -82,6 +82,28 @@ class ShiftPlanningInstaller
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
         $this->ensureRoleAccess($container);
         $this->ensureEmailTemplates($container);
+        $this->ensureSlotCrmCalendarDateSource($container, $injectableFactory);
+    }
+
+    /**
+     * Keep ActivityOfferSlot on the CRM calendar (CDS isActive + calendarViewEnabled).
+     * Google routing stays optional and is not modified here.
+     */
+    private function ensureSlotCrmCalendarDateSource(
+        Container $container,
+        InjectableFactory $injectableFactory
+    ): void {
+        if (!class_exists(\Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner::class)) {
+            return;
+        }
+
+        if (!class_exists(\Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisioner::class)) {
+            return;
+        }
+
+        $injectableFactory
+            ->create(\Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisioner::class)
+            ->ensureDateSourcesOnly($container);
     }
 
     /**
@@ -109,7 +131,7 @@ class ShiftPlanningInstaller
             $defs = $this->getShiftEmailTemplateDefs();
             $changed = false;
             // Bump when default subject/body must be rewritten on existing installs.
-            $contentVersion = '2026-08-04-safehouse-weekly-v1';
+            $contentVersion = '2026-08-06-cancel-v1';
             $storedVersion = (string) ($config->get('vadEmailTemplateContentVersion') ?? '');
             $refreshBodies = $storedVersion !== $contentVersion;
 
@@ -200,8 +222,8 @@ class ShiftPlanningInstaller
                     . '<p>Ciao <strong>{User.firstName}</strong>,</p>'
                     . '<p>i tuoi turni per <strong>{ActivityOffer.name}</strong> '
                     . '(settimana dal {ActivityOffer.weekStart}) sono stati <strong>confermati</strong>.</p>'
+                    . '<p>Solo dopo questa email i turni risultano ufficialmente assegnati a te.</p>'
                     . '<p><strong>I tuoi turni</strong> (dove / quando / condizioni):</p>{shiftList}'
-                    . '<p>Troverai le relative attività anche nella sezione <strong>Task</strong> del CRM.</p>'
                     . '<p>Se non puoi più presentarti, avvisa subito l’organizzazione e aggiorna la tua '
                     . 'disponibilità dal piano:</p>'
                     . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
@@ -216,6 +238,34 @@ class ShiftPlanningInstaller
                     . '<p>il piano turni <strong>{ActivityOffer.name}</strong> '
                     . '(settimana dal {ActivityOffer.weekStart}) è stato <strong>confermato</strong>.</p>'
                     . '<p><strong>Assegnazioni:</strong></p>{shiftList}'
+                    . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
+                    . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
+                    . $signOff,
+            ],
+            ShiftEmailService::KIND_PLAN_UPDATED => [
+                'name' => 'Turni — Aggiornamento piano',
+                'subject' => 'Piano turni aggiornato: {ActivityOffer.name}',
+                'body' => '{logoHtml}'
+                    . '<p>Ciao <strong>{User.firstName}</strong>,</p>'
+                    . '<p>il piano turni <strong>{ActivityOffer.name}</strong> '
+                    . '(settimana dal {ActivityOffer.weekStart}) è stato <strong>aggiornato</strong>.</p>'
+                    . '<p><strong>Cosa è cambiato:</strong></p>{changeList}'
+                    . '<p><strong>Turni previsti:</strong></p>{slotList}'
+                    . '<p>Controlla i dettagli e aggiorna la disponibilità se necessario:</p>'
+                    . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
+                    . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
+                    . $signOff,
+            ],
+            ShiftEmailService::KIND_SHIFT_CANCELLED => [
+                'name' => 'Turni — Turno annullato',
+                'subject' => 'Turno annullato: {ActivityOffer.name}',
+                'body' => '{logoHtml}'
+                    . '<p>Ciao <strong>{User.firstName}</strong>,</p>'
+                    . '<p>uno o più turni del piano <strong>{ActivityOffer.name}</strong> '
+                    . '(settimana dal {ActivityOffer.weekStart}) sono stati <strong>annullati</strong>.</p>'
+                    . '<p><strong>Turni annullati:</strong></p>{shiftList}'
+                    . '<p>Non è più necessario presentarti a questi turni. '
+                    . 'Per dettagli apri il piano nel CRM:</p>'
                     . '<p><a href="{recordUrl}"><strong>Apri la pianificazione turni</strong></a><br>'
                     . '<span style="font-size:12px;color:#888">{recordUrl}</span></p>'
                     . $signOff,
@@ -335,6 +385,11 @@ class ShiftPlanningInstaller
             );
         }
     }
+
+    /**
+     * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.
+     * Plan-level ActivityOffer.Draft is unchanged.
+     */
 
     /**
      * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.

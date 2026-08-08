@@ -298,9 +298,34 @@ if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
         $report("Extra role `$extraRole` provisioned", in_array($extraRole, $roleNames, true));
     }
 } else {
-    foreach (['Manager', 'Desk', 'Can create', 'Can edit', 'Can delete', 'Website'] as $gone) {
+    foreach (['Manager', 'Desk', 'Can create', 'Can edit', 'Can delete'] as $gone) {
         $report("Non-core role `$gone` absent", !in_array($gone, $roleNames, true));
     }
+    $report('API role `Website` provisioned', in_array('Website', $roleNames, true));
+}
+
+$websiteApiUser = $em->getRDBRepository('User')->where([
+    'userName' => 'website',
+    'type' => 'api',
+    'deleted' => false,
+])->findOne();
+if ($websiteApiUser) {
+    $websiteRole = $em->getRDBRepository('Role')->where(['name' => 'Website'])->findOne();
+    $linked = $websiteRole
+        && in_array($websiteRole->getId(), $websiteApiUser->getLinkMultipleIdList('roles'), true);
+    $report('API user `website` has Website role', $linked);
+
+    $websiteFieldData = json_decode(json_encode($websiteRole?->get('fieldData') ?? new \stdClass()), true) ?? [];
+    $contactEmail = $websiteFieldData['Contact']['emailAddress']['read'] ?? null;
+    $contactPhone = $websiteFieldData['Contact']['phoneNumber']['read'] ?? null;
+    $report(
+        'Website role allows Contact.emailAddress read (overrides baseline Volunteer locks)',
+        $contactEmail === 'yes'
+    );
+    $report(
+        'Website role allows Contact.phoneNumber read (overrides baseline Volunteer locks)',
+        $contactPhone === 'yes'
+    );
 }
 
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();

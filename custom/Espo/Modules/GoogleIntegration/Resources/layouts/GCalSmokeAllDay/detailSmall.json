@@ -1,5 +1,55 @@
 [
     {
+        "name": "Overview",
+        "label": "Overview",
+        "rows": [
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "eventDate"
+                }
+            ],
+            [
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
+            ]
+        ]
+    },
+    {
+        "name": "System",
+        "label": "System",
+        "rows": [
+            [
+                {
+                    "name": "assignedUser"
+                },
+                {
+                    "name": "teams"
+                }
+            ],
+            [
+                {
+                    "name": "createdBy"
+                },
+                {
+                    "name": "createdAt"
+                }
+            ],
+            [
+                {
+                    "name": "modifiedBy"
+                },
+                {
+                    "name": "modifiedAt"
+                }
+            ]
+        ]
+    },
+    {
         "name": "GoogleCalendar",
         "label": "Google Calendar",
         "rows": [

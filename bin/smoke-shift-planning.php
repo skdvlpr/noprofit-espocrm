@@ -51,7 +51,7 @@ function ok(bool $cond, string $label): void
 $buttons = $metadata->get(['clientDefs', 'ActivityOffer', 'detailButtonList']) ?? [];
 $buttonNames = array_map(fn ($item) => is_object($item) ? ($item->name ?? '') : ($item['name'] ?? ''), $buttons);
 
-foreach (['fillAvailability', 'requestAvailability', 'autoAssign', 'confirmPlan'] as $name) {
+foreach (['fillAvailability', 'requestAvailability', 'autoAssign', 'confirmPlan', 'sendPendingUpdate', 'closePlan', 'cancelAll'] as $name) {
     ok(in_array($name, $buttonNames, true), "clientDefs detailButtonList has $name");
 }
 
@@ -179,8 +179,13 @@ ok(
 );
 
 $slotStatusOpts = $metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'options']) ?? [];
-ok($slotStatusOpts === ['Published', 'Covered'], 'ActivityOfferSlot status options Published/Covered only');
 ok(
+    in_array('Published', $slotStatusOpts, true)
+        && in_array('Covered', $slotStatusOpts, true)
+        && in_array('Completed', $slotStatusOpts, true)
+        && in_array('Cancelled', $slotStatusOpts, true),
+    'ActivityOfferSlot status options Published/Covered/Completed/Cancelled'
+);ok(
     ($metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'default']) ?? '') === 'Published',
     'ActivityOfferSlot status default Published'
 );
@@ -632,7 +637,7 @@ $dist = $assignedNames['MealDistribution'] ?? [];
 ok(count(array_intersect($prep, $dist)) === 0, 'no volunteer double-booked on overlapping slots');
 
 $confirmRes = $adminService->confirm($offer->getId());
-ok($confirmRes['taskCount'] === 3, 'confirm created 3 tasks');
+ok(($confirmRes['taskCount'] ?? 0) === 0, 'confirm does not auto-create personal Tasks');
 ok($confirmRes['confirmedCount'] === $assignRes['assignedCount'], 'all assigned got confirmed');
 echo "  confirmation emails sent: " . ($confirmRes['emailCount'] ?? 0) . "\n";
 
@@ -648,25 +653,15 @@ ok($sentEmails >= $reported, "stored emails ($sentEmails) cover reported sends (
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'Confirmed', 'offer -> Confirmed');
 
-$slotReloaded = $em->getEntityById('ActivityOfferSlot', $slots['MealPreparation']->getId());
-$task = $em->getEntityById('Task', (string) $slotReloaded->get('taskId'));
-ok($task !== null, 'task exists for MealPreparation slot');
-
-if ($task) {
-    $task->loadLinkMultipleField('collaborators');
-    $collabIds = $task->getLinkMultipleIdList('collaborators');
-
-    $prepAssigned = [];
-    foreach ($em->getRDBRepository('ActivityInvite')->where([
-        'activityOfferSlotId' => $slots['MealPreparation']->getId(),
-        'status' => 'Confirmed',
-    ])->find() as $inv) {
-        $prepAssigned[] = (string) $inv->get('userId');
-    }
-
-    ok(count($prepAssigned) === 2 && count(array_diff($prepAssigned, $collabIds)) === 0,
-        'both assigned volunteers are task collaborators');
+$prepConfirmed = $em->getRDBRepository('ActivityInvite')->where([
+    'activityOfferSlotId' => $slots['MealPreparation']->getId(),
+    'status' => 'Confirmed',
+])->find();
+$prepConfirmedIds = [];
+foreach ($prepConfirmed as $inv) {
+    $prepConfirmedIds[] = (string) $inv->get('userId');
 }
+ok(count($prepConfirmedIds) === 2, 'MealPreparation has 2 Confirmed invites after confirm');
 
 // Post-confirm decline.
 $confirmedInvite = $em->getRDBRepository('ActivityInvite')->where([
@@ -686,11 +681,6 @@ if ($confirmedInvite) {
 
     $confirmedInvite = $em->getEntityById('ActivityInvite', $confirmedInvite->getId());
     ok($confirmedInvite->get('status') === 'Declined', 'volunteer decline -> Declined');
-
-    $task = $em->getEntityById('Task', (string) $slotReloaded->get('taskId'));
-    $task->loadLinkMultipleField('collaborators');
-    ok(!in_array($declineUserId, $task->getLinkMultipleIdList('collaborators'), true),
-        'declined volunteer removed from task collaborators');
 } else {
     ok(false, 'a confirmed invite exists on MealPreparation for decline check');
 }
@@ -725,6 +715,245 @@ foreach ($volunteers as $u) {
         $em->removeEntity($fresh, ['skipAll' => true, 'silent' => true]);
     }
 }
+
+
+// --- restored Thursday-evening features --------------------------------------
+
+ok(
+    class_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class),
+    'ShiftChangeNotifyService class exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'sendPendingUpdate'),
+    'ShiftPlanningService::sendPendingUpdate exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'extendPendingUpdate'),
+    'ShiftPlanningService::extendPendingUpdate exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'closePlan'),
+    'ShiftPlanningService::closePlan exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'cancelAll'),
+    'ShiftPlanningService::cancelAll exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'slotStaffing'),
+    'ShiftPlanningService::slotStaffing exists'
+);
+ok(
+    method_exists(
+        \Espo\Modules\NonprofitEspocrm\Controllers\ActivityOfferSlot::class,
+        'getActionStaffing'
+    ),
+    'ActivityOfferSlot controller exposes GET staffing'
+);
+ok(
+    method_exists(
+        \Espo\Modules\NonprofitEspocrm\Controllers\ActivityOfferSlot::class,
+        'postActionResendInvite'
+    ),
+    'ActivityOfferSlot controller exposes POST resendInvite'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer-slot/record/panels/staffing.js'),
+    'slot staffing panel view exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'completePastSlots'),
+    'ShiftPlanningService::completePastSlots exists'
+);
+ok(
+    method_exists(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class, 'syncSlotDatesFromDayOfWeek'),
+    'ShiftPlanningService::syncSlotDatesFromDayOfWeek exists'
+);
+ok(
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/ActivityOfferSlot/BeforeSaveSyncDatesFromDayOfWeek.php'),
+    'BeforeSaveSyncDatesFromDayOfWeek hook file exists'
+);
+ok(
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Jobs/CompletePastActivityOfferSlots.php'),
+    'CompletePastActivityOfferSlots job file exists'
+);
+ok(
+    is_file(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Jobs/NotifyPlanUpdated.php'),
+    'NotifyPlanUpdated job file exists'
+);
+
+$offerStatusOpts = $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'status', 'options']) ?? [];
+ok(in_array('Updated', $offerStatusOpts, true), 'ActivityOffer status options include Updated');
+ok(in_array('Completed', $offerStatusOpts, true), 'ActivityOffer status options include Completed');
+
+$slotStatusOpts = $metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'options']) ?? [];
+ok(
+    $slotStatusOpts === ['Published', 'Covered', 'Completed', 'Cancelled']
+        || (in_array('Completed', $slotStatusOpts, true) && in_array('Cancelled', $slotStatusOpts, true)),
+    'ActivityOfferSlot status options include Completed/Cancelled'
+);
+
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'pendingNotifyAt']),
+    'ActivityOffer.pendingNotifyAt field exists'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'pendingNotifyKind']),
+    'ActivityOffer.pendingNotifyKind field exists'
+);
+
+$reportingCss = file_get_contents(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css') ?: '';
+$auroraLayoutCss = file_get_contents(__DIR__ . '/../client/custom/css/safehouse-aurora/safehouse-aurora-layout.css') ?: '';
+$inlineEditJs = file_get_contents(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/views/record/list-inline-edit.js') ?: '';
+ok(str_contains($reportingCss, ':has(.sh-editing)'), 'reporting-stats unlocks overflow when sh-editing');
+ok(str_contains($auroraLayoutCss, ':has(.sh-editing)'), 'aurora layout unlocks overflow when sh-editing');
+ok(str_contains($inlineEditJs, '_unlockOverflowAncestors'), 'list-inline-edit unlocks overflow ancestors');
+
+$shiftActionsJs = file_get_contents($handlerFile) ?: '';
+ok(str_contains($shiftActionsJs, 'sendPendingUpdate'), 'shift-actions.js has sendPendingUpdate');
+ok(str_contains($shiftActionsJs, 'extendPendingUpdate'), 'shift-actions.js has extendPendingUpdate');
+ok(str_contains($shiftActionsJs, 'cancelAll'), 'shift-actions.js has cancelAll');
+
+ok(
+    defined(\Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService::class . '::KIND_PLAN_UPDATED'),
+    'ShiftEmailService::KIND_PLAN_UPDATED defined'
+);
+
+// dayOfWeek → dateStart/dateEnd sync
+$dowOffer = $em->getNewEntity('ActivityOffer');
+$dowOffer->set([
+    'name' => 'Smoke DayOfWeek Dates',
+    'weekStart' => '2026-08-03',
+    'status' => 'Draft',
+]);
+$em->saveEntity($dowOffer, [
+    'skipAll' => true,
+    'silent' => true,
+    \Espo\Modules\NonprofitEspocrm\Tools\StatusGuard::SKIP_OPTION => true,
+]);
+
+$dowSlot = $em->getNewEntity('ActivityOfferSlot');
+$dowSlot->set([
+    'activityOfferId' => $dowOffer->getId(),
+    'category' => 'Cleaning',
+    'dayOfWeek' => 'Monday',
+    'dateStart' => '2026-08-03 10:00:00',
+    'dateEnd' => '2026-08-03 12:00:00',
+    'requiredCount' => 1,
+    'name' => 'DOW sync slot',
+    'status' => 'Published',
+]);
+$em->saveEntity($dowSlot, [
+    'skipAll' => true,
+    'silent' => true,
+    \Espo\Modules\NonprofitEspocrm\Tools\StatusGuard::SKIP_OPTION => true,
+]);
+
+$dowSvc = $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class);
+$dowSlot->set('dayOfWeek', 'Wednesday');
+$dowSvc->syncSlotDatesFromDayOfWeek($dowSlot);
+ok(
+    str_starts_with((string) $dowSlot->get('dateStart'), '2026-08-05'),
+    'dayOfWeek Wednesday moves dateStart to 2026-08-05'
+);
+ok(
+    str_starts_with((string) $dowSlot->get('dateEnd'), '2026-08-05'),
+    'dayOfWeek Wednesday moves dateEnd to 2026-08-05'
+);
+
+// completePastSlots
+$pastSlot = $em->getNewEntity('ActivityOfferSlot');
+$pastSlot->set([
+    'activityOfferId' => $dowOffer->getId(),
+    'category' => 'Cleaning',
+    'dayOfWeek' => 'Monday',
+    'dateStart' => '2020-01-06 10:00:00',
+    'dateEnd' => '2020-01-06 12:00:00',
+    'requiredCount' => 1,
+    'name' => 'Past slot',
+    'status' => 'Published',
+]);
+$em->saveEntity($pastSlot, [
+    'skipAll' => true,
+    'silent' => true,
+    \Espo\Modules\NonprofitEspocrm\Tools\StatusGuard::SKIP_OPTION => true,
+]);
+$completedCount = $dowSvc->completePastSlots('2020-01-08 00:00:00');
+$pastSlot = $em->getEntityById('ActivityOfferSlot', $pastSlot->getId());
+ok($completedCount >= 1, 'completePastSlots updates at least one past slot');
+ok($pastSlot && $pastSlot->get('status') === 'Completed', 'past slot → Completed');
+
+foreach ([$dowSlot->getId(), $pastSlot ? $pastSlot->getId() : null] as $sid) {
+    if (!$sid) continue;
+    $s = $em->getEntityById('ActivityOfferSlot', $sid);
+    if ($s) {
+        $em->removeEntity($s, ['skipAll' => true, 'silent' => true]);
+    }
+}
+$o = $em->getEntityById('ActivityOffer', $dowOffer->getId());
+if ($o) {
+    $em->removeEntity($o, ['skipAll' => true, 'silent' => true]);
+}
+
+
+
+// --- layout: plan has no category / weekSlots / uniqueAddress (Notion 2026-08-04) ---
+$detailLayout = json_decode((string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/ActivityOffer/detail.json'), true);
+$editLayout = json_decode((string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/ActivityOffer/edit.json'), true);
+$layoutBlob = json_encode([$detailLayout, $editLayout]);
+ok(!str_contains($layoutBlob, '"category"'), 'ActivityOffer detail/edit layouts have no category');
+ok(!str_contains($layoutBlob, '"weekSlots"'), 'ActivityOffer detail/edit layouts have no weekSlots');
+ok(!str_contains($layoutBlob, '"uniqueAddress"'), 'ActivityOffer detail/edit layouts have no uniqueAddress');
+ok(!str_contains($layoutBlob, '"place"'), 'ActivityOffer detail/edit layouts have no place');
+$detailTpl = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/res/templates/activity-offer/record/detail.tpl');
+ok(str_contains($detailTpl, 'showPendingUpdateBanner'), 'detail.tpl has pending-update banner');
+ok(
+    str_contains($detailTpl, 'bannerSendPendingUpdate'),
+    'detail.tpl banner Send-now uses distinct data-action'
+);
+$clientCssList = $metadata->get(['app', 'client', 'cssList']) ?? [];
+ok(
+    in_array('client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css', $clientCssList, true),
+    'activity-offer.css is registered in app.client.cssList'
+);
+ok(
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css'),
+    'activity-offer.css file exists'
+);
+ok(
+    str_contains(
+        (string) file_get_contents(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css'),
+        'data-status="Updated"'
+    ),
+    'activity-offer.css defines Updated badge color'
+);
+ok(
+    ($metadata->get(['entityDefs', 'ActivityOfferSlot', 'fields', 'status', 'view']) ?? '')
+        === 'nonprofit-espocrm:views/fields/enum-status-badge',
+    'ActivityOfferSlot status uses enum-status-badge view'
+);
+ok(
+    (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
+        ->hasMethod('markPendingUpdate'),
+    'ShiftChangeNotifyService::markPendingUpdate exists'
+);
+ok(
+    (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
+        ->hasMethod('wasScheduleChangeQueuedForSlot'),
+    'ShiftChangeNotifyService::wasScheduleChangeQueuedForSlot exists'
+);
+$notifyStatuses = (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
+    ->getConstant('OFFER_NOTIFY_STATUSES') ?? null;
+// constant may be private — probe via offerAllowsNotify through reflection or string search
+$notifySrc = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftChangeNotifyService.php');
+ok(str_contains($notifySrc, "'Confirmed'"), 'notify statuses include Confirmed');
+ok(str_contains($notifySrc, "'Updated'"), 'notify statuses include Updated');
+ok(str_contains($notifySrc, "DEBOUNCE_INTERVAL = 'PT10M'"), 'pending notify debounce is 10 minutes');
+
 
 echo $fail === 0 ? "ALL OK\n" : "FAILURES: $fail\n";
 exit($fail === 0 ? 0 : 1);

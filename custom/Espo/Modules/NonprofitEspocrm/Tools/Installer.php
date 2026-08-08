@@ -189,6 +189,10 @@ class Installer
         $roleSetup = $injectableFactory->create(RoleSetup::class);
         $roleSetup->provisionRoles();
         $roleSetup->provisionTeams();
+        $roleSetup->ensureWebsiteApiRoleAssignments();
+
+        $configWriter->set('safehouseStripeSyncUserNames', RoleSetup::STRIPE_SYNC_USER_NAMES);
+        $configWriter->save();
 
         $injectableFactory->create(SafehouseGoogleCalendarProvisioner::class)->run($container);
         $injectableFactory->create(\Espo\Modules\NonprofitEspocrm\Tools\FoodParcel\FoodParcelPdfService::class)

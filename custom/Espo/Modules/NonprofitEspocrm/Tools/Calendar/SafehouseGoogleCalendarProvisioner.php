@@ -35,6 +35,23 @@ class SafehouseGoogleCalendarProvisioner
         $container->getByClass(DataManager::class)->rebuild();
     }
 
+    /**
+     * Seed/refresh CalendarDateSource rows only (no layout provision, no rebuild).
+     * Used by ShiftPlanningInstaller during rebuild to avoid recursion.
+     */
+    public function ensureDateSourcesOnly(Container $container): void
+    {
+        if (!class_exists(GoogleCalendarLayoutProvisioner::class)) {
+            return;
+        }
+
+        $em = $container->getByClass(EntityManager::class);
+        $metadata = $container->getByClass(Metadata::class);
+        $metadata->init(true);
+
+        $this->ensureDateSources($em, $metadata);
+    }
+
     private function ensureDateSources(EntityManager $entityManager, Metadata $metadata): void
     {
         $repo = $entityManager->getRDBRepository('CalendarDateSource');

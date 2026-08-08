@@ -1,0 +1,11 @@
+{
+    "entity": true,
+    "object": true,
+    "tab": false,
+    "acl": true,
+    "module": "NonprofitEspocrm",
+    "importable": false,
+    "exportable": false,
+    "stream": false,
+    "customizable": false
+}

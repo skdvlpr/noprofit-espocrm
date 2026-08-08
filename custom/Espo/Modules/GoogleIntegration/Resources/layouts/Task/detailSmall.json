@@ -52,6 +52,20 @@
             ],
             [
                 {
+                    "name": "activityOffer"
+                },
+                {
+                    "name": "activityOfferSlot"
+                }
+            ],
+            [
+                {
+                    "name": "notifyChannelList"
+                },
+                false
+            ],
+            [
+                {
                     "name": "description",
                     "fullWidth": true
                 }

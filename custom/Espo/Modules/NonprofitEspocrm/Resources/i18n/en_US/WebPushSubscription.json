@@ -1,0 +1,14 @@
+{
+    "fields": {
+        "name": "Name",
+        "user": "User",
+        "endpoint": "Endpoint",
+        "p256dh": "p256dh",
+        "auth": "Auth",
+        "userAgent": "User agent"
+    },
+    "labels": {
+        "WebPushSubscription": "Web Push Subscription",
+        "WebPushSubscriptionPlural": "Web Push Subscriptions"
+    }
+}

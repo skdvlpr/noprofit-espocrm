@@ -4,11 +4,11 @@
         "rows": [
             [
                 {"name": "name"},
-                {"name": "category"}
+                {"name": "activityOffer"}
             ],
             [
-                {"name": "dayOfWeek"},
-                {"name": "isAllDay"}
+                {"name": "category"},
+                {"name": "dayOfWeek"}
             ],
             [
                 {"name": "dateStart"},
@@ -16,11 +16,11 @@
             ],
             [
                 {"name": "duration"},
-                {"name": "requiredCount"}
+                {"name": "isAllDay"}
             ],
             [
-                {"name": "status"},
-                false
+                {"name": "requiredCount"},
+                {"name": "status"}
             ],
             [
                 {"name": "place", "fullWidth": true}
@@ -29,8 +29,8 @@
                 {"name": "conditions", "fullWidth": true}
             ],
             [
-                {"name": "activityOffer"},
-                {"name": "task"}
+                {"name": "task"},
+                {"name": "sortOrder"}
             ]
         ]
     }

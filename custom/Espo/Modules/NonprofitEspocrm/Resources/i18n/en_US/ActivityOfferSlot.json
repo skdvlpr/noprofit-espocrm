@@ -29,13 +29,35 @@
     "labels": {
         "ActivityOfferSlot": "Volunteer shift",
         "ActivityOfferSlotPlural": "Volunteer shifts",
-        "Create ActivityOfferSlot": "Create Shift"
+        "Create ActivityOfferSlot": "Create Shift",
+        "slotStaffing": "Assigned & candidates",
+        "slotAssigned": "Assigned volunteers",
+        "slotCandidates": "Candidates (available)",
+        "resendInvite": "Resend invite",
+        "Cancel shift": "Cancel shift"
+    },
+    "messages": {
+        "slotNoneAssigned": "No volunteers assigned to this shift.",
+        "slotNoneCandidates": "No available candidates on this shift.",
+        "resendInviteTooltip": "Resend the availability request notification and email to this person.",
+        "confirmResendInvite": "Resend the availability invite to {name}?",
+        "resendInviteDone": "Invite resent to {name} (emails sent: {emailSent}).",
+        "cancelSlotConfirm": "Cancel this shift? Assigned/Confirmed volunteers will be notified. Availability-only responses are not notified.",
+        "cancelSlotSuccess": "Shift cancelled. Notified {notifyCount} people ({emailCount} emails).",
+        "cancelSlotPlanClosed": "All shifts are terminal — the week plan was finalized automatically ({status})."
+    },
+    "tooltips": {
+        "dayOfWeek": "Changing the day recalculates the real start/end dates from the plan week start, keeping the same times.",
+        "conditions": "Up to 5 free-text conditions for this shift.",
+        "isAllDay": "All-day shift: time selection is disabled."
     },
     "options": {
-            "status": {
-                "Published": "Published",
-                "Covered": "Covered"
-            },
+        "status": {
+            "Published": "Published",
+            "Covered": "Covered",
+            "Completed": "Completed",
+            "Cancelled": "Cancelled"
+        },
         "category": {
             "MealPreparation": "Meal preparation",
             "MealDistribution": "Meal distribution",
@@ -65,9 +87,5 @@
             "Saturday": "Saturday",
             "Sunday": "Sunday"
         }
-    },
-    "tooltips": {
-        "conditions": "Up to 5 free-text conditions for this shift.",
-        "isAllDay": "All-day shift: time selection is disabled."
     }
 }

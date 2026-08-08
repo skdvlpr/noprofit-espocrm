@@ -46,6 +46,27 @@
     </div>
     {{/unless}}
 
+    {{#if showPendingUpdateBanner}}
+    <div class="alert alert-warning activity-offer-pending-update-banner" role="status">
+        <div class="activity-offer-pending-update-main">
+            <div class="activity-offer-pending-update-text">{{pendingUpdateBannerText}}</div>
+            <div class="activity-offer-pending-update-timer text-muted">{{pendingUpdateCountdown}}</div>
+        </div>
+        <div class="activity-offer-pending-update-actions btn-group" role="group">
+            <button
+                type="button"
+                class="btn btn-sm btn-default action"
+                data-action="bannerExtendPendingUpdate"
+            >{{translate 'Add 5 minutes' scope='ActivityOffer' category='labels'}}</button>
+            <button
+                type="button"
+                class="btn btn-sm btn-warning action"
+                data-action="bannerSendPendingUpdate"
+            >{{translate 'Send update now' scope='ActivityOffer' category='labels'}}</button>
+        </div>
+    </div>
+    {{/if}}
+
     {{! Full-width planning band (coverage + volunteer match). }}
     <div class="activity-offer-planning-top">{{{planning}}}</div>
 

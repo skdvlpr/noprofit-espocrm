@@ -4,8 +4,10 @@
         "rows": [
             [
                 {
-                    "name": "name",
-                    "fullWidth": true
+                    "name": "firstName"
+                },
+                {
+                    "name": "lastName"
                 }
             ],
             [
@@ -18,6 +20,20 @@
             ],
             [
                 {
+                    "name": "assignedUser"
+                },
+                {
+                    "name": "teams"
+                }
+            ],
+            [
+                {
+                    "name": "birthDate"
+                },
+                false
+            ],
+            [
+                {
                     "name": "emailAddress"
                 },
                 {
@@ -26,10 +42,14 @@
             ],
             [
                 {
-                    "name": "birthDate"
-                },
-                {
                     "name": "birthPlace"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "address",
+                    "fullWidth": true
                 }
             ],
             [
@@ -38,12 +58,6 @@
                 },
                 {
                     "name": "leaveDate"
-                }
-            ],
-            [
-                {
-                    "name": "address",
-                    "fullWidth": true
                 }
             ],
             [

@@ -58,8 +58,9 @@ class StripeRefreshService
         $token = trim((string) $this->config->get('safehouseCrmSyncToken'));
 
         if ($siteUrl === '' || $token === '') {
-            throw new Error(
-                'Donation site sync is not configured (safehouseDonationSiteUrl / safehouseCrmSyncToken).'
+            // 400 so the UI shows a clear toast (not opaque Internal server error).
+            throw new BadRequest(
+                'Donation site sync is not configured. Set safehouseDonationSiteUrl and safehouseCrmSyncToken in CRM config.'
             );
         }
 
@@ -124,12 +125,18 @@ class StripeRefreshService
 
         $this->entityManager->refreshEntity($entity);
 
+        $site = $decoded ?? (object) [];
+        $reason = is_object($site) && isset($site->reason) ? (string) $site->reason : '';
+        $applyError = is_object($site) && isset($site->applyError) ? (string) $site->applyError : '';
+
         return (object) [
             'id' => $id,
             'paymentStatus' => $entity->get('paymentStatus'),
             'stripePayoutId' => $entity->get('stripePayoutId'),
             'stripePayoutPaidAt' => $entity->get('stripePayoutPaidAt'),
-            'site' => $decoded ?? (object) [],
+            'reason' => $reason !== '' ? $reason : null,
+            'applyError' => $applyError !== '' ? $applyError : null,
+            'site' => $site,
         ];
     }
 }

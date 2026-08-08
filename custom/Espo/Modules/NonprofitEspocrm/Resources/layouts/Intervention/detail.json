@@ -15,6 +15,14 @@
                 false
             ],
             [
+                {"name": "account"},
+                {"name": "contact"}
+            ],
+            [
+                {"name": "lead"},
+                false
+            ],
+            [
                 {"name": "description", "fullWidth": true}
             ],
             [

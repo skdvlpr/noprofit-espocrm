@@ -94,6 +94,14 @@
             ],
             [
                 {
+                    "name": "amountIn"
+                },
+                {
+                    "name": "amountOut"
+                }
+            ],
+            [
+                {
                     "name": "amountGross"
                 },
                 {

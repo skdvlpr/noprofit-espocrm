@@ -35,3 +35,21 @@
 .modal.dialog-record .modal-body:has(.week-slots-editor) {
     overflow: visible !important;
 }
+
+/*
+ * View-on-Map modal uses height:auto; Aurora drawers often report parent height 0,
+ * leaving a black empty panel. Force a usable map viewport.
+ */
+.modal .map-container,
+.modal .map-container.no-side-margin {
+    min-height: 60vh;
+    height: 60vh;
+    width: 100%;
+}
+
+.modal .map-container .map,
+#main .map-container .map {
+    min-height: 320px;
+    width: 100%;
+    background: transparent;
+}

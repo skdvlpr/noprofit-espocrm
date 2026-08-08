@@ -1,81 +1,89 @@
 <div class="gi-admin-integration">
-    <div class="button-container">
+    <div class="button-container gi-admin-integration__toolbar">
         <div class="btn-group">
             <button class="btn btn-primary btn-xs-wide" data-action="save">{{translate 'Save'}}</button>
             <button class="btn btn-default btn-xs-wide" data-action="cancel">{{translate 'Cancel'}}</button>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-default gi-panel">
-                <div class="panel-body panel-body-form">
-                    <div class="cell form-group" data-name="enabled">
+    <div class="gi-admin-integration__stack">
+        {{#if helpText}}
+        <div class="gi-help" role="note">
+            {{complexText helpText}}
+        </div>
+        {{/if}}
+
+        <section
+            class="gi-panel gi-credentials"
+            aria-label="{{translate 'enabled' scope='Integration' category='fields'}}"
+        >
+            <div class="gi-panel__body panel-body panel-body-form">
+                <div class="cell form-group" data-name="enabled">
+                    <label
+                        class="control-label"
+                        data-name="enabled"
+                    >{{translate 'enabled' scope='Integration' category='fields'}}</label>
+                    <div class="field" data-name="enabled">{{{enabled}}}</div>
+                </div>
+                {{#each fieldDataList}}
+                    <div
+                        class="cell form-group"
+                        data-name="{{name}}"
+                    >
                         <label
                             class="control-label"
-                            data-name="enabled"
-                        >{{translate 'enabled' scope='Integration' category='fields'}}</label>
-                        <div class="field" data-name="enabled">{{{enabled}}}</div>
-                    </div>
-                    {{#each fieldDataList}}
-                        <div
-                            class="cell form-group"
                             data-name="{{name}}"
-                        >
-                            <label
-                                class="control-label"
-                                data-name="{{name}}"
-                            >{{label}}</label>
-                            <div
-                                class="field"
-                                data-name="{{name}}"
-                            >{{{var name ../this}}}</div>
-                        </div>
-                    {{/each}}
-                    <div class="cell form-group gi-redirect-uri" data-name="redirectUri">
-                        <label
-                            class="control-label"
-                            data-name="redirectUri"
-                        >{{translate 'redirectUri' scope='Integration' category='fields'}}</label>
-                        <div class="field" data-name="redirectUri">
-                            <input type="text" class="form-control" readonly value="{{redirectUri}}">
-                        </div>
+                        >{{label}}</label>
+                        <div
+                            class="field"
+                            data-name="{{name}}"
+                        >{{{var name ../this}}}</div>
+                    </div>
+                {{/each}}
+                <div class="cell form-group gi-redirect-uri" data-name="redirectUri">
+                    <label
+                        class="control-label"
+                        data-name="redirectUri"
+                    >{{translate 'redirectUri' scope='Integration' category='fields'}}</label>
+                    <div class="field" data-name="redirectUri">
+                        <input type="text" class="form-control" readonly value="{{redirectUri}}">
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-sm-6">
-            {{#if helpText}}
-            <div class="gi-help">
-                {{complexText helpText}}
-            </div>
-            {{/if}}
-        </div>
-    </div>
+        </section>
 
-    <div class="row google-calendar-admin-config-panels gi-section">
-        <div class="col-sm-12">
+        <section class="gi-section google-calendar-admin-config-panels">
             <div class="gi-section__head">
                 <h4 class="gi-section__title">{{calendarConfigTitle}}</h4>
                 <p class="gi-section__lead">{{calendarConfigHelp}}</p>
             </div>
+
             {{#if crmCalendarScopes.length}}
-            <div class="gi-crm-calendar-scopes" style="margin-bottom: 1em;">
-                <div class="small text-muted" style="margin-bottom: 0.35em;">
-                    {{crmCalendarScopesTitle}}
+            <div class="gi-crm-calendar-scopes">
+                <div class="gi-crm-calendar-scopes__head">
+                    <span class="gi-crm-calendar-scopes__badge" aria-hidden="true">
+                        <span class="fas fa-calendar-check"></span>
+                    </span>
+                    <div class="gi-crm-calendar-scopes__titles">
+                        <div class="gi-crm-calendar-scopes__title">{{crmCalendarScopesTitle}}</div>
+                        <p class="gi-crm-calendar-scopes__help">{{crmCalendarScopesHelp}}</p>
+                    </div>
                 </div>
-                <ul class="list-unstyled" style="margin: 0; padding-left: 0;">
+                <ul class="gi-crm-calendar-scopes__grid">
                     {{#each crmCalendarScopes}}
-                    <li style="padding: 0.15em 0;">
-                        <span class="fas fa-check text-success" style="margin-right: 0.4em;"></span>
-                        {{label}}
-                        <span class="text-muted small">({{entityType}})</span>
+                    <li class="gi-crm-scope-chip" title="{{entityType}}">
+                        <span class="gi-crm-scope-chip__check fas fa-check" aria-hidden="true"></span>
+                        <span class="gi-crm-scope-chip__label">{{label}}</span>
                     </li>
                     {{/each}}
                 </ul>
-                <p class="text-muted small" style="margin-top: 0.5em;">{{crmCalendarScopesHelp}}</p>
+                <p class="gi-crm-calendar-scopes__google-note">
+                    <span class="fas fa-info-circle" aria-hidden="true"></span>
+                    <span>{{crmCalendarScopesGoogleNote}}</span>
+                </p>
             </div>
             {{/if}}
+
             <div class="gi-nav-grid" role="navigation" aria-label="{{calendarConfigTitle}}">
                 {{#each calendarNavItems}}
                 <a
@@ -93,6 +101,6 @@
                 </a>
                 {{/each}}
             </div>
-        </div>
+        </section>
     </div>
 </div>

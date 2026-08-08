@@ -1,0 +1,7 @@
+[
+    {"name": "name", "link": true},
+    {"name": "isActive"},
+    {"name": "targetEntityType"},
+    {"name": "triggerType"},
+    {"name": "executionOrder"}
+]

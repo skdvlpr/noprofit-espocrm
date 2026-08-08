@@ -27,6 +27,19 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
                 }
 
                 this.model.trigger('update-related:coverage');
+                // Parent plan may flip to Updated + pendingNotify* via slot AfterSave.
+                this.model.trigger('update-related:slots');
+            });
+
+            // Inline edit / related modal save (collection may not re-sync).
+            this.listenTo(this.collection, 'change', () => {
+                this.model.trigger('update-related:coverage');
+                this.model.trigger('update-related:slots');
+            });
+
+            this.listenTo(this.model, 'after:relate after:unrelate', () => {
+                this.model.trigger('update-related:coverage');
+                this.model.trigger('update-related:slots');
             });
         },
 

@@ -39,7 +39,7 @@
                     "name": "requiredCount"
                 },
                 {
-                    "name": "status"
+                    "name": "sortOrder"
                 }
             ],
             [
@@ -58,9 +58,7 @@
                 {
                     "name": "task"
                 },
-                {
-                    "name": "sortOrder"
-                }
+                false
             ]
         ]
     },

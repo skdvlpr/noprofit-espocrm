@@ -10,5 +10,11 @@
         "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\SyncMemberStatus",
         "scheduling": "6 0 * * *",
         "isSystem": true
+    },
+    "SafehouseCrmCompletePastActivityOfferSlots": {
+        "name": "Complete past volunteer shifts",
+        "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\CompletePastActivityOfferSlots",
+        "scheduling": "*/15 * * * *",
+        "isSystem": true
     }
 }

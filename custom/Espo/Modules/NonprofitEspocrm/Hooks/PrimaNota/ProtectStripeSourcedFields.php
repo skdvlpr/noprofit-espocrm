@@ -13,8 +13,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
  * When donationPaymentProvider is Stripe, every Stripe-sourced attribute is locked
- * after create for normal UI users. Operational fields remain editable: assignedUser,
- * teams, modelDClassification, paymentStatus. Ingest create still works (isNew).
+ * after create for normal UI users — including paymentStatus (Stripe / refresh only).
+ * Operational fields remain editable: assignedUser, teams, modelDClassification.
+ * Ingest create still works (isNew).
  *
  * Trusted site/API sync users (config safehouseStripeSyncUserNames / Ids) may
  * overwrite Stripe-sourced attrs so webhook + «Aggiorna da Stripe» keep CRM in sync.
@@ -59,6 +60,7 @@ class ProtectStripeSourcedFields implements BeforeSave
         'donationDonorCategory',
         'donationFrequency',
         'donationComment',
+        'paymentStatus',
         'financingId',
         'subjectName',
         'subjectPartyId',
@@ -148,7 +150,7 @@ class ProtectStripeSourcedFields implements BeforeSave
         /** @var mixed $names */
         $names = $this->config->get('safehouseStripeSyncUserNames');
         if (!is_array($names) || $names === []) {
-            $names = ['site_safehouse.community'];
+            $names = ['website', 'site_safehouse.community'];
         }
 
         foreach ($names as $name) {

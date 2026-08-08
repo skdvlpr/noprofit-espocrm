@@ -115,7 +115,7 @@ class Installer
     }
 
     /**
-     * @return array{create: string, read: string, edit: string, delete: string}
+     * @return array{create: string, read: string, edit: string, delete: string, stream: string}
      */
     private function aclForRoleName(string $name): array
     {
@@ -125,6 +125,7 @@ class Installer
                 'read' => 'all',
                 'edit' => 'all',
                 'delete' => 'all',
+                'stream' => 'all',
             ];
         }
 
@@ -133,6 +134,7 @@ class Installer
             'read' => 'own',
             'edit' => 'own',
             'delete' => 'no',
+            'stream' => 'own',
         ];
     }
 

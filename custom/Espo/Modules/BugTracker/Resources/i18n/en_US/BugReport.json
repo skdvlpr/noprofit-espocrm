@@ -19,6 +19,9 @@
         "assignedUser": "Assigned user",
         "teams": "Teams"
     },
+    "tooltips": {
+        "screenshots": "You can attach multiple images (select several files at once, or click the paperclip again)."
+    },
     "labels": {
         "Create BugReport": "Report a bug",
         "ReportBug": "Report a bug",

@@ -41,6 +41,59 @@ class ActivityOffer extends Record
     }
 
     /**
+     * @throws BadRequest|Forbidden|NotFound|Error
+     */
+    public function postActionSendPendingUpdate(Request $request): stdClass
+    {
+        return (object) $this->createService()
+            ->sendPendingUpdate($this->requireId($request));
+    }
+
+    /**
+     * Push pending auto-send further (+5 minutes by default).
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+
+    /**
+     * Push pending auto-send further (+5 minutes by default).
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function postActionExtendPendingUpdate(Request $request): stdClass
+    {
+        $data = $request->getParsedBody();
+        $id = $data->id ?? null;
+        $minutes = isset($data->minutes) ? (int) $data->minutes : 5;
+
+        if (!$id || !is_string($id)) {
+            throw new BadRequest("No id.");
+        }
+
+        return (object) $this->createService()->extendPendingUpdate($id, $minutes);
+    }
+
+    /**
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function postActionClosePlan(Request $request): stdClass
+    {
+        return (object) $this->createService()
+            ->closePlan($this->requireId($request));
+    }
+
+    /**
+     * Annul every non-terminal shift and close the week plan.
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function postActionCancelAll(Request $request): stdClass
+    {
+        return (object) $this->createService()
+            ->cancelAll($this->requireId($request));
+    }
+
+    /**
      * @throws BadRequest|Forbidden|NotFound
      */
     public function getActionAvailabilityGrid(Request $request): stdClass
@@ -87,6 +140,18 @@ class ActivityOffer extends Record
 
         return (object) $this->createService()->coverage($id);
     }
+
+    /**
+     * Cohort competenze / response / assignment stats for organizers.
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+
+    /**
+     * Append a batch of weekly shifts (mass create from Turni panel).
+     *
+     * @throws BadRequest|Forbidden|NotFound|Error
+     */
 
     /**
      * Cohort competenze / response / assignment stats for organizers.

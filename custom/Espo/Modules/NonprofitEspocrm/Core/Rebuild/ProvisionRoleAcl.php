@@ -37,6 +37,7 @@ class ProvisionRoleAcl implements RebuildAction
 
         $configWriter = $this->injectableFactory->create(ConfigWriter::class);
         $configWriter->set(RoleSetup::ACL_MATRIX_CONFIG_KEY, RoleSetup::ACL_MATRIX_VERSION);
+        $configWriter->set('safehouseStripeSyncUserNames', RoleSetup::STRIPE_SYNC_USER_NAMES);
         $configWriter->save();
 
         $this->dataManager->clearCache();

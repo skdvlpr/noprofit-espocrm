@@ -116,7 +116,9 @@ class InviteResponseService
             'respondedAt',
             (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d H:i:s')
         );
-        $this->entityManager->saveEntity($invite);
+        $this->entityManager->saveEntity($invite, [
+            StatusGuard::SKIP_OPTION => true,
+        ]);
 
         $taskId = $invite->get('taskId');
 

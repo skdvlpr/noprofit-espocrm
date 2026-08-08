@@ -1,0 +1,7 @@
+[
+    {"name": "name"},
+    {"name": "sourceEntityType"},
+    {"name": "sourceDateType"},
+    {"name": "user"},
+    {"name": "lastSyncedAt"}
+]

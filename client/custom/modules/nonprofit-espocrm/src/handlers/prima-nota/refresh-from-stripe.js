@@ -31,11 +31,25 @@ define('nonprofit-espocrm:handlers/prima-nota/refresh-from-stripe', [], function
                     const status = response && response.paymentStatus
                         ? String(response.paymentStatus)
                         : (model.get('paymentStatus') || '');
+                    const reason = response && response.reason ? String(response.reason) : '';
+                    const applyError = response && response.applyError
+                        ? String(response.applyError)
+                        : '';
 
-                    Espo.Ui.success(
-                        this.view.translate('refreshFromStripeSuccess', 'messages', 'PrimaNota')
-                            .replace('{status}', status)
-                    );
+                    if (applyError) {
+                        Espo.Ui.error(applyError);
+
+                        return;
+                    }
+
+                    let msg = this.view.translate('refreshFromStripeSuccess', 'messages', 'PrimaNota')
+                        .replace('{status}', status);
+
+                    if (reason && reason !== 'payout_paid' && reason !== 'already_inviato') {
+                        msg = msg + ' (' + reason + ')';
+                    }
+
+                    Espo.Ui.success(msg);
                 })
                 .catch(xhr => {
                     let message = this.view.translate('refreshFromStripeFailed', 'messages', 'PrimaNota');

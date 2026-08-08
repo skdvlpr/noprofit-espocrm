@@ -1,0 +1,65 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "maxLength": 100
+        },
+        "user": {
+            "type": "link",
+            "required": true
+        },
+        "endpoint": {
+            "type": "text",
+            "required": true
+        },
+        "p256dh": {
+            "type": "varchar",
+            "maxLength": 255,
+            "required": true
+        },
+        "auth": {
+            "type": "varchar",
+            "maxLength": 255,
+            "required": true
+        },
+        "userAgent": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "createdBy": {
+            "type": "link",
+            "readOnly": true
+        },
+        "modifiedBy": {
+            "type": "link",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "user": {
+            "type": "belongsTo",
+            "entity": "User",
+            "foreign": "webPushSubscriptions"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "collection": {
+        "orderBy": "createdAt",
+        "order": "desc"
+    }
+}

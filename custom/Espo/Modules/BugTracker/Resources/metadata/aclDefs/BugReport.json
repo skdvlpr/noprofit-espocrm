@@ -3,7 +3,8 @@
         "read",
         "create",
         "edit",
-        "delete"
+        "delete",
+        "stream"
     ],
     "levelList": [
         "all",
@@ -14,5 +15,6 @@
     "read": "own",
     "create": "yes",
     "edit": "own",
-    "delete": "no"
+    "delete": "no",
+    "stream": "own"
 }

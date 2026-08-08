@@ -4,9 +4,18 @@
         "duration": "Duration",
         "activityOffer": "Shift plan",
         "activityOfferSlot": "Shift",
+        "notifyChannelList": "Notify assignee via",
         "myInviteStatus": "My availability"
     },
+    "tooltips": {
+        "notifyChannelList": "Optional channels when creating or reassigning this task. Leave empty for no notification. Not shown on the list view."
+    },
     "options": {
+        "notifyChannelList": {
+            "Email": "Email",
+            "InApp": "In-app",
+            "Push": "Push"
+        },
         "category": {
             "MealPreparation": "Meal preparation",
             "MealDistribution": "Meal distribution",
@@ -38,6 +47,8 @@
         "Invites": "Availabilities"
     },
     "messages": {
-        "schedulerNeedDatesAndPeople": "Set start and end date/time (and assigned user or collaborators) to show the planner timeline."
+        "schedulerNeedDatesAndPeople": "Set start and end date/time (and assigned user or collaborators) to show the planner timeline.",
+        "assignedYouTask": "You were assigned the personal task “{name}”.",
+        "assignedYouTaskEmailSubject": "Personal task assigned: {name}"
     }
 }

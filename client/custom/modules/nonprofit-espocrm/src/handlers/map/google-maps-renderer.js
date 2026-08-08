@@ -125,12 +125,17 @@ define('nonprofit-espocrm:handlers/map/google-maps-renderer', [
             }
 
             // Modal with height:auto can collapse to 0 — force a usable viewport.
-            if (!mapEl.style.minHeight) {
-                mapEl.style.minHeight = '320px';
+            const minPx = Math.max(320, Math.round(window.innerHeight * 0.6));
+
+            mapEl.style.minHeight = minPx + 'px';
+
+            if (mapEl.clientHeight < 120) {
+                mapEl.style.height = minPx + 'px';
             }
 
-            if (mapEl.clientHeight < 80) {
-                mapEl.style.height = '60vh';
+            if (mapEl.parentElement && mapEl.parentElement.clientHeight < 120) {
+                mapEl.parentElement.style.minHeight = minPx + 'px';
+                mapEl.parentElement.style.height = minPx + 'px';
             }
 
             const geocoder = new google.maps.Geocoder();

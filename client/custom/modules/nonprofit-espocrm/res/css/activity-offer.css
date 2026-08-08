@@ -1,0 +1,280 @@
+/* ActivityOffer pending-update banner (Updated / Aggiornato). */
+.activity-offer-pending-update-banner {
+    margin: 0.75rem 0 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.25rem;
+}
+
+.activity-offer-pending-update-main {
+    flex: 1 1 16rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+}
+
+.activity-offer-pending-update-text {
+    flex: 1 1 12rem;
+}
+
+.activity-offer-pending-update-timer {
+    flex: 0 0 auto;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/*
+ * Semantic status badges — Aurora maps label-primary to brand red, so Published
+ * looked like Cancelled. Colors keyed by data-status (enum-status-badge field).
+ * Theme-scoped selectors beat safehouse-aurora-enum-colors.css
+ * (body[theme] .label-state.label-primary).
+ *
+ * Slots: Published=blue open | Covered=green staffed | Completed=teal done | Cancelled=red
+ * Plan:  Planned=blue | Confirmed=green | Completed=teal | Updated/Collecting=amber | Closed=red | Draft=gray
+ */
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Published"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Planned"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Published"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Planned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Planned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Planned"],
+.label-state[data-status="Published"],
+.label-state[data-status="Planned"] {
+    background-color: rgba(37, 99, 235, 0.32) !important;
+    color: #93c5fd !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Covered"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Confirmed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Covered"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Confirmed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Confirmed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Confirmed"],
+.label-state[data-status="Covered"],
+.label-state[data-status="Confirmed"] {
+    background-color: rgba(101, 163, 13, 0.32) !important;
+    color: #d9f99d !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Completed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Completed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Completed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Completed"],
+.label-state[data-status="Completed"] {
+    background-color: rgba(13, 148, 136, 0.32) !important;
+    color: #99f6e4 !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Updated"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Updated"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Updated"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Updated"],
+.label-state[data-status="CollectingAvailability"],
+.label-state[data-status="Updated"] {
+    background-color: rgba(217, 119, 6, 0.32) !important;
+    color: #fde68a !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Cancelled"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Closed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Cancelled"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Closed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Closed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Closed"],
+.label-state[data-status="Cancelled"],
+.label-state[data-status="Closed"] {
+    background-color: rgba(220, 38, 38, 0.35) !important;
+    color: #fecaca !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Draft"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Draft"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Draft"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Draft"],
+.label-state[data-status="Draft"] {
+    background-color: rgba(113, 113, 122, 0.35) !important;
+    color: #e4e4e7 !important;
+}
+
+/* Invite statuses on slot staffing cards */
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Available"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Available"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Available"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Available"],
+.label-state[data-status="Available"] {
+    background-color: rgba(37, 99, 235, 0.28) !important;
+    color: #93c5fd !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Assigned"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Assigned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Assigned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Assigned"],
+.label-state[data-status="Assigned"] {
+    background-color: rgba(217, 119, 6, 0.32) !important;
+    color: #fde68a !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Declined"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Declined"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Declined"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Declined"],
+.label-state[data-status="Declined"] {
+    background-color: rgba(220, 38, 38, 0.35) !important;
+    color: #fecaca !important;
+}
+
+/* Light theme readable contrast */
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Planned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Planned"] {
+    background-color: rgba(37, 99, 235, 0.14) !important;
+    color: #1d4ed8 !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Confirmed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Confirmed"] {
+    background-color: rgba(101, 163, 13, 0.16) !important;
+    color: #3f6212 !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Completed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Completed"] {
+    background-color: rgba(13, 148, 136, 0.14) !important;
+    color: #0f766e !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Updated"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Updated"] {
+    background-color: rgba(217, 119, 6, 0.16) !important;
+    color: #b45309 !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Closed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Closed"] {
+    background-color: rgba(220, 38, 38, 0.14) !important;
+    color: #b91c1c !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Draft"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Draft"] {
+    background-color: #e4e4e7 !important;
+    color: #3f3f46 !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Available"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Available"] {
+    background-color: rgba(37, 99, 235, 0.14) !important;
+    color: #1d4ed8 !important;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Assigned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Assigned"] {
+    background-color: rgba(217, 119, 6, 0.16) !important;
+    color: #b45309 !important;
+}
+
+
+.activity-offer-pending-update-actions {
+    flex: 0 0 auto;
+}
+
+/*
+ * Semantic status badges (enum-status-badge) — map entity values → Aurora --state-* tokens.
+ * Source of truth is safehouse-aurora(.css|/light.css); do not invent parallel neon colors here.
+ *
+ * default grey = Draft/Closed inactive | primary blue = open | info indigo = done/mid
+ * success sage = covered/confirmed | warning amber = collecting/updated | danger rose = cancelled
+ */
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Published"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Planned"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Available"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Published"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Planned"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Available"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Planned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Available"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Published"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Planned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Available"] {
+    background-color: var(--state-primary-bg) !important;
+    color: var(--state-primary-text) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Covered"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Confirmed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Covered"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Confirmed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Confirmed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Covered"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Confirmed"] {
+    background-color: var(--state-success-bg) !important;
+    color: var(--state-success-text) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Completed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Completed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Completed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Completed"] {
+    background-color: var(--state-info-bg) !important;
+    color: var(--state-info-text) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Updated"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Assigned"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Updated"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Assigned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Updated"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Assigned"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="CollectingAvailability"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Updated"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Assigned"] {
+    background-color: var(--state-warning-bg) !important;
+    color: var(--state-warning-text) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Cancelled"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Cancelled"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Cancelled"] {
+    background-color: var(--state-danger-bg) !important;
+    color: var(--state-danger-text) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Draft"],
+body[data-theme-name="SafehouseAurora"] .label-state[data-status="Closed"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Draft"],
+body[data-theme-name="SafehouseAurora"] .label-status-semantic[data-status="Closed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Draft"],
+body[data-theme-name="SafehouseAuroraLight"] .label-state[data-status="Closed"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Draft"],
+body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status="Closed"] {
+    background-color: var(--state-default-bg) !important;
+    color: var(--state-default-text) !important;
+}

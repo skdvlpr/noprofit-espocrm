@@ -4,11 +4,13 @@
         "client/custom/modules/nonprofit-espocrm/res/css/kanban-card.css",
         "client/custom/modules/nonprofit-espocrm/res/css/reporting-stats.css",
         "client/custom/modules/nonprofit-espocrm/res/css/knowledge-base.css",
-        "client/custom/modules/nonprofit-espocrm/res/css/google-places-modal.css"
+        "client/custom/modules/nonprofit-espocrm/res/css/google-places-modal.css",
+        "client/custom/modules/nonprofit-espocrm/res/css/activity-offer.css"
     ],
     "scriptList": [
         "__APPEND__",
-        "client/custom/modules/nonprofit-espocrm/lib/init.js"
+        "client/custom/modules/nonprofit-espocrm/lib/init.js",
+        "client/custom/modules/nonprofit-espocrm/lib/web-push.js"
     ],
     "favicon": "client/img/favicon.svg",
     "faviconAlternate": "client/img/favicon.ico",

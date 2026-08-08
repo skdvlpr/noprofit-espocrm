@@ -9,6 +9,5 @@
     {"name": "category"},
     {"name": "requiredCount"},
     {"name": "placeCity"},
-    {"name": "conditions"},
-    {"name": "task"}
+    {"name": "conditions"}
 ]

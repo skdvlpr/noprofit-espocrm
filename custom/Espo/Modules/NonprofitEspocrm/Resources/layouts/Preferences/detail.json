@@ -1,0 +1,84 @@
+[
+    {
+        "name": "overview",
+        "rows": [
+            [
+                {"name": "timeZone"},
+                {"name": "dateFormat"}
+            ]
+        ]
+    },
+    {
+        "name": "locale",
+        "rows": [
+            [
+                {"name": "timeFormat"},
+                {"name": "weekStart"}
+            ],
+            [
+                {"name": "defaultCurrency"},
+                {"name": "thousandSeparator"}
+            ],
+            [
+                {"name": "decimalMark"},
+                false
+            ],
+            [
+                {"name": "language"},
+                false
+            ]
+        ]
+    },
+    {
+        "name": "misc",
+        "rows": [
+            [
+                {"name": "exportDelimiter"},
+                false
+            ],
+            [
+                {"name": "receiveAssignmentEmailNotifications"},
+                false
+            ]
+        ]
+    },
+    {
+        "name": "dashboard",
+        "rows": [
+            [
+                {"name": "dashboardLayout"}
+            ]
+        ]
+    },
+    {
+        "tabBreak": true,
+        "tabLabel": "$label:Notifications",
+        "name": "notifications",
+        "rows": [
+            [
+                {"name": "receiveAssignmentEmailNotifications"},
+                {"name": "receiveMentionEmailNotifications"}
+            ],
+            [
+                {"name": "receiveStreamEmailNotifications"},
+                false
+            ],
+            [
+                {"name": "assignmentNotificationsIgnoreEntityTypeList"},
+                {"name": "assignmentEmailNotificationsIgnoreEntityTypeList"}
+            ],
+            [
+                {"name": "reactionNotifications"},
+                {"name": "reactionNotificationsNotFollowed"}
+            ],
+            [
+                {"name": "notificationGrouping"},
+                {"name": "notificationSound"}
+            ],
+            [
+                {"name": "webPushEnabled"},
+                false
+            ]
+        ]
+    }
+]

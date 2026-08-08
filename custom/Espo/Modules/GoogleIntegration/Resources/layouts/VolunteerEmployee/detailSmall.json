@@ -4,8 +4,10 @@
         "rows": [
             [
                 {
-                    "name": "name",
-                    "fullWidth": true
+                    "name": "firstName"
+                },
+                {
+                    "name": "lastName"
                 }
             ],
             [
@@ -18,27 +20,29 @@
             ],
             [
                 {
-                    "name": "contractType"
+                    "name": "assignedUser"
                 },
                 {
-                    "name": "assignedUser"
-                }
-            ],
-            [
-                {
-                    "name": "emailAddress",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "phoneNumber",
-                    "fullWidth": true
+                    "name": "teams"
                 }
             ],
             [
                 {
                     "name": "birthDate"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "emailAddress"
+                },
+                {
+                    "name": "phoneNumber"
+                }
+            ],
+            [
+                {
+                    "name": "contractType"
                 },
                 false
             ],

@@ -528,6 +528,47 @@ $dateFieldView = file_get_contents(__DIR__ . '/../client/custom/modules/google-i
 $adminEditView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/edit.js') ?: '';
 $ok('CalendarDateSource blocks datetime companion date fields', str_contains($dateSourceBeforeSave, 'dateStartDate') && str_contains($dateFieldView, 'BLOCKED_DATE_FIELD_NAMES'));
 $ok('Admin integration links to CalendarDateSource and CalendarTemplate', str_contains($adminEditView, '#CalendarDateSource') && str_contains($adminEditView, '#CalendarTemplate'));
+$adminEditTpl = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/res/templates/admin/integrations/edit.tpl') ?: '';
+$adminEditCss = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/res/css/admin-integrations-edit.css') ?: '';
+$integrationHelpEn = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/i18n/en_US/Integration.json'
+) ?: '';
+$integrationHelpIt = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/i18n/it_IT/Integration.json'
+) ?: '';
+$ok(
+    'Admin integration layout is stacked (no col-sm-6 side-by-side)',
+    str_contains($adminEditTpl, 'gi-admin-integration__stack')
+        && !str_contains($adminEditTpl, 'col-sm-6')
+        && str_contains($adminEditTpl, 'gi-credentials')
+);
+$ok(
+    'Admin CRM scope chips omit entity-code clutter',
+    str_contains($adminEditTpl, 'gi-crm-scope-chip__label')
+        && !str_contains($adminEditTpl, '({{entityType}})')
+);
+$ok(
+    'Admin help CSS hides images (screenshots are KB-only)',
+    str_contains($adminEditCss, '.gi-help img')
+        && str_contains($adminEditCss, 'display: none')
+);
+$ok(
+    'Integration help has no kb-google-connect screenshots',
+    !str_contains($integrationHelpEn, 'kb-google-connect')
+        && !str_contains($integrationHelpIt, 'kb-google-connect')
+        && !str_contains($integrationHelpEn, '![')
+        && !str_contains($integrationHelpIt, '![')
+);
+$ok(
+    'KB Google Connect article ships annotated screenshots',
+    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect/00-admin-integrazioni.jpg')
+        && str_contains(
+            (string) file_get_contents(
+                __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/knowledge-base/articles.it_IT.json'
+            ),
+            'kb-google-connect/00-admin-integrazioni.jpg'
+        )
+);
 $ok('Dead admin template-modal view removed', !is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/template-modal.js'));
 $eventSettingsView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
 $templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-template-link.js') ?: '';

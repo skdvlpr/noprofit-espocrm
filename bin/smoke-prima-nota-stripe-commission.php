@@ -230,9 +230,10 @@ $ok(
 $protectStripeHookPath = __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Hooks/PrimaNota/ProtectStripeSourcedFields.php';
 $protectStripeHookSrc = is_file($protectStripeHookPath) ? (string) file_get_contents($protectStripeHookPath) : '';
 $ok(
-    'paymentStatus not Stripe-locked (webhook can update)',
+    'paymentStatus is Stripe-locked (trusted sync user bypasses)',
     $protectStripeHookSrc !== ''
-        && ! preg_match("/'paymentStatus'/", $protectStripeHookSrc)
+        && (bool) preg_match("/'paymentStatus'/", $protectStripeHookSrc)
+        && str_contains($protectStripeHookSrc, 'isTrustedStripeSyncUser')
 );
 $ok(
     'refuse-production guard exists',
@@ -528,6 +529,17 @@ try {
     $stripeDateBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
 }
 $ok('Stripe transactionDate edit → BadRequest', $stripeDateBlocked);
+
+$stripeStatusBlocked = false;
+try {
+    $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
+    // Must differ from current (default Inviato) or isAttributeChanged is false.
+    $stripe->set('paymentStatus', 'Planned');
+    $em->saveEntity($stripe);
+} catch (BadRequest $e) {
+    $stripeStatusBlocked = $isBadRequestMsg($e->getMessage(), 'Stripe', 'stripeSourcedReadOnly');
+}
+$ok('Stripe paymentStatus edit → BadRequest', $stripeStatusBlocked);
 
 $stripe = $em->getEntityById('PrimaNota', $stripe->getId());
 $stripe->set('modelDClassification', 'C');

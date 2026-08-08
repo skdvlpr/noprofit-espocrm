@@ -1,0 +1,8 @@
+{
+    "controller": "controllers/record",
+    "createDisabled": true,
+    "recordViews": {
+        "list": "views/record/list",
+        "detail": "views/record/detail"
+    }
+}

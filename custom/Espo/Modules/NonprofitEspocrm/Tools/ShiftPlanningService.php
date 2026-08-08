@@ -15,19 +15,25 @@ use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\Core\ORM\Repository\Option\SaveOption;
+use Espo\Core\Utils\DateTime as DateTimeUtil;
 use DateTimeImmutable;
 use DateTimeZone;
 
 /**
  * Weekly shift planning lifecycle:
  *
- *   Draft -> CollectingAvailability -> Planned -> Confirmed -> Closed
+ *   Draft -> CollectingAvailability -> Planned -> Confirmed -> Updated -> Completed|Closed
+ *
+ * Completed = week finished naturally (slots done by time). Closed = annulled or manual close.
+ * Updated is a transient organizer-facing status while a soft/hard notify is pending
+ * after editing a Confirmed plan (soft returns to Confirmed; hard → CollectingAvailability).
  *
  * - requestAvailability: notify the volunteer cohort to fill the availability grid.
  * - availabilityGrid / saveAvailability: volunteer-facing checkbox grid (per slot).
  * - coverage: organizer table (required / available / assigned per shift).
  * - autoAssign: fair greedy assignment respecting availability + competences.
- * - confirm: create Tasks per shift, sync collaborators, notify volunteers.
+ * - confirm: mark assigned invites Confirmed and notify volunteers (no auto Task).
+ * - sendPendingUpdate: flush debounced soft/hard notify immediately.
  */
 class ShiftPlanningService
 {
@@ -35,12 +41,26 @@ class ShiftPlanningService
     private const STATUS_COLLECTING = 'CollectingAvailability';
     private const STATUS_PLANNED = 'Planned';
     private const STATUS_CONFIRMED = 'Confirmed';
+    private const STATUS_UPDATED = 'Updated';
+    private const STATUS_COMPLETED = 'Completed';
+    private const STATUS_CLOSED = 'Closed';
+
+    private const SLOT_PUBLISHED = 'Published';
+    private const SLOT_COVERED = 'Covered';
+    private const SLOT_COMPLETED = 'Completed';
+    private const SLOT_CANCELLED = 'Cancelled';
 
     private const INVITE_AVAILABLE = 'Available';
     private const INVITE_ASSIGNED = 'Assigned';
     private const INVITE_CONFIRMED = 'Confirmed';
     private const INVITE_DECLINED = 'Declined';
     private const INVITE_CANCELLED = 'Cancelled';
+
+    /** @var string[] */
+    private const TERMINAL_SLOT_STATUSES = [
+        self::SLOT_COMPLETED,
+        self::SLOT_CANCELLED,
+    ];
 
     private const DAY_OFFSET = [
         'Monday' => 0,
@@ -58,6 +78,7 @@ class ShiftPlanningService
         private User $user,
         private Language $language,
         private ShiftEmailService $shiftEmailService,
+        private ShiftChangeNotifyService $shiftChangeNotifyService,
     ) {}
 
     /**
@@ -257,7 +278,7 @@ class ShiftPlanningService
             }
 
             $slot->set($payload);
-            $this->entityManager->saveEntity($slot);
+            $this->saveEntityAllowStatus($slot);
             $keptIds[] = $slot->getId();
         }
 
@@ -309,7 +330,7 @@ class ShiftPlanningService
 
         $offer->set('status', self::STATUS_COLLECTING);
         $offer->set('publishedAt', $this->nowString());
-        $this->entityManager->saveEntity($offer);
+        $this->saveEntityAllowStatus($offer);
 
         $message = $this->translateMessage('availabilityRequestNotification', [
             'name' => (string) $offer->get(Field::NAME),
@@ -476,7 +497,7 @@ class ShiftPlanningService
                         'comment' => $commentValue ?? '',
                     ]);
 
-                    $this->entityManager->saveEntity($new);
+                    $this->saveEntityAllowStatus($new);
                     $availableCount++;
 
                     continue;
@@ -491,7 +512,7 @@ class ShiftPlanningService
                     $invite->set('comment', $commentValue);
                 }
 
-                $this->entityManager->saveEntity($invite);
+                $this->saveEntityAllowStatus($invite);
                 $availableCount++;
 
                 continue;
@@ -515,7 +536,7 @@ class ShiftPlanningService
                     $invite->set('comment', $commentValue);
                 }
 
-                $this->entityManager->saveEntity($invite);
+                $this->saveEntityAllowStatus($invite);
 
                 $this->syncTaskCollaborator($invite, false);
                 $withdrawnCount++;
@@ -620,6 +641,136 @@ class ShiftPlanningService
             'status' => $offer->get('status'),
             'slots' => $slotList,
             'uncoveredCount' => $uncoveredCount,
+        ];
+    }
+
+    /**
+     * Staffing for one shift: assigned (Assigned+Confirmed) and candidates (Available).
+     *
+     * @return array{
+     *     slotId: string,
+     *     activityOfferId: string,
+     *     requiredCount: int,
+     *     assigned: list<array{id: string, name: string, inviteId: string, status: string}>,
+     *     candidates: list<array{id: string, name: string, inviteId: string, status: string}>,
+     *     canResend: bool
+     * }
+     * @throws Forbidden|NotFound
+     */
+    public function slotStaffing(string $slotId): array
+    {
+        $slot = $this->entityManager->getEntityById('ActivityOfferSlot', $slotId);
+
+        if (!$slot) {
+            throw new NotFound('ActivityOfferSlot not found.');
+        }
+
+        if (!$this->acl->check($slot, Acl\Table::ACTION_READ)) {
+            throw new Forbidden('No read access to ActivityOfferSlot.');
+        }
+
+        $offerId = (string) ($slot->get('activityOfferId') ?? '');
+
+        if ($offerId === '') {
+            throw new BadRequest('Shift is not linked to a plan.');
+        }
+
+        $offer = $this->getOffer($offerId);
+        $canResend = $this->acl->check($offer, Acl\Table::ACTION_EDIT)
+            || $this->acl->check($slot, Acl\Table::ACTION_EDIT);
+
+        $userNames = $this->loadUserNames($offerId);
+        $assigned = [];
+        $candidates = [];
+
+        foreach ($this->getInvites($offerId) as $invite) {
+            if ((string) $invite->get('activityOfferSlotId') !== $slotId) {
+                continue;
+            }
+
+            $status = (string) $invite->get('status');
+            $userId = (string) $invite->get('userId');
+            $row = [
+                'id' => $userId,
+                'name' => $userNames[$userId] ?? $userId,
+                'inviteId' => (string) $invite->getId(),
+                'status' => $status,
+            ];
+
+            if (in_array($status, [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED], true)) {
+                $assigned[] = $row;
+            } elseif ($status === self::INVITE_AVAILABLE) {
+                $candidates[] = $row;
+            }
+        }
+
+        return [
+            'slotId' => $slotId,
+            'activityOfferId' => $offerId,
+            'requiredCount' => (int) ($slot->get('requiredCount') ?? 1),
+            'assigned' => $assigned,
+            'candidates' => $candidates,
+            'canResend' => $canResend,
+        ];
+    }
+
+    /**
+     * Re-send availability request (email + in-app) to one Available candidate.
+     *
+     * @return array{emailSent: int, notified: bool, userId: string}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function resendSlotInvite(string $slotId, string $userId): array
+    {
+        $slot = $this->entityManager->getEntityById('ActivityOfferSlot', $slotId);
+
+        if (!$slot) {
+            throw new NotFound('ActivityOfferSlot not found.');
+        }
+
+        $offerId = (string) ($slot->get('activityOfferId') ?? '');
+
+        if ($offerId === '') {
+            throw new BadRequest('Shift is not linked to a plan.');
+        }
+
+        $offer = $this->getOfferForEdit($offerId);
+
+        $invite = null;
+
+        foreach ($this->getInvites($offerId, $userId) as $row) {
+            if ((string) $row->get('activityOfferSlotId') === $slotId) {
+                $invite = $row;
+                break;
+            }
+        }
+
+        if (!$invite) {
+            throw new BadRequest('No availability for this volunteer on this shift.');
+        }
+
+        if ((string) $invite->get('status') !== self::INVITE_AVAILABLE) {
+            throw new BadRequest('Resend is only available for candidates who marked themselves available.');
+        }
+
+        $message = $this->translateMessage('availabilityRequestNotification', [
+            'name' => (string) $offer->get(Field::NAME),
+            'weekStart' => (string) ($offer->get('weekStart') ?? ''),
+        ]);
+
+        $notified = false;
+
+        if ($userId !== $this->user->getId()) {
+            $this->createNotification($offer, $userId, $message);
+            $notified = true;
+        }
+
+        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, [$userId]);
+
+        return [
+            'emailSent' => (int) ($emailResult['sent'] ?? 0),
+            'notified' => $notified,
+            'userId' => $userId,
         ];
     }
 
@@ -964,7 +1115,7 @@ class ShiftPlanningService
                 }
 
                 $invite->set('status', self::INVITE_ASSIGNED);
-                $this->entityManager->saveEntity($invite);
+                $this->saveEntityAllowStatus($invite);
 
                 $load[$userId] = ($load[$userId] ?? 0) + 1;
                 $busyIntervals[$userId][] = [
@@ -978,7 +1129,7 @@ class ShiftPlanningService
         }
 
         $offer->set('status', self::STATUS_PLANNED);
-        $this->entityManager->saveEntity($offer);
+        $this->saveEntityAllowStatus($offer);
 
         $this->syncSlotCoverageStatuses($offerId);
 
@@ -997,9 +1148,85 @@ class ShiftPlanningService
     }
 
     /**
-     * Confirm the plan: create Tasks, sync collaborators, notify volunteers.
+     * Extend pending auto-send window (+5 minutes by default).
      *
-     * @return array{taskCount: int, confirmedCount: int, notifyCount: int}
+     * @return array{status: string, pendingNotifyAt: ?string, pendingNotifyKind: ?string, extendedMinutes: int}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+
+    /**
+     * Extend pending auto-send window (+5 minutes by default).
+     *
+     * @return array{status: string, pendingNotifyAt: ?string, pendingNotifyKind: ?string, extendedMinutes: int}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function extendPendingUpdate(string $offerId, int $minutes = 5): array
+    {
+        $this->getOfferForEdit($offerId);
+
+        $result = $this->shiftChangeNotifyService->extendPendingUpdate($offerId, $minutes);
+
+        if (($result['extendedMinutes'] ?? 0) < 1) {
+            throw new BadRequest("Only an Updated plan with a pending notify can be extended.");
+        }
+
+        return $result;
+    }
+
+    /**
+     * Flush pending soft/hard update notify for an Updated plan (Send update now).
+     *
+     * @return array{
+     *     kind: string,
+     *     status: string,
+     *     resetCount: int,
+     *     emailSent: int,
+     *     notifyCount: int
+     * }
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function sendPendingUpdate(string $offerId): array
+    {
+        $offer = $this->getOfferForEdit($offerId);
+        $status = (string) ($offer->get('status') ?? '');
+        $kind = (string) ($offer->get('pendingNotifyKind') ?? '');
+
+        // Debounce job may already have finalized while the UI was still open.
+        if ($status !== self::STATUS_UPDATED || $kind === '') {
+            if (in_array($status, [self::STATUS_CONFIRMED, self::STATUS_COLLECTING], true)) {
+                return [
+                    'kind' => $status === self::STATUS_COLLECTING
+                        ? ShiftChangeNotifyService::KIND_HARD
+                        : ShiftChangeNotifyService::KIND_SOFT,
+                    'status' => $status,
+                    'resetCount' => 0,
+                    'emailSent' => 0,
+                    'notifyCount' => 0,
+                    'alreadySent' => true,
+                ];
+            }
+
+            throw new BadRequest("Only an Updated plan can send a pending update.");
+        }
+
+        if (!in_array($kind, [
+            ShiftChangeNotifyService::KIND_SOFT,
+            ShiftChangeNotifyService::KIND_HARD,
+        ], true)) {
+            throw new BadRequest("No pending update to send.");
+        }
+
+        $result = $this->shiftChangeNotifyService->sendPendingUpdateNow($offerId);
+        $result['alreadySent'] = false;
+
+        return $result;
+    }
+
+    /**
+     * Confirm the plan: mark assigned invites Confirmed, notify volunteers.
+     * Does NOT auto-create personal Tasks (those are manual / Workflow optional).
+     *
+     * @return array{taskCount: int, confirmedCount: int, notifyCount: int, emailCount: int}
      * @throws BadRequest|Forbidden|NotFound
      */
     public function confirm(string $offerId): array
@@ -1028,7 +1255,6 @@ class ShiftPlanningService
             throw new BadRequest("No assigned volunteers. Run auto-assignment first.");
         }
 
-        $taskCount = 0;
         $confirmedCount = 0;
         /** @var array<string, string[]> $shiftsByUser */
         $shiftsByUser = [];
@@ -1042,11 +1268,6 @@ class ShiftPlanningService
                 continue;
             }
 
-            $task = $this->ensureTaskForSlot($offer, $slot);
-            $taskCount++;
-
-            $task->loadLinkMultipleField(Field::COLLABORATORS);
-            $collaboratorIds = $task->getLinkMultipleIdList(Field::COLLABORATORS);
             $assigneeNames = [];
 
             foreach ($invites as $invite) {
@@ -1054,15 +1275,10 @@ class ShiftPlanningService
 
                 if ($invite->get('status') !== self::INVITE_CONFIRMED) {
                     $invite->set('status', self::INVITE_CONFIRMED);
+                    $this->saveEntityAllowStatus($invite);
                 }
 
-                $invite->set('taskId', $task->getId());
-                $this->entityManager->saveEntity($invite);
                 $confirmedCount++;
-
-                if (!in_array($userId, $collaboratorIds, true)) {
-                    $collaboratorIds[] = $userId;
-                }
 
                 $line = $this->shiftEmailService->formatConfirmedShiftLine($slot);
                 $shiftsByUser[$userId][] = $line;
@@ -1071,15 +1287,12 @@ class ShiftPlanningService
                 $assigneeNames[] = $userEntity ? (string) $userEntity->getName() : $userId;
             }
 
-            $task->set(Field::COLLABORATORS . 'Ids', $collaboratorIds);
-            $this->entityManager->saveEntity($task);
-
             $adminDigestLines[] = $this->shiftEmailService->formatConfirmedShiftLine($slot)
                 . ' → ' . implode(', ', $assigneeNames);
         }
 
         $offer->set('status', self::STATUS_CONFIRMED);
-        $this->entityManager->saveEntity($offer);
+        $this->saveEntityAllowStatus($offer);
 
         $this->syncSlotCoverageStatuses($offerId);
 
@@ -1111,7 +1324,7 @@ class ShiftPlanningService
         }
 
         return [
-            'taskCount' => $taskCount,
+            'taskCount' => 0,
             'confirmedCount' => $confirmedCount,
             'notifyCount' => $notifyCount,
             'emailCount' => $emailCount,
@@ -1167,6 +1380,18 @@ class ShiftPlanningService
      * Published → Covered when assignedCount >= requiredCount,
      * Covered → Published when staffing drops below required.
      */
+
+    /**
+     * Shifts that can receive availability invites / auto-assignment (Published only).
+     *
+     * @return Entity[]
+     */
+
+    /**
+     * Keep slot status in sync with staffing:
+     * Published → Covered when assignedCount >= requiredCount,
+     * Covered → Published when staffing drops below required.
+     */
     public function syncSlotCoverageStatuses(string $offerId): void
     {
         foreach ($this->coverage($offerId)['slots'] as $row) {
@@ -1185,15 +1410,21 @@ class ShiftPlanningService
             $status = (string) ($slotEntity->get('status') ?? 'Published');
             $isCovered = !empty($row['isCovered']);
 
+            // Coverage flip must not enqueue plan-update / schedule notify jobs.
+            $coverageSaveOpts = [
+                ShiftChangeNotifyService::SKIP_SCHEDULE_NOTIFY => true,
+                ShiftChangeNotifyService::SKIP_PLAN_UPDATE_NOTIFY => true,
+            ];
+
             if ($isCovered && $status === 'Published') {
                 $slotEntity->set('status', 'Covered');
-                $this->entityManager->saveEntity($slotEntity);
+                $this->saveEntityAllowStatus($slotEntity, $coverageSaveOpts);
                 continue;
             }
 
             if (!$isCovered && $status === 'Covered') {
                 $slotEntity->set('status', 'Published');
-                $this->entityManager->saveEntity($slotEntity);
+                $this->saveEntityAllowStatus($slotEntity, $coverageSaveOpts);
             }
         }
     }
@@ -1255,7 +1486,7 @@ class ShiftPlanningService
             if ($slotId && $invite->get('activityOfferId') !== $offerId) {
                 $invite->set('activityOfferId', $offerId);
 
-                $this->entityManager->saveEntity($invite, [SaveOption::SILENT => true]);
+                $this->saveEntityAllowStatus($invite, [SaveOption::SILENT => true]);
             }
 
             $invites[] = $invite;
@@ -1327,73 +1558,6 @@ class ShiftPlanningService
         }
 
         return false;
-    }
-
-    private function ensureTaskForSlot(Entity $offer, Entity $slot): Entity
-    {
-        $existingTaskId = $slot->get('taskId');
-
-        if ($existingTaskId) {
-            $existing = $this->entityManager->getEntityById('Task', $existingTaskId);
-
-            if ($existing) {
-                return $existing;
-            }
-        }
-
-        $name = $slot->get(Field::NAME);
-
-        if (!$name) {
-            $name = trim(
-                $this->language->translateOption(
-                    (string) ($slot->get('category') ?? ''),
-                    'category',
-                    'ActivityOfferSlot'
-                ) . ' ' . ($slot->get('dateStart') ?? '')
-            );
-        }
-
-        $descriptionParts = [];
-        $placeLabel = $this->formatPlaceAddress($slot);
-
-        if ($placeLabel !== '') {
-            $descriptionParts[] = $placeLabel;
-        }
-
-        $conditions = $this->normalizeConditions($slot->get('conditions') ?? []);
-
-        if ($conditions !== []) {
-            $descriptionParts[] = implode("\n", array_map(
-                static fn (string $c): string => '• ' . $c,
-                $conditions
-            ));
-        }
-
-        if ($offer->get('description')) {
-            $descriptionParts[] = (string) $offer->get('description');
-        }
-
-        $task = $this->entityManager->getNewEntity('Task');
-        $task->set([
-            'name' => $name,
-            'status' => 'Not Started',
-            'priority' => 'Normal',
-            'dateStart' => $slot->get('dateStart'),
-            'dateEnd' => $slot->get('dateEnd'),
-            'category' => $slot->get('category'),
-            'description' => $descriptionParts !== [] ? implode("\n\n", $descriptionParts) : null,
-            'activityOfferId' => $offer->getId(),
-            'activityOfferSlotId' => $slot->getId(),
-            'assignedUserId' => $offer->get('assignedUserId') ?: $this->user->getId(),
-            'teamsIds' => $offer->getLinkMultipleIdList('teams'),
-        ]);
-
-        $this->entityManager->saveEntity($task);
-
-        $slot->set('taskId', $task->getId());
-        $this->entityManager->saveEntity($slot);
-
-        return $task;
     }
 
     private function syncTaskCollaborator(Entity $invite, bool $add): void
@@ -1564,6 +1728,512 @@ class ShiftPlanningService
         }
 
         return array_values(array_unique($out));
+    }
+
+    /**
+     * Persist entity allowing system-managed status writes.
+     *
+     * @param array<string, mixed> $options
+     */
+    private function saveEntityAllowStatus(Entity $entity, array $options = []): void
+    {
+        $options[StatusGuard::SKIP_OPTION] = true;
+        $this->entityManager->saveEntity($entity, $options);
+    }
+
+    /**
+     * Close a shift plan (system status transition; not editable via form).
+     *
+     * @return array{status: string}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function closePlan(string $offerId): array
+    {
+        $offer = $this->getOfferForEdit($offerId);
+        $status = (string) ($offer->get('status') ?? '');
+
+        if ($this->isPlanTerminal($status) || $status === self::STATUS_DRAFT) {
+            throw new BadRequest("Plan can only be closed after availability collection has started.");
+        }
+
+        $offer->set('status', self::STATUS_CLOSED);
+        $this->saveEntityAllowStatus($offer);
+
+        return ['status' => self::STATUS_CLOSED];
+    }
+
+    /**
+     * Annul one shift. Notifies Assigned/Confirmed only; then tries auto-close week.
+     * Never changes Completed slots.
+     *
+     * @return array{status: string, notifyCount: int, emailCount: int, planClosed: bool, planStatus: ?string}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function cancelSlot(string $slotId): array
+    {
+        $slot = $this->entityManager->getEntityById('ActivityOfferSlot', $slotId);
+
+        if (!$slot) {
+            throw new NotFound("ActivityOfferSlot not found.");
+        }
+
+        $offerId = (string) ($slot->get('activityOfferId') ?? '');
+        $offer = $this->getOfferForEdit($offerId);
+
+        $status = (string) ($slot->get('status') ?? '');
+
+        if (in_array($status, self::TERMINAL_SLOT_STATUSES, true)) {
+            throw new BadRequest("Shift is already completed or cancelled.");
+        }
+
+        $staffedUserIds = $this->getStaffedInviteUserIds($slot);
+
+        $slot->set('status', self::SLOT_CANCELLED);
+        $this->saveEntityAllowStatus($slot);
+
+        $this->cancelInvitesOnSlot($slot);
+
+        $notify = $this->notifyUsersSlotCancellation(
+            $offer,
+            $staffedUserIds,
+            [$this->shiftEmailService->formatConfirmedShiftLine($slot)]
+        );
+
+        $planStatus = $this->tryAutoCloseOffer($offerId);
+        $planClosed = $planStatus !== null;
+
+        return [
+            'status' => self::SLOT_CANCELLED,
+            'notifyCount' => $notify['notifyCount'],
+            'emailCount' => $notify['emailCount'],
+            'planClosed' => $planClosed,
+            'planStatus' => $planStatus,
+        ];
+    }
+
+    /**
+     * Annul every non-terminal shift and mark the week Closed (annulled).
+     * Completed slots are never touched. One digest per Assigned/Confirmed user.
+     *
+     * @return array{status: string, cancelledCount: int, notifyCount: int, emailCount: int}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    /**
+     * Annul remaining open shifts and close the plan.
+     * Personal Tasks linked to the week/slots are intentionally left untouched.
+     *
+     * @return array{status: string, cancelledCount: int, notifyCount: int, emailCount: int}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    /**
+     * Annul remaining open shifts and close the plan.
+     * Personal Tasks linked to the week/slots are intentionally left untouched.
+     *
+     * @return array{status: string, cancelledCount: int, notifyCount: int, emailCount: int}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function cancelAll(string $offerId): array
+    {
+        $offer = $this->getOfferForEdit($offerId);
+        $status = (string) ($offer->get('status') ?? '');
+
+        if ($status === self::STATUS_DRAFT || $this->isPlanTerminal($status)) {
+            throw new BadRequest("Plan can only be cancelled after availability collection has started.");
+        }
+
+        /** @var array<string, string[]> $linesByUser */
+        $linesByUser = [];
+        $cancelledCount = 0;
+
+        foreach ($this->getSlots($offerId) as $slot) {
+            $slotStatus = (string) ($slot->get('status') ?? '');
+
+            // Completed stays Completed — never reclassified as Cancelled.
+            if (in_array($slotStatus, self::TERMINAL_SLOT_STATUSES, true)) {
+                continue;
+            }
+
+            $staffedUserIds = $this->getStaffedInviteUserIds($slot);
+            $line = $this->shiftEmailService->formatConfirmedShiftLine($slot);
+
+            $slot->set('status', self::SLOT_CANCELLED);
+            $this->saveEntityAllowStatus($slot);
+            $this->cancelInvitesOnSlot($slot);
+            $cancelledCount++;
+
+            foreach ($staffedUserIds as $userId) {
+                $linesByUser[$userId][] = $line;
+            }
+        }
+
+        $notifyCount = 0;
+        $emailCount = 0;
+
+        foreach ($linesByUser as $userId => $lines) {
+            $result = $this->notifyUsersSlotCancellation($offer, [$userId], $lines);
+            $notifyCount += $result['notifyCount'];
+            $emailCount += $result['emailCount'];
+        }
+
+        // Explicit annul → Closed (even if some shifts were already Completed).
+        $offer->set('status', self::STATUS_CLOSED);
+        $this->saveEntityAllowStatus($offer);
+
+        return [
+            'status' => self::STATUS_CLOSED,
+            'cancelledCount' => $cancelledCount,
+            'notifyCount' => $notifyCount,
+            'emailCount' => $emailCount,
+        ];
+    }
+
+    /**
+     * Before hard-delete: notify Assigned/Confirmed (no-op if none / already Cancelled).
+     */
+    public function notifyOnSlotDelete(Entity $slot): void
+    {
+        $status = (string) ($slot->get('status') ?? '');
+
+        if ($status === self::SLOT_CANCELLED) {
+            return;
+        }
+
+        $offerId = (string) ($slot->get('activityOfferId') ?? '');
+        $offer = $offerId !== ''
+            ? $this->entityManager->getEntityById('ActivityOffer', $offerId)
+            : null;
+
+        if (!$offer) {
+            return;
+        }
+
+        $staffedUserIds = $this->getStaffedInviteUserIds($slot);
+
+        if ($staffedUserIds === []) {
+            return;
+        }
+
+        $this->notifyUsersSlotCancellation(
+            $offer,
+            $staffedUserIds,
+            [$this->shiftEmailService->formatConfirmedShiftLine($slot)]
+        );
+    }
+
+    /**
+     * When every slot is terminal, set plan status:
+     * - any Completed → Completed (natural finish; completed work is not “annulled”)
+     * - all Cancelled → Closed (fully annulled week)
+     *
+     * No emails. Returns the new plan status, or null if unchanged.
+     */
+    /**
+     * Flip shifts whose dateEnd is in the past to Completed.
+     * Idempotent; does not notify volunteers.
+     *
+     * @return int Number of slots updated
+     */
+    public function completePastSlots(?string $now = null): int
+    {
+        $now = $now ?? (new DateTimeImmutable('now', new DateTimeZone('UTC')))
+            ->format('Y-m-d H:i:s');
+
+        $collection = $this->entityManager
+            ->getRDBRepository('ActivityOfferSlot')
+            ->where([
+                'status!=' => self::SLOT_COMPLETED,
+                'dateEnd!=' => null,
+                'dateEnd<' => $now,
+            ])
+            ->limit(0, 500)
+            ->find();
+
+        $updated = 0;
+
+        foreach ($collection as $slot) {
+            $status = (string) ($slot->get('status') ?? '');
+
+            if ($status === self::SLOT_COMPLETED) {
+                continue;
+            }
+
+            // Only active staffing statuses are auto-completed.
+            if (!in_array($status, [self::SLOT_PUBLISHED, self::SLOT_COVERED, ''], true)) {
+                continue;
+            }
+
+            $slot->set('status', self::SLOT_COMPLETED);
+            $this->saveEntityAllowStatus($slot, [
+                SaveOption::SILENT => true,
+            ]);
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    public function tryAutoCloseOffer(string $offerId): ?string
+    {
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return null;
+        }
+
+        $offerStatus = (string) ($offer->get('status') ?? '');
+
+        if ($offerStatus === self::STATUS_DRAFT || $this->isPlanTerminal($offerStatus)) {
+            return null;
+        }
+
+        $slots = $this->getSlots($offerId);
+
+        if ($slots === []) {
+            return null;
+        }
+
+        $hasCompleted = false;
+        $hasCancelled = false;
+
+        foreach ($slots as $slot) {
+            $status = (string) ($slot->get('status') ?? '');
+
+            if (!in_array($status, self::TERMINAL_SLOT_STATUSES, true)) {
+                return null;
+            }
+
+            if ($status === self::SLOT_COMPLETED) {
+                $hasCompleted = true;
+            }
+
+            if ($status === self::SLOT_CANCELLED) {
+                $hasCancelled = true;
+            }
+        }
+
+        // Prefer Completed when any shift was actually worked/finished by time.
+        $newStatus = $hasCompleted ? self::STATUS_COMPLETED : self::STATUS_CLOSED;
+
+        if (!$hasCompleted && !$hasCancelled) {
+            return null;
+        }
+
+        $offer->set('status', $newStatus);
+        $this->saveEntityAllowStatus($offer, [
+            SaveOption::SILENT => true,
+        ]);
+
+        return $newStatus;
+    }
+
+    private function isPlanTerminal(string $status): bool
+    {
+        return in_array($status, [self::STATUS_COMPLETED, self::STATUS_CLOSED], true);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getStaffedInviteUserIds(Entity $slot): array
+    {
+        $ids = [];
+
+        foreach ($this->getInvitesForSlot($slot->getId()) as $invite) {
+            $inviteStatus = (string) ($invite->get('status') ?? '');
+
+            if (!in_array($inviteStatus, [self::INVITE_ASSIGNED, self::INVITE_CONFIRMED], true)) {
+                continue;
+            }
+
+            $userId = (string) ($invite->get('userId') ?? '');
+
+            if ($userId !== '') {
+                $ids[$userId] = true;
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * @return Entity[]
+     */
+    private function getInvitesForSlot(string $slotId): array
+    {
+        $collection = $this->entityManager
+            ->getRDBRepository('ActivityInvite')
+            ->where(['activityOfferSlotId' => $slotId])
+            ->find();
+
+        return iterator_to_array($collection);
+    }
+
+    private function cancelInvitesOnSlot(Entity $slot): void
+    {
+        foreach ($this->getInvitesForSlot($slot->getId()) as $invite) {
+            if ((string) ($invite->get('status') ?? '') === self::INVITE_CANCELLED) {
+                continue;
+            }
+
+            $invite->set('status', self::INVITE_CANCELLED);
+            $this->entityManager->saveEntity($invite, [
+                SaveOption::SKIP_ALL => true,
+                SaveOption::SILENT => true,
+            ]);
+        }
+    }
+
+    /**
+     * @param string[] $userIds
+     * @param string[] $shiftLines
+     * @return array{notifyCount: int, emailCount: int}
+     */
+    private function notifyUsersSlotCancellation(Entity $offer, array $userIds, array $shiftLines): array
+    {
+        $notifyCount = 0;
+        $emailCount = 0;
+        $message = $this->translateMessage('shiftCancelledNotification', [
+            'name' => (string) ($offer->get(Field::NAME) ?? ''),
+            'shifts' => implode('; ', $shiftLines),
+        ]);
+
+        foreach ($userIds as $userId) {
+            if ($userId === $this->user->getId()) {
+                continue;
+            }
+
+            $this->createNotification($offer, $userId, $message);
+            $notifyCount++;
+
+            $result = $this->shiftEmailService->sendShiftCancelled($offer, $userId, $shiftLines);
+            $emailCount += (int) ($result['sent'] ?? 0);
+        }
+
+        return [
+            'notifyCount' => $notifyCount,
+            'emailCount' => $emailCount,
+        ];
+    }
+
+    /**
+     * Move slot dateStart/dateEnd onto the calendar day implied by dayOfWeek
+     * within the parent plan weekStart, keeping clock times (or all-day bounds).
+     */
+
+    /**
+     * Derive English dayOfWeek enum from dateStart (keeps Giorno in sync when Inizio is edited).
+     */
+
+    /**
+     * Move slot dateStart/dateEnd onto the calendar day implied by dayOfWeek
+     * within the parent plan weekStart, keeping clock times (or all-day bounds).
+     */
+    public function syncSlotDatesFromDayOfWeek(Entity $slot): void
+    {
+        $dayOfWeek = (string) ($slot->get('dayOfWeek') ?? '');
+
+        if (!isset(self::DAY_OFFSET[$dayOfWeek])) {
+            return;
+        }
+
+        $offerId = (string) ($slot->get('activityOfferId') ?? '');
+
+        if ($offerId === '') {
+            return;
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return;
+        }
+
+        $weekStart = (string) ($offer->get('weekStart') ?? '');
+
+        if ($weekStart === '') {
+            return;
+        }
+
+        $date = $this->dateForWeekday($weekStart, $dayOfWeek);
+
+        $startTime = $this->extractClockTime((string) ($slot->get('dateStart') ?? ''));
+        $endTime = $this->extractClockTime((string) ($slot->get('dateEnd') ?? ''));
+
+        if ($startTime === null) {
+            $startTime = '10:00:00';
+        }
+
+        if ($endTime === null) {
+            $endTime = '12:00:00';
+        }
+
+        if (!empty($slot->get('isAllDay'))) {
+            $startTime = '00:00:00';
+            $endTime = '23:59:00';
+        }
+
+        $dateStart = $date . ' ' . $startTime;
+        $dateEnd = $date . ' ' . $endTime;
+
+        if ($dateEnd <= $dateStart) {
+            $dateEnd = $date . ' 23:59:00';
+        }
+
+        $slot->set('dateStart', $dateStart);
+        $slot->set('dateEnd', $dateEnd);
+    }
+
+    /**
+     * Derive English dayOfWeek enum from dateStart (keeps Giorno in sync when Inizio is edited).
+     */
+    public function syncSlotDayOfWeekFromDateStart(Entity $slot): void
+    {
+        $dateStart = (string) ($slot->get('dateStart') ?? '');
+
+        if ($dateStart === '') {
+            return;
+        }
+
+        try {
+            $dt = new DateTimeImmutable($dateStart);
+        } catch (\Throwable) {
+            return;
+        }
+
+        $map = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday',
+        ];
+
+        $n = (int) $dt->format('N');
+
+        if (!isset($map[$n])) {
+            return;
+        }
+
+        $slot->set('dayOfWeek', $map[$n]);
+    }
+
+    private function extractClockTime(string $datetime): ?string
+    {
+        $datetime = trim($datetime);
+
+        if ($datetime === '') {
+            return null;
+        }
+
+        if (preg_match('/\b(\d{2}):(\d{2})(?::(\d{2}))?\b/', $datetime, $m)) {
+            $sec = $m[3] ?? '00';
+
+            return sprintf('%02d:%02d:%02d', (int) $m[1], (int) $m[2], (int) $sec);
+        }
+
+        return null;
     }
 
     private function normalizeTime(string $value): ?string

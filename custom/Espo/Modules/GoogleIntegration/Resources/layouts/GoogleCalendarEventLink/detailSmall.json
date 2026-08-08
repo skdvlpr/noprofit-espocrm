@@ -1,0 +1,13 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "user"}],
+            [{"name": "sourceEntityType"}, {"name": "sourceEntityId"}],
+            [{"name": "sourceDateType"}, {"name": "calendarId"}],
+            [{"name": "googleEventId"}, false],
+            [{"name": "googleEventHtmlLink", "fullWidth": true}],
+            [{"name": "lastSyncedAt"}, false]
+        ]
+    }
+]

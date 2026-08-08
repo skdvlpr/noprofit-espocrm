@@ -4,7 +4,11 @@
         "duration": "Durata",
         "activityOffer": "Piano turni",
         "activityOfferSlot": "Turno",
+        "notifyChannelList": "Notifica assegnatario via",
         "myInviteStatus": "Mia disponibilità"
+    },
+    "tooltips": {
+        "notifyChannelList": "Canali opzionali alla creazione o riassegnazione del task. Lascia vuoto per nessuna notifica. Non compare in elenco."
     },
     "labels": {
         "Task": "Task",
@@ -14,6 +18,11 @@
         "Invites": "Disponibilità"
     },
     "options": {
+        "notifyChannelList": {
+            "Email": "Email",
+            "InApp": "In-app",
+            "Push": "Push"
+        },
         "category": {
             "MealPreparation": "Preparazione pasti",
             "MealDistribution": "Distribuzione pasti",
@@ -41,6 +50,8 @@
         "activityInvites": "Disponibilità"
     },
     "messages": {
-        "schedulerNeedDatesAndPeople": "Imposta data/ora di inizio e fine (e utente assegnato o collaboratori) per vedere la timeline del pianificatore."
+        "schedulerNeedDatesAndPeople": "Imposta data/ora di inizio e fine (e utente assegnato o collaboratori) per vedere la timeline del pianificatore.",
+        "assignedYouTask": "Ti è stato assegnato il task personale “{name}”.",
+        "assignedYouTaskEmailSubject": "Task personale assegnato: {name}"
     }
 }

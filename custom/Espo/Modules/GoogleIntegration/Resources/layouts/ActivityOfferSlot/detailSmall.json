@@ -7,15 +7,15 @@
                     "name": "name"
                 },
                 {
-                    "name": "category"
+                    "name": "activityOffer"
                 }
             ],
             [
                 {
-                    "name": "dayOfWeek"
+                    "name": "category"
                 },
                 {
-                    "name": "isAllDay"
+                    "name": "dayOfWeek"
                 }
             ],
             [
@@ -31,14 +31,16 @@
                     "name": "duration"
                 },
                 {
-                    "name": "requiredCount"
+                    "name": "isAllDay"
                 }
             ],
             [
                 {
-                    "name": "status"
+                    "name": "requiredCount"
                 },
-                false
+                {
+                    "name": "status"
+                }
             ],
             [
                 {
@@ -54,10 +56,10 @@
             ],
             [
                 {
-                    "name": "activityOffer"
+                    "name": "task"
                 },
                 {
-                    "name": "task"
+                    "name": "sortOrder"
                 }
             ]
         ]

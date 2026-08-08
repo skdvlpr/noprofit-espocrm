@@ -18,18 +18,33 @@
                 "CollectingAvailability",
                 "Planned",
                 "Confirmed",
+                "Updated",
+                "Completed",
                 "Closed"
             ],
             "default": "Draft",
             "displayAsLabel": true,
+            "readOnly": true,
+            "view": "nonprofit-espocrm:views/fields/enum-status-badge",
             "style": {
                 "Draft": "default",
                 "CollectingAvailability": "warning",
                 "Planned": "primary",
                 "Confirmed": "success",
-                "Closed": "info"
+                "Updated": "warning",
+                "Completed": "info",
+                "Closed": "default"
             },
             "audited": true
+        },
+        "pendingNotifyKind": {
+            "type": "enum",
+            "options": ["soft", "hard"],
+            "readOnly": true
+        },
+        "pendingNotifyAt": {
+            "type": "datetime",
+            "readOnly": true
         },
         "description": {
             "type": "text"
