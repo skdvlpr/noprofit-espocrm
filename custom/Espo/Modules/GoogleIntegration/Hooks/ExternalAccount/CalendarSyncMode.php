@@ -2,7 +2,6 @@
 
 namespace Espo\Modules\GoogleIntegration\Hooks\ExternalAccount;
 
-use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\SyncMode;
 use Espo\Modules\GoogleIntegration\Tools\Installer;
@@ -10,7 +9,8 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Normalizes per-user calendarSyncMode on Google ExternalAccount rows.
+ * Force calendarSyncMode=none (manual export only) on Google ExternalAccount rows.
+ * Background bidirectional / pull / push modes are intentionally disabled product-wide.
  *
  * @implements BeforeSave<Entity>
  */
@@ -26,16 +26,6 @@ class CalendarSyncMode implements BeforeSave
             return;
         }
 
-        $mode = $entity->get('calendarSyncMode');
-
-        if ($mode === null || $mode === '') {
-            $entity->set('calendarSyncMode', SyncMode::DEFAULT);
-
-            return;
-        }
-
-        if (!SyncMode::isValid(is_string($mode) ? $mode : null)) {
-            throw new BadRequest('Invalid calendarSyncMode.');
-        }
+        $entity->set('calendarSyncMode', SyncMode::NONE);
     }
 }

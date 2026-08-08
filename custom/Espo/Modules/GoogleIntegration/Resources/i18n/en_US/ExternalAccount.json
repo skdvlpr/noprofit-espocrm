@@ -11,11 +11,11 @@
         }
     },
     "labels": {
-        "calendarSyncModeHelp": "Personal setting. Applies to your Google account only. Records with **Add to Google Calendar** still export on save regardless of this mode.",
+        "calendarSyncModeHelp": "Background calendar sync is off. Use **Add to Google Calendar** on records to export manually. Showing Google events inside the CRM calendar is a separate preference (when available).",
         "googleAccountProfileMissing": "Connected with an older authorization. Reconnect this Google account to show its email, name and avatar.",
         "reconnectGoogleAccount": "Reconnect Google account"
     },
     "help": {
-        "GoogleCalendarDrive": "Use **Connect** to authorize Google. While connected: **Reconnect** switches account; **Disconnect** clears tokens (same as turning off **Enabled** + **Save**). After connecting, verify email/name/avatar, choose optional background sync, then **Save**."
+        "GoogleCalendarDrive": "Use **Connect** to authorize Google. While connected: **Reconnect** switches account; **Disconnect** clears tokens (same as turning off **Enabled** + **Save**). After connecting, verify email/name/avatar, then **Save**. Calendar export is manual only (per-record **Add to Google Calendar**)."
     }
 }

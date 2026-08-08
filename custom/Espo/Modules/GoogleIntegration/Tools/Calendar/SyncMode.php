@@ -4,6 +4,9 @@ namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
 /**
  * Per-user Google Calendar background sync mode (stored on ExternalAccount.data).
+ *
+ * Product policy (2026-08-05+): only {@see self::NONE} (manual export). Other
+ * constants remain for legacy rows; BeforeSave always coerces to NONE.
  */
 final class SyncMode
 {
@@ -17,7 +20,7 @@ final class SyncMode
 
     public const DEFAULT = self::NONE;
 
-    /** @var list<string> */
+    /** @var list<string> Legacy values still recognized then coerced to NONE. */
     public const ALL = [
         self::NONE,
         self::BIDIRECTIONAL,

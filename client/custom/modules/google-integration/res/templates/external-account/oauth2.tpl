@@ -73,19 +73,8 @@
             </div>
             {{/if}}
         {{/if}}
-        {{#if showCalendarSyncSettings}}
-        <div class="panel panel-default calendar-sync-panel margin-top">
-            <div class="panel-body panel-body-form">
-                <div class="cell form-group" data-name="calendarSyncMode">
-                    <label
-                        class="control-label"
-                        data-name="calendarSyncMode"
-                    >{{translate 'calendarSyncMode' scope='ExternalAccount' category='fields'}}</label>
-                    <div class="field" data-name="calendarSyncMode">{{{calendarSyncMode}}}</div>
-                </div>
-                <p class="help-block text-muted small">{{translate 'calendarSyncModeHelp' scope='ExternalAccount' category='labels'}}</p>
-            </div>
-        </div>
+        {{#if isConnected}}
+        <p class="help-block text-muted small margin-top">{{translate 'calendarSyncModeHelp' scope='ExternalAccount' category='labels'}}</p>
         {{/if}}
     </div>
     <div class="col-sm-6">

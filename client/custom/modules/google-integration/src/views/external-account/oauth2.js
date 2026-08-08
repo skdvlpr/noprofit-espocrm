@@ -4,8 +4,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
     _parent = _interopRequireDefault(_parent);
     function _interopRequireDefault(e) { return e && e.__esModule ? e : {default: e}; }
 
-    const SYNC_MODE_OPTIONS = ['none', 'bidirectional', 'crmToGoogle', 'googleToCrm'];
     const OAUTH_MESSAGE_TYPE = 'googleIntegrationOAuthCallback';
+    const OAUTH_STATE_STORAGE_KEY = 'googleIntegrationOAuthState';
 
     class GoogleIntegrationExternalAccountOauth2View extends _parent.default {
         template = 'google-integration:external-account/oauth2';
@@ -15,7 +15,6 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
         data() {
             return {
                 ...super.data(),
-                showCalendarSyncSettings: this.shouldShowCalendarSyncSettings(),
                 showGoogleAccountProfile: this.shouldShowGoogleAccountProfile(),
                 googleAccountEmail: this.model.get('googleAccountEmail'),
                 googleAccountName: this.model.get('googleAccountName') || this.model.get('googleAccountEmail'),
@@ -28,10 +27,6 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             super.setup();
 
             this.addActionHandler('disconnect', () => this.actionDisconnect());
-
-            this.listenToOnce(this.model, 'sync', () => {
-                this.initCalendarSyncModeField();
-            });
 
             this.listenTo(this.model, 'change:enabled', () => {
                 this.reRender();
@@ -56,7 +51,6 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             const enabledView = this.getView('enabled');
 
             if (enabledView && typeof enabledView.fetchToModel === 'function') {
-                // Force unchecked before save (checkbox may still look checked in DOM).
                 this.model.set('enabled', false);
 
                 if (typeof enabledView.reRender === 'function') {
@@ -69,15 +63,18 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             this.save();
         }
 
-        afterRender() {
-            super.afterRender();
-            this.initCalendarSyncModeField();
+        shouldShowGoogleAccountProfile() {
+            return this.integration === 'GoogleCalendarDrive'
+                && this.isConnected
+                && !!this.model.get('googleAccountEmail');
         }
 
         /**
          * COOP blocks popup.location / popup.closed polling. Authorization code is
          * delivered via postMessage from EntryPoints/OauthCallback (encodeURIComponent
          * for query params — stock encodeURI breaks redirect_uri).
+         *
+         * Manual export only: no background calendarSyncMode UI (forced to none server-side).
          */
         connect() {
             if (this.connectInProgress) {
@@ -92,6 +89,14 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 this.connectInProgress = false;
             };
 
+            const clearStoredState = () => {
+                try {
+                    sessionStorage.removeItem(OAUTH_STATE_STORAGE_KEY);
+                } catch (e) {
+                    // ignore
+                }
+            };
+
             const handleOAuthResponse = response => {
                 if (exchangeStarted) {
                     return;
@@ -99,6 +104,22 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
                 exchangeStarted = true;
                 window.removeEventListener('message', onMessage);
+
+                const expectedState = (() => {
+                    try {
+                        return sessionStorage.getItem(OAUTH_STATE_STORAGE_KEY) || '';
+                    } catch (e) {
+                        return '';
+                    }
+                })();
+                clearStoredState();
+
+                if (!expectedState || !response.state || response.state !== expectedState) {
+                    Espo.Ui.error(this.translate('Error occurred'));
+                    finishConnect();
+
+                    return;
+                }
 
                 if (response.error) {
                     Espo.Ui.notify(false);
@@ -127,8 +148,9 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
                     if (response === true) {
                         this.model.fetch().then(() => {
+                            // Background sync is manual-export-only; never leave other modes.
+                            this.model.set('calendarSyncMode', 'none', {silent: true});
                             this.setConnected();
-                            this.initCalendarSyncModeField();
                         });
                     } else {
                         this.setNotConnected();
@@ -161,13 +183,30 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             const endpoint = this.getMetadata().get(`integrations.${this.integration}.params.endpoint`);
             const resolvedRedirectUri = this.redirectUri
                 || (String(this.getConfig().get('siteUrl') || '') + '?entryPoint=oauthCallback');
+
+            const state = (() => {
+                const bytes = new Uint8Array(24);
+                window.crypto.getRandomValues(bytes);
+                const token = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+
+                try {
+                    sessionStorage.setItem(OAUTH_STATE_STORAGE_KEY, token);
+                } catch (e) {
+                    // ignore
+                }
+
+                return token;
+            })();
+
+            // Google rejects approval_prompt + prompt together; use prompt=consent only.
             const params = {
                 client_id: this.clientId,
                 redirect_uri: resolvedRedirectUri,
                 scope: this.getMetadata().get(`integrations.${this.integration}.params.scope`),
                 response_type: 'code',
                 access_type: 'offline',
-                approval_prompt: 'force',
+                prompt: 'consent',
+                state: state,
             };
 
             const query = Object.keys(params)
@@ -183,6 +222,7 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
             if (!popupWindow) {
                 window.removeEventListener('message', onMessage);
+                clearStoredState();
                 finishConnect();
 
                 return;
@@ -197,100 +237,21 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
                 if (!exchangeStarted) {
                     window.removeEventListener('message', onMessage);
+                    clearStoredState();
                     finishConnect();
                 }
             }, 500);
         }
 
-        shouldShowCalendarSyncSettings() {
-            if (this.integration !== 'GoogleCalendarDrive') {
-                return false;
-            }
-
-            const integrations = this.getConfig().get('integrations') || {};
-
-            if (!integrations.GoogleCalendarDrive) {
-                return false;
-            }
-
-            return this.isConnected && !!this.model.get('enabled');
-        }
-
-        shouldShowGoogleAccountProfile() {
-            return this.integration === 'GoogleCalendarDrive'
-                && this.isConnected
-                && !!this.model.get('googleAccountEmail');
-        }
-
-        initCalendarSyncModeField() {
-            if (!this.shouldShowCalendarSyncSettings()) {
-                return;
-            }
-
-            const fields = {
-                ...(this.model.defs?.fields || {}),
-                calendarSyncMode: {
-                    type: 'enum',
-                    options: SYNC_MODE_OPTIONS,
-                    default: 'none',
-                },
-            };
-
-            this.model.setDefs({fields: fields});
-
-            if (!this.model.get('calendarSyncMode')) {
-                this.model.set('calendarSyncMode', 'none', {silent: true});
-            }
-
-            const existingView = this.getView('calendarSyncMode');
-
-            if (existingView) {
-                existingView.render();
-
-                return;
-            }
-
-            this.createView('calendarSyncMode', 'views/fields/enum', {
-                model: this.model,
-                selector: '.field[data-name="calendarSyncMode"]',
-                defs: {
-                    name: 'calendarSyncMode',
-                    params: {
-                        options: SYNC_MODE_OPTIONS,
-                        translationHash: this.getSyncModeTranslationHash(),
-                    },
-                },
-                mode: 'edit',
-            }, view => view.render());
-
-            if (!this.fieldList.includes('calendarSyncMode')) {
-                this.fieldList.push('calendarSyncMode');
-            }
-        }
-
-        getSyncModeTranslationHash() {
-            const hash = {};
-            const optionsMap = this.getLanguage().translate('calendarSyncMode', 'options', 'ExternalAccount');
-
-            SYNC_MODE_OPTIONS.forEach(option => {
-                hash[option] = (typeof optionsMap === 'object' && optionsMap[option]) || option;
-            });
-
-            return hash;
-        }
-
         getFieldsForSave() {
-            return this.fieldList.filter(field => {
-                if (field === 'calendarSyncMode' && !this.shouldShowCalendarSyncSettings()) {
-                    return false;
-                }
-
-                return true;
-            });
+            // calendarSyncMode is server-forced to none — never send UI enum.
+            return this.fieldList.filter(field => field !== 'calendarSyncMode');
         }
 
         save() {
-            if (!this.model.get('enabled')) {
+            if (this.model.get('enabled')) {
+                this.model.set('calendarSyncMode', 'none', {silent: true});
+            } else {
                 this.model.unset('calendarSyncMode', {silent: true});
             }
 
@@ -305,6 +266,11 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
 
                 view.fetchToModel();
             });
+
+            // Keep manual-only after fetchToModel (parent checkbox views must not revive modes).
+            if (this.model.get('enabled')) {
+                this.model.set('calendarSyncMode', 'none', {silent: true});
+            }
 
             let notValid = false;
 

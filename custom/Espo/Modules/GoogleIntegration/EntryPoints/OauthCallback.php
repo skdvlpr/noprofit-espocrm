@@ -8,7 +8,7 @@ use Espo\Core\EntryPoint\EntryPoint;
 use Espo\Core\EntryPoint\Traits\NoAuth;
 
 /**
- * OAuth callback: deliver authorization code to opener via postMessage (COOP-safe).
+ * OAuth callback: deliver authorization code + state to opener via postMessage (COOP-safe).
  */
 class OauthCallback implements EntryPoint
 {
@@ -27,7 +27,8 @@ class OauthCallback implements EntryPoint
             . 'var payload = {'
             . 'type: "googleIntegrationOAuthCallback",'
             . 'code: params.get("code"),'
-            . 'error: params.get("error")'
+            . 'error: params.get("error"),'
+            . 'state: params.get("state")'
             . '};'
             . 'if (window.opener && !window.opener.closed) {'
             . 'try { window.opener.postMessage(payload, window.location.origin); } catch (e) {}'

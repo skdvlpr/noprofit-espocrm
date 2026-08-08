@@ -517,7 +517,16 @@ $perDateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-int
 $templateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-description-template.js') ?: '';
 $entityTypeView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/calendar-config-entity-type.js') ?: '';
 $ok('Opportunity per-date template selector is not raw ID input', !str_contains($perDateView, 'CalendarTemplate ID') && str_contains($perDateView, 'data-role="calendarTemplateId"'));
-$ok('Variable picker uses shared bottom panel UI', str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel') && str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel'));
+$ok(
+    'Variable picker uses shared template inserter (or Google panel)',
+    (
+        str_contains($perDateView, 'nonprofit-espocrm:lib/template-variable-inserter')
+        || str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel')
+    ) && (
+        str_contains($templateView, 'nonprofit-espocrm:lib/template-variable-inserter')
+        || str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel')
+    )
+);
 $ok('CalendarTemplate template field resolves target entity from select', str_contains($templateView, 'readTargetEntityTypeFromField'));
 $ok('CalendarTemplate entity type select syncs initial value to model', str_contains($entityTypeView, 'syncInitialValue') || str_contains($entityTypeView, 'initialValue'));
 $titleHelper = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEventTitle.php') ?: '';
@@ -860,10 +869,13 @@ $migratedData = $provisioned->get('data');
 $migratedMode = is_object($migratedData)
     ? ($migratedData->calendarSyncMode ?? null)
     : (is_array($migratedData) ? ($migratedData['calendarSyncMode'] ?? null) : null);
+$migratedToken = is_object($migratedData)
+    ? ($migratedData->smokeToken ?? null)
+    : (is_array($migratedData) ? ($migratedData['smokeToken'] ?? null) : null);
 $ok(
-    'AccountProvisioner copies legacy ExternalAccount data',
-    $migratedMode === 'crmToGoogle',
-    'mode=' . (string) ($migratedMode ?? 'null')
+    'AccountProvisioner copies legacy ExternalAccount data (token) and coerces sync mode to none',
+    $migratedToken === 'legacy' && $migratedMode === 'none',
+    'token=' . (string) ($migratedToken ?? 'null') . ' mode=' . (string) ($migratedMode ?? 'null')
 );
 
 $pdo->exec('DELETE FROM external_account WHERE id IN ('
@@ -891,7 +903,7 @@ if ($primaNotaTableExists) {
     $ok('prima_nota.stripe_subscription_id column exists', true, 'skipped (no PrimaNota table)');
 }
 
-echo "\nExternalAccount calendarSyncMode hook\n";
+echo "\nExternalAccount calendarSyncMode hook (manual export only)\n";
 
 $userId = $user->getId();
 $externalAccountId = GoogleIntegrationInstaller::INTEGRATION_ID . '__' . $userId;
@@ -909,9 +921,44 @@ $externalAccount->clear('calendarSyncMode');
 $em->saveEntity($externalAccount);
 $externalAccount = $em->getEntityById('ExternalAccount', $externalAccountId);
 $ok(
-    'beforeSave sets default calendarSyncMode when missing',
+    'beforeSave sets calendarSyncMode=none when missing',
     $externalAccount !== null && $externalAccount->get('calendarSyncMode') === 'none',
     'mode=' . (string) ($externalAccount?->get('calendarSyncMode') ?? 'null')
+);
+
+$externalAccount->set('calendarSyncMode', 'crmToGoogle');
+$em->saveEntity($externalAccount);
+$externalAccount = $em->getEntityById('ExternalAccount', $externalAccountId);
+$ok(
+    'beforeSave coerces legacy crmToGoogle → none (manual export only)',
+    $externalAccount !== null && $externalAccount->get('calendarSyncMode') === 'none',
+    'mode=' . (string) ($externalAccount?->get('calendarSyncMode') ?? 'null')
+);
+
+$oauth2Js = file_get_contents(
+    dirname(__DIR__) . '/client/custom/modules/google-integration/src/views/external-account/oauth2.js'
+) ?: '';
+$oauth2Tpl = file_get_contents(
+    dirname(__DIR__) . '/client/custom/modules/google-integration/res/templates/external-account/oauth2.tpl'
+) ?: '';
+$oauthCallback = file_get_contents(
+    dirname(__DIR__) . '/custom/Espo/Modules/GoogleIntegration/EntryPoints/OauthCallback.php'
+) ?: '';
+$ok(
+    'External Account UI has no calendarSyncMode dropdown helpers',
+    !str_contains($oauth2Js, 'initCalendarSyncModeField')
+        && !str_contains($oauth2Js, 'SYNC_MODE_OPTIONS')
+        && !str_contains($oauth2Tpl, 'showCalendarSyncSettings')
+);
+$ok(
+    'OAuth authorize uses prompt=consent (not approval_prompt param) + state',
+    str_contains($oauth2Js, "prompt: 'consent'")
+        && !str_contains($oauth2Js, 'approval_prompt:')
+        && str_contains($oauth2Js, 'state: state')
+);
+$ok(
+    'OauthCallback postMessage includes state',
+    str_contains($oauthCallback, 'state: params.get("state")')
 );
 
 $externalAccount->set('enabled', false);
