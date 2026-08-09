@@ -6,6 +6,8 @@
     {"name": "beneficiaryName"},
     {"name": "entryType"},
     {"name": "amount"},
+    {"name": "donationPaymentReference", "width": 14},
+    {"name": "stripePayoutId", "width": 14},
     {"name": "modelDClassification"},
     {"name": "internalClassification"},
     {"name": "financing"}
