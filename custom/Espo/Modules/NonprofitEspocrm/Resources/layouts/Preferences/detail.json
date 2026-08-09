@@ -1,30 +1,10 @@
 [
     {
-        "name": "overview",
+        "tabBreak": true,
+        "tabLabel": "$label:Locale",
         "rows": [
             [
                 {"name": "webPushEnabled"},
-                false
-            ],
-            [
-                {"name": "timeZone"},
-                {"name": "dateFormat"}
-            ]
-        ]
-    },
-    {
-        "name": "locale",
-        "rows": [
-            [
-                {"name": "timeFormat"},
-                {"name": "weekStart"}
-            ],
-            [
-                {"name": "defaultCurrency"},
-                {"name": "thousandSeparator"}
-            ],
-            [
-                {"name": "decimalMark"},
                 false
             ],
             [
@@ -34,14 +14,112 @@
         ]
     },
     {
-        "name": "misc",
+        "rows": [
+            [
+                {"name": "timeZone"},
+                {"name": "weekStart"}
+            ],
+            [
+                {"name": "dateFormat"},
+                false
+            ],
+            [
+                {"name": "timeFormat"},
+                false
+            ]
+        ]
+    },
+    {
+        "rows": [
+            [
+                {"name": "defaultCurrency"},
+                false
+            ]
+        ]
+    },
+    {
+        "rows": [
+            [
+                {"name": "thousandSeparator"},
+                {"name": "decimalMark"}
+            ]
+        ]
+    },
+    {
+        "tabBreak": true,
+        "tabLabel": "$label:General",
+        "rows": [
+            [
+                {"name": "emailReplyToAllByDefault"},
+                {"name": "emailReplyForceHtml"}
+            ],
+            [
+                {"name": "emailUseExternalClient"},
+                false
+            ],
+            [
+                {"name": "signature"}
+            ]
+        ]
+    },
+    {
+        "rows": [
+            [
+                {"name": "followEntityOnStreamPost"},
+                {"name": "autoFollowEntityTypeList"}
+            ],
+            [
+                {"name": "followCreatedEntities"},
+                {"name": "followCreatedEntityTypeList"}
+            ],
+            [
+                {"name": "followAsCollaborator"},
+                false
+            ]
+        ]
+    },
+    {
         "rows": [
             [
                 {"name": "exportDelimiter"},
                 false
             ],
             [
-                {"name": "receiveAssignmentEmailNotifications"},
+                {"name": "textSearchStoringDisabled"},
+                {"name": "doNotFillAssignedUserIfNotRequired"}
+            ]
+        ]
+    },
+    {
+        "rows": [
+            [
+                {"name": "calendarSlotDuration"},
+                {"name": "calendarScrollHour"}
+            ],
+            [
+                {"name": "defaultReminders"},
+                {"name": "defaultRemindersTask"}
+            ]
+        ]
+    },
+    {
+        "tabBreak": true,
+        "tabLabel": "$label:User Interface",
+        "rows": [
+            [
+                {"name": "theme"},
+                {"name": "pageContentWidth"}
+            ]
+        ]
+    },
+    {
+        "rows": [
+            [
+                {"name": "useCustomTabList"},
+                {"name": "addCustomTabs"}
+            ],
+            [
+                {"name": "tabList"},
                 false
             ]
         ]

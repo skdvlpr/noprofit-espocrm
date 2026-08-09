@@ -1,4 +1,9 @@
 {
+    "Preferences": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        }
+    },
     "User": {
         "detail": {
             "module": "NonprofitEspocrm"

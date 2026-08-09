@@ -15,6 +15,7 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Metadata;
 use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushService;
 use Espo\ORM\EntityManager;
+use Espo\Tools\Layout\LayoutProvider;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -104,13 +105,19 @@ ok(
 $prefsLayout = (string) file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/Preferences/detail.json'
 );
-ok(str_contains($prefsLayout, 'webPushEnabled'), 'Preferences layout includes webPushEnabled');
-$overviewPos = strpos($prefsLayout, '"name": "overview"');
-$firstPushPos = strpos($prefsLayout, 'webPushEnabled');
+ok(str_contains($prefsLayout, 'webPushEnabled'), 'Preferences layout file includes webPushEnabled');
 ok(
-    $overviewPos !== false && $firstPushPos !== false && $firstPushPos > $overviewPos
-        && $firstPushPos < ($overviewPos + 400),
-    'webPushEnabled is on Preferences overview (first panel)'
+    ($metadata->get(['app', 'layouts', 'Preferences', 'detail', 'module']) ?? '') === 'NonprofitEspocrm',
+    'app.layouts.Preferences.detail.module=NonprofitEspocrm (core Preferences otherwise ignores module layout)'
+);
+
+$layoutProvider = $factory->create(LayoutProvider::class);
+$runtimeLayout = (string) ($layoutProvider->get('Preferences', 'detail') ?? '');
+ok(str_contains($runtimeLayout, 'webPushEnabled'), 'LayoutProvider serves Preferences detail with webPushEnabled');
+ok(
+    str_contains($runtimeLayout, '"tabLabel": "$label:Locale"')
+        && strpos($runtimeLayout, 'webPushEnabled') < strpos($runtimeLayout, '"tabLabel": "$label:General"'),
+    'webPushEnabled appears on first Preferences tab (Locale)'
 );
 
 echo $fail === 0 ? "ALL OK\n" : "FAILED: $fail\n";
