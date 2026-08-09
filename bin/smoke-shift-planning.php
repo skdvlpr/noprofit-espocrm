@@ -1286,8 +1286,21 @@ ok(
 $layoutCss = (string) file_get_contents(__DIR__
     . '/../client/custom/css/safehouse-aurora/safehouse-aurora-layout.css');
 ok(
-    str_contains($layoutCss, 'min-width: 7.5rem'),
+    str_contains($layoutCss, 'min-width: 9rem')
+        || str_contains($layoutCss, 'min-width: 11.5rem'),
     'mobile list cells have readable min-width'
+);
+ok(
+    str_contains($layoutCss, 'min-width: 11.5rem')
+        && str_contains($layoutCss, '.label-state'),
+    'status label columns wide enough for full pills'
+);
+$addressListTpl = __DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/res/templates/fields/address/list.tpl';
+ok(is_file($addressListTpl), 'address list template exists (no map link)');
+ok(
+    !str_contains((string) file_get_contents($addressListTpl), 'viewMap'),
+    'address list template has no map link'
 );
 ok(
     str_contains($layoutCss, '--panel-default-bg: #ffffff'),

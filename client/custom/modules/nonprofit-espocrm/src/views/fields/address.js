@@ -40,10 +40,11 @@ define('nonprofit-espocrm:views/fields/address', [
 
     return Dep.extend({
 
-        // Explicit multiline lines (street/city/…) — core breaklines + sparse
-        // list clones sometimes left only city visible in Aurora drawers.
+        // List/relationship tables: address text only (no map link — opens poorly in cells).
+        // Detail/quick: multiline lines + map.
         detailTemplate: 'nonprofit-espocrm:fields/address/detail',
-        listTemplate: 'nonprofit-espocrm:fields/address/detail',
+        listTemplate: 'nonprofit-espocrm:fields/address/list',
+        listLinkTemplate: 'nonprofit-espocrm:fields/address/list',
 
         data() {
             const data = Dep.prototype.data.call(this);

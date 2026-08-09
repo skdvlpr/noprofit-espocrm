@@ -1,10 +1,10 @@
 [
-    {"name": "name", "link": true, "width": 22},
-    {"name": "status", "width": 12},
-    {"name": "dayOfWeek", "width": 8},
-    {"name": "dateStart", "width": 14},
+    {"name": "name", "link": true, "width": 20},
+    {"name": "status", "width": 14},
+    {"name": "dayOfWeek", "width": 10},
+    {"name": "dateStart", "width": 12},
     {"name": "category", "width": 12},
-    {"name": "requiredCount", "width": 8},
+    {"name": "requiredCount", "width": 10},
     {"name": "availableCount", "width": 8},
     {"name": "assignedCount", "width": 8},
     {"name": "place", "width": 16}

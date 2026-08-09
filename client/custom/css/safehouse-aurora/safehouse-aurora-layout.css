@@ -2199,7 +2199,7 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list > table,
   body[data-theme-name="SafehouseAurora"] #content #main .panel .list > table,
   body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list > table {
-    min-width: max(100%, 42rem) !important;
+    min-width: max(100%, 56rem) !important;
   }
 
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell,
@@ -2210,19 +2210,32 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
   body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell,
   body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell,
   body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell {
-    min-width: 7.5rem !important;
+    min-width: 9rem !important;
     white-space: normal !important;
     word-break: break-word;
   }
 
+  /* Cap very long free-text columns; prefer scroll over clipping status pills. */
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="name"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="name"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="name"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="name"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="name"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="name"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="name"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="name"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="description"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="description"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="description"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="description"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="description"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="description"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="description"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="description"] {
+    min-width: 12rem !important;
+    max-width: 18rem !important;
+  }
+
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="transactionDate"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="transactionDate"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="transactionDate"],
@@ -2230,19 +2243,65 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="dateStart"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="dateStart"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="dateStart"],
-  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="dateStart"] {
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="dateStart"] {
     min-width: 11rem !important;
   }
 
+  /* Status / payment pills must fit fully (IT labels like Pubblicato). */
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="status"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="status"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="status"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="status"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="status"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="status"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="status"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="status"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="paymentStatus"],
   body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="paymentStatus"],
   body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="paymentStatus"],
-  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="paymentStatus"] {
-    min-width: 8.5rem !important;
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="paymentStatus"] {
+    min-width: 11.5rem !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .list .label-state,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list .label-state,
+  body[data-theme-name="SafehouseAurora"] #content #main .list .label-status-semantic,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list .label-status-semantic,
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list .label-state,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list .label-state,
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list .label-status-semantic,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list .label-status-semantic {
+    white-space: nowrap !important;
+    max-width: none !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="requiredCount"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="place"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="place"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="place"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="place"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell[data-name="place"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell[data-name="place"],
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell[data-name="place"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell[data-name="place"] {
+    min-width: 12rem !important;
+    max-width: 16rem !important;
   }
 
   body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-dialog,
