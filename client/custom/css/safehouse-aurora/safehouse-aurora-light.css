@@ -683,7 +683,7 @@ body #content #main .panel.panel-default:not(.safehouse-kanban-card) .panel-body
   }
 }
 
-/* Floating Espo.Ui.notify (#notification) — opaque over blurred modals */
+/* Floating Espo.Ui.notify (#notification) — colors; geometry in layout.css */
 body > #notification.alert {
   opacity: 1 !important;
   -webkit-backdrop-filter: none !important;

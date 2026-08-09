@@ -864,6 +864,13 @@ After metadata or client change:
 
 **Responsive UI rule:** For all frontend work, always implement adaptive/responsive layouts that remain readable and usable across light/dark themes, desktop/laptop/tablet/mobile widths, and high zoom levels. Avoid hardcoded light-only colors unless there is a strict design requirement.
 
+**Mobile detail/edit panels (Aurora — mandatory):** On viewports `<992px`, record `detail`/`edit` (and `dialog-record` drawers) MUST use full-width stacked columns (`record-grid` → column flex, `.left`/`.side` `width:100%`, `height:auto`). Do **not** keep desktop equal-height flex that shortens the glass shell. Prefer painting `background` on the `.panel` itself and **disable** `::before` glass/`backdrop-filter` under 992px — absolute glass layers on Chromium/WebKit mobile often stop mid-content while labels continue over the page background.
+
+**Notifications UI (toast + bell panel + Push hint — mandatory):** Keep a modern, even layout:
+- Floating `body > #notification.alert` (Espo.Ui.notify): centered chip with `width:min(…, 100vw − gutters)`, flex row (message + close), no float/offset close button, `safe-area-inset-top`, opaque colors (no blur over modals). Geometry in `safehouse-aurora-layout.css`; theme files only set alert colors.
+- Bell `#notifications-panel` header: flex row (title left, actions right) — never `float:right` link-group that looks crooked on phone.
+- Preferences Browser Push hint/checklist (`.web-push-field`): stacked column, even action row, rounded hint card — no ragged `margin-top-sm` button pile.
+
 **UI labeling rule (MANDATORY — never regress):** User-visible UI text MUST be human language via i18n (`scopeNames` / `scopeNamesPlural` in `Global.json`, `labels.*`, `Create {EntityType}`, enum `options`, formula-generated names). **FORBIDDEN in UI:** entity type CamelCase (`ActivityOffer`, `WorkflowDefinition`), raw enum keys (`MealDistribution`), snake_case, technical jargon (Espo/native/legacy/JSON) in end-user help. Breadcrumbs, Create buttons, stream text, and auto-names all count. Formula auto-names must use `language\translateOption(...)` (or equivalent), never concatenate raw enum codes. Exceptions: template placeholders (e.g. `{{dateEnd}}`) and other technically required raw tokens hidden from normal users.
 
 **Browser automation policy:** Do not run browser automation by default. Provide

@@ -841,6 +841,14 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
     }
 }
 
+.web-push-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    max-width: 36rem;
+}
+
 .web-push-field .web-push-toggle {
     display: inline-flex;
     align-items: center;
@@ -852,21 +860,75 @@ select.prima-nota-entry-type-expense option[value="Expense"] {
 .web-push-field .web-push-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 0.75rem;
+    gap: 0.4rem 0.65rem;
     align-items: center;
 }
 
+.web-push-field .web-push-test .input-group {
+    max-width: 100%;
+    width: min(20rem, 100%);
+}
+
+.web-push-field .web-push-help {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.web-push-field .web-push-checklist {
+    margin-top: 0.15rem;
+}
+
 .web-push-field .web-push-checklist-box {
-    margin-bottom: 0;
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+}
+
+.web-push-field .web-push-checklist-box > strong {
+    display: block;
+    line-height: 1.3;
 }
 
 .web-push-field .web-push-checklist-list {
-    margin: 0.5rem 0 0;
-    padding-left: 1.2rem;
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.4;
+}
+
+.web-push-field .web-push-checklist-box .btn {
+    margin: 0 !important;
+    align-self: flex-start;
+}
+
+.web-push-field .web-push-checklist-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
 }
 
 .web-push-field .margin-top-sm {
-    margin-top: 0.4rem;
+    margin-top: 0;
+}
+
+@media (max-width: 575px) {
+    .web-push-field {
+        max-width: 100%;
+    }
+
+    .web-push-field .web-push-actions,
+    .web-push-field .web-push-checklist-box {
+        width: 100%;
+    }
+
+    .web-push-field .web-push-checklist-box .btn,
+    .web-push-field .web-push-actions .btn {
+        width: auto;
+    }
 }
 
 @media (max-width: 575px) {

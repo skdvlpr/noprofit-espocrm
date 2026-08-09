@@ -586,7 +586,7 @@ body.theme-SafehouseAurora #content #main .list-container > .list > .stick-sub {
   }
 }
 
-/* Floating Espo.Ui.notify (#notification) — opaque over blurred modals */
+/* Floating Espo.Ui.notify (#notification) — colors; geometry in layout.css */
 body > #notification.alert {
   opacity: 1 !important;
   -webkit-backdrop-filter: none !important;

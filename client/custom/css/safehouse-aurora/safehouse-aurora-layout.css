@@ -2033,3 +2033,273 @@ body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
+
+/*
+ * Mobile detail/edit — glass ::before + equal-height flex can leave a short opaque
+ * shell while field text continues over the page background (phone screenshots).
+ * Prefer solid panel paint + natural height stacking under 992px.
+ */
+@media (max-width: 991px) {
+  body[data-theme-name="SafehouseAurora"] #content #main .detail,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit,
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record-grid,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid > .left,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid > .left,
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid > .side,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid > .side,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record-grid > .left,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record-grid > .left,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record-grid > .side,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record-grid > .side {
+    display: block !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    align-self: stretch !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid > .left > .middle,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid > .left > .middle,
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid > .left > .extra,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid > .left > .extra,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record-grid > .left > .middle,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record-grid > .left > .middle {
+    display: block !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .detail .record-grid > .side > .panel,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .detail .record-grid > .side > .panel,
+  body[data-theme-name="SafehouseAurora"] #content #main .edit .record-grid > .side > .panel,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .edit .record-grid > .side > .panel {
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Drop glass ::before on phone — paint the panel itself (avoids short shell). */
+  body[data-theme-name="SafehouseAurora"] #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)),
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table)),
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card),
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) {
+    position: relative;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: var(--panel-default-bg) !important;
+    border: var(--panel-border-width, 1px) solid var(--panel-default-border, var(--default-border-color)) !important;
+    box-shadow: var(--aurora-glass-shadow, 0 8px 24px -12px rgba(0, 0, 0, 0.18)) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table))::before,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default:not(.safehouse-kanban-card):not(:has(> .table)):not(:has(> table.table))::before,
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card)::before,
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card)::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-dialog,
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-content,
+  body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-content {
+    border-radius: 12px 12px 0 0;
+  }
+}
+
+/*
+ * Floating Espo.Ui.notify toast (#notification) — even modern chip, safe on phones.
+ * (Colors stay in theme CSS; layout/geometry lives here.)
+ */
+body[data-theme-name="SafehouseAurora"] > #notification.alert,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert {
+  left: 50% !important;
+  right: auto !important;
+  top: max(0.75rem, env(safe-area-inset-top, 0px)) !important;
+  width: min(26rem, calc(100vw - 1.5rem)) !important;
+  max-width: calc(100vw - 1.5rem) !important;
+  transform: translateX(-50%) !important;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.95rem !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  box-sizing: border-box;
+  text-align: left;
+  line-height: 1.35;
+}
+
+body[data-theme-name="SafehouseAurora"] > #notification.alert > .message,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert > .message {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+body[data-theme-name="SafehouseAurora"] > #notification.alert > .close-container,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert > .close-container {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  align-self: flex-start;
+}
+
+body[data-theme-name="SafehouseAurora"] > #notification.alert > .close-container .close,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert > .close-container .close {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  float: none !important;
+  opacity: 0.85;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+body[data-theme-name="SafehouseAurora"] > #notification.alert > .close-container .close:hover,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert > .close-container .close:hover,
+body[data-theme-name="SafehouseAurora"] > #notification.alert > .close-container .close:focus,
+body[data-theme-name="SafehouseAuroraLight"] > #notification.alert > .close-container .close:focus {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/*
+ * Bell notifications panel — replace float header with even flex row.
+ */
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.35);
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  float: none;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading::before,
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading::after,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading::before,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading::after {
+  content: none !important;
+  display: none !important;
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading > a.text-solid,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading > a.text-solid {
+  order: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  margin: 0;
+  float: none;
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading > .link-group,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading > .link-group {
+  order: 2;
+  float: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading > .link-group > a,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading > .link-group > a {
+  padding: 0.2rem 0.15rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-heading > .link-group > a.close-link,
+body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-heading > .link-group > a.close-link {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0;
+}
+
+@media (max-width: 767px) {
+  body[data-theme-name="SafehouseAurora"] #notifications-panel,
+  body[data-theme-name="SafehouseAuroraLight"] #notifications-panel {
+    padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.5rem 0.5rem;
+    box-sizing: border-box;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel,
+  body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel {
+    border-radius: 14px;
+    height: calc(100% - 0.5rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #notifications-panel > .panel > .panel-body,
+  body[data-theme-name="SafehouseAuroraLight"] #notifications-panel > .panel > .panel-body {
+    flex: 1 1 auto;
+    max-height: none !important;
+  }
+}

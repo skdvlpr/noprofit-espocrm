@@ -57,19 +57,21 @@ define('nonprofit-espocrm:views/preferences/fields/web-push-enabled', ['views/fi
                     </div>
                 </div>
                 <p class="text-muted small web-push-help margin-top-sm">{{helpText}}</p>
-                <div class="web-push-checklist hidden margin-top">
+                <div class="web-push-checklist hidden">
                     <div class="alert alert-warning web-push-checklist-box">
                         <strong>{{checklistTitle}}</strong>
                         <ul class="web-push-checklist-list"></ul>
-                        <a href="{{helpUrl}}" target="_blank" rel="noopener noreferrer"
-                           class="btn btn-default btn-sm margin-top-sm web-push-help-link"
-                           data-action="openPermissionHelp">
-                            {{openSettingsLabel}}
-                        </a>
-                        <button type="button" class="btn btn-primary btn-sm margin-top-sm"
-                                data-action="checkPermissions">
-                            {{checkPermissionsLabel}}
-                        </button>
+                        <div class="web-push-checklist-actions">
+                            <a href="{{helpUrl}}" target="_blank" rel="noopener noreferrer"
+                               class="btn btn-default btn-sm web-push-help-link"
+                               data-action="openPermissionHelp">
+                                {{openSettingsLabel}}
+                            </a>
+                            <button type="button" class="btn btn-primary btn-sm"
+                                    data-action="checkPermissions">
+                                {{checkPermissionsLabel}}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
