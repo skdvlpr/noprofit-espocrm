@@ -10,6 +10,6 @@
     {"name": "requiredCount"},
     {"name": "availableCount"},
     {"name": "assignedCount"},
-    {"name": "placeCity"},
+    {"name": "place"},
     {"name": "conditions"}
 ]

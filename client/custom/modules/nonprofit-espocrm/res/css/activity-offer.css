@@ -278,3 +278,132 @@ body[data-theme-name="SafehouseAuroraLight"] .label-status-semantic[data-status=
     background-color: var(--state-default-bg) !important;
     color: var(--state-default-text) !important;
 }
+
+/* Selective availability pack modal (volunteers × shifts) */
+.sh-avail-pack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-height: 12rem;
+}
+
+.sh-avail-pack__hint {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.sh-avail-pack__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+@media (max-width: 720px) {
+    .sh-avail-pack__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sh-avail-pack__col {
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+    border-radius: 0.5rem;
+    background: var(--panel-bg, var(--main-bg-color, transparent));
+    display: flex;
+    flex-direction: column;
+    min-height: 14rem;
+    overflow: hidden;
+}
+
+.sh-avail-pack__col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.3));
+}
+
+.sh-avail-pack__col-head h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.sh-avail-pack__select-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sh-avail-pack__list {
+    flex: 1 1 auto;
+    max-height: 18rem;
+    overflow: auto;
+    padding: 0.35rem 0;
+}
+
+.sh-avail-pack__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0.55rem 0.85rem;
+    cursor: pointer;
+    border: 0;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.18));
+}
+
+.sh-avail-pack__row:last-child {
+    border-bottom: 0;
+}
+
+.sh-avail-pack__row:hover {
+    background: var(--table-hover-bg, rgba(127, 127, 127, 0.08));
+}
+
+.sh-avail-pack__row input[type="checkbox"] {
+    margin-top: 0.2rem;
+    flex: 0 0 auto;
+}
+
+.sh-avail-pack__row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.sh-avail-pack__row-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+}
+
+.sh-avail-pack__row-meta {
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.sh-avail-pack__summary {
+    margin: 0;
+    font-size: 0.88rem;
+}
+
+/* Address field: keep every part (street/city/…) on its own readable line */
+.field[data-name="place"] .address-line,
+.field[data-name="address"] .address-line,
+.cell[data-name="place"] .address-line,
+.cell[data-name="address"] .address-line {
+    display: block;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+}

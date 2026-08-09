@@ -613,11 +613,22 @@ ok(array_key_exists('emailCount', $res), 'requestAvailability returns emailCount
 ok(array_key_exists('emailFailed', $res), 'requestAvailability returns emailFailed');
 echo "  availability emails sent: " . ($res['emailCount'] ?? 0) . "\n";
 
-$selectedRes = $adminService->requestAvailabilityForUsers($offer->getId(), [$volunteers[0]->getId(), $volunteers[1]->getId()]);
+$selectedRes = $adminService->requestAvailabilityForUsers(
+    $offer->getId(),
+    [$volunteers[0]->getId(), $volunteers[1]->getId()],
+    [$slots['MealPreparation']->getId()]
+);
 ok(($selectedRes['userCount'] ?? 0) === 2, 'requestAvailabilityForUsers userCount=2');
-ok(($selectedRes['slotCount'] ?? 0) === 3, 'requestAvailabilityForUsers slotCount=3');
+ok(($selectedRes['slotCount'] ?? 0) === 1, 'requestAvailabilityForUsers slotCount=1 (filtered)');
 ok(array_key_exists('emailCount', $selectedRes), 'requestAvailabilityForUsers returns emailCount');
 ok(array_key_exists('notifyCount', $selectedRes), 'requestAvailabilityForUsers returns notifyCount');
+
+$selectedAllSlots = $adminService->requestAvailabilityForUsers(
+    $offer->getId(),
+    [$volunteers[0]->getId()],
+    null
+);
+ok(($selectedAllSlots['slotCount'] ?? 0) === 3, 'requestAvailabilityForUsers null slotIds = all open');
 
 $selectedBad = false;
 
@@ -629,15 +640,35 @@ try {
 
 ok($selectedBad, 'requestAvailabilityForUsers rejects non-cohort user');
 
+$selectedBadSlot = false;
+
+try {
+    $adminService->requestAvailabilityForUsers(
+        $offer->getId(),
+        [$volunteers[0]->getId()],
+        ['not-a-slot-id']
+    );
+} catch (\Espo\Core\Exceptions\BadRequest $e) {
+    $selectedBadSlot = true;
+}
+
+ok($selectedBadSlot, 'requestAvailabilityForUsers rejects foreign slot id');
+
 $selectedModal = __DIR__
     . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/request-availability-selected.js';
 ok(is_file($selectedModal), 'request-availability-selected modal exists');
+$selectedModalSrc = (string) file_get_contents($selectedModal);
 ok(
-    str_contains((string) file_get_contents($selectedModal), 'label-success'),
+    str_contains($selectedModalSrc, 'data-slot-id')
+        && str_contains($selectedModalSrc, 'slotIds'),
+    'selective-resend modal maps users and shifts'
+);
+ok(
+    str_contains($selectedModalSrc, 'label-success'),
     'selective-resend modal uses green responded badge'
 );
 ok(
-    str_contains((string) file_get_contents($selectedModal), 'volunteerRespondedSingular'),
+    str_contains($selectedModalSrc, 'volunteerRespondedSingular'),
     'selective-resend modal uses singular responded label key'
 );
 
@@ -1201,6 +1232,24 @@ $clientDefsSlot = (string) file_get_contents(__DIR__
 ok(
     !str_contains($clientDefsSlot, '"quickDetailDisabled": true'),
     'ActivityOfferSlot keeps quick detail (overlay on full plan)'
+);
+
+$addressJs = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/fields/address.js');
+ok(
+    str_contains($addressJs, 'getAddressLines')
+        && str_contains($addressJs, 'nonprofit-espocrm:fields/address/detail'),
+    'address field builds explicit multiline address lines'
+);
+$addressTpl = __DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/res/templates/fields/address/detail.tpl';
+ok(is_file($addressTpl), 'custom address detail template exists');
+$listSmallSlot = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/ActivityOfferSlot/listSmall.json');
+ok(
+    str_contains($listSmallSlot, '"place"')
+        && !str_contains($listSmallSlot, '"placeCity"'),
+    'ActivityOfferSlot listSmall selects full place address field'
 );
 
 $qvNav = (string) file_get_contents(__DIR__

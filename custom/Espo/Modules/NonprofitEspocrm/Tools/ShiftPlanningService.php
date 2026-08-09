@@ -397,10 +397,11 @@ class ShiftPlanningService
     }
 
     /**
-     * Re-send the full plan availability pack (email + in-app) to selected users only.
+     * Re-send availability pack to selected users for selected shifts only.
      * Does not wipe invites, does not change plan status, does not notify the rest of the cohort.
      *
      * @param string[] $userIds
+     * @param string[]|null $slotIds null/empty = all resendable shifts; otherwise intersection with plan
      * @return array{
      *     userCount: int,
      *     notifyCount: int,
@@ -411,8 +412,11 @@ class ShiftPlanningService
      * }
      * @throws BadRequest|Forbidden|NotFound
      */
-    public function requestAvailabilityForUsers(string $offerId, array $userIds): array
-    {
+    public function requestAvailabilityForUsers(
+        string $offerId,
+        array $userIds,
+        ?array $slotIds = null
+    ): array {
         $offer = $this->getOfferForEdit($offerId);
 
         $status = (string) $offer->get('status');
@@ -428,10 +432,41 @@ class ShiftPlanningService
             );
         }
 
-        $slots = $this->getPublishedSlots($offerId);
+        $resendable = $this->getResendableSlots($offerId);
 
-        if ($slots === []) {
-            throw new BadRequest("Publish at least one shift before resending availability.");
+        if ($resendable === []) {
+            throw new BadRequest("No open shifts to include in the availability pack.");
+        }
+
+        $resendableMap = [];
+
+        foreach ($resendable as $slot) {
+            $resendableMap[$slot->getId()] = $slot;
+        }
+
+        $selectedSlotIds = [];
+
+        if (is_array($slotIds) && $slotIds !== []) {
+            foreach ($slotIds as $slotId) {
+                if (!is_string($slotId) || $slotId === '') {
+                    continue;
+                }
+
+                if (!isset($resendableMap[$slotId])) {
+                    throw new BadRequest("Shift is not part of this open plan: " . $slotId);
+                }
+
+                $selectedSlotIds[$slotId] = true;
+            }
+
+            $selectedSlotIds = array_keys($selectedSlotIds);
+        }
+        else {
+            $selectedSlotIds = array_keys($resendableMap);
+        }
+
+        if ($selectedSlotIds === []) {
+            throw new BadRequest("Select at least one shift.");
         }
 
         $normalized = [];
@@ -480,12 +515,16 @@ class ShiftPlanningService
         ]);
 
         $notifyCount = $this->notifyUsers($offer, $selectedIds, $message);
-        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, $selectedIds);
+        $emailResult = $this->shiftEmailService->sendAvailabilityRequest(
+            $offer,
+            $selectedIds,
+            $selectedSlotIds
+        );
 
         return [
             'userCount' => count($selectedIds),
             'notifyCount' => $notifyCount,
-            'slotCount' => count($slots),
+            'slotCount' => count($selectedSlotIds),
             'emailCount' => (int) ($emailResult['sent'] ?? 0),
             'emailSkipped' => $emailResult['skipped'] ?? [],
             'emailFailed' => $emailResult['failed'] ?? [],
@@ -780,6 +819,7 @@ class ShiftPlanningService
             $slotList[] = [
                 'id' => $slotId,
                 'name' => $slot->get(Field::NAME),
+                'status' => (string) ($slot->get('status') ?? ''),
                 'category' => $slot->get('category'),
                 'categoryLabel' => $this->language->translateOption(
                     (string) ($slot->get('category') ?? ''),
@@ -1594,6 +1634,23 @@ class ShiftPlanningService
         return array_values(array_filter(
             $this->getSlots($offerId),
             static fn (Entity $slot): bool => $slot->get('status') === 'Published'
+        ));
+    }
+
+    /**
+     * Open shifts for selective pack resend (not Cancelled / Completed).
+     *
+     * @return Entity[]
+     */
+    private function getResendableSlots(string $offerId): array
+    {
+        return array_values(array_filter(
+            $this->getSlots($offerId),
+            static fn (Entity $slot): bool => !in_array(
+                (string) $slot->get('status'),
+                ['Cancelled', 'Completed'],
+                true
+            )
         ));
     }
 

@@ -37,7 +37,17 @@ class ActivityOffer extends Record
             throw new BadRequest("No id or userIds.");
         }
 
-        return (object) $this->createService()->requestAvailabilityForUsers($id, $userIds);
+        $slotIds = $data->slotIds ?? null;
+
+        if ($slotIds !== null && !is_array($slotIds)) {
+            throw new BadRequest("slotIds must be an array.");
+        }
+
+        return (object) $this->createService()->requestAvailabilityForUsers(
+            $id,
+            $userIds,
+            is_array($slotIds) ? $slotIds : null
+        );
     }
 
     /**

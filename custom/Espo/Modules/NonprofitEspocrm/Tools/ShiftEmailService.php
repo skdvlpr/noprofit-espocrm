@@ -59,11 +59,19 @@ class ShiftEmailService
 
     /**
      * @param string[] $userIds
+     * @param string[]|null $slotIds null = all plan slots; non-empty = only those ids
      * @return array{sent: int, skipped: string[], failed: string[]}
      */
-    public function sendAvailabilityRequest(Entity $offer, array $userIds): array
+    public function sendAvailabilityRequest(Entity $offer, array $userIds, ?array $slotIds = null): array
     {
-        return $this->sendTemplated(self::KIND_AVAILABILITY_REQUEST, $offer, $userIds, []);
+        return $this->sendTemplated(
+            self::KIND_AVAILABILITY_REQUEST,
+            $offer,
+            $userIds,
+            [],
+            [],
+            $slotIds
+        );
     }
 
     /**
@@ -132,6 +140,7 @@ class ShiftEmailService
      * @param string[] $userIds
      * @param string[] $shiftLines
      * @param array<string, string> $extraTokens
+     * @param string[]|null $slotIds
      * @return array{sent: int, skipped: string[], failed: string[]}
      */
     private function sendTemplated(
@@ -139,7 +148,8 @@ class ShiftEmailService
         Entity $offer,
         array $userIds,
         array $shiftLines,
-        array $extraTokens = []
+        array $extraTokens = [],
+        ?array $slotIds = null
     ): array {
         $template = $this->getTemplate($kind);
 
@@ -172,7 +182,7 @@ class ShiftEmailService
         $processor = $this->injectableFactory->create(Processor::class);
         $params = Params::create()->withApplyAcl(false)->withCopyAttachments(false);
 
-        $slots = $this->loadSlots($offer->getId());
+        $slots = $this->loadSlots($offer->getId(), $slotIds);
         $slotLines = array_map(fn (Entity $slot): string => $this->formatSlotLine($slot, true), $slots);
         $slotListHtml = $this->linesToHtml($slotLines);
         $shiftListHtml = $this->linesToHtml($shiftLines);
@@ -273,13 +283,32 @@ class ShiftEmailService
     }
 
     /**
+     * @param string[]|null $slotIds null = all; list = filter by id (order by dateStart)
      * @return Entity[]
      */
-    private function loadSlots(string $offerId): array
+    private function loadSlots(string $offerId, ?array $slotIds = null): array
     {
+        $where = ['activityOfferId' => $offerId];
+
+        if ($slotIds !== null) {
+            $ids = [];
+
+            foreach ($slotIds as $slotId) {
+                if (is_string($slotId) && $slotId !== '') {
+                    $ids[$slotId] = true;
+                }
+            }
+
+            if ($ids === []) {
+                return [];
+            }
+
+            $where['id'] = array_keys($ids);
+        }
+
         $collection = $this->entityManager
             ->getRDBRepository('ActivityOfferSlot')
-            ->where(['activityOfferId' => $offerId])
+            ->where($where)
             ->order('dateStart')
             ->find();
 

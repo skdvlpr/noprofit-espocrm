@@ -40,8 +40,23 @@ define('nonprofit-espocrm:views/fields/address', [
 
     return Dep.extend({
 
+        // Explicit multiline lines (street/city/…) — core breaklines + sparse
+        // list clones sometimes left only city visible in Aurora drawers.
+        detailTemplate: 'nonprofit-espocrm:fields/address/detail',
+        listTemplate: 'nonprofit-espocrm:fields/address/detail',
+
         data() {
             const data = Dep.prototype.data.call(this);
+
+            if (this.isReadMode()) {
+                data.addressLines = this.getAddressLines();
+
+                if (data.addressLines.length) {
+                    data.formattedAddress = data.addressLines.join('\n');
+                    data.isNone = false;
+                    data.isLoading = false;
+                }
+            }
 
             if (this.params.viewMap && this.canBeDisplayedOnMap()) {
                 data.viewMap = true;
@@ -52,6 +67,37 @@ define('nonprofit-espocrm:views/fields/address', [
             }
 
             return data;
+        },
+
+        /**
+         * Ordered non-empty address parts for detail/list display.
+         * @return {string[]}
+         */
+        getAddressLines() {
+            const street = (this.model.get(this.name + 'Street') || '').toString().trim();
+            const city = (this.model.get(this.name + 'City') || '').toString().trim();
+            const state = (this.model.get(this.name + 'State') || '').toString().trim();
+            const postal = (this.model.get(this.name + 'PostalCode') || '').toString().trim();
+            const country = (this.model.get(this.name + 'Country') || '').toString().trim();
+
+            const lines = [];
+
+            if (street) {
+                lines.push(street);
+            }
+
+            const cityLine = [city, state].filter(Boolean).join(', ');
+            const cityPostal = [cityLine, postal].filter(Boolean).join(' ').trim();
+
+            if (cityPostal) {
+                lines.push(cityPostal);
+            }
+
+            if (country) {
+                lines.push(country);
+            }
+
+            return lines;
         },
 
         /**
