@@ -21,7 +21,9 @@
         "googleCalendarCreateNewFailed": "Не удалось создать календарь Google.",
         "googleCalendarNamingPatternHelp": "Полное имя в Google: {name}",
         "googleCalendarNamePrefixLocked": "Префикс задаёт администратор — здесь его нельзя менять.",
-        "googleCalendarNameSuffixLocked": "Суффикс задаёт администратор — здесь его нельзя менять."
+        "googleCalendarNameSuffixLocked": "Суффикс задаёт администратор — здесь его нельзя менять.",
+        "googleCalendarNamePrefixBadge": "Префикс",
+        "googleCalendarNameSuffixBadge": "Суффикс"
     },
     "scopeNames": {
         "CalendarTemplate": "Шаблон календаря",

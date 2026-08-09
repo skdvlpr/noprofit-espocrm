@@ -2035,6 +2035,45 @@ body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default
 }
 
 /*
+ * Quick-view / edit drawers (dialog-record): growing fields (e.g. Google “create
+ * calendar”) must expand the panel. Absolute glass ::before stays short and looks
+ * like the form “falls apart” below a floating shadow — paint the panel itself.
+ */
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card),
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) {
+  position: relative;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  background: var(--panel-default-bg) !important;
+  border: var(--panel-border-width, 1px) solid var(--panel-default-border, var(--default-border-color)) !important;
+  box-shadow: var(--aurora-glass-shadow, 0 8px 24px -12px rgba(0, 0, 0, 0.18)) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card)::before,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card)::before {
+  content: none !important;
+  display: none !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .record-grid,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid {
+  align-items: start;
+}
+
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .record-grid > .left,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid > .left,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .record-grid > .side,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid > .side {
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: stretch;
+}
+
+/*
  * Mobile detail/edit — glass ::before + equal-height flex can leave a short opaque
  * shell while field text continues over the page background (phone screenshots).
  * Prefer solid panel paint + natural height stacking under 992px.

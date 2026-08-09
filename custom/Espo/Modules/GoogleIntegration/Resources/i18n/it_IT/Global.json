@@ -21,7 +21,9 @@
         "googleCalendarCreateNewFailed": "Impossibile creare il calendario Google.",
         "googleCalendarNamingPatternHelp": "Nome completo su Google: {name}",
         "googleCalendarNamePrefixLocked": "Il prefisso è impostato dall’amministratore e non si può cambiare qui.",
-        "googleCalendarNameSuffixLocked": "Il suffisso è impostato dall’amministratore e non si può cambiare qui."
+        "googleCalendarNameSuffixLocked": "Il suffisso è impostato dall’amministratore e non si può cambiare qui.",
+        "googleCalendarNamePrefixBadge": "Prefisso",
+        "googleCalendarNameSuffixBadge": "Suffisso"
     },
     "scopeNames": {
         "CalendarTemplate": "Template calendario",
