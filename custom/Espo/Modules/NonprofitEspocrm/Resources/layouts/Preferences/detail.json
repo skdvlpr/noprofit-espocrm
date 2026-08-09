@@ -4,10 +4,6 @@
         "tabLabel": "$label:Locale",
         "rows": [
             [
-                {"name": "webPushEnabled"},
-                false
-            ],
-            [
                 {"name": "language"},
                 false
             ]

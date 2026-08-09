@@ -114,11 +114,18 @@ ok(
 $layoutProvider = $factory->create(LayoutProvider::class);
 $runtimeLayout = (string) ($layoutProvider->get('Preferences', 'detail') ?? '');
 ok(str_contains($runtimeLayout, 'webPushEnabled'), 'LayoutProvider serves Preferences detail with webPushEnabled');
+$notificationsTabPos = strpos($runtimeLayout, '"tabLabel": "$label:Notifications"');
+$webPushPos = strpos($runtimeLayout, 'webPushEnabled');
+$localeTabPos = strpos($runtimeLayout, '"tabLabel": "$label:Locale"');
 ok(
-    str_contains($runtimeLayout, '"tabLabel": "$label:Locale"')
-        && strpos($runtimeLayout, 'webPushEnabled') < strpos($runtimeLayout, '"tabLabel": "$label:General"'),
-    'webPushEnabled appears on first Preferences tab (Locale)'
+    $notificationsTabPos !== false
+        && $webPushPos !== false
+        && $webPushPos > $notificationsTabPos
+        && ($localeTabPos === false || $webPushPos > $localeTabPos),
+    'webPushEnabled appears on Preferences Notifications tab (not Locale)'
 );
+// Field must appear once (Notifications only) — avoid duplicate on Formato Dati / Locale.
+ok(substr_count($runtimeLayout, 'webPushEnabled') === 1, 'webPushEnabled appears once in Preferences detail layout');
 
 echo $fail === 0 ? "ALL OK\n" : "FAILED: $fail\n";
 exit($fail === 0 ? 0 : 1);
