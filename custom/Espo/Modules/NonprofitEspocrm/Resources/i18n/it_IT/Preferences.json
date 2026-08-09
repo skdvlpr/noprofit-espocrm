@@ -26,6 +26,8 @@
         "webPushTestSent": "Push di test inviata ({sent}). Controlla le notifiche OS / browser.",
         "webPushTestScheduled": "Push di test tra {seconds}s — riduci il browser e attendi.",
         "webPushTestFailed": "Push di test fallita (nessuna subscription attiva). Attiva prima le push.",
+        "webPushTestStale": "La subscription push era scaduta ed è stata rimossa. Spunta di nuovo la casella (o riprova il test) per registrare questo browser.",
+        "webPushTestSendFailed": "Push di test fallita (il servizio push del browser ha rifiutato l’invio). Controlla le notifiche di sistema/browser e riprova.",
         "webPushTestInvalidDelay": "Il ritardo deve essere tra 0 e 300 secondi."
     }
 }

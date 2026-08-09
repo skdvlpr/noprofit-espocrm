@@ -120,7 +120,15 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
 
                     this.reRender();
                 })
-                .catch(() => {});
+                .catch(xhr => {
+                    const msg = (xhr && xhr.message) ||
+                        this.translate('Error occurred', 'messages');
+
+                    if (!this._coverageErrorNotified) {
+                        this._coverageErrorNotified = true;
+                        Espo.Ui.error(msg);
+                    }
+                });
         },
 
         formatWhen: function (dateStart, dateEnd) {

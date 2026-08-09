@@ -19,7 +19,8 @@ class WebPush extends Base
 {
     protected function checkAccess(): bool
     {
-        return $this->user->isLogged() && !$this->user->isPortal();
+        // Espo 10 User has no isLogged(); session users are regular/admin with an id.
+        return $this->isCrmSessionUser();
     }
 
     public function getActionPublicKey(): stdClass
@@ -83,6 +84,11 @@ class WebPush extends Base
     public function postActionTest(): stdClass
     {
         $user = $this->requireUser();
+        $em = $this->getContainer()->getByClass(EntityManager::class);
+        $subscriptionCount = $em->getRDBRepository('WebPushSubscription')
+            ->where(['userId' => $user->getId()])
+            ->count();
+
         $sent = $this->createService()->sendToUser($user->getId(), [
             'title' => 'Safehouse CRM',
             'body' => 'Browser push is working.',
@@ -90,7 +96,27 @@ class WebPush extends Base
             'tag' => 'web-push-test',
         ]);
 
-        return (object) ['sent' => $sent];
+        $remaining = $em->getRDBRepository('WebPushSubscription')
+            ->where(['userId' => $user->getId()])
+            ->count();
+
+        $reason = null;
+
+        if ($sent < 1) {
+            if ($subscriptionCount < 1) {
+                $reason = 'no_subscription';
+            } elseif ($remaining < 1) {
+                $reason = 'stale_subscription';
+            } else {
+                $reason = 'send_failed';
+            }
+        }
+
+        return (object) [
+            'sent' => $sent,
+            'subscriptionCount' => $subscriptionCount,
+            'reason' => $reason,
+        ];
     }
 
     private function createService(): WebPushService
@@ -106,11 +132,22 @@ class WebPush extends Base
      */
     private function requireUser(): User
     {
-        if (!$this->user->isLogged() || $this->user->isSystem() || $this->user->isPortal()) {
+        if (!$this->isCrmSessionUser()) {
             throw new Forbidden();
         }
 
         return $this->user;
+    }
+
+    private function isCrmSessionUser(): bool
+    {
+        $id = $this->user->getId();
+
+        return is_string($id)
+            && $id !== ''
+            && !$this->user->isPortal()
+            && !$this->user->isSystem()
+            && !$this->user->isApi();
     }
 
     private function setPreference(User $user, bool $enabled): void

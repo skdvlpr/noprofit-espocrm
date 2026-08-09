@@ -8,6 +8,8 @@
     {"name": "isAllDay"},
     {"name": "category"},
     {"name": "requiredCount"},
+    {"name": "availableCount"},
+    {"name": "assignedCount"},
     {"name": "placeCity"},
     {"name": "conditions"}
 ]

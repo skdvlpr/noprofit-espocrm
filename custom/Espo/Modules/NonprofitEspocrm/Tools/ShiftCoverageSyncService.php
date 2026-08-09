@@ -67,6 +67,8 @@ class ShiftCoverageSyncService
             ->find() as $slot
         ) {
             $required = (int) ($slot->get('requiredCount') ?? 1);
+            // Available column = people who marked Disponibile (not yet assigned).
+            $availableOnly = $this->countInvites($slot->getId(), ['Available']);
             $availableLike = $this->countInvites($slot->getId(), self::AVAILABILITY_STATUSES);
             $assignedLike = $this->countInvites($slot->getId(), self::STAFFED_STATUSES);
 
@@ -82,16 +84,35 @@ class ShiftCoverageSyncService
                 }
             }
 
+            $countsChanged =
+                (int) ($slot->get('availableCount') ?? 0) !== $availableOnly
+                || (int) ($slot->get('assignedCount') ?? 0) !== $assignedLike;
+
+            if ($countsChanged) {
+                $slot->set('availableCount', $availableOnly);
+                $slot->set('assignedCount', $assignedLike);
+            }
+
             if ($status === self::SLOT_COMPLETED) {
+                if ($countsChanged) {
+                    $this->entityManager->saveEntity($slot, $coverageSaveOpts);
+                }
+
                 continue;
             }
 
             // Covered badge still means people were assigned/confirmed (unchanged).
+            $statusChanged = false;
+
             if ($isStaffed && $status === self::SLOT_PUBLISHED) {
                 $slot->set('status', self::SLOT_COVERED);
-                $this->entityManager->saveEntity($slot, $coverageSaveOpts);
+                $statusChanged = true;
             } elseif (!$isStaffed && $status === self::SLOT_COVERED) {
                 $slot->set('status', self::SLOT_PUBLISHED);
+                $statusChanged = true;
+            }
+
+            if ($countsChanged || $statusChanged) {
                 $this->entityManager->saveEntity($slot, $coverageSaveOpts);
             }
         }

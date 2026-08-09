@@ -142,7 +142,12 @@ class WebPushService
                     continue;
                 }
 
-                if ($report->isSubscriptionExpired()) {
+                $reason = (string) $report->getReason();
+                $gone = $report->isSubscriptionExpired()
+                    || str_contains($reason, '410')
+                    || str_contains(strtolower($reason), 'gone');
+
+                if ($gone) {
                     $this->entityManager->removeEntity($row);
                 }
 
@@ -150,7 +155,7 @@ class WebPushService
                     'WebPush send failed for user {userId}: {reason}',
                     [
                         'userId' => $userId,
-                        'reason' => $report->getReason(),
+                        'reason' => $reason,
                     ]
                 );
             } catch (Throwable $e) {

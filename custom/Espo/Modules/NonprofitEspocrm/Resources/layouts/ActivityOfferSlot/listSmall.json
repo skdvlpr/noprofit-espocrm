@@ -1,9 +1,11 @@
 [
-    {"name": "name", "link": true, "width": 28},
-    {"name": "status", "width": 12},
-    {"name": "dayOfWeek", "width": 10},
-    {"name": "dateStart", "width": 16},
-    {"name": "category", "width": 14},
-    {"name": "requiredCount", "width": 10},
+    {"name": "name", "link": true, "width": 22},
+    {"name": "status", "width": 10},
+    {"name": "dayOfWeek", "width": 8},
+    {"name": "dateStart", "width": 14},
+    {"name": "category", "width": 12},
+    {"name": "requiredCount", "width": 8},
+    {"name": "availableCount", "width": 8},
+    {"name": "assignedCount", "width": 8},
     {"name": "placeCity", "width": 10}
 ]

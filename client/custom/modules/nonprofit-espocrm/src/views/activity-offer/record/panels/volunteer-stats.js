@@ -176,7 +176,15 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
 
                     this.reRender();
                 })
-                .catch(() => {});
+                .catch(xhr => {
+                    const msg = (xhr && xhr.message) ||
+                        this.translate('Error occurred', 'messages');
+
+                    if (!this._statsErrorNotified) {
+                        this._statsErrorNotified = true;
+                        Espo.Ui.error(msg);
+                    }
+                });
         },
     });
 });

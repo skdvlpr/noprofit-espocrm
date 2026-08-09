@@ -26,6 +26,8 @@
         "webPushTestSent": "Test push sent ({sent}). Check the OS / browser notification.",
         "webPushTestScheduled": "Test push scheduled in {seconds}s — minimize the browser and wait.",
         "webPushTestFailed": "Test push failed (no active subscription on this account). Enable push first.",
+        "webPushTestStale": "Push subscription was stale and was removed. Click the checkbox again (or retry test) to re-register this browser.",
+        "webPushTestSendFailed": "Test push failed (browser push service rejected delivery). Check OS/browser notification settings and retry.",
         "webPushTestInvalidDelay": "Delay must be between 0 and 300 seconds."
     }
 }

@@ -67,6 +67,20 @@
             "min": 0,
             "max": 99
         },
+        "availableCount": {
+            "type": "int",
+            "default": 0,
+            "readOnly": true,
+            "tooltip": true,
+            "min": 0
+        },
+        "assignedCount": {
+            "type": "int",
+            "default": 0,
+            "readOnly": true,
+            "tooltip": true,
+            "min": 0
+        },
         "place": {
             "type": "address",
             "viewMap": true,

@@ -26,6 +26,11 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
                     return;
                 }
 
+                // Skip echo when this sync came from live-refresh fetch below.
+                if (this._slotsLiveFetching) {
+                    return;
+                }
+
                 this.model.trigger('update-related:coverage');
                 // Parent plan may flip to Updated + pendingNotify* via slot AfterSave.
                 this.model.trigger('update-related:slots');
@@ -33,6 +38,10 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
 
             // Inline edit / related modal save (collection may not re-sync).
             this.listenTo(this.collection, 'change', () => {
+                if (this._slotsLiveFetching) {
+                    return;
+                }
+
                 this.model.trigger('update-related:coverage');
                 this.model.trigger('update-related:slots');
             });
@@ -40,6 +49,19 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/slots', [
             this.listenTo(this.model, 'after:relate after:unrelate', () => {
                 this.model.trigger('update-related:coverage');
                 this.model.trigger('update-related:slots');
+            });
+
+            // Live planner refresh: re-fetch Turni rows so available/assigned counts update.
+            this.listenTo(this.model, 'update-related:coverage', () => {
+                if (!this.collection || this._slotsLiveFetching) {
+                    return;
+                }
+
+                this._slotsLiveFetching = true;
+                this.collection.fetch()
+                    .finally(() => {
+                        this._slotsLiveFetching = false;
+                    });
             });
         },
 

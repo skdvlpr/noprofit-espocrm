@@ -259,27 +259,100 @@ define('nonprofit-espocrm:views/preferences/fields/web-push-enabled', ['views/fi
                 return;
             }
 
-            const send = () => {
-                Espo.Ui.notify(this.translate('pleaseWait', 'messages'));
+            const mapFailReason = (res) => {
+                const reason = res && res.reason;
 
-                Espo.Ajax.postRequest('WebPush/action/test', {delaySeconds: delay})
+                if (reason === 'stale_subscription') {
+                    return this.translate('webPushTestStale', 'messages', 'Preferences');
+                }
+
+                if (reason === 'send_failed') {
+                    return this.translate('webPushTestSendFailed', 'messages', 'Preferences');
+                }
+
+                return this.translate('webPushTestFailed', 'messages', 'Preferences');
+            };
+
+            const postTest = (allowResubscribe) => {
+                return Espo.Ajax.postRequest('WebPush/action/test', {delaySeconds: 0})
                     .then(res => {
                         const sent = res && typeof res.sent === 'number' ? res.sent : 0;
 
-                        if (sent < 1) {
-                            Espo.Ui.error(this.translate('webPushTestFailed', 'messages', 'Preferences'));
+                        if (sent > 0) {
+                            Espo.Ui.success(
+                                this.translate('webPushTestSent', 'messages', 'Preferences')
+                                    .replace('{sent}', String(sent))
+                            );
+
+                            this.model.set(this.name, true, {ui: false});
+                            this.$el.find('.web-push-checkbox').prop('checked', true);
 
                             return;
                         }
 
-                        Espo.Ui.success(
-                            this.translate('webPushTestSent', 'messages', 'Preferences')
-                                .replace('{sent}', String(sent))
-                        );
+                        const reason = res && res.reason;
+                        const helper = this.getHelperApi();
+
+                        // Stale FCM endpoint (410) or missing row — re-subscribe once then retry.
+                        if (
+                            allowResubscribe &&
+                            helper &&
+                            (reason === 'no_subscription' || reason === 'stale_subscription')
+                        ) {
+                            Espo.Ui.notify(this.translate('pleaseWait', 'messages'));
+
+                            return helper.enable()
+                                .then(() => postTest(false))
+                                .catch(err => {
+                                    this.forceOff(
+                                        (err && err.message) ||
+                                        this.translate('webPushEnableFailed', 'messages', 'Preferences')
+                                    );
+                                });
+                        }
+
+                        Espo.Ui.error(mapFailReason(res));
                     })
                     .catch(() => {
                         Espo.Ui.error(this.translate('webPushTestFailed', 'messages', 'Preferences'));
                     });
+            };
+
+            const send = () => {
+                Espo.Ui.notify(this.translate('pleaseWait', 'messages'));
+
+                const helper = this.getHelperApi();
+
+                // Ensure this browser has a live PushSubscription before testing.
+                const ensureLocal = helper && helper.hasLocalSubscription
+                    ? helper.hasLocalSubscription()
+                    : Promise.resolve(false);
+
+                ensureLocal.then(hasLocal => {
+                    if (hasLocal) {
+                        return postTest(true);
+                    }
+
+                    if (!helper) {
+                        Espo.Ui.error(this.translate('webPushUnsupported', 'messages', 'Preferences'));
+
+                        return;
+                    }
+
+                    return helper.enable()
+                        .then(() => {
+                            this.model.set(this.name, true, {ui: false});
+                            this.$el.find('.web-push-checkbox').prop('checked', true);
+
+                            return postTest(false);
+                        })
+                        .catch(err => {
+                            this.forceOff(
+                                (err && err.message) ||
+                                this.translate('webPushEnableFailed', 'messages', 'Preferences')
+                            );
+                        });
+                });
             };
 
             if (delay > 0) {

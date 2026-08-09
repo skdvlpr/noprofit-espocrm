@@ -7,6 +7,8 @@
         "duration": "Durata",
         "category": "Categoria",
         "requiredCount": "Volontari richiesti",
+        "availableCount": "Disponibili",
+        "assignedCount": "Assegnati",
         "invites": "Disponibilità",
         "place": "Luogo",
         "placeStreet": "Via",
