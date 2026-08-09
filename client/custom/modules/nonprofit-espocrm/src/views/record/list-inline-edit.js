@@ -29,8 +29,10 @@ define('nonprofit-espocrm:views/record/list-inline-edit', [
             Dep.prototype.setup.apply(this, arguments);
 
             if (QuickViewNavigation.isRelationshipList(this)) {
-                QuickViewNavigation.ensureEnabled(this);
-                QuickViewNavigation.patchListLinkClick(this);
+                // Respect clientDefs.quickDetailDisabled (ActivityOffer / Slot = full page).
+                if (QuickViewNavigation.applyQuickDetailPolicy(this) === 'quick') {
+                    QuickViewNavigation.patchListLinkClick(this);
+                }
             }
 
             QuickViewNavigation.bindAfterSaveRefresh(this);

@@ -23,6 +23,24 @@ class ActivityOffer extends Record
     }
 
     /**
+     * Re-send the full availability pack to selected users only (no invite wipe).
+     *
+     * @throws BadRequest|Forbidden|NotFound|Error
+     */
+    public function postActionRequestAvailabilityForUsers(Request $request): stdClass
+    {
+        $data = $request->getParsedBody();
+        $id = $data->id ?? null;
+        $userIds = $data->userIds ?? null;
+
+        if (!$id || !is_string($id) || !is_array($userIds)) {
+            throw new BadRequest("No id or userIds.");
+        }
+
+        return (object) $this->createService()->requestAvailabilityForUsers($id, $userIds);
+    }
+
+    /**
      * @throws BadRequest|Forbidden|NotFound
      */
     public function postActionAutoAssign(Request $request): stdClass

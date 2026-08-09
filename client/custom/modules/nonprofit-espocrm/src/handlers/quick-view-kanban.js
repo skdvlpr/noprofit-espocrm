@@ -9,8 +9,10 @@ define('nonprofit-espocrm:handlers/quick-view-kanban', [
         }
 
         process() {
-            QuickViewNavigation.ensureEnabled(this.view);
-            QuickViewNavigation.patchKanbanLinkClick(this.view);
+            if (QuickViewNavigation.applyQuickDetailPolicy(this.view) === 'quick') {
+                QuickViewNavigation.patchKanbanLinkClick(this.view);
+            }
+
             QuickViewNavigation.bindAfterSaveRefresh(this.view);
 
             return Promise.resolve();

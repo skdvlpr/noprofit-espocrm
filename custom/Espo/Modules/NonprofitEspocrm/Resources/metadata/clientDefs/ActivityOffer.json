@@ -88,6 +88,15 @@
             "checkVisibilityFunction": "isRequestAvailabilityVisible"
         },
         {
+            "name": "requestAvailabilitySelected",
+            "label": "Request availability from selected",
+            "iconClass": "fas fa-user-check",
+            "acl": "edit",
+            "handler": "nonprofit-espocrm:handlers/activity-offer/shift-actions",
+            "actionFunction": "requestAvailabilitySelected",
+            "checkVisibilityFunction": "isRequestAvailabilitySelectedVisible"
+        },
+        {
             "name": "autoAssign",
             "label": "Auto assign",
             "iconClass": "fas fa-magic",

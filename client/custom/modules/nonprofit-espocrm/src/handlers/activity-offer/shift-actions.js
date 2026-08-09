@@ -28,6 +28,14 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                 && this.canEdit();
         }
 
+        isRequestAvailabilitySelectedVisible() {
+            const status = this.status();
+
+            // Selective pack resend after the plan is already open (not Draft).
+            return ['CollectingAvailability', 'Planned', 'Confirmed', 'Updated'].includes(status)
+                && this.canEdit();
+        }
+
         isAutoAssignVisible() {
             return ['CollectingAvailability', 'Planned'].includes(this.status()) && this.canEdit();
         }
@@ -136,42 +144,73 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                 Espo.Ajax
                     .postRequest('ActivityOffer/action/requestAvailability', {id: view.model.id})
                     .then(response => {
-                        let msg = view
-                            .translate('requestAvailabilitySuccess', 'messages', 'ActivityOffer')
-                            .replace('{cohortCount}', String(response.cohortCount ?? 0))
-                            .replace('{emailCount}', String(response.emailCount ?? 0))
-                            .replace('{notifyCount}', String(response.notifyCount ?? 0))
-                            .replace('{slotCount}', String(response.slotCount ?? 0));
-
-                        const failed = response.emailFailed || [];
-                        const skipped = response.emailSkipped || [];
-
-                        if (failed.length || skipped.length) {
-                            const parts = [];
-
-                            if (failed.length) {
-                                parts.push(
-                                    view.translate('requestAvailabilityEmailFailed', 'messages', 'ActivityOffer')
-                                        .replace('{list}', failed.join('; '))
-                                );
-                            }
-
-                            if (skipped.length) {
-                                parts.push(
-                                    view.translate('requestAvailabilityEmailSkipped', 'messages', 'ActivityOffer')
-                                        .replace('{list}', skipped.join('; '))
-                                );
-                            }
-
-                            Espo.Ui.warning(msg + '\n' + parts.join('\n'));
-                        } else {
-                            Espo.Ui.success(msg);
-                        }
-
+                        this.showAvailabilityRequestResult(view, response, false);
                         this.refreshPlan(view);
                     })
                     .catch(() => {});
             });
+        }
+
+        requestAvailabilitySelected() {
+            const view = this.view;
+
+            if (!this.isRequestAvailabilitySelectedVisible()) {
+                return;
+            }
+
+            view.createView(
+                'requestAvailabilitySelectedModal',
+                'nonprofit-espocrm:views/activity-offer/modals/request-availability-selected',
+                {id: view.model.id},
+                modal => {
+                    modal.render();
+
+                    view.listenToOnce(modal, 'sent', response => {
+                        this.showAvailabilityRequestResult(view, response, true);
+                        this.refreshPlan(view);
+                    });
+                }
+            );
+        }
+
+        showAvailabilityRequestResult(view, response, selectedOnly) {
+            const successKey = selectedOnly
+                ? 'requestAvailabilitySelectedSuccess'
+                : 'requestAvailabilitySuccess';
+
+            let msg = view
+                .translate(successKey, 'messages', 'ActivityOffer')
+                .replace('{cohortCount}', String(response.cohortCount ?? response.userCount ?? 0))
+                .replace('{userCount}', String(response.userCount ?? response.cohortCount ?? 0))
+                .replace('{emailCount}', String(response.emailCount ?? 0))
+                .replace('{notifyCount}', String(response.notifyCount ?? 0))
+                .replace('{slotCount}', String(response.slotCount ?? 0));
+
+            const failed = response.emailFailed || [];
+            const skipped = response.emailSkipped || [];
+
+            if (failed.length || skipped.length) {
+                const parts = [];
+
+                if (failed.length) {
+                    parts.push(
+                        view.translate('requestAvailabilityEmailFailed', 'messages', 'ActivityOffer')
+                            .replace('{list}', failed.join('; '))
+                    );
+                }
+
+                if (skipped.length) {
+                    parts.push(
+                        view.translate('requestAvailabilityEmailSkipped', 'messages', 'ActivityOffer')
+                            .replace('{list}', skipped.join('; '))
+                    );
+                }
+
+                Espo.Ui.warning(msg + '\n' + parts.join('\n'));
+            }
+            else {
+                Espo.Ui.success(msg);
+            }
         }
 
         autoAssign() {

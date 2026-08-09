@@ -4,9 +4,48 @@ define('nonprofit-espocrm:lib/quick-view-navigation', [], function () {
     const isRelationshipList = view =>
         view.options?.buttonsDisabled === true || view.layoutName === 'listSmall';
 
+    /**
+     * clientDefs.{scope}.quickDetailDisabled — planner entities must stay full-page.
+     */
+    const isMetadataQuickDetailDisabled = view => {
+        const scope = view.scope || view.entityType;
+
+        if (scope && typeof view.getMetadata === 'function') {
+            return !!view.getMetadata().get(['clientDefs', scope, 'quickDetailDisabled']);
+        }
+
+        return !!view.quickDetailDisabled;
+    };
+
     const ensureEnabled = view => {
         view.quickDetailDisabled = false;
         view.quickEditDisabled = false;
+    };
+
+    /**
+     * Apply metadata policy for relationship lists.
+     * @returns {'full'|'quick'}
+     */
+    const applyQuickDetailPolicy = view => {
+        if (isMetadataQuickDetailDisabled(view)) {
+            view.quickDetailDisabled = true;
+
+            const scope = view.scope || view.entityType;
+
+            if (scope && typeof view.getMetadata === 'function') {
+                view.quickEditDisabled = !!view.getMetadata()
+                    .get(['clientDefs', scope, 'quickEditDisabled']);
+            }
+            else {
+                view.quickEditDisabled = true;
+            }
+
+            return 'full';
+        }
+
+        ensureEnabled(view);
+
+        return 'quick';
     };
 
     const shouldBypass = e => e.ctrlKey || e.metaKey || e.shiftKey;
@@ -92,6 +131,8 @@ define('nonprofit-espocrm:lib/quick-view-navigation', [], function () {
 
     return {
         isRelationshipList,
+        isMetadataQuickDetailDisabled,
+        applyQuickDetailPolicy,
         ensureEnabled,
         patchListLinkClick,
         patchKanbanLinkClick,

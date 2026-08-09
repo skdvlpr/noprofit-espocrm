@@ -51,7 +51,7 @@ function ok(bool $cond, string $label): void
 $buttons = $metadata->get(['clientDefs', 'ActivityOffer', 'detailButtonList']) ?? [];
 $buttonNames = array_map(fn ($item) => is_object($item) ? ($item->name ?? '') : ($item['name'] ?? ''), $buttons);
 
-foreach (['fillAvailability', 'requestAvailability', 'autoAssign', 'confirmPlan', 'sendPendingUpdate', 'closePlan', 'cancelAll'] as $name) {
+foreach (['fillAvailability', 'requestAvailability', 'requestAvailabilitySelected', 'autoAssign', 'confirmPlan', 'sendPendingUpdate', 'closePlan', 'cancelAll'] as $name) {
     ok(in_array($name, $buttonNames, true), "clientDefs detailButtonList has $name");
 }
 
@@ -613,6 +613,30 @@ ok(array_key_exists('emailCount', $res), 'requestAvailability returns emailCount
 ok(array_key_exists('emailFailed', $res), 'requestAvailability returns emailFailed');
 echo "  availability emails sent: " . ($res['emailCount'] ?? 0) . "\n";
 
+$selectedRes = $adminService->requestAvailabilityForUsers($offer->getId(), [$volunteers[0]->getId(), $volunteers[1]->getId()]);
+ok(($selectedRes['userCount'] ?? 0) === 2, 'requestAvailabilityForUsers userCount=2');
+ok(($selectedRes['slotCount'] ?? 0) === 3, 'requestAvailabilityForUsers slotCount=3');
+ok(array_key_exists('emailCount', $selectedRes), 'requestAvailabilityForUsers returns emailCount');
+ok(array_key_exists('notifyCount', $selectedRes), 'requestAvailabilityForUsers returns notifyCount');
+
+$selectedBad = false;
+
+try {
+    $adminService->requestAvailabilityForUsers($offer->getId(), ['not-a-cohort-user']);
+} catch (\Espo\Core\Exceptions\BadRequest $e) {
+    $selectedBad = true;
+}
+
+ok($selectedBad, 'requestAvailabilityForUsers rejects non-cohort user');
+
+$selectedModal = __DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/request-availability-selected.js';
+ok(is_file($selectedModal), 'request-availability-selected modal exists');
+ok(
+    str_contains((string) file_get_contents($handlerFile), 'requestAvailabilitySelected'),
+    'shift-actions handler has requestAvailabilitySelected'
+);
+
 $offer = $em->getEntityById('ActivityOffer', $offer->getId());
 ok($offer->get('status') === 'CollectingAvailability', 'offer -> CollectingAvailability');
 
@@ -1153,6 +1177,34 @@ $clientDefsOffer = (string) file_get_contents(__DIR__
 ok(
     str_contains($clientDefsOffer, '"quickDetailDisabled": true'),
     'ActivityOffer quick detail disabled (always full detail)'
+);
+$clientDefsSlot = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/ActivityOfferSlot.json');
+ok(
+    !str_contains($clientDefsSlot, '"quickDetailDisabled": true'),
+    'ActivityOfferSlot keeps quick detail (overlay on full plan)'
+);
+
+$qvNav = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/lib/quick-view-navigation.js');
+ok(
+    str_contains($qvNav, 'applyQuickDetailPolicy')
+        && str_contains($qvNav, 'isMetadataQuickDetailDisabled'),
+    'quick-view-navigation respects metadata quickDetailDisabled'
+);
+
+$qvListHandler = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/handlers/quick-view-list.js');
+ok(
+    str_contains($qvListHandler, "applyQuickDetailPolicy(this.view) === 'quick'"),
+    'quick-view-list skips force-enable when full-form policy'
+);
+
+$listInline = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/record/list-inline-edit.js');
+ok(
+    str_contains($listInline, "applyQuickDetailPolicy(this) === 'quick'"),
+    'list-inline-edit skips force-enable when full-form policy'
 );
 $lightCss = (string) file_get_contents(__DIR__
     . '/../client/custom/css/safehouse-aurora/safehouse-aurora-light.css');

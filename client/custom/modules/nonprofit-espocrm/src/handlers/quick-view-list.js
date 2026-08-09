@@ -13,8 +13,11 @@ define('nonprofit-espocrm:handlers/quick-view-list', [
                 return Promise.resolve();
             }
 
-            QuickViewNavigation.ensureEnabled(this.view);
-            QuickViewNavigation.patchListLinkClick(this.view);
+            // Planner (and any scope with quickDetailDisabled) stays full-page.
+            if (QuickViewNavigation.applyQuickDetailPolicy(this.view) === 'quick') {
+                QuickViewNavigation.patchListLinkClick(this.view);
+            }
+
             QuickViewNavigation.bindAfterSaveRefresh(this.view);
 
             return Promise.resolve();

@@ -397,6 +397,102 @@ class ShiftPlanningService
     }
 
     /**
+     * Re-send the full plan availability pack (email + in-app) to selected users only.
+     * Does not wipe invites, does not change plan status, does not notify the rest of the cohort.
+     *
+     * @param string[] $userIds
+     * @return array{
+     *     userCount: int,
+     *     notifyCount: int,
+     *     slotCount: int,
+     *     emailCount: int,
+     *     emailSkipped: string[],
+     *     emailFailed: string[]
+     * }
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function requestAvailabilityForUsers(string $offerId, array $userIds): array
+    {
+        $offer = $this->getOfferForEdit($offerId);
+
+        $status = (string) $offer->get('status');
+
+        if (!in_array($status, [
+            self::STATUS_COLLECTING,
+            self::STATUS_PLANNED,
+            self::STATUS_CONFIRMED,
+            self::STATUS_UPDATED,
+        ], true)) {
+            throw new BadRequest(
+                "Selective resend is available after the plan is open (not Draft/Closed/Completed)."
+            );
+        }
+
+        $slots = $this->getPublishedSlots($offerId);
+
+        if ($slots === []) {
+            throw new BadRequest("Publish at least one shift before resending availability.");
+        }
+
+        $normalized = [];
+
+        foreach ($userIds as $userId) {
+            if (!is_string($userId) || $userId === '') {
+                continue;
+            }
+
+            $normalized[$userId] = true;
+        }
+
+        $selectedIds = array_keys($normalized);
+
+        if ($selectedIds === []) {
+            throw new BadRequest("Select at least one volunteer.");
+        }
+
+        $allowedIds = array_values(array_unique(array_merge(
+            $this->resolveCohortUserIds($offer),
+            $this->resolveInvolvedUserIds($offerId)
+        )));
+
+        if ($allowedIds === []) {
+            throw new BadRequest("No volunteers involved in this plan.");
+        }
+
+        $allowedMap = array_fill_keys($allowedIds, true);
+        $rejected = [];
+
+        foreach ($selectedIds as $userId) {
+            if (!isset($allowedMap[$userId])) {
+                $rejected[] = $userId;
+            }
+        }
+
+        if ($rejected !== []) {
+            throw new BadRequest(
+                "Selected users are not in this plan's cohort: " . implode(', ', $rejected)
+            );
+        }
+
+        $message = $this->translateMessage('availabilityRequestNotification', [
+            'name' => (string) $offer->get(Field::NAME),
+            'weekStart' => (string) ($offer->get('weekStart') ?? ''),
+        ]);
+
+        $notifyCount = $this->notifyUsers($offer, $selectedIds, $message);
+        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, $selectedIds);
+
+        return [
+            'userCount' => count($selectedIds),
+            'notifyCount' => $notifyCount,
+            'slotCount' => count($slots),
+            'emailCount' => (int) ($emailResult['sent'] ?? 0),
+            'emailSkipped' => $emailResult['skipped'] ?? [],
+            'emailFailed' => $emailResult['failed'] ?? [],
+        ];
+    }
+
+    /**
      * Volunteer-facing grid data.
      *
      * @return array<string, mixed>
