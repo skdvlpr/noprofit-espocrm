@@ -317,6 +317,31 @@ try {
     $ok('PrimaNota summary managementBalance', isset($summary->today->managementBalance));
     $ok('PrimaNota summary cashBalance present', isset($summary->cashBalance->balance));
 
+    $listStatsJs = file_get_contents(
+        'client/custom/modules/nonprofit-espocrm/src/views/reporting/list-stats-footer.js'
+    ) ?: '';
+    $ok('list stats footer renders standalone cash balance', str_contains($listStatsJs, 'renderCashBalance'));
+    $ok(
+        'list stats footer cash balance CSS class',
+        str_contains($listStatsJs, 'safehouse-reporting-stats-cash')
+    );
+    $globalEn = json_decode(
+        file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/en_US/Global.json') ?: '{}',
+        true
+    );
+    $globalIt = json_decode(
+        file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Global.json') ?: '{}',
+        true
+    );
+    $ok(
+        'EN reportingListStatsCashBalance label',
+        ($globalEn['labels']['reportingListStatsCashBalance'] ?? '') === 'Current balance'
+    );
+    $ok(
+        'IT reportingListStatsCashBalance label',
+        ($globalIt['labels']['reportingListStatsCashBalance'] ?? '') === 'Saldo corrente'
+    );
+
     $openingBefore = (float) ($summary->cashBalance->opening ?? 0);
     $balanceBefore = (float) ($summary->cashBalance->balance ?? 0);
 

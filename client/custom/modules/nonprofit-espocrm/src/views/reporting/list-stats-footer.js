@@ -19,6 +19,68 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
         }
 
         /**
+         * Standalone current cash balance (opening + all Inviato through today).
+         * Not tied to year / month / today period cells.
+         *
+         * @param {jQuery} $container
+         * @param {object|null} cashBalance summary.cashBalance
+         */
+        renderCashBalance($container, cashBalance) {
+            if (!$container || !$container.length) {
+                return;
+            }
+
+            $container.find('.safehouse-reporting-stats-cash').remove();
+
+            if (!cashBalance || cashBalance.balance === undefined || cashBalance.balance === null) {
+                return;
+            }
+
+            const title = this.view.translate('reportingListStatsCashBalance', 'labels', 'Global');
+            const label = this.view.translate('cashBalance', 'fields', 'PrimaNota');
+            const item = {
+                ...this.resolveMetricItem('PrimaNota', 'amountIn'),
+                fieldType: 'currency',
+                currency: 'EUR',
+            };
+            const formatted = this.formatValue(cashBalance.balance, item);
+            const valueClass = this.getMetricValueClass('cashBalance', cashBalance.balance);
+
+            let range = '';
+            if (cashBalance.openingAsOf && cashBalance.asOf) {
+                range = cashBalance.openingAsOf + ' → ' + cashBalance.asOf;
+            } else if (cashBalance.asOf) {
+                range = cashBalance.asOf;
+            }
+
+            const $block = $('<div>').addClass('safehouse-reporting-stats-cash margin-bottom');
+            $block.append($('<div>').addClass('safehouse-reporting-stats-period-title').text(title));
+
+            if (range) {
+                $block.append($('<div>').addClass('safehouse-reporting-stats-period-range').text(range));
+            }
+
+            $block.append(
+                $('<div>').addClass('safehouse-reporting-stats-metrics')
+                    .append(
+                        $('<div>').addClass('safehouse-reporting-stats-metric')
+                            .append(
+                                $('<span>')
+                                    .addClass('safehouse-reporting-stats-value ' + valueClass)
+                                    .text(formatted)
+                            )
+                            .append(
+                                $('<span>')
+                                    .addClass('safehouse-reporting-stats-label')
+                                    .text(label)
+                            )
+                    )
+            );
+
+            $container.prepend($block);
+        }
+
+        /**
          * Year | Month | Today responsive grid (Anno / Mese / Oggi).
          *
          * @param {jQuery} $container
@@ -30,12 +92,18 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection').remove();
+            $container.find(
+                '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-cash'
+            ).remove();
 
             const items = options.items || [];
 
             if (!items.length) {
                 return;
+            }
+
+            if (options.showCashBalance !== false && summary && summary.cashBalance) {
+                this.renderCashBalance($container, summary.cashBalance);
             }
 
             const $grid = $('<div>').addClass('safehouse-reporting-stats-period-grid margin-bottom');
@@ -80,6 +148,14 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
             });
 
             $container.prepend($grid);
+
+            // Cash must stay above periods: re-prepend after grid insert.
+            if (options.showCashBalance !== false && summary && summary.cashBalance) {
+                const $cash = $container.children('.safehouse-reporting-stats-cash').detach();
+                if ($cash.length) {
+                    $container.prepend($cash);
+                }
+            }
         }
 
         /**
@@ -94,7 +170,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection').remove();
+            $container.find('.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-cash').remove();
 
             const items = options.items || [];
             const title = options.title ||
@@ -161,7 +237,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return 'safehouse-reporting-stats-value--expense';
             }
 
-            if (key === 'managementBalance') {
+            if (key === 'managementBalance' || key === 'cashBalance') {
                 const num = Number(value);
 
                 if (!Number.isNaN(num) && num < 0) {

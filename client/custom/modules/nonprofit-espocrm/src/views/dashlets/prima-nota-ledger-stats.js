@@ -31,7 +31,7 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                                 {{/if}}
                                 <div class="safehouse-reporting-stats-metrics">
                                     <div class="safehouse-reporting-stats-metric">
-                                        <span class="safehouse-reporting-stats-value safehouse-reporting-stats-value--accent">{{cashBalance.value}}</span>
+                                        <span class="safehouse-reporting-stats-value {{cashBalance.valueClass}}">{{cashBalance.value}}</span>
                                         <span class="safehouse-reporting-stats-label">{{cashBalance.label}}</span>
                                     </div>
                                 </div>
@@ -102,10 +102,11 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
             }
 
             return {
-                title: this.translate('cashBalance', 'fields', this.entityScope),
+                title: this.translate('reportingListStatsCashBalance', 'labels', 'Global'),
                 label: this.translate('cashBalance', 'fields', this.entityScope),
                 range: range,
                 value: this.statsFooter.formatValue(cash.balance, item),
+                valueClass: this.statsFooter.getMetricValueClass('cashBalance', cash.balance),
             };
         },
 

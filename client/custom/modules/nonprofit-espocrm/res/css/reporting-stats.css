@@ -27,6 +27,23 @@ body[data-theme-name="SafehouseAurora"] {
 body[data-theme-name="SafehouseAuroraLight"] {
     --sh-reporting-income-color: #4d7c0f;
 }
+/* Standalone current cash balance (not year/month/today) */
+.safehouse-reporting-stats-cash {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border-radius: var(--border-radius, 4px);
+    border: 1px solid var(--panel-default-border, var(--default-border-color, rgba(127, 127, 127, 0.22)));
+    background: color-mix(
+        in srgb,
+        var(--panel-bg, var(--default-body-bg, #fff)) calc(100% - var(--sh-reporting-cell-tint)),
+        var(--brand-primary, var(--link-color, #64748b)) var(--sh-reporting-cell-tint)
+    );
+}
+
+.safehouse-reporting-stats-cash .safehouse-reporting-stats-value {
+    font-size: 1.35em;
+}
+
 .safehouse-reporting-stats-period-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
