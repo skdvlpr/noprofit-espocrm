@@ -27,7 +27,7 @@ body[data-theme-name="SafehouseAurora"] {
 body[data-theme-name="SafehouseAuroraLight"] {
     --sh-reporting-income-color: #4d7c0f;
 }
-/* Standalone current cash balance (not year/month/today) */
+/* Standalone Bank + Real balances (not year/month/today) — neutral panel, no brand-primary tint */
 .safehouse-reporting-stats-cash {
     margin-bottom: 12px;
     padding: 12px 14px;
@@ -36,12 +36,23 @@ body[data-theme-name="SafehouseAuroraLight"] {
     background: color-mix(
         in srgb,
         var(--panel-bg, var(--default-body-bg, #fff)) calc(100% - var(--sh-reporting-cell-tint)),
-        var(--brand-primary, var(--link-color, #64748b)) var(--sh-reporting-cell-tint)
+        var(--panel-default-border, var(--default-border-color, #808080)) var(--sh-reporting-cell-tint)
     );
 }
 
 .safehouse-reporting-stats-cash .safehouse-reporting-stats-value {
     font-size: 1.35em;
+}
+
+.safehouse-reporting-stats-cash .safehouse-reporting-stats-metrics--inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+    align-items: flex-start;
+}
+
+.safehouse-reporting-stats-cash .safehouse-reporting-stats-metrics--inline .safehouse-reporting-stats-metric {
+    min-width: 8rem;
 }
 
 .safehouse-reporting-stats-period-grid {

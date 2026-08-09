@@ -23,17 +23,19 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                     <div class="no-data text-soft">{{loadingLabel}}</div>
                 {{else}}
                     {{#if hasStats}}
-                        {{#if cashBalance}}
+                        {{#if balances}}
                             <div class="safehouse-reporting-stats-cash">
-                                <div class="safehouse-reporting-stats-period-title">{{cashBalance.title}}</div>
-                                {{#if cashBalance.range}}
-                                    <div class="safehouse-reporting-stats-period-range">{{cashBalance.range}}</div>
+                                <div class="safehouse-reporting-stats-period-title">{{balances.title}}</div>
+                                {{#if balances.range}}
+                                    <div class="safehouse-reporting-stats-period-range">{{balances.range}}</div>
                                 {{/if}}
-                                <div class="safehouse-reporting-stats-metrics">
-                                    <div class="safehouse-reporting-stats-metric">
-                                        <span class="safehouse-reporting-stats-value {{cashBalance.valueClass}}">{{cashBalance.value}}</span>
-                                        <span class="safehouse-reporting-stats-label">{{cashBalance.label}}</span>
-                                    </div>
+                                <div class="safehouse-reporting-stats-metrics safehouse-reporting-stats-metrics--inline">
+                                    {{#each balances.metrics}}
+                                        <div class="safehouse-reporting-stats-metric">
+                                            <span class="safehouse-reporting-stats-value {{valueClass}}">{{value}}</span>
+                                            <span class="safehouse-reporting-stats-label">{{label}}</span>
+                                        </div>
+                                    {{/each}}
                                 </div>
                             </div>
                         {{/if}}
@@ -78,35 +80,61 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                 loading: this.loading,
                 loadingLabel: this.translate('loading', 'labels', 'Global'),
                 noDataLabel: this.translate('No Data'),
-                hasStats: this.buildPeriodSections().length > 0 || !!this.buildCashBalanceSection(),
-                cashBalance: this.buildCashBalanceSection(),
+                hasStats: this.buildPeriodSections().length > 0 || !!this.buildBalancesSection(),
+                balances: this.buildBalancesSection(),
                 periodSections: this.buildPeriodSections(),
             };
         },
 
-        buildCashBalanceSection() {
-            if (!this.summary || !this.summary.cashBalance) {
+        buildBalancesSection() {
+            if (!this.summary) {
                 return null;
             }
 
+            const bank = this.summary.bankBalance;
             const cash = this.summary.cashBalance;
+            const hasBank = bank && bank.balance !== undefined && bank.balance !== null;
+            const hasCash = cash && cash.balance !== undefined && cash.balance !== null;
+
+            if (!hasBank && !hasCash) {
+                return null;
+            }
+
             const item = {
                 ...this.statsFooter.resolveMetricItem(this.entityScope, 'amountIn'),
                 fieldType: 'currency',
                 currency: 'EUR',
             };
 
-            let range = cash.asOf || '';
-            if (cash.openingAsOf) {
-                range = cash.openingAsOf + ' → ' + (cash.asOf || '');
+            const rangeSource = cash || bank;
+            let range = rangeSource.asOf || '';
+
+            if (rangeSource.openingAsOf) {
+                range = rangeSource.openingAsOf + ' → ' + (rangeSource.asOf || '');
+            }
+
+            const metrics = [];
+
+            if (hasBank) {
+                metrics.push({
+                    label: this.translate('bankBalance', 'fields', this.entityScope),
+                    value: this.statsFooter.formatValue(bank.balance, item),
+                    valueClass: this.statsFooter.getMetricValueClass('bankBalance', bank.balance),
+                });
+            }
+
+            if (hasCash) {
+                metrics.push({
+                    label: this.translate('cashBalance', 'fields', this.entityScope),
+                    value: this.statsFooter.formatValue(cash.balance, item),
+                    valueClass: this.statsFooter.getMetricValueClass('cashBalance', cash.balance),
+                });
             }
 
             return {
                 title: this.translate('reportingListStatsCashBalance', 'labels', 'Global'),
-                label: this.translate('cashBalance', 'fields', this.entityScope),
                 range: range,
-                value: this.statsFooter.formatValue(cash.balance, item),
-                valueClass: this.statsFooter.getMetricValueClass('cashBalance', cash.balance),
+                metrics: metrics,
             };
         },
 

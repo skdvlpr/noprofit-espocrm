@@ -316,11 +316,12 @@ try {
     $ok('PrimaNota summary today amountIn', isset($summary->today->amountIn));
     $ok('PrimaNota summary managementBalance', isset($summary->today->managementBalance));
     $ok('PrimaNota summary cashBalance present', isset($summary->cashBalance->balance));
+    $ok('PrimaNota summary bankBalance present', isset($summary->bankBalance->balance));
 
     $listStatsJs = file_get_contents(
         'client/custom/modules/nonprofit-espocrm/src/views/reporting/list-stats-footer.js'
     ) ?: '';
-    $ok('list stats footer renders standalone cash balance', str_contains($listStatsJs, 'renderCashBalance'));
+    $ok('list stats footer renders dual balances', str_contains($listStatsJs, 'renderBalances'));
     $ok(
         'list stats footer cash balance CSS class',
         str_contains($listStatsJs, 'safehouse-reporting-stats-cash')
@@ -333,17 +334,46 @@ try {
         file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Global.json') ?: '{}',
         true
     );
+    $pnEn = json_decode(
+        file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/en_US/PrimaNota.json') ?: '{}',
+        true
+    );
+    $pnIt = json_decode(
+        file_get_contents('custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json') ?: '{}',
+        true
+    );
     $ok(
         'EN reportingListStatsCashBalance label',
-        ($globalEn['labels']['reportingListStatsCashBalance'] ?? '') === 'Current balance'
+        ($globalEn['labels']['reportingListStatsCashBalance'] ?? '') === 'Balances'
     );
     $ok(
         'IT reportingListStatsCashBalance label',
-        ($globalIt['labels']['reportingListStatsCashBalance'] ?? '') === 'Saldo corrente'
+        ($globalIt['labels']['reportingListStatsCashBalance'] ?? '') === 'Saldi'
+    );
+    $ok(
+        'EN bankBalance field label',
+        ($pnEn['fields']['bankBalance'] ?? '') === 'Digital balance'
+    );
+    $ok(
+        'IT bankBalance field label',
+        ($pnIt['fields']['bankBalance'] ?? '') === 'Saldo digitale'
+    );
+    $ok(
+        'EN cashBalance field label',
+        ($pnEn['fields']['cashBalance'] ?? '') === 'Real balance'
+    );
+    $ok(
+        'IT cashBalance field label',
+        ($pnIt['fields']['cashBalance'] ?? '') === 'Saldo reale'
+    );
+    $ok(
+        'settlementChannel not in PrimaNota fields',
+        !isset($pnEn['fields']['settlementChannel']) && !isset($pnIt['fields']['settlementChannel'])
     );
 
     $openingBefore = (float) ($summary->cashBalance->opening ?? 0);
     $balanceBefore = (float) ($summary->cashBalance->balance ?? 0);
+    $bankBefore = (float) ($summary->bankBalance->balance ?? 0);
 
     $pnCashIn = $em->getNewEntity('PrimaNota');
     $pnCashIn->set([
@@ -357,6 +387,7 @@ try {
         'amount' => 10.0,
         'paymentStatus' => 'Inviato',
         'transactionDate' => date('Y-m-d'),
+        'donationPaymentProvider' => 'BankTransfer',
     ]);
     $em->saveEntity($pnCashIn);
     $created[] = $pnCashIn;
@@ -373,16 +404,23 @@ try {
         'amount' => 100.0,
         'paymentStatus' => 'Planned',
         'transactionDate' => date('Y-m-d'),
+        'donationPaymentProvider' => 'BankTransfer',
     ]);
     $em->saveEntity($pnCashPlanned);
     $created[] = $pnCashPlanned;
 
     $summaryAfterCash = $primaNotaStats->getSummary();
     $balanceAfter = (float) ($summaryAfterCash->cashBalance->balance ?? 0);
+    $bankAfter = (float) ($summaryAfterCash->bankBalance->balance ?? 0);
     $ok(
         'PrimaNota cashBalance +Inviato income, ignores Planned',
         abs(($balanceAfter - $balanceBefore) - 10.0) < 0.01,
         'before=' . $balanceBefore . ' after=' . $balanceAfter . ' opening=' . $openingBefore
+    );
+    $ok(
+        'PrimaNota bankBalance +non-Cash Inviato income, ignores Planned',
+        abs(($bankAfter - $bankBefore) - 10.0) < 0.01,
+        'before=' . $bankBefore . ' after=' . $bankAfter
     );
     $ok(
         'PrimaNota month plannedAmountIn includes Planned fixture',
@@ -393,6 +431,37 @@ try {
     $ok(
         'PrimaNota month amountIn excludes Planned',
         abs((float) ($summaryAfterCash->month->amountIn ?? 0) - (float) ($summary->month->amountIn ?? 0) - 10.0) < 0.01
+    );
+
+    $pnCashChannel = $em->getNewEntity('PrimaNota');
+    $pnCashChannel->set([
+        'description' => 'SMOKE-Rend-Cash-Channel',
+        'subjectName' => 'CashChannelDonor',
+        'entryType' => 'Income',
+        'amountGross' => 5.0,
+        'amountGrossCurrency' => 'EUR',
+        'commissionAmount' => 0.0,
+        'commissionPercent' => 0.0,
+        'amount' => 5.0,
+        'paymentStatus' => 'Inviato',
+        'transactionDate' => date('Y-m-d'),
+        'donationPaymentProvider' => 'Cash',
+    ]);
+    $em->saveEntity($pnCashChannel);
+    $created[] = $pnCashChannel;
+
+    $summaryAfterCashChannel = $primaNotaStats->getSummary();
+    $cashAfterChannel = (float) ($summaryAfterCashChannel->cashBalance->balance ?? 0);
+    $bankAfterChannel = (float) ($summaryAfterCashChannel->bankBalance->balance ?? 0);
+    $ok(
+        'PrimaNota Contanti (Cash provider) increases real cashBalance only',
+        abs(($cashAfterChannel - $balanceAfter) - 5.0) < 0.01,
+        'before=' . $balanceAfter . ' after=' . $cashAfterChannel
+    );
+    $ok(
+        'PrimaNota Contanti (Cash provider) leaves digital bankBalance unchanged',
+        abs($bankAfterChannel - $bankAfter) < 0.01,
+        'before=' . $bankAfter . ' after=' . $bankAfterChannel
     );
 
     $contact = $em->getNewEntity('Contact');

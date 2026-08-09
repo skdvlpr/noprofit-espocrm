@@ -73,6 +73,7 @@ class PrimaNotaStatsProvider
             'timezone' => $timezone->getName(),
             'metricList' => $metricList,
             'cashBalance' => $this->buildCashBalance($timezone, $allowedAttributes, $additionalWhere),
+            'bankBalance' => $this->buildBankBalance($timezone, $allowedAttributes, $additionalWhere),
             'today' => $this->buildPeriodSummary(
                 $todayFrom,
                 $todayTo,
@@ -98,7 +99,23 @@ class PrimaNotaStatsProvider
     }
 
     /**
-     * Opening cash + cumulative Inviato net (amountIn − amountOut) through today.
+     * Digital / non-Contanti ledger (exclude donationPaymentProvider = Cash).
+     * Includes Stripe, BankTransfer, Other, card POS, null, etc. as one digital balance.
+     *
+     * @return array<string, mixed>
+     */
+    public static function bankChannelWhere(): array
+    {
+        return [
+            'OR' => [
+                ['donationPaymentProvider!=' => 'Cash'],
+                ['donationPaymentProvider' => null],
+            ],
+        ];
+    }
+
+    /**
+     * Opening + cumulative Inviato net through today (all payment channels = real balance).
      *
      * Config:
      * - primaNotaOpeningCashBalance (float, default 0)
@@ -112,6 +129,39 @@ class PrimaNotaStatsProvider
         ?DateTimeZone $timezone = null,
         ?array $allowedAttributes = null,
         ?array $additionalWhere = null,
+    ): stdClass {
+        return $this->buildLedgerBalance($timezone, $allowedAttributes, $additionalWhere, null);
+    }
+
+    /**
+     * Opening + cumulative Inviato net excluding Cash (bank ledger in CRM).
+     *
+     * @param string[] $allowedAttributes
+     * @param array<string, mixed>|null $additionalWhere
+     */
+    public function buildBankBalance(
+        ?DateTimeZone $timezone = null,
+        ?array $allowedAttributes = null,
+        ?array $additionalWhere = null,
+    ): stdClass {
+        return $this->buildLedgerBalance(
+            $timezone,
+            $allowedAttributes,
+            $additionalWhere,
+            self::bankChannelWhere()
+        );
+    }
+
+    /**
+     * @param string[]|null $allowedAttributes
+     * @param array<string, mixed>|null $additionalWhere
+     * @param array<string, mixed>|null $channelWhere
+     */
+    private function buildLedgerBalance(
+        ?DateTimeZone $timezone,
+        ?array $allowedAttributes,
+        ?array $additionalWhere,
+        ?array $channelWhere,
     ): stdClass {
         $timezone ??= ReportingDateRange::defaultTimezone();
         [, $todayTo] = ReportingDateRange::currentCalendarDay($timezone);
@@ -131,6 +181,15 @@ class PrimaNotaStatsProvider
         }
 
         $where = $this->mergeIncomeWhere($dateWhere);
+
+        if ($channelWhere !== null && $channelWhere !== []) {
+            $where = [
+                'AND' => [
+                    $where,
+                    $channelWhere,
+                ],
+            ];
+        }
 
         if ($additionalWhere !== null && $additionalWhere !== []) {
             $where = [

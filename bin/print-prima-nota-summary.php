@@ -13,6 +13,7 @@ $p = $app->getContainer()->get('injectableFactory')->create(PrimaNotaStatsProvid
 $s = $p->getSummary();
 
 echo json_encode([
+    'bankBalance' => $s->bankBalance->balance ?? null,
     'cashBalance' => $s->cashBalance->balance ?? null,
     'cashOpening' => $s->cashBalance->opening ?? null,
     'month' => [
