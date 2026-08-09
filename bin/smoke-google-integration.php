@@ -1512,6 +1512,19 @@ $ok(
         || str_starts_with($calendarProvisioner->buildCalendarName('Meeting'), 'CRM-')
 );
 $ok(
+    'extractLabelFromCalendarName strips admin prefix/suffix',
+    $calendarProvisioner->extractLabelFromCalendarName($calendarProvisioner->buildCalendarName('Meeting')) === 'Meeting'
+);
+$ok(
+    'create-calendar UI locks prefix/suffix affixes',
+    str_contains(
+        (string) file_get_contents(
+            __DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-id.js'
+        ),
+        'google-calendar-name-affix-fixed'
+    )
+);
+$ok(
     'isCrmCalendarName detects CRM-Meeting',
     $calendarProvisioner->isCrmCalendarName('CRM-Meeting') === true
 );

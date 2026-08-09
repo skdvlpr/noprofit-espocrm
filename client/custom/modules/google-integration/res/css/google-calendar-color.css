@@ -110,3 +110,30 @@
 .selectize-dropdown [data-selectable][class*='google-calendar-color-opt-'] {
   background-color: inherit !important;
 }
+
+/* Create-new calendar: admin prefix/suffix locked, middle editable */
+.google-calendar-name-affix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.google-calendar-name-affix-fixed {
+  flex: 0 0 auto;
+  font-weight: 600;
+  opacity: 0.85;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.google-calendar-name-affix-middle {
+  flex: 1 1 8rem;
+  min-width: 7rem;
+  max-width: 100%;
+}
+
+.google-calendar-naming-preview {
+  margin: 0.35rem 0 0;
+}

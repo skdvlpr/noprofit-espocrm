@@ -11,11 +11,16 @@ use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\AllowedEntityTypesProvider;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateCapableEntityTypesProvider;
 use Throwable;
 
 /**
  * Create a Google calendar for the current user (user_pick "Create new calendar" UI).
+ *
+ * Prefix/suffix come only from Admin → Integrations → Google. The client may send
+ * a middle `label` (preferred) or a full `summary` (legacy); the final Google name
+ * is always rebuilt via CalendarProvisioner::buildCalendarName.
  */
 class PostGoogleCalendar implements Action
 {
@@ -24,6 +29,7 @@ class PostGoogleCalendar implements Action
         private GoogleClientProvider $googleClientProvider,
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private DateCapableEntityTypesProvider $dateCapableEntityTypesProvider,
+        private CalendarProvisioner $calendarProvisioner,
     ) {}
 
     public function process(Request $request): Response
@@ -33,7 +39,22 @@ class PostGoogleCalendar implements Action
         }
 
         $body = $request->getParsedBody();
-        $summary = trim((string) ($body->summary ?? ''));
+        $label = trim((string) ($body->label ?? ''));
+        $summaryRaw = trim((string) ($body->summary ?? ''));
+
+        if ($label === '' && $summaryRaw !== '') {
+            $label = $this->calendarProvisioner->extractLabelFromCalendarName($summaryRaw);
+        }
+
+        if ($label === '') {
+            throw new BadRequest('Calendar name is required.');
+        }
+
+        if (mb_strlen($label) > 200) {
+            throw new BadRequest('Calendar name is too long.');
+        }
+
+        $summary = $this->calendarProvisioner->buildCalendarName($label);
 
         if ($summary === '') {
             throw new BadRequest('Calendar name is required.');
@@ -51,6 +72,7 @@ class PostGoogleCalendar implements Action
                 return ResponseComposer::json([
                     'id' => $existingId,
                     'summary' => $summary,
+                    'label' => $label,
                     'created' => false,
                 ]);
             }
@@ -65,6 +87,7 @@ class PostGoogleCalendar implements Action
             return ResponseComposer::json([
                 'id' => $id,
                 'summary' => (string) ($created['summary'] ?? $summary),
+                'label' => $label,
                 'created' => true,
             ]);
         } catch (Forbidden $e) {

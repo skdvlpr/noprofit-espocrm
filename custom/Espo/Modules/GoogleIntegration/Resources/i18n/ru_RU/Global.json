@@ -12,13 +12,16 @@
         "googleCalendarConnectAccountHint": "Подключите учётную запись Google в разделе «Внешние аккаунты», чтобы загрузить список календарей.",
         "googleCalendarListFailedHint": "Не удалось загрузить календари Google. Доступен только основной календарь.",
         "googleCalendarCreateNew": "Создать новый календарь",
-        "googleCalendarCreateNewNamePlaceholder": "Имя нового календаря",
-        "googleCalendarCreateNewHelp": "Создаёт календарь в вашем Google-аккаунте и выбирает его здесь. В следующий раз он будет в списке.",
+        "googleCalendarCreateNewNamePlaceholder": "Средняя часть (метка)",
+        "googleCalendarCreateNewHelp": "Редактируется только средняя часть. Префикс и суффикс задаёт администратор в Administration → Integrations → Google и подставляются автоматически.",
         "googleCalendarCreateNewSubmit": "Создать календарь",
-        "googleCalendarCreateNewNameRequired": "Введите имя нового календаря.",
+        "googleCalendarCreateNewNameRequired": "Введите среднюю часть имени календаря.",
         "googleCalendarCreateNewSuccess": "Календарь Google создан.",
         "googleCalendarCreateNewExists": "Календарь уже существовал — выбран.",
-        "googleCalendarCreateNewFailed": "Не удалось создать календарь Google."
+        "googleCalendarCreateNewFailed": "Не удалось создать календарь Google.",
+        "googleCalendarNamingPatternHelp": "Полное имя в Google: {name}",
+        "googleCalendarNamePrefixLocked": "Префикс задаёт администратор — здесь его нельзя менять.",
+        "googleCalendarNameSuffixLocked": "Суффикс задаёт администратор — здесь его нельзя менять."
     },
     "scopeNames": {
         "CalendarTemplate": "Шаблон календаря",

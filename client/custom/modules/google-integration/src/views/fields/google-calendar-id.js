@@ -114,15 +114,46 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .addClass('google-calendar-create-new-name margin-top')
                 .toggleClass('hidden', !this.createNewCalendar);
 
+            const $affixRow = $('<div>')
+                .addClass('google-calendar-name-affix');
+
+            const prefix = String(this.calendarNamePrefix || '').trim();
+            const suffix = String(this.calendarNameSuffix || '').trim();
+
+            if (prefix) {
+                $affixRow.append(
+                    $('<span>')
+                        .addClass('google-calendar-name-affix-fixed')
+                        .attr('title', this.translateLabelKey('googleCalendarNamePrefixLocked'))
+                        .text(prefix + '-')
+                );
+            }
+
             const $input = $('<input>')
-                .addClass('form-control')
+                .addClass('form-control google-calendar-name-affix-middle')
                 .attr({
                     type: 'text',
                     maxlength: 200,
                     placeholder: this.translateLabelKey('googleCalendarCreateNewNamePlaceholder'),
                     'data-role': 'new-calendar-name',
+                    'aria-label': this.translateLabelKey('googleCalendarCreateNewNamePlaceholder'),
                 })
-                .val(this.newCalendarName || this.defaultNewCalendarName());
+                .val(this.stripAffixes(this.newCalendarName || this.defaultNewCalendarName()));
+
+            $affixRow.append($input);
+
+            if (suffix) {
+                $affixRow.append(
+                    $('<span>')
+                        .addClass('google-calendar-name-affix-fixed')
+                        .attr('title', this.translateLabelKey('googleCalendarNameSuffixLocked'))
+                        .text('-' + suffix)
+                );
+            }
+
+            const $preview = $('<p>')
+                .addClass('help-block text-muted small google-calendar-naming-preview')
+                .attr('data-role', 'new-calendar-preview');
 
             const $createBtn = $('<button>')
                 .attr({type: 'button'})
@@ -134,8 +165,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .addClass('help-block text-muted small')
                 .text(this.translateLabelKey('googleCalendarCreateNewHelp'));
 
-            $nameRow.append($input, $createBtn, $help);
-            this.renderNamingPatternHelp($nameRow);
+            $nameRow.append($affixRow, $preview, $createBtn, $help);
             $wrap.append($checkLabel, $nameRow);
             this.$el.append($wrap);
 
@@ -151,17 +181,20 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             });
 
             $input.on('input', e => {
-                this.newCalendarName = String(e.currentTarget.value || '');
+                this.newCalendarName = this.stripAffixes(String(e.currentTarget.value || ''));
+                e.currentTarget.value = this.newCalendarName;
+                this.updateNamingPreview();
             });
 
             $createBtn.on('click', () => this.submitCreateCalendar());
+            this.updateNamingPreview();
         }
 
+        /** Middle label only — prefix/suffix are admin-locked affixes. */
         defaultNewCalendarName() {
             const entityType = this.model.entityType || this.entityType || '';
-            const entityLabel = this.translate(entityType, 'scopeNames') || entityType || 'Calendar';
 
-            return this.buildNamingPatternPreview(entityLabel);
+            return this.translate(entityType, 'scopeNames') || entityType || 'Calendar';
         }
 
         /**
@@ -177,14 +210,44 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             return parts.join('-');
         }
 
-        renderNamingPatternHelp($nameRow) {
-            $nameRow.find('.google-calendar-naming-pattern-help').remove();
+        stripAffixes(name) {
+            let value = String(name || '').trim();
+            const prefix = String(this.calendarNamePrefix || '').trim();
+            const suffix = String(this.calendarNameSuffix || '').trim();
 
-            const $help = $('<p>')
-                .addClass('help-block text-muted small google-calendar-naming-pattern-help')
-                .text(this.translateLabelKey('googleCalendarNamingPatternHelp'));
+            if (prefix) {
+                if (value.indexOf(prefix + ' - ') === 0) {
+                    value = value.slice(prefix.length + 3).trim();
+                } else if (value.indexOf(prefix + '-') === 0) {
+                    value = value.slice(prefix.length + 1).trim();
+                }
+            }
 
-            $nameRow.append($help);
+            if (suffix) {
+                if (value.length >= suffix.length + 3 && value.slice(-(suffix.length + 3)) === ' - ' + suffix) {
+                    value = value.slice(0, -(suffix.length + 3)).trim();
+                } else if (value.length >= suffix.length + 1 && value.slice(-(suffix.length + 1)) === '-' + suffix) {
+                    value = value.slice(0, -(suffix.length + 1)).trim();
+                }
+            }
+
+            return value;
+        }
+
+        updateNamingPreview() {
+            const $preview = this.$el.find('[data-role="new-calendar-preview"]');
+
+            if (!$preview.length) {
+                return;
+            }
+
+            const label = this.stripAffixes(
+                this.newCalendarName || this.$el.find('[data-role="new-calendar-name"]').val() || ''
+            );
+            const full = this.buildNamingPatternPreview(label || this.defaultNewCalendarName());
+            const template = this.translateLabelKey('googleCalendarNamingPatternHelp');
+
+            $preview.text(String(template || '').replace(/\{name\}/g, full));
         }
 
         syncCreateNewUiState() {
@@ -201,9 +264,10 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .prop('checked', this.createNewCalendar);
 
             if (this.createNewCalendar) {
-                $panel.find('[data-role="new-calendar-name"]').val(
-                    this.newCalendarName || this.defaultNewCalendarName()
-                );
+                const middle = this.stripAffixes(this.newCalendarName || this.defaultNewCalendarName());
+                this.newCalendarName = middle;
+                $panel.find('[data-role="new-calendar-name"]').val(middle);
+                this.updateNamingPreview();
             }
 
             const selectize = this.getSelectize();
@@ -225,10 +289,11 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 return;
             }
 
-            const summary = String(this.newCalendarName || this.$el.find('[data-role="new-calendar-name"]').val() || '')
-                .trim();
+            const label = this.stripAffixes(
+                String(this.newCalendarName || this.$el.find('[data-role="new-calendar-name"]').val() || '')
+            );
 
-            if (!summary) {
+            if (!label) {
                 Espo.Ui.error(this.translateLabelKey('googleCalendarCreateNewNameRequired'));
 
                 return;
@@ -238,13 +303,13 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             Espo.Ui.notify(this.translate('pleaseWait', 'messages'));
 
             Espo.Ajax.postRequest('GoogleIntegration/calendar/google-calendars', {
-                summary: summary,
+                label: label,
             }).then(response => {
                 this.createInProgress = false;
                 Espo.Ui.notify(false);
 
                 const id = String(response.id || '');
-                const name = String(response.summary || summary);
+                const name = String(response.summary || this.buildNamingPatternPreview(label));
 
                 if (!id) {
                     Espo.Ui.error(this.translateLabelKey('googleCalendarCreateNewFailed'));
@@ -364,6 +429,11 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
 
                     if (typeof data.nameSuffix === 'string') {
                         this.calendarNameSuffix = data.nameSuffix;
+                    }
+
+                    if (this.isRendered() && this.mode === 'edit') {
+                        this.renderCreateNewUi();
+                        this.syncCreateNewUiState();
                     }
 
                     const list = Array.isArray(data.list) ? data.list : [];

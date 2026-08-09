@@ -12,13 +12,16 @@
         "googleCalendarConnectAccountHint": "Connect your Google account under External Accounts to load your calendar list.",
         "googleCalendarListFailedHint": "Could not load your Google calendars. Only the primary calendar is available.",
         "googleCalendarCreateNew": "Create new calendar",
-        "googleCalendarCreateNewNamePlaceholder": "New calendar name",
-        "googleCalendarCreateNewHelp": "Creates the calendar in your Google account, then selects it here. You can reuse it next time from the list.",
+        "googleCalendarCreateNewNamePlaceholder": "Middle name (label)",
+        "googleCalendarCreateNewHelp": "Only the middle part is editable. Prefix and suffix come from Administration → Integrations → Google and are applied automatically.",
         "googleCalendarCreateNewSubmit": "Create calendar",
-        "googleCalendarCreateNewNameRequired": "Enter a name for the new calendar.",
+        "googleCalendarCreateNewNameRequired": "Enter a middle name for the new calendar.",
         "googleCalendarCreateNewSuccess": "Google calendar created.",
         "googleCalendarCreateNewExists": "Calendar already existed — selected.",
-        "googleCalendarCreateNewFailed": "Could not create Google calendar."
+        "googleCalendarCreateNewFailed": "Could not create Google calendar.",
+        "googleCalendarNamingPatternHelp": "Full Google name: {name}",
+        "googleCalendarNamePrefixLocked": "Prefix is set by an administrator and cannot be changed here.",
+        "googleCalendarNameSuffixLocked": "Suffix is set by an administrator and cannot be changed here."
     },
     "scopeNames": {
         "CalendarTemplate": "Calendar Template",

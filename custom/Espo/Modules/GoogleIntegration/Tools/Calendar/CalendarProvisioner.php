@@ -101,6 +101,47 @@ class CalendarProvisioner
     }
 
     /**
+     * Strip admin prefix/suffix (and legacy "CRM - "/"CRM-") so a user-typed
+     * full name collapses to the editable middle label only.
+     */
+    public function extractLabelFromCalendarName(string $name): string
+    {
+        $name = trim($name);
+
+        if ($name === '') {
+            return '';
+        }
+
+        if (str_starts_with($name, self::LEGACY_PREFIX . ' - ')) {
+            $name = trim(substr($name, strlen(self::LEGACY_PREFIX . ' - ')));
+        } elseif (str_starts_with($name, self::LEGACY_PREFIX . '-')) {
+            $name = trim(substr($name, strlen(self::LEGACY_PREFIX . '-')));
+        }
+
+        [$prefix, $suffix] = $this->getPrefixSuffix();
+
+        if ($prefix !== '') {
+            foreach ([$prefix . ' - ', $prefix . '-'] as $with) {
+                if (str_starts_with($name, $with)) {
+                    $name = trim(substr($name, strlen($with)));
+                    break;
+                }
+            }
+        }
+
+        if ($suffix !== '') {
+            foreach ([' - ' . $suffix, '-' . $suffix] as $with) {
+                if (str_ends_with($name, $with)) {
+                    $name = trim(substr($name, 0, -strlen($with)));
+                    break;
+                }
+            }
+        }
+
+        return $name;
+    }
+
+    /**
      * Detects Google calendars that were created/named by this CRM (current prefix/suffix,
      * or the legacy hardcoded "CRM - " / "CRM-" prefixes). Used to exclude CRM
      * calendars from the personal overlay picker so CRM ↔ Google display never loops.
