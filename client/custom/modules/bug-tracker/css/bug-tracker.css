@@ -37,7 +37,6 @@
     line-height: 1;
 }
 
-/* Keep clear of mobile nav / safe areas */
 @supports (padding: max(0px)) {
     .bug-tracker-fab {
         right: max(1.25rem, env(safe-area-inset-right));
@@ -54,7 +53,6 @@
     }
 }
 
-/* Dark theme: slightly softer red so it stays readable on dark chrome */
 body.theme-dark .bug-tracker-fab,
 html.theme-dark .bug-tracker-fab {
     background: #e74c3c;
@@ -65,4 +63,39 @@ body.theme-dark .bug-tracker-fab:focus,
 html.theme-dark .bug-tracker-fab:hover,
 html.theme-dark .bug-tracker-fab:focus {
     background: #c0392b;
+}
+
+/* Create-bug modal help — stacked list, not one run-on line */
+.bug-report-fill-help {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    line-height: 1.45;
+}
+
+.bug-report-fill-help-title {
+    font-weight: 600;
+    margin: 0 0 0.55rem;
+}
+
+.bug-report-fill-help-list {
+    display: block;
+    margin: 0 0 0.65rem;
+    padding-left: 1.35rem;
+    list-style: decimal outside;
+}
+
+.bug-report-fill-help-list > li {
+    display: list-item;
+    margin: 0 0 0.4rem;
+    padding-left: 0.15rem;
+}
+
+.bug-report-fill-help-list > li:last-child {
+    margin-bottom: 0;
+}
+
+.bug-report-fill-help-note {
+    margin: 0.55rem 0 0;
+    font-size: 0.92em;
+    opacity: 0.92;
 }

@@ -29,9 +29,14 @@ use Throwable;
  * soft → Confirmed, hard (place/time/conditions) → CollectingAvailability.
  *
  * Invite statuses: there is no Pending enum — Available is the affirmative /
- * re-openable state. Declined / Cancelled are never touched. On hard re-collect
- * for a changed slot: prior Available is cleared (must re-answer); Assigned /
- * Confirmed (accepted) stay as-is.
+ * re-openable state. Declined / Cancelled are never touched.
+ *
+ * On hard re-collect for a **changed** slot: clear Available and strip
+ * Assigned/Confirmed (assignment + availability both reset). Unchanged slots
+ * are never processed here, so their Assigned/Confirmed stay intact.
+ *
+ * Offer stays **Updated** until send / auto-job / Request availability;
+ * only then → CollectingAvailability.
  */
 class ShiftChangeNotifyService
 {
@@ -418,8 +423,8 @@ class ShiftChangeNotifyService
     }
 
     /**
-     * Hard re-collect for Confirmed/Updated (or flush pending hard): reset assignments
-     * on changed slots, keep prior Available, open CollectingAvailability.
+     * Hard re-collect for Confirmed/Updated (or flush pending hard): reset
+     * Available + Assigned/Confirmed on target slots only, then CollectingAvailability.
      *
      * @param list<string>|null $slotIds null = all published slots on the offer
      * @return array{resetCount: int, emailSent: int, notifyCount: int, slotCount: int, status: string}
@@ -637,11 +642,11 @@ class ShiftChangeNotifyService
     }
 
     /**
-     * Process place/time/conditions change on one slot:
-     * - Clear prior Available (must re-answer)
-     * - Keep Assigned/Confirmed (accepted staffing stays)
-     * - Email availability request only to users whose Available was cleared
-     * - In-app notify all previously involved (Available + accepted)
+     * Process place/time/conditions change on one **changed** slot:
+     * - Clear Available (interest)
+     * - Clear Assigned/Confirmed (assignment) — remove collaborator + invite
+     * - Email availability request to those users
+     * - Unchanged slots are not passed here, so their Accepted staffing stays
      *
      * @return array{resetCount: int, emailSent: int, notifyCount: int, skipped: bool}
      */
@@ -668,8 +673,7 @@ class ShiftChangeNotifyService
             $this->rememberChangedSlot($offerId, $slotId);
         }
 
-        $notifyUserIds = [];
-        $reRequestUserIds = [];
+        $userIds = [];
         $resetCount = 0;
 
         foreach ($this->getSlotInvites($slotId) as $invite) {
@@ -685,25 +689,24 @@ class ShiftChangeNotifyService
                 continue;
             }
 
-            $notifyUserIds[] = $userId;
+            $userIds[] = $userId;
 
-            if ($status === 'Available') {
-                // Clear old interest on the changed slot — volunteer must re-answer.
-                $this->entityManager->removeEntity($invite, [
-                    StatusGuard::SKIP_OPTION => true,
-                    self::SKIP_SCHEDULE_NOTIFY => true,
-                    self::SKIP_PLAN_UPDATE_NOTIFY => true,
-                ]);
-                $reRequestUserIds[] = $userId;
-                $resetCount++;
+            if (in_array($status, ['Assigned', 'Confirmed'], true)) {
+                $this->removeTaskCollaborator($invite);
             }
-            // Assigned / Confirmed: accepted staffing stays unchanged.
+
+            // Changed slot: strip both availability and assignment — must re-answer.
+            $this->entityManager->removeEntity($invite, [
+                StatusGuard::SKIP_OPTION => true,
+                self::SKIP_SCHEDULE_NOTIFY => true,
+                self::SKIP_PLAN_UPDATE_NOTIFY => true,
+            ]);
+            $resetCount++;
         }
 
-        $notifyUserIds = array_values(array_unique($notifyUserIds));
-        $reRequestUserIds = array_values(array_unique($reRequestUserIds));
+        $userIds = array_values(array_unique($userIds));
 
-        if ($notifyUserIds === [] && $reRequestUserIds === []) {
+        if ($userIds === []) {
             if (!$skipFinalize) {
                 $this->maybeFinalizeAfterScheduleChange($offerId);
             }
@@ -724,14 +727,12 @@ class ShiftChangeNotifyService
 
         $notifyCount = 0;
 
-        foreach ($notifyUserIds as $userId) {
+        foreach ($userIds as $userId) {
             $this->createOfferNotification($offer, $userId, $message);
             $notifyCount++;
         }
 
-        $emailResult = $reRequestUserIds !== []
-            ? $this->shiftEmailService->sendAvailabilityRequest($offer, $reRequestUserIds)
-            : ['sent' => 0];
+        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, $userIds);
 
         $this->syncSlotCoverageStatusesInline($offerId);
 

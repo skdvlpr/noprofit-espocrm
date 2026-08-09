@@ -42,6 +42,10 @@
     "messages": {
         "reportSubmitted": "Thank you — your bug report was submitted.",
         "fabTooltip": "Report a bug on this page",
-        "fillInstructions": "<strong>How to fill this form</strong><ol><li><strong>Page URL</strong> and <strong>page title</strong> are filled automatically and cannot be changed.</li><li>Write a clear <strong>description</strong>: what you did, what you expected, what happened.</li><li>Attach one or more <strong>screenshots</strong> (required when possible).</li></ol>Only description and screenshots are editable after you save."
+        "fillInstructionsTitle": "How to fill this form",
+        "fillInstructionsStep1": "<strong>Page URL</strong> and <strong>page title</strong> are filled automatically and cannot be changed.",
+        "fillInstructionsStep2": "Write a clear <strong>description</strong>: what you did, what you expected, what happened.",
+        "fillInstructionsStep3": "Attach one or more <strong>screenshots</strong> (when possible).",
+        "fillInstructionsNote": "After saving you can edit only description and screenshots."
     }
 }

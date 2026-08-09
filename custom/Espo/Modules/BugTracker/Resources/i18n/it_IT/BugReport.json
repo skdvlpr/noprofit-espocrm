@@ -42,6 +42,10 @@
     "messages": {
         "reportSubmitted": "Grazie — la segnalazione è stata inviata.",
         "fabTooltip": "Segnala un bug su questa pagina",
-        "fillInstructions": "<strong>Come compilare</strong><ol><li><strong>URL pagina</strong> e <strong>titolo pagina</strong> si compilano da soli e non si possono cambiare.</li><li>Scrivi una <strong>descrizione</strong> chiara: cosa hai fatto, cosa ti aspettavi, cosa è successo.</li><li>Allega uno o più <strong>screenshot</strong> (quando possibile).</li></ol>Dopo il salvataggio puoi modificare solo descrizione e screenshot."
+        "fillInstructionsTitle": "Come compilare",
+        "fillInstructionsStep1": "<strong>URL pagina</strong> e <strong>titolo pagina</strong> si compilano da soli e non si possono cambiare.",
+        "fillInstructionsStep2": "Scrivi una <strong>descrizione</strong> chiara: cosa hai fatto, cosa ti aspettavi, cosa è successo.",
+        "fillInstructionsStep3": "Allega uno o più <strong>screenshot</strong> (quando possibile).",
+        "fillInstructionsNote": "Dopo il salvataggio puoi modificare solo descrizione e screenshot."
     }
 }

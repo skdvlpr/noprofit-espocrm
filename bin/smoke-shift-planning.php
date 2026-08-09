@@ -1121,13 +1121,14 @@ ok(
     'slot conditions are not soft importantSlotFields'
 );
 ok(
-    str_contains($notifySrc, 'Clear old interest')
-        || str_contains($notifySrc, 'must re-answer'),
-    'processScheduleChange clears Available on changed slots'
+    str_contains($notifySrc, 'strip both availability and assignment')
+        || str_contains($notifySrc, 'Clear Assigned/Confirmed'),
+    'processScheduleChange clears Available and Assigned/Confirmed on changed slots'
 );
 ok(
-    str_contains($notifySrc, 'accepted staffing stays'),
-    'processScheduleChange keeps Assigned/Confirmed on changed slots'
+    str_contains($notifySrc, 'Unchanged slots are not passed')
+        || str_contains($notifySrc, 'Accepted staffing stay'),
+    'unchanged slots keep Assigned/Confirmed (not processed)'
 );
 ok(
     (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'pendingChangedSlotIdList']),

@@ -304,8 +304,10 @@ class ShiftPlanningService
     /**
      * Open / re-open availability collection and notify involved volunteers.
      *
-     * Draft → first open (cohort). Collecting → re-send to cohort.
-     * Confirmed / Updated → hard re-collect (sticky Available on changed slots).
+     * Draft → first open (cohort).
+     * With pending changed slots / Updated / Confirmed re-request → hard re-collect
+     * (clears Available+Assigned/Confirmed on those slots only) → CollectingAvailability.
+     * Collecting/Planned without pending edits → re-send emails only (no invite wipe).
      *
      * @return array{notifyCount: int, slotCount: int, cohortCount: int, emailCount: int}
      * @throws BadRequest|Forbidden|NotFound
@@ -334,16 +336,12 @@ class ShiftPlanningService
             throw new BadRequest("Publish at least one shift (status Published) before requesting availability.");
         }
 
-        // Re-collect anytime after first publish: Confirmed / Updated / Planned / Collecting
-        // with prior invites. Only changed slots if pendingChangedSlotIdList is set;
-        // otherwise all published slots. Clears Available; keeps Assigned/Confirmed.
-        if (in_array($status, [
-            self::STATUS_COLLECTING,
-            self::STATUS_PLANNED,
-            self::STATUS_CONFIRMED,
-            self::STATUS_UPDATED,
-        ], true) && $this->resolveInvolvedUserIds($offerId) !== []) {
-            $changedOnly = $this->shiftChangeNotifyService->getPendingChangedSlotIds($offerId);
+        $changedOnly = $this->shiftChangeNotifyService->getPendingChangedSlotIds($offerId);
+        $needsHardRecollect = $changedOnly !== []
+            || in_array($status, [self::STATUS_UPDATED, self::STATUS_CONFIRMED], true);
+
+        if ($needsHardRecollect && $this->resolveInvolvedUserIds($offerId) !== []) {
+            // Only changed slots when we know them; otherwise all published (full re-request).
             $hard = $this->shiftChangeNotifyService->hardRecollectAvailability(
                 $offerId,
                 $changedOnly !== [] ? $changedOnly : null
@@ -363,6 +361,11 @@ class ShiftPlanningService
         }
 
         $cohortIds = $this->resolveCohortUserIds($offer);
+
+        if ($cohortIds === []) {
+            // Fall back to already-involved users when cohort links are empty.
+            $cohortIds = $this->resolveInvolvedUserIds($offerId);
+        }
 
         if ($cohortIds === []) {
             throw new BadRequest("Select volunteers and/or teams before requesting availability.");
