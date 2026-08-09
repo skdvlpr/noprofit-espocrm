@@ -212,6 +212,7 @@ class StripeBulkPullService
             'created' => is_object($site) && isset($site->created) ? (int) $site->created : 0,
             'updated' => is_object($site) && isset($site->updated) ? (int) $site->updated : 0,
             'duplicate' => is_object($site) && isset($site->duplicate) ? (int) $site->duplicate : 0,
+            'restored' => is_object($site) && isset($site->restored) ? (int) $site->restored : 0,
             'skipped' => is_object($site) && isset($site->skipped) ? (int) $site->skipped : 0,
             'failed' => is_object($site) && isset($site->failed) ? (int) $site->failed : 0,
             'markedInviato' => is_object($site) && isset($site->markedInviato)

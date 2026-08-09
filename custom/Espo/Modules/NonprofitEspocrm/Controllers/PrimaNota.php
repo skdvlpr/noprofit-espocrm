@@ -8,6 +8,7 @@ use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Error;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
+use Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\RestoreByDonationReference;
 use Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeBulkPullService;
 use Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeRefreshService;
 use stdClass;
@@ -79,5 +80,30 @@ class PrimaNota extends Record
         @set_time_limit(600);
 
         return $service->pull($providers, $mode, $fromDate, $maxItems, $currencies, $startingAfter);
+    }
+
+    /**
+     * Restore soft-deleted PrimaNota matched by donationPaymentReference (Stripe PI id).
+     * Donation-site ingest calls this when live search misses a soft-deleted row.
+     *
+     * @throws BadRequest
+     * @throws Forbidden
+     * @throws NotFound
+     */
+    public function postActionRestoreByDonationPaymentReference(Request $request): stdClass
+    {
+        $data = $request->getParsedBody() ?? (object) [];
+        $reference = isset($data->donationPaymentReference) && is_string($data->donationPaymentReference)
+            ? $data->donationPaymentReference
+            : null;
+
+        if ($reference === null || trim($reference) === '') {
+            throw new BadRequest('donationPaymentReference is required.');
+        }
+
+        /** @var RestoreByDonationReference $service */
+        $service = $this->injectableFactory->create(RestoreByDonationReference::class);
+
+        return $service->restore($reference);
     }
 }

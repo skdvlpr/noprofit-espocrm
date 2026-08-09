@@ -135,6 +135,17 @@ $ok(
     class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\StripeBulkPullService::class)
 );
 $ok(
+    'RestoreByDonationReference class',
+    class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PrimaNota\RestoreByDonationReference::class)
+);
+$ok(
+    'PrimaNota controller has restoreByDonationPaymentReference',
+    str_contains(
+        file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Controllers/PrimaNota.php') ?: '',
+        'postActionRestoreByDonationPaymentReference'
+    )
+);
+$ok(
     'bulkPull list menu button',
     in_array(
         'bulkPullFromProviders',
