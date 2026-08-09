@@ -55,10 +55,16 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/volunteer-stats', [
                                                 <span class="label label-default">{{respondedNo}}</span>
                                             {{/if}}
                                         </td>
-                                        <td class="text-center">{{availableCount}}</td>
+                                        <td class="text-center">
+                                            {{#if availableCount}}
+                                                <span class="label label-primary" data-status="Available">{{availableCount}}</span>
+                                            {{else}}
+                                                0
+                                            {{/if}}
+                                        </td>
                                         <td class="text-center">
                                             {{#if assignedCount}}
-                                                <span class="label label-primary">{{assignedCount}}</span>
+                                                <span class="label label-warning" data-status="Assigned">{{assignedCount}}</span>
                                             {{else}}
                                                 0
                                             {{/if}}

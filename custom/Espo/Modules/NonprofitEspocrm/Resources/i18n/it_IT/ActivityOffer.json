@@ -25,6 +25,7 @@
         "weekSlots": "Turni settimanali",
         "pendingNotifyKind": "Tipo aggiornamento in sospeso",
         "pendingNotifyAt": "Invio aggiornamento previsto",
+        "pendingChangedSlotIdList": "Turni modificati (ri-raccolta)",
         "isFullyStaffed": "Disponibilità sufficienti",
         "autoConfirmWhenFullyStaffed": "Assegna + conferma automaticamente quando ci sono abbastanza disponibili",
         "fullyStaffedNotifiedAt": "Notifica disponibilità sufficienti inviata il"
@@ -47,8 +48,12 @@
         "Close plan": "Chiudi piano",
         "Cancel all": "Annulla tutto",
         "Send update now": "Invia aggiornamento ora",
+        "Do not send update": "Non inviare aggiornamento",
         "Add 5 minutes": "Aggiungi altri 5 minuti",
         "Fill availability": "Indica disponibilità",
+        "availabilitySectionChanged": "Turni aggiornati",
+        "availabilitySectionUnchanged": "Turni invariati",
+        "availabilityLocked": "Disponibilità mantenuta",
         "pendingConfirmation": "In attesa di conferma",
         "Coverage": "Copertura turni",
         "coverageAvailable": "Disponibili",
@@ -91,7 +96,7 @@
         },
         "pendingNotifyKind": {
             "soft": "Contenuto",
-            "hard": "Luogo/orario"
+            "hard": "Luogo/orario/condizioni"
         },
         "category": {
             "MealPreparation": "Preparazione pasti",
@@ -141,8 +146,10 @@
         "sendPendingUpdateSoftSuccess": "Aggiornamento inviato. Il piano è di nuovo Confermato.",
         "sendPendingUpdateHardSuccess": "Aggiornamento inviato. Il piano torna in raccolta disponibilità.",
         "extendPendingUpdateSuccess": "Invio automatico ritardato di altri {minutes} minuti.",
-        "pendingUpdateBannerSoft": "Il piano confermato è stato modificato. I volontari riceveranno l'aggiornamento tra circa 10 minuti (conto alla rovescia sotto), oppure puoi inviare ora o aggiungere tempo.",
-        "pendingUpdateBannerHard": "Luogo o orario modificati. Dopo l'invio automatico (~10 min) il piano riaprirà la raccolta disponibilità.",
+        "discardPendingUpdateConfirm": "Annullare l'aggiornamento in sospeso? I volontari non verranno avvisati e il piano resta Confermato.",
+        "discardPendingUpdateSuccess": "Aggiornamento in sospeso annullato. Il piano è di nuovo Confermato.",
+        "pendingUpdateBannerSoft": "Il piano confermato è stato modificato. I volontari riceveranno l'aggiornamento tra circa 10 minuti (conto alla rovescia sotto), oppure puoi inviare ora, aggiungere tempo o non inviare.",
+        "pendingUpdateBannerHard": "Luogo, orario o condizioni aggiuntive modificati. Dopo l'invio automatico (~10 min) il piano riaprirà la raccolta disponibilità.",
         "pendingUpdateCountdown": "Invio automatico tra {time}",
         "pendingUpdateSendingSoon": "Invio automatico in corso…",
         "availabilityRequestNotification": "Nuova pianificazione turni «{name}» (settimana dal {weekStart}): indica la tua disponibilità.",

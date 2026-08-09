@@ -2,12 +2,7 @@
     {
         "rows": [
             [
-                {"name": "name"},
-                {"name": "status"}
-            ],
-            [
-                {"name": "pageTitle"},
-                false
+                {"name": "pageTitle", "fullWidth": true}
             ],
             [
                 {"name": "pageUrl", "fullWidth": true}
@@ -17,14 +12,6 @@
             ],
             [
                 {"name": "screenshots", "fullWidth": true}
-            ],
-            [
-                {"name": "assignedUser"},
-                {"name": "teams"}
-            ],
-            [
-                {"name": "screenshotsClearedAt"},
-                false
             ]
         ]
     }

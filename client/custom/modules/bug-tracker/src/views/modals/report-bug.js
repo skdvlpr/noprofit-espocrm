@@ -31,6 +31,32 @@ define('bug-tracker:views/modals/report-bug', ['views/modals/edit'], function (D
             this.headerHtml = this.translate('ReportBug', 'labels', 'BugReport');
         },
 
+        afterRender: function () {
+            Dep.prototype.afterRender.call(this);
+
+            // Fill instructions above the form (create only).
+            if (this.$el.find('.bug-report-fill-help').length) {
+                return;
+            }
+
+            const help = this.translate('fillInstructions', 'messages', 'BugReport');
+            const $help = $('<div class="alert alert-info bug-report-fill-help" role="note"></div>')
+                .html(help);
+
+            this.$el.find('.edit-container, .record').first().prepend($help);
+
+            // Ensure URL / page title stay non-editable in the create UI.
+            ['pageUrl', 'pageTitle', 'name'].forEach(name => {
+                const view = this.getView('record') && this.getView('record').getFieldView
+                    ? this.getView('record').getFieldView(name)
+                    : null;
+
+                if (view && typeof view.setReadOnly === 'function') {
+                    view.setReadOnly(true);
+                }
+            });
+        },
+
         afterSave: function () {
             Dep.prototype.afterSave.apply(this, arguments);
 

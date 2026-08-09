@@ -302,19 +302,30 @@ class ShiftPlanningService
     }
 
     /**
-     * Open availability collection and notify the cohort.
+     * Open / re-open availability collection and notify involved volunteers.
      *
-     * @return array{notifyCount: int, slotCount: int}
+     * Draft → first open (cohort). Collecting → re-send to cohort.
+     * Confirmed / Updated → hard re-collect (sticky Available on changed slots).
+     *
+     * @return array{notifyCount: int, slotCount: int, cohortCount: int, emailCount: int}
      * @throws BadRequest|Forbidden|NotFound
      */
     public function requestAvailability(string $offerId): array
     {
         $offer = $this->getOfferForEdit($offerId);
 
-        $status = $offer->get('status');
+        $status = (string) $offer->get('status');
 
-        if (!in_array($status, [self::STATUS_DRAFT, self::STATUS_COLLECTING], true)) {
-            throw new BadRequest("Availability can be requested for Draft plans only.");
+        if (!in_array($status, [
+            self::STATUS_DRAFT,
+            self::STATUS_COLLECTING,
+            self::STATUS_PLANNED,
+            self::STATUS_CONFIRMED,
+            self::STATUS_UPDATED,
+        ], true)) {
+            throw new BadRequest(
+                "Availability can be requested for open plans (not Closed/Completed)."
+            );
         }
 
         $slots = $this->getPublishedSlots($offerId);
@@ -323,15 +334,45 @@ class ShiftPlanningService
             throw new BadRequest("Publish at least one shift (status Published) before requesting availability.");
         }
 
+        // Re-collect anytime after first publish: Confirmed / Updated / Planned / Collecting
+        // with prior invites. Only changed slots if pendingChangedSlotIdList is set;
+        // otherwise all published slots. Clears Available; keeps Assigned/Confirmed.
+        if (in_array($status, [
+            self::STATUS_COLLECTING,
+            self::STATUS_PLANNED,
+            self::STATUS_CONFIRMED,
+            self::STATUS_UPDATED,
+        ], true) && $this->resolveInvolvedUserIds($offerId) !== []) {
+            $changedOnly = $this->shiftChangeNotifyService->getPendingChangedSlotIds($offerId);
+            $hard = $this->shiftChangeNotifyService->hardRecollectAvailability(
+                $offerId,
+                $changedOnly !== [] ? $changedOnly : null
+            );
+
+            $involvedIds = $this->resolveInvolvedUserIds($offerId);
+
+            return [
+                'cohortCount' => count($involvedIds),
+                'notifyCount' => (int) ($hard['notifyCount'] ?? 0),
+                'slotCount' => (int) ($hard['slotCount'] ?? count($slots)),
+                'emailCount' => (int) ($hard['emailSent'] ?? 0),
+                'emailSkipped' => [],
+                'emailFailed' => [],
+                'kind' => ShiftChangeNotifyService::KIND_HARD,
+            ];
+        }
+
         $cohortIds = $this->resolveCohortUserIds($offer);
 
         if ($cohortIds === []) {
             throw new BadRequest("Select volunteers and/or teams before requesting availability.");
         }
 
-        $offer->set('status', self::STATUS_COLLECTING);
-        $offer->set('publishedAt', $this->nowString());
-        $this->saveEntityAllowStatus($offer);
+        if ($status === self::STATUS_DRAFT) {
+            $offer->set('status', self::STATUS_COLLECTING);
+            $offer->set('publishedAt', $this->nowString());
+            $this->saveEntityAllowStatus($offer);
+        }
 
         $message = $this->translateMessage('availabilityRequestNotification', [
             'name' => (string) $offer->get(Field::NAME),
@@ -384,6 +425,11 @@ class ShiftPlanningService
             }
         }
 
+        $changedIds = array_fill_keys(
+            $this->shiftChangeNotifyService->getPendingChangedSlotIds($offerId),
+            true
+        );
+
         $slotList = [];
 
         foreach ($this->getSlots($offerId) as $slot) {
@@ -394,11 +440,13 @@ class ShiftPlanningService
             }
 
             $category = (string) ($slot->get('category') ?? '');
-
-            $myInvite = $myInvites[$slot->getId()] ?? null;
+            $slotId = (string) $slot->getId();
+            $myInvite = $myInvites[$slotId] ?? null;
+            $myStatus = is_array($myInvite) ? ($myInvite['status'] ?? null) : $myInvite;
+            $isChanged = isset($changedIds[$slotId]);
 
             $slotList[] = [
-                'id' => $slot->getId(),
+                'id' => $slotId,
                 'name' => $slot->get(Field::NAME),
                 'category' => $category,
                 'categoryLabel' => $this->language
@@ -410,11 +458,23 @@ class ShiftPlanningService
                 'placeCity' => (string) ($slot->get('placeCity') ?? ''),
                 'placeLabel' => $this->formatPlaceLabel($slot),
                 'conditions' => $this->normalizeConditions($slot->get('conditions') ?? []),
-                'myStatus' => is_array($myInvite) ? ($myInvite['status'] ?? null) : $myInvite,
+                'myStatus' => $myStatus,
                 'myComment' => is_array($myInvite) ? ($myInvite['comment'] ?? '') : '',
                 'allowed' => $competences === [] || in_array($category, $competences, true),
+                'changed' => $isChanged,
             ];
         }
+
+        usort($slotList, static function (array $a, array $b): int {
+            $aChanged = !empty($a['changed']) ? 0 : 1;
+            $bChanged = !empty($b['changed']) ? 0 : 1;
+
+            if ($aChanged !== $bChanged) {
+                return $aChanged <=> $bChanged;
+            }
+
+            return strcmp((string) ($a['dateStart'] ?? ''), (string) ($b['dateStart'] ?? ''));
+        });
 
         return [
             'id' => $offer->getId(),
@@ -428,6 +488,7 @@ class ShiftPlanningService
                 [self::STATUS_COLLECTING, self::STATUS_PLANNED],
                 true
             ),
+            'changedSlotIds' => array_keys($changedIds),
             'comment' => $this->getUserPlanComment($offerId, $this->user->getId()),
             'slots' => $slotList,
         ];
@@ -1180,6 +1241,25 @@ class ShiftPlanningService
     }
 
     /**
+     * Discard pending soft/hard update (do not send). Updated → Confirmed, no emails.
+     *
+     * @return array{status: string, discarded: bool}
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function discardPendingUpdate(string $offerId): array
+    {
+        $this->getOfferForEdit($offerId);
+
+        $result = $this->shiftChangeNotifyService->discardPendingUpdate($offerId);
+
+        if (empty($result['discarded'])) {
+            throw new BadRequest("Only an Updated plan with a pending notify can be discarded.");
+        }
+
+        return $result;
+    }
+
+    /**
      * Flush pending soft/hard update notify for an Updated plan (Send update now).
      *
      * @return array{
@@ -1299,6 +1379,7 @@ class ShiftPlanningService
 
         $offer->set('status', self::STATUS_CONFIRMED);
         $this->saveEntityAllowStatus($offer);
+        $this->shiftChangeNotifyService->clearPendingChangedSlots($offerId);
 
         $this->syncSlotCoverageStatuses($offerId);
 
@@ -1497,6 +1578,36 @@ class ShiftPlanningService
         }
 
         return array_values(array_unique(array_filter($ids)));
+    }
+
+    /**
+     * Users with Available / Assigned / Confirmed invites on this plan.
+     *
+     * @return list<string>
+     */
+    private function resolveInvolvedUserIds(string $offerId): array
+    {
+        $ids = [];
+
+        foreach ($this->getInvites($offerId) as $invite) {
+            $status = (string) ($invite->get('status') ?? '');
+
+            if (!in_array($status, [
+                self::INVITE_AVAILABLE,
+                self::INVITE_ASSIGNED,
+                self::INVITE_CONFIRMED,
+            ], true)) {
+                continue;
+            }
+
+            $userId = (string) ($invite->get('userId') ?? '');
+
+            if ($userId !== '') {
+                $ids[$userId] = true;
+            }
+        }
+
+        return array_keys($ids);
     }
 
     /**

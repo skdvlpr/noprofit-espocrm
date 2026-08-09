@@ -119,9 +119,9 @@
   --state-warning-text: #92400e;
   --warning-bg: #fffbeb;
 
-  /* Enum text — default is neutral gray (not brand red); matches kanban column headers */
+  /* Enum text — default is neutral gray; primary = semantic blue (not brand red) */
   --enum-text-default: #52525b;
-  --enum-text-primary: #b91c1b;
+  --enum-text-primary: #1d4ed8;
   --enum-text-success: #15803d;
   --enum-text-warning: #c2410c;
   --enum-text-danger: #dc2626;
@@ -131,7 +131,7 @@
 
   /* Left stripe on styled enum selectize — aligned with kanban group-header pastels */
   --sh-enum-stripe-default: #a1a1aa;
-  --sh-enum-stripe-primary: #f87171;
+  --sh-enum-stripe-primary: #60a5fa;
   --sh-enum-stripe-warning: #fb923c;
   --sh-enum-stripe-success: #4ade80;
   --sh-enum-stripe-danger: #f87171;
@@ -140,9 +140,9 @@
   --state-default-bg: #e4e4e7;
   --state-default-text: #3f3f46;
   --state-default-border: #d4d4d8;
-  --state-primary-bg: rgba(239, 68, 68, 0.18);
-  --state-primary-text: #b91c1b;
-  --state-primary-border: rgba(239, 68, 68, 0.28);
+  --state-primary-bg: rgba(37, 99, 235, 0.14);
+  --state-primary-text: #1d4ed8;
+  --state-primary-border: rgba(37, 99, 235, 0.28);
   --state-danger-bg: rgba(220, 38, 38, 0.14);
   --state-danger-text: #dc2626;
   --state-danger-border: rgba(220, 38, 38, 0.28);
@@ -155,8 +155,8 @@
   --state-info-bg: rgba(99, 102, 241, 0.14);
   --state-info-text: #4338ca;
   --state-info-border: rgba(99, 102, 241, 0.32);
-  --enum-active-primary-bg: rgba(239, 68, 68, 0.18);
-  --enum-active-primary-text: #b91c1b;
+  --enum-active-primary-bg: rgba(37, 99, 235, 0.14);
+  --enum-active-primary-text: #1d4ed8;
   --enum-active-success-bg: rgba(101, 163, 13, 0.16);
   --enum-active-success-text: #4d7c0f;
   --enum-active-warning-bg: rgba(217, 119, 6, 0.16);
@@ -201,9 +201,9 @@ body {
   --btn-primary-hover-border: #b91c1c;
   --btn-primary-active-bg: #b91c1c;
   --btn-primary-active-border: #991b1b;
-  --state-primary-bg: rgba(239, 68, 68, 0.12);
-  --state-primary-border: rgba(239, 68, 68, 0.28);
-  --state-primary-text: #b91c1c;
+  --state-primary-bg: rgba(37, 99, 235, 0.12);
+  --state-primary-border: rgba(37, 99, 235, 0.28);
+  --state-primary-text: #1d4ed8;
   --input-border-focus: #ef4444;
   --input-border-focus-rgba: rgba(239, 68, 68, 0.55);
   color: var(--text-color);
@@ -474,15 +474,15 @@ body #content #main > .panel.panel-default:has(> table.table) {
   background-color: rgba(255, 255, 255, 0.96) !important;
 }
 
-/* Status labels — pastels */
+/* Status labels — pastels (default gray; primary = semantic blue, not brand red) */
 body .label-default {
-  background-color: rgba(239, 68, 68, 0.18) !important;
-  color: #b91c1b !important;
+  background-color: var(--state-default-bg) !important;
+  color: var(--state-default-text) !important;
 }
 
 body .label-primary {
-  background-color: rgba(239, 68, 68, 0.18) !important;
-  color: #b91c1b !important;
+  background-color: var(--state-primary-bg) !important;
+  color: var(--state-primary-text) !important;
 }
 
 body .label-success {
@@ -514,8 +514,8 @@ body .list-kanban th.group-header.group-header-default > div {
 }
 
 body .list-kanban th.group-header.group-header-primary > div {
-  background-color: #fecaca !important;
-  color: #b91c1b !important;
+  background-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
 }
 
 body .list-kanban th.group-header.group-header-warning > div {

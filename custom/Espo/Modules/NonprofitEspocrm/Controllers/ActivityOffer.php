@@ -54,12 +54,6 @@ class ActivityOffer extends Record
      *
      * @throws BadRequest|Forbidden|NotFound
      */
-
-    /**
-     * Push pending auto-send further (+5 minutes by default).
-     *
-     * @throws BadRequest|Forbidden|NotFound
-     */
     public function postActionExtendPendingUpdate(Request $request): stdClass
     {
         $data = $request->getParsedBody();
@@ -71,6 +65,17 @@ class ActivityOffer extends Record
         }
 
         return (object) $this->createService()->extendPendingUpdate($id, $minutes);
+    }
+
+    /**
+     * Discard pending soft/hard update (do not send emails / no invite reset).
+     *
+     * @throws BadRequest|Forbidden|NotFound
+     */
+    public function postActionDiscardPendingUpdate(Request $request): stdClass
+    {
+        return (object) $this->createService()
+            ->discardPendingUpdate($this->requireId($request));
     }
 
     /**

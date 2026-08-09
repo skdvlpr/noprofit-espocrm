@@ -2,6 +2,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
 
     /**
      * Volunteer availability grid: checkboxes per shift, place, conditions, comment.
+     * After hard re-collect, changed slots are listed first (Available was cleared).
      */
     return Dep.extend({
 
@@ -29,7 +30,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                         {{#each slots}}
                             <label
                                 class="availability-slot"
-                                style="display: block; padding: 0.55em 0.35em; border-bottom: 1px solid var(--border-color, #4443); cursor: pointer;"
+                                style="display: block; padding: 0.55em 0.35em; border-bottom: 1px solid var(--border-color, #4443); cursor: {{#if enabled}}pointer{{else}}default{{/if}};"
                             >
                                 <div style="display: flex; align-items: flex-start; gap: 0.6em; flex-wrap: wrap;">
                                     <input
@@ -44,7 +45,10 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                                             <strong>{{dayLabel}}</strong>
                                             <span class="text-muted"> · {{timeLabel}}</span>
                                             {{#if statusLabel}}
-                                                <span class="label label-{{statusStyle}}">{{statusLabel}}</span>
+                                                <span
+                                                    class="label label-state label-status-semantic label-{{statusStyle}}"
+                                                    data-status="{{myStatus}}"
+                                                >{{statusLabel}}</span>
                                             {{/if}}
                                         </div>
                                         {{#if placeLabel}}
@@ -134,7 +138,6 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
         },
 
         prepareGroups: function () {
-            const groupMap = {};
             const statusStyleMap = {
                 Available: 'primary',
                 Assigned: 'warning',
@@ -143,16 +146,18 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                 Cancelled: 'default',
             };
 
-            (this.gridData.slots || []).forEach(slot => {
-                const key = slot.category || '';
+            const changedSectionLabel = this.translate(
+                'availabilitySectionChanged',
+                'labels',
+                'ActivityOffer'
+            );
+            const unchangedSectionLabel = this.translate(
+                'availabilitySectionUnchanged',
+                'labels',
+                'ActivityOffer'
+            );
 
-                if (!groupMap[key]) {
-                    groupMap[key] = {
-                        label: slot.categoryLabel || key,
-                        slots: [],
-                    };
-                }
-
+            const mapSlot = slot => {
                 if (!slot.allowed) {
                     this.hasDisallowed = true;
                 }
@@ -160,7 +165,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                 const checked = ['Available', 'Assigned', 'Confirmed'].includes(slot.myStatus);
                 const volunteerLabel = this.volunteerFacingStatusLabel(slot.myStatus);
 
-                groupMap[key].slots.push({
+                return {
                     id: slot.id,
                     dayLabel: this.formatDay(slot.dateStart),
                     timeLabel: this.formatTimeRange(slot.dateStart, slot.dateEnd),
@@ -169,20 +174,55 @@ define('nonprofit-espocrm:views/activity-offer/modals/availability', ['views/mod
                     requiredCount: slot.requiredCount,
                     checked: checked,
                     enabled: this.gridData.canRespond && slot.allowed,
+                    myStatus: slot.myStatus || '',
                     statusLabel: volunteerLabel,
                     statusStyle: statusStyleMap[slot.myStatus] || 'default',
                     placeText: this.translate('place', 'fields', 'ActivityOfferSlot'),
                     conditionsText: this.translate('conditions', 'fields', 'ActivityOfferSlot'),
                     requiredText: this.translate('requiredCount', 'fields', 'ActivityOfferSlot'),
-                });
+                };
+            };
+
+            const slots = this.gridData.slots || [];
+            const hasChangedTracking = slots.some(s => !!s.changed) ||
+                ((this.gridData.changedSlotIds || []).length > 0);
+
+            if (hasChangedTracking) {
+                const changed = slots.filter(s => !!s.changed).map(mapSlot);
+                const unchanged = slots.filter(s => !s.changed).map(mapSlot);
+
+                this.groups = [];
+
+                if (changed.length) {
+                    this.groups.push({label: changedSectionLabel, slots: changed});
+                }
+
+                if (unchanged.length) {
+                    this.groups.push({label: unchangedSectionLabel, slots: unchanged});
+                }
+
+                return;
+            }
+
+            const groupMap = {};
+
+            slots.forEach(slot => {
+                const key = slot.category || '';
+
+                if (!groupMap[key]) {
+                    groupMap[key] = {
+                        label: slot.categoryLabel || key ||
+                            this.translate('Shifts', 'labels', 'ActivityOffer'),
+                        slots: [],
+                    };
+                }
+
+                groupMap[key].slots.push(mapSlot(slot));
             });
 
             this.groups = Object.keys(groupMap).map(key => groupMap[key]);
         },
 
-        /**
-         * Volunteer-facing labels: Assigned is not final until Confirm email.
-         */
         volunteerFacingStatusLabel: function (status) {
             if (!status || status === 'Available') {
                 return null;

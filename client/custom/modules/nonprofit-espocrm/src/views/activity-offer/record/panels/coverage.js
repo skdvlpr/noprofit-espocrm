@@ -32,10 +32,16 @@ define('nonprofit-espocrm:views/activity-offer/record/panels/coverage', ['views/
                                         </td>
                                         <td class="text-muted" style="white-space: nowrap;">{{when}}</td>
                                         <td class="text-center">{{requiredCount}}</td>
-                                        <td class="text-center">{{availableCount}}</td>
+                                        <td class="text-center">
+                                            {{#if availableCount}}
+                                                <span class="label label-primary" data-status="Available">{{availableCount}}</span>
+                                            {{else}}
+                                                0
+                                            {{/if}}
+                                        </td>
                                         <td class="text-center">
                                             {{#if isCovered}}
-                                                <span class="label label-success">{{assignedCount}}</span>
+                                                <span class="label label-success" data-status="Confirmed">{{assignedCount}}</span>
                                             {{else}}
                                                 <span class="label label-danger" title="{{../uncoveredText}}">
                                                     {{assignedCount}} ⚠

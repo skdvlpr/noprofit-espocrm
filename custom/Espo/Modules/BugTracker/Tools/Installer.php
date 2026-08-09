@@ -131,10 +131,10 @@ class Installer
 
         return [
             'create' => 'yes',
-            'read' => 'own',
+            'read' => 'all',
             'edit' => 'own',
             'delete' => 'no',
-            'stream' => 'own',
+            'stream' => 'all',
         ];
     }
 

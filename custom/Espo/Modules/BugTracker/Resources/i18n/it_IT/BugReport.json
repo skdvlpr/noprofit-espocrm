@@ -20,7 +20,10 @@
         "teams": "Team"
     },
     "tooltips": {
-        "screenshots": "Puoi allegare più immagini (seleziona più file insieme oppure clicca di nuovo sulla graffetta)."
+        "screenshots": "Puoi allegare più immagini (seleziona più file insieme oppure clicca di nuovo sulla graffetta).",
+        "pageUrl": "Compilato automaticamente dalla pagina da cui apri Segnala un bug. Non modificabile.",
+        "pageTitle": "Compilato automaticamente dal titolo del browser. Non modificabile.",
+        "name": "Generato automaticamente. Non modificabile."
     },
     "labels": {
         "Create BugReport": "Segnala un bug",
@@ -38,6 +41,7 @@
     },
     "messages": {
         "reportSubmitted": "Grazie — la segnalazione è stata inviata.",
-        "fabTooltip": "Segnala un bug su questa pagina"
+        "fabTooltip": "Segnala un bug su questa pagina",
+        "fillInstructions": "<strong>Come compilare</strong><ol><li><strong>URL pagina</strong> e <strong>titolo pagina</strong> si compilano da soli e non si possono cambiare.</li><li>Scrivi una <strong>descrizione</strong> chiara: cosa hai fatto, cosa ti aspettavi, cosa è successo.</li><li>Allega uno o più <strong>screenshot</strong> (quando possibile).</li></ol>Dopo il salvataggio puoi modificare solo descrizione e screenshot."
     }
 }

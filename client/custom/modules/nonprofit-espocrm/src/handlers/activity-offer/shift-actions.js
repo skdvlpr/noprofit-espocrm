@@ -20,7 +20,12 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
         }
 
         isRequestAvailabilityVisible() {
-            return ['Draft', 'CollectingAvailability'].includes(this.status()) && this.canEdit();
+            const status = this.status();
+
+            // Re-request anytime on open plans (including after discard → Confirmed).
+            return !!status
+                && !['Closed', 'Completed'].includes(status)
+                && this.canEdit();
         }
 
         isAutoAssignVisible() {
@@ -84,6 +89,36 @@ define('nonprofit-espocrm:handlers/activity-offer/shift-actions', [], function (
                     this.refreshPlan(view);
                 })
                 .catch(() => {});
+        }
+
+        discardPendingUpdate() {
+            const view = this.view;
+
+            if (!this.isSendPendingUpdateVisible()) {
+                return;
+            }
+
+            Espo.Ui.confirm(
+                view.translate('discardPendingUpdateConfirm', 'messages', 'ActivityOffer'),
+                {
+                    confirmText: view.translate('Do not send update', 'labels', 'ActivityOffer'),
+                    cancelText: view.translate('Cancel'),
+                }
+            ).then(() => {
+                Espo.Ui.notify('...');
+
+                Espo.Ajax
+                    .postRequest('ActivityOffer/action/discardPendingUpdate', {
+                        id: view.model.id,
+                    })
+                    .then(() => {
+                        Espo.Ui.success(
+                            view.translate('discardPendingUpdateSuccess', 'messages', 'ActivityOffer')
+                        );
+                        this.refreshPlan(view);
+                    })
+                    .catch(() => {});
+            });
         }
 
         requestAvailability() {

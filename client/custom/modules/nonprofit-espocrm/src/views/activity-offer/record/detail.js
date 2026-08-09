@@ -55,6 +55,18 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
 
                 this.actionExtendPendingUpdate();
             },
+            'click [data-action="bannerDiscardPendingUpdate"]': function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!this.getAcl().checkModel(this.model, 'edit')) {
+                    Espo.Ui.error(this.translate('Access denied'));
+
+                    return;
+                }
+
+                this.actionDiscardPendingUpdate();
+            },
         },
 
         setup: function () {
@@ -366,6 +378,10 @@ define('nonprofit-espocrm:views/activity-offer/record/detail', [
 
         actionExtendPendingUpdate: function () {
             (new ShiftActions(this)).extendPendingUpdate();
+        },
+
+        actionDiscardPendingUpdate: function () {
+            (new ShiftActions(this)).discardPendingUpdate();
         },
 
         actionSendPendingUpdate: function () {

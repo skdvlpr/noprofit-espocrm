@@ -10,8 +10,9 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Place/time change → debounced availability re-request.
- * Soft important fields → planUpdated (skipped when schedule notify already queued).
+ * Place/time/conditions change → debounced hard availability re-request.
+ * Soft important fields (category, requiredCount) → planUpdated
+ * (skipped when schedule notify already queued).
  */
 class AfterSaveNotifyScheduleChange implements AfterSave
 {

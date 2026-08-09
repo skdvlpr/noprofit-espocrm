@@ -20,7 +20,10 @@
         "teams": "Teams"
     },
     "tooltips": {
-        "screenshots": "You can attach multiple images (select several files at once, or click the paperclip again)."
+        "screenshots": "You can attach multiple images (select several files at once, or click the paperclip again).",
+        "pageUrl": "Filled automatically from the page where you opened Report a bug. Not editable.",
+        "pageTitle": "Filled automatically from the browser title. Not editable.",
+        "name": "Generated automatically. Not editable."
     },
     "labels": {
         "Create BugReport": "Report a bug",
@@ -38,6 +41,7 @@
     },
     "messages": {
         "reportSubmitted": "Thank you — your bug report was submitted.",
-        "fabTooltip": "Report a bug on this page"
+        "fabTooltip": "Report a bug on this page",
+        "fillInstructions": "<strong>How to fill this form</strong><ol><li><strong>Page URL</strong> and <strong>page title</strong> are filled automatically and cannot be changed.</li><li>Write a clear <strong>description</strong>: what you did, what you expected, what happened.</li><li>Attach one or more <strong>screenshots</strong> (required when possible).</li></ol>Only description and screenshots are editable after you save."
     }
 }

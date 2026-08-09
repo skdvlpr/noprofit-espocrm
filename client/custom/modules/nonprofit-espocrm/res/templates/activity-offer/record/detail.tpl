@@ -57,6 +57,11 @@
             <button
                 type="button"
                 class="btn btn-sm btn-default action"
+                data-action="bannerDiscardPendingUpdate"
+            >{{translate 'Do not send update' scope='ActivityOffer' category='labels'}}</button>
+            <button
+                type="button"
+                class="btn btn-sm btn-default action"
                 data-action="bannerExtendPendingUpdate"
             >{{translate 'Add 5 minutes' scope='ActivityOffer' category='labels'}}</button>
             <button

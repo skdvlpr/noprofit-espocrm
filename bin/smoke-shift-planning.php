@@ -1086,14 +1086,99 @@ ok(
         ->hasMethod('wasScheduleChangeQueuedForSlot'),
     'ShiftChangeNotifyService::wasScheduleChangeQueuedForSlot exists'
 );
-$notifyStatuses = (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
-    ->getConstant('OFFER_NOTIFY_STATUSES') ?? null;
-// constant may be private — probe via offerAllowsNotify through reflection or string search
+ok(
+    (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
+        ->hasMethod('discardPendingUpdate'),
+    'ShiftChangeNotifyService::discardPendingUpdate exists'
+);
+ok(
+    (new ReflectionClass(\Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::class))
+        ->hasMethod('hardRecollectAvailability'),
+    'ShiftChangeNotifyService::hardRecollectAvailability exists'
+);
+ok(
+    method_exists(
+        \Espo\Modules\NonprofitEspocrm\Controllers\ActivityOffer::class,
+        'postActionDiscardPendingUpdate'
+    ),
+    'ActivityOffer discardPendingUpdate action exists'
+);
 $notifySrc = (string) file_get_contents(__DIR__
     . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftChangeNotifyService.php');
 ok(str_contains($notifySrc, "'Confirmed'"), 'notify statuses include Confirmed');
 ok(str_contains($notifySrc, "'Updated'"), 'notify statuses include Updated');
 ok(str_contains($notifySrc, "DEBOUNCE_INTERVAL = 'PT10M'"), 'pending notify debounce is 10 minutes');
+ok(
+    in_array('conditions', \Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::placeTimeFields(), true),
+    'slot conditions are HARD pending-update triggers (placeTimeFields)'
+);
+ok(
+    !in_array(
+        'conditions',
+        \Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService::importantSlotFields(),
+        true
+    ),
+    'slot conditions are not soft importantSlotFields'
+);
+ok(
+    str_contains($notifySrc, 'Clear old interest')
+        || str_contains($notifySrc, 'must re-answer'),
+    'processScheduleChange clears Available on changed slots'
+);
+ok(
+    str_contains($notifySrc, 'accepted staffing stays'),
+    'processScheduleChange keeps Assigned/Confirmed on changed slots'
+);
+ok(
+    (bool) $metadata->get(['entityDefs', 'ActivityOffer', 'fields', 'pendingChangedSlotIdList']),
+    'ActivityOffer.pendingChangedSlotIdList field exists'
+);
+$planningSrc = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php');
+ok(str_contains($planningSrc, "'changed'"), 'availabilityGrid exposes changed slot flag');
+ok(
+    !str_contains($planningSrc, 'lockedAvailable'),
+    'availabilityGrid no longer locks Available (interest is cleared instead)'
+);
+$availJs = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/availability.js');
+ok(str_contains($availJs, 'availabilitySectionChanged'), 'availability modal groups changed slots first');
+ok(
+    !str_contains($availJs, 'lockedAvailable'),
+    'availability modal does not lock Available checkboxes'
+);
+$clientDefsOffer = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/clientDefs/ActivityOffer.json');
+ok(
+    str_contains($clientDefsOffer, '"quickDetailDisabled": true'),
+    'ActivityOffer quick detail disabled (always full detail)'
+);
+$lightCss = (string) file_get_contents(__DIR__
+    . '/../client/custom/css/safehouse-aurora/safehouse-aurora-light.css');
+ok(
+    str_contains($lightCss, '--state-primary-text: #1d4ed8'),
+    'Aurora Light state-primary is blue (not brand red)'
+);
+ok(
+    str_contains($lightCss, 'var(--state-default-bg)'),
+    'Aurora Light label-default uses gray state tokens'
+);
+$layoutCss = (string) file_get_contents(__DIR__
+    . '/../client/custom/css/safehouse-aurora/safehouse-aurora-layout.css');
+ok(
+    str_contains($layoutCss, 'min-width: 7.5rem'),
+    'mobile list cells have readable min-width'
+);
+ok(
+    str_contains($layoutCss, '--panel-default-bg: #ffffff'),
+    'mobile Light panels forced opaque white'
+);
+$volStats = (string) file_get_contents(__DIR__
+    . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/record/panels/volunteer-stats.js');
+ok(
+    str_contains($volStats, 'label-warning') && str_contains($volStats, 'data-status="Assigned"'),
+    'volunteer-stats Assigned chip uses warning/amber'
+);
 
 
 echo $fail === 0 ? "ALL OK\n" : "FAILURES: $fail\n";

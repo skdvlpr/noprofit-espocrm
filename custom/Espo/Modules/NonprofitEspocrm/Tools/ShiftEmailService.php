@@ -85,7 +85,7 @@ class ShiftEmailService
     }
 
     /**
-     * Soft plan change (description / conditions / category / requiredCount).
+     * Soft plan change (description / category / requiredCount).
      *
      * @param string[] $userIds
      * @param string[] $changeLines human-readable field labels

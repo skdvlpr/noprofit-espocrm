@@ -2169,6 +2169,82 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
     display: none !important;
   }
 
+  /* Opaque panels/lists on phone — kill see-through body after white header. */
+  body[data-theme-name="SafehouseAuroraLight"] {
+    --panel-bg: #ffffff;
+    --panel-default-bg: #ffffff;
+    --aurora-list-bg: #ffffff;
+    --aurora-list-blur: none;
+    --aurora-glass-bg: #ffffff;
+    --aurora-glass-blur: none;
+  }
+
+  body[data-theme-name="SafehouseAurora"] {
+    --panel-bg: #1c1c21;
+    --panel-default-bg: #1c1c21;
+    --aurora-list-bg: #1c1c21;
+    --aurora-list-blur: none;
+    --aurora-glass-bg: #1c1c21;
+    --aurora-glass-blur: none;
+  }
+
+  body[data-theme-name="SafehouseAurora"] .modal-backdrop.in,
+  body[data-theme-name="SafehouseAuroraLight"] .modal-backdrop.in {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Readable list columns: floor widths + horizontal scroll (Espo default min is 30px). */
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list > table,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list > table,
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list > table,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list > table {
+    min-width: max(100%, 42rem) !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell,
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell,
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list th.cell,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list th.cell,
+  body[data-theme-name="SafehouseAurora"] #content #main .panel .list td.cell,
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .panel .list td.cell {
+    min-width: 7.5rem !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="name"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="name"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="name"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="name"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="description"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="description"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="description"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="description"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="transactionDate"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="transactionDate"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="transactionDate"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="transactionDate"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="dateStart"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="dateStart"] {
+    min-width: 11rem !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="status"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="status"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="status"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="status"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list th.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list th.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list td.cell[data-name="paymentStatus"],
+  body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list td.cell[data-name="paymentStatus"] {
+    min-width: 8.5rem !important;
+  }
+
   body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-dialog,
   body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-dialog {
     width: 100% !important;

@@ -12,9 +12,9 @@
         "own",
         "no"
     ],
-    "read": "own",
+    "read": "all",
     "create": "yes",
     "edit": "own",
     "delete": "no",
-    "stream": "own"
+    "stream": "all"
 }

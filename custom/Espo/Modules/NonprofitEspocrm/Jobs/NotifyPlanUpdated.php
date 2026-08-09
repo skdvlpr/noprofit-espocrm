@@ -8,7 +8,7 @@ use Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService;
 use Throwable;
 
 /**
- * Debounced soft plan-update email (description / conditions / category / requiredCount).
+ * Debounced soft plan-update email (description / category / requiredCount).
  */
 class NotifyPlanUpdated implements JobContract
 {

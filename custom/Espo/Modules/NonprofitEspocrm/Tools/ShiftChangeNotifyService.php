@@ -26,10 +26,12 @@ use Throwable;
  * Debounced shift-plan change notifications (schedule re-request + soft planUpdated).
  *
  * Confirmed plans flip to Updated while a notify is pending; after send:
- * soft → Confirmed, hard (place/time) → CollectingAvailability.
+ * soft → Confirmed, hard (place/time/conditions) → CollectingAvailability.
  *
  * Invite statuses: there is no Pending enum — Available is the affirmative /
- * re-openable state. Declined / Cancelled are never touched.
+ * re-openable state. Declined / Cancelled are never touched. On hard re-collect
+ * for a changed slot: prior Available is cleared (must re-answer); Assigned /
+ * Confirmed (accepted) stay as-is.
  */
 class ShiftChangeNotifyService
 {
@@ -49,6 +51,7 @@ class ShiftChangeNotifyService
     /** Statuses that enter the Updated / pending-notify UI flow. */
     private const OFFER_PENDING_UI_STATUSES = ['Confirmed', 'Updated'];
 
+    /** Hard pending: place, time, or additional conditions. */
     private const PLACE_TIME_FIELDS = [
         'dateStart',
         'dateEnd',
@@ -57,10 +60,10 @@ class ShiftChangeNotifyService
         'placeState',
         'placeCountry',
         'placePostalCode',
+        'conditions',
     ];
 
     private const IMPORTANT_SLOT_FIELDS = [
-        'conditions',
         'category',
         'requiredCount',
     ];
@@ -84,6 +87,8 @@ class ShiftChangeNotifyService
     ) {}
 
     /**
+     * Hard-trigger slot fields (place, time, conditions).
+     *
      * @return list<string>
      */
     public static function placeTimeFields(): array
@@ -92,6 +97,18 @@ class ShiftChangeNotifyService
     }
 
     /**
+     * Alias for hard schedule/conditions fields (same as placeTimeFields).
+     *
+     * @return list<string>
+     */
+    public static function scheduleOrConditionsFields(): array
+    {
+        return self::PLACE_TIME_FIELDS;
+    }
+
+    /**
+     * Soft-trigger slot fields (planUpdated only).
+     *
      * @return list<string>
      */
     public static function importantSlotFields(): array
@@ -133,6 +150,7 @@ class ShiftChangeNotifyService
         $offerId = $slot ? (string) ($slot->get('activityOfferId') ?? '') : '';
 
         if ($offerId !== '') {
+            $this->rememberChangedSlot($offerId, $slotId);
             $this->markPendingUpdate($offerId, self::KIND_HARD);
         }
 
@@ -351,6 +369,145 @@ class ShiftChangeNotifyService
     }
 
     /**
+     * Discard pending soft/hard update: cancel jobs, clear banner, Updated → Confirmed.
+     * No emails and no invite reset.
+     *
+     * @return array{status: string, discarded: bool}
+     */
+    public function discardPendingUpdate(string $offerId): array
+    {
+        $empty = ['status' => '', 'discarded' => false];
+
+        if ($offerId === '') {
+            return $empty;
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return $empty;
+        }
+
+        $status = (string) ($offer->get('status') ?? '');
+        $kind = (string) ($offer->get('pendingNotifyKind') ?? '');
+
+        if ($status !== 'Updated' || !in_array($kind, [self::KIND_SOFT, self::KIND_HARD], true)) {
+            return [
+                'status' => $status,
+                'discarded' => false,
+            ];
+        }
+
+        $this->cancelPendingJobs(NotifyPlanUpdated::class, $offerId);
+
+        foreach ($this->getOfferSlots($offerId) as $slot) {
+            $this->cancelPendingJobs(NotifySlotScheduleChange::class, (string) $slot->getId());
+        }
+
+        $offer->set('status', 'Confirmed');
+        $offer->set('pendingNotifyKind', null);
+        $offer->set('pendingNotifyAt', null);
+        // Keep pendingChangedSlotIdList so "Request availability" can still
+        // target only the edited slots after discard.
+        $this->saveOfferSilent($offer);
+
+        return [
+            'status' => 'Confirmed',
+            'discarded' => true,
+        ];
+    }
+
+    /**
+     * Hard re-collect for Confirmed/Updated (or flush pending hard): reset assignments
+     * on changed slots, keep prior Available, open CollectingAvailability.
+     *
+     * @param list<string>|null $slotIds null = all published slots on the offer
+     * @return array{resetCount: int, emailSent: int, notifyCount: int, slotCount: int, status: string}
+     */
+    public function hardRecollectAvailability(string $offerId, ?array $slotIds = null): array
+    {
+        $empty = [
+            'resetCount' => 0,
+            'emailSent' => 0,
+            'notifyCount' => 0,
+            'slotCount' => 0,
+            'status' => '',
+        ];
+
+        if ($offerId === '') {
+            return $empty;
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer || !$this->offerAllowsNotify($offer)) {
+            return $empty;
+        }
+
+        $this->cancelPendingJobs(NotifyPlanUpdated::class, $offerId);
+
+        $targets = [];
+
+        foreach ($this->getOfferSlots($offerId) as $slot) {
+            $slotId = (string) $slot->getId();
+            $slotStatus = (string) ($slot->get('status') ?? 'Published');
+
+            if (!in_array($slotStatus, ['Published', 'Covered'], true)) {
+                continue;
+            }
+
+            if ($slotIds !== null && !in_array($slotId, $slotIds, true)) {
+                continue;
+            }
+
+            $targets[] = $slotId;
+            $this->cancelPendingJobs(NotifySlotScheduleChange::class, $slotId);
+            $this->rememberChangedSlot($offerId, $slotId);
+        }
+
+        $resetCount = 0;
+        $emailSent = 0;
+        $notifyCount = 0;
+
+        foreach ($targets as $slotId) {
+            $result = $this->processScheduleChange($slotId, true);
+            $resetCount += (int) ($result['resetCount'] ?? 0);
+            $emailSent += (int) ($result['emailSent'] ?? 0);
+            $notifyCount += (int) ($result['notifyCount'] ?? 0);
+        }
+
+        $this->applyPostNotifyStatus($offerId, 'CollectingAvailability', false);
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        return [
+            'resetCount' => $resetCount,
+            'emailSent' => $emailSent,
+            'notifyCount' => $notifyCount,
+            'slotCount' => count($targets),
+            'status' => $offer ? (string) ($offer->get('status') ?? '') : '',
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getPendingChangedSlotIds(string $offerId): array
+    {
+        if ($offerId === '') {
+            return [];
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return [];
+        }
+
+        return $this->normalizeIdList($offer->get('pendingChangedSlotIdList'));
+    }
+
+    /**
      * Immediate flush of pending soft/hard notify (UI "Send update now").
      *
      * @return array{
@@ -393,17 +550,33 @@ class ShiftChangeNotifyService
         $notifyCount = 0;
 
         if ($kind === self::KIND_HARD) {
+            $changedIds = $this->getPendingChangedSlotIds($offerId);
+
+            if ($changedIds === []) {
+                foreach ($this->getOfferSlots($offerId) as $slot) {
+                    $slotId = (string) $slot->getId();
+
+                    if ($this->hasPendingJob(NotifySlotScheduleChange::class, $slotId, null)) {
+                        $changedIds[] = $slotId;
+                        $this->rememberChangedSlot($offerId, $slotId);
+                    }
+                }
+            }
+
             $this->cancelPendingJobs(NotifyPlanUpdated::class, $offerId);
 
             foreach ($this->getOfferSlots($offerId) as $slot) {
                 $this->cancelPendingJobs(NotifySlotScheduleChange::class, (string) $slot->getId());
-                $result = $this->processScheduleChange((string) $slot->getId(), true);
+            }
+
+            foreach ($changedIds as $slotId) {
+                $result = $this->processScheduleChange($slotId, true);
                 $resetCount += (int) ($result['resetCount'] ?? 0);
                 $emailSent += (int) ($result['emailSent'] ?? 0);
                 $notifyCount += (int) ($result['notifyCount'] ?? 0);
             }
 
-            $this->applyPostNotifyStatus($offerId, 'CollectingAvailability');
+            $this->applyPostNotifyStatus($offerId, 'CollectingAvailability', false);
         } else {
             $jobs = $this->entityManager
                 ->getRDBRepository(Job::ENTITY_TYPE)
@@ -449,7 +622,7 @@ class ShiftChangeNotifyService
                 $this->entityManager->saveEntity($job, ['skipAll' => true, 'silent' => true]);
             }
 
-            $this->applyPostNotifyStatus($offerId, 'Confirmed');
+            $this->applyPostNotifyStatus($offerId, 'Confirmed', true);
         }
 
         $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
@@ -464,7 +637,11 @@ class ShiftChangeNotifyService
     }
 
     /**
-     * Process place/time change: reset invites + availability email/notification.
+     * Process place/time/conditions change on one slot:
+     * - Clear prior Available (must re-answer)
+     * - Keep Assigned/Confirmed (accepted staffing stays)
+     * - Email availability request only to users whose Available was cleared
+     * - In-app notify all previously involved (Available + accepted)
      *
      * @return array{resetCount: int, emailSent: int, notifyCount: int, skipped: bool}
      */
@@ -487,7 +664,12 @@ class ShiftChangeNotifyService
             return $empty;
         }
 
-        $userIds = [];
+        if ($offerId !== '') {
+            $this->rememberChangedSlot($offerId, $slotId);
+        }
+
+        $notifyUserIds = [];
+        $reRequestUserIds = [];
         $resetCount = 0;
 
         foreach ($this->getSlotInvites($slotId) as $invite) {
@@ -503,29 +685,25 @@ class ShiftChangeNotifyService
                 continue;
             }
 
-            $userIds[] = $userId;
+            $notifyUserIds[] = $userId;
 
-            if (in_array($status, ['Assigned', 'Confirmed'], true)) {
-                $this->removeTaskCollaborator($invite);
-                $invite->set('status', 'Available');
-                $invite->set('respondedAt', null);
-                $invite->set('taskId', null);
-                $this->saveInviteAllowStatus($invite);
-                $resetCount++;
-            } elseif ($status === 'Available') {
-                // Force re-answer: drop affirmative response so the grid is unchecked.
+            if ($status === 'Available') {
+                // Clear old interest on the changed slot — volunteer must re-answer.
                 $this->entityManager->removeEntity($invite, [
                     StatusGuard::SKIP_OPTION => true,
                     self::SKIP_SCHEDULE_NOTIFY => true,
                     self::SKIP_PLAN_UPDATE_NOTIFY => true,
                 ]);
+                $reRequestUserIds[] = $userId;
                 $resetCount++;
             }
+            // Assigned / Confirmed: accepted staffing stays unchanged.
         }
 
-        $userIds = array_values(array_unique($userIds));
+        $notifyUserIds = array_values(array_unique($notifyUserIds));
+        $reRequestUserIds = array_values(array_unique($reRequestUserIds));
 
-        if ($userIds === []) {
+        if ($notifyUserIds === [] && $reRequestUserIds === []) {
             if (!$skipFinalize) {
                 $this->maybeFinalizeAfterScheduleChange($offerId);
             }
@@ -546,12 +724,14 @@ class ShiftChangeNotifyService
 
         $notifyCount = 0;
 
-        foreach ($userIds as $userId) {
+        foreach ($notifyUserIds as $userId) {
             $this->createOfferNotification($offer, $userId, $message);
             $notifyCount++;
         }
 
-        $emailResult = $this->shiftEmailService->sendAvailabilityRequest($offer, $userIds);
+        $emailResult = $reRequestUserIds !== []
+            ? $this->shiftEmailService->sendAvailabilityRequest($offer, $reRequestUserIds)
+            : ['sent' => 0];
 
         $this->syncSlotCoverageStatusesInline($offerId);
 
@@ -640,7 +820,7 @@ class ShiftChangeNotifyService
             return;
         }
 
-        $this->applyPostNotifyStatus($offerId, 'CollectingAvailability');
+        $this->applyPostNotifyStatus($offerId, 'CollectingAvailability', false);
     }
 
     private function maybeFinalizeAfterPlanUpdated(string $offerId): void
@@ -667,11 +847,19 @@ class ShiftChangeNotifyService
             return;
         }
 
-        $this->applyPostNotifyStatus($offerId, 'Confirmed');
+        $this->applyPostNotifyStatus($offerId, 'Confirmed', true);
     }
 
-    private function applyPostNotifyStatus(string $offerId, string $status): void
-    {
+    /**
+     * @param bool $clearChangedSlots Clear pendingChangedSlotIdList (Confirmed/discard).
+     *                                 Keep when entering CollectingAvailability so the modal
+     *                                 can group/lock changed slots.
+     */
+    private function applyPostNotifyStatus(
+        string $offerId,
+        string $status,
+        bool $clearChangedSlots = false
+    ): void {
         $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
 
         if (!$offer) {
@@ -681,7 +869,79 @@ class ShiftChangeNotifyService
         $offer->set('status', $status);
         $offer->set('pendingNotifyKind', null);
         $offer->set('pendingNotifyAt', null);
+
+        if ($clearChangedSlots || $status === 'Confirmed') {
+            $offer->set('pendingChangedSlotIdList', []);
+        }
+
         $this->saveOfferSilent($offer);
+    }
+
+    public function clearPendingChangedSlots(string $offerId): void
+    {
+        if ($offerId === '') {
+            return;
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return;
+        }
+
+        $offer->set('pendingChangedSlotIdList', []);
+        $this->saveOfferSilent($offer);
+    }
+
+    private function rememberChangedSlot(string $offerId, string $slotId): void
+    {
+        if ($offerId === '' || $slotId === '') {
+            return;
+        }
+
+        $offer = $this->entityManager->getEntityById('ActivityOffer', $offerId);
+
+        if (!$offer) {
+            return;
+        }
+
+        $list = $this->normalizeIdList($offer->get('pendingChangedSlotIdList'));
+
+        if (in_array($slotId, $list, true)) {
+            return;
+        }
+
+        $list[] = $slotId;
+        $offer->set('pendingChangedSlotIdList', $list);
+        $this->saveOfferSilent($offer);
+    }
+
+    /**
+     * @param mixed $raw
+     * @return list<string>
+     */
+    private function normalizeIdList(mixed $raw): array
+    {
+        if (is_string($raw) && $raw !== '') {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($raw as $value) {
+            $id = trim((string) $value);
+
+            if ($id !== '') {
+                $ids[$id] = true;
+            }
+        }
+
+        return array_keys($ids);
     }
 
     private function saveOfferSilent(Entity $offer): void

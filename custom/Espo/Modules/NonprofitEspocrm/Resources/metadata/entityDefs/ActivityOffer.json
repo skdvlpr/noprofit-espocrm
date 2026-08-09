@@ -46,6 +46,14 @@
             "type": "datetime",
             "readOnly": true
         },
+        "pendingChangedSlotIdList": {
+            "type": "jsonArray",
+            "readOnly": true,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutFiltersDisabled": true,
+            "layoutMassUpdateDisabled": true
+        },
         "isFullyStaffed": {
             "type": "bool",
             "default": false,

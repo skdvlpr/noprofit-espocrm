@@ -4,8 +4,11 @@
     "color": "#e67e22",
     "recordViews": {
         "detail": "nonprofit-espocrm:views/activity-offer/record/detail",
-        "edit": "nonprofit-espocrm:views/activity-offer/record/edit"
+        "edit": "nonprofit-espocrm:views/activity-offer/record/edit",
+        "detailSmall": "nonprofit-espocrm:views/activity-offer/record/detail"
     },
+    "quickDetailDisabled": true,
+    "quickEditDisabled": true,
     "boolFilterList": [
         "onlyMy"
     ],

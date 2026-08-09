@@ -34,13 +34,13 @@
         "pageUrl": {
             "type": "url",
             "maxLength": 2000,
-            "readOnlyAfterCreate": true,
+            "readOnly": true,
             "audited": true
         },
         "pageTitle": {
             "type": "varchar",
             "maxLength": 255,
-            "readOnlyAfterCreate": true,
+            "readOnly": true,
             "audited": true
         },
         "screenshots": {
@@ -51,7 +51,6 @@
             "maxCount": 20,
             "previewSize": "medium",
             "tooltip": true,
-            "readOnlyAfterCreate": true,
             "audited": true
         },
         "screenshotsClearedAt": {
@@ -80,13 +79,11 @@
         "assignedUser": {
             "type": "link",
             "view": "views/fields/assigned-user",
-            "readOnlyAfterCreate": true,
             "audited": true
         },
         "teams": {
             "type": "linkMultiple",
             "view": "views/fields/teams",
-            "readOnlyAfterCreate": true,
             "audited": true
         }
     },
