@@ -38,7 +38,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/request-availability-selec
                                     <span style="flex:1; min-width:0;">
                                         <strong>{{name}}</strong>
                                         {{#if responded}}
-                                            <span class="label label-default" style="margin-left:0.35em;">{{respondedLabel}}</span>
+                                            <span class="label label-success" style="margin-left:0.35em;">{{respondedLabel}}</span>
                                         {{/if}}
                                         {{#if competenceText}}
                                             <div class="small text-muted">{{competenceText}}</div>
@@ -62,7 +62,7 @@ define('nonprofit-espocrm:views/activity-offer/modals/request-availability-selec
                     name: row.name || row.id,
                     responded: !!row.responded,
                     respondedLabel: this.translate(
-                        'volunteerStatsResponded',
+                        'volunteerRespondedSingular',
                         'labels',
                         'ActivityOffer'
                     ),

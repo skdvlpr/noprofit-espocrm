@@ -633,6 +633,24 @@ $selectedModal = __DIR__
     . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/request-availability-selected.js';
 ok(is_file($selectedModal), 'request-availability-selected modal exists');
 ok(
+    str_contains((string) file_get_contents($selectedModal), 'label-success'),
+    'selective-resend modal uses green responded badge'
+);
+ok(
+    str_contains((string) file_get_contents($selectedModal), 'volunteerRespondedSingular'),
+    'selective-resend modal uses singular responded label key'
+);
+
+$i18nItOffer = json_decode(
+    (string) file_get_contents(__DIR__
+        . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/ActivityOffer.json'),
+    true
+);
+ok(
+    ($i18nItOffer['labels']['volunteerRespondedSingular'] ?? null) === 'Ha risposto',
+    'IT singular responded badge is Ha risposto'
+);
+ok(
     str_contains((string) file_get_contents($handlerFile), 'requestAvailabilitySelected'),
     'shift-actions handler has requestAvailabilitySelected'
 );

@@ -71,6 +71,7 @@
         "slotPersonSingular": "persona",
         "slotPersonPlural": "persone",
         "volunteerStatsResponded": "Hanno risposto",
+        "volunteerRespondedSingular": "Ha risposto",
         "volunteerStatsGaps": "Può coprire buchi",
         "volunteerStatsMatch": "Assegnati / idonei",
         "volunteerStatsCohort": "Volontari coinvolti",
