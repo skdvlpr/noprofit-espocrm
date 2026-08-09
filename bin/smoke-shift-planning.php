@@ -743,6 +743,91 @@ $prep = $assignedNames['MealPreparation'] ?? [];
 $dist = $assignedNames['MealDistribution'] ?? [];
 ok(count(array_intersect($prep, $dist)) === 0, 'no volunteer double-booked on overlapping slots');
 
+// --- regression: withdraw / re-request on Covered slots (not Published-only) ---
+// After autoAssign every slot is Covered. Volunteers must still be able to
+// uncheck Assigned slots; managers must still be able to re-send availability.
+$prepAssignedInvite = $em->getRDBRepository('ActivityInvite')->where([
+    'activityOfferSlotId' => $slots['MealPreparation']->getId(),
+    'status' => 'Assigned',
+])->findOne();
+ok($prepAssignedInvite !== null, 'precondition: MealPreparation has an Assigned invite on Covered slot');
+
+$withdrawVol = null;
+$withdrawVolId = $prepAssignedInvite ? (string) $prepAssignedInvite->get('userId') : '';
+foreach ($volunteers as $vol) {
+    if ($vol->getId() === $withdrawVolId) {
+        $withdrawVol = $vol;
+        break;
+    }
+}
+ok($withdrawVol !== null, 'precondition: Assigned volunteer is in smoke cohort');
+
+if ($withdrawVol !== null) {
+    $stillChecked = [];
+    foreach ($em->getRDBRepository('ActivityInvite')->where([
+        'activityOfferId' => $offer->getId(),
+        'userId' => $withdrawVol->getId(),
+        'status' => ['Available', 'Assigned', 'Confirmed'],
+    ])->find() as $inv) {
+        $sid = (string) $inv->get('activityOfferSlotId');
+        if ($sid !== '' && $sid !== $slots['MealPreparation']->getId()) {
+            $stillChecked[] = $sid;
+        }
+    }
+
+    $withdrawRes = $declare($withdrawVol, $stillChecked, 'smoke withdraw Covered');
+    ok(
+        ($withdrawRes['withdrawnCount'] ?? 0) >= 1,
+        'saveAvailability withdraws Assigned invite on Covered slot'
+    );
+
+    $prepAssignedInvite = $em->getEntityById('ActivityInvite', $prepAssignedInvite->getId());
+    ok(
+        $prepAssignedInvite !== null
+            && ($prepAssignedInvite->get('status') ?? '') === 'Declined',
+        'Covered-slot withdraw sets Assigned → Declined (not silent no-op)'
+    );
+}
+
+try {
+    $reReq = $adminService->requestAvailability($offer->getId());
+    ok(
+        ($reReq['slotCount'] ?? 0) >= 1,
+        'requestAvailability accepts fully Covered plan (Published|Covered)'
+    );
+} catch (\Throwable $e) {
+    ok(false, 'requestAvailability accepts fully Covered plan (' . $e->getMessage() . ')');
+}
+
+// Restore staffing so confirm() below still has assignments to confirm.
+$offer = $em->getEntityById('ActivityOffer', $offer->getId());
+if ($offer && ($offer->get('status') ?? '') === 'CollectingAvailability') {
+    // hard re-collect path may have opened Collecting — re-declare + assign.
+    $declare($volunteers[0], [
+        $slots['MealPreparation']->getId(),
+        $slots['MealDistribution']->getId(),
+        $slots['Cleaning']->getId(),
+    ]);
+    $declare($volunteers[1], [
+        $slots['MealPreparation']->getId(),
+        $slots['Cleaning']->getId(),
+    ]);
+    $declare($volunteers[2], [
+        $slots['MealPreparation']->getId(),
+    ]);
+    $assignRes = $adminService->autoAssign($offer->getId());
+    $offer = $em->getEntityById('ActivityOffer', $offer->getId());
+    ok($offer->get('status') === 'Planned', 're-staff after Covered withdraw → Planned');
+} elseif ($withdrawVol !== null) {
+    // Soft re-send path: put the withdrawn volunteer back on MealPreparation.
+    $restoreSlots = array_values(array_unique(array_merge(
+        $stillChecked ?? [],
+        [$slots['MealPreparation']->getId()]
+    )));
+    $declare($withdrawVol, $restoreSlots);
+    $assignRes = $adminService->autoAssign($offer->getId());
+}
+
 $confirmRes = $adminService->confirm($offer->getId());
 ok(($confirmRes['taskCount'] ?? 0) === 0, 'confirm does not auto-create personal Tasks');
 ok($confirmRes['confirmedCount'] === $assignRes['assignedCount'], 'all assigned got confirmed');
@@ -1140,6 +1225,19 @@ ok(str_contains($planningSrc, "'changed'"), 'availabilityGrid exposes changed sl
 ok(
     !str_contains($planningSrc, 'lockedAvailable'),
     'availabilityGrid no longer locks Available (interest is cleared instead)'
+);
+ok(
+    str_contains($planningSrc, 'function getRespondableSlots')
+        && str_contains($planningSrc, "['Published', 'Covered']"),
+    'getRespondableSlots includes Published and Covered'
+);
+ok(
+    substr_count($planningSrc, 'getRespondableSlots(') >= 3,
+    'saveAvailability + requestAvailability use getRespondableSlots'
+);
+ok(
+    !str_contains($planningSrc, 'function getPublishedSlots'),
+    'getPublishedSlots removed (Covered was silently skipped)'
 );
 $availJs = (string) file_get_contents(__DIR__
     . '/../client/custom/modules/nonprofit-espocrm/src/views/activity-offer/modals/availability.js');

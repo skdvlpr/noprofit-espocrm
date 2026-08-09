@@ -330,10 +330,12 @@ class ShiftPlanningService
             );
         }
 
-        $slots = $this->getPublishedSlots($offerId);
+        // Published and Covered both participate in availability (autoAssign
+        // flips fully-staffed shifts to Covered — still editable/withdrawable).
+        $slots = $this->getRespondableSlots($offerId);
 
         if ($slots === []) {
-            throw new BadRequest("Publish at least one shift (status Published) before requesting availability.");
+            throw new BadRequest("Publish at least one shift (status Published or Covered) before requesting availability.");
         }
 
         $changedOnly = $this->shiftChangeNotifyService->getPendingChangedSlotIds($offerId);
@@ -539,7 +541,10 @@ class ShiftPlanningService
         $availableCount = 0;
         $withdrawnCount = 0;
 
-        foreach ($this->getPublishedSlots($offerId) as $slot) {
+        // Must match availabilityGrid: Covered slots stay in the volunteer UI
+        // after autoAssign. Iterating Published-only made uncheck a silent no-op
+        // (invite stayed Available/Assigned while the modal reported success).
+        foreach ($this->getRespondableSlots($offerId) as $slot) {
             $slotId = $slot->getId();
             $category = (string) ($slot->get('category') ?? '');
             $isChecked = isset($checked[$slotId]);
@@ -1489,15 +1494,20 @@ class ShiftPlanningService
     }
 
     /**
-     * Shifts that can receive availability invites / auto-assignment (Published only).
+     * Shifts volunteers can mark / withdraw availability on (and managers can
+     * re-request). Matches availabilityGrid: Published + Covered.
      *
      * @return Entity[]
      */
-    private function getPublishedSlots(string $offerId): array
+    private function getRespondableSlots(string $offerId): array
     {
         return array_values(array_filter(
             $this->getSlots($offerId),
-            static fn (Entity $slot): bool => $slot->get('status') === 'Published'
+            static fn (Entity $slot): bool => in_array(
+                (string) ($slot->get('status') ?? ''),
+                ['Published', 'Covered'],
+                true
+            )
         ));
     }
 
