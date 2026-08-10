@@ -79,6 +79,20 @@
             ],
             [
                 {
+                    "name": "googleCalendarShareRoutingMode"
+                },
+                {
+                    "name": "googleCalendarShareCalendarUserId"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareCalendarId"
+                },
+                false
+            ],
+            [
+                {
                     "name": "googleCalendarEventSettings",
                     "fullWidth": true
                 }

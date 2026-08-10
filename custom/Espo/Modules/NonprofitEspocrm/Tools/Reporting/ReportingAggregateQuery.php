@@ -111,7 +111,7 @@ class ReportingAggregateQuery
         }
 
         $queryBuilder = $this->buildBaseQueryBuilder($entityType, $searchParams, $additionalWhere);
-        $queryBuilder->select(['COUNT:id', 'recordCount']);
+        $queryBuilder->select([['COUNT:id', 'recordCount']]);
 
         $sth = $this->entityManager->getQueryExecutor()->execute($queryBuilder->build());
         $row = $sth->fetch() ?: [];

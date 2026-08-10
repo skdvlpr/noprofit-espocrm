@@ -29,7 +29,7 @@ define('google-integration:views/modals/select-share-teams', [
 
             this.buttonList = [
                 {
-                    name: 'select',
+                    name: 'confirmSelect',
                     style: 'danger',
                     label: 'Select',
                     onClick: () => this.actionConfirmSelect(),
@@ -45,33 +45,31 @@ define('google-integration:views/modals/select-share-teams', [
                 this.translate('googleCalendarShareTeamsSelectTitle', 'labels', 'Global') ||
                 this.translate('Team', 'scopeNamesPlural');
 
-            this.addHandler('input', '[data-name="teamSearch"]', e => {
-                const target = e.currentTarget || e.target;
+            // addHandler passes (originalEvent, currentTarget) — use the 2nd arg.
+            this.addHandler('input', '[data-name="teamSearch"]', (e, target) => {
+                const el = target || (e && e.target);
 
-                this.query = String((target && target.value) || '').trim().toLowerCase();
+                this.query = String((el && el.value) || '').trim().toLowerCase();
                 this.reRender();
             });
 
-            this.addHandler('change', '[data-role="team-check"]', e => {
-                const target = e.currentTarget || e.target;
-                const id = String((target && target.getAttribute('data-id')) || '');
-
-                if (!id) {
-                    return;
-                }
-
-                if (target.checked) {
-                    this.selectedIds.add(id);
-                }
-                else {
-                    this.selectedIds.delete(id);
-                }
-
-                this.refreshSelectedCount();
-                this.refreshCardSelectedState(id, target.checked);
+            this.addHandler('change', '[data-role="team-check"]', (e, target) => {
+                this.syncCheckboxSelection(target || (e && e.target));
             });
 
-            // Espo routes data-action via addActionHandler (Modal listens on .action).
+            this.addHandler('click', '.gi-share-team-card__check', (e, target) => {
+                // Label click can be flaky with delegated change; sync from the input.
+                const el = target || (e && e.target);
+                const input = el && el.closest
+                    ? el.closest('.gi-share-team-card__check').querySelector('[data-role="team-check"]')
+                    : null;
+
+                if (input) {
+                    // Defer so the browser toggles checked first.
+                    setTimeout(() => this.syncCheckboxSelection(input), 0);
+                }
+            });
+
             this.addActionHandler('toggleMembers', (e, target) => {
                 if (e && typeof e.preventDefault === 'function') {
                     e.preventDefault();
@@ -83,6 +81,49 @@ define('google-integration:views/modals/select-share-teams', [
 
                 this.toggleTeamMembers(target);
             });
+        }
+
+        syncCheckboxSelection(input) {
+            if (!input || !input.getAttribute) {
+                return;
+            }
+
+            const id = String(input.getAttribute('data-id') || '');
+
+            if (!id) {
+                return;
+            }
+
+            if (input.checked) {
+                this.selectedIds.add(id);
+            }
+            else {
+                this.selectedIds.delete(id);
+            }
+
+            this.refreshSelectedCount();
+            this.refreshCardSelectedState(id, !!input.checked);
+        }
+
+        /**
+         * Prefer live checkbox state in the DOM (source of truth on confirm).
+         */
+        readSelectedIdsFromDom() {
+            const ids = new Set();
+
+            if (!this.element) {
+                return ids;
+            }
+
+            this.element.querySelectorAll('[data-role="team-check"]:checked').forEach(el => {
+                const id = String(el.getAttribute('data-id') || '');
+
+                if (id) {
+                    ids.add(id);
+                }
+            });
+
+            return ids;
         }
 
         toggleTeamMembers(target) {
@@ -208,7 +249,7 @@ define('google-integration:views/modals/select-share-teams', [
 
         refreshCardSelectedState(id, selected) {
             const card = this.element
-                ? this.element.querySelector('.gi-share-team-card[data-id="' + id + '"]')
+                ? this.element.querySelector('.gi-share-team-card[data-id="' + CSS.escape(id) + '"]')
                 : null;
 
             if (card) {
@@ -217,21 +258,30 @@ define('google-integration:views/modals/select-share-teams', [
         }
 
         actionConfirmSelect() {
+            const fromDom = this.readSelectedIdsFromDom();
+
+            if (fromDom.size) {
+                this.selectedIds = fromDom;
+            }
+
             const models = [];
 
             this.teams.forEach(team => {
-                if (!this.selectedIds.has(String(team.id))) {
+                const id = String(team.id || '');
+
+                if (!id || !this.selectedIds.has(id)) {
                     return;
                 }
 
-                const model = new Model(null, {entityType: 'Team'});
+                const model = new Model(
+                    {
+                        id: id,
+                        name: team.name || id,
+                    },
+                    {entityType: 'Team'}
+                );
 
-                model.id = team.id;
-                model.set({
-                    id: team.id,
-                    name: team.name,
-                });
-
+                model.id = id;
                 models.push(model);
             });
 

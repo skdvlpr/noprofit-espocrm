@@ -13,7 +13,10 @@
         "googleCalendarTransparency": "Disponibilità",
         "googleCalendarColorId": "Colore",
         "googleCalendarShareUsers": "Aggiungi anche per utenti",
-        "googleCalendarShareTeams": "Aggiungi anche per team"
+        "googleCalendarShareTeams": "Aggiungi anche per team",
+        "googleCalendarShareRoutingMode": "Calendario per utenti condivisi",
+        "googleCalendarShareCalendarUserId": "Proprietario calendario condiviso",
+        "googleCalendarShareCalendarId": "Calendario Google condiviso"
     },
     "labels": {
         "Google Calendar": "Google Calendar",
@@ -29,6 +32,10 @@
         "googleCalendarShareNoGoogle": "Nessun Google",
         "googleCalendarShareMembers": "Membri",
         "googleCalendarShareTeamsEmptySearch": "Nessun team corrisponde alla ricerca.",
+        "googleCalendarShareRoutingHelp": "Principale e Crea calendario CRM valgono per tutti i destinatari. Scegli calendario usa un solo account Google (gli altri ricevono Principale).",
+        "googleCalendarSharePickNeedsUser": "Seleziona il proprietario del calendario per elencare i suoi calendari Google.",
+        "googleCalendarSharePickOwnerHint": "In quale account Google scegliere o creare il calendario (dagli utenti\/team selezionati).",
+        "googleCalendarSharePickOwnerEmpty": "Nessun utente con consenso Google nei utenti\/team selezionati.",
         "googleCalendarRoutingHintTitle": "Instradamento Google Calendar (per data selezionata)",
         "googleCalendarRoutingHintPrimary": "Gli eventi vanno nel calendario principale Google.",
         "googleCalendarRoutingHintUserPick": "Scegli il calendario sotto (l'admin ha abilitato la scelta utente per questa data).",
@@ -81,6 +88,11 @@
             "9": "Mirtillo",
             "10": "Basilico",
             "11": "Pomodoro"
+        },
+        "googleCalendarShareRoutingMode": {
+            "primary": "Calendario principale",
+            "auto_dedicated": "Crea calendario CRM",
+            "user_pick": "Scegli calendario esistente"
         }
     }
 }

@@ -13,7 +13,10 @@
         "googleCalendarTransparency": "Занятость",
         "googleCalendarColorId": "Цвет",
         "googleCalendarShareUsers": "Также добавить пользователям",
-        "googleCalendarShareTeams": "Также добавить командам"
+        "googleCalendarShareTeams": "Также добавить командам",
+        "googleCalendarShareRoutingMode": "Календарь для общих пользователей",
+        "googleCalendarShareCalendarUserId": "Владелец общего календаря",
+        "googleCalendarShareCalendarId": "Общий календарь Google"
     },
     "labels": {
         "Google Calendar": "Google Calendar",
@@ -29,6 +32,10 @@
         "googleCalendarShareNoGoogle": "Без Google",
         "googleCalendarShareMembers": "Участники",
         "googleCalendarShareTeamsEmptySearch": "Нет команд по запросу.",
+        "googleCalendarShareRoutingHelp": "Основной и «Создать CRM-календарь» применяются ко всем получателям. Выбор календаря — один Google-аккаунт (остальным — основной).",
+        "googleCalendarSharePickNeedsUser": "Выберите владельца календаря, чтобы показать его календари Google.",
+        "googleCalendarSharePickOwnerHint": "В чьём Google-аккаунте выбрать или создать календарь (из выбранных пользователей\/команд).",
+        "googleCalendarSharePickOwnerEmpty": "В выбранных пользователях\/командах нет пользователей с согласием на запись в Google.",
         "googleCalendarRoutingHintTitle": "Маршрутизация Google Calendar (по выбранным датам)",
         "googleCalendarRoutingHintPrimary": "События попадут в основной календарь Google.",
         "googleCalendarRoutingHintUserPick": "Выберите календарь ниже (админ включил выбор пользователя для этой даты).",
@@ -81,6 +88,11 @@
             "9": "Черника",
             "10": "Базилик",
             "11": "Томат"
+        },
+        "googleCalendarShareRoutingMode": {
+            "primary": "Основной календарь",
+            "auto_dedicated": "Создать CRM-календарь",
+            "user_pick": "Выбрать существующий календарь"
         }
     }
 }

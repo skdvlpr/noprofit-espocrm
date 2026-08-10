@@ -117,6 +117,24 @@ $ok(
     isset($fields['googleCalendarShareUsers']) ? 'ok' : 'missing fields'
 );
 
+$ok(
+    'Meeting fields include share routing mode + calendar id',
+    isset($fields['googleCalendarShareRoutingMode']) && isset($fields['googleCalendarShareCalendarId']),
+    isset($fields['googleCalendarShareRoutingMode']) ? 'ok' : 'missing routing fields'
+);
+
+$shareModeOpts = is_array($fields['googleCalendarShareRoutingMode'] ?? null)
+    ? ($fields['googleCalendarShareRoutingMode']['options'] ?? [])
+    : [];
+$ok(
+    'Share routing mode options primary/auto_dedicated/user_pick',
+    is_array($shareModeOpts)
+        && in_array('primary', $shareModeOpts, true)
+        && in_array('auto_dedicated', $shareModeOpts, true)
+        && in_array('user_pick', $shareModeOpts, true),
+    json_encode($shareModeOpts)
+);
+
 $shareView = is_array($fields['googleCalendarShareUsers'] ?? null)
     ? (string) ($fields['googleCalendarShareUsers']['view'] ?? '')
     : '';
@@ -141,6 +159,13 @@ if ($rPicker->getStatusCode() === 200) {
         json_encode(array_keys($pickerBody))
     );
 }
+
+$rTargetCal = $client->get('/api/v1/GoogleIntegration/calendar/share-target-calendars?userId=x');
+$ok(
+    'GET share-target-calendars responds (200/400/403)',
+    in_array($rTargetCal->getStatusCode(), [200, 400, 403], true),
+    'code=' . $rTargetCal->getStatusCode()
+);
 
 /** @var \Espo\Core\Utils\Metadata $metadata */
 $metadata = $container->getByClass(\Espo\Core\Utils\Metadata::class);

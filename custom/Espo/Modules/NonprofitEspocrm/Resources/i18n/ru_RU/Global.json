@@ -39,7 +39,12 @@
         "ContattiAssociati": "Ассоциаты",
         "ContattiVolontariDipendenti": "Волонтёры / Сотрудники"
     },
+    "messages": {
+        "insertFieldHelp": "Вставьте плейсхолдер поля как {{field}} или {{link.field}}. Хелперы: {{recordUrl}}, {{users}} (имена) и т.д."
+    },
     "labels": {
+        "templateVarRecordUrl": "URL записи (ссылка CRM)",
+        "templateVarNamesSuffix": "имена",
         "Create VolunteerEmployee": "Создать новый",
         "Create Member": "Создать новый",
         "Create MealCount": "Создать новый",

@@ -317,7 +317,7 @@ class ManagerCalendarShare
         return $ids;
     }
 
-    private function isEligibleShareTarget(string $userId): bool
+    public function isEligibleShareTarget(string $userId): bool
     {
         /** @var ?User $user */
         $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
@@ -335,6 +335,30 @@ class ManagerCalendarShare
         }
 
         return $this->userHasManagerWriteConsent($userId);
+    }
+
+    /**
+     * Manager may list/create calendars on a target account that has Google connected
+     * (consent is still required later for event fan-out).
+     */
+    public function canManageTargetCalendars(string $userId): bool
+    {
+        /** @var ?User $user */
+        $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
+
+        if ($user === null) {
+            return false;
+        }
+
+        if ($user->isPortal() || $user->isApi() || $user->isSystem()) {
+            return false;
+        }
+
+        if ($user->get('isActive') === false) {
+            return false;
+        }
+
+        return $this->userHasGoogleConnected($userId);
     }
 
     /**

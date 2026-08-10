@@ -58,9 +58,11 @@
         "xlsxIncludeTotals": "Include totals row"
     },
     "messages": {
-        "insertFieldHelp": "Insert a field placeholder as {{field}} or {{link.field}}."
+        "insertFieldHelp": "Insert a field placeholder as {{field}} or {{link.field}}. Helpers: {{recordUrl}}, {{users}} (names), etc."
     },
     "labels": {
+        "templateVarRecordUrl": "Record URL (CRM link)",
+        "templateVarNamesSuffix": "names",
         "Create VolunteerEmployee": "Create New",
         "Create Member": "Create New",
         "Create MealCount": "Create Meal Count",

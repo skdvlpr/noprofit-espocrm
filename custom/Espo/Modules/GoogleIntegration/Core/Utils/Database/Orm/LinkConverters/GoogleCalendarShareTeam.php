@@ -24,6 +24,18 @@ class GoogleCalendarShareTeam implements LinkConverter
         $relationshipName = $linkDefs->getRelationshipName();
 
         return EntityDefs::create()
+            ->withAttribute(
+                AttributeDefs::create($name . 'Ids')
+                    ->withType(AttributeType::JSON_ARRAY)
+                    ->withNotStorable()
+                    ->withParam('isLinkStub', false)
+            )
+            ->withAttribute(
+                AttributeDefs::create($name . 'Names')
+                    ->withType(AttributeType::JSON_OBJECT)
+                    ->withNotStorable()
+                    ->withParam('isLinkStub', false)
+            )
             ->withRelation(
                 RelationDefs::create($name)
                     ->withType(RelationType::MANY_MANY)

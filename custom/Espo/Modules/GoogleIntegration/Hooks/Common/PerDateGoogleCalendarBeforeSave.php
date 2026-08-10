@@ -67,6 +67,10 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
         if ($entity->hasRelation(ManagerCalendarShare::FIELD_TEAMS)) {
             $entity->setLinkMultipleIdList(ManagerCalendarShare::FIELD_TEAMS, []);
         }
+
+        $entity->set('googleCalendarShareRoutingMode', 'primary');
+        $entity->set('googleCalendarShareCalendarUserId', null);
+        $entity->set('googleCalendarShareCalendarId', 'primary');
     }
 
     private function shouldNormalizeDateSourceList(Entity $entity): bool

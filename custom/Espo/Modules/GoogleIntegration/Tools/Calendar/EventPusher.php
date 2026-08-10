@@ -32,6 +32,9 @@ class EventPusher
     /** @var User|null When set, Google API calls use this user (e.g. async job after failed HTTP push). */
     private ?User $pushUserOverride = null;
 
+    /** When true, calendar routing uses manager share fields instead of target External Account mode. */
+    private bool $sharedWriteActive = false;
+
     public function __construct(
         private EntityManager $entityManager,
         private ClientManager $clientManager,
@@ -59,7 +62,9 @@ class EventPusher
         ?User $aclUserOverride = null
     ): void {
         $previousOverride = $this->pushUserOverride;
+        $previousShared = $this->sharedWriteActive;
         $this->pushUserOverride = $pushUserOverride;
+        $this->sharedWriteActive = $sharedWrite;
 
         try {
             if (!$entity->get('saveToGoogleCalendar')) {
@@ -134,6 +139,7 @@ class EventPusher
             }
         } finally {
             $this->pushUserOverride = $previousOverride;
+            $this->sharedWriteActive = $previousShared;
         }
     }
 
@@ -473,9 +479,28 @@ class EventPusher
      */
     private function resolveCalendarId(Entity $entity, ?array $source): string
     {
-        $mode = $this->resolveEffectiveRoutingMode($source);
+        $mode = $this->resolveEffectiveRoutingMode($entity, $source);
 
         if ($mode === CalendarRoutingMode::USER_PICK) {
+            if ($this->sharedWriteActive) {
+                $ownerId = trim((string) ($entity->get('googleCalendarShareCalendarUserId') ?? ''));
+                $targetId = $this->pushUser()->getId();
+
+                if (
+                    is_string($targetId)
+                    && $targetId !== ''
+                    && $ownerId !== ''
+                    && $ownerId === $targetId
+                ) {
+                    $shareCalendarId = trim((string) ($entity->get('googleCalendarShareCalendarId') ?? ''));
+
+                    return $shareCalendarId !== '' ? $shareCalendarId : self::DEFAULT_CALENDAR_ID;
+                }
+
+                // Pick calendar is scoped to one Google account; other targets get primary.
+                return self::DEFAULT_CALENDAR_ID;
+            }
+
             $entityCalendarId = trim((string) ($entity->get('googleCalendarId') ?? ''));
 
             return $entityCalendarId !== '' ? $entityCalendarId : self::DEFAULT_CALENDAR_ID;
@@ -501,13 +526,24 @@ class EventPusher
     }
 
     /**
-     * Routing is per-user only (External Accounts). CalendarDateSource admin UI no longer
-     * exposes calendarRoutingMode — ignore any legacy source value.
+     * Own export: External Account routing mode (default auto_dedicated).
+     * Shared write: manager-chosen googleCalendarShareRoutingMode (default primary).
+     * CalendarDateSource.calendarRoutingMode is ignored — ignore any legacy source value.
      *
      * @param ?array<string, mixed> $source
      */
-    private function resolveEffectiveRoutingMode(?array $source): string
+    private function resolveEffectiveRoutingMode(Entity $entity, ?array $source): string
     {
+        if ($this->sharedWriteActive) {
+            $shareMode = $entity->get('googleCalendarShareRoutingMode');
+
+            if (is_string($shareMode) && CalendarRoutingMode::isValid($shareMode)) {
+                return $shareMode;
+            }
+
+            return $this->resolveUserCalendarRoutingMode() ?? CalendarRoutingMode::PRIMARY;
+        }
+
         return $this->resolveUserCalendarRoutingMode() ?? CalendarRoutingMode::AUTO_DEDICATED;
     }
 
@@ -865,6 +901,7 @@ class EventPusher
             ->setEntity($entity)
             ->setUser($this->pushUser())
             ->setData([
+                'recordUrl' => $this->buildRecordUrl($entity),
                 'espocrmUrl' => $this->buildRecordUrl($entity),
                 'sourceDateType' => $sourceDateType,
             ])
@@ -1017,6 +1054,12 @@ class EventPusher
         $template = preg_replace_callback(
             '/{{\s*([A-Za-z][A-Za-z0-9_]*)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/',
             function (array $matches) use ($entity): string {
+                if ($matches[2] === 'recordUrl') {
+                    return $this->escapeTemplateValue(
+                        $this->getRelatedRecordUrl($entity, $matches[1])
+                    );
+                }
+
                 return $this->escapeTemplateValue(
                     $this->getRelatedScalarValue($entity, $matches[1], $matches[2])
                 );
@@ -1044,6 +1087,33 @@ class EventPusher
             },
             $template
         );
+    }
+
+    private function getRelatedRecordUrl(Entity $entity, string $relation): string
+    {
+        if (!in_array($relation, $entity->getRelationList(), true)) {
+            return '';
+        }
+
+        try {
+            $relationType = $entity->getRelationType($relation);
+            $relationRepository = $this->entityManager->getRelation($entity, $relation);
+
+            if (!in_array($relationType, [Entity::BELONGS_TO, Entity::BELONGS_TO_PARENT, Entity::HAS_ONE], true)) {
+                return '';
+            }
+
+            $related = $relationRepository->findOne();
+
+            return $related ? $this->buildRecordUrl($related) : '';
+        } catch (\Throwable $e) {
+            $this->log->warning(
+                'Google Calendar template related recordUrl skipped: '
+                . $entity->getEntityType() . '.' . $relation . ' - ' . $e->getMessage()
+            );
+        }
+
+        return '';
     }
 
     private function getRelatedScalarValue(Entity $entity, string $relation, string $field): string

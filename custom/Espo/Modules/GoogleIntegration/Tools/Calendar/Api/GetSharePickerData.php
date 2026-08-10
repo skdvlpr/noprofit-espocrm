@@ -8,6 +8,7 @@ use Espo\Core\Api\Response;
 use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Entities\User;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\ManagerCalendarShare;
 use Espo\ORM\EntityManager;
 
@@ -20,6 +21,7 @@ class GetSharePickerData implements Action
         private ManagerCalendarShare $managerCalendarShare,
         private User $user,
         private EntityManager $entityManager,
+        private CalendarProvisioner $calendarProvisioner,
     ) {}
 
     public function process(Request $request): Response
@@ -52,10 +54,14 @@ class GetSharePickerData implements Action
             static fn (array $a, array $b): int => strcasecmp($a['name'], $b['name'])
         );
 
+        [$namePrefix, $nameSuffix] = $this->calendarProvisioner->getPrefixSuffix();
+
         return ResponseComposer::json([
             'users' => $users,
             'connectedUserIds' => $connectedIds,
             'teams' => $this->managerCalendarShare->listTeamsWithGoogleMembers(),
+            'namePrefix' => $namePrefix,
+            'nameSuffix' => $nameSuffix,
         ]);
     }
 }

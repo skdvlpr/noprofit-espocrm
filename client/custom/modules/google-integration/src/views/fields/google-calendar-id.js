@@ -120,26 +120,29 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .addClass('google-calendar-create-new-name margin-top')
                 .toggleClass('hidden', !this.createNewCalendar);
 
+            const $nameLabel = $('<label>')
+                .addClass('control-label')
+                .text(this.translateLabelKey(
+                    'googleCalendarCreateNewNameLabel',
+                    'Calendar name'
+                ));
+
             const $affixRow = $('<div>')
                 .addClass('google-calendar-name-affix');
 
-            const prefix = String(this.calendarNamePrefix || '').trim();
+            // Always show locked prefix (default CRM) so naming is visible without admin jargon.
+            const prefix = String(this.calendarNamePrefix || '').trim() || 'CRM';
             const suffix = String(this.calendarNameSuffix || '').trim();
 
-            if (prefix) {
-                $affixRow.append(
-                    $('<span>')
-                        .addClass('google-calendar-name-affix-fixed')
-                        .attr(
-                            'title',
-                            this.translateLabelKey(
-                                'googleCalendarNamePrefixLocked',
-                                'Prefix is set by an administrator and cannot be changed here.'
-                            )
-                        )
-                        .text(this.translateLabelKey('googleCalendarNamePrefixBadge', 'Prefix') + ': ' + prefix)
-                );
-            }
+            $affixRow.append(
+                $('<span>')
+                    .addClass('google-calendar-name-affix-fixed')
+                    .attr('title', this.translateLabelKey(
+                        'googleCalendarNameAffixLocked',
+                        'Set automatically'
+                    ))
+                    .text(prefix)
+            );
 
             const middleName = this.stripAffixes(this.newCalendarName || this.defaultNewCalendarName());
             this.newCalendarName = middleName;
@@ -151,12 +154,12 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                     maxlength: 200,
                     placeholder: this.translateLabelKey(
                         'googleCalendarCreateNewNamePlaceholder',
-                        'Middle name (label)'
+                        'Name'
                     ),
                     'data-role': 'new-calendar-name',
                     'aria-label': this.translateLabelKey(
-                        'googleCalendarCreateNewNamePlaceholder',
-                        'Middle name (label)'
+                        'googleCalendarCreateNewNameLabel',
+                        'Calendar name'
                     ),
                 })
                 .val(middleName);
@@ -167,14 +170,11 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 $affixRow.append(
                     $('<span>')
                         .addClass('google-calendar-name-affix-fixed')
-                        .attr(
-                            'title',
-                            this.translateLabelKey(
-                                'googleCalendarNameSuffixLocked',
-                                'Suffix is set by an administrator and cannot be changed here.'
-                            )
-                        )
-                        .text(this.translateLabelKey('googleCalendarNameSuffixBadge', 'Suffix') + ': ' + suffix)
+                        .attr('title', this.translateLabelKey(
+                            'googleCalendarNameAffixLocked',
+                            'Set automatically'
+                        ))
+                        .text(suffix)
                 );
             }
 
@@ -188,14 +188,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
                 .attr('data-role', 'create-calendar-submit')
                 .text(this.translateLabelKey('googleCalendarCreateNewSubmit', 'Create calendar'));
 
-            const $help = $('<p>')
-                .addClass('help-block text-muted small')
-                .text(this.translateLabelKey(
-                    'googleCalendarCreateNewHelp',
-                    'Only the middle part is editable. Prefix and suffix come from Administration → Integrations → Google.'
-                ));
-
-            $nameRow.append($affixRow, $preview, $createBtn, $help);
+            $nameRow.append($nameLabel, $affixRow, $preview, $createBtn);
             $wrap.append($checkLabel, $nameRow);
             this.$el.append($wrap);
 
@@ -277,7 +270,7 @@ define('google-integration:views/fields/google-calendar-id', ['exports', 'views/
             const full = this.buildNamingPatternPreview(label || this.defaultNewCalendarName());
             const template = this.translateLabelKey(
                 'googleCalendarNamingPatternHelp',
-                'Full Google name: {name}'
+                'Will be created as: {name}'
             );
 
             $preview.text(String(template).replace(/\{name\}/g, full));

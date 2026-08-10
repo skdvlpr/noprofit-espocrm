@@ -92,10 +92,10 @@ class RoleSetup
     /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
     /**
      * Bump when role specs change so ProvisionRoleAcl rewrites matrices on rebuild.
-     * 2026-08-08-v4: Volunteer/Employee/Member get ExternalAccount (Google connect)
-     * + own Meeting/Call/Task create; Opportunity stays read-only.
+     * 2026-08-10-v5: Website API read-all on MealCount / AssociationMealCount /
+     * Intervention for public home impact stats.
      */
-    public const ACL_MATRIX_VERSION = '2026-08-08-volunteer-calendar-external-v4';
+    public const ACL_MATRIX_VERSION = '2026-08-10-website-reporting-read-v5';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -793,6 +793,13 @@ class RoleSetup
         }
         foreach (['Account', 'Contact', 'Opportunity', 'PrimaNota', 'Lead', 'Case'] as $e) {
             $websiteData[$e] = $websiteCreateReadEdit();
+        }
+        // Public site home impact cards (reporting totals) — read aggregates only.
+        $websiteReadAll = static fn(): array => [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'no',
+        ];
+        foreach (['MealCount', 'AssociationMealCount', 'Intervention'] as $e) {
+            $websiteData[$e] = $websiteReadAll();
         }
 
         $specs = [

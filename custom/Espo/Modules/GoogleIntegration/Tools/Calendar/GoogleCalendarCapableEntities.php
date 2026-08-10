@@ -37,12 +37,33 @@ class GoogleCalendarCapableEntities
             'googleCalendarShareUsers' => (object) [
                 'type' => 'linkMultiple',
                 'view' => 'google-integration:views/fields/google-calendar-share-users',
-                'audited' => true,
+                'audited' => false,
             ],
             'googleCalendarShareTeams' => (object) [
                 'type' => 'linkMultiple',
                 'view' => 'google-integration:views/fields/google-calendar-share-teams',
+                'audited' => false,
+            ],
+            'googleCalendarShareRoutingMode' => (object) [
+                'type' => 'enum',
+                'options' => [
+                    CalendarRoutingMode::PRIMARY,
+                    CalendarRoutingMode::AUTO_DEDICATED,
+                    CalendarRoutingMode::USER_PICK,
+                ],
+                'default' => CalendarRoutingMode::PRIMARY,
                 'audited' => true,
+            ],
+            'googleCalendarShareCalendarUserId' => (object) [
+                'type' => 'varchar',
+                'maxLength' => 17,
+                'view' => 'google-integration:views/fields/google-calendar-share-calendar-user',
+            ],
+            'googleCalendarShareCalendarId' => (object) [
+                'type' => 'varchar',
+                'maxLength' => 255,
+                'default' => 'primary',
+                'view' => 'google-integration:views/fields/google-calendar-share-calendar-id',
             ],
         ];
     }
@@ -87,6 +108,14 @@ class GoogleCalendarCapableEntities
                 ['name' => 'googleCalendarShareTeams'],
             ],
             [
+                ['name' => 'googleCalendarShareRoutingMode'],
+                ['name' => 'googleCalendarShareCalendarUserId'],
+            ],
+            [
+                ['name' => 'googleCalendarShareCalendarId'],
+                false,
+            ],
+            [
                 ['name' => 'googleCalendarEventSettings', 'fullWidth' => true],
             ],
         ];
@@ -116,6 +145,9 @@ class GoogleCalendarCapableEntities
                     'googleCalendarColorId' => 'Color',
                     'googleCalendarShareUsers' => 'Also add to users',
                     'googleCalendarShareTeams' => 'Also add to teams',
+                    'googleCalendarShareRoutingMode' => 'Calendar for shared users',
+                    'googleCalendarShareCalendarUserId' => 'Shared calendar owner',
+                    'googleCalendarShareCalendarId' => 'Shared Google calendar',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
@@ -131,6 +163,10 @@ class GoogleCalendarCapableEntities
                     'googleCalendarShareNoGoogle' => 'No Google',
                     'googleCalendarShareMembers' => 'Members',
                     'googleCalendarShareTeamsEmptySearch' => 'No teams match the search.',
+                    'googleCalendarShareRoutingHelp' => 'Primary and Create CRM calendar apply to every shared target. Pick calendar uses one chosen user’s Google account (others get Primary).',
+                    'googleCalendarSharePickNeedsUser' => 'Select a shared calendar owner to list their Google calendars.',
+                    'googleCalendarSharePickOwnerHint' => 'Whose Google account to pick or create the calendar in (from selected users/teams).',
+                    'googleCalendarSharePickOwnerEmpty' => 'No consented Google users in the selected users/teams yet.',
                     'googleCalendarRoutingHintTitle' => 'Google calendar routing (per selected date)',
                     'googleCalendarRoutingHintPrimary' => 'Events go to your Google primary calendar.',
                     'googleCalendarRoutingHintUserPick' => 'Choose a calendar below (admin enabled user pick for this date).',
@@ -147,7 +183,13 @@ class GoogleCalendarCapableEntities
                     'googleCalendarDateClose' => 'Close date',
                     'googleCalendarTemplateLoadFailed' => 'Could not load calendar templates. Run Rebuild or reinstall Google Integration.',
                 ],
-                'options' => self::sharedOptionsEn(),
+                'options' => array_merge(self::sharedOptionsEn(), [
+                    'googleCalendarShareRoutingMode' => [
+                        'primary' => 'Primary calendar',
+                        'auto_dedicated' => 'Create CRM calendar',
+                        'user_pick' => 'Pick existing calendar',
+                    ],
+                ]),
             ],
             'it_IT' => [
                 'fields' => [
@@ -165,6 +207,9 @@ class GoogleCalendarCapableEntities
                     'googleCalendarColorId' => 'Colore',
                     'googleCalendarShareUsers' => 'Aggiungi anche per utenti',
                     'googleCalendarShareTeams' => 'Aggiungi anche per team',
+                    'googleCalendarShareRoutingMode' => 'Calendario per utenti condivisi',
+                    'googleCalendarShareCalendarUserId' => 'Proprietario calendario condiviso',
+                    'googleCalendarShareCalendarId' => 'Calendario Google condiviso',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
@@ -180,6 +225,10 @@ class GoogleCalendarCapableEntities
                     'googleCalendarShareNoGoogle' => 'Nessun Google',
                     'googleCalendarShareMembers' => 'Membri',
                     'googleCalendarShareTeamsEmptySearch' => 'Nessun team corrisponde alla ricerca.',
+                    'googleCalendarShareRoutingHelp' => 'Principale e Crea calendario CRM valgono per tutti i destinatari. Scegli calendario usa un solo account Google (gli altri ricevono Principale).',
+                    'googleCalendarSharePickNeedsUser' => 'Seleziona il proprietario del calendario per elencare i suoi calendari Google.',
+                    'googleCalendarSharePickOwnerHint' => 'In quale account Google scegliere o creare il calendario (dagli utenti/team selezionati).',
+                    'googleCalendarSharePickOwnerEmpty' => 'Nessun utente con consenso Google nei utenti/team selezionati.',
                     'googleCalendarRoutingHintTitle' => 'Instradamento Google Calendar (per data selezionata)',
                     'googleCalendarRoutingHintPrimary' => 'Gli eventi vanno nel calendario principale Google.',
                     'googleCalendarRoutingHintUserPick' => 'Scegli il calendario sotto (l\'admin ha abilitato la scelta utente per questa data).',
@@ -196,7 +245,13 @@ class GoogleCalendarCapableEntities
                     'googleCalendarDateClose' => 'Data chiusura',
                     'googleCalendarTemplateLoadFailed' => 'Impossibile caricare i template calendario. Esegui Rebuild o reinstalla Google Integration.',
                 ],
-                'options' => self::sharedOptionsIt(),
+                'options' => array_merge(self::sharedOptionsIt(), [
+                    'googleCalendarShareRoutingMode' => [
+                        'primary' => 'Calendario principale',
+                        'auto_dedicated' => 'Crea calendario CRM',
+                        'user_pick' => 'Scegli calendario esistente',
+                    ],
+                ]),
             ],
             'ru_RU' => [
                 'fields' => [
@@ -214,6 +269,9 @@ class GoogleCalendarCapableEntities
                     'googleCalendarColorId' => 'Цвет',
                     'googleCalendarShareUsers' => 'Также добавить пользователям',
                     'googleCalendarShareTeams' => 'Также добавить командам',
+                    'googleCalendarShareRoutingMode' => 'Календарь для общих пользователей',
+                    'googleCalendarShareCalendarUserId' => 'Владелец общего календаря',
+                    'googleCalendarShareCalendarId' => 'Общий календарь Google',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
@@ -229,6 +287,10 @@ class GoogleCalendarCapableEntities
                     'googleCalendarShareNoGoogle' => 'Без Google',
                     'googleCalendarShareMembers' => 'Участники',
                     'googleCalendarShareTeamsEmptySearch' => 'Нет команд по запросу.',
+                    'googleCalendarShareRoutingHelp' => 'Основной и «Создать CRM-календарь» применяются ко всем получателям. Выбор календаря — один Google-аккаунт (остальным — основной).',
+                    'googleCalendarSharePickNeedsUser' => 'Выберите владельца календаря, чтобы показать его календари Google.',
+                    'googleCalendarSharePickOwnerHint' => 'В чьём Google-аккаунте выбрать или создать календарь (из выбранных пользователей/команд).',
+                    'googleCalendarSharePickOwnerEmpty' => 'В выбранных пользователях/командах нет пользователей с согласием на запись в Google.',
                     'googleCalendarRoutingHintTitle' => 'Маршрутизация Google Calendar (по выбранным датам)',
                     'googleCalendarRoutingHintPrimary' => 'События попадут в основной календарь Google.',
                     'googleCalendarRoutingHintUserPick' => 'Выберите календарь ниже (админ включил выбор пользователя для этой даты).',
@@ -245,7 +307,13 @@ class GoogleCalendarCapableEntities
                     'googleCalendarDateClose' => 'Дата закрытия',
                     'googleCalendarTemplateLoadFailed' => 'Не удалось загрузить шаблоны календаря. Выполните Rebuild.',
                 ],
-                'options' => self::sharedOptionsRu(),
+                'options' => array_merge(self::sharedOptionsRu(), [
+                    'googleCalendarShareRoutingMode' => [
+                        'primary' => 'Основной календарь',
+                        'auto_dedicated' => 'Создать CRM-календарь',
+                        'user_pick' => 'Выбрать существующий календарь',
+                    ],
+                ]),
             ],
         ];
     }

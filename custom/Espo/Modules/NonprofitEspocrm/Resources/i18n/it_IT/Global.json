@@ -60,9 +60,11 @@
         "xlsxIncludeTotals": "Includi riga Totali"
     },
     "messages": {
-        "insertFieldHelp": "Inserisci un segnaposto campo come {{field}} o {{link.field}}."
+        "insertFieldHelp": "Inserisci un segnaposto campo come {{field}} o {{link.field}}. Helper: {{recordUrl}}, {{users}} (nomi), ecc."
     },
     "labels": {
+        "templateVarRecordUrl": "URL del record (link CRM)",
+        "templateVarNamesSuffix": "nomi",
         "Create VolunteerEmployee": "Crea Nuovo",
         "Create Member": "Crea Nuovo",
         "Create MealCount": "Crea Conteggio pasti",

@@ -61,6 +61,7 @@ class CalendarTemplateApplier
             ->setEntity($record)
             ->setUser($this->user)
             ->setData([
+                'recordUrl' => $this->buildRecordUrl($record),
                 'espocrmUrl' => $this->buildRecordUrl($record),
                 'sourceDateType' => $sourceDateType,
             ])
@@ -75,6 +76,12 @@ class CalendarTemplateApplier
         $template = preg_replace_callback(
             '/{{\s*([A-Za-z][A-Za-z0-9_]*)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/',
             function (array $matches) use ($record): string {
+                if ($matches[2] === 'recordUrl') {
+                    return $this->escapeTemplateValue(
+                        $this->getRelatedRecordUrl($record, $matches[1])
+                    );
+                }
+
                 return $this->escapeTemplateValue(
                     $this->getRelatedScalarValue($record, $matches[1], $matches[2])
                 );
@@ -95,6 +102,28 @@ class CalendarTemplateApplier
             },
             $template
         );
+    }
+
+    private function getRelatedRecordUrl(Entity $record, string $relation): string
+    {
+        try {
+            $relationType = $record->getRelationType($relation);
+
+            if (!in_array($relationType, [Entity::BELONGS_TO, Entity::BELONGS_TO_PARENT, Entity::HAS_ONE], true)) {
+                return '';
+            }
+
+            $related = $this->entityManager->getRelation($record, $relation)->findOne();
+
+            return $related ? $this->buildRecordUrl($related) : '';
+        } catch (\Throwable $e) {
+            $this->log->warning(
+                'Google Calendar template related recordUrl skipped: '
+                . $record->getEntityType() . '.' . $relation . ' - ' . $e->getMessage()
+            );
+
+            return '';
+        }
     }
 
     private function getRelatedScalarValue(Entity $record, string $relation, string $field): string

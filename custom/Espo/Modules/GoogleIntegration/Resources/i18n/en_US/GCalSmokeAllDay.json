@@ -13,7 +13,10 @@
         "googleCalendarTransparency": "Availability",
         "googleCalendarColorId": "Color",
         "googleCalendarShareUsers": "Also add to users",
-        "googleCalendarShareTeams": "Also add to teams"
+        "googleCalendarShareTeams": "Also add to teams",
+        "googleCalendarShareRoutingMode": "Calendar for shared users",
+        "googleCalendarShareCalendarUserId": "Shared calendar owner",
+        "googleCalendarShareCalendarId": "Shared Google calendar"
     },
     "labels": {
         "Google Calendar": "Google Calendar",
@@ -29,6 +32,10 @@
         "googleCalendarShareNoGoogle": "No Google",
         "googleCalendarShareMembers": "Members",
         "googleCalendarShareTeamsEmptySearch": "No teams match the search.",
+        "googleCalendarShareRoutingHelp": "Primary and Create CRM calendar apply to every shared target. Pick calendar uses one chosen user’s Google account (others get Primary).",
+        "googleCalendarSharePickNeedsUser": "Select a shared calendar owner to list their Google calendars.",
+        "googleCalendarSharePickOwnerHint": "Whose Google account to pick or create the calendar in (from selected users\/teams).",
+        "googleCalendarSharePickOwnerEmpty": "No consented Google users in the selected users\/teams yet.",
         "googleCalendarRoutingHintTitle": "Google calendar routing (per selected date)",
         "googleCalendarRoutingHintPrimary": "Events go to your Google primary calendar.",
         "googleCalendarRoutingHintUserPick": "Choose a calendar below (admin enabled user pick for this date).",
@@ -81,6 +88,11 @@
             "9": "Blueberry",
             "10": "Basil",
             "11": "Tomato"
+        },
+        "googleCalendarShareRoutingMode": {
+            "primary": "Primary calendar",
+            "auto_dedicated": "Create CRM calendar",
+            "user_pick": "Pick existing calendar"
         }
     }
 }

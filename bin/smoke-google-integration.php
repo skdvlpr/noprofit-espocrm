@@ -527,6 +527,14 @@ $ok(
         || str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel')
     )
 );
+$inserterJs = file_get_contents(
+    __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/lib/template-variable-inserter.js'
+) ?: '';
+$eventPusherPhp = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php'
+) ?: '';
+$ok('template-variable-inserter offers recordUrl helper', str_contains($inserterJs, "'recordUrl'"));
+$ok('EventPusher injects recordUrl into Htmlizer data', str_contains($eventPusherPhp, "'recordUrl'"));
 $ok('CalendarTemplate template field resolves target entity from select', str_contains($templateView, 'readTargetEntityTypeFromField'));
 $ok('CalendarTemplate entity type select syncs initial value to model', str_contains($entityTypeView, 'syncInitialValue') || str_contains($entityTypeView, 'initialValue'));
 $titleHelper = file_get_contents(__DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEventTitle.php') ?: '';
@@ -877,6 +885,32 @@ $ok(
     'AccountProvisioner copies legacy ExternalAccount data (token) and coerces sync mode to none',
     $migratedToken === 'legacy' && $migratedMode === 'none',
     'token=' . (string) ($migratedToken ?? 'null') . ' mode=' . (string) ($migratedMode ?? 'null')
+);
+
+// Soft-deleted canonical row must be restored (never re-INSERT — duplicate PK 500 on EA open).
+$pdo->exec(
+    'UPDATE external_account SET deleted = 1 WHERE id = ' . $pdo->quote($canonicalProvisionId)
+);
+$softDeleted = $pdo->query(
+    'SELECT deleted FROM external_account WHERE id = ' . $pdo->quote($canonicalProvisionId)
+)->fetch(\PDO::FETCH_ASSOC);
+$ok('soft-delete seed for AccountProvisioner', (int) ($softDeleted['deleted'] ?? 0) === 1);
+
+$restored = $accountProvisioner->ensureForUser($provisionUserId);
+$restoredRow = $pdo->query(
+    'SELECT id, deleted FROM external_account WHERE id = ' . $pdo->quote($canonicalProvisionId)
+)->fetch(\PDO::FETCH_ASSOC);
+$ok(
+    'AccountProvisioner restores soft-deleted ExternalAccount without duplicate PK',
+    is_array($restoredRow)
+        && (int) ($restoredRow['deleted'] ?? 1) === 0
+        && $restored->getId() === $canonicalProvisionId
+);
+
+$again = $accountProvisioner->ensureForUser($provisionUserId);
+$ok(
+    'AccountProvisioner ensureForUser is idempotent',
+    $again->getId() === $canonicalProvisionId
 );
 
 $pdo->exec('DELETE FROM external_account WHERE id IN ('

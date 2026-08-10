@@ -10,6 +10,16 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetSharePickerData"
     },
     {
+        "route": "/GoogleIntegration/calendar/share-target-calendars",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetShareTargetCalendars"
+    },
+    {
+        "route": "/GoogleIntegration/calendar/share-target-calendars",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\PostShareTargetCalendar"
+    },
+    {
         "route": "/GoogleIntegration/calendar/date-options/:entityType/:id",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateOptions"

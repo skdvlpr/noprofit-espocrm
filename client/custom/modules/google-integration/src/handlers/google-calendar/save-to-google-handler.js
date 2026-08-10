@@ -11,6 +11,9 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
         'googleCalendarId',
         'googleCalendarShareUsers',
         'googleCalendarShareTeams',
+        'googleCalendarShareRoutingMode',
+        'googleCalendarShareCalendarUserId',
+        'googleCalendarShareCalendarId',
     ];
 
     class SaveToGoogleHandler {
@@ -32,6 +35,10 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             });
 
             this.listenTo(this.model, 'change:googleCalendarDateSourceList', () => {
+                this.control();
+            });
+
+            this.listenTo(this.model, 'change:googleCalendarShareRoutingMode', () => {
                 this.control();
             });
 
@@ -124,6 +131,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             this.removeNotice();
             this.removeRoutingHint();
             this.removeShareHelp();
+            this.removeShareRoutingHelp();
 
             GOOGLE_FIELD_NAMES.forEach(field => this.toggleField(field, false));
 
@@ -148,6 +156,8 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             // not only for explicit user_pick routing sources. See product spec (B).
             const showCalendarPicker = enabled;
             const showShare = enabled && this.canShareToOthers;
+            const shareMode = String(this.model.get('googleCalendarShareRoutingMode') || 'primary');
+            const showSharePick = showShare && shareMode === 'user_pick';
 
             this.toggleField('saveToGoogleCalendar', true);
             this.toggleField('googleCalendarDateSourceList', enabled);
@@ -155,13 +165,31 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             this.toggleField('googleCalendarId', showCalendarPicker);
             this.toggleField('googleCalendarShareUsers', showShare);
             this.toggleField('googleCalendarShareTeams', showShare);
+            this.toggleField('googleCalendarShareRoutingMode', showShare);
+            this.toggleField('googleCalendarShareCalendarUserId', showSharePick);
+            this.toggleField('googleCalendarShareCalendarId', showSharePick);
             this.toggleNotice(enabled);
             this.toggleRoutingHint(enabled);
             this.toggleShareHelp(showShare);
+            this.toggleShareRoutingHelp(showShare);
 
             if (showCalendarPicker) {
                 this.refreshGoogleCalendarField();
             }
+
+            if (showSharePick) {
+                this.refreshShareCalendarField();
+            }
+        }
+
+        refreshShareCalendarField() {
+            const fieldView = this.view.getFieldView('googleCalendarShareCalendarId');
+
+            if (!fieldView || typeof fieldView.ensureCalendarsLoaded !== 'function') {
+                return;
+            }
+
+            fieldView.ensureCalendarsLoaded();
         }
 
         toggleField(field, visible) {
@@ -379,6 +407,50 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             }
 
             this.view.$el.find('.google-calendar-share-help').remove();
+        }
+
+        toggleShareRoutingHelp(visible) {
+            this.removeShareRoutingHelp();
+
+            if (!visible || !this.view.$el) {
+                return;
+            }
+
+            const $target = this.view.$el
+                .find('[data-name="googleCalendarShareRoutingMode"]')
+                .first();
+
+            if (!$target.length) {
+                return;
+            }
+
+            const text = this.view.translate(
+                'googleCalendarShareRoutingHelp',
+                'labels',
+                this.view.entityType
+            );
+
+            const $help = $('<div>')
+                .addClass('help-block text-muted small google-calendar-share-routing-help')
+                .text(text);
+
+            const $cell = $target.closest('.cell, .field');
+
+            if ($cell.length) {
+                $cell.append($help);
+
+                return;
+            }
+
+            $target.after($help);
+        }
+
+        removeShareRoutingHelp() {
+            if (!this.view.$el) {
+                return;
+            }
+
+            this.view.$el.find('.google-calendar-share-routing-help').remove();
         }
     }
 

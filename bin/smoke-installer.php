@@ -326,6 +326,20 @@ if ($websiteApiUser) {
         'Website role allows Contact.phoneNumber read (overrides baseline Volunteer locks)',
         $contactPhone === 'yes'
     );
+
+    $websiteAcl = json_decode(json_encode($websiteRole?->get('data') ?? new \stdClass()), true) ?? [];
+    $report(
+        'Website ACL: MealCount read=all (home impact stats)',
+        ($websiteAcl['MealCount']['read'] ?? null) === 'all'
+    );
+    $report(
+        'Website ACL: AssociationMealCount read=all',
+        ($websiteAcl['AssociationMealCount']['read'] ?? null) === 'all'
+    );
+    $report(
+        'Website ACL: Intervention read=all',
+        ($websiteAcl['Intervention']['read'] ?? null) === 'all'
+    );
 }
 
 $adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();

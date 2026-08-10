@@ -175,7 +175,11 @@ define('google-integration:views/fields/google-calendar-share-teams', [
                 teams: teams,
                 selectedIds: [...(this.ids || [])],
                 onSelect: models => {
-                    const keep = new Set(models.map(m => String(m.id)));
+                    const keep = new Set(
+                        (models || [])
+                            .map(m => String((m && (m.id || (m.get && m.get('id')))) || ''))
+                            .filter(Boolean)
+                    );
                     const current = [...(this.ids || [])];
 
                     current.forEach(id => {
@@ -184,12 +188,19 @@ define('google-integration:views/fields/google-calendar-share-teams', [
                         }
                     });
 
-                    const existing = new Set((this.ids || []).map(id => String(id)));
-                    const toAdd = models.filter(m => !existing.has(String(m.id)));
+                    (models || []).forEach(model => {
+                        const id = String((model && (model.id || (model.get && model.get('id')))) || '');
 
-                    if (toAdd.length) {
-                        this.select(toAdd);
-                    }
+                        if (!id) {
+                            return;
+                        }
+
+                        const name = (model.get && model.get('name'))
+                            || (model.attributes && model.attributes.name)
+                            || id;
+
+                        this.addLink(id, name);
+                    });
 
                     this.renderSelectedTeamSummary();
                 },
