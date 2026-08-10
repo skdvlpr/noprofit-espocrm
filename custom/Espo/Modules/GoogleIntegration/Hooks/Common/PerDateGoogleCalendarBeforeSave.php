@@ -4,8 +4,10 @@ namespace Espo\Modules\GoogleIntegration\Hooks\Common;
 
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave as BeforeSaveHook;
+use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarExportGuard;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\ManagerCalendarShare;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
@@ -19,11 +21,15 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
     public function __construct(
         private DateSourceProvider $dateSourceProvider,
         private GoogleCalendarExportGuard $googleCalendarExportGuard,
+        private ManagerCalendarShare $managerCalendarShare,
+        private User $user,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
         $this->googleCalendarExportGuard->assertExportAllowed($entity);
+        $this->assertShareTargetsAllowed($entity);
+
         if ($this->shouldNormalizeDateSourceList($entity)) {
             $this->normalizeDateSourceList($entity);
         }
@@ -33,6 +39,34 @@ class PerDateGoogleCalendarBeforeSave implements BeforeSaveHook
         }
 
         $this->assertDateSourcesWhenExportEnabled($entity);
+    }
+
+    private function assertShareTargetsAllowed(Entity $entity): void
+    {
+        $hasUsers = $this->managerCalendarShare->readLinkMultipleIds(
+            $entity,
+            ManagerCalendarShare::FIELD_USERS
+        ) !== [];
+        $hasTeams = $this->managerCalendarShare->readLinkMultipleIds(
+            $entity,
+            ManagerCalendarShare::FIELD_TEAMS
+        ) !== [];
+
+        if (!$hasUsers && !$hasTeams) {
+            return;
+        }
+
+        if ($this->managerCalendarShare->actorCanShare($this->user)) {
+            return;
+        }
+
+        if ($entity->hasRelation(ManagerCalendarShare::FIELD_USERS)) {
+            $entity->setLinkMultipleIdList(ManagerCalendarShare::FIELD_USERS, []);
+        }
+
+        if ($entity->hasRelation(ManagerCalendarShare::FIELD_TEAMS)) {
+            $entity->setLinkMultipleIdList(ManagerCalendarShare::FIELD_TEAMS, []);
+        }
     }
 
     private function shouldNormalizeDateSourceList(Entity $entity): bool

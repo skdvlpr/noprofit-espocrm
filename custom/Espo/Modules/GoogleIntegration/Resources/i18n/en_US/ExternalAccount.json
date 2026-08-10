@@ -2,7 +2,8 @@
     "fields": {
         "calendarSyncMode": "Calendar background sync",
         "calendarRoutingMode": "Google calendar routing",
-        "overlayCalendarIdList": "Calendars to show in CRM"
+        "overlayCalendarIdList": "Calendars to show in CRM",
+        "allowManagerGoogleCalendarWrite": "Allow managers to add events to my Google Calendar"
     },
     "options": {
         "calendarSyncMode": {
@@ -28,6 +29,7 @@
         "oauthSafetyAckHint": "Connect / Reconnect stay disabled until this box is checked. You do **not** need to enable **Enabled** first. After you connect, the checkbox locks until you disconnect.",
         "googleCalendarUserSettings": "Google Calendar preferences",
         "overlayCalendarIdListHelp": "Choose which **personal** Google calendars to show inside the CRM calendar. Calendars created by the CRM are never listed here. Default: primary calendar only. Overlay events older than 1 month are removed automatically.",
+        "allowManagerGoogleCalendarWriteHelp": "When enabled, Admin or Manager users may export association events into **your** Google Calendar from CRM records. Off by default. Your own exports never require this setting.",
         "calendarRoutingDescPrimary": "All manual exports go to your **primary** Google calendar (the one Google marks as primary). The CRM does **not** create a dedicated calendar. Admin naming prefix `{prefix}` / suffix `{suffix}` is unused in this mode.",
         "calendarRoutingDescUserPick": "On each record you choose an existing Google calendar or create one. When the CRM suggests a new calendar name, it follows the admin pattern, e.g. **{exampleName}** (prefix `{prefix}`, entity label, suffix `{suffix}`; empty parts are omitted).",
         "calendarRoutingDescAutoDedicated": "**Recommended default.** The CRM creates or reuses one dedicated Google calendar per entity type, named like **{exampleName}** (admin prefix `{prefix}` + entity label such as `{entityLabel}` + suffix `{suffix}`). Empty prefix/suffix parts are omitted."

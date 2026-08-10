@@ -23,7 +23,15 @@
         "googleCalendarNamePrefixLocked": "Il prefisso è impostato dall’amministratore e non si può cambiare qui.",
         "googleCalendarNameSuffixLocked": "Il suffisso è impostato dall’amministratore e non si può cambiare qui.",
         "googleCalendarNamePrefixBadge": "Prefisso",
-        "googleCalendarNameSuffixBadge": "Suffisso"
+        "googleCalendarNameSuffixBadge": "Suffisso",
+        "googleCalendarShareUsersHint": "Sono elencati solo gli utenti con un account Google collegato.",
+        "googleCalendarShareUsersEmpty": "Nessun utente ha ancora collegato Google Calendar.",
+        "googleCalendarShareTeamsHint": "Tutti i team sono disponibili. Espandi un team per vedere chi ha Google collegato.",
+        "googleCalendarShareTeamsSelectTitle": "Seleziona team",
+        "googleCalendarShareGoogleBadge": "Google",
+        "googleCalendarShareNoGoogle": "Nessun Google",
+        "googleCalendarShareMembers": "Membri",
+        "googleCalendarShareTeamsEmptySearch": "Nessun team corrisponde alla ricerca."
     },
     "scopeNames": {
         "CalendarTemplate": "Template calendario",

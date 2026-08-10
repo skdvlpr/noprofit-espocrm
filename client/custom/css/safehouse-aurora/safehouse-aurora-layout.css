@@ -1883,6 +1883,62 @@ body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list 
   backdrop-filter: none !important;
   box-shadow: none !important;
 }
+
+/*
+ * "Show more" / Mostra altro footer in dashlets & relationship panels.
+ * Espo core zeros border-radius on dashlet show-more buttons, so the bar
+ * squares past Aurora's rounded panel corners and looks naked on the gray
+ * dashboard (worse on wide dashlets). Clip the panel (except open menus)
+ * and restyle the footer to sit inside the card.
+ */
+body[data-theme-name="SafehouseAurora"] .panel.dashlet:not(.has-dropdown-opened):not(:has(.panel-heading .btn-group.open)),
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet:not(.has-dropdown-opened):not(:has(.panel-heading .btn-group.open)) {
+  overflow: hidden;
+}
+
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list > .show-more,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list > .show-more,
+body[data-theme-name="SafehouseAurora"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  margin-top: 0;
+}
+
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list > .show-more > a.btn,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list > .show-more > a.btn,
+body[data-theme-name="SafehouseAurora"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn {
+  border-width: 0 !important;
+  border-top: 1px solid var(--default-border-color) !important;
+  border-bottom-left-radius: var(--panel-border-radius) !important;
+  border-bottom-right-radius: var(--panel-border-radius) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-left: 0.85rem !important;
+  padding-right: 0.85rem !important;
+  min-height: 2.35rem;
+  line-height: 2.35rem;
+  color: var(--text-color, inherit);
+}
+
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list > .show-more > a.btn:hover,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list > .show-more > a.btn:hover,
+body[data-theme-name="SafehouseAurora"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn:hover,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn:hover {
+  background: color-mix(in srgb, var(--panel-bg, #fff) 82%, var(--brand-primary, #ef4444) 18%) !important;
+  border-top-color: var(--default-border-color) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .panel.dashlet .dashlet-body .list > .show-more > a.btn .more-count,
+body[data-theme-name="SafehouseAuroraLight"] .panel.dashlet .dashlet-body .list > .show-more > a.btn .more-count,
+body[data-theme-name="SafehouseAurora"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn .more-count,
+body[data-theme-name="SafehouseAuroraLight"] #content #main .panel > .panel-body > .list-container:last-child > .list > .show-more > a.btn .more-count {
+  margin-left: 0.75rem;
+  line-height: inherit;
+}
+
 body[data-theme-name="SafehouseAurora"] #content #main .list-container > .list > table,
 body[data-theme-name="SafehouseAuroraLight"] #content #main .list-container > .list > table {
   border-radius: 0 !important;

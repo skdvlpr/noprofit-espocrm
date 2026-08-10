@@ -37,6 +37,7 @@ class AccountProvisioner
             $entity->set(Attribute::ID, $canonicalId);
             $entity->set('enabled', false);
             $entity->set('calendarRoutingMode', 'auto_dedicated');
+            $entity->set('allowManagerGoogleCalendarWrite', false);
             $this->copyLegacyDataIfNeeded($entity, $userId);
             $this->entityManager->saveEntity($entity);
         }
@@ -57,6 +58,7 @@ class AccountProvisioner
             $fresh->set(Attribute::ID, $canonicalId);
             $fresh->set('enabled', false);
             $fresh->set('calendarRoutingMode', 'auto_dedicated');
+            $fresh->set('allowManagerGoogleCalendarWrite', false);
             $this->copyLegacyDataIfNeeded($fresh, $userId);
             $this->entityManager->saveEntity($fresh);
         }

@@ -66,6 +66,14 @@
             ],
             [
                 {
+                    "name": "googleCalendarShareUsers"
+                },
+                {
+                    "name": "googleCalendarShareTeams"
+                }
+            ],
+            [
+                {
                     "name": "googleCalendarEventSettings",
                     "fullWidth": true
                 }

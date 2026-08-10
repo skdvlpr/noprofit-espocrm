@@ -48,11 +48,16 @@ class EventPusher
         private EventRemover $eventRemover,
         private CalendarDisplayDateResolver $calendarDisplayDateResolver,
         private CalendarDateTimeResolver $calendarDateTimeResolver,
-        private CalendarProvisioner $calendarProvisioner
+        private CalendarProvisioner $calendarProvisioner,
+        private ManagerCalendarShare $managerCalendarShare,
     ) {}
 
-    public function pushIfRequested(Entity $entity, ?User $pushUserOverride = null): void
-    {
+    public function pushIfRequested(
+        Entity $entity,
+        ?User $pushUserOverride = null,
+        bool $sharedWrite = false,
+        ?User $aclUserOverride = null
+    ): void {
         $previousOverride = $this->pushUserOverride;
         $this->pushUserOverride = $pushUserOverride;
 
@@ -63,20 +68,27 @@ class EventPusher
 
             $this->googleCalendarExportGuard->assertExportAllowed($entity);
 
-            $actor = $this->pushUser();
+            $tokenUser = $this->pushUser();
+            $aclUser = $aclUserOverride
+                ?? ($sharedWrite ? $this->interactiveSessionUser() : null)
+                ?? $tokenUser;
 
-            if (!$actor->getId() || $actor->isApi()) {
+            if (!$tokenUser->getId() || $tokenUser->isApi()) {
                 return;
             }
 
-            if (!$this->acl->checkEntityEdit($entity, $actor)) {
+            if (!$aclUser->getId() || $aclUser->isApi()) {
+                return;
+            }
+
+            if (!$this->acl->checkEntityEdit($entity, $aclUser)) {
                 $this->log->warning(
                     'Google Calendar sync skipped: no edit ACL for '
                     . $entity->getEntityType()
                     . ' '
                     . $entity->getId()
                     . ' user '
-                    . $actor->getId()
+                    . $aclUser->getId()
                 );
 
                 return;
@@ -93,11 +105,12 @@ class EventPusher
                 return;
             }
 
-            $client = $this->clientManager->create(Installer::INTEGRATION_ID, $actor->getId());
+            $client = $this->clientManager->create(Installer::INTEGRATION_ID, $tokenUser->getId());
 
             if (!$client instanceof GoogleClient) {
                 $this->log->warning(
-                    'Google Calendar sync skipped: Google account is not connected for user ' . $actor->getId()
+                    'Google Calendar sync skipped: Google account is not connected for user '
+                    . $tokenUser->getId()
                 );
 
                 return;
@@ -117,10 +130,71 @@ class EventPusher
             }
 
             if ($this->hasCalendarDateSources($entity->getEntityType())) {
-                $this->eventRemover->removeStaleDateSourceLinks($entity, $actor, $syncedDateTypes);
+                $this->eventRemover->removeStaleDateSourceLinks($entity, $tokenUser, $syncedDateTypes);
             }
         } finally {
             $this->pushUserOverride = $previousOverride;
+        }
+    }
+
+    /**
+     * Fan-out export to consented share targets (Admin/Manager only). Soft-skips ineligible users.
+     */
+    public function pushSharedTargetsIfRequested(Entity $entity, ?User $actorOverride = null): void
+    {
+        if (!$entity->get('saveToGoogleCalendar')) {
+            return;
+        }
+
+        $actor = $actorOverride ?? $this->interactiveSessionUser();
+
+        if ($actor === null || !$actor->getId() || $actor->isApi() || $actor->isSystem()) {
+            return;
+        }
+
+        if (!$this->managerCalendarShare->actorCanShare($actor)) {
+            return;
+        }
+
+        if (!$this->acl->checkEntityEdit($entity, $actor)) {
+            $this->log->warning(
+                'Google Calendar share skipped: no edit ACL for '
+                . $entity->getEntityType()
+                . ' '
+                . $entity->getId()
+                . ' actor '
+                . $actor->getId()
+            );
+
+            return;
+        }
+
+        foreach ($this->managerCalendarShare->resolveEligibleTargetUserIds($entity) as $userId) {
+            if ($userId === $actor->getId()) {
+                continue;
+            }
+
+            /** @var ?User $target */
+            $target = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
+
+            if ($target === null) {
+                continue;
+            }
+
+            try {
+                $this->pushIfRequested($entity, $target, true, $actor);
+            } catch (Throwable $e) {
+                $this->log->warning(
+                    'Google Calendar share push soft-skipped for user '
+                    . $userId
+                    . ' on '
+                    . $entity->getEntityType()
+                    . ' '
+                    . $entity->getId()
+                    . ': '
+                    . $e->getMessage()
+                );
+            }
         }
     }
 
@@ -1051,6 +1125,19 @@ class EventPusher
     private function pushUser(): User
     {
         return $this->pushUserOverride ?? $this->sessionUser;
+    }
+
+    private function interactiveSessionUser(): ?User
+    {
+        if (
+            !$this->sessionUser->getId()
+            || $this->sessionUser->isSystem()
+            || $this->sessionUser->isApi()
+        ) {
+            return null;
+        }
+
+        return $this->sessionUser;
     }
 }
 

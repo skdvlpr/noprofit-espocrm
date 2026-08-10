@@ -9,6 +9,8 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
         'googleCalendarDateSourceList',
         'googleCalendarEventSettings',
         'googleCalendarId',
+        'googleCalendarShareUsers',
+        'googleCalendarShareTeams',
     ];
 
     class SaveToGoogleHandler {
@@ -19,6 +21,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             this.routingHintsLoaded = false;
             this.globalIntegrationEnabled = null;
             this.integrationStatusLoaded = false;
+            this.canShareToOthers = false;
         }
 
         process() {
@@ -44,6 +47,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
         loadIntegrationStatus() {
             if (!this.isConfigIntegrationFlagOn()) {
                 this.globalIntegrationEnabled = false;
+                this.canShareToOthers = false;
                 this.integrationStatusLoaded = true;
                 this.control();
 
@@ -53,6 +57,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             Espo.Ajax.getRequest('GoogleIntegration/integration-status')
                 .then(data => {
                     this.globalIntegrationEnabled = !!data.enabled;
+                    this.canShareToOthers = !!data.canShareToOthers;
                     this.integrationStatusLoaded = true;
                     this.control();
 
@@ -62,6 +67,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
                 })
                 .catch(() => {
                     this.globalIntegrationEnabled = false;
+                    this.canShareToOthers = false;
                     this.integrationStatusLoaded = true;
                     this.control();
                 });
@@ -117,6 +123,7 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
         hideGoogleCalendarUi() {
             this.removeNotice();
             this.removeRoutingHint();
+            this.removeShareHelp();
 
             GOOGLE_FIELD_NAMES.forEach(field => this.toggleField(field, false));
 
@@ -140,13 +147,17 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             // Always offer a calendar picker (incl. "create new calendar") once export is on —
             // not only for explicit user_pick routing sources. See product spec (B).
             const showCalendarPicker = enabled;
+            const showShare = enabled && this.canShareToOthers;
 
             this.toggleField('saveToGoogleCalendar', true);
             this.toggleField('googleCalendarDateSourceList', enabled);
             this.toggleField('googleCalendarEventSettings', enabled);
             this.toggleField('googleCalendarId', showCalendarPicker);
+            this.toggleField('googleCalendarShareUsers', showShare);
+            this.toggleField('googleCalendarShareTeams', showShare);
             this.toggleNotice(enabled);
             this.toggleRoutingHint(enabled);
+            this.toggleShareHelp(showShare);
 
             if (showCalendarPicker) {
                 this.refreshGoogleCalendarField();
@@ -324,6 +335,50 @@ define('google-integration:handlers/google-calendar/save-to-google-handler', ['e
             }
 
             this.view.$el.find('.google-calendar-routing-hint').remove();
+        }
+
+        toggleShareHelp(visible) {
+            this.removeShareHelp();
+
+            if (!visible || !this.view.$el) {
+                return;
+            }
+
+            const $target = this.view.$el
+                .find('[data-name="googleCalendarShareUsers"], [data-name="googleCalendarShareTeams"]')
+                .first();
+
+            if (!$target.length) {
+                return;
+            }
+
+            const text = this.view.translate(
+                'googleCalendarShareHelp',
+                'labels',
+                this.view.entityType
+            );
+
+            const $help = $('<div>')
+                .addClass('help-block text-muted small google-calendar-share-help margin-bottom')
+                .text(text);
+
+            const $row = $target.closest('.row, .panel-body');
+
+            if ($row.length) {
+                $row.prepend($help);
+
+                return;
+            }
+
+            $target.before($help);
+        }
+
+        removeShareHelp() {
+            if (!this.view.$el) {
+                return;
+            }
+
+            this.view.$el.find('.google-calendar-share-help').remove();
         }
     }
 

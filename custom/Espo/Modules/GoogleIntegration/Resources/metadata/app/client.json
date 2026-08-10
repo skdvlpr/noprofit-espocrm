@@ -2,6 +2,7 @@
     "cssList": [
         "__APPEND__",
         "client/custom/modules/google-integration/res/css/google-calendar-color.css",
-        "client/custom/modules/google-integration/res/css/external-account-oauth2.css"
+        "client/custom/modules/google-integration/res/css/external-account-oauth2.css",
+        "client/custom/modules/google-integration/res/css/google-calendar-share-picker.css"
     ]
 }

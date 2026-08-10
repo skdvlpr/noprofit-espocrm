@@ -1,0 +1,8 @@
+{
+    "googleCalendarShareUser": {
+        "converterClassName": "Espo\\Modules\\GoogleIntegration\\Core\\Utils\\Database\\Orm\\LinkConverters\\GoogleCalendarShareUser"
+    },
+    "googleCalendarShareTeam": {
+        "converterClassName": "Espo\\Modules\\GoogleIntegration\\Core\\Utils\\Database\\Orm\\LinkConverters\\GoogleCalendarShareTeam"
+    }
+}

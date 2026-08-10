@@ -23,7 +23,15 @@
         "googleCalendarNamePrefixLocked": "Prefix is set by an administrator and cannot be changed here.",
         "googleCalendarNameSuffixLocked": "Suffix is set by an administrator and cannot be changed here.",
         "googleCalendarNamePrefixBadge": "Prefix",
-        "googleCalendarNameSuffixBadge": "Suffix"
+        "googleCalendarNameSuffixBadge": "Suffix",
+        "googleCalendarShareUsersHint": "Only users with a connected Google account are listed.",
+        "googleCalendarShareUsersEmpty": "No users have Google Calendar connected yet.",
+        "googleCalendarShareTeamsHint": "All teams are available. Expand a team to see who has Google connected.",
+        "googleCalendarShareTeamsSelectTitle": "Select teams",
+        "googleCalendarShareGoogleBadge": "Google",
+        "googleCalendarShareNoGoogle": "No Google",
+        "googleCalendarShareMembers": "Members",
+        "googleCalendarShareTeamsEmptySearch": "No teams match the search."
     },
     "scopeNames": {
         "CalendarTemplate": "Calendar Template",

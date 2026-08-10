@@ -47,6 +47,7 @@ class PushGoogleCalendarEntity implements JobContract
             }
 
             $this->eventPusher->pushIfRequested($entity, $user);
+            $this->eventPusher->pushSharedTargetsIfRequested($entity, $user);
         } catch (Throwable) {
             // Schema drift / OAuth failures must not crash the job worker as uncaught 500.
         }

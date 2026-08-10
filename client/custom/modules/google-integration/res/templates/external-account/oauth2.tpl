@@ -145,6 +145,15 @@
                         {{translate 'overlayCalendarIdListHelp' scope='ExternalAccount' category='labels'}}
                     </p>
                 </div>
+                <div class="gi-ea-cell cell form-group" data-name="allowManagerGoogleCalendarWrite">
+                    <label class="control-label">
+                        {{translate 'allowManagerGoogleCalendarWrite' scope='ExternalAccount' category='fields'}}
+                    </label>
+                    <div class="field" data-name="allowManagerGoogleCalendarWrite">{{{allowManagerGoogleCalendarWrite}}}</div>
+                    <p class="help-block text-muted small gi-ea-muted">
+                        {{translate 'allowManagerGoogleCalendarWriteHelp' scope='ExternalAccount' category='labels'}}
+                    </p>
+                </div>
                 <p class="help-block text-muted small gi-ea-muted">
                     {{complexText calendarSyncModeHelp}}
                 </p>

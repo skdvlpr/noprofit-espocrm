@@ -51,6 +51,7 @@ class GoogleCalendarEntityLifecycle
         try {
             $entityForPush = $this->reloadEntityForPush($entity) ?? $entity;
             $this->eventPusher->pushIfRequested($entityForPush);
+            $this->eventPusher->pushSharedTargetsIfRequested($entityForPush);
         } catch (Throwable $e) {
             $this->log->error(
                 'Google Calendar push failed on '
@@ -85,7 +86,19 @@ class GoogleCalendarEntityLifecycle
             return null;
         }
 
-        return $this->entityManager->getEntityById($entity->getEntityType(), $id);
+        $fresh = $this->entityManager->getEntityById($entity->getEntityType(), $id);
+
+        if ($fresh === null) {
+            return null;
+        }
+
+        foreach (['googleCalendarShareUsers', 'googleCalendarShareTeams'] as $link) {
+            if ($fresh->hasRelation($link)) {
+                $fresh->loadLinkMultipleField($link);
+            }
+        }
+
+        return $fresh;
     }
 
     private function scheduleRetryJob(Entity $entity): void

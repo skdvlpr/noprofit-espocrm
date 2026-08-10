@@ -34,6 +34,37 @@ class GoogleCalendarCapableEntities
                 'default' => 'primary',
                 'view' => 'google-integration:views/fields/google-calendar-id',
             ],
+            'googleCalendarShareUsers' => (object) [
+                'type' => 'linkMultiple',
+                'view' => 'google-integration:views/fields/google-calendar-share-users',
+                'audited' => true,
+            ],
+            'googleCalendarShareTeams' => (object) [
+                'type' => 'linkMultiple',
+                'view' => 'google-integration:views/fields/google-calendar-share-teams',
+                'audited' => true,
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, object>
+     */
+    public static function perDateLinkDefs(): array
+    {
+        return [
+            'googleCalendarShareUsers' => (object) [
+                'type' => 'hasMany',
+                'entity' => 'User',
+                'relationName' => 'googleCalendarShareUser',
+                'layoutRelationshipsDisabled' => true,
+            ],
+            'googleCalendarShareTeams' => (object) [
+                'type' => 'hasMany',
+                'entity' => 'Team',
+                'relationName' => 'googleCalendarShareTeam',
+                'layoutRelationshipsDisabled' => true,
+            ],
         ];
     }
 
@@ -50,6 +81,10 @@ class GoogleCalendarCapableEntities
             [
                 ['name' => 'googleCalendarId'],
                 false,
+            ],
+            [
+                ['name' => 'googleCalendarShareUsers'],
+                ['name' => 'googleCalendarShareTeams'],
             ],
             [
                 ['name' => 'googleCalendarEventSettings', 'fullWidth' => true],
@@ -79,12 +114,23 @@ class GoogleCalendarCapableEntities
                     'googleCalendarVisibility' => 'Visibility',
                     'googleCalendarTransparency' => 'Availability',
                     'googleCalendarColorId' => 'Color',
+                    'googleCalendarShareUsers' => 'Also add to users',
+                    'googleCalendarShareTeams' => 'Also add to teams',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
                     'googleCalendarPerDateSettingsHelp' => 'Configure Google Calendar options separately for each selected date.',
                     'googleCalendarTemplateSelectHelp' => 'Choose a template to fill the fields below. You can edit any value before saving.',
                     'googleCalendarReminderNotice' => 'You can save this record to Google Calendar with or without Google reminders.',
+                    'googleCalendarShareHelp' => 'Optional. Adds the same event to calendars of selected users or team members who connected Google and allowed managers to write.',
+                    'googleCalendarShareUsersHint' => 'Only users with a connected Google account are listed.',
+                    'googleCalendarShareUsersEmpty' => 'No users have Google Calendar connected yet.',
+                    'googleCalendarShareTeamsHint' => 'All teams are available. Expand a team to see who has Google connected.',
+                    'googleCalendarShareTeamsSelectTitle' => 'Select teams',
+                    'googleCalendarShareGoogleBadge' => 'Google',
+                    'googleCalendarShareNoGoogle' => 'No Google',
+                    'googleCalendarShareMembers' => 'Members',
+                    'googleCalendarShareTeamsEmptySearch' => 'No teams match the search.',
                     'googleCalendarRoutingHintTitle' => 'Google calendar routing (per selected date)',
                     'googleCalendarRoutingHintPrimary' => 'Events go to your Google primary calendar.',
                     'googleCalendarRoutingHintUserPick' => 'Choose a calendar below (admin enabled user pick for this date).',
@@ -117,12 +163,23 @@ class GoogleCalendarCapableEntities
                     'googleCalendarVisibility' => 'Visibilità',
                     'googleCalendarTransparency' => 'Disponibilità',
                     'googleCalendarColorId' => 'Colore',
+                    'googleCalendarShareUsers' => 'Aggiungi anche per utenti',
+                    'googleCalendarShareTeams' => 'Aggiungi anche per team',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
                     'googleCalendarPerDateSettingsHelp' => 'Configura separatamente le opzioni Google Calendar per ogni data selezionata.',
                     'googleCalendarTemplateSelectHelp' => 'Scegli un template per compilare i campi sotto. Puoi modificarli prima di salvare.',
                     'googleCalendarReminderNotice' => 'Puoi salvare questo record in Google Calendar con o senza promemoria Google.',
+                    'googleCalendarShareHelp' => 'Opzionale. Aggiunge lo stesso evento ai calendari degli utenti o membri del team selezionati che hanno collegato Google e autorizzato i manager a scrivere.',
+                    'googleCalendarShareUsersHint' => 'Sono elencati solo gli utenti con un account Google collegato.',
+                    'googleCalendarShareUsersEmpty' => 'Nessun utente ha ancora collegato Google Calendar.',
+                    'googleCalendarShareTeamsHint' => 'Tutti i team sono disponibili. Espandi un team per vedere chi ha Google collegato.',
+                    'googleCalendarShareTeamsSelectTitle' => 'Seleziona team',
+                    'googleCalendarShareGoogleBadge' => 'Google',
+                    'googleCalendarShareNoGoogle' => 'Nessun Google',
+                    'googleCalendarShareMembers' => 'Membri',
+                    'googleCalendarShareTeamsEmptySearch' => 'Nessun team corrisponde alla ricerca.',
                     'googleCalendarRoutingHintTitle' => 'Instradamento Google Calendar (per data selezionata)',
                     'googleCalendarRoutingHintPrimary' => 'Gli eventi vanno nel calendario principale Google.',
                     'googleCalendarRoutingHintUserPick' => 'Scegli il calendario sotto (l\'admin ha abilitato la scelta utente per questa data).',
@@ -155,12 +212,23 @@ class GoogleCalendarCapableEntities
                     'googleCalendarVisibility' => 'Видимость',
                     'googleCalendarTransparency' => 'Занятость',
                     'googleCalendarColorId' => 'Цвет',
+                    'googleCalendarShareUsers' => 'Также добавить пользователям',
+                    'googleCalendarShareTeams' => 'Также добавить командам',
                 ],
                 'labels' => [
                     'Google Calendar' => 'Google Calendar',
                     'googleCalendarPerDateSettingsHelp' => 'Настраивайте параметры Google Calendar отдельно для каждой выбранной даты.',
                     'googleCalendarTemplateSelectHelp' => 'Выберите шаблон — поля ниже заполнятся автоматически. Перед сохранением их можно изменить.',
                     'googleCalendarReminderNotice' => 'Можно сохранить запись в Google Calendar с напоминаниями или без них.',
+                    'googleCalendarShareHelp' => 'Необязательно. Добавляет то же событие в календари выбранных пользователей или участников команд, которые подключили Google и разрешили менеджерам запись.',
+                    'googleCalendarShareUsersHint' => 'В списке только пользователи с подключённым Google-аккаунтом.',
+                    'googleCalendarShareUsersEmpty' => 'Пока никто не подключил Google Calendar.',
+                    'googleCalendarShareTeamsHint' => 'Доступны все команды. Раскройте команду, чтобы увидеть, у кого подключён Google.',
+                    'googleCalendarShareTeamsSelectTitle' => 'Выбор команд',
+                    'googleCalendarShareGoogleBadge' => 'Google',
+                    'googleCalendarShareNoGoogle' => 'Без Google',
+                    'googleCalendarShareMembers' => 'Участники',
+                    'googleCalendarShareTeamsEmptySearch' => 'Нет команд по запросу.',
                     'googleCalendarRoutingHintTitle' => 'Маршрутизация Google Calendar (по выбранным датам)',
                     'googleCalendarRoutingHintPrimary' => 'События попадут в основной календарь Google.',
                     'googleCalendarRoutingHintUserPick' => 'Выберите календарь ниже (админ включил выбор пользователя для этой даты).',

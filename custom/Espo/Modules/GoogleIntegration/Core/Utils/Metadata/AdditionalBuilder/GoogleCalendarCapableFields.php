@@ -41,9 +41,14 @@ class GoogleCalendarCapableFields implements AdditionalBuilder
 
         $entityDefsItem = $data->entityDefs->$entityType;
         $entityDefsItem->fields ??= (object) [];
+        $entityDefsItem->links ??= (object) [];
 
         foreach (GoogleCalendarCapableEntities::perDateFieldDefs() as $field => $fieldDefs) {
             $entityDefsItem->fields->$field = $fieldDefs;
+        }
+
+        foreach (GoogleCalendarCapableEntities::perDateLinkDefs() as $link => $linkDefs) {
+            $entityDefsItem->links->$link = $linkDefs;
         }
     }
 

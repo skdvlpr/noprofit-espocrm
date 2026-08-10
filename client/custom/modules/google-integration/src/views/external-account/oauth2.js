@@ -225,6 +225,10 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 options: ['primary'],
                 translation: 'ExternalAccount.options.overlayCalendarIdList',
             };
+            fields.allowManagerGoogleCalendarWrite = {
+                type: 'bool',
+                default: false,
+            };
 
             this.model.defs.fields = fields;
 
@@ -238,6 +242,13 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
                 this.model.set('overlayCalendarIdList', ['primary'], {silent: true});
             }
 
+            if (
+                !this.model.has('allowManagerGoogleCalendarWrite')
+                || this.model.get('allowManagerGoogleCalendarWrite') == null
+            ) {
+                this.model.set('allowManagerGoogleCalendarWrite', false, {silent: true});
+            }
+
             this.createFieldView('enum', 'calendarRoutingMode', false, {
                 options: ROUTING_OPTIONS,
             });
@@ -245,6 +256,8 @@ define('google-integration:views/external-account/oauth2', ['exports', 'views/ex
             this.createFieldView('multiEnum', 'overlayCalendarIdList', false, {
                 options: ['primary'],
             });
+
+            this.createFieldView('bool', 'allowManagerGoogleCalendarWrite', false, {});
 
             if (this.isConnected) {
                 this.loadOverlayCalendarOptions();

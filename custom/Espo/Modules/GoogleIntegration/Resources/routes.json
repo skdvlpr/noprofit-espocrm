@@ -5,6 +5,11 @@
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetIntegrationStatus"
     },
     {
+        "route": "/GoogleIntegration/calendar/share-picker-data",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetSharePickerData"
+    },
+    {
         "route": "/GoogleIntegration/calendar/date-options/:entityType/:id",
         "method": "get",
         "actionClassName": "Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\Api\\GetDateOptions"

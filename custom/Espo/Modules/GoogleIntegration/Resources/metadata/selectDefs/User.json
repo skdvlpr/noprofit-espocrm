@@ -1,0 +1,5 @@
+{
+    "boolFilterClassNameMap": {
+        "googleCalendarConnected": "Espo\\Modules\\GoogleIntegration\\Classes\\Select\\User\\BoolFilters\\GoogleCalendarConnected"
+    }
+}

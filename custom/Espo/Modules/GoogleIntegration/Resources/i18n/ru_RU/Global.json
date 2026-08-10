@@ -23,7 +23,15 @@
         "googleCalendarNamePrefixLocked": "Префикс задаёт администратор — здесь его нельзя менять.",
         "googleCalendarNameSuffixLocked": "Суффикс задаёт администратор — здесь его нельзя менять.",
         "googleCalendarNamePrefixBadge": "Префикс",
-        "googleCalendarNameSuffixBadge": "Суффикс"
+        "googleCalendarNameSuffixBadge": "Суффикс",
+        "googleCalendarShareUsersHint": "В списке только пользователи с подключённым Google-аккаунтом.",
+        "googleCalendarShareUsersEmpty": "Пока никто не подключил Google Calendar.",
+        "googleCalendarShareTeamsHint": "Доступны все команды. Раскройте команду, чтобы увидеть, у кого подключён Google.",
+        "googleCalendarShareTeamsSelectTitle": "Выбор команд",
+        "googleCalendarShareGoogleBadge": "Google",
+        "googleCalendarShareNoGoogle": "Без Google",
+        "googleCalendarShareMembers": "Участники",
+        "googleCalendarShareTeamsEmptySearch": "Нет команд по запросу."
     },
     "scopeNames": {
         "CalendarTemplate": "Шаблон календаря",

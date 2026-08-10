@@ -2,7 +2,8 @@
     "fields": {
         "calendarSyncMode": "Sincronizzazione calendario in background",
         "calendarRoutingMode": "Instradamento calendario Google",
-        "overlayCalendarIdList": "Calendari da mostrare nel CRM"
+        "overlayCalendarIdList": "Calendari da mostrare nel CRM",
+        "allowManagerGoogleCalendarWrite": "Consenti ai manager di aggiungere eventi al mio Google Calendar"
     },
     "options": {
         "calendarSyncMode": {
@@ -28,6 +29,7 @@
         "oauthSafetyAckHint": "Connetti / Ricollega restano disabilitati finche' non selezioni questa casella. **Non** serve attivare **Abilitato** prima. Dopo la connessione la casella si blocca fino alla disconnessione.",
         "googleCalendarUserSettings": "Preferenze Google Calendar",
         "overlayCalendarIdListHelp": "Scegli quali calendari Google **personali** mostrare nel calendario CRM. I calendari creati dal CRM non compaiono qui. Predefinito: solo il calendario principale. Gli eventi overlay piu' vecchi di 1 mese vengono eliminati automaticamente.",
+        "allowManagerGoogleCalendarWriteHelp": "Se attivo, Admin o Manager possono esportare eventi associativi nel **tuo** Google Calendar dai record CRM. Disattivato di default. I tuoi export personali non richiedono questa impostazione.",
         "calendarRoutingDescPrimary": "Tutti gli export manuali vanno nel tuo calendario Google **principale**. Il CRM **non** crea un calendario dedicato. Prefisso admin `{prefix}` / suffisso `{suffix}` non vengono usati in questa modalita'.",
         "calendarRoutingDescUserPick": "Su ogni record scegli un calendario Google esistente oppure ne crei uno. Quando il CRM propone un nome per un nuovo calendario, usa il pattern admin, es. **{exampleName}** (prefisso `{prefix}`, etichetta tipo record, suffisso `{suffix}`; le parti vuote vengono omesse).",
         "calendarRoutingDescAutoDedicated": "**Predefinito consigliato.** Il CRM crea o riusa un calendario Google dedicato per tipo di record, con nome come **{exampleName}** (prefisso admin `{prefix}` + etichetta tipo es. `{entityLabel}` + suffisso `{suffix}`). Prefisso/suffisso vuoti vengono omessi."
