@@ -24,18 +24,15 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                 {{else}}
                     {{#if hasStats}}
                         {{#if balances}}
-                            <div class="safehouse-reporting-stats-cash">
+                            <div class="safehouse-reporting-stats-digital">
                                 <div class="safehouse-reporting-stats-period-title">{{balances.title}}</div>
                                 {{#if balances.range}}
                                     <div class="safehouse-reporting-stats-period-range">{{balances.range}}</div>
                                 {{/if}}
-                                <div class="safehouse-reporting-stats-metrics safehouse-reporting-stats-metrics--inline">
-                                    {{#each balances.metrics}}
-                                        <div class="safehouse-reporting-stats-metric">
-                                            <span class="safehouse-reporting-stats-value {{valueClass}}">{{value}}</span>
-                                            <span class="safehouse-reporting-stats-label">{{label}}</span>
-                                        </div>
-                                    {{/each}}
+                                <div class="safehouse-reporting-stats-metrics">
+                                    <div class="safehouse-reporting-stats-metric">
+                                        <span class="safehouse-reporting-stats-value {{balances.valueClass}}">{{balances.value}}</span>
+                                    </div>
                                 </div>
                             </div>
                         {{/if}}
@@ -87,16 +84,13 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
         },
 
         buildBalancesSection() {
-            if (!this.summary) {
+            if (!this.summary || !this.summary.bankBalance) {
                 return null;
             }
 
             const bank = this.summary.bankBalance;
-            const cash = this.summary.cashBalance;
-            const hasBank = bank && bank.balance !== undefined && bank.balance !== null;
-            const hasCash = cash && cash.balance !== undefined && cash.balance !== null;
 
-            if (!hasBank && !hasCash) {
+            if (bank.balance === undefined || bank.balance === null) {
                 return null;
             }
 
@@ -106,35 +100,17 @@ define('nonprofit-espocrm:views/dashlets/prima-nota-ledger-stats', [
                 currency: 'EUR',
             };
 
-            const rangeSource = cash || bank;
-            let range = rangeSource.asOf || '';
+            let range = bank.asOf || '';
 
-            if (rangeSource.openingAsOf) {
-                range = rangeSource.openingAsOf + ' → ' + (rangeSource.asOf || '');
-            }
-
-            const metrics = [];
-
-            if (hasBank) {
-                metrics.push({
-                    label: this.translate('bankBalance', 'fields', this.entityScope),
-                    value: this.statsFooter.formatValue(bank.balance, item),
-                    valueClass: this.statsFooter.getMetricValueClass('bankBalance', bank.balance),
-                });
-            }
-
-            if (hasCash) {
-                metrics.push({
-                    label: this.translate('cashBalance', 'fields', this.entityScope),
-                    value: this.statsFooter.formatValue(cash.balance, item),
-                    valueClass: this.statsFooter.getMetricValueClass('cashBalance', cash.balance),
-                });
+            if (bank.openingAsOf) {
+                range = bank.openingAsOf + ' → ' + (bank.asOf || '');
             }
 
             return {
-                title: this.translate('reportingListStatsCashBalance', 'labels', 'Global'),
+                title: this.translate('reportingListStatsDigitalBalance', 'labels', 'Global'),
                 range: range,
-                metrics: metrics,
+                value: this.statsFooter.formatValue(bank.balance, item),
+                valueClass: this.statsFooter.getMetricValueClass('bankBalance', bank.balance),
             };
         },
 

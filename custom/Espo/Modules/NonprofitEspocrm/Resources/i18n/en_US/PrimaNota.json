@@ -22,7 +22,6 @@
         "amountIn": "Income",
         "amountOut": "Expense",
         "managementBalance": "Management surplus/deficit",
-        "cashBalance": "Real balance",
         "bankBalance": "Digital balance",
         "plannedAmountIn": "Forecast income",
         "plannedAmountOut": "Forecast expense",

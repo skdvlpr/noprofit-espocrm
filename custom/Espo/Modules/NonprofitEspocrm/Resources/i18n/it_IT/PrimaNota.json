@@ -22,7 +22,6 @@
         "amountIn": "Entrata",
         "amountOut": "Uscita",
         "managementBalance": "Avanzo/disavanzo di gestione",
-        "cashBalance": "Saldo reale",
         "bankBalance": "Saldo digitale",
         "plannedAmountIn": "Previsione entrate",
         "plannedAmountOut": "Previsione uscite",

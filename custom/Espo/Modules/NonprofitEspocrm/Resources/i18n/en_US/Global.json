@@ -72,7 +72,7 @@
         "reportingListStatsMonth": "Month",
         "reportingListStatsYear": "Year",
         "reportingListStatsToday": "Today",
-        "reportingListStatsCashBalance": "Balances",
+        "reportingListStatsDigitalBalance": "Digital balance",
         "reportingListStatsSelection": "Filtered selection totals",
         "reportingListStatsTitle": "Reporting totals",
         "reportingExportIncludeTotals": "Include totals row",

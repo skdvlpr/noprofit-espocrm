@@ -14,8 +14,7 @@ $s = $p->getSummary();
 
 echo json_encode([
     'bankBalance' => $s->bankBalance->balance ?? null,
-    'cashBalance' => $s->cashBalance->balance ?? null,
-    'cashOpening' => $s->cashBalance->opening ?? null,
+    'opening' => $s->bankBalance->opening ?? null,
     'month' => [
         'amountIn' => $s->month->amountIn ?? null,
         'amountOut' => $s->month->amountOut ?? null,

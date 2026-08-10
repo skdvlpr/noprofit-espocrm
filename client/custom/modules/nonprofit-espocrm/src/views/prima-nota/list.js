@@ -180,7 +180,7 @@ define('nonprofit-espocrm:views/prima-nota/list', [
 
             if ($container.length) {
                 $container.find(
-                    '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-cash'
+                    '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-digital'
                 ).remove();
             }
         },

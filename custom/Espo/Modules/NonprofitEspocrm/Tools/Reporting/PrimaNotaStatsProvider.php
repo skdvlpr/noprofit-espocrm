@@ -21,30 +21,40 @@ class PrimaNotaStatsProvider
     public const CONFIG_OPENING_CASH_AS_OF = 'primaNotaOpeningCashAsOf';
 
     /**
-     * Income / expense totals count only Inviato rows (plus legacy null status).
+     * Income / expense totals: Inviato (plus legacy null status), never Contanti.
      * Cancelled / Refunded / Disputed / Problematic / Planned are excluded.
+     * Cash (donationPaymentProvider) is excluded from all reporting totals/balances.
      *
      * @return array<string, mixed>
      */
     public static function incomeCountedWhere(): array
     {
         return [
-            'OR' => [
-                ['paymentStatus' => 'Inviato'],
-                ['paymentStatus' => null],
+            'AND' => [
+                [
+                    'OR' => [
+                        ['paymentStatus' => 'Inviato'],
+                        ['paymentStatus' => null],
+                    ],
+                ],
+                self::bankChannelWhere(),
             ],
         ];
     }
 
     /**
      * Planned forecast rows (Stripe awaiting payout / manual forecasts).
+     * Contanti excluded (same as income totals).
      *
      * @return array<string, mixed>
      */
     public static function plannedCountedWhere(): array
     {
         return [
-            'paymentStatus' => 'Planned',
+            'AND' => [
+                ['paymentStatus' => 'Planned'],
+                self::bankChannelWhere(),
+            ],
         ];
     }
 
@@ -72,7 +82,6 @@ class PrimaNotaStatsProvider
         return (object) [
             'timezone' => $timezone->getName(),
             'metricList' => $metricList,
-            'cashBalance' => $this->buildCashBalance($timezone, $allowedAttributes, $additionalWhere),
             'bankBalance' => $this->buildBankBalance($timezone, $allowedAttributes, $additionalWhere),
             'today' => $this->buildPeriodSummary(
                 $todayFrom,
@@ -115,7 +124,7 @@ class PrimaNotaStatsProvider
     }
 
     /**
-     * Opening + cumulative Inviato net through today (all payment channels = real balance).
+     * Opening + cumulative digital Inviato net through today (Contanti excluded).
      *
      * Config:
      * - primaNotaOpeningCashBalance (float, default 0)
@@ -125,43 +134,10 @@ class PrimaNotaStatsProvider
      * @param string[] $allowedAttributes
      * @param array<string, mixed>|null $additionalWhere
      */
-    public function buildCashBalance(
-        ?DateTimeZone $timezone = null,
-        ?array $allowedAttributes = null,
-        ?array $additionalWhere = null,
-    ): stdClass {
-        return $this->buildLedgerBalance($timezone, $allowedAttributes, $additionalWhere, null);
-    }
-
-    /**
-     * Opening + cumulative Inviato net excluding Cash (bank ledger in CRM).
-     *
-     * @param string[] $allowedAttributes
-     * @param array<string, mixed>|null $additionalWhere
-     */
     public function buildBankBalance(
         ?DateTimeZone $timezone = null,
         ?array $allowedAttributes = null,
         ?array $additionalWhere = null,
-    ): stdClass {
-        return $this->buildLedgerBalance(
-            $timezone,
-            $allowedAttributes,
-            $additionalWhere,
-            self::bankChannelWhere()
-        );
-    }
-
-    /**
-     * @param string[]|null $allowedAttributes
-     * @param array<string, mixed>|null $additionalWhere
-     * @param array<string, mixed>|null $channelWhere
-     */
-    private function buildLedgerBalance(
-        ?DateTimeZone $timezone,
-        ?array $allowedAttributes,
-        ?array $additionalWhere,
-        ?array $channelWhere,
     ): stdClass {
         $timezone ??= ReportingDateRange::defaultTimezone();
         [, $todayTo] = ReportingDateRange::currentCalendarDay($timezone);
@@ -181,15 +157,6 @@ class PrimaNotaStatsProvider
         }
 
         $where = $this->mergeIncomeWhere($dateWhere);
-
-        if ($channelWhere !== null && $channelWhere !== []) {
-            $where = [
-                'AND' => [
-                    $where,
-                    $channelWhere,
-                ],
-            ];
-        }
 
         if ($additionalWhere !== null && $additionalWhere !== []) {
             $where = [

@@ -19,103 +19,63 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
         }
 
         /**
-         * Standalone Bank + Real balances (opening + Inviato through today).
-         * Bank excludes Cash; Real includes all channels. Not tied to period cells.
+         * Standalone digital balance (opening + Inviato through today, Contanti excluded).
          *
          * @param {jQuery} $container
-         * @param {object|null} summary API summary (bankBalance, cashBalance)
+         * @param {object|null} summary API summary (bankBalance)
          */
         renderBalances($container, summary) {
             if (!$container || !$container.length) {
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-cash').remove();
+            $container.find('.safehouse-reporting-stats-digital').remove();
 
             const bankBalance = summary && summary.bankBalance ? summary.bankBalance : null;
-            const cashBalance = summary && summary.cashBalance ? summary.cashBalance : null;
             const hasBank = bankBalance &&
                 bankBalance.balance !== undefined && bankBalance.balance !== null;
-            const hasCash = cashBalance &&
-                cashBalance.balance !== undefined && cashBalance.balance !== null;
 
-            if (!hasBank && !hasCash) {
+            if (!hasBank) {
                 return;
             }
 
-            const title = this.view.translate('reportingListStatsCashBalance', 'labels', 'Global');
+            const title = this.view.translate('reportingListStatsDigitalBalance', 'labels', 'Global');
             const item = {
                 ...this.resolveMetricItem('PrimaNota', 'amountIn'),
                 fieldType: 'currency',
                 currency: 'EUR',
             };
 
-            const rangeSource = cashBalance || bankBalance;
             let range = '';
 
-            if (rangeSource.openingAsOf && rangeSource.asOf) {
-                range = rangeSource.openingAsOf + ' → ' + rangeSource.asOf;
-            } else if (rangeSource.asOf) {
-                range = rangeSource.asOf;
+            if (bankBalance.openingAsOf && bankBalance.asOf) {
+                range = bankBalance.openingAsOf + ' → ' + bankBalance.asOf;
+            } else if (bankBalance.asOf) {
+                range = bankBalance.asOf;
             }
 
-            const $metrics = $('<div>')
-                .addClass('safehouse-reporting-stats-metrics safehouse-reporting-stats-metrics--inline');
-
-            if (hasBank) {
-                $metrics.append(
-                    $('<div>').addClass('safehouse-reporting-stats-metric')
-                        .append(
-                            $('<span>')
-                                .addClass(
-                                    'safehouse-reporting-stats-value ' +
-                                    this.getMetricValueClass('bankBalance', bankBalance.balance)
-                                )
-                                .text(this.formatValue(bankBalance.balance, item))
-                        )
-                        .append(
-                            $('<span>')
-                                .addClass('safehouse-reporting-stats-label')
-                                .text(this.view.translate('bankBalance', 'fields', 'PrimaNota'))
-                        )
-                );
-            }
-
-            if (hasCash) {
-                $metrics.append(
-                    $('<div>').addClass('safehouse-reporting-stats-metric')
-                        .append(
-                            $('<span>')
-                                .addClass(
-                                    'safehouse-reporting-stats-value ' +
-                                    this.getMetricValueClass('cashBalance', cashBalance.balance)
-                                )
-                                .text(this.formatValue(cashBalance.balance, item))
-                        )
-                        .append(
-                            $('<span>')
-                                .addClass('safehouse-reporting-stats-label')
-                                .text(this.view.translate('cashBalance', 'fields', 'PrimaNota'))
-                        )
-                );
-            }
-
-            const $block = $('<div>').addClass('safehouse-reporting-stats-cash margin-bottom');
+            const $block = $('<div>').addClass('safehouse-reporting-stats-digital margin-bottom');
             $block.append($('<div>').addClass('safehouse-reporting-stats-period-title').text(title));
 
             if (range) {
                 $block.append($('<div>').addClass('safehouse-reporting-stats-period-range').text(range));
             }
 
-            $block.append($metrics);
+            $block.append(
+                $('<div>').addClass('safehouse-reporting-stats-metrics')
+                    .append(
+                        $('<div>').addClass('safehouse-reporting-stats-metric')
+                            .append(
+                                $('<span>')
+                                    .addClass(
+                                        'safehouse-reporting-stats-value ' +
+                                        this.getMetricValueClass('bankBalance', bankBalance.balance)
+                                    )
+                                    .text(this.formatValue(bankBalance.balance, item))
+                            )
+                    )
+            );
             $container.prepend($block);
-        }
-
-        /**
-         * @deprecated Use renderBalances(summary). Kept for callers that still pass cash only.
-         */
-        renderCashBalance($container, cashBalance) {
-            this.renderBalances($container, {cashBalance: cashBalance});
         }
 
         /**
@@ -131,7 +91,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
             }
 
             $container.find(
-                '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-cash'
+                '.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-digital'
             ).remove();
 
             const items = options.items || [];
@@ -140,9 +100,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return;
             }
 
-            if (options.showCashBalance !== false && summary &&
-                (summary.cashBalance || summary.bankBalance)
-            ) {
+            if (options.showDigitalBalance !== false && summary && summary.bankBalance) {
                 this.renderBalances($container, summary);
             }
 
@@ -189,13 +147,11 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
 
             $container.prepend($grid);
 
-            // Balances must stay above periods: re-prepend after grid insert.
-            if (options.showCashBalance !== false && summary &&
-                (summary.cashBalance || summary.bankBalance)
-            ) {
-                const $cash = $container.children('.safehouse-reporting-stats-cash').detach();
-                if ($cash.length) {
-                    $container.prepend($cash);
+            // Digital balance must stay above periods: re-prepend after grid insert.
+            if (options.showDigitalBalance !== false && summary && summary.bankBalance) {
+                const $digital = $container.children('.safehouse-reporting-stats-digital').detach();
+                if ($digital.length) {
+                    $container.prepend($digital);
                 }
             }
         }
@@ -212,7 +168,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return;
             }
 
-            $container.find('.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-cash').remove();
+            $container.find('.safehouse-reporting-stats-period-grid, .safehouse-reporting-stats-selection, .safehouse-reporting-stats-digital').remove();
 
             const items = options.items || [];
             const title = options.title ||
@@ -279,7 +235,7 @@ define('nonprofit-espocrm:views/reporting/list-stats-footer', ['exports'], funct
                 return 'safehouse-reporting-stats-value--expense';
             }
 
-            if (key === 'managementBalance' || key === 'cashBalance' || key === 'bankBalance') {
+            if (key === 'managementBalance' || key === 'bankBalance') {
                 const num = Number(value);
 
                 if (!Number.isNaN(num) && num < 0) {
