@@ -4,6 +4,78 @@
  * Admin reference: frosted panel-bg shell, flat search above, row separators inside.
  */
 
+/*
+ * Viewport shell fill ("transparent bottom" on prod).
+ * Espo sticky-footer already gives body>.content { min-height:100% }, but Aurora forces
+ * #content/#main + --site-footer-bg to transparent so empty regions expose html::before
+ * geometric pattern above the credit line. Veil the shell, grow the main column, solidify
+ * the site footer. Glass ::before panels still paint above the veil.
+ */
+body[data-theme-name="SafehouseAurora"] {
+  --site-footer-bg: rgba(8, 8, 10, 0.94);
+  --site-footer-color: #a1a1aa;
+  --aurora-content-veil: rgba(5, 5, 5, 0.62);
+}
+
+body[data-theme-name="SafehouseAuroraLight"] {
+  --site-footer-bg: rgba(232, 234, 238, 0.96);
+  --site-footer-color: #52525b;
+  --aurora-content-veil: rgba(223, 225, 230, 0.72);
+}
+
+body[data-theme-name="SafehouseAurora"] > .content,
+body[data-theme-name="SafehouseAuroraLight"] > .content,
+body[data-theme-name="SafehouseAurora"] > #content,
+body[data-theme-name="SafehouseAuroraLight"] > #content {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: var(--aurora-content-veil) !important;
+}
+
+body[data-theme-name="SafehouseAurora"] #content #main,
+body[data-theme-name="SafehouseAuroraLight"] #content #main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  background-color: transparent !important;
+}
+
+/* Grow primary list / detail so glass shell covers leftover viewport height. */
+body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)),
+body[data-theme-name="SafehouseAurora"] #content #main > .row,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .row,
+body[data-theme-name="SafehouseAurora"] #content #main > .detail,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .detail,
+body[data-theme-name="SafehouseAurora"] #content #main > .record,
+body[data-theme-name="SafehouseAuroraLight"] #content #main > .record {
+  flex: 1 1 auto;
+}
+
+body[data-theme-name="SafehouseAurora"] > footer,
+body[data-theme-name="SafehouseAuroraLight"] > footer {
+  background-color: var(--site-footer-bg) !important;
+  color: var(--site-footer-color);
+  border-top: 1px solid var(--aurora-glass-border, rgba(255, 255, 255, 0.08));
+  z-index: 2;
+}
+
+body[data-theme-name="SafehouseAurora"] > footer > p,
+body[data-theme-name="SafehouseAuroraLight"] > footer > p,
+body[data-theme-name="SafehouseAurora"] > footer > p a,
+body[data-theme-name="SafehouseAuroraLight"] > footer > p a,
+body[data-theme-name="SafehouseAurora"] > footer > p a:active,
+body[data-theme-name="SafehouseAuroraLight"] > footer > p a:active,
+body[data-theme-name="SafehouseAurora"] > footer > p a:hover,
+body[data-theme-name="SafehouseAuroraLight"] > footer > p a:hover,
+body[data-theme-name="SafehouseAurora"] > footer > p a:visited,
+body[data-theme-name="SafehouseAuroraLight"] > footer > p a:visited {
+  color: var(--site-footer-color) !important;
+}
+
 /* ── Frosted transparent navbar ── */
 body[data-theme-name="SafehouseAurora"] #navbar,
 body[data-theme-name="SafehouseAuroraLight"] #navbar {
