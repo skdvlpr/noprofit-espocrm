@@ -2163,10 +2163,51 @@ body[data-theme-name="SafehouseAuroraLight"] #content #main .panel.panel-default
 }
 
 /*
- * Quick-view / edit drawers (dialog-record): growing fields (e.g. Google “create
- * calendar”) must expand the panel. Absolute glass ::before stays short and looks
- * like the form “falls apart” below a floating shadow — paint the panel itself.
+ * Quick-view / edit drawers (dialog-record): MUST be opaque.
+ * Theme --panel-default-bg is translucent glass (e.g. rgba(255,255,255,0.22)).
+ * Painting panels with that token lets the page (Movimenti table, body pattern)
+ * bleed through Stripe/long panels — “transparent bottom” in Quick View.
+ * Also kill glass ::before: absolute shells stay short while fields grow.
  */
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record {
+  --aurora-drawer-surface: #1c1c21;
+  --aurora-drawer-panel: #1c1c21;
+  --panel-bg: #1c1c21;
+  --panel-default-bg: #1c1c21;
+  --modal-content-bg: #1c1c21;
+  --modal-header-bg: #1c1c21;
+  --modal-footer-bg: #1c1c21;
+  --aurora-glass-blur: none;
+  --aurora-list-blur: none;
+}
+
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record {
+  --aurora-drawer-surface: #ffffff;
+  --aurora-drawer-panel: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-default-bg: #ffffff;
+  --modal-content-bg: #ffffff;
+  --modal-header-bg: #ffffff;
+  --modal-footer-bg: #ffffff;
+  --aurora-glass-blur: none;
+  --aurora-list-blur: none;
+}
+
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-content,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-content,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-header,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-header,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-body,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-body,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .modal-footer,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .modal-footer {
+  background-color: var(--aurora-drawer-surface) !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card),
 body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) {
   position: relative;
@@ -2174,9 +2215,26 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-d
   min-height: 0 !important;
   max-height: none !important;
   overflow: visible !important;
-  background: var(--panel-default-bg) !important;
+  background: var(--aurora-drawer-panel) !important;
+  background-color: var(--aurora-drawer-panel) !important;
+  background-image: none !important;
   border: var(--panel-border-width, 1px) solid var(--panel-default-border, var(--default-border-color)) !important;
-  box-shadow: var(--aurora-glass-shadow, 0 8px 24px -12px rgba(0, 0, 0, 0.18)) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) > .panel-heading,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) > .panel-heading,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) > .panel-body,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) > .panel-body,
+body[data-theme-name="SafehouseAurora"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) .panel-body-form,
+body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .panel.panel-default:not(.safehouse-kanban-card) .panel-body-form {
+  background: var(--aurora-drawer-panel) !important;
+  background-color: var(--aurora-drawer-panel) !important;
+  background-image: none !important;
+  opacity: 1 !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
@@ -2199,6 +2257,7 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
   height: auto !important;
   min-height: 0 !important;
   align-self: stretch;
+  background: transparent !important;
 }
 
 /*
@@ -2282,9 +2341,12 @@ body[data-theme-name="SafehouseAuroraLight"] .modal.dialog-record .record-grid >
     min-height: 0 !important;
     max-height: none !important;
     overflow: visible !important;
-    background: var(--panel-default-bg) !important;
+    background: var(--aurora-drawer-panel, var(--panel-default-bg)) !important;
+    background-color: var(--aurora-drawer-panel, var(--panel-default-bg)) !important;
+    background-image: none !important;
     border: var(--panel-border-width, 1px) solid var(--panel-default-border, var(--default-border-color)) !important;
-    box-shadow: var(--aurora-glass-shadow, 0 8px 24px -12px rgba(0, 0, 0, 0.18)) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
