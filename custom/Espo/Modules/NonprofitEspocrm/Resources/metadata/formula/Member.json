@@ -1,3 +1,0 @@
-{
-    "beforeSaveCustomScript": "name = string\\trim(string\\concatenate(firstName, ' ', lastName));\n\nif (taxCode != null) {\n    taxCode = string\\upperCase(string\\trim(taxCode));\n}\n\nif (addressState != null) {\n    addressState = string\\upperCase(string\\trim(addressState));\n}\n\n$today = datetime\\today();\n$startOk = ifThenElse(joinDate == null, true, joinDate <= $today);\n$endOk = ifThenElse(leaveDate == null, true, leaveDate >= $today);\nstatus = ifThenElse($startOk && $endOk, 'Active', 'Inactive');"
-}

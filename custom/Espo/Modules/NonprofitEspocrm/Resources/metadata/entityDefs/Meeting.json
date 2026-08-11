@@ -1,9 +1,3 @@
 {
-    "links": {
-        "volunteerEmployees": {
-            "type": "hasMany",
-            "entity": "VolunteerEmployee",
-            "foreign": "meetings"
-        }
-    }
+    "links": {}
 }

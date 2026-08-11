@@ -76,7 +76,7 @@ foreach ($entityTypes as $entityType) {
     if (!($scopeDefs['entity'] ?? false)) continue;
 
     $nameField = GcalTestFixtures::nameField($entityType);
-    $isPerson = in_array($entityType, ['Member', 'VolunteerEmployee', 'Contact'], true);
+    $isPerson = in_array($entityType, ['Contact'], true);
 
     $records = $em->getRDBRepository($entityType)
         ->where([

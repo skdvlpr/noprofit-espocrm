@@ -1,6 +1,7 @@
 {
     "actionClassNameList": [
         "Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\BumpAppTimestamp",
+        "Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\DropRetiredPartyTables",
         "Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\ProvisionUserContactProfile",
         "Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\ProvisionRoleAcl",
         "Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\ProvisionShiftPlanning"

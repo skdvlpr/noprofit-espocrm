@@ -12,12 +12,12 @@ require __DIR__ . '/lib/refuse-production.php';
  * 1) Admin API user (`smoke_api_catalog`): catalog, metadata, list routes, schema checks,
  *    `GoogleCalendarDrive` extension metadata (universal Google OAuth2) + ORM DB row check;
  *    `GET Integration/...` is not asserted for API users (Espo: admin UI only, type=admin).
- * 2) Volunteer API user (`smoke_api_volunteer`): read=all for personnel/reporting;
+ * 2) Volunteer API user (`smoke_api_volunteer`): read=all for Contact/reporting;
  *    field ACL hides Contact.emailAddress; Task.edit=own; MealCount.edit=no.
  *
  * Provisions idempotent API users with `X-Api-Key` auth (Workflow E). Ensures the
- * Volunteer user has a linked `VolunteerEmployee` profile (same pattern as
- * `RoleSetup::provisionTestProfiles()`).
+ * Volunteer user has a linked `Contact` (contactType=Volunteer) profile (same
+ * pattern as `RoleSetup::provisionTestProfiles()`).
  *
  * Usage:
  *   ddev exec php bin/smoke-espo-rest-catalog.php
@@ -155,7 +155,7 @@ $ok('GET /api/v1/App/user → 200', $code === 200, "code=$code");
 $acl = is_array($body) ? ($body['acl']['table'] ?? null) : null;
 $ok('App/user has acl.table', is_array($acl) && $acl !== []);
 
-foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity'] as $entity) {
+foreach (['Contact', 'MealCount', 'Account', 'Opportunity'] as $entity) {
     $row = is_array($acl) ? ($acl[$entity] ?? null) : null;
     $ok("acl.table[$entity] present", is_array($row), $row === null ? 'missing' : 'ok');
     if (is_array($row) && ($row['read'] ?? '') === 'no') {
@@ -168,14 +168,19 @@ $r2 = $client->get('/api/v1/Metadata', ['query' => ['key' => 'scopes']]);
 $scopes = json_decode((string) $r2->getBody(), true);
 $ok('GET Metadata?key=scopes → 200', $r2->getStatusCode() === 200);
 
-foreach (['VolunteerEmployee', 'Member', 'MealCount'] as $entity) {
+foreach (['Contact', 'MealCount'] as $entity) {
     $ent = is_array($scopes) ? ($scopes[$entity] ?? null) : null;
     $flag = is_array($ent) && (($ent['entity'] ?? false) === true);
     $ok("scopes[$entity].entity === true", $flag);
 }
+foreach (['VolunteerEmployee', 'Member'] as $retired) {
+    $ent = is_array($scopes) ? ($scopes[$retired] ?? null) : null;
+    $gone = $ent === null || (($ent['entity'] ?? false) !== true);
+    $ok("scopes[$retired] retired (entity not true)", $gone);
+}
 
 /* --- List entities (select + maxSize, skill rule) --- */
-foreach (['VolunteerEmployee', 'Member', 'MealCount', 'Account', 'Opportunity'] as $entity) {
+foreach (['Contact', 'MealCount', 'Account', 'Opportunity'] as $entity) {
     $path = '/api/v1/' . $entity;
     $rq = $client->get($path, [
         'query' => [
@@ -350,8 +355,7 @@ foreach ([
     'FoodParcelRegistration',
     'MealCount',
     'AssociationMealCount',
-    'Member',
-    'VolunteerEmployee',
+    'Contact',
     'Case',
 ] as $streamEntity) {
     $scopeRow = is_array($scopes) ? ($scopes[$streamEntity] ?? null) : null;
@@ -433,38 +437,41 @@ if (!is_string($volId) || $volId === '') {
     exit(1);
 }
 
-$ownVe = $em->getRDBRepository('VolunteerEmployee')
-    ->where(['assignedUserId' => $volId])
+$ownContact = $em->getRDBRepository('Contact')
+    ->where([
+        'assignedUserId' => $volId,
+        'contactType' => 'Volunteer',
+    ])
     ->findOne();
 
-if ($ownVe === null) {
-    $ownVe = $em->getRDBRepository('VolunteerEmployee')->getNew();
-    $ownVe->set([
-        'type'            => 'Volunteer',
+if ($ownContact === null) {
+    $ownContact = $em->getRDBRepository('Contact')->getNew();
+    $ownContact->set([
+        'contactType'     => 'Volunteer',
         'firstName'       => 'Smoke',
         'lastName'        => 'ApiVolunteer',
         'weeklyHours'     => 4,
         'assignedUserId'  => $volId,
         'emailAddress'    => SMOKE_USER_VOLUNTEER . '@example.com',
     ]);
-    $em->saveEntity($ownVe, [SaveOption::SKIP_ALL => true]);
+    $em->saveEntity($ownContact, [SaveOption::SKIP_ALL => true]);
 }
 
-$ownVeId = $ownVe->getId();
-if (!is_string($ownVeId) || $ownVeId === '') {
-    fwrite(STDERR, "FAIL: could not resolve own VolunteerEmployee id.\n");
+$ownContactId = $ownContact->getId();
+if (!is_string($ownContactId) || $ownContactId === '') {
+    fwrite(STDERR, "FAIL: could not resolve own Contact id.\n");
     exit(1);
 }
 
-$foreignVe = null;
-foreach ($em->getRDBRepository('VolunteerEmployee')->limit(0, 80)->find() as $cand) {
+$foreignContact = null;
+foreach ($em->getRDBRepository('Contact')->limit(0, 80)->find() as $cand) {
     $aid = $cand->get('assignedUserId');
     $cid = $cand->getId();
-    if (!is_string($cid) || $cid === '' || $cid === $ownVeId) {
+    if (!is_string($cid) || $cid === '' || $cid === $ownContactId) {
         continue;
     }
     if (is_string($aid) && $aid !== '' && $aid !== $volId) {
-        $foreignVe = $cand;
+        $foreignContact = $cand;
         break;
     }
 }
@@ -480,44 +487,47 @@ $volClient = new Client([
     ],
 ]);
 
-$rOwnVe = $volClient->get('/api/v1/VolunteerEmployee/' . $ownVeId, [
-    'query' => ['select' => 'id,firstName,lastName,assignedUserId'],
+$rOwnContact = $volClient->get('/api/v1/Contact/' . $ownContactId, [
+    'query' => ['select' => 'id,firstName,lastName,assignedUserId,contactType'],
 ]);
 $ok(
-    'Volunteer GET own VolunteerEmployee → 200',
-    $rOwnVe->getStatusCode() === 200,
-    'code=' . $rOwnVe->getStatusCode()
+    'Volunteer GET own Contact → 200',
+    $rOwnContact->getStatusCode() === 200,
+    'code=' . $rOwnContact->getStatusCode()
 );
 
-if ($foreignVe !== null) {
-    $foreignVeId = $foreignVe->getId();
-    if (is_string($foreignVeId) && $foreignVeId !== '') {
-        $rFor = $volClient->get('/api/v1/VolunteerEmployee/' . $foreignVeId, [
+if ($foreignContact !== null) {
+    $foreignContactId = $foreignContact->getId();
+    if (is_string($foreignContactId) && $foreignContactId !== '') {
+        $rFor = $volClient->get('/api/v1/Contact/' . $foreignContactId, [
             'query' => ['select' => 'id,firstName'],
         ]);
         $ok(
-            'Volunteer GET foreign VolunteerEmployee → 200 (read=all)',
+            'Volunteer GET foreign Contact → 200 (read=all)',
             $rFor->getStatusCode() === 200,
             'code=' . $rFor->getStatusCode()
         );
     }
 } else {
-    $ok('Volunteer GET foreign VolunteerEmployee → 200 (read=all)', true, 'skipped (no foreign VE row)');
+    $ok('Volunteer GET foreign Contact → 200 (read=all)', true, 'skipped (no foreign Contact row)');
 }
 
-$anyMember = $em->getRDBRepository('Member')->limit(0, 1)->findOne();
-if ($anyMember !== null) {
-    $mid = $anyMember->getId();
+$anyMemberContact = $em->getRDBRepository('Contact')
+    ->where(['contactType' => 'MemberContact'])
+    ->limit(0, 1)
+    ->findOne();
+if ($anyMemberContact !== null) {
+    $mid = $anyMemberContact->getId();
     if (is_string($mid) && $mid !== '') {
-        $rMem = $volClient->get('/api/v1/Member/' . $mid, ['query' => ['select' => 'id,firstName']]);
+        $rMem = $volClient->get('/api/v1/Contact/' . $mid, ['query' => ['select' => 'id,firstName,contactType']]);
         $ok(
-            'Volunteer GET Member → 200 (read=all)',
+            'Volunteer GET MemberContact Contact → 200 (read=all)',
             $rMem->getStatusCode() === 200,
             'code=' . $rMem->getStatusCode()
         );
     }
 } else {
-    $ok('Volunteer GET Member → 200 (read=all)', true, 'skipped (no Member rows)');
+    $ok('Volunteer GET MemberContact Contact → 200 (read=all)', true, 'skipped (no MemberContact rows)');
 }
 
 $foreignMc = null;
@@ -546,9 +556,9 @@ if ($foreignMc !== null) {
 }
 
 $volBody = json_decode((string) $volClient->get('/api/v1/App/user')->getBody(), true);
-$volAcl = is_array($volBody) ? ($volBody['acl']['table']['VolunteerEmployee'] ?? null) : null;
+$volAcl = is_array($volBody) ? ($volBody['acl']['table']['Contact'] ?? null) : null;
 $ok(
-    'Volunteer App/user shows VolunteerEmployee.read=all',
+    'Volunteer App/user shows Contact.read=all',
     is_array($volAcl) && ($volAcl['read'] ?? '') === 'all',
     is_array($volAcl) ? 'read=' . ($volAcl['read'] ?? '') : 'missing acl row'
 );

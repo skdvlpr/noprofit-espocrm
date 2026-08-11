@@ -42,7 +42,7 @@ class ProductionAccessSetup
     /** @var string[] */
     private const DOMAIN_ENTITIES = [
         'Account', 'AccountWebsite', 'Contact', 'Lead', 'Opportunity',
-        'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'Document',
+        'MealCount', 'AssociationMealCount', 'Document',
         'Meeting', 'Call', 'Task', 'Email', 'Case',
         'Intervention', 'PrimaNota', 'FoodParcelRegistration', 'FoodParcelDateLog',
         'KnowledgeBaseArticle',

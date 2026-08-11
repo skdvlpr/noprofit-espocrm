@@ -340,9 +340,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
                 sourceDateType: allowed.includes(item.sourceDateType) ? item.sourceDateType : fallback,
                 reminderMode: REMINDER_MODE_LIST.includes(item.reminderMode)
                     ? item.reminderMode
-                    : (this.model.entityType === 'VolunteerEmployee'
-                        ? 'none'
-                        : (this.model.get('googleCalendarReminderMode') || 'none')),
+                    : (this.model.get('googleCalendarReminderMode') || 'none'),
                 reminders: this.normalizeReminders(item.reminders || this.model.get('googleCalendarReminders')),
                 location: String(item.location ?? this.model.get('googleCalendarLocation') ?? ''),
                 visibility: VISIBILITY_LIST.includes(item.visibility) ? item.visibility : this.model.get('googleCalendarVisibility') || 'default',

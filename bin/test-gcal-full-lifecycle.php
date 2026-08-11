@@ -138,10 +138,9 @@ $dayMap = [
     'GCalSmokeDateTime' => 2,
     'GCalSmokeTwinDate' => 2,
     'Meeting'           => 3,
-    'Member'            => 3,
+    'Contact'           => 3,
     'Opportunity'       => 4,
     'Task'              => 5,
-    'VolunteerEmployee' => 6,
 ];
 
 $expectedLinksPerEntity = [];
@@ -171,7 +170,7 @@ foreach ($sources as $entityType => $srcList) {
     $scopeDefs = $metadata->get(['scopes', $entityType]) ?? [];
     if (!($scopeDefs['entity'] ?? false)) continue;
 
-    $nameField = in_array($entityType, ['Member', 'VolunteerEmployee', 'Contact'], true) ? 'lastName' : 'name';
+    $nameField = in_array($entityType, ['Contact'], true) ? 'lastName' : 'name';
 
     $records = $em->getRDBRepository($entityType)
         ->where(["{$nameField}*" => 'E2E_%', 'deleted' => false])
@@ -241,17 +240,22 @@ foreach ($sources as $entityType => $srcList) {
         case 'Meeting':
             $entity->set(['name' => "{$tag} Meet {$sfx}", 'dateStart' => $dt, 'dateEnd' => $de, 'status' => 'Planned', 'assignedUserId' => $adminId]);
             break;
-        case 'Member':
-            $entity->set(['firstName' => 'Test', 'lastName' => "{$tag} {$sfx}", 'birthDate' => $d, 'emailAddress' => "test-member-{$sfx}@example.test"]);
+        case 'Contact':
+            $entity->set([
+                'firstName' => 'Test',
+                'lastName' => "{$tag} {$sfx}",
+                'contactType' => 'Volunteer',
+                'birthDate' => $d,
+                'startDate' => $d,
+                'endDate' => $baseDate->modify('+2 days')->format('Y-m-d'),
+                'emailAddress' => "test-contact-{$sfx}@example.test",
+            ]);
             break;
         case 'Opportunity':
             $entity->set(['name' => "{$tag} Opp {$sfx}", 'presentationDate' => $d, 'closeDate' => $baseDate->modify('+1 day')->format('Y-m-d'), 'amount' => 1000.00, 'amountCurrency' => 'EUR']);
             break;
         case 'Task':
             $entity->set(['name' => "{$tag} Task {$sfx}", 'status' => 'Not Started', 'dateEnd' => $dt, 'dateEndDate' => $d, 'assignedUserId' => $adminId]);
-            break;
-        case 'VolunteerEmployee':
-            $entity->set(['firstName' => 'Test', 'lastName' => "{$tag} {$sfx}", 'type' => 'Volunteer', 'startDate' => $d, 'endDate' => $baseDate->modify('+2 days')->format('Y-m-d'), 'emailAddress' => "test-vol-{$sfx}@example.test"]);
             break;
         default:
             $entity->set('name', "{$tag} {$entityType} {$sfx}");

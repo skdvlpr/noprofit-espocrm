@@ -7,9 +7,7 @@
                 "Account",
                 "Contact",
                 "Lead",
-                "Opportunity",
-                "Member",
-                "VolunteerEmployee"
+                "Opportunity"
             ],
             "audited": true
         },

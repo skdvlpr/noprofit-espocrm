@@ -24,11 +24,26 @@ class GoogleCalendarCapableFields implements AdditionalBuilder
     public function build(stdClass $data): void
     {
         foreach ((new DateSourceEntityTypesReader())->readActiveTargetEntityTypes() as $entityType) {
+            if (!$this->isLiveEntityScope($data, $entityType)) {
+                continue;
+            }
+
             $this->applyEntityDefs($data, $entityType);
             $this->applyLayoutModuleOverride($data, $entityType);
             $this->applyRecordDefsHooks($data, $entityType);
             $this->applyClientDefsHandlers($data, $entityType);
         }
+    }
+
+    private function isLiveEntityScope(stdClass $data, string $entityType): bool
+    {
+        $scope = $data->scopes->$entityType ?? null;
+
+        if (!is_object($scope)) {
+            return false;
+        }
+
+        return ($scope->entity ?? false) === true;
     }
 
     private function applyEntityDefs(stdClass $data, string $entityType): void

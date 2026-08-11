@@ -1,16 +1,4 @@
 {
-    "SafehouseCrmSyncVolunteerEmployeeStatus": {
-        "name": "Sync Volunteers / Employees Status",
-        "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\SyncVolunteerEmployeeStatus",
-        "scheduling": "5 0 * * *",
-        "isSystem": true
-    },
-    "SafehouseCrmSyncMemberStatus": {
-        "name": "Sync Members Status",
-        "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\SyncMemberStatus",
-        "scheduling": "6 0 * * *",
-        "isSystem": true
-    },
     "SafehouseCrmCompletePastActivityOfferSlots": {
         "name": "Complete past volunteer shifts",
         "jobClassName": "Espo\\Modules\\NonprofitEspocrm\\Jobs\\CompletePastActivityOfferSlots",

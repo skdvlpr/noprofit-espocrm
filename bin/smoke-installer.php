@@ -12,7 +12,7 @@ require __DIR__ . '/lib/refuse-production.php';
  *   - `Case` is present in `tabList` (Principali, before `$Rendicontazione`) and `quickCreateList`;
  *   - `Lead` is present in `tabList` and `quickCreateList`;
  *   - Contatti group tab (`type: group`) contains Contact + URL primary filters;
- *   - legacy `VolunteerEmployee` / `Member` tabs are hidden (entities kept for rollback);
+ *   - retired `VolunteerEmployee` / `Member` entities are absent from scopes (or tabs hidden);
  *   - `MealCount` lives in `$Rendicontazione` group tab (`type: group`), not as
  *     a top-level tab; `Opportunity` (F&F) is NOT in that group;
  *   - canonical roles + Administration team exist;
@@ -210,6 +210,21 @@ $report(
 );
 $report('VolunteerEmployee hidden from tabList', !in_array('VolunteerEmployee', $tabStrings, true));
 $report('Member hidden from tabList', !in_array('Member', $tabStrings, true));
+
+$metadata = $container->get('metadata');
+$metadata->init(true);
+$veScopeEntity = $metadata->get(['scopes', 'VolunteerEmployee', 'entity']);
+$memberScopeEntity = $metadata->get(['scopes', 'Member', 'entity']);
+$report(
+    'VolunteerEmployee retired from scopes.entity',
+    $veScopeEntity !== true,
+    'entity=' . var_export($veScopeEntity, true)
+);
+$report(
+    'Member retired from scopes.entity',
+    $memberScopeEntity !== true,
+    'entity=' . var_export($memberScopeEntity, true)
+);
 
 foreach (['Account', 'Opportunity', 'Document'] as $must) {
     $report("$must present in tabList", in_array($must, $tabStrings, true));

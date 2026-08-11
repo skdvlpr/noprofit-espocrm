@@ -1,7 +1,10 @@
 <?php
 /**
- * Migrate VolunteerEmployee + Member → Contact (STI contactType).
- * Keeps source rows (soft-delete) and stamps Contact.migratedFrom* for rollback.
+ * One-shot migrate VolunteerEmployee + Member → Contact (STI contactType).
+ *
+ * Entities VolunteerEmployee and Member are RETIRED (2026-08-11). Keep this
+ * script only for historical / leftover-table cleanup on old DBs. Do not recreate
+ * those entity scopes. Rollback helper was deleted — no restore path.
  *
  * DDEV only (refuse-production).
  *

@@ -4,15 +4,15 @@ namespace Espo\Modules\NonprofitEspocrm\Tools\Calendar;
 
 /**
  * Safehouse-specific CalendarDateSource seeds (requires SafehouseCrm entities/fields).
+ *
+ * VolunteerEmployee / Member CDS seeds removed — people live on Contact STI;
+ * those entities are retired and must not be registered for Google calendar.
  */
 final class SafehouseCalendarDateSourceDefaults
 {
     /** @var array<string, string> */
     public const CANONICAL_LABELS = [
         'Opportunity:presentationDate' => 'Presentation',
-        'VolunteerEmployee:main' => 'Start',
-        'VolunteerEmployee:endDate' => 'End',
-        'Member:main' => 'Member',
         'ActivityOfferSlot:main' => 'Shift',
         'GCalSmokeAllDay:main' => 'All-day',
         'GCalSmokeDateTime:main' => 'DateTime',
@@ -33,36 +33,6 @@ final class SafehouseCalendarDateSourceDefaults
                 'label' => self::CANONICAL_LABELS['Opportunity:presentationDate'],
                 'allDay' => true,
                 'sortOrder' => 40,
-            ],
-            [
-                'name' => 'Volunteer / Employee start date',
-                'targetEntityType' => 'VolunteerEmployee',
-                'dateField' => 'startDate',
-                'endDateField' => null,
-                'sourceDateType' => 'main',
-                'label' => self::CANONICAL_LABELS['VolunteerEmployee:main'],
-                'allDay' => true,
-                'sortOrder' => 60,
-            ],
-            [
-                'name' => 'Volunteer / Employee end date',
-                'targetEntityType' => 'VolunteerEmployee',
-                'dateField' => 'endDate',
-                'endDateField' => null,
-                'sourceDateType' => 'endDate',
-                'label' => self::CANONICAL_LABELS['VolunteerEmployee:endDate'],
-                'allDay' => true,
-                'sortOrder' => 61,
-            ],
-            [
-                'name' => 'Member birth date',
-                'targetEntityType' => 'Member',
-                'dateField' => 'birthDate',
-                'endDateField' => null,
-                'sourceDateType' => 'main',
-                'label' => self::CANONICAL_LABELS['Member:main'],
-                'allDay' => true,
-                'sortOrder' => 70,
             ],
             [
                 'name' => 'Shift planner — slot',
@@ -90,14 +60,6 @@ final class SafehouseCalendarDateSourceDefaults
             'reminderMode' => 'none',
             'transparency' => 'opaque',
             'colorId' => '10',
-        ],
-        [
-            'name' => 'Volunteer / Employee — default',
-            'targetEntityType' => 'VolunteerEmployee',
-            'summaryTemplate' => '{{name}}',
-            'descriptionTemplate' => "{{name}}\nStart: {{startDate}}\nEnd: {{endDate}}\n\n{{extra}}\n\nEspoCRM: {{espocrmUrl}}",
-            'reminderMode' => 'none',
-            'transparency' => 'opaque',
         ],
     ];
 }

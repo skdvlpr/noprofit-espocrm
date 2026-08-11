@@ -27,11 +27,5 @@
             "exportDisabled": true
         }
     },
-    "links": {
-        "volunteerEmployees": {
-            "type": "hasMany",
-            "entity": "VolunteerEmployee",
-            "foreign": "documents"
-        }
-    }
+    "links": {}
 }

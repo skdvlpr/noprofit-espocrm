@@ -13,7 +13,7 @@ use Espo\ORM\EntityManager;
 /**
  * Shared Google Calendar E2E fixtures: realistic CRM data + T- prefix.
  *
- * Production entities (Meeting, Call, Member, …) — default test scope.
+ * Production entities (Meeting, Call, Contact, …) — default test scope.
  * GCalSmoke* — custom-entity extension smoke only (see test-google-calendar-smoke-entities.php).
  */
 final class GcalTestFixtures
@@ -32,7 +32,7 @@ final class GcalTestFixtures
     ];
 
     /** @var list<string> */
-    private const PERSON_ENTITIES = ['Member', 'VolunteerEmployee', 'Contact'];
+    private const PERSON_ENTITIES = ['Contact'];
 
     /** @var array<string, list<string>> */
     private const REALISTIC_TITLES = [
@@ -66,8 +66,7 @@ final class GcalTestFixtures
             'Campagna volontari autunno',
             'Evento benefico annuale',
         ],
-        'Member' => ['Rossi', 'Bianchi', 'Verdi', 'Ferrari'],
-        'VolunteerEmployee' => ['Conti', 'Romano', 'Galli', 'Costa'],
+        'Contact' => ['Rossi', 'Bianchi', 'Verdi', 'Ferrari', 'Conti', 'Romano'],
         'GCalSmokeAllDay' => [
             'Verifica calendario giornata intera',
         ],
@@ -111,8 +110,7 @@ final class GcalTestFixtures
             'Eroi con grembiule — reclutamento',
             'Cena dei bro che brodano',
         ],
-        'Member' => ['Panettone', 'Tramezzino', 'Lasagnone', 'Polpetta'],
-        'VolunteerEmployee' => ['Carbonara', 'Tiramisu', 'Gorgonzola', 'Bruschetta'],
+        'Contact' => ['Panettone', 'Tramezzino', 'Lasagnone', 'Polpetta', 'Carbonara', 'Tiramisu'],
         'GCalSmokeAllDay' => [
             'Giornata intera nel frigo (smoke test)',
         ],
@@ -178,10 +176,9 @@ final class GcalTestFixtures
             'Account', 'Call' => 0,
             'Campaign', 'GCalSmokeAllDay' => 1,
             'GCalSmokeDateTime', 'GCalSmokeTwinDate' => 2,
-            'Meeting', 'Member' => 3,
+            'Meeting', 'Contact' => 3,
             'Opportunity' => 4,
             'Task' => 5,
-            'VolunteerEmployee' => 6,
             default => 0,
         };
     }
@@ -326,11 +323,14 @@ final class GcalTestFixtures
                 'status' => 'Planned',
                 'assignedUserId' => $adminId,
             ],
-            'Member' => [
+            'Contact' => [
                 'firstName' => $titleStyle === 'funny' ? 'Pippo' : 'Marco',
-                'lastName' => self::TEST_PREFIX . self::pickTitle('Member', $suffix, null, $titleStyle) . '-' . $suffix,
+                'lastName' => self::TEST_PREFIX . self::pickTitle('Contact', $suffix, null, $titleStyle) . '-' . $suffix,
+                'contactType' => 'Volunteer',
                 'birthDate' => $d,
-                'emailAddress' => 't-member-' . $suffix . '@safehouse.test',
+                'startDate' => $d,
+                'endDate' => $baseDate->modify('+2 days')->format('Y-m-d'),
+                'emailAddress' => 't-contact-' . $suffix . '@safehouse.test',
             ],
             'Opportunity' => [
                 'name' => self::pickTitle('Opportunity', $suffix, $variant, $titleStyle),
@@ -345,14 +345,6 @@ final class GcalTestFixtures
                 'dateEndDate' => $d,
                 'dateStartDate' => $d,
                 'assignedUserId' => $adminId,
-            ],
-            'VolunteerEmployee' => [
-                'firstName' => $titleStyle === 'funny' ? 'Birillo' : 'Giulia',
-                'lastName' => self::TEST_PREFIX . self::pickTitle('VolunteerEmployee', $suffix, null, $titleStyle) . '-' . $suffix,
-                'type' => 'Volunteer',
-                'startDate' => $d,
-                'endDate' => $baseDate->modify('+2 days')->format('Y-m-d'),
-                'emailAddress' => 't-vol-' . $suffix . '@safehouse.test',
             ],
             default => self::buildGenericAttributes($entityType, $sources, $suffix, $d, $dt, $de, $variant, $titleStyle),
         };

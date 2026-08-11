@@ -15,17 +15,24 @@ use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 use stdClass;
 
 /**
- * Keeps VolunteerEmployee / Member email & phone data aligned with the
- * {@see User} record referenced by the standard `assignedUser` link and
- * enforces cross-record uniqueness between those two entity types only.
+ * Legacy email/phone uniqueness helper for person records.
+ *
+ * VolunteerEmployee / Member entities are retired (Contact STI). Contact
+ * profile sync lives in {@see UserContactProfileSync}. This class keeps an
+ * empty person-type list so callers no longer treat retired entities as
+ * person scopes; uniqueness checks are effectively a no-op.
  *
  * When {@see SaveOption::SKIP_ALL} is set, this class does nothing (same as other
  * hooks) so imports/migrations can bypass checks intentionally.
  */
 class PersonContactSync
 {
-    /** @var string[] */
-    public const PERSON_ENTITY_TYPES = ['VolunteerEmployee', 'Member'];
+    /**
+     * Retired VE/Member removed. Contact uniqueness is handled elsewhere.
+     *
+     * @var string[]
+     */
+    public const PERSON_ENTITY_TYPES = [];
 
     public function __construct(
         private EntityManager $entityManager,
@@ -46,6 +53,14 @@ class PersonContactSync
     public function process(Entity $entity, SaveOptions $options): void
     {
         if ($options->get(SaveOption::SKIP_ALL)) {
+            return;
+        }
+
+        if (self::PERSON_ENTITY_TYPES === []) {
+            return;
+        }
+
+        if (!in_array($entity->getEntityType(), self::PERSON_ENTITY_TYPES, true)) {
             return;
         }
 

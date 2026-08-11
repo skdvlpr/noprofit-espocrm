@@ -70,20 +70,17 @@ $ok(
         && str_contains($integrationOppDefault, 'presentationDate')
 );
 $ok(
-    'Merged integration has VolunteerEmployee description template field',
-    is_array($metadata->get([
+    'Merged integration has no VolunteerEmployee description template field',
+    $metadata->get([
         'integrations',
         'GoogleCalendarDrive',
         'fields',
         'googleCalendarDescriptionTemplateVolunteerEmployee',
-    ]))
+    ]) === null
 );
 
 foreach ([
     'Opportunity:presentationDate',
-    'VolunteerEmployee:main',
-    'VolunteerEmployee:endDate',
-    'Member:main',
 ] as $sourceKey) {
     [$entityType, $sourceDateType] = explode(':', $sourceKey);
     $row = $em->getRDBRepository('CalendarDateSource')
@@ -94,6 +91,17 @@ foreach ([
         ])
         ->findOne();
     $ok("CalendarDateSource $sourceKey seeded", $row !== null);
+}
+
+foreach (['VolunteerEmployee', 'Member'] as $retired) {
+    $row = $em->getRDBRepository('CalendarDateSource')
+        ->where([
+            'targetEntityType' => $retired,
+            'deleted' => false,
+            'isActive' => true,
+        ])
+        ->findOne();
+    $ok("No active CalendarDateSource for retired $retired", $row === null);
 }
 
 echo "\n=== " . ($fail === 0 ? 'ALL PASS' : ($fail . ' FAILURE(S)')) . " ===\n";

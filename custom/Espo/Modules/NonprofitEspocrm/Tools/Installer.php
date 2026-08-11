@@ -33,7 +33,6 @@ use Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller;
 class Installer
 {
     private const DOMAIN_ENTITIES = [
-        // Legacy VE/Member kept in DB for rollback; hidden from navbar after Contact STI.
     ];
 
     private const REPORTING_ENTITIES = [
@@ -51,7 +50,7 @@ class Installer
         'FoodParcelRegistration',
     ];
 
-    /** Soft-hide after Contact STI migration (entities remain for rollback). */
+    /** Retired Contact-STI legacy entities — never restore to tabList. */
     private const ENTITIES_TO_HIDE_DEFAULT = [
         'VolunteerEmployee',
         'Member',
@@ -222,7 +221,7 @@ class Installer
 
     /**
      * Enforce canonical `$CRM` entity order immediately after the `$CRM` divider.
-     * Lead → Contact → Account → Opportunity → Member → VolunteerEmployee.
+     * Lead → Contatti group → Account → Opportunity (Member/VE retired).
      *
      * @param array<int, mixed> $tabList
      * @return array<int, mixed>
@@ -408,8 +407,8 @@ class Installer
     }
 
     /**
-     * Ensure PrimaNota is in navbar global search so payment intent IDs
-     * (`pi_…` / `#pi_…`) resolve via name and donationPaymentReference.
+     * Ensure PrimaNota (and Contact) are in navbar global search; strip retired
+     * VolunteerEmployee / Member scopes so search never probes deleted entities.
      */
     private function provisionGlobalSearchEntityList(Config $config, ConfigWriter $configWriter): void
     {
@@ -420,13 +419,21 @@ class Installer
         }
 
         $list = array_values(array_filter($list, 'is_string'));
+        $list = $this->removeEntitiesFromList($list, self::entitiesToHide());
 
-        if (in_array('PrimaNota', $list, true)) {
-            return;
+        $changed = false;
+
+        foreach (['Contact', 'PrimaNota'] as $entityType) {
+            if (!in_array($entityType, $list, true)) {
+                $list[] = $entityType;
+                $changed = true;
+            }
         }
 
-        $list[] = 'PrimaNota';
-        $configWriter->set('globalSearchEntityList', $list);
+        // Always persist when hide-list may have removed stale VE/Member entries.
+        if ($changed || $list !== array_values(array_filter($config->get('globalSearchEntityList') ?? [], 'is_string'))) {
+            $configWriter->set('globalSearchEntityList', $list);
+        }
     }
 
     /**
@@ -609,7 +616,8 @@ class Installer
         }
 
         foreach ($without as $i => $item) {
-            if ($item === 'VolunteerEmployee') {
+            // Contact STI replaced retired VolunteerEmployee as CRM-block anchor.
+            if ($item === 'Contact') {
                 return array_merge(
                     array_slice($without, 0, $i + 1),
                     ['Case', 'Intervention', 'FoodParcelRegistration'],

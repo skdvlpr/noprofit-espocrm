@@ -87,61 +87,6 @@
             "module": "NonprofitEspocrm"
         }
     },
-    "Member": {
-        "detail": {
-            "module": "NonprofitEspocrm"
-        },
-        "detailSmall": {
-            "module": "NonprofitEspocrm"
-        },
-        "list": {
-            "module": "NonprofitEspocrm"
-        },
-        "listSmall": {
-            "module": "NonprofitEspocrm"
-        },
-        "filters": {
-            "module": "NonprofitEspocrm"
-        },
-        "massUpdate": {
-            "module": "NonprofitEspocrm"
-        },
-        "edit": {
-            "module": "NonprofitEspocrm"
-        },
-        "sidePanels": {
-            "module": "NonprofitEspocrm"
-        }
-    },
-    "VolunteerEmployee": {
-        "detail": {
-            "module": "NonprofitEspocrm"
-        },
-        "detailSmall": {
-            "module": "NonprofitEspocrm"
-        },
-        "list": {
-            "module": "NonprofitEspocrm"
-        },
-        "listSmall": {
-            "module": "NonprofitEspocrm"
-        },
-        "filters": {
-            "module": "NonprofitEspocrm"
-        },
-        "massUpdate": {
-            "module": "NonprofitEspocrm"
-        },
-        "edit": {
-            "module": "NonprofitEspocrm"
-        },
-        "sidePanels": {
-            "module": "NonprofitEspocrm"
-        },
-        "bottomPanelsDetail": {
-            "module": "NonprofitEspocrm"
-        }
-    },
     "MealCount": {
         "detail": {
             "module": "NonprofitEspocrm"

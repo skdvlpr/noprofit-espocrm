@@ -45,7 +45,7 @@
             "trim": true,
             "isPersonalData": true,
             "validatorClassNameList": [
-                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Member\\TaxCode\\ItalianFiscalCode"
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\TaxCode\\ItalianFiscalCode"
             ]
         },
         "birthDate": {

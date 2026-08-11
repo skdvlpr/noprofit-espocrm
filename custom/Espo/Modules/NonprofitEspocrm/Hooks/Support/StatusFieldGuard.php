@@ -10,6 +10,7 @@ use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
  * Shared logic: block manual status changes unless safehouseSkipStatusGuard is set.
+ * Used by ActivityOffer / ActivityOfferSlot / ActivityInvite (not retired person entities).
  */
 trait StatusFieldGuard
 {
@@ -46,26 +47,5 @@ trait StatusFieldGuard
         $entity->set('status', $fetched);
 
         throw new Forbidden("Status is system-managed and cannot be changed manually.");
-    }
-
-    /**
-     * For Member / VolunteerEmployee: strip client status changes early;
-     * formula (later hook) recalculates from date window.
-     */
-    protected function stripManualStatusChange(Entity $entity, SaveOptions $options): void
-    {
-        if ($options->get(SaveOption::SKIP_ALL) || $options->get(SaveOption::SKIP_HOOKS)) {
-            return;
-        }
-
-        if ($options->get(StatusGuard::SKIP_OPTION)) {
-            return;
-        }
-
-        if ($entity->isNew() || !$entity->isAttributeChanged('status')) {
-            return;
-        }
-
-        $entity->set('status', $entity->getFetched('status'));
     }
 }

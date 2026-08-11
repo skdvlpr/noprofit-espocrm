@@ -2,10 +2,13 @@
 
 namespace Espo\Modules\GoogleIntegration\Tools\Calendar;
 
+use Espo\Core\Utils\Metadata;
+
 class CapableEntityTypeResolver
 {
     public function __construct(
-        private DateSourceEntityTypesReader $dateSourceEntityTypesReader
+        private DateSourceEntityTypesReader $dateSourceEntityTypesReader,
+        private Metadata $metadata
     ) {}
 
     /**
@@ -13,6 +16,16 @@ class CapableEntityTypeResolver
      */
     public function getProvisionableEntityTypes(): array
     {
-        return $this->dateSourceEntityTypesReader->readActiveTargetEntityTypes();
+        $list = [];
+
+        foreach ($this->dateSourceEntityTypesReader->readActiveTargetEntityTypes() as $entityType) {
+            if ($this->metadata->get(['scopes', $entityType, 'entity']) !== true) {
+                continue;
+            }
+
+            $list[] = $entityType;
+        }
+
+        return $list;
     }
 }

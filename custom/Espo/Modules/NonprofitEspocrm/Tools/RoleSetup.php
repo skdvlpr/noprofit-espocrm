@@ -21,13 +21,13 @@ use Espo\ORM\EntityManager;
  * All public methods are idempotent for creates; existing Role rows are left
  * unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1 (dev only).
  *
- * Permission matrix (2026-08-04):
+ * Permission matrix (2026-08-04; VE/Member entities retired 2026-08-11):
  *   - Admin     : full all
  *   - Volunteer : read all domain + reporting; field-level hide personal data on
- *                 Contact/User/VE/Member (name/status/competences/positionsHeld
- *                 remain visible); write only own Task + ActivityInvite
+ *                 Contact/User (name/status/competences/positionsHeld remain
+ *                 visible); write only own Task + ActivityInvite
  *   - Employee  : same ACL as Volunteer (IT label Dipendente); Contact sync → contactType=Employee
- *   - Member    : read all; write nowhere
+ *   - Member    : CRM role name (not entity); read all; write nowhere
  *   - Manager / Desk : only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev)
  *
  * Existing roles are left unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1
@@ -37,9 +37,10 @@ class RoleSetup
 {
     public const ROLE_ADMIN     = 'Admin';
     public const ROLE_EMPLOYEE  = 'Employee';
-    /** HR / personnel: create & edit VolunteerEmployee / Member (no hard delete on those). */
+    /** HR / personnel staff role (SAFEHOUSE_EXTRA_ROLES only). */
     public const ROLE_MANAGER   = 'Manager';
     public const ROLE_VOLUNTEER = 'Volunteer';
+    /** CRM role name for associati — not the retired Member entity. */
     public const ROLE_MEMBER    = 'Member';
     /** Sportello desk staff: Case / Lead / Email intake with team-scoped group mailboxes. */
     public const ROLE_DESK      = 'Desk';
@@ -92,10 +93,10 @@ class RoleSetup
     /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
     /**
      * Bump when role specs change so ProvisionRoleAcl rewrites matrices on rebuild.
-     * 2026-08-10-v5: Website API read-all on MealCount / AssociationMealCount /
-     * Intervention for public home impact stats.
+     * 2026-08-11-v6: drop retired VolunteerEmployee / Member entity ACL keys
+     * (people live on Contact STI); keep CRM roles Member/Volunteer/Employee.
      */
-    public const ACL_MATRIX_VERSION = '2026-08-10-website-reporting-read-v5';
+    public const ACL_MATRIX_VERSION = '2026-08-11-retire-ve-member-entities-v6';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -446,15 +447,16 @@ class RoleSetup
     }
 
     /**
-     * For each test user, ensure there is a linked domain record assigned to
-     * them so the `read=own` ACL has at least one row to return.
+     * For each test user, ensure there is a linked Contact (STI contactType)
+     * so personnel ACL / profile sync has at least one row.
      *
-     *   - test_volontario  -> VolunteerEmployee (type=Volunteer)
-     *   - test_dipendente  -> VolunteerEmployee (type=Employee)
-     *   - test_associato   -> Member
+     *   - test_volontario  -> Contact (contactType=Volunteer)
+     *   - test_dipendente  -> Contact (contactType=Employee)
+     *   - test_manager     -> Contact (contactType=Employee)
+     *   - test_associato   -> Contact (contactType=MemberContact)
      *
-     * Idempotent: skipped if a record already exists with the same
-     * `assignedUserId` **or** `userId` (unique per linked User on personnel entities).
+     * Idempotent: skipped if a Contact already exists with the same
+     * `assignedUserId` **or** `linkedUserId`.
      *
      * Must run after {@see provisionTestUsers()} (use {@see provisionTestUsersTeamsAndProfiles()}
      * from scripts so order is guaranteed).
@@ -468,40 +470,40 @@ class RoleSetup
 
         $profiles = [
             'test_volontario' => [
-                'entityType' => 'VolunteerEmployee',
                 'attributes' => [
-                    'type'        => 'Volunteer',
-                    'firstName'   => 'Test',
-                    'lastName'    => 'Volunteer',
-                    'weeklyHours' => 8,
+                    'contactType'      => 'Volunteer',
+                    'firstName'        => 'Test',
+                    'lastName'         => 'Volunteer',
+                    'weeklyHours'      => 8,
+                    'personnelStatus'  => 'Active',
                 ],
             ],
             'test_dipendente' => [
-                'entityType' => 'VolunteerEmployee',
                 'attributes' => [
-                    'type'         => 'Employee',
-                    'firstName'    => 'Test',
-                    'lastName'     => 'Employee',
-                    'contractType' => 'FixedTerm',
-                    'weeklyHours'  => 40,
+                    'contactType'      => 'Employee',
+                    'firstName'        => 'Test',
+                    'lastName'         => 'Employee',
+                    'contractType'     => 'FixedTerm',
+                    'weeklyHours'      => 40,
+                    'personnelStatus'  => 'Active',
                 ],
             ],
             'test_manager' => [
-                'entityType' => 'VolunteerEmployee',
                 'attributes' => [
-                    'type'         => 'Employee',
-                    'firstName'    => 'Test',
-                    'lastName'     => 'Manager',
-                    'contractType' => 'Permanent',
-                    'weeklyHours'  => 40,
+                    'contactType'      => 'Employee',
+                    'firstName'        => 'Test',
+                    'lastName'         => 'Manager',
+                    'contractType'     => 'Permanent',
+                    'weeklyHours'      => 40,
+                    'personnelStatus'  => 'Active',
                 ],
             ],
             'test_associato' => [
-                'entityType' => 'Member',
                 'attributes' => [
-                    'firstName' => 'Test',
-                    'lastName'  => 'Member',
-                    'status'    => 'Active',
+                    'contactType'      => 'MemberContact',
+                    'firstName'        => 'Test',
+                    'lastName'         => 'Member',
+                    'personnelStatus'  => 'Active',
                 ],
             ],
         ];
@@ -517,11 +519,11 @@ class RoleSetup
                 continue;
             }
 
-            $existing = $em->getRDBRepository($spec['entityType'])
+            $existing = $em->getRDBRepository('Contact')
                 ->where([
                     'OR' => [
                         ['assignedUserId' => $user->getId()],
-                        ['userId' => $user->getId()],
+                        ['linkedUserId' => $user->getId()],
                     ],
                 ])
                 ->findOne();
@@ -534,26 +536,28 @@ class RoleSetup
                 continue;
             }
 
-            $entity = $em->getRDBRepository($spec['entityType'])->getNew();
-            $payload = array_merge($spec['attributes'], [
-                'assignedUserId' => $user->getId(),
-                'userId'         => $user->getId(),
-            ]);
+            $entity = $em->getRDBRepository('Contact')->getNew();
             $email = $user->get('emailAddress');
             if (!is_string($email) || trim($email) === '') {
                 $email = $userName . '@example.com';
             } else {
                 $email = trim($email);
             }
-            if (in_array($spec['entityType'], ['VolunteerEmployee', 'Member'], true)) {
-                $payload['emailAddress'] = $email;
-            }
+            $payload = array_merge($spec['attributes'], [
+                'assignedUserId' => $user->getId(),
+                'linkedUserId'   => $user->getId(),
+                'emailAddress'   => $email,
+            ]);
             $entity->set($payload);
             $em->saveEntity($entity);
 
             $this->ensureTeamMembership($entity, $userName);
 
-            $report[$userName] = sprintf('created (%s id=%s)', $spec['entityType'], $entity->getId());
+            $report[$userName] = sprintf(
+                'created (Contact contactType=%s id=%s)',
+                (string) $entity->get('contactType'),
+                $entity->getId()
+            );
         }
 
         return $report;
@@ -633,7 +637,7 @@ class RoleSetup
     }
 
     /**
-     * Link the given domain entity (VolunteerEmployee / Member) to every team
+     * Link the given domain entity (Contact test profile) to every team
      * the corresponding test user is a member of, via the entity's `teams`
      * linkMultiple field. Idempotent.
      */
@@ -690,7 +694,7 @@ class RoleSetup
 
         $domainEntities = [
             'Account', 'AccountWebsite', 'Contact', 'Opportunity', 'Lead',
-            'VolunteerEmployee', 'Member', 'MealCount', 'AssociationMealCount', 'PrimaNota',
+            'MealCount', 'AssociationMealCount', 'PrimaNota',
             'Intervention', 'FoodParcelRegistration', 'FoodParcelDateLog',
             'Document', 'Meeting', 'Call', 'Task', 'Email', 'Case',
             'ActivityOffer', 'ActivityOfferSlot', 'ActivityInvite',
@@ -762,10 +766,6 @@ class RoleSetup
             ]),
             'User' => array_merge($pdHide, [
                 'activityCompetences' => ['read' => 'yes', 'edit' => 'no'],
-            ]),
-            'VolunteerEmployee' => $pdHide,
-            'Member' => array_merge($pdHide, [
-                'positionsHeld' => ['read' => 'yes', 'edit' => 'no'],
             ]),
         ];
 
@@ -880,8 +880,6 @@ class RoleSetup
         $employeeStaffData['PrimaNota'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
         ];
-        $employeeStaffData['VolunteerEmployee'] = $readOnlyAll();
-        $employeeStaffData['Member'] = $readOnlyAll();
         $employeeStaffData['ActivityOffer'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
         ];
@@ -894,10 +892,7 @@ class RoleSetup
 
         /** @var array<string, array<string, string>> $managerData */
         $managerData = json_decode(json_encode($employeeStaffData), true);
-        $managerData['VolunteerEmployee'] = [
-            'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
-        ];
-        $managerData['Member'] = [
+        $managerData['Contact'] = [
             'create' => 'yes', 'read' => 'all', 'edit' => 'team', 'delete' => 'no', 'stream' => 'all',
         ];
         $managerData['Lead'] = [
@@ -911,14 +906,6 @@ class RoleSetup
 
         $personContactFieldLocks = [
             'User' => [
-                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
-                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
-            ],
-            'VolunteerEmployee' => [
-                'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
-                'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
-            ],
-            'Member' => [
                 'emailAddress' => ['read' => 'yes', 'edit' => 'no'],
                 'phoneNumber'  => ['read' => 'yes', 'edit' => 'no'],
             ],

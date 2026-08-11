@@ -43,9 +43,11 @@ $report(
         && ($parentField['required'] ?? false) === true
 );
 $report(
-    'Case.parent entityList includes Member and VolunteerEmployee',
-    in_array('Member', $parentField['entityList'] ?? [], true)
-        && in_array('VolunteerEmployee', $parentField['entityList'] ?? [], true)
+    'Case.parent entityList includes Contact (not Member/VolunteerEmployee)',
+    in_array('Contact', $parentField['entityList'] ?? [], true)
+        && !in_array('Member', $parentField['entityList'] ?? [], true)
+        && !in_array('VolunteerEmployee', $parentField['entityList'] ?? [], true),
+    'entityList=' . json_encode($parentField['entityList'] ?? [])
 );
 $report(
     'Case.type has NGO intake options',

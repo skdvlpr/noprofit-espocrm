@@ -429,7 +429,8 @@ $ok(
     'GoogleIntegration Global.json does not rename VolunteerEmployee',
     !isset($enGlobal['scopeNames']['VolunteerEmployee'])
 );
-$safehouseCrmInstalled = (bool) $metadata->get(['scopes', 'VolunteerEmployee', 'entity']);
+$safehouseCrmInstalled = (bool) $metadata->get(['scopes', 'MealCount', 'entity'])
+    || is_dir(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm');
 $integrationOpportunityDefault = (string) ($metadata->get([
     'integrations',
     'GoogleCalendarDrive',
@@ -625,8 +626,6 @@ foreach ([
     'Task:main',
     'Opportunity:presentationDate',
     'Opportunity:closeDate',
-    'VolunteerEmployee:main',
-    'VolunteerEmployee:endDate',
 ] as $sourceKey) {
     [$sourceEntityType, $sourceDateType] = explode(':', $sourceKey);
     $source = $em->getRDBRepository('CalendarDateSource')

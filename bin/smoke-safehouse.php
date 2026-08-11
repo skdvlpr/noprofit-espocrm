@@ -6,18 +6,16 @@ require __DIR__ . '/lib/refuse-production.php';
 /**
  * Read-only smoke test of post-refactor Safehouse domain entities.
  *
- * Verifies:
- *   - VolunteerEmployee status formula (Active/Inactive based on startDate/endDate)
- *   - VolunteerEmployee monthlyHours = round(weeklyHours * 4.33, 2)
- *   - VolunteerEmployee name = trim(firstName + ' ' + lastName)
- *   - Member status formula (Active/Inactive based on joinDate/leaveDate)
- *   - Member taxCode + province uppercased
+ * Verifies (Contact STI — VolunteerEmployee / Member entities retired):
+ *   - Contact Volunteer/Employee personnelStatus (Active/Inactive from startDate/endDate)
+ *   - Contact monthlyHours = round(weeklyHours * 4.33, 1) for Volunteer/Employee
+ *   - Contact MemberContact personnelStatus from joinDate/leaveDate
  *   - MealCount totalMeals = adults + minors
  *   - MealCount foodCost = totalMeals * foodUnitPrice (default 1.5 EUR)
  *   - MealCount dayOfWeek translated to English weekday
  *   - Scheduled jobs renamed (English Safehouse* jobClassName, Active)
  *
- * Creates 4 temporary records and deletes them at the end.
+ * Creates temporary records and deletes them at the end.
  *
  * Usage:
  *   ddev exec php bin/smoke-safehouse.php
@@ -34,13 +32,26 @@ $em = $container->get('entityManager');
 
 $results = [];
 $created = [];
+$failures = 0;
+
+$assert = static function (string $label, bool $pass, string $detail = '') use (&$failures, &$results): void {
+    if (!$pass) {
+        $failures++;
+    }
+    $marker = $pass ? 'PASS' : 'FAIL';
+    $row = [$marker, $label];
+    if ($detail !== '') {
+        $row[] = $detail;
+    }
+    $results[] = $row;
+};
 
 try {
-    $ve = $em->getNewEntity('VolunteerEmployee');
+    $ve = $em->getNewEntity('Contact');
     $ve->set([
         'firstName' => 'Smoke',
         'lastName' => 'Active',
-        'type' => 'Employee',
+        'contactType' => 'Employee',
         'contractType' => 'Permanent',
         'startDate' => date('Y-m-d', strtotime('-30 days')),
         'endDate' => date('Y-m-d', strtotime('+30 days')),
@@ -48,46 +59,75 @@ try {
     ]);
     $em->saveEntity($ve);
     $created[] = $ve;
-    $results[] = ['VolunteerEmployee active', 'status=' . $ve->get('status'), 'name=' . $ve->get('name'), 'monthlyHours=' . $ve->get('monthlyHours')];
+    $assert(
+        'Contact Employee active',
+        $ve->get('personnelStatus') === 'Active'
+            && (float) $ve->get('monthlyHours') === (float) round(40 * 4.33, 1),
+        'personnelStatus=' . $ve->get('personnelStatus')
+            . ' monthlyHours=' . $ve->get('monthlyHours')
+            . ' name=' . $ve->get('name')
+    );
 
-    $ve2 = $em->getNewEntity('VolunteerEmployee');
+    $ve2 = $em->getNewEntity('Contact');
     $ve2->set([
         'firstName' => 'Smoke',
         'lastName' => 'Expired',
-        'type' => 'Volunteer',
+        'contactType' => 'Volunteer',
         'startDate' => date('Y-m-d', strtotime('-60 days')),
         'endDate' => date('Y-m-d', strtotime('-1 days')),
         'weeklyHours' => 8,
     ]);
     $em->saveEntity($ve2);
     $created[] = $ve2;
-    $results[] = ['VolunteerEmployee expired', 'status=' . $ve2->get('status'), 'name=' . $ve2->get('name'), 'monthlyHours=' . $ve2->get('monthlyHours')];
+    $assert(
+        'Contact Volunteer expired',
+        $ve2->get('personnelStatus') === 'Inactive'
+            && (float) $ve2->get('monthlyHours') === (float) round(8 * 4.33, 1),
+        'personnelStatus=' . $ve2->get('personnelStatus')
+            . ' monthlyHours=' . $ve2->get('monthlyHours')
+            . ' name=' . $ve2->get('name')
+    );
 
-    $mb = $em->getNewEntity('Member');
+    $mb = $em->getNewEntity('Contact');
     $mb->set([
         'firstName' => 'Smoke',
         'lastName' => 'Member',
-        'taxCode' => 'rsmrra80a01h501u',
-        'addressState' => 'rm',
+        'contactType' => 'MemberContact',
+        'taxCode' => 'RSMRRA80A01H501U',
         'addressStreet' => 'Via Test 1',
         'addressCity' => 'Roma',
+        'addressState' => 'RM',
         'joinDate' => date('Y-m-d', strtotime('-365 days')),
     ]);
     $em->saveEntity($mb);
     $created[] = $mb;
-    $results[] = ['Member active', 'status=' . $mb->get('status'), 'name=' . $mb->get('name'), 'taxCode=' . $mb->get('taxCode'), 'addressState=' . $mb->get('addressState')];
+    $assert(
+        'Contact MemberContact active',
+        $mb->get('personnelStatus') === 'Active',
+        'personnelStatus=' . $mb->get('personnelStatus')
+            . ' name=' . $mb->get('name')
+            . ' taxCode=' . $mb->get('taxCode')
+    );
 
     $mc = $em->getNewEntity('MealCount');
     $mc->set(['date' => date('Y-m-d'), 'adults' => 25, 'minors' => 10]);
     $em->saveEntity($mc);
     $created[] = $mc;
-    $results[] = ['MealCount today', 'totalMeals=' . $mc->get('totalMeals'), 'foodCost=' . $mc->get('foodCost'), 'dayOfWeek=' . $mc->get('dayOfWeek'), 'foodUnitPrice=' . $mc->get('foodUnitPrice')];
+    $assert(
+        'MealCount today',
+        (int) $mc->get('totalMeals') === 35
+            && (float) $mc->get('foodCost') === 35 * 1.5,
+        'totalMeals=' . $mc->get('totalMeals')
+            . ' foodCost=' . $mc->get('foodCost')
+            . ' dayOfWeek=' . $mc->get('dayOfWeek')
+            . ' foodUnitPrice=' . $mc->get('foodUnitPrice')
+    );
 
     $jobs = $em->getRDBRepository('ScheduledJob')->find();
     foreach ($jobs as $job) {
         $name = $job->get('job');
         if ($name !== null && str_starts_with($name, 'Safehouse')) {
-            $results[] = ['ScheduledJob', 'job=' . $name, 'status=' . $job->get('status'), 'sched=' . $job->get('scheduling')];
+            $results[] = ['INFO', 'ScheduledJob', 'job=' . $name, 'status=' . $job->get('status'), 'sched=' . $job->get('scheduling')];
         }
     }
 
@@ -95,9 +135,16 @@ try {
     foreach ($results as $row) {
         echo implode(' | ', $row) . "\n";
     }
-    echo "=== OK ===\n";
+    echo $failures === 0 ? "=== OK ===\n" : "=== {$failures} FAILURE(S) ===\n";
+    if ($failures > 0) {
+        exit(1);
+    }
 } finally {
     foreach ($created as $entity) {
-        $em->removeEntity($entity);
+        try {
+            $em->removeEntity($entity);
+        } catch (Throwable $e) {
+            echo "cleanup failed: {$e->getMessage()}\n";
+        }
     }
 }

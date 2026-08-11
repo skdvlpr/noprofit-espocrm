@@ -33,9 +33,7 @@
                 "Lead",
                 "Opportunity",
                 "Case",
-                "Intervention",
-                "Member",
-                "VolunteerEmployee"
+                "Intervention"
             ]
         },
         "dateStart": {

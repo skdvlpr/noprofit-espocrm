@@ -1,6 +1,6 @@
 <?php
 
-namespace Espo\Modules\NonprofitEspocrm\Classes\FieldValidators\Member\TaxCode;
+namespace Espo\Modules\NonprofitEspocrm\Classes\FieldValidators\Contact\TaxCode;
 
 use Espo\Core\FieldValidation\Validator;
 use Espo\Core\FieldValidation\Validator\Data;
