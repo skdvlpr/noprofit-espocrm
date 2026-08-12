@@ -21,13 +21,15 @@ use Espo\ORM\EntityManager;
  * All public methods are idempotent for creates; existing Role rows are left
  * unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1 (dev only).
  *
- * Permission matrix (2026-08-04; VE/Member entities retired 2026-08-11):
- *   - Admin     : full all
- *   - Volunteer : read all domain + reporting; field-level hide personal data on
- *                 Contact/User (name/status/competences/positionsHeld remain
- *                 visible); write only own Task + ActivityInvite
+ * Permission matrix (2026-08-12):
+ *   - Admin     : full all + Calendar boolean + BugReport
+ *   - Volunteer : read all domain; Calendar + CalendarDateSource; field-level hide
+ *                 Contact/User PD (email/phone/…); Meeting/Call/Task read-all write-own;
+ *                 ActivityInvite own (shift RSVP); Contact create + edit own; stream all;
+ *                 BugReport create/edit own; User read-all (names only — PD locked)
  *   - Employee  : same ACL as Volunteer (IT label Dipendente); Contact sync → contactType=Employee
- *   - Member    : CRM role name (not entity); read all; write nowhere
+ *   - Member    : CRM role name (not entity); read all + stream; Calendar; BugReport own;
+ *                 Meeting/Call/Task own calendar tools (same as Volunteer write-own)
  *   - Manager / Desk : only when SAFEHOUSE_EXTRA_ROLES=1 (local/dev)
  *
  * Existing roles are left unchanged unless SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1
@@ -90,13 +92,13 @@ class RoleSetup
         self::ROLE_DESK,
     ];
 
-    /** Bump when Volunteer/Member/Admin/Employee ACL must be rewritten on rebuild (prod-safe). */
     /**
      * Bump when role specs change so ProvisionRoleAcl rewrites matrices on rebuild.
-     * 2026-08-11-v6: drop retired VolunteerEmployee / Member entity ACL keys
-     * (people live on Contact STI); keep CRM roles Member/Volunteer/Employee.
+     * 2026-08-12-v7: Calendar boolean + CalendarDateSource (fix Volunteer planner /
+     * Access denied toasts); BugReport in matrix (survives overwrite); Contact create;
+     * User read-all; Meeting/Call/Task read-all + write-own.
      */
-    public const ACL_MATRIX_VERSION = '2026-08-11-retire-ve-member-entities-v6';
+    public const ACL_MATRIX_VERSION = '2026-08-12-volunteer-calendar-bugreport-v7';
     public const ACL_MATRIX_CONFIG_KEY = 'safehouseRoleAclVersion';
 
     /**
@@ -701,28 +703,55 @@ class RoleSetup
             'GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate',
         ];
 
+        // Boolean CRM Calendar scope — required for GET Activities / planner (else 403 Access denied).
+        $calendarYes = true;
+        $calendarDateSourceRead = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+        ];
+        // BugTracker non-manager defaults (must live in RoleSetup so ProvisionRoleAcl does not wipe them).
+        $bugReportOwn = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $bugReportFull = $allFull();
+        // See everyone's calendar items; create/edit/delete only own.
+        $calendarOwnWrite = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
+        ];
+        $userReadAll = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+        ];
+
         $adminData = [];
         foreach ($domainEntities as $e) {
             $adminData[$e] = $allFull();
         }
+        $adminData['Calendar'] = $calendarYes;
+        $adminData['CalendarDateSource'] = $allFull();
+        $adminData['BugReport'] = $bugReportFull;
+        $adminData['User'] = $allFull();
+        $adminData['ExternalAccount'] = $allFull();
 
-        // Volunteer: read domain; own CRM calendar (Meeting/Call/Task); Google ExternalAccount;
-        // ActivityInvite own; never create Opportunity / Funds.
+        // Volunteer: read domain; CRM calendar write-own; Google ExternalAccount;
+        // ActivityInvite own (RSVP); Contact create/edit own; never create Opportunity / Funds.
         $volunteerData = [];
         foreach ($domainEntities as $e) {
             $volunteerData[$e] = $readOnlyAll();
         }
+        $volunteerData['Calendar'] = $calendarYes;
+        $volunteerData['CalendarDateSource'] = $calendarDateSourceRead;
+        $volunteerData['BugReport'] = $bugReportOwn;
+        $volunteerData['User'] = $userReadAll;
         $volunteerData['Email'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
         ];
-        $ownCalendar = [
-            'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own', 'stream' => 'own',
-        ];
-        $volunteerData['Meeting'] = $ownCalendar;
-        $volunteerData['Call'] = $ownCalendar;
-        $volunteerData['Task'] = $ownCalendar;
+        $volunteerData['Meeting'] = $calendarOwnWrite;
+        $volunteerData['Call'] = $calendarOwnWrite;
+        $volunteerData['Task'] = $calendarOwnWrite;
         $volunteerData['ExternalAccount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own',
+        ];
+        $volunteerData['Contact'] = [
+            'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'no', 'stream' => 'all',
         ];
         $volunteerData['Opportunity'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
@@ -731,31 +760,41 @@ class RoleSetup
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
         $volunteerData['ActivityOfferSlot'] = [
-            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
         $volunteerData['ActivityInvite'] = [
-            'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+            'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
         ];
 
-        // Member: read domain; own calendar + Google connect (same personal tools as Volunteer).
+        // Member: read domain + stream; calendar tools; BugReport; no Contact create.
         $memberData = [];
         foreach ($domainEntities as $e) {
             $memberData[$e] = $readOnlyAll();
         }
+        $memberData['Calendar'] = $calendarYes;
+        $memberData['CalendarDateSource'] = $calendarDateSourceRead;
+        $memberData['BugReport'] = $bugReportOwn;
+        $memberData['User'] = $userReadAll;
         $memberData['Email'] = [
             'create' => 'no', 'read' => 'own', 'edit' => 'no', 'delete' => 'no', 'stream' => 'own',
         ];
-        $memberData['Meeting'] = $ownCalendar;
-        $memberData['Call'] = $ownCalendar;
-        $memberData['Task'] = $ownCalendar;
+        $memberData['Meeting'] = $calendarOwnWrite;
+        $memberData['Call'] = $calendarOwnWrite;
+        $memberData['Task'] = $calendarOwnWrite;
         $memberData['ExternalAccount'] = [
             'create' => 'yes', 'read' => 'own', 'edit' => 'own', 'delete' => 'own',
         ];
         $memberData['Opportunity'] = [
             'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
+        $memberData['ActivityOffer'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        ];
+        $memberData['ActivityOfferSlot'] = [
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
+        ];
         $memberData['ActivityInvite'] = [
-            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+            'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
         ];
 
         $pdHide = $this->personalDataFieldLocks();

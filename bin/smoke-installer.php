@@ -371,6 +371,10 @@ $report(
     ($volunteerAcl['Meeting']['create'] ?? null) === 'yes'
 );
 $report(
+    'Volunteer ACL: Meeting read=all (see all; write own)',
+    ($volunteerAcl['Meeting']['read'] ?? null) === 'all'
+);
+$report(
     'Volunteer ACL: Call create=yes',
     ($volunteerAcl['Call']['create'] ?? null) === 'yes'
 );
@@ -381,6 +385,27 @@ $report(
 $report(
     'Volunteer ACL: Opportunity create=no (no Funds write)',
     ($volunteerAcl['Opportunity']['create'] ?? null) === 'no'
+);
+$report(
+    'Volunteer ACL: Calendar boolean enabled (planner / Activities)',
+    ($volunteerAcl['Calendar'] ?? null) === true || ($volunteerAcl['Calendar'] ?? null) === 'true'
+);
+$report(
+    'Volunteer ACL: CalendarDateSource read=all',
+    ($volunteerAcl['CalendarDateSource']['read'] ?? null) === 'all'
+);
+$report(
+    'Volunteer ACL: BugReport create=yes',
+    ($volunteerAcl['BugReport']['create'] ?? null) === 'yes'
+);
+$report(
+    'Volunteer ACL: Contact create=yes (own write)',
+    ($volunteerAcl['Contact']['create'] ?? null) === 'yes'
+    && ($volunteerAcl['Contact']['edit'] ?? null) === 'own'
+);
+$report(
+    'Volunteer ACL: User read=all (names; PD field-locked)',
+    ($volunteerAcl['User']['read'] ?? null) === 'all'
 );
 $report(
     'Volunteer userCalendarPermission=own',

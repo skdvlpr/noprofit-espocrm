@@ -429,14 +429,15 @@ class ShiftPlanningInstaller
             ],
         ],
         'Employee' => [
+            // CORE Employee === Volunteer ACL (Dipendente). Do not grant staff shift-create here.
             'ActivityOffer' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own', 'stream' => 'all',
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityOfferSlot' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'own', 'delete' => 'own',
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityInvite' => [
-                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
             ],
         ],
         // Volunteers: open plans from notifications, view shifts, respond to
@@ -446,10 +447,10 @@ class ShiftPlanningInstaller
                 'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityOfferSlot' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityInvite' => [
-                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no',
+                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
             ],
         ],
         // Members: read-only visibility of shift plans (stream posts allowed).
@@ -458,10 +459,10 @@ class ShiftPlanningInstaller
                 'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityOfferSlot' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
             'ActivityInvite' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no',
+                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
             ],
         ],
     ];
