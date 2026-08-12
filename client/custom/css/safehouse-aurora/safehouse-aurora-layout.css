@@ -8,8 +8,11 @@
  * Viewport shell fill ("transparent bottom" on prod).
  * Espo sticky-footer already gives body>.content { min-height:100% }, but Aurora forces
  * #content/#main + --site-footer-bg to transparent so empty regions expose html::before
- * geometric pattern above the credit line. Veil the shell, grow the main column, solidify
- * the site footer. Glass ::before panels still paint above the veil.
+ * geometric pattern above the credit line. Veil the shell and solidify the site footer.
+ *
+ * CRITICAL: do NOT set display:flex on #content / #main for this — that shrink-wrapped
+ * the content column on phone / narrow viewports (margin:auto + max-width side-nav
+ * layout), leaving a thin centered strip over the geometric body pattern.
  */
 body[data-theme-name="SafehouseAurora"] {
   --site-footer-bg: rgba(8, 8, 10, 0.94);
@@ -27,32 +30,17 @@ body[data-theme-name="SafehouseAurora"] > .content,
 body[data-theme-name="SafehouseAuroraLight"] > .content,
 body[data-theme-name="SafehouseAurora"] > #content,
 body[data-theme-name="SafehouseAuroraLight"] > #content {
-  display: flex;
-  flex-direction: column;
   box-sizing: border-box;
+  width: 100%;
   background-color: var(--aurora-content-veil) !important;
 }
 
 body[data-theme-name="SafehouseAurora"] #content #main,
 body[data-theme-name="SafehouseAuroraLight"] #content #main {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  min-height: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: transparent !important;
-}
-
-/* Grow primary list / detail so glass shell covers leftover viewport height. */
-body[data-theme-name="SafehouseAurora"] #content #main > .list-container:not(:has(.list-kanban)),
-body[data-theme-name="SafehouseAuroraLight"] #content #main > .list-container:not(:has(.list-kanban)),
-body[data-theme-name="SafehouseAurora"] #content #main > .row,
-body[data-theme-name="SafehouseAuroraLight"] #content #main > .row,
-body[data-theme-name="SafehouseAurora"] #content #main > .detail,
-body[data-theme-name="SafehouseAuroraLight"] #content #main > .detail,
-body[data-theme-name="SafehouseAurora"] #content #main > .record,
-body[data-theme-name="SafehouseAuroraLight"] #content #main > .record {
-  flex: 1 1 auto;
 }
 
 body[data-theme-name="SafehouseAurora"] > footer,
@@ -304,10 +292,42 @@ body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized.side-
     padding-top: 0 !important;
   }
 
+  /*
+   * Full-width content under top hamburger. Espo side-nav keeps
+   * padding-left: navbar-width, max-width: container+navbar, margin:auto on #content,
+   * and footer margin-left: navbar-width through the desktop breakpoint — reset all of it.
+   */
   body[data-theme-name="SafehouseAurora"][data-navbar='side'].has-navbar > .content,
-  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].has-navbar > .content {
-    padding-left: var(--container-padding, 15px) !important;
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].has-navbar > .content,
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'].has-navbar > #content,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].has-navbar > #content,
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] #content,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #content {
+    width: 100% !important;
     max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: var(--container-padding, 15px) !important;
+    padding-right: var(--container-padding, 15px) !important;
+    box-sizing: border-box !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] #content #main,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] #content #main {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'] > footer,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'] > footer,
+  body[data-theme-name="SafehouseAurora"][data-navbar='side'].minimized > footer,
+  body[data-theme-name="SafehouseAuroraLight"][data-navbar='side'].minimized > footer {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body[data-theme-name="SafehouseAurora"][data-navbar='side'] #header,
