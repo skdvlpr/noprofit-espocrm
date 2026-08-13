@@ -3,13 +3,21 @@
 namespace Espo\Modules\NonprofitEspocrm\Core\Rebuild;
 
 use Espo\Core\Rebuild\RebuildAction;
+use Espo\Core\Utils\Log;
 use Espo\ORM\EntityManager;
 use PDO;
+use Throwable;
 
 /**
  * Permanently drop retired Contact-STI legacy party tables and related GCal seeds.
- * Member / VolunteerEmployee metadata is gone; tables and CalendarDateSource rows
- * must not survive rebuild or Google Integration will rehydrate stub entityDefs.
+ * Member / VolunteerEmployee metadata is gone; empty leftover tables and
+ * CalendarDateSource rows must not survive rebuild or Google Integration may
+ * keep stale CDS rows around.
+ *
+ * NEVER drop a table that still has live rows. The only Contact STI migrator
+ * (`bin/migrate-ve-member-to-contact.php`) is DDEV-only (`refuse-production`)
+ * and is excluded from prod rsync. Production rebuild used to DROP
+ * unconditionally, destroying unmigrated people and meeting/document links.
  *
  * @noinspection PhpUnused
  */
@@ -30,8 +38,17 @@ class DropRetiredPartyTables implements RebuildAction
     ];
 
     public function __construct(
-        private EntityManager $entityManager
+        private EntityManager $entityManager,
+        private Log $log
     ) {}
+
+    /**
+     * Fail-closed drop decision. Unknown counts must not destroy data.
+     */
+    public static function shouldDropRetiredTable(bool $tableExists, ?int $liveRowCount): bool
+    {
+        return $tableExists && $liveRowCount === 0;
+    }
 
     public function process(): void
     {
@@ -39,6 +56,22 @@ class DropRetiredPartyTables implements RebuildAction
 
         foreach (self::TABLES as $table) {
             if (!preg_match('/^[a-z0-9_]+$/', $table)) {
+                continue;
+            }
+
+            if (!$this->tableExists($pdo, $table)) {
+                continue;
+            }
+
+            $live = $this->liveRowCount($pdo, $table);
+
+            if (!self::shouldDropRetiredTable(true, $live)) {
+                $this->log->warning(
+                    "DropRetiredPartyTables: refusing to DROP `{$table}` "
+                    . '(liveRowCount=' . ($live === null ? 'unknown' : (string) $live) . '). '
+                    . 'Migrate VolunteerEmployee/Member to Contact before dropping leftover party tables.'
+                );
+
                 continue;
             }
 
@@ -84,5 +117,43 @@ class DropRetiredPartyTables implements RebuildAction
         );
 
         return $stmt !== false && (int) $stmt->fetchColumn() > 0;
+    }
+
+    private function columnExists(PDO $pdo, string $table, string $column): bool
+    {
+        if (!preg_match('/^[a-z0-9_]+$/', $table) || !preg_match('/^[a-z0-9_]+$/', $column)) {
+            return false;
+        }
+
+        $stmt = $pdo->query(
+            "SELECT COUNT(*) FROM information_schema.columns
+             WHERE table_schema = DATABASE()
+               AND table_name = " . $pdo->quote($table) . "
+               AND column_name = " . $pdo->quote($column)
+        );
+
+        return $stmt !== false && (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Live (not soft-deleted) row count, or null when the count cannot be trusted.
+     */
+    private function liveRowCount(PDO $pdo, string $table): ?int
+    {
+        try {
+            $sql = $this->columnExists($pdo, $table, 'deleted')
+                ? "SELECT COUNT(*) FROM `{$table}` WHERE `deleted` = 0"
+                : "SELECT COUNT(*) FROM `{$table}`";
+
+            $stmt = $pdo->query($sql);
+
+            if ($stmt === false) {
+                return null;
+            }
+
+            return (int) $stmt->fetchColumn();
+        } catch (Throwable) {
+            return null;
+        }
     }
 }
