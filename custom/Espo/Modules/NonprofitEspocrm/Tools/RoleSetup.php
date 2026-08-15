@@ -25,7 +25,8 @@ use Espo\ORM\EntityManager;
  *   - Admin     : full all + Calendar boolean + BugReport
  *   - Volunteer : read all domain; Calendar + CalendarDateSource; field-level hide
  *                 Contact/User PD (email/phone/…); Meeting/Call/Task read-all write-own;
- *                 ActivityInvite own (shift RSVP); Contact create + edit own; stream all;
+ *                 ActivityInvite own (shift RSVP); Contact create + edit own (linkedUser /
+ *                 portalUser locked — ProtectLinkedUser); stream all;
  *                 BugReport create/edit own; User read-all (names only — PD locked)
  *   - Employee  : same ACL as Volunteer (IT label Dipendente); Contact sync → contactType=Employee
  *   - Member    : CRM role name (not entity); read all + stream; Calendar; BugReport own;
@@ -802,6 +803,9 @@ class RoleSetup
         $volunteerFieldData = [
             'Contact' => array_merge($pdHide, [
                 'positionsHeld' => ['read' => 'yes', 'edit' => 'no'],
+                // Create/edit-own must not bind another CRM/portal user (ProtectLinkedUser).
+                'linkedUser' => ['read' => 'yes', 'edit' => 'no'],
+                'portalUser' => ['read' => 'no', 'edit' => 'no'],
             ]),
             'User' => array_merge($pdHide, [
                 'activityCompetences' => ['read' => 'yes', 'edit' => 'no'],

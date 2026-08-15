@@ -73,6 +73,8 @@
     },
     "messages": {
         "removeRecordConfirmationContactOnly": "Questo contatto è collegato a un utente. Verrà eliminato solo il Contatto — l'account Utente resterà.",
-        "removeSelectedRecordsConfirmationContactOnly": "Almeno un contatto selezionato è collegato a un utente. Verranno eliminati solo i Contatti — gli account Utente collegati resteranno."
+        "removeSelectedRecordsConfirmationContactOnly": "Almeno un contatto selezionato è collegato a un utente. Verranno eliminati solo i Contatti — gli account Utente collegati resteranno.",
+        "cannotLinkContactToOtherUser": "Non puoi collegare questo contatto a un altro utente.",
+        "cannotLinkContactToPortalUser": "Non puoi collegare questo contatto a un utente portale."
     }
 }
