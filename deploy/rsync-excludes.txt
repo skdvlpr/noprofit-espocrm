@@ -21,6 +21,7 @@ bin/migrate-*.php
 bin/test-*.php
 bin/cleanup-*.php
 bin/provision-*.php
+bin/provision-*.sh
 bin/setup-*.php
 bin/import-*.php
 bin/export-*.php
@@ -30,7 +31,20 @@ bin/reorder-*.php
 bin/rollback-*.php
 bin/set-prima-nota-*.php
 bin/_tmp-*.php
+bin/build*.sh
+bin/dev-rebuild.sh
+bin/packaging/
 bin/lib/mailpit-smtp-for-smoke.php
+
+# Extension ZIP packaging scripts (only needed when building ZIPs locally/CI)
+/scripts/AfterInstall.php
+/scripts/BeforeInstall.php
+/scripts/AfterUninstall.php
+/scripts/BeforeUninstall.php
+
+# Local scratch / dumps (never ship)
+/_local/
+/data/tmp-*/
 
 # Build / dev artifacts
 /dist/
@@ -61,8 +75,6 @@ Thumbs.db
 /data/upload/
 /data/preferences/
 /data/.backup/
-/data/tmp-kb-google-shots/
-/data/tmp-kb-google-shots-v3/
 
 # Installer state (server decides installed vs not)
 /install/config.php

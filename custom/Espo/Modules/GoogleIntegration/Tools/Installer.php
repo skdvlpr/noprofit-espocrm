@@ -12,7 +12,6 @@ use Espo\Modules\GoogleIntegration\Tools\Calendar\DefaultCalendarTemplateProvisi
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarLayoutProvisioner;
 use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\AccountProvisioner;
 use Espo\Entities\Integration as IntegrationEntity;
-use Espo\Entities\Role;
 use Espo\ORM\EntityManager;
 
 /**
@@ -92,7 +91,7 @@ class Installer
             ->provisionAll();
 
         $this->migrateLegacyExternalAccounts($container);
-        $this->ensureAdminRoleAccess($em, $metadata);
+        // Roles: never auto-mutate — grant CalendarTemplate/CalendarDateSource in Administration → Roles.
         $this->pruneGoogleCalendarConfigFromNavigation($container);
 
         $dataManager->rebuild();
@@ -334,48 +333,6 @@ class Installer
         }
 
         return $result;
-    }
-
-    private function ensureAdminRoleAccess(EntityManager $entityManager, Metadata $metadata): void
-    {
-        $role = $entityManager
-            ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => 'Admin', 'deleted' => false])
-            ->findOne();
-
-        if ($role === null) {
-            return;
-        }
-
-        $data = json_decode(json_encode($role->get('data') ?? new \stdClass()), true) ?? [];
-        $changed = false;
-
-        foreach (['CalendarTemplate', 'CalendarDateSource'] as $entityType) {
-            $expected = [];
-            foreach (['read', 'create', 'edit', 'delete', 'stream'] as $action) {
-                $value = $metadata->get(['aclDefs', $entityType, $action]);
-
-                if (is_string($value) && $value !== '') {
-                    $expected[$action] = $value;
-                }
-            }
-
-            if ($expected === []) {
-                continue;
-            }
-
-            if (($data[$entityType] ?? null) !== $expected) {
-                $data[$entityType] = $expected;
-                $changed = true;
-            }
-        }
-
-        if (!$changed) {
-            return;
-        }
-
-        $role->set('data', (object) $data);
-        $entityManager->saveEntity($role);
     }
 
     /**

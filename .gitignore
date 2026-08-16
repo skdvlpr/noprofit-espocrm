@@ -1,3 +1,7 @@
+# Local scratch (tmp dumps, screenshots, restore trees — never commit/deploy)
+/_local/
+/data/tmp-*/
+
 # Local integration handoff docs (not committed; for other agents on dev machine)
 /docs/integrations/
 
@@ -43,7 +47,6 @@
 .ddev/traefik/config/
 
 # Local Codex/agent workspace files
-/AGENTS.md
 .cursor/
 .agents/
 .codex/
