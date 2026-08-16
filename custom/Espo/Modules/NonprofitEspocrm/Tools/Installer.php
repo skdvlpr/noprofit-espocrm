@@ -181,6 +181,7 @@ class Installer
         $this->provisionEmailAddressLookupEntityTypeList($config, $configWriter);
         $this->provisionPrimaNotaOpeningCashDefaults($config, $configWriter);
         $this->provisionInboundEmailCaseTypes($config, $configWriter);
+        $this->provisionAssignmentNotificationEntityList($config, $configWriter);
 
         $configWriter->set('tabList', $tabList);
         $configWriter->set('quickCreateList', $quickCreateList);
@@ -495,6 +496,55 @@ class Installer
         }
 
         $configWriter->set('inboundEmailCaseTypes', $merged);
+    }
+
+    /**
+     * Merge Safehouse-required entity types into Admin → Notifications
+     * assignment entity list (Preferences checklists read this config).
+     * Espo core default is Meeting/Call/Email only — Task is not included
+     * unless configured: https://docs.espocrm.com/development/metadata/notification-defs/
+     */
+    private function provisionAssignmentNotificationEntityList(Config $config, ConfigWriter $configWriter): void
+    {
+        $list = $config->get('assignmentNotificationsEntityList') ?? [];
+
+        if (!is_array($list)) {
+            $list = [];
+        }
+
+        $list = array_values(array_filter($list, 'is_string'));
+        $changed = false;
+
+        foreach (SafehouseDefaults::ASSIGNMENT_NOTIFICATION_ENTITY_TYPES as $entityType) {
+            if (!in_array($entityType, $list, true)) {
+                $list[] = $entityType;
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $configWriter->set('assignmentNotificationsEntityList', $list);
+        }
+
+        $emailList = $config->get('assignmentEmailNotificationsEntityList') ?? [];
+
+        if (!is_array($emailList)) {
+            $emailList = [];
+        }
+
+        $emailList = array_values(array_filter($emailList, 'is_string'));
+        $emailChanged = false;
+
+        foreach (SafehouseDefaults::ASSIGNMENT_NOTIFICATION_ENTITY_TYPES as $entityType) {
+            if (!in_array($entityType, $emailList, true)) {
+                $emailList[] = $entityType;
+                $emailChanged = true;
+            }
+        }
+
+        if ($emailChanged) {
+            $configWriter->set('assignmentEmailNotificationsEntityList', $emailList);
+        }
     }
 
     /**

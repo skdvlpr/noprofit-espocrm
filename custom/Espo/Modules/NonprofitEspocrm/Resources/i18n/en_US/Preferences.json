@@ -2,7 +2,7 @@
     "fields": {
         "notificationSound": "Notification Sound",
         "webPushEnabled": "Browser push notifications",
-        "assignmentPushNotificationsIgnoreEntityTypeList": "In-app style push (by record type)"
+        "assignmentPushNotificationsIgnoreEntityTypeList": "Push assignment notifications"
     },
     "labels": {
         "webPushStatusOn": "Enabled on this device",
@@ -14,10 +14,10 @@
         "webPushDelaySeconds": "Delay (seconds)"
     },
     "tooltips": {
-        "webPushEnabled": "Optional channel, separate from in-app (bell) and email. Only you control this for your account. Enabling registers this browser for push; in-app notifications keep working either way.",
-        "webPushHelp": "Push is not the same as in-app notifications. Use “Check permissions” to verify browser/OS access. On a phone: leave the browser running in the background — do not swipe it away or force-close it; that keeps delivery reliable. A setup checklist appears only if the check fails.",
+        "webPushEnabled": "Optional channel, separate from in-app (bell) and email. Enabling registers this browser for push.",
+        "webPushHelp": "Push is not the same as in-app notifications. Use “Check permissions” to verify browser/OS access. On a phone: leave the browser in the background — do not force-close it.",
         "webPushSendTest": "Sends a real browser push to this device. Optional delay lets you minimize the window first (0 = now, max 300).",
-        "assignmentPushNotificationsIgnoreEntityTypeList": "Same entity list as in-app assignment notifications. Checked types may receive browser push when an in-app notification is created for that record type. Requires browser push to be enabled above."
+        "assignmentPushNotificationsIgnoreEntityTypeList": "Choose which record types may send browser push when you are assigned. Requires browser push to be enabled above. The available types are set by the administrator."
     },
     "messages": {
         "webPushUnsupported": "This browser does not support Web Push.",

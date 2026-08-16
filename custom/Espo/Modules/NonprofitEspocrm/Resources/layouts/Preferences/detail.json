@@ -139,7 +139,7 @@
             ],
             [
                 {"name": "assignmentPushNotificationsIgnoreEntityTypeList"},
-                false
+                {"name": "assignmentNotificationsIgnoreEntityTypeList"}
             ],
             [
                 {"name": "receiveAssignmentEmailNotifications"},
@@ -150,8 +150,8 @@
                 false
             ],
             [
-                {"name": "assignmentNotificationsIgnoreEntityTypeList"},
-                {"name": "assignmentEmailNotificationsIgnoreEntityTypeList"}
+                {"name": "assignmentEmailNotificationsIgnoreEntityTypeList"},
+                false
             ],
             [
                 {"name": "reactionNotifications"},

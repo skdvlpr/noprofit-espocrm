@@ -46,6 +46,42 @@ $ok(
     'Preferences detail layout includes push ignore checklist',
     str_contains($layout, 'assignmentPushNotificationsIgnoreEntityTypeList')
 );
+$ok(
+    'Push and In-app checklists share one layout row (two columns)',
+    (bool) preg_match(
+        '/assignmentPushNotificationsIgnoreEntityTypeList[\s\S]{0,120}assignmentNotificationsIgnoreEntityTypeList/',
+        $layout
+    )
+);
+
+$en = json_decode(
+    (string) file_get_contents(
+        __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/en_US/Preferences.json'
+    ),
+    true
+);
+$it = json_decode(
+    (string) file_get_contents(
+        __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/Preferences.json'
+    ),
+    true
+);
+$ok(
+    'EN push label has no come/in-app jargon',
+    ($en['fields']['assignmentPushNotificationsIgnoreEntityTypeList'] ?? '') === 'Push assignment notifications'
+        && !str_contains(strtolower(json_encode($en)), 'come in-app')
+        && !str_contains(strtolower((string) ($en['fields']['assignmentPushNotificationsIgnoreEntityTypeList'] ?? '')), 'in-app style')
+);
+$ok(
+    'IT push label mirrors in-app wording (no come in-app)',
+    ($it['fields']['assignmentPushNotificationsIgnoreEntityTypeList'] ?? '') === 'Notifiche di assegnazione push'
+        && !str_contains(strtolower((string) ($it['fields']['assignmentPushNotificationsIgnoreEntityTypeList'] ?? '')), 'come')
+);
+
+$ok(
+    'SafehouseDefaults includes Task for assignment notifications',
+    in_array('Task', \Espo\Modules\NonprofitEspocrm\Tools\SafehouseDefaults::ASSIGNMENT_NOTIFICATION_ENTITY_TYPES, true)
+);
 
 $viewPath = __DIR__
     . '/../client/custom/modules/nonprofit-espocrm/src/views/preferences/fields/'
