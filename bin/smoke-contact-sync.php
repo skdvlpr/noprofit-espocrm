@@ -4,18 +4,16 @@ require __DIR__ . '/lib/refuse-production.php';
 
 
 /**
- * Smoke: PersonContactSync retirement + Contact STI fixtures.
+ * Smoke: Contact STI fixtures (PersonContactSync retired/removed).
  *
- * VolunteerEmployee / Member entities are retired. {@see PersonContactSync}
- * keeps an empty PERSON_ENTITY_TYPES list (no-op). User ↔ Contact profile
+ * VolunteerEmployee / Member entities are retired. User ↔ Contact profile
  * sync is covered by bin/smoke-contact-occasional.php
  * ({@see UserContactProfileSync}).
  *
  * Scenarios:
- *   1. PERSON_ENTITY_TYPES is empty (retired VE/Member).
- *   2. Contact (Volunteer) saves with email/phone without PersonContactSync errors.
- *   3. Second Contact (MemberContact) may share no cross-entity VE/Member dedup
- *      (legacy BadRequest path retired); save succeeds with its own email.
+ *   1. PersonContactSync class is absent (retired).
+ *   2. Contact (Volunteer) saves with email/phone.
+ *   3. Second Contact (MemberContact) saves with its own email.
  *   4. Contact assigned to a User without email still saves.
  *
  * Usage:
@@ -25,7 +23,6 @@ require __DIR__ . '/lib/refuse-production.php';
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
-use Espo\Modules\NonprofitEspocrm\Tools\PersonContactSync;
 use Espo\ORM\Repository\Option\SaveOption;
 
 $app = new Application();
@@ -46,9 +43,8 @@ $report = function (string $name, bool $pass, string $detail = '') use (&$failur
 try {
     echo "Scenario 0: PersonContactSync retirement\n";
     $report(
-        'PersonContactSync::PERSON_ENTITY_TYPES is empty',
-        PersonContactSync::PERSON_ENTITY_TYPES === [],
-        'types=' . json_encode(PersonContactSync::PERSON_ENTITY_TYPES)
+        'PersonContactSync class removed',
+        !class_exists(\Espo\Modules\NonprofitEspocrm\Tools\PersonContactSync::class)
     );
 
     echo "\nCreating throw-away test user...\n";

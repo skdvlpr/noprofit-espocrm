@@ -3,34 +3,110 @@
         "label": "Overview",
         "rows": [
             [
-                {"name": "name"},
-                {"name": "activityOffer"}
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "activityOffer"
+                }
             ],
             [
-                {"name": "category"},
-                {"name": "dayOfWeek"}
+                {
+                    "name": "category"
+                },
+                {
+                    "name": "dayOfWeek"
+                }
             ],
             [
-                {"name": "dateStart"},
-                {"name": "dateEnd"}
+                {
+                    "name": "dateStart"
+                },
+                {
+                    "name": "dateEnd"
+                }
             ],
             [
-                {"name": "duration"},
-                {"name": "isAllDay"}
+                {
+                    "name": "duration"
+                },
+                {
+                    "name": "isAllDay"
+                }
             ],
             [
-                {"name": "requiredCount"},
-                {"name": "sortOrder"}
+                {
+                    "name": "requiredCount"
+                },
+                {
+                    "name": "sortOrder"
+                }
             ],
             [
-                {"name": "place", "fullWidth": true}
+                {
+                    "name": "place",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "conditions", "fullWidth": true}
+                {
+                    "name": "conditions",
+                    "fullWidth": true
+                }
             ],
             [
-                {"name": "task"},
+                {
+                    "name": "task"
+                },
                 false
+            ]
+        ]
+    },
+    {
+        "name": "GoogleCalendar",
+        "label": "Google Calendar",
+        "rows": [
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarShareUsers"
+                },
+                {
+                    "name": "googleCalendarShareTeams"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareRoutingMode"
+                },
+                {
+                    "name": "googleCalendarShareCalendarUserId"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
             ]
         ]
     }

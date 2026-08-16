@@ -1207,9 +1207,15 @@ ok(
 );
 $planningSrc = (string) file_get_contents(__DIR__
     . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php');
-ok(str_contains($planningSrc, "'changed'"), 'availabilityGrid exposes changed slot flag');
+$availabilityWorkflowSrc = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php');
 ok(
-    !str_contains($planningSrc, 'lockedAvailable'),
+    str_contains($planningSrc, "'changed'") || str_contains($availabilityWorkflowSrc, "'changed'"),
+    'availabilityGrid exposes changed slot flag'
+);
+ok(
+    !str_contains($planningSrc, 'lockedAvailable')
+        && !str_contains($availabilityWorkflowSrc, 'lockedAvailable'),
     'availabilityGrid no longer locks Available (interest is cleared instead)'
 );
 $availJs = (string) file_get_contents(__DIR__

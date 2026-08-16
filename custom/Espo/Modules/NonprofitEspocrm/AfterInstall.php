@@ -6,17 +6,29 @@ use Espo\Core\Application;
 use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 
 /**
- * Entrypoint invoked when the module ships pre-installed (dev workflows or
- * direct in-tree installs). Delegates to {@see Installer} which holds the
- * single source of truth for post-install provisioning. The ZIP-install
- * entrypoint at `scripts/AfterInstall.php` delegates to the same Installer.
+ * In-tree post-install (dev / pre-installed tree). Same orchestration as
+ * `scripts/AfterInstall.php` for the unified suite ZIP.
  */
 class AfterInstall
 {
     public function run(Application $app): void
     {
         $container = $app->getContainer();
-        $installer = new Installer();
-        $installer->runPostInstall($container);
+        (new Installer())->runPostInstall($container);
+
+        $siblingInstallers = [
+            \Espo\Modules\GoogleIntegration\Tools\Installer::class,
+            \Espo\Modules\WorkflowEngine\Tools\Installer::class,
+            \Espo\Modules\BugTracker\Tools\Installer::class,
+            \Espo\Modules\SafehouseAuroraThemes\Tools\Installer::class,
+        ];
+
+        foreach ($siblingInstallers as $className) {
+            if (!class_exists($className)) {
+                continue;
+            }
+
+            (new $className())->runPostInstall($container);
+        }
     }
 }

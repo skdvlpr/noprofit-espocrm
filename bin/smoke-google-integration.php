@@ -249,8 +249,13 @@ foreach ($calendarCapableEntityTypes as $entityType) {
             )
     );
     $ok(
-        "$entityType app.layouts detail module is GoogleIntegration",
-        $metadata->get(['app', 'layouts', $entityType, 'detail', 'module']) === 'GoogleIntegration'
+        "$entityType app.layouts detail module is owner (NonprofitEspocrm or GoogleIntegration)",
+        in_array(
+            $metadata->get(['app', 'layouts', $entityType, 'detail', 'module']),
+            ['NonprofitEspocrm', 'GoogleIntegration'],
+            true
+        ),
+        'module=' . (string) $metadata->get(['app', 'layouts', $entityType, 'detail', 'module'])
     );
 
     foreach (['detail', 'detailSmall'] as $layoutType) {
@@ -579,14 +584,9 @@ $ok(
         && !str_contains($integrationHelpIt, '![')
 );
 $ok(
-    'KB Google Connect article ships annotated screenshots',
-    is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect/00-admin-integrazioni.jpg')
-        && str_contains(
-            (string) file_get_contents(
-                __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/knowledge-base/articles.it_IT.json'
-            ),
-            'kb-google-connect/00-admin-integrazioni.jpg'
-        )
+    'KB Google Connect screenshots live under client custom img (seeder retired)',
+    is_dir(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect')
+        || is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect/00-admin-integrazioni.jpg')
 );
 $ok('Dead admin template-modal view removed', !is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/template-modal.js'));
 $eventSettingsView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
@@ -603,6 +603,8 @@ $ok(
         && !str_contains($eventPusherSource, "'Presentation date'")
 );
 $callDetailLayout = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/layouts/Call/detail.json'
+) ?: file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Resources/layouts/Call/detail.json'
 ) ?: '';
 $ok(
@@ -1285,50 +1287,13 @@ $ok(
         && str_contains((string) ($syncJobMeta['jobClassName'] ?? ''), 'SyncCalendar')
 );
 
-echo "\nGCalSmoke entities (hash navigation QA)\n";
+echo "\nGCalSmoke entities (removed from product)\n";
 
 foreach (['GCalSmokeAllDay', 'GCalSmokeDateTime', 'GCalSmokeTwinDate'] as $smokeEntity) {
-    if (!$metadata->get(['scopes', $smokeEntity, 'entity'])) {
-        $ok("$smokeEntity has clientDefs for hash navigation", true, 'skipped (entity not installed)');
-        $ok("$smokeEntity tab:false (no navbar tab)", true, 'skipped (entity not installed)');
-        $ok("GET /api/v1/$smokeEntity list → 200", true, 'skipped (entity not installed)');
-        $ok("GET /api/v1/$smokeEntity/{id} → 200", true, 'skipped (entity not installed)');
-        continue;
-    }
-
-    $smokeClientDefs = $metadata->get(['clientDefs', $smokeEntity]) ?? [];
     $ok(
-        "$smokeEntity has clientDefs for hash navigation",
-        is_array($smokeClientDefs) && ($smokeClientDefs['controller'] ?? '') === 'controllers/record'
+        "$smokeEntity scope absent",
+        !$metadata->get(['scopes', $smokeEntity, 'entity'])
     );
-    $smokeScopes = $metadata->get(['scopes', $smokeEntity]) ?? [];
-    $ok(
-        "$smokeEntity tab:false (no navbar tab)",
-        ($smokeScopes['tab'] ?? true) === false
-    );
-
-    $rSmokeList = $client->get("/api/v1/$smokeEntity", [
-        'query' => ['maxSize' => 1, 'select' => 'id,name'],
-    ]);
-    $ok(
-        "GET /api/v1/$smokeEntity list → 200",
-        $rSmokeList->getStatusCode() === 200,
-        'code=' . $rSmokeList->getStatusCode()
-    );
-
-    $smokeList = json_decode((string) $rSmokeList->getBody(), true);
-    $smokeId = is_array($smokeList['list'][0] ?? null) ? ($smokeList['list'][0]['id'] ?? '') : '';
-
-    if (is_string($smokeId) && $smokeId !== '') {
-        $rSmokeGet = $client->get("/api/v1/$smokeEntity/$smokeId", ['query' => ['select' => 'id,name']]);
-        $ok(
-            "GET /api/v1/$smokeEntity/{id} → 200",
-            $rSmokeGet->getStatusCode() === 200,
-            'id=' . $smokeId
-        );
-    } else {
-        $ok("GET /api/v1/$smokeEntity/{id} → 200", true, 'skipped (no seeded row)');
-    }
 }
 
 $smokeSourceEntityId = substr(Util::generateId(), 0, 17);

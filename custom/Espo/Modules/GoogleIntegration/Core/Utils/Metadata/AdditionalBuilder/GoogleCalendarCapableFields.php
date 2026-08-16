@@ -78,18 +78,35 @@ class GoogleCalendarCapableFields implements AdditionalBuilder
 
         $entityLayouts = $data->app->layouts->$entityType;
 
-        // Merge only detail views — preserve SafehouseCrm list/filters/kanban routing.
+        // Prefer the vertical CRM module when it owns the detail layout (suite install).
+        // Fall back to GoogleIntegration for standalone GI on vanilla Espo.
+        $layoutModule = $this->resolveLayoutOwnerModule($entityType);
+
         if (!isset($entityLayouts->detail)) {
             $entityLayouts->detail = (object) [];
         }
 
-        $entityLayouts->detail->module = 'GoogleIntegration';
+        $entityLayouts->detail->module = $layoutModule;
 
         if (!isset($entityLayouts->detailSmall)) {
             $entityLayouts->detailSmall = (object) [];
         }
 
-        $entityLayouts->detailSmall->module = 'GoogleIntegration';
+        $entityLayouts->detailSmall->module = $layoutModule;
+    }
+
+    private function resolveLayoutOwnerModule(string $entityType): string
+    {
+        foreach (['NonprofitEspocrm'] as $module) {
+            $path = 'custom/Espo/Modules/' . $module
+                . '/Resources/layouts/' . $entityType . '/detail.json';
+
+            if (is_readable($path)) {
+                return $module;
+            }
+        }
+
+        return 'GoogleIntegration';
     }
 
     private function applyRecordDefsHooks(stdClass $data, string $entityType): void

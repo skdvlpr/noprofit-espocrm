@@ -4,32 +4,41 @@ use Espo\Core\Container;
 use Espo\Modules\NonprofitEspocrm\Tools\Installer;
 
 /**
- * Extension-package post-install script.
+ * Extension-package post-install script for the unified suite ZIP.
  *
- * Espo Extension Manager runs this class's `run(Container, params)` method
- * after copying the package files into place. We delegate to
- * {@see Installer} which centralises the post-install actions:
+ * Espo Extension Manager runs `run(Container, params)` after copying files.
+ * Orchestrates module Installers that remain separately extractable:
  *
- *   - ensure Safehouse custom entities are visible in `tabList`;
- *   - hide `Case` from `tabList` and `quickCreateList`;
- *   - restore `Lead` and reorder domain entities into the top `$CRM` block;
- *   - place reporting entities under `$Rendicontazione`;
- *   - rebuild metadata so the changes are picked up immediately.
+ *   1. NonprofitEspocrm (navbar, Safehouse defaults, shift planning, …)
+ *   2. GoogleIntegration (when present in the package)
+ *   3. WorkflowEngine (when present)
+ *   4. BugTracker (when present)
+ *   5. SafehouseAuroraThemes (when present)
  *
- * Roles / teams are NOT auto-provisioned — configure via Administration → Roles.
- *
- * The in-tree module class `Espo\Modules\NonprofitEspocrm\AfterInstall`
- * delegates to the same Installer so both install flows stay in sync.
+ * Roles / teams are NOT auto-provisioned — Administration → Roles only.
  */
 class AfterInstall
 {
     /**
-     * @param array<string, mixed> $params Installer parameters from Espo's
-     *                                     Extension Manager.
+     * @param array<string, mixed> $params
      */
     public function run(Container $container, array $params): void
     {
-        $installer = new Installer();
-        $installer->runPostInstall($container);
+        (new Installer())->runPostInstall($container);
+
+        $siblingInstallers = [
+            \Espo\Modules\GoogleIntegration\Tools\Installer::class,
+            \Espo\Modules\WorkflowEngine\Tools\Installer::class,
+            \Espo\Modules\BugTracker\Tools\Installer::class,
+            \Espo\Modules\SafehouseAuroraThemes\Tools\Installer::class,
+        ];
+
+        foreach ($siblingInstallers as $className) {
+            if (!class_exists($className)) {
+                continue;
+            }
+
+            (new $className())->runPostInstall($container);
+        }
     }
 }

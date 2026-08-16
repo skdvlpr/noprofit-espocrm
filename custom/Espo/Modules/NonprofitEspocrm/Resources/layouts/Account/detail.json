@@ -1,30 +1,101 @@
 [
     {
-        "label": "Overview",
         "rows": [
             [
-                {"name": "name"},
-                {"name": "sector"}
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "cDataFirmaContratto"
+                },
+                {
+                    "name": "sector"
+                }
             ],
             [
-                {"name": "emailAddress"},
-                {"name": "phoneNumber"}
+                {
+                    "name": "emailAddress"
+                },
+                {
+                    "name": "phoneNumber"
+                }
             ],
             [
-                {"name": "billingAddress"},
-                {"name": "shippingAddress"}
+                {
+                    "name": "billingAddress"
+                },
+                {
+                    "name": "shippingAddress"
+                }
             ]
-        ]
+        ],
+        "style": "default",
+        "label": "Overview"
     },
     {
-        "label": "Details",
         "rows": [
             [
-                {"name": "type"},
-                {"name": "industry"}
+                {
+                    "name": "type"
+                },
+                {
+                    "name": "industry"
+                }
             ],
             [
-                {"name": "description", "fullWidth": true}
+                {
+                    "name": "description"
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Details"
+    },
+    {
+        "name": "GoogleCalendar",
+        "label": "Google Calendar",
+        "rows": [
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarShareUsers"
+                },
+                {
+                    "name": "googleCalendarShareTeams"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareRoutingMode"
+                },
+                {
+                    "name": "googleCalendarShareCalendarUserId"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
             ]
         ]
     }

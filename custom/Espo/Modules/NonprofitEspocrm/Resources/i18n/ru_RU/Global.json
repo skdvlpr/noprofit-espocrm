@@ -8,20 +8,14 @@
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайт организации",
         "MealCount": "Учет питания",
-        "Case": "Обращение",
-        "GCalSmokeAllDay": "Тест GCal (весь день)",
-        "GCalSmokeDateTime": "Тест GCal (дата/время)",
-        "GCalSmokeTwinDate": "Тест GCal (две даты)"
+        "Case": "Обращение"
     },
     "scopeNamesPlural": {
         "Lead": "Leads",
         "Opportunity": "Гранты и Финансирование",
         "AccountWebsite": "Сайты организаций",
         "MealCount": "Учет питания",
-        "Case": "Обращения",
-        "GCalSmokeAllDay": "Тесты GCal (весь день)",
-        "GCalSmokeDateTime": "Тесты GCal (дата/время)",
-        "GCalSmokeTwinDate": "Тесты GCal (две даты)"
+        "Case": "Обращения"
     },
     "navbarTabs": {
         "mainSections": "Главные разделы",

@@ -869,28 +869,31 @@ Post-install MUST: seed DB rows if needed, fix `tabList` only via `ConfigWriter`
 | Init script | `client/custom/modules/{hyphen}/lib/init.js` |
 | 3rd-party JS lib | Rollup in build + `Resources/metadata/app/jsLibs.json` (ext-template README) |
 
-### EXT-007 — Multiple extensions in one repo
+### EXT-007 — Multiple modules, one suite ZIP (since 2026-08-16)
 
-This repo ships **independent** extensions:
+Modules stay **separate on disk** (extractable for vanilla Espo). Product default ship is **one** Extension Manager ZIP built by `bin/build.sh`:
 
-| Extension | Backend | Frontend | Build |
-| --------- | ------- | -------- | ----- |
-| SafehouseCrm | `custom/Espo/Modules/NonprofitEspocrm/` | (core overrides only if needed) | `bin/build.sh` |
+| Module | Backend | Frontend | Standalone build (extractability) |
+| ------ | ------- | -------- | --------------------------------- |
+| NonprofitEspocrm (suite root + AfterInstall orchestrator) | `custom/Espo/Modules/NonprofitEspocrm/` | `client/custom/modules/nonprofit-espocrm/` | (suite) `bin/build.sh` |
 | GoogleIntegration | `custom/Espo/Modules/GoogleIntegration/` | `client/custom/modules/google-integration/` | `bin/build-google-integration.sh` |
-| WorkflowEngine (planned) | `custom/Espo/Modules/WorkflowEngine/` | `client/custom/modules/workflow-engine/` | `bin/build-workflow-engine.sh` |
+| WorkflowEngine | `custom/Espo/Modules/WorkflowEngine/` | `client/custom/modules/workflow-engine/` | `bin/build-workflow-engine.sh` |
+| BugTracker | `custom/Espo/Modules/BugTracker/` | `client/custom/modules/bug-tracker/` | `bin/build-bug-tracker.sh` |
+| SafehouseAuroraThemes | `custom/Espo/Modules/SafehouseAuroraThemes/` | Aurora CSS/fonts under `client/` | `bin/build-safehouse-aurora-themes.sh` |
 
-**VolunteerActivityDispatch:** merged into **NonprofitEspocrm** (2026-08-04). Shift planning PHP/JS live under `NonprofitEspocrm` / `nonprofit-espocrm:` AMD. Do **not** recreate a separate VAD extension. On environments that still have the old Extension Manager package, deploy SafehouseCrm first, rebuild, then uninstall the orphan VAD package.
+**Suite AfterInstall:** `scripts/AfterInstall.php` runs NonprofitEspocrm Installer, then sibling Installers if `class_exists` (Google → Workflow → BugTracker → Themes). No Role ACL mutate.
 
-**RULE:** Do not bundle GoogleIntegration / WorkflowEngine inside Safehouse ZIP. Install order on fresh instance: Espo core → GoogleIntegration (if needed) → SafehouseCrm → optional workflows ZIPs. **Standalone `safehouse-aurora-themes` ZIP:** only when SafehouseCrm is not installed — see `deploy/DEPLOY.md` (Extension install order and Aurora themes policy).
+**Extractability RULE:** GoogleIntegration / WorkflowEngine must remain usable on vanilla Espo without Nonprofit entities. Do **not** commit Safehouse-only full layouts under GoogleIntegration; owner vertical module owns those layouts. Prefer suite ZIP on Safehouse prod; use standalone ZIPs when installing a single module elsewhere.
+
+**VolunteerActivityDispatch:** merged into **NonprofitEspocrm** (2026-08-04). Do **not** recreate a separate VAD extension.
 
 **GoogleIntegration frontend rule:** edit only
 `client/custom/modules/google-integration/`. Do not mirror runtime JS/templates
 into `custom/Espo/Modules/GoogleIntegration/client/modules/google-integration/`.
-If a change touches GoogleIntegration UI, update the canonical frontend tree and
-run `bin/build-google-integration.sh`; the build script is responsible for
-putting frontend files into the extension ZIP.
 
-Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`, `bin/smoke-kanban-assets.php`.
+Smokes: `bin/smoke-google-integration.php`, `bin/smoke-installer.php`, `bin/smoke-safehouse.php`, `bin/smoke-kanban-assets.php`, `bin/smoke-shift-planning.php`, `bin/smoke-workflow-engine.php`.
+
+Docs: [Modules](https://docs.espocrm.com/development/modules/), [Extensions](https://docs.espocrm.com/administration/extensions/).
 
 ### EXT-008 — Frontend verification checklist (per extension with UI)
 

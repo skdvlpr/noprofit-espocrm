@@ -2,12 +2,96 @@
     {
         "label": "Overview",
         "rows": [
-            [{"name": "name"}, {"name": "account"}],
-            [{"name": "stage"}, {"name": "amount"}],
-            [{"name": "fundraisingProgress", "fullWidth": true}],
-            [{"name": "presentationDate"}, {"name": "closeDate"}],
-            [{"name": "contacts"}, false],
-            [{"name": "description", "fullWidth": true}]
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "account"
+                }
+            ],
+            [
+                {
+                    "name": "stage"
+                },
+                {
+                    "name": "amount"
+                }
+            ],
+            [
+                {
+                    "name": "fundraisingProgress",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "presentationDate"
+                },
+                {
+                    "name": "closeDate"
+                }
+            ],
+            [
+                {
+                    "name": "contacts"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
+            ]
+        ]
+    },
+    {
+        "name": "GoogleCalendar",
+        "label": "Google Calendar",
+        "rows": [
+            [
+                {
+                    "name": "saveToGoogleCalendar"
+                },
+                {
+                    "name": "googleCalendarDateSourceList"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarShareUsers"
+                },
+                {
+                    "name": "googleCalendarShareTeams"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareRoutingMode"
+                },
+                {
+                    "name": "googleCalendarShareCalendarUserId"
+                }
+            ],
+            [
+                {
+                    "name": "googleCalendarShareCalendarId"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "googleCalendarEventSettings",
+                    "fullWidth": true
+                }
+            ]
         ]
     }
 ]

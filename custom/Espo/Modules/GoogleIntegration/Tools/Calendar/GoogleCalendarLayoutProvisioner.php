@@ -35,6 +35,13 @@ class GoogleCalendarLayoutProvisioner
 
     private function writeDetailLayout(string $entityType, string $layoutName): void
     {
+        $ownerPath = $this->ownerLayoutWritePath($entityType, $layoutName);
+
+        // Standalone GoogleIntegration (no vertical CRM module): keep a layout under GI.
+        if ($ownerPath === null) {
+            $ownerPath = $this->moduleLayoutPath(self::MODULE, $entityType, $layoutName);
+        }
+
         $merged = $this->mergeGooglePanel($this->readBaseLayout($entityType, $layoutName));
 
         if ($this->countGoogleCalendarPanels($merged) !== 1) {
@@ -45,29 +52,39 @@ class GoogleCalendarLayoutProvisioner
             );
         }
 
-        foreach ($this->layoutWritePaths($entityType, $layoutName) as $path) {
-            $this->writeLayoutFile($path, $merged);
-        }
+        $this->writeLayoutFile($ownerPath, $merged);
     }
 
     /**
-     * Espo FileReader serves custom/Espo/Custom/Resources/layouts before module overrides.
-     *
-     * @return array<int, string>
+     * Write GoogleCalendar panel into the vertical/owner module layout only.
+     * Never write full snapshots under GoogleIntegration; never write Custom.
      */
-    private function layoutWritePaths(string $entityType, string $layoutName): array
+    private function ownerLayoutWritePath(string $entityType, string $layoutName): ?string
     {
-        $paths = [$this->layoutPath($entityType, $layoutName)];
+        foreach ($this->preferredBaseLayoutModules($entityType) as $moduleName) {
+            if ($moduleName === self::MODULE || $moduleName === 'Custom') {
+                continue;
+            }
 
-        $customPath = $this->customResourcesLayoutPath($entityType, $layoutName);
+            $path = $this->moduleLayoutPath($moduleName, $entityType, $layoutName);
 
-        if ($customPath !== null) {
-            $paths[] = $customPath;
+            if (is_readable($path) || $moduleName === 'NonprofitEspocrm') {
+                return $path;
+            }
         }
 
-        return array_values(array_unique($paths));
+        $module = $this->metadata->get(['scopes', $entityType, 'module']);
+
+        if (is_string($module) && $module !== '' && $module !== self::MODULE && $module !== 'Custom') {
+            return $this->moduleLayoutPath($module, $entityType, $layoutName);
+        }
+
+        return null;
     }
 
+    /**
+     * @deprecated Unused — retained temporarily for readBaseLayout Custom reads only.
+     */
     private function customResourcesLayoutPath(string $entityType, string $layoutName): ?string
     {
         $path = 'custom/Espo/Custom/Resources/layouts/' . $entityType . '/' . $layoutName . '.json';
@@ -315,11 +332,6 @@ class GoogleCalendarLayoutProvisioner
                 Json::encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n"
             );
         }
-    }
-
-    private function layoutPath(string $entityType, string $layoutName): string
-    {
-        return $this->moduleLayoutPath(self::MODULE, $entityType, $layoutName);
     }
 
     private function moduleLayoutPath(string $module, string $entityType, string $layoutName): string

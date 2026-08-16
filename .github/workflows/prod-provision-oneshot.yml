@@ -58,22 +58,6 @@ jobs:
           echo "Installer OK\n";
           '
 
-          echo "== Knowledge Base guides upsert (it_IT) =="
-          php -r '
-          require "bootstrap.php";
-          use Espo\Core\Application;
-          use Espo\Core\InjectableFactory;
-          use Espo\Modules\NonprofitEspocrm\Tools\KnowledgeBaseGuidesSeeder;
-          $app = new Application();
-          $app->setupSystemUser();
-          $result = $app->getContainer()->getByClass(InjectableFactory::class)
-              ->create(KnowledgeBaseGuidesSeeder::class)->run();
-          echo "KB created=" . count($result["created"]) . " updated=" . count($result["updated"]) . "\n";
-          foreach (array_merge($result["created"], $result["updated"]) as $n) {
-              echo " - $n\n";
-          }
-          '
-
           echo "== BugTracker Installer (tab, ACL, templates) =="
           php -r '
           require "bootstrap.php";

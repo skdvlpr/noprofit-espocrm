@@ -14,10 +14,6 @@ final class SafehouseCalendarDateSourceDefaults
     public const CANONICAL_LABELS = [
         'Opportunity:presentationDate' => 'Presentation',
         'ActivityOfferSlot:main' => 'Shift',
-        'GCalSmokeAllDay:main' => 'All-day',
-        'GCalSmokeDateTime:main' => 'DateTime',
-        'GCalSmokeTwinDate:primaryDate' => 'Primary',
-        'GCalSmokeTwinDate:reviewDate' => 'Review',
     ];
 
     /** @return array<int, array<string, mixed>> */
