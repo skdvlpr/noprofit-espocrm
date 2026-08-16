@@ -5,15 +5,15 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\Notification;
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Config;
+use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushPreferenceChecker;
 use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushService;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Optional browser Web Push channel when Preferences.webPushEnabled is on.
- * Independent from in-app Notification (bell) and email preference toggles:
- * the in-app record is always created by Espo; this hook only fans out push.
+ * Optional browser Web Push when Preferences.webPushEnabled is on.
+ * Respects assignmentPushNotificationsIgnoreEntityTypeList (parity with in-app).
  */
 class AfterSaveWebPush implements AfterSave
 {
@@ -22,6 +22,7 @@ class AfterSaveWebPush implements AfterSave
     public function __construct(
         private EntityManager $entityManager,
         private WebPushService $webPushService,
+        private WebPushPreferenceChecker $preferenceChecker,
         private Config $config,
     ) {}
 
@@ -43,7 +44,16 @@ class AfterSaveWebPush implements AfterSave
 
         $prefs = $this->entityManager->getEntityById('Preferences', $userId);
 
-        if (!$prefs || !$prefs->get('webPushEnabled')) {
+        if (!$prefs) {
+            return;
+        }
+
+        $relatedType = (string) ($entity->get('relatedType') ?? '');
+        $data = $entity->get('data');
+        $fromData = is_object($data) ? (string) ($data->entityType ?? '') : '';
+        $entityType = $relatedType !== '' ? $relatedType : $fromData;
+
+        if (!$this->preferenceChecker->allowsEntity($prefs, $entityType !== '' ? $entityType : null)) {
             return;
         }
 
@@ -55,7 +65,6 @@ class AfterSaveWebPush implements AfterSave
         }
 
         $url = '#Notification';
-        $relatedType = (string) ($entity->get('relatedType') ?? '');
         $relatedId = (string) ($entity->get('relatedId') ?? '');
 
         if ($relatedType !== '' && $relatedId !== '') {

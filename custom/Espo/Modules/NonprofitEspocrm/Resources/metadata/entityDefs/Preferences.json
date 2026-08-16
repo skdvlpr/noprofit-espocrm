@@ -5,6 +5,13 @@
             "default": false,
             "tooltip": true,
             "view": "nonprofit-espocrm:views/preferences/fields/web-push-enabled"
+        },
+        "assignmentPushNotificationsIgnoreEntityTypeList": {
+            "type": "checklist",
+            "translation": "Global.scopeNamesPlural",
+            "view": "nonprofit-espocrm:views/preferences/fields/assignment-push-notifications-ignore-entity-type-list",
+            "default": [],
+            "tooltip": true
         }
     }
 }

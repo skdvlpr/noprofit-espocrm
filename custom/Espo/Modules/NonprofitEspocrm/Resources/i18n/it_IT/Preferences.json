@@ -1,7 +1,8 @@
 {
     "fields": {
         "notificationSound": "Suono notifica",
-        "webPushEnabled": "Notifiche push del browser"
+        "webPushEnabled": "Notifiche push del browser",
+        "assignmentPushNotificationsIgnoreEntityTypeList": "Push per tipo di record (come in-app)"
     },
     "labels": {
         "webPushStatusOn": "Attive su questo dispositivo",
@@ -15,7 +16,8 @@
     "tooltips": {
         "webPushEnabled": "Canale opzionale, separato dalle notifiche in-app (campanella) e dalle email. Lo attivi solo per il tuo utente. Abilitando registri questo browser per le push; le in-app restano indipendenti.",
         "webPushHelp": "Le push non sono le notifiche in-app. Usa «Verifica permessi» per controllare browser/sistema. Sul telefono: lascia il browser in background — non chiuderlo con lo swipe né con «Chiudi app»; così la consegna resta affidabile. La checklist compare solo se la verifica fallisce.",
-        "webPushSendTest": "Invia una vera push a questo dispositivo. Il ritardo opzionale serve per ridurre la finestra prima (0 = subito, max 300)."
+        "webPushSendTest": "Invia una vera push a questo dispositivo. Il ritardo opzionale serve per ridurre la finestra prima (0 = subito, max 300).",
+        "assignmentPushNotificationsIgnoreEntityTypeList": "Stessa lista entità delle notifiche in-app di assegnazione. I tipi spuntati possono ricevere push del browser quando nasce una notifica in-app per quel tipo. Serve prima attivare le push sopra."
     },
     "messages": {
         "webPushUnsupported": "Questo browser non supporta le Web Push.",

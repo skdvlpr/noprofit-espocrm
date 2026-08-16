@@ -11,6 +11,7 @@ use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\Modules\Crm\Entities\Meeting;
 use Espo\Modules\Crm\Entities\Reminder;
+use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushPreferenceChecker;
 use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushService;
 use Espo\ORM\EntityManager;
 use RuntimeException;
@@ -27,6 +28,7 @@ class PushReminder
         private Language $language,
         private Config $config,
         private WebPushService $webPushService,
+        private WebPushPreferenceChecker $preferenceChecker,
     ) {}
 
     public function send(Reminder $reminder): void
@@ -41,7 +43,7 @@ class PushReminder
 
         $prefs = $this->entityManager->getEntityById('Preferences', $userId);
 
-        if (!$prefs || !$prefs->get('webPushEnabled')) {
+        if (!$prefs || !$this->preferenceChecker->allowsEntity($prefs, $entityType)) {
             return;
         }
 

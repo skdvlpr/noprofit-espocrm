@@ -12,6 +12,7 @@ use Espo\Core\Utils\Log;
 use Espo\Entities\Email;
 use Espo\Entities\Notification;
 use Espo\Entities\User;
+use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushPreferenceChecker;
 use Espo\Modules\NonprofitEspocrm\Tools\WebPush\WebPushService;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
@@ -33,6 +34,7 @@ class AfterSaveNotifyAssignees implements AfterSave
         private EmailSender $emailSender,
         private Config $config,
         private WebPushService $webPushService,
+        private WebPushPreferenceChecker $preferenceChecker,
         private Log $log,
     ) {}
 
@@ -100,12 +102,16 @@ class AfterSaveNotifyAssignees implements AfterSave
         }
 
         if (in_array('Push', $channels, true)) {
-            $this->webPushService->sendToUser($assigneeId, [
-                'title' => 'Safehouse CRM',
-                'body' => strip_tags($message),
-                'url' => '#Task/view/' . $entity->getId(),
-                'tag' => 'task-assign-' . $entity->getId(),
-            ]);
+            $prefs = $this->entityManager->getEntityById('Preferences', $assigneeId);
+
+            if ($prefs && $this->preferenceChecker->allowsEntity($prefs, 'Task')) {
+                $this->webPushService->sendToUser($assigneeId, [
+                    'title' => 'Safehouse CRM',
+                    'body' => strip_tags($message),
+                    'url' => '#Task/view/' . $entity->getId(),
+                    'tag' => 'task-assign-' . $entity->getId(),
+                ]);
+            }
         }
 
         if (in_array('Email', $channels, true)) {

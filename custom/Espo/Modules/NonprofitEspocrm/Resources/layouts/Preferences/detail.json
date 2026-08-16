@@ -138,6 +138,10 @@
                 false
             ],
             [
+                {"name": "assignmentPushNotificationsIgnoreEntityTypeList"},
+                false
+            ],
+            [
                 {"name": "receiveAssignmentEmailNotifications"},
                 {"name": "receiveMentionEmailNotifications"}
             ],
