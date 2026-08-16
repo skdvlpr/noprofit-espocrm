@@ -401,7 +401,8 @@ class ShiftPlanningInstaller
     }
 
     /**
-     * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.
+     * Remap retired ActivityOfferSlot.Draft leftovers to Published.
+     * Cancelled is a live status (annul shift / cancelAll) and must never be rewritten.
      * Plan-level ActivityOffer.Draft is unchanged.
      */
     public function migrateSlotStatusesPublishedCovered(Container $container): void
@@ -410,13 +411,13 @@ class ShiftPlanningInstaller
             /** @var \Espo\ORM\EntityManager $em */
             $em = $container->getByClass(\Espo\ORM\EntityManager::class);
 
-            // Raw SQL: after Draft is removed from entityDefs enum options, ORM
-            // where/find may miss or refuse legacy values still stored in DB.
+            // Raw SQL: Draft was removed from entityDefs enum options; ORM
+            // where/find may miss leftover Draft values still stored in DB.
             $pdo = $em->getPDO();
             $pdo->exec(
                 "UPDATE activity_offer_slot"
                 . " SET status = 'Published'"
-                . " WHERE status IN ('Draft', 'Cancelled')"
+                . " WHERE status = 'Draft'"
             );
         } catch (\Throwable $e) {
             $container->getByClass(\Espo\Core\Utils\Log::class)->warning(

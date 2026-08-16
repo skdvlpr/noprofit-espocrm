@@ -1061,7 +1061,31 @@ $pastSlot = $em->getEntityById('ActivityOfferSlot', $pastSlot->getId());
 ok($completedCount >= 1, 'completePastSlots updates at least one past slot');
 ok($pastSlot && $pastSlot->get('status') === 'Completed', 'past slot → Completed');
 
-foreach ([$dowSlot->getId(), $pastSlot ? $pastSlot->getId() : null] as $sid) {
+$cancelledSlot = $em->getNewEntity('ActivityOfferSlot');
+$cancelledSlot->set([
+    'activityOfferId' => $dowOffer->getId(),
+    'category' => 'Cleaning',
+    'dayOfWeek' => 'Tuesday',
+    'dateStart' => '2026-08-04 10:00:00',
+    'dateEnd' => '2026-08-04 12:00:00',
+    'requiredCount' => 1,
+    'name' => 'Annulled slot must stay Cancelled',
+    'status' => 'Cancelled',
+]);
+$em->saveEntity($cancelledSlot, [
+    'skipAll' => true,
+    'silent' => true,
+    \Espo\Modules\NonprofitEspocrm\Tools\StatusGuard::SKIP_OPTION => true,
+]);
+(new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())
+    ->migrateSlotStatusesPublishedCovered($container);
+$cancelledSlot = $em->getEntityById('ActivityOfferSlot', $cancelledSlot->getId());
+ok(
+    $cancelledSlot && $cancelledSlot->get('status') === 'Cancelled',
+    'Installer slot migration does not revive Cancelled shifts'
+);
+
+foreach ([$dowSlot->getId(), $pastSlot ? $pastSlot->getId() : null, $cancelledSlot ? $cancelledSlot->getId() : null] as $sid) {
     if (!$sid) continue;
     $s = $em->getEntityById('ActivityOfferSlot', $sid);
     if ($s) {
@@ -1108,13 +1132,16 @@ ok(
         && str_contains($detailJsSrc, 'liveRefreshIntervalMs'),
     'detail.js polls for live banner/coverage refresh'
 );
+$installerSrc = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php'
+);
 ok(
-    str_contains(
-        (string) file_get_contents(
-            __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php'
-        ),
-        'hanno indicato la propria disponibilità'
-    ),
+    str_contains($installerSrc, "WHERE status = 'Draft'")
+        && !str_contains($installerSrc, "WHERE status IN ('Draft', 'Cancelled')"),
+    'slot status migration remaps legacy Draft only (never live Cancelled)'
+);
+ok(
+    str_contains($installerSrc, 'hanno indicato la propria disponibilità'),
     'weekFullyStaffed email uses indicato (not salvato)'
 );
 ok(
