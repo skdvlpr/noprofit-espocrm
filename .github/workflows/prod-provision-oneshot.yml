@@ -98,7 +98,7 @@ jobs:
                      bin/cleanup-*.php bin/provision-*.php bin/setup-*.php \
                      bin/import-*.php bin/export-*.php bin/qa-*.php bin/print-*.php \
                      bin/reorder-*.php bin/rollback-*.php bin/set-prima-nota-*.php \
-                     bin/_tmp-*.php bin/lib/GcalTestFixtures.php bin/lib/mailpit-smtp-for-smoke.php; do
+                     bin/_tmp-*.php bin/lib/mailpit-smtp-for-smoke.php; do
               [[ -e "$f" ]] || continue
               base=$(basename "$f")
               echo "Quarantine $f"

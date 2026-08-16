@@ -11,17 +11,14 @@ use Espo\Core\ORM\EntityManager;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Entities\EmailTemplate;
-use Espo\Entities\Role;
 
 /**
- * Post-install: tab, role ACL, default config + email templates, rebuild.
+ * Post-install: tab, default config + email templates, rebuild.
+ * Does not create or mutate Roles — ACL is Administration → Roles only.
  */
 class Installer
 {
     private const ENTITY = 'BugReport';
-
-    /** Roles that manage all bug reports. */
-    private const MANAGER_ROLE_NAMES = ['Admin', 'Manager', 'Desk'];
 
     private const TEMPLATE_NEW_NAME = 'BugTracker — New report';
     private const TEMPLATE_CLOSED_NAME = 'BugTracker — Closed confirmation';
@@ -36,7 +33,6 @@ class Installer
         $em = $container->getByClass(EntityManager::class);
 
         $this->ensureTab($config, $injectableFactory);
-        $this->provisionRoleAcl($em);
         $this->ensureDefaultConfigAndTemplates($config, $injectableFactory, $em);
 
         $container->getByClass(DataManager::class)->rebuild();
@@ -85,57 +81,6 @@ class Installer
         }
 
         return false;
-    }
-
-    private function provisionRoleAcl(EntityManager $em): void
-    {
-        $roles = $em->getRDBRepositoryByClass(Role::class)->find();
-
-        foreach ($roles as $role) {
-            /** @var Role $role */
-            $name = (string) $role->get('name');
-            $data = $role->get('data');
-
-            if (!is_object($data) && !is_array($data)) {
-                $data = (object) [];
-            }
-
-            if (is_array($data)) {
-                $data = (object) $data;
-            }
-
-            $acl = $this->aclForRoleName($name);
-            $data->{self::ENTITY} = (object) $acl;
-            $role->set('data', $data);
-            $em->saveEntity($role, [
-                'skipAll' => true,
-                'silent' => true,
-            ]);
-        }
-    }
-
-    /**
-     * @return array{create: string, read: string, edit: string, delete: string, stream: string}
-     */
-    private function aclForRoleName(string $name): array
-    {
-        if (in_array($name, self::MANAGER_ROLE_NAMES, true)) {
-            return [
-                'create' => 'yes',
-                'read' => 'all',
-                'edit' => 'all',
-                'delete' => 'all',
-                'stream' => 'all',
-            ];
-        }
-
-        return [
-            'create' => 'yes',
-            'read' => 'all',
-            'edit' => 'own',
-            'delete' => 'no',
-            'stream' => 'all',
-        ];
     }
 
     private function ensureDefaultConfigAndTemplates(

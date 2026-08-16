@@ -98,12 +98,10 @@ foreach (['Fill availability', 'Request availability', 'Auto assign', 'Confirm p
     ok(isset($itLabels['labels'][$label]), "it_IT label present: $label");
 }
 
-// --- role access (bug #2: volunteer access to plans) --------------------------
-
-(new \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller())->ensureRoleAccess($container);
+// --- role access (read-only check; Roles are not auto-provisioned) ------------
 
 $volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
-ok($volunteerRole !== null, 'canonical Volunteer role exists');
+ok($volunteerRole !== null, 'canonical Volunteer role exists (configure in Admin → Roles if missing)');
 
 if ($volunteerRole) {
     $roleData = json_decode(json_encode($volunteerRole->get('data')), true) ?: [];

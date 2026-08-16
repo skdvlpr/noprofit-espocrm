@@ -11,6 +11,7 @@ Allowed on the server (examples):
 Forbidden to leave runnable on production:
 - smoke-*.php, seed-*.php, migrate-*.php, setup-*.php, provision-*.php
 - test-*.php, cleanup-*.php, import-*.php, export-*.php, qa-*.php
+- Any role/ACL rewrite or data-migration oneshot (if briefly present, must self-delete via ephemeral-oneshot)
 
 Deploy rsync excludes those globs (see deploy/rsync-excludes.txt).
 If you find leftovers under /var/www/safehouse-crm/bin/, quarantine or delete them.
@@ -18,5 +19,5 @@ If you find leftovers under /var/www/safehouse-crm/bin/, quarantine or delete th
 Production changes:
 1. Prefer code deploy + php command.php rebuild.
 2. One-shots only with explicit human approval for the exact command;
-   prefer self-deleting ephemeral scripts.
-3. Never mass-overwrite Role ACL / create test users on production.
+   MUST use bin/lib/ephemeral-oneshot.php and self-delete on success (no keep flag).
+3. Never mass-overwrite Role ACL / create test users on production via long-lived CLIs.

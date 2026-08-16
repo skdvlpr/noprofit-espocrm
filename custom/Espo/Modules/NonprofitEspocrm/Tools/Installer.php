@@ -8,6 +8,7 @@ use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Modules\NonprofitEspocrm\Tools\Calendar\SafehouseGoogleCalendarProvisioner;
+use Espo\Modules\NonprofitEspocrm\Tools\SafehouseDefaults;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller;
 
 /**
@@ -23,8 +24,8 @@ use Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningInstaller;
  * `$CRM` / Principali block immediately before `$Rendicontazione`, enforce the
  * native navbar group tab (`type: group` dropdown — works in horizontal and
  * vertical navbars), surface Safehouse custom tabs, apply the Safehouse Aurora
- * default theme on fresh/stock-theme installs, provision the canonical roles +
- * Administration team, and rebuild metadata.
+ * default theme on fresh/stock-theme installs, and rebuild metadata.
+ * Roles / teams are never auto-provisioned — use Administration → Roles.
  *
  * The class is intentionally Container-based (rather than constructor DI) so
  * it can be invoked from `scripts/AfterInstall.php`, which receives a bare
@@ -185,12 +186,8 @@ class Installer
         $configWriter->set('quickCreateList', $quickCreateList);
         $configWriter->save();
 
-        $roleSetup = $injectableFactory->create(RoleSetup::class);
-        $roleSetup->provisionRoles();
-        $roleSetup->provisionTeams();
-        $roleSetup->ensureWebsiteApiRoleAssignments();
-
-        $configWriter->set('safehouseStripeSyncUserNames', RoleSetup::STRIPE_SYNC_USER_NAMES);
+        // Roles / teams: never auto-provision. Admins manage via Administration → Roles.
+        $configWriter->set('safehouseStripeSyncUserNames', SafehouseDefaults::STRIPE_SYNC_USER_NAMES);
         $configWriter->save();
 
         $injectableFactory->create(SafehouseGoogleCalendarProvisioner::class)->run($container);
@@ -466,7 +463,7 @@ class Installer
 
     /**
      * Seed Saldo di cassa opening balance keys once (CRM-S16). Admins may
-     * override via bin/set-prima-nota-opening-cash.php.
+     * override via Administration → Settings / config (`primaNotaOpeningCashBalance`).
      */
     private function provisionPrimaNotaOpeningCashDefaults(Config $config, ConfigWriter $configWriter): void
     {

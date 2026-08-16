@@ -54,9 +54,6 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
 
 echo "Run Safehouse installer (Lead in tabList)\n";
 (new Installer())->runPostInstall($container);
-$roleSetup = $container->getByClass(\Espo\Core\InjectableFactory::class)
-    ->create(\Espo\Modules\NonprofitEspocrm\Tools\RoleSetup::class);
-$roleSetup->provisionRoles();
 $config->update();
 
 $tabStrings = array_filter($config->get('tabList', []) ?? [], 'is_string');

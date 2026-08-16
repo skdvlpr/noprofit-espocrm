@@ -15,9 +15,9 @@ require __DIR__ . '/lib/refuse-production.php';
  * 2) Volunteer API user (`smoke_api_volunteer`): read=all for Contact/reporting;
  *    field ACL hides Contact.emailAddress; Task.edit=own; MealCount.edit=no.
  *
- * Provisions idempotent API users with `X-Api-Key` auth (Workflow E). Ensures the
- * Volunteer user has a linked `Contact` (contactType=Volunteer) profile (same
- * pattern as `RoleSetup::provisionTestProfiles()`).
+ * Provisions idempotent API users with X-Api-Key auth (Workflow E). Ensures the
+ * Volunteer user has a linked Contact (contactType=Volunteer) profile.
+ * Does not create Roles — Admin/Volunteer must already exist in Administration → Roles.
  *
  * Usage:
  *   ddev exec php bin/smoke-espo-rest-catalog.php

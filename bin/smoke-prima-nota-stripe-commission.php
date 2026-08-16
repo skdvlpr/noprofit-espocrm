@@ -7,12 +7,11 @@ require __DIR__ . '/lib/refuse-production.php';
 
 
 /**
- * Smoke: PrimaNota commission triangle + Stripe sourced-field lock + legacy migration helper.
+ * Smoke: PrimaNota commission triangle + Stripe sourced-field lock.
  *
  * Usage: ddev exec php bin/smoke-prima-nota-stripe-commission.php
  *
  * Does NOT delete QA-STRIPE-MOCK* manual-test rows.
- * Does NOT run the legacy migration (call bin/migrate-prima-nota-legacy-gross.php separately).
  */
 
 include __DIR__ . '/../bootstrap.php';

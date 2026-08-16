@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-
 require __DIR__ . '/lib/refuse-production.php';
 
-
 /**
- * Provision a full-access Admin role + smoke_api_catalog API user on fresh Espo
- * installs that have no Safehouse roles yet (vanilla 9.3.8 clean instances).
+ * Attach smoke_api_catalog API user to an existing Admin role.
+ * Does NOT create or rewrite Roles — create Admin via Administration → Roles first.
  *
  * Usage:
  *   ddev exec php bin/provision-smoke-api-user.php
@@ -18,7 +16,6 @@ include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
-use Espo\Core\Utils\Metadata;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
 use Espo\ORM\EntityManager;
@@ -31,62 +28,14 @@ $app->setupSystemUser();
 $container = $app->getContainer();
 /** @var EntityManager $em */
 $em = $container->getByClass(EntityManager::class);
-/** @var Metadata $metadata */
-$metadata = $container->getByClass(Metadata::class);
-$metadata->init(true);
-
-$full = static fn (): array => [
-    'create' => 'yes',
-    'read' => 'all',
-    'edit' => 'all',
-    'delete' => 'all',
-    'stream' => 'all',
-];
-
-$roleData = [];
-foreach ($metadata->get('scopes', []) as $entityType => $scope) {
-    if (!is_string($entityType) || $entityType === '') {
-        continue;
-    }
-
-    if (!is_array($scope) || !($scope['entity'] ?? false)) {
-        continue;
-    }
-
-    if (($scope['acl'] ?? true) === false) {
-        continue;
-    }
-
-    $roleData[$entityType] = $full();
-}
 
 $role = $em->getRDBRepository('Role')
     ->where(['name' => SMOKE_ROLE_ADMIN, 'deleted' => false])
     ->findOne();
 
 if ($role === null) {
-    $role = $em->createEntity('Role', [
-        'name' => SMOKE_ROLE_ADMIN,
-        'assignmentPermission' => 'all',
-        'userPermission' => 'all',
-        'messagePermission' => 'all',
-        'portalPermission' => 'yes',
-        'exportPermission' => 'yes',
-        'massUpdatePermission' => 'yes',
-        'data' => (object) $roleData,
-    ]);
-    $em->saveEntity($role);
-    echo "Created role " . SMOKE_ROLE_ADMIN . "\n";
-} else {
-    $role->set('data', (object) $roleData);
-    $role->set('assignmentPermission', 'all');
-    $role->set('userPermission', 'all');
-    $role->set('messagePermission', 'all');
-    $role->set('portalPermission', 'yes');
-    $role->set('exportPermission', 'yes');
-    $role->set('massUpdatePermission', 'yes');
-    $em->saveEntity($role);
-    echo "Updated role " . SMOKE_ROLE_ADMIN . "\n";
+    fwrite(STDERR, "FAIL: Role '" . SMOKE_ROLE_ADMIN . "' not found. Create it in Administration → Roles first.\n");
+    exit(1);
 }
 
 $roleId = $role->getId();

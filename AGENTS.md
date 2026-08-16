@@ -1,17 +1,32 @@
 # SafehouseCrm Module Rulebook
 
 **EspoCRM Version:** 10.x (DDEV/prod; historically documented as 9.3.6) | **Module:** custom/Espo/Modules/NonprofitEspocrm/
-**Executor:** Antigravity AI / Cursor agents | **Last updated:** 2026-07-31
+**Executor:** Antigravity AI / Cursor agents | **Last updated:** 2026-08-16
 **Language:** specs/paths/code = English | User communication = Russian
+**Canonical docs:** [EspoCRM Documentation](https://docs.espocrm.com/) (Admin + Developer). Prefer current docs over stale empirical notes when they conflict — then **patch this file**.
+
+## LIVING RULEBOOK (DOC DRIFT — MANDATORY)
+
+This file is a **project-specific** rulebook, not a mirror of Espo docs. Agents MUST continuously improve it:
+
+1. **Do not copy docs blindly.** When a task touches metadata, ACL, layouts, formula, modules, or Entity Manager behaviour: open the relevant page on [docs.espocrm.com](https://docs.espocrm.com/) **and** compare with the matching SECTION here.
+2. **Reconcile, then edit.** If docs and this file disagree: verify against lab/runtime (`espocrm-ai-lab` or local DDEV), then update the SECTION (version note, correct path/key, link to docs). Keep Safehouse conventions that are intentional (English enum keys, layout path, Installer tabList, refuse-production) even when docs show a generic UI path.
+3. **Append evidence.** When you correct a rule, bump **Last updated**, cite the docs URL in one line, and note Espo version if the behaviour is version-gated (e.g. “as of v10.0”).
+4. **Scope of edits:** Prefer surgical SECTION patches. Do not rewrite the whole file in one turn unless the user asked for a full rewrite.
+5. **Known doc anchors (start here, not exhaustive):**
+   - Admin Entity Manager / fields / layouts: [Entity Manager](https://docs.espocrm.com/administration/entity-manager/) — *after creating a field, put it on layouts + Search Filters*
+   - Roles + Field Level Security: [Roles](https://docs.espocrm.com/administration/roles-management/)
+   - Dev ACL / field restrictions: [ACL](https://docs.espocrm.com/development/acl/), [aclDefs](https://docs.espocrm.com/development/metadata/acl-defs/), [entityAcl](https://docs.espocrm.com/development/metadata/entity-acl/), [app/acl](https://docs.espocrm.com/development/metadata/app-acl/)
+   - Modules / extensions: [Modules](https://docs.espocrm.com/development/modules/), [Extensions](https://docs.espocrm.com/administration/extensions/)
 
 ## MANDATORY PRE-TASK PROTOCOL
 
 Before implementing ANY task, executor MUST:
 
-1. Re-read this file in full.
+1. Re-read this file in full (at least the SECTIONs relevant to the task + Living Rulebook).
 2. Fetch current Notion project page and task page.
 3. Read referenced files from the repository (never assume content).
-4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change.
+4. Run: **Admin → Repair → Rebuild → Clear Cache** after EVERY metadata change (or `bin/dev-rebuild.sh` / `php command.php rebuild` so `appTimestamp` bumps for frontend).
 5. Never overwrite executor logs in Notion. Append only.
 6. **Notion logging (when Notion MCP is available):** Fetch project + task pages; append executor log and deploy notes (never overwrite). Update task status in Notion. **Do this proactively for every implementation/planning milestone without waiting for a separate user request.** Logs MUST be **handoff-ready**: include current state, files changed, verification performed, blockers, and exact next steps so another agent can continue after context compaction or token exhaustion. **Do not** create local markdown files as a Notion substitute. Mark tasks **Done** only when acceptance criteria are met. **NEVER** ask the user to paste executor logs manually into Notion. If Notion write tools are unavailable: (1) call `mcp_auth` for `plugin-notion-workspace-notion`; (2) verify MCP tools folder lists `notion-fetch` / `notion-update-page` (not only `mcp_auth`); (3) retry the write; (4) if tools are still missing after auth, tell the user to reconnect Notion MCP or restart the chat — do **not** offer a copy-paste log workaround.
 7. **Git / remote:** Do **not** run `git push` to the remote (and do **not** create a PR) unless the **user explicitly asked** to push or publish. Prefer local commits only when the user asked to save work; if they gave no git instruction, **ask** before `git commit` as well.
@@ -364,7 +379,9 @@ The older `search.json` envelope (`{"filterList": [...], "boolFilterList": [...]
 
 ### LAY-006 — After layout changes
 
-Always run: **Admin → Repair → Rebuild → Clear Cache** Browser hard-refresh (Ctrl+Shift+R) required to see frontend changes.
+Always run: **Admin → Repair → Rebuild → Clear Cache** (or `bin/dev-rebuild.sh` so `appTimestamp` bumps). Browser hard-refresh (Ctrl+Shift+R) if the frontend still looks stale.
+
+**LAY-011 — Official Entity Manager reminder:** Creating a field in Entity Manager / `entityDefs` does **not** place it on forms. Docs: [Entity Manager → Fields](https://docs.espocrm.com/administration/entity-manager/) — also add to Detail (and Search Filters). Module apply/AI drafts must update layouts (and ideally Role field ACL) in the same change set.
 
 ### LAY-008 — Field coverage across views (mandatory)
 
@@ -493,27 +510,55 @@ Reference these files when in doubt — they are confirmed to work in 9.3.6:
 
 ## SECTION 7 — ACL RULES (ACL-\*)
 
-### ACL-001 — ACL file
+Sources of truth (compare before inventing new patterns): [Roles](https://docs.espocrm.com/administration/roles-management/), [aclDefs](https://docs.espocrm.com/development/metadata/acl-defs/), [entityAcl](https://docs.espocrm.com/development/metadata/entity-acl/), [app/acl](https://docs.espocrm.com/development/metadata/app-acl/), [ACL API](https://docs.espocrm.com/development/acl/).
 
-File: `Resources/metadata/aclDefs/{EntityName}.json`
+### ACL-001 — Scope ACL (`aclDefs` + Roles)
+
+File: `Resources/metadata/aclDefs/{EntityName}.json` — defines **how** access is checked for a scope (checker classes, ownership field, etc.). Role grants (`data` / `fieldData`) are set only in **Administration → Roles** — no custom auto-provision.
+
+Typical module snippet (action/level lists often live on `scopes` as `aclActionList` / `aclLevelList` — keep both consistent with [scopes](https://docs.espocrm.com/development/metadata/scopes/)):
 
 ```
 {
-  "actionList": ["read", "create", "edit", "delete", "stream"],
-  "levelList": ["all", "team", "own", "no"],
-  "read": "team",
-  "create": "yes",
-  "edit": "own",
-  "delete": "own",
-  "stream": "team"
+  "accessCheckerClassName": "Espo\\Core\\Acl\\DefaultAccessChecker",
+  "ownershipCheckerClassName": "Espo\\Core\\Acl\\DefaultOwnershipChecker"
 }
 ```
 
-**RULE**: ACL must be defined BEFORE the entity is tested. Default for new entities without `aclDefs`: admin-only access.
+Older Safehouse files may still list `actionList` / `levelList` / default levels inside `aclDefs`. Prefer aligning new entities with current Espo metadata + Roles UI rather than inventing a third shape.
 
-### ACL-002 — Field-level ACL
+**RULE**: Scope must be ACL-ready BEFORE non-admin testing. Without Role rows for the scope, users get minimal access (near-everything denied). Admin UI: Administration → Roles.
 
-Sensitive fields (salary, medical) must be restricted at `aclDefs` level. **PROHIBITED**: Using `dynamicLogic` to hide sensitive fields — it is client-side only.
+**New entity checklist:** (1) `scopes` with `"acl": true`, (2) `aclDefs` if custom checkers needed, (3) **Administration → Roles** — grant create/read/edit/delete/stream for Admin / Manager / … as product requires (do **not** add RoleSetup / rebuild ACL provisioners).
+
+### ACL-002 — Field-level security (NOT `aclDefs`)
+
+Espo separates **scope** ACL from **field** ACL. Do **not** put field read/edit yes|no inside `aclDefs`.
+
+| Mechanism | Path / UI | Use for |
+| --------- | --------- | ------- |
+| **Role Field Level** | Admin → Roles → Field Level; stored on Role as `fieldData` | Per-role allow/deny read/edit for a field ([Roles docs](https://docs.espocrm.com/administration/roles-management/#field-level-security)). Default: if user can read/edit the **record**, they can read/edit **all fields** until restricted. |
+| **entityAcl** | `Resources/metadata/entityAcl/{Entity}.json` | Hard metadata locks: `forbidden`, `internal`, `onlyAdmin`, `readOnly`, `nonAdminReadOnly` ([entityAcl](https://docs.espocrm.com/development/metadata/entity-acl/)). |
+| **app/acl mandatory** | `metadata > app > acl` (`scopeFieldLevel` / `fieldLevel`) | Forced levels that Roles cannot loosen ([app/acl](https://docs.espocrm.com/development/metadata/app-acl/)). |
+
+**Safehouse convention:** sensitive person fields are locked via Role `fieldData` (Admin → Roles → Field Level) and/or `entityAcl`. When adding a **new field or entity**:
+
+1. Decide who may read/edit it (Admin only? Manager? Volunteer?).
+2. Update **Roles in the UI** (or an explicit user-approved oneshot) so `fieldData` / scope `data` includes the new keys — do **not** auto-provision Roles from Installer/rebuild/smokes.
+3. For hard product locks (non-admin never edits), prefer `entityAcl` **in addition to** Roles.
+4. **PROHIBITED**: Using `dynamicLogic` / CSS to hide sensitive fields as security — client-side only.
+
+**AI / metadata drafts:** applying `entityDefs` alone is incomplete. Checklist must include layouts + i18n + **entityAcl**; Role `fieldData` stays manual in Roles UI.
+
+### ACL-003 — Verify with a non-admin identity
+
+After ACL or Roles UI changes, smoke with a constrained API/UI user (Volunteer / Member role), not only Admin:
+
+- Scope denied → list/detail **403** / no tab.
+- Field `read: no` → attribute absent or forbidden in API (`getScopeForbiddenFieldList` / REST omit).
+- Field `edit: no` → PUT rejected or field ignored per Espo rules.
+
+See SECTION 15 REST probes (`smoke-espo-rest-catalog.php`).
 
 ## SECTION 8 — DYNAMIC LOGIC RULES (DYN-\*)
 
@@ -664,12 +709,11 @@ for post-install provisioning:
 2. Remove `Lead` and `Case` from both `tabList` and `quickCreateList`.
 3. Reorder domain entities into the top `$CRM` navbar section after
    `Contact`.
-4. Provision canonical roles (`Admin`, `Employee`, `Manager`, `Volunteer`,
-   `Member`) and the `Administration` team via `Tools\RoleSetup`.
-5. Rebuild metadata so changes are picked up immediately.
+4. Rebuild metadata so changes are picked up immediately.
 
-Regression smoke: `ddev exec php bin/smoke-installer.php` — asserts all
-five items above and that re-running is idempotent.
+**PROHIBITED:** auto-creating or rewriting Roles / Teams from Installer, rebuild actions, or smokes. Admins manage ACL only via Administration → Roles.
+
+Regression smoke: `ddev exec php bin/smoke-installer.php` — asserts tab/nav items above and that re-running is idempotent.
 
 ### PKG-003 — Prohibited in packaging
 
@@ -1063,7 +1107,7 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 
 ## SECTION 14 — DEVELOPMENT WORKFLOW
 
-### SCRIPT / CLI SAFETY (MANDATORY — updated 2026-07-26)
+### SCRIPT / CLI SAFETY (MANDATORY — updated 2026-08-16)
 
 **Incident context:** a long-lived `bin/setup-roles.php` was run on production, rewrote live ACL, and created test users. That class of script must never exist again as a reusable prod tool.
 
@@ -1072,14 +1116,14 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 1. **Production is not a playground.** Do **not** SSH-run maintenance/smoke/seed/migrate/setup/provision scripts on `crm.safehouse.community` / `/var/www/safehouse-crm` without the user’s **explicit** written approval for that exact command.
 2. **Tests and smokes run ONLY on local DDEV** (`ddev exec php bin/smoke-…`). Never on production.
 3. **Every `bin/*.php` script MUST** `require` `bin/lib/refuse-production.php` (after `declare(strict_types=1);` if present). That helper **hard-exits** when `siteUrl` is `*.safehouse.community` or the tree is under `/var/www/safehouse-crm`. **No bypass flag.**
-4. **No long-lived migration / role-reset / seed / provision CLIs** in `bin/`. If a one-off change needs a script:
-   - Write a **new ephemeral** file under `bin/` (or `/tmp` on the server only with approval).
-   - Include `refuse-production.php` **unless** the user explicitly approved a production oneshot.
-   - For disposable oneshots: also `require bin/lib/ephemeral-oneshot.php` and call `safehouse_ephemeral_oneshot_register(__FILE__);` then exit via `safehouse_ephemeral_oneshot_exit(0)` so the file **self-deletes on success**.
-   - Do **not** leave the script in the repo after it has been applied (delete in the same PR/commit that lands the result, or let self-delete remove it).
+4. **No long-lived migration / role / import-export / seed CLIs** in `bin/` or `Tools/Migration/`. Deleted on purpose: `export/import-*-config`, `export/import-integration-settings`, applied `migrate-*`, RoleSetup. If the user later **explicitly** asks for a one-off (roles, data migration, seed, ACL rewrite):
+   - Write a **new ephemeral** file under `bin/` (name like `bin/_tmp-oneshot-….php`) or `/tmp` on the server only with approval.
+   - `require` `refuse-production.php` **unless** the user explicitly approved that exact production command.
+   - **Always** `require bin/lib/ephemeral-oneshot.php`, call `safehouse_ephemeral_oneshot_register(__FILE__);`, finish with `safehouse_ephemeral_oneshot_exit(0)` so the file **self-deletes on success**.
+   - **No keep/bypass flag.** Do not leave the script in the repo after a successful run. Do not recreate long-lived `migrate-*` / `setup-roles` / import-export helpers.
 5. **Production `bin/`** must stay empty of runnable maintenance PHP (see server `bin/README.PRODUCTION.txt`). Quarantine leftovers; do not restore them “just in case”.
 6. **Deploy:** never rsync/copy `bin/smoke-*`, `bin/seed-*`, `bin/migrate-*`, `bin/setup-*`, `bin/provision-*`, `bin/test-*`, `bin/cleanup-*`, `bin/import-*`, `bin/export-*` onto production. Prefer excluding `bin/**` from prod deploys except packaging artifacts if required by build.
-7. **`RoleSetup`:** may **create** missing roles on fresh install; must **not** overwrite existing roles unless `SAFEHOUSE_ALLOW_ROLE_OVERWRITE=1` (local/dev only). Test users require `SAFEHOUSE_ALLOW_TEST_USERS=1`. There is **no** `bin/setup-roles.php`.
+7. **Roles:** never auto-create / overwrite / prune Roles from custom Installer, rebuild, BugTracker, ShiftPlanning, EspoAI apply, or long-lived `bin/*`. Administration → Roles only. If the user explicitly requests a one-off Role script → rule 4 (ephemeral + self-delete). There is **no** `bin/setup-roles.php` and **no** `Tools\RoleSetup`.
 
 #### Allowed long-lived `bin/` tools (local / CI only)
 
@@ -1092,7 +1136,7 @@ Before shipping any `"notStorable": true` field visible in list view: Verify it 
 
 #### Forbidden to keep as reusable CLIs
 
-`setup-roles`, `setup-production-access`, `provision-production`, `seed-qa-*`, one-shot `migrate-*` after applied, `cleanup-test-api-users`, any script that rewrites ACL/users on an existing instance.
+`setup-roles`, `setup-production-access`, `provision-production`, `seed-*`, `migrate-*`, `import-*` / `export-*` config transfer scripts, `Tools/Migration/*`, `cleanup-test-api-users`, any script that rewrites ACL/users on an existing instance — except a **single-run ephemeral** oneshot that self-deletes (rule 4).
 
 ### After EVERY metadata change:
 
@@ -1120,13 +1164,13 @@ mass-reset roles via a CLI on production.
 - [ ] `layouts/{EntityName}/search.json`
 - [ ] `i18n/en_US/{EntityName}.json` with all field labels
 - [ ] `i18n/it_IT/{EntityName}.json` with all field labels
-- [ ] `aclDefs/{EntityName}.json`
+- [ ] `aclDefs/{EntityName}.json` (if needed) + **Administration → Roles** `data` / `fieldData` for every new field/scope (ACL-002)
 - [ ] `formula/{EntityName}.json` (if computed fields exist)
 - [ ] `clientDefs/{EntityName}.json` (if dynamicLogic needed)
 - [ ] Rebuild + Clear Cache
 - [ ] Verify "Create" button appears and works
 - [ ] Verify layout renders correctly
-- [ ] Run security test matrix
+- [ ] Run security test matrix **as non-admin** (Volunteer/Member), not only Admin
 
 ## SECTION 15 — REST API REGRESSION (explore-espo-endpoints skill)
 
@@ -1223,7 +1267,7 @@ All of the following are **local DDEV / CI only**. They include `refuse-producti
 | `bin/smoke-google-integration.php` | **HTTP REST** + `GoogleIntegration` module metadata / DB row |
 | `bin/smoke-safehouse.php` | ORM + formulas + scheduled jobs |
 | `bin/smoke-contact-sync.php` | ORM + `PersonContactSync` invariants |
-| `bin/smoke-installer.php` | Post-install / `tabList` / roles |
+| `bin/smoke-installer.php` | Post-install / `tabList` (roles not auto-provisioned) |
 | `bin/smoke-lead-restore.php` | Epic 7 — Lead tab + i18n + REST CRUD |
 | `bin/smoke-lead-convert.php` | Epic 7 — Lead convert flows + Volunteer ACL |
 | `bin/smoke-rendicontazione.php` | Epic 7 — reporting aggregates + export totals layer |
@@ -1231,8 +1275,6 @@ All of the following are **local DDEV / CI only**. They include `refuse-producti
 | `bin/smoke-theme-assets.php` | Theme asset paths / overrides |
 | `bin/smoke-kanban-assets.php` | Kanban client assets |
 | `bin/smoke-google-calendar-deep.php` | Google Calendar integration deep smoke |
-| `bin/test-gcal-full-lifecycle.php` | GCal E2E lifecycle (manual QA helper) |
-| `bin/cleanup-gcal-e2e.php` | Purge GCal E2E test events/links |
 | `bin/reorder-safehouse-tabs.php` | Re-run Installer tabList provisioning (local) |
 | `bin/smoke-prima-nota-stripe-commission.php` | Prima Nota gross/fee/net + Stripe lock / backfill window |
 | `bin/dev-rebuild.sh` | clear_cache + rebuild wrapper |
@@ -1240,7 +1282,7 @@ All of the following are **local DDEV / CI only**. They include `refuse-producti
 | `bin/lib/refuse-production.php` | Hard prod block for all bin PHP |
 | `bin/lib/ephemeral-oneshot.php` | Self-delete helper for disposable oneshots |
 
-**Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-qa-*.php`, applied `bin/migrate-*.php`, `bin/cleanup-test-api-users.php`.
+**Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-*.php`, applied `bin/migrate-*.php`, `bin/export-*-config.php`, `bin/import-*-config.php`, `bin/export-integration-settings.php`, `bin/import-integration-settings.php`, `Tools/Migration/*`, `bin/test-gcal-full-lifecycle.php`, `bin/cleanup-gcal-e2e.php`, `bin/oneshot-*`, `bin/print-prima-nota-*.php`, `bin/set-prima-nota-opening-cash.php`, `bin/qa-run-stripe-status-sim.sh`, `bin/smoke-activity-offer.php`, `bin/smoke-role-acl-lastname.php`, `bin/cleanup-test-api-users.php`, `Tools\RoleSetup`, rebuild `ProvisionRoleAcl`. Future role/migration work = ephemeral `_tmp-oneshot-*.php` + self-delete only.
 
 **Epic 7 smokes (local):**
 
@@ -1298,9 +1340,11 @@ Sanity-check rules to avoid silent breakage:
 
 Create `Resources/i18n/en_US/{EntityName}.json` and `Resources/i18n/it_IT/{EntityName}.json`. Every field used in any layout MUST have a label entry.
 
-### Step 6: aclDefs
+### Step 6: aclDefs + Roles
 
-Create `Resources/metadata/aclDefs/{EntityName}.json`. Without this, only admin can access the entity.
+Create `Resources/metadata/aclDefs/{EntityName}.json` when custom checkers are needed (ACL-001). **Also** set Role scope `data` and any required `fieldData` in **Administration → Roles** (ACL-002). Never add custom Role auto-provisioners. Without Role grants, only Admin can usefully use the entity.
+
+Official reminder ([Entity Manager](https://docs.espocrm.com/administration/entity-manager/)): after creating a field you must put it on **layouts** and usually **Search Filters** — entityDefs alone does not show the field.
 
 ### Step 7: Formula (if needed)
 
@@ -1346,7 +1390,8 @@ Admin → Repair → Rebuild → Clear Cache. Browser hard-refresh.
 - **LAY**: `Resources/layouts/{E}/` ← CORRECT | `Resources/metadata/layouts/` ← WRONG | empty cells = `false` not `null` | first list column needs `"link": true` | `edit.json` is OPTIONAL — falls back to `detail.json` | `filters.json` = **string array only** (objects → `[object Object]`) | detail/detailSmall = full fields; list = key + status | status enums need `style` | UI QA in Aurora Light **and** Dark + Espo docs
 - **DEF**: static → `"default"` key | dynamic → formula `beforeSaveCustomScript` (don't combine with `required:true` for the same field)
 - **FRM**: `Resources/metadata/formula/{E}.json` | key: `beforeSaveCustomScript` | math via `+ - * /` operators (NOT `add()/multiply()`) | `datetime\today()` (NOT `date\today()`) | `entity\isNew()` (NOT bare `isNew()`) | always check `data/logs/espo-{date}.log` after save
-- **ACL**: `aclDefs` BEFORE testing | `dynamicLogic` ≠ security
+- **ACL**: `aclDefs`/scopes for **scope** access; field locks via Role `fieldData` + `entityAcl` (NOT aclDefs); never `dynamicLogic` for security; Roles UI only (no RoleSetup) | verify non-admin
+- **AGENTS.md**: living file — compare with [docs.espocrm.com](https://docs.espocrm.com/) and patch when drift found (do not blind-copy)
 - **DYN**: `clientDefs` `dynamicLogic` = UI only, always duplicate server-side
 - **I18N**: `en_US` mandatory | `it_IT` required | every layout field needs label
 - **HOK**: hooks only when formula insufficient | `afterSave` = idempotent

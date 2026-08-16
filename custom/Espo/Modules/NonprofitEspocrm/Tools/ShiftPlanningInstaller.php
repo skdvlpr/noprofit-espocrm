@@ -9,8 +9,9 @@ use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Config\ConfigWriter;
 
 /**
- * Shift-planning provisioning (tab, roles, email templates, migrations).
+ * Shift-planning provisioning (tab, email templates, migrations).
  * Called from NonprofitEspocrm Installer and ProvisionShiftPlanning rebuild action.
+ * Does not create or mutate Roles — ACL is Administration → Roles only.
  */
 class ShiftPlanningInstaller
 {
@@ -80,7 +81,6 @@ class ShiftPlanningInstaller
         $this->migrateSlotStatusesPublishedCovered($container);
         $this->normalizeInviteOfferLinks($container);
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
-        $this->ensureRoleAccess($container);
         $this->ensureEmailTemplates($container);
         $this->ensureCompletePastSlotsScheduling($container);
         $this->ensureReconcileFullyStaffedScheduling($container);
@@ -399,125 +399,6 @@ class ShiftPlanningInstaller
             ],
         ];
     }
-
-    /**
-     * Scope-level access for this module's entities per canonical role.
-     * Only these three scope keys are (re)written; everything else in the
-     * role is left untouched. Applied additively and idempotently.
-     */
-    private const ROLE_SCOPE_DATA = [
-        'Admin' => [
-            'ActivityOffer' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all', 'stream' => 'all',
-            ],
-            'ActivityOfferSlot' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
-            ],
-            'ActivityInvite' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
-            ],
-        ],
-        'Manager' => [
-            'ActivityOffer' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all', 'stream' => 'all',
-            ],
-            'ActivityOfferSlot' => [
-                'create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'all',
-            ],
-            'ActivityInvite' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'no',
-            ],
-        ],
-        'Employee' => [
-            // CORE Employee === Volunteer ACL (Dipendente). Do not grant staff shift-create here.
-            'ActivityOffer' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityOfferSlot' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityInvite' => [
-                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-            ],
-        ],
-        // Volunteers: open plans from notifications, view shifts, respond to
-        // own invites. Writing goes through cohort-gated service endpoints.
-        'Volunteer' => [
-            'ActivityOffer' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityOfferSlot' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityInvite' => [
-                'create' => 'no', 'read' => 'own', 'edit' => 'own', 'delete' => 'no', 'stream' => 'own',
-            ],
-        ],
-        // Members: read-only visibility of shift plans (stream posts allowed).
-        'Member' => [
-            'ActivityOffer' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityOfferSlot' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-            'ActivityInvite' => [
-                'create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'all',
-            ],
-        ],
-    ];
-
-    public function ensureRoleAccess(Container $container): void
-    {
-        try {
-            /** @var \Espo\ORM\EntityManager $em */
-            $em = $container->getByClass(\Espo\ORM\EntityManager::class);
-
-            $changed = false;
-
-            foreach (self::ROLE_SCOPE_DATA as $roleName => $scopeData) {
-                $role = $em->getRDBRepository('Role')
-                    ->where(['name' => $roleName])
-                    ->findOne();
-
-                if (!$role) {
-                    continue;
-                }
-
-                $data = $role->get('data');
-                $data = $data ? json_decode(json_encode($data), true) : [];
-
-                if (!is_array($data)) {
-                    $data = [];
-                }
-
-                foreach ($scopeData as $scope => $access) {
-                    if (($data[$scope] ?? null) === $access) {
-                        continue;
-                    }
-
-                    $data[$scope] = $access;
-                    $changed = true;
-                }
-
-                $role->set('data', $data);
-                $em->saveEntity($role, ['skipAll' => true, 'silent' => true]);
-            }
-
-            if ($changed) {
-                $container->getByClass(DataManager::class)->clearCache();
-            }
-        } catch (\Throwable $e) {
-            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
-                'NonprofitEspocrm role access provisioning skipped: ' . $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.
-     * Plan-level ActivityOffer.Draft is unchanged.
-     */
 
     /**
      * Drop Draft/Cancelled from ActivityOfferSlot: map legacy values to Published.

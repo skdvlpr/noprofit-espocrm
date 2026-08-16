@@ -14,9 +14,9 @@ use Espo\Modules\NonprofitEspocrm\Tools\Installer;
  *   - hide `Case` from `tabList` and `quickCreateList`;
  *   - restore `Lead` and reorder domain entities into the top `$CRM` block;
  *   - place reporting entities under `$Rendicontazione`;
- *   - provision the canonical roles (Admin, Employee, Manager, Volunteer,
- *     Member) and the `Administration` team idempotently;
  *   - rebuild metadata so the changes are picked up immediately.
+ *
+ * Roles / teams are NOT auto-provisioned — configure via Administration → Roles.
  *
  * The in-tree module class `Espo\Modules\NonprofitEspocrm\AfterInstall`
  * delegates to the same Installer so both install flows stay in sync.

@@ -23,7 +23,6 @@ use Espo\Core\Authentication\Logins\ApiKey as ApiKeyLogin;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Util;
 use Espo\Entities\User;
-use Espo\Modules\NonprofitEspocrm\Tools\RoleSetup;
 use Espo\ORM\EntityManager;
 use GuzzleHttp\Client;
 
@@ -53,9 +52,6 @@ $ok = static function (string $name, bool $pass, string $detail = '') use (&$fai
     echo "  [$m] $name" . ($detail !== '' ? " — $detail" : '') . "\n";
 };
 
-$roleSetup = $container->getByClass(\Espo\Core\InjectableFactory::class)
-    ->create(RoleSetup::class);
-$roleSetup->provisionRoles();
 $config->update();
 
 $siteUrl = rtrim((string) ($config->get('siteUrl') ?? ''), '/');

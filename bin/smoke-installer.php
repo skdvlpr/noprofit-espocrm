@@ -15,7 +15,7 @@ require __DIR__ . '/lib/refuse-production.php';
  *   - retired `VolunteerEmployee` / `Member` entities are absent from scopes (or tabs hidden);
  *   - `MealCount` lives in `$Rendicontazione` group tab (`type: group`), not as
  *     a top-level tab; `Opportunity` (F&F) is NOT in that group;
- *   - canonical roles + Administration team exist;
+ *   - Roles / teams are NOT auto-provisioned (Administration → Roles only);
  *   - universal `GoogleCalendarDrive` extension post-install (Integration row, legacy cleanup);
  *   - rerunning is idempotent (counts stable).
  *
@@ -301,116 +301,8 @@ $report(
 );
 
 $em = $container->get('entityManager');
-$roleNames = [];
-foreach ($em->getRDBRepository('Role')->find() as $r) {
-    $roleNames[] = $r->get('name');
-}
-foreach (['Admin', 'Volunteer', 'Employee', 'Member'] as $expectedRole) {
-    $report("Role `$expectedRole` provisioned", in_array($expectedRole, $roleNames, true));
-}
-if (getenv('SAFEHOUSE_EXTRA_ROLES') === '1') {
-    foreach (['Manager', 'Desk'] as $extraRole) {
-        $report("Extra role `$extraRole` provisioned", in_array($extraRole, $roleNames, true));
-    }
-} else {
-    foreach (['Manager', 'Desk', 'Can create', 'Can edit', 'Can delete'] as $gone) {
-        $report("Non-core role `$gone` absent", !in_array($gone, $roleNames, true));
-    }
-    $report('API role `Website` provisioned', in_array('Website', $roleNames, true));
-}
 
-$websiteApiUser = $em->getRDBRepository('User')->where([
-    'userName' => 'website',
-    'type' => 'api',
-    'deleted' => false,
-])->findOne();
-if ($websiteApiUser) {
-    $websiteRole = $em->getRDBRepository('Role')->where(['name' => 'Website'])->findOne();
-    $linked = $websiteRole
-        && in_array($websiteRole->getId(), $websiteApiUser->getLinkMultipleIdList('roles'), true);
-    $report('API user `website` has Website role', $linked);
-
-    $websiteFieldData = json_decode(json_encode($websiteRole?->get('fieldData') ?? new \stdClass()), true) ?? [];
-    $contactEmail = $websiteFieldData['Contact']['emailAddress']['read'] ?? null;
-    $contactPhone = $websiteFieldData['Contact']['phoneNumber']['read'] ?? null;
-    $report(
-        'Website role allows Contact.emailAddress read (overrides baseline Volunteer locks)',
-        $contactEmail === 'yes'
-    );
-    $report(
-        'Website role allows Contact.phoneNumber read (overrides baseline Volunteer locks)',
-        $contactPhone === 'yes'
-    );
-
-    $websiteAcl = json_decode(json_encode($websiteRole?->get('data') ?? new \stdClass()), true) ?? [];
-    $report(
-        'Website ACL: MealCount read=all (home impact stats)',
-        ($websiteAcl['MealCount']['read'] ?? null) === 'all'
-    );
-    $report(
-        'Website ACL: AssociationMealCount read=all',
-        ($websiteAcl['AssociationMealCount']['read'] ?? null) === 'all'
-    );
-    $report(
-        'Website ACL: Intervention read=all',
-        ($websiteAcl['Intervention']['read'] ?? null) === 'all'
-    );
-}
-
-$adminTeam = $em->getRDBRepository('Team')->where(['name' => 'Administration'])->findOne();
-$report('Team `Administration` provisioned', $adminTeam !== null);
-
-$volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
-$volunteerAcl = json_decode(json_encode($volunteerRole?->get('data') ?? new \stdClass()), true) ?? [];
-$report(
-    'Volunteer ACL: ExternalAccount create=yes (Google connect)',
-    ($volunteerAcl['ExternalAccount']['create'] ?? null) === 'yes'
-);
-$report(
-    'Volunteer ACL: Meeting create=yes (own CRM calendar)',
-    ($volunteerAcl['Meeting']['create'] ?? null) === 'yes'
-);
-$report(
-    'Volunteer ACL: Meeting read=all (see all; write own)',
-    ($volunteerAcl['Meeting']['read'] ?? null) === 'all'
-);
-$report(
-    'Volunteer ACL: Call create=yes',
-    ($volunteerAcl['Call']['create'] ?? null) === 'yes'
-);
-$report(
-    'Volunteer ACL: Task create=yes',
-    ($volunteerAcl['Task']['create'] ?? null) === 'yes'
-);
-$report(
-    'Volunteer ACL: Opportunity create=no (no Funds write)',
-    ($volunteerAcl['Opportunity']['create'] ?? null) === 'no'
-);
-$report(
-    'Volunteer ACL: Calendar boolean enabled (planner / Activities)',
-    ($volunteerAcl['Calendar'] ?? null) === true || ($volunteerAcl['Calendar'] ?? null) === 'true'
-);
-$report(
-    'Volunteer ACL: CalendarDateSource read=all',
-    ($volunteerAcl['CalendarDateSource']['read'] ?? null) === 'all'
-);
-$report(
-    'Volunteer ACL: BugReport create=yes',
-    ($volunteerAcl['BugReport']['create'] ?? null) === 'yes'
-);
-$report(
-    'Volunteer ACL: Contact create=yes (own write)',
-    ($volunteerAcl['Contact']['create'] ?? null) === 'yes'
-    && ($volunteerAcl['Contact']['edit'] ?? null) === 'own'
-);
-$report(
-    'Volunteer ACL: User read=all (names; PD field-locked)',
-    ($volunteerAcl['User']['read'] ?? null) === 'all'
-);
-$report(
-    'Volunteer userCalendarPermission=own',
-    ($volunteerRole?->get('userCalendarPermission') ?? null) === 'own'
-);
+// Roles / teams: installer must not create or rewrite them (Administration → Roles).
 
 $metadata = $container->getByClass(\Espo\Core\Utils\Metadata::class);
 $metadata->init(true);
