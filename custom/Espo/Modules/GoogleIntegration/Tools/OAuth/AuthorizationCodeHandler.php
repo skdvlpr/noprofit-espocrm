@@ -55,11 +55,16 @@ class AuthorizationCodeHandler
         }
 
         $entity->clear('accessToken');
-        $entity->clear('refreshToken');
         $entity->clear('tokenType');
         $entity->clear('expiresAt');
 
         foreach ($result as $name => $value) {
+            // Google often omits refresh_token on reconnect; keep the existing
+            // long-lived token unless a new non-empty one is issued.
+            if ($name === 'refreshToken' && (!is_string($value) || $value === '')) {
+                continue;
+            }
+
             $entity->set($name, $value);
         }
 
