@@ -21,13 +21,13 @@ class CoreVersionTest extends TestCase
 
     public function testEspoVersionIsTenSeries(): void
     {
-        $root = dirname(__DIR__, 4);
-        $output = shell_exec('php ' . escapeshellarg($root . '/command.php') . ' version 2>&1');
+        $version = $this->espocrmVersion();
 
-        $this->assertIsString($output);
-        $version = trim($output);
-
-        $this->assertMatchesRegularExpression('/^10\.\d+\.\d+$/', $version, 'Expected Espo 10.x, got: ' . $version);
+        $this->assertMatchesRegularExpression(
+            '/^10\.\d+\.\d+$/',
+            $version,
+            'Expected Espo 10.x, got: ' . $version
+        );
     }
 
     public function testNonprofitManifestAcceptableVersionsIncludeCurrentCore(): void
@@ -42,11 +42,7 @@ class CoreVersionTest extends TestCase
 
         $this->assertIsArray($manifest['acceptableVersions'] ?? null);
 
-        $output = shell_exec(
-            'php ' . escapeshellarg(dirname(__DIR__, 4) . '/command.php') . ' version 2>&1'
-        );
-        $version = trim((string) $output);
-
+        $version = $this->espocrmVersion();
         $accepted = false;
 
         foreach ($manifest['acceptableVersions'] as $constraint) {
@@ -57,6 +53,18 @@ class CoreVersionTest extends TestCase
         }
 
         $this->assertTrue($accepted, "Espo {$version} must match manifest acceptableVersions");
+    }
+
+    private function espocrmVersion(): string
+    {
+        $root = dirname(__DIR__, 4);
+        $packagePath = $root . '/package.json';
+        $this->assertFileExists($packagePath);
+
+        /** @var array{version?: string} $package */
+        $package = json_decode((string) file_get_contents($packagePath), true);
+
+        return (string) ($package['version'] ?? '');
     }
 
     private function versionMatchesConstraint(string $version, string $constraint): bool
