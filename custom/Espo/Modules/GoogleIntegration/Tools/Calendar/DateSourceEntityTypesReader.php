@@ -95,7 +95,7 @@ class DateSourceEntityTypesReader
      */
     private function readCache(): array
     {
-        $path = $this->projectRoot() . '/' . self::CACHE_RELATIVE;
+        $path = $this->installRoot() . '/' . self::CACHE_RELATIVE;
 
         if (!is_readable($path)) {
             return [];
@@ -115,7 +115,7 @@ class DateSourceEntityTypesReader
      */
     private function writeCache(array $entityTypes): void
     {
-        $path = $this->projectRoot() . '/' . self::CACHE_RELATIVE;
+        $path = $this->installRoot() . '/' . self::CACHE_RELATIVE;
         $dir = dirname($path);
 
         if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
@@ -130,12 +130,49 @@ class DateSourceEntityTypesReader
         return dirname(__DIR__, 6);
     }
 
+    private function installRoot(): string
+    {
+        foreach ($this->installRootCandidates() as $candidate) {
+            if (is_readable($candidate . '/data/config.php')) {
+                return $candidate;
+            }
+        }
+
+        return $this->projectRoot();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function installRootCandidates(): array
+    {
+        $candidates = [];
+        $projectRoot = $this->projectRoot();
+
+        $candidates[] = $projectRoot;
+        $candidates[] = $projectRoot . '/build/test';
+
+        $cwd = getcwd();
+
+        if (is_string($cwd) && $cwd !== '') {
+            $candidates[] = rtrim(str_replace('\\', '/', $cwd), '/');
+        }
+
+        $envRoot = getenv('ESPOCRM_INSTALL_ROOT');
+
+        if (is_string($envRoot) && $envRoot !== '') {
+            $candidates[] = rtrim(str_replace('\\', '/', $envRoot), '/');
+        }
+
+        return array_values(array_unique($candidates));
+    }
+
     /**
      * @return array<string, mixed>|null
      */
     private function loadConfig(): ?array
     {
-        $root = $this->projectRoot();
+        $root = $this->installRoot();
         $mainPath = $root . '/data/config.php';
 
         if (!is_readable($mainPath)) {
