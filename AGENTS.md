@@ -1285,47 +1285,51 @@ All of the following are **local DDEV / CI only**. They include `refuse-producti
 | `bin/lib/refuse-production.php` | Hard prod block for all bin PHP |
 | `bin/lib/ephemeral-oneshot.php` | Self-delete helper for disposable oneshots |
 
-### TEST-001 — Canonical PHPUnit / PHPStan (Espo docs)
+### TEST-001 — Goal: custom works on current Espo core (NOT version-string checks)
 
-Per [EspoCRM Tests](https://docs.espocrm.com/development/tests/):
+**Primary purpose of the suite:** prove that **Safehouse custom modules still work** on whatever Espo core is installed — after a core upgrade (10 → 11 → 12…) **and** after we change custom code. Asserting `package.json` version / “we are on 10.0.x” is **forbidden** as a substitute for that (humans already know the version; it does not catch breakage).
 
-| Layer | Path | Command |
-| ----- | ---- | ------- |
-| **Unit** | `tests/unit/` | `vendor/bin/phpunit tests/unit` |
-| **Integration** | `tests/integration/` | `vendor/bin/phpunit tests/integration` |
-| **Static analysis** | `custom/Espo/Modules/` + `phpstan.neon` | `vendor/bin/phpstan analyse -c phpstan.neon` |
-| **Local full suite** | DDEV | `ddev exec bash bin/run-tests.sh` |
-| **CI (GitHub Actions)** | ephemeral MariaDB `db_test` on ubuntu-latest | workflow `.github/workflows/ci.yml` job `test` |
+Per [EspoCRM Tests](https://docs.espocrm.com/development/tests/) layout (paths/commands only):
 
-**Integration tests never use dev/prod CRM data.** Each class installs a fresh Espo under `build/test` using `tests/integration/config.php` → **`db_test`**. Locally: `ddev exec bash bin/test-build.sh` creates `db_test` in DDEV. In CI: GitHub Actions **MariaDB service** creates `db_test` automatically — nothing to configure on production.
+| Layer | Path | Command | What it must prove |
+| ----- | ---- | ------- | ------------------ |
+| **Unit** | `tests/unit/Espo/Modules/{Module}/` | `vendor/bin/phpunit tests/unit` | Pure custom PHP still correct |
+| **Integration** | `tests/integration/Espo/Modules/{Module}/` | `vendor/bin/phpunit tests/integration` | Custom entities/hooks/installers/ORM paths still work **on this core** + `db_test` |
+| **Core↔custom smoke** | `tests/integration/Espo/Core/CoreCompatibilityTest.php` | same | Modules load, custom scopes in metadata, ORM can instantiate custom entities |
+| **Static analysis** | `custom/Espo/Modules/` + `phpstan.neon` | `vendor/bin/phpstan analyse -c phpstan.neon` | Custom PHP type-safe against current core APIs |
+| **Local full suite** | DDEV | `ddev exec bash bin/run-tests.sh` | All of the above |
+| **CI** | `.github/workflows/ci.yml` job `test` | ephemeral MariaDB `db_test` | Gate before deploy |
 
-**Deploy gate:** push to `main` → CI `test` (PHPStan + PHPUnit) → only then `deploy` to production. Prod server does not run tests and does not need a test database.
+**Integration tests never use dev/prod CRM data.** Fresh Espo under `build/test` via `tests/integration/config.php` → **`db_test`**. Locally: `bin/test-build.sh`. CI: MariaDB service. Nothing on production.
 
-- **`vendor/bin/phpunit`** / **`vendor/bin/phpstan`** at project root (root `composer.json`).
-- **`bin/smoke-*.php` kept** for ad-hoc local probes only; they do **not** replace PHPUnit.
+**Deploy gate:** push → CI `test` → only then `deploy`.
+
+- **`bin/smoke-*.php`**: local probes only; do **not** replace PHPUnit. Port stable smoke assertions into integration tests.
 - **Never** run tests/smokes on production (`refuse-production.php`).
+- **Do not** add tests whose only assertion is Espo version / PHP version strings.
 
-### TEST-002 — Mandatory tests for every new feature (REQUIRED)
+### TEST-002 — Mandatory tests for every custom change + core upgrade (REQUIRED)
 
-**Every change that adds or materially alters backend behaviour MUST include PHPUnit tests** before merge, following [EspoCRM Tests](https://docs.espocrm.com/development/tests/). This is not optional and is enforced by GitHub CI (`ci.yml` job `test`).
+**Every change that adds or alters custom backend behaviour MUST include PHPUnit tests that exercise that behaviour on the current core.** Same rule after a **manual Espo core upgrade**: run / extend the suite until green — if custom breaks on new core, fix custom (or document intentional break), do not “fix” by asserting the new version number.
 
-| What you changed | Where to add tests | Base class / style |
-| ---------------- | ------------------ | ------------------ |
-| Pure PHP (formatters, date ranges, cron builders, validators) | `tests/unit/Espo/Modules/{Module}/` | `PHPUnit\Framework\TestCase` |
-| Metadata, Installer, ORM entities, hooks, workflows, integrations | `tests/integration/Espo/Modules/{Module}/` | extend `tests\integration\Espo\Support\SafehouseBaseTestCase` |
-| Core compatibility (Espo version, module registration) | `tests/unit/Espo/Core/` or `tests/integration/Espo/Core/` | as appropriate |
+Coverage target: **all custom modules** under `custom/Espo/Modules/` (NonprofitEspocrm, GoogleIntegration, WorkflowEngine, BugTracker, SafehouseAuroraThemes) — not Espo stock entities unless we customized them.
 
-**Workflow for agents and humans:**
+| What you changed | Where to add tests | Base class |
+| ---------------- | ------------------ | ---------- |
+| Pure custom PHP (formatters, builders, validators) | `tests/unit/Espo/Modules/{Module}/` | `PHPUnit\Framework\TestCase` |
+| Metadata, Installer, ORM, hooks, jobs, ACL, integrations | `tests/integration/Espo/Modules/{Module}/` | `SafehouseBaseTestCase` |
+| “Does custom still attach to this core?” | extend `tests/integration/Espo/Core/CoreCompatibilityTest.php` | `SafehouseBaseTestCase` |
 
-1. Implement the feature in `custom/Espo/Modules/…`.
-2. Add or extend PHPUnit tests covering the acceptance criteria (happy path + one meaningful edge case when cheap).
-3. Run **`ddev exec bash bin/run-tests.sh`** locally — must be green before push.
-4. Push to `main` or open PR — CI re-runs the same suite on ephemeral `db_test`.
-5. Do **not** mark a Notion task Done until CI is green (or PR is ready with passing checks).
+**Workflow:**
 
-**Naming:** `{Feature}Test.php` under the module namespace, e.g. `tests/integration/Espo/Modules/NonprofitEspocrm/FundraisingProgressTest.php`.
+1. Implement / upgrade in `custom/Espo/Modules/…` (or bump Espo core manually).
+2. Add or extend PHPUnit covering the acceptance criteria (happy path + one edge case).
+3. `ddev exec bash bin/run-tests.sh` green before push.
+4. CI must be green before Done / deploy.
 
-**When smokes still help:** keep `bin/smoke-*.php` for manual DDEV probes (REST catalog, Google OAuth, long lifecycle scripts). When a smoke covers stable behaviour, **port its assertions into PHPUnit** and leave the smoke as optional local tooling.
+**Naming:** `{Feature}Test.php`, e.g. `tests/integration/Espo/Modules/NonprofitEspocrm/FundraisingProgressTest.php`.
+
+**Honest gap:** the suite is **not yet complete** for every custom hook/job/ACL path. Expanding coverage of remaining custom surfaces is mandatory ongoing work — new features must not widen the gap.
 
 **Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-*.php`, applied `bin/migrate-*.php`, `bin/export-*-config.php`, `bin/import-*-config.php`, `bin/export-integration-settings.php`, `bin/import-integration-settings.php`, `Tools/Migration/*`, `bin/test-gcal-full-lifecycle.php`, `bin/cleanup-gcal-e2e.php`, `bin/oneshot-*`, `bin/print-prima-nota-*.php`, `bin/set-prima-nota-opening-cash.php`, `bin/qa-run-stripe-status-sim.sh`, `bin/smoke-activity-offer.php`, `bin/smoke-role-acl-lastname.php`, `bin/cleanup-test-api-users.php`, `Tools\RoleSetup`, rebuild `ProvisionRoleAcl`. Future role/migration work = ephemeral `_tmp-oneshot-*.php` + self-delete only.
 
