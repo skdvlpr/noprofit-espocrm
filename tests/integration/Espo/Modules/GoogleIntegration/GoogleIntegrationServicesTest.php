@@ -121,6 +121,11 @@ class GoogleIntegrationServicesTest extends SafehouseBaseTestCase
             'saveToGoogleCalendar' => true,
         ]);
 
+        $this->assertTrue(
+            $meeting->get('saveToGoogleCalendar'),
+            'Meeting.saveToGoogleCalendar must be provisioned in metadata (CalendarDateSource bootstrap).'
+        );
+
         try {
             $guard->assertExportAllowed($meeting);
             $this->fail('Expected BadRequest when export requested while integration disabled.');
