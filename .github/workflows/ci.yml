@@ -51,7 +51,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring, xml, dom, curl, zip, gd, exif, pdo_mysql, iconv
           coverage: none
           tools: composer:v2
@@ -110,6 +110,36 @@ jobs:
             -e "ssh -p ${DEPLOY_SSH_PORT:-22} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             --exclude-from=deploy/rsync-excludes.txt \
             ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+      - name: Ensure PHP 8.4 on server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_SSH_PORT:-22}" -i ~/.ssh/deploy_key \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" "DEPLOY_PATH='${DEPLOY_PATH}' bash -se" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          echo "== PHP before =="
+          php -v 2>/dev/null | head -1 || echo "(php not in PATH)"
+          if [[ -f deploy/upgrade-php84.sh ]]; then
+            if sudo -n bash deploy/upgrade-php84.sh; then
+              echo "== PHP 8.4 upgrade completed =="
+            else
+              echo "WARNING: sudo deploy/upgrade-php84.sh failed — checking current PHP..."
+            fi
+          fi
+          PHP_MM="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo unknown)"
+          if [[ "$PHP_MM" != "8.4" && "$PHP_MM" != "8.5" ]]; then
+            echo "ERROR: production PHP is ${PHP_MM}; need 8.4+. Run: sudo bash ${DEPLOY_PATH}/deploy/upgrade-php84.sh"
+            exit 1
+          fi
+          echo "== PHP after =="
+          php -v | head -1
+          REMOTE
 
       - name: Post-deploy (rebuild only if already installed)
         env:

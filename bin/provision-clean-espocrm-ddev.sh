@@ -118,7 +118,7 @@ cd "$PROJECT_DIR"
 ddev config \
     --project-type=php \
     --docroot=public \
-    --php-version=8.3 \
+    --php-version=8.4 \
     --database=mariadb:10.11 \
     --webserver-type=nginx-fpm \
     --project-name="$PROJECT_NAME" \

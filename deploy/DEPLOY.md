@@ -41,14 +41,31 @@ Optional **Variable** (Settings → Variables): `DEPLOY_RSYNC_DELETE=1` to prune
 stale code files on the server (runtime/server-state excludes still protect
 `data/`, `install/config.php`, `custom/Espo/Custom/`). Default is no deletion.
 
+## PHP 8.4 upgrade (one-time)
+
+EspoCRM 10 supports PHP 8.3–8.5. Target runtime: **8.4** (DDEV + CI + production).
+
+On the server (as root):
+
+```bash
+sudo bash /var/www/safehouse-crm/deploy/upgrade-php84.sh
+```
+
+The script installs `php8.4-*`, switches CLI default, updates Caddy `php_fastcgi` socket,
+restarts `php8.4-fpm`, and stops `php8.3-fpm`. **Web, CLI, and cron must use the same
+PHP** — cron should call `/usr/bin/php8.4 cron.php`.
+
+GitHub Actions deploy (after rsync) runs the same script via `sudo -n` when the deploy
+user has passwordless sudo for it; otherwise run manually once before the next deploy.
+
 ## Server prerequisites (one-time)
 
-1. PHP 8.3 + required extensions (pdo_mysql, gd, mbstring, zip, openssl, curl,
+1. PHP **8.4** (EspoCRM 10 supports 8.3–8.5) + required extensions (pdo_mysql, gd,
    intl, exif, ldap optional) and a MySQL/MariaDB database.
 2. A deploy user with write access to `DEPLOY_PATH`, and the PHP-FPM/web user
    able to write `data/` and `custom/` (Espo creates `data/config.php` during
    install).
-3. Cron for Espo (`* * * * * cd DEPLOY_PATH && php cron.php > /dev/null 2>&1`).
+3. Cron for Espo (`* * * * * cd DEPLOY_PATH && /usr/bin/php8.4 cron.php > /dev/null 2>&1`).
 4. Caddy serving the `public/` docroot (below).
 
 ## Caddy
@@ -60,7 +77,7 @@ Caddyfile:
 crm.safehouse.community {
     root * /var/www/safehouse-crm/public
     encode zstd gzip
-    php_fastcgi unix//run/php/php8.3-fpm.sock
+    php_fastcgi unix//run/php/php8.4-fpm.sock
     file_server
 
     # Deny access to sensitive paths (defense in depth).
