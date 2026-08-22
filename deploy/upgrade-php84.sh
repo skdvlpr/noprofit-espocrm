@@ -120,29 +120,42 @@ if systemctl is-active --quiet caddy 2>/dev/null; then
 fi
 
 purge_old_php_versions() {
-    local ver
+    local ver pkg
     for ver in 8.5 8.3 8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0; do
         [[ "$ver" == "$TARGET_MM" ]] && continue
         if systemctl list-unit-files "php${ver}-fpm.service" 2>/dev/null | grep -q php; then
             systemctl stop "php${ver}-fpm" 2>/dev/null || true
             systemctl disable "php${ver}-fpm" 2>/dev/null || true
         fi
-        mapfile -t old_pkgs < <(dpkg-query -W -f='${Package}\n' "php${ver}*" 2>/dev/null | grep -v '^$' || true)
+        mapfile -t old_pkgs < <(
+            dpkg -l "php${ver}*" 2>/dev/null | awk '/^ii|^rc/ {print $2}' || true
+        )
         if ((${#old_pkgs[@]} > 0)); then
             log "Purging PHP ${ver} packages: ${old_pkgs[*]}"
-            apt-get purge -y "${old_pkgs[@]}"
+            apt-get purge -y "${old_pkgs[@]}" 2>/dev/null || apt-get purge -y "${old_pkgs[@]}" || true
         fi
+    done
+    # Leftover config dirs after purge (harmless but confusing).
+    for ver in 8.3 8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0; do
+        [[ -d "/etc/php/${ver}" ]] && rm -rf "/etc/php/${ver}" && log "Removed leftover /etc/php/${ver}"
     done
     apt-get autoremove -y -qq
     apt-get autoclean -y -qq
 }
 
+installed_php_packages_other_than_target() {
+    dpkg -l 'php[0-9]*' 2>/dev/null \
+        | awk '/^ii/ {print $2}' \
+        | grep -E '^php[0-9]+\.[0-9]+' \
+        | grep -v "^php${TARGET_MM}" || true
+}
+
 log "Removing all PHP versions except ${TARGET_MM}..."
 purge_old_php_versions
 
-remaining="$(dpkg-query -W -f='${Package}\n' 'php[0-9]*' 2>/dev/null | grep -E '^php[0-9]+\.[0-9]+' | grep -v "^php${TARGET_MM}" || true)"
-if [[ -n "$remaining" ]]; then
-    die "Old PHP packages still installed:${remaining}"
+mapfile -t remaining < <(installed_php_packages_other_than_target)
+if ((${#remaining[@]} > 0)); then
+    die "Old PHP packages still installed: ${remaining[*]}"
 fi
 
 normalize_cron() {
@@ -170,6 +183,6 @@ normalize_cron
 log "Verification:"
 php -v | head -1
 command -v php
-dpkg-query -W -f='${Package}\n' 'php[0-9]*' 2>/dev/null | grep -E '^php[0-9]+\.[0-9]+' | sort -u || true
+dpkg -l 'php[0-9]*' 2>/dev/null | awk '/^ii/ {print $2}' | grep -E '^php[0-9]+\.[0-9]+' | sort -u || true
 
 log "Done. Single PHP ${TARGET_MM} for FPM + CLI + cron. Rebuild Espo if installed: cd ${DEPLOY_PATH} && php command.php rebuild"
