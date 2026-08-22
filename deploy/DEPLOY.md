@@ -55,6 +55,9 @@ One-time on the server (as root):
 sudo bash /var/www/safehouse-crm/deploy/upgrade-php84.sh
 ```
 
+The script auto-adds [packages.sury.org](https://packages.sury.org/php/) when the OS
+default apt has no `php8.4-*` (typical on Ubuntu 22.04/24.04 with only 8.3 from Ubuntu repos).
+
 The script:
 
 1. Installs `php8.4-*` (FPM + CLI + extensions)

@@ -2,6 +2,9 @@
 # Production: single PHP runtime (8.4) for web (FPM), CLI, and cron.
 # Installs php8.4-*, makes `php` the only CLI, updates Caddy, purges other PHP versions.
 #
+# Ubuntu/Debian default repos often ship only PHP 8.3 — this script adds Ondřej Surý's
+# packages.sury.org repo when php8.4-fpm is not available.
+#
 # Run as root: sudo bash deploy/upgrade-php84.sh
 set -euo pipefail
 
@@ -23,8 +26,49 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
+apt_pkg_available() {
+    apt-cache show "$1" >/dev/null 2>&1
+}
+
+ensure_php84_apt_repository() {
+    if apt_pkg_available php8.4-fpm; then
+        log "php8.4-fpm found in apt — no extra repository needed."
+        return 0
+    fi
+
+    log "php8.4-fpm not in default apt — adding packages.sury.org (Ondřej Surý PHP)..."
+    apt-get update -qq
+    apt-get install -y -qq ca-certificates apt-transport-https lsb-release gnupg curl
+
+    local codename=""
+    if [[ -f /etc/os-release ]]; then
+        # shellcheck source=/dev/null
+        . /etc/os-release
+        codename="${VERSION_CODENAME:-}"
+        log "Detected: ${NAME:-unknown} ${VERSION_ID:-} (${codename})"
+    fi
+    [[ -n "$codename" ]] || die "Could not detect OS codename from /etc/os-release"
+
+    install -d -m 0755 /usr/share/keyrings
+    curl -fsSL https://packages.sury.org/php/apt.gpg \
+        | gpg --dearmor -o /usr/share/keyrings/deb.sury.org-php.gpg
+
+    cat >/etc/apt/sources.list.d/php-sury.list <<EOF
+deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${codename} main
+EOF
+
+    apt-get update -qq
+
+    if ! apt_pkg_available php8.4-fpm; then
+        die "php8.4-fpm still unavailable after adding sury repo. Check OS support for PHP 8.4 (${codename})."
+    fi
+
+    log "PHP 8.4 packages are now available from apt."
+}
+
+ensure_php84_apt_repository
+
 log "Installing PHP ${TARGET_MM} packages..."
-apt-get update -qq
 PACKAGES=(
     php8.4-fpm php8.4-cli php8.4-common
     php8.4-mysql php8.4-gd php8.4-mbstring php8.4-xml
