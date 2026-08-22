@@ -41,22 +41,30 @@ Optional **Variable** (Settings → Variables): `DEPLOY_RSYNC_DELETE=1` to prune
 stale code files on the server (runtime/server-state excludes still protect
 `data/`, `install/config.php`, `custom/Espo/Custom/`). Default is no deletion.
 
-## PHP 8.4 upgrade (one-time)
+## PHP runtime (single version on production)
 
-EspoCRM 10 supports PHP 8.3–8.5. Target runtime: **8.4** (DDEV + CI + production).
+**Policy:** production runs **one** PHP version only (currently **8.4**). Web (FPM), CLI
+(`php command.php`), and cron (`php cron.php`) all use the same system default — no
+side-by-side 8.3/8.4, no versioned binaries in cron.
 
-On the server (as root):
+EspoCRM 10 supports PHP 8.3–8.5; we standardize on **8.4** (DDEV + CI + prod).
+
+One-time on the server (as root):
 
 ```bash
 sudo bash /var/www/safehouse-crm/deploy/upgrade-php84.sh
 ```
 
-The script installs `php8.4-*`, switches CLI default, updates Caddy `php_fastcgi` socket,
-restarts `php8.4-fpm`, and stops `php8.3-fpm`. **Web, CLI, and cron must use the same
-PHP** — cron should call `/usr/bin/php8.4 cron.php`.
+The script:
 
-GitHub Actions deploy (after rsync) runs the same script via `sudo -n` when the deploy
-user has passwordless sudo for it; otherwise run manually once before the next deploy.
+1. Installs `php8.4-*` (FPM + CLI + extensions)
+2. Sets `update-alternatives` so **`php`** → `php8.4`
+3. Points Caddy at `php8.4-fpm.sock`
+4. **Purges** all other `php8.3*`, `php8.2*`, … packages and stops old FPM units
+5. Normalizes deploy-user cron to `php cron.php` (not `/usr/bin/php8.4`)
+
+GitHub Actions deploy runs the same script via `sudo -n` when passwordless sudo is
+configured; otherwise run manually once before the next deploy.
 
 ## Server prerequisites (one-time)
 
@@ -65,7 +73,8 @@ user has passwordless sudo for it; otherwise run manually once before the next d
 2. A deploy user with write access to `DEPLOY_PATH`, and the PHP-FPM/web user
    able to write `data/` and `custom/` (Espo creates `data/config.php` during
    install).
-3. Cron for Espo (`* * * * * cd DEPLOY_PATH && /usr/bin/php8.4 cron.php > /dev/null 2>&1`).
+3. Cron for Espo (`* * * * * cd DEPLOY_PATH && php cron.php > /dev/null 2>&1`) — plain
+   `php` is correct after `upgrade-php84.sh` (single system default).
 4. Caddy serving the `public/` docroot (below).
 
 ## Caddy

@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# Switch production host to PHP 8.4 for EspoCRM (web + CLI + cron must match).
-# Run on the server as root or via: sudo bash deploy/upgrade-php84.sh
+# Production: single PHP runtime (8.4) for web (FPM), CLI, and cron.
+# Installs php8.4-*, makes `php` the only CLI, updates Caddy, purges other PHP versions.
 #
-# Idempotent: safe to re-run; exits 0 when PHP 8.4 is already active everywhere.
+# Run as root: sudo bash deploy/upgrade-php84.sh
 set -euo pipefail
 
+TARGET_MM="8.4"
 REQUIRED_EXTS=(pdo_mysql gd mbstring zip openssl curl exif xml iconv bcmath)
+DEPLOY_PATH="${DEPLOY_PATH:-/var/www/safehouse-crm}"
+CRON_USER="${CRON_USER:-deploy}"
 
 log() { echo "[upgrade-php84] $*"; }
 die() { echo "[upgrade-php84] ERROR: $*" >&2; exit 1; }
@@ -20,32 +23,48 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-log "Installing PHP 8.4 packages..."
+log "Installing PHP ${TARGET_MM} packages..."
 apt-get update -qq
-PACKAGES=(php8.4-fpm php8.4-cli php8.4-common php8.4-mysql php8.4-gd php8.4-mbstring php8.4-xml php8.4-curl php8.4-zip php8.4-intl php8.4-bcmath php8.4-exif)
+PACKAGES=(
+    php8.4-fpm php8.4-cli php8.4-common
+    php8.4-mysql php8.4-gd php8.4-mbstring php8.4-xml
+    php8.4-curl php8.4-zip php8.4-intl php8.4-bcmath php8.4-exif
+)
 apt-get install -y -qq "${PACKAGES[@]}"
 
 for ext in "${REQUIRED_EXTS[@]}"; do
     php8.4 -m | grep -qi "^${ext}$" || die "Missing PHP extension: ${ext}"
 done
 
-log "Setting system default php CLI to 8.4..."
+log "Setting system default CLI: php -> php8.4..."
 if command -v update-alternatives >/dev/null 2>&1; then
-    update-alternatives --set php /usr/bin/php8.4 2>/dev/null || ln -sf /usr/bin/php8.4 /usr/local/bin/php-safehouse
+    update-alternatives --install /usr/bin/php php /usr/bin/php8.4 84 2>/dev/null || true
+    update-alternatives --set php /usr/bin/php8.4
 fi
 
-CLI_VER="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
-[[ "$CLI_VER" == "8.4" ]] || die "CLI still on PHP ${CLI_VER}, expected 8.4"
+CLI_MM="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+[[ "$CLI_MM" == "$TARGET_MM" ]] || die "CLI is PHP ${CLI_MM}, expected ${TARGET_MM}"
 
-log "Updating Caddy php_fastcgi socket (8.3 -> 8.4) if present..."
-CADDYFILES=(/etc/caddy/Caddyfile /etc/caddy/Caddyfile.d/*.caddy)
-for f in "${CADDYFILES[@]}"; do
-    [[ -f "$f" ]] || continue
-    if grep -q 'php8\.3-fpm\.sock' "$f"; then
-        sed -i 's|php8\.3-fpm\.sock|php8.4-fpm.sock|g' "$f"
-        log "Patched $f"
-    fi
-done
+patch_caddy_socket() {
+    local from="$1"
+    local to="$2"
+    local files=(/etc/caddy/Caddyfile)
+    shopt -s nullglob
+    files+=(/etc/caddy/Caddyfile.d/*.caddy)
+    shopt -u nullglob
+    for f in "${files[@]}"; do
+        [[ -f "$f" ]] || continue
+        if grep -qF "$from" "$f"; then
+            sed -i "s|$(printf '%s' "$from" | sed 's/[|&\\]/\\&/g')|$(printf '%s' "$to" | sed 's/[|&\\]/\\&/g')|g" "$f"
+            log "Caddy: patched ${f} (${from} -> ${to})"
+        fi
+    done
+}
+
+log "Updating Caddy php_fastcgi socket to php8.4-fpm..."
+patch_caddy_socket 'php8.3-fpm.sock' 'php8.4-fpm.sock'
+patch_caddy_socket 'php8.2-fpm.sock' 'php8.4-fpm.sock'
+patch_caddy_socket 'php8.1-fpm.sock' 'php8.4-fpm.sock'
 
 systemctl enable php8.4-fpm
 systemctl restart php8.4-fpm
@@ -56,20 +75,57 @@ if systemctl is-active --quiet caddy 2>/dev/null; then
     log "Caddy reloaded"
 fi
 
-if systemctl is-active --quiet php8.3-fpm 2>/dev/null; then
-    systemctl stop php8.3-fpm || true
-    systemctl disable php8.3-fpm || true
-    log "Stopped php8.3-fpm"
+purge_old_php_versions() {
+    local ver
+    for ver in 8.5 8.3 8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0; do
+        [[ "$ver" == "$TARGET_MM" ]] && continue
+        if systemctl list-unit-files "php${ver}-fpm.service" 2>/dev/null | grep -q php; then
+            systemctl stop "php${ver}-fpm" 2>/dev/null || true
+            systemctl disable "php${ver}-fpm" 2>/dev/null || true
+        fi
+        mapfile -t old_pkgs < <(dpkg-query -W -f='${Package}\n' "php${ver}*" 2>/dev/null | grep -v '^$' || true)
+        if ((${#old_pkgs[@]} > 0)); then
+            log "Purging PHP ${ver} packages: ${old_pkgs[*]}"
+            apt-get purge -y "${old_pkgs[@]}"
+        fi
+    done
+    apt-get autoremove -y -qq
+    apt-get autoclean -y -qq
+}
+
+log "Removing all PHP versions except ${TARGET_MM}..."
+purge_old_php_versions
+
+remaining="$(dpkg-query -W -f='${Package}\n' 'php[0-9]*' 2>/dev/null | grep -E '^php[0-9]+\.[0-9]+' | grep -v "^php${TARGET_MM}" || true)"
+if [[ -n "$remaining" ]]; then
+    die "Old PHP packages still installed:${remaining}"
 fi
 
-log "PHP versions:"
+normalize_cron() {
+    local tmp
+    tmp="$(mktemp)"
+    if ! crontab -l -u "$CRON_USER" 2>/dev/null >"$tmp"; then
+        rm -f "$tmp"
+        return 0
+    fi
+    if grep -q 'cron\.php' "$tmp"; then
+        sed -i \
+            -e 's|/usr/bin/php8\.[0-9]\+|php|g' \
+            -e 's|/usr/local/bin/php8\.[0-9]\+|php|g' \
+            -e "s|cd [^ ]*safehouse-crm|cd ${DEPLOY_PATH}|g" \
+            "$tmp"
+        crontab -u "$CRON_USER" "$tmp"
+        log "Normalized ${CRON_USER} crontab to use plain \`php\` (system default ${TARGET_MM})"
+        crontab -l -u "$CRON_USER" | grep cron.php || true
+    fi
+    rm -f "$tmp"
+}
+
+normalize_cron
+
+log "Verification:"
 php -v | head -1
-php8.4 -v | head -1
+command -v php
+dpkg-query -W -f='${Package}\n' 'php[0-9]*' 2>/dev/null | grep -E '^php[0-9]+\.[0-9]+' | sort -u || true
 
-CRON_LINE='* * * * * cd /var/www/safehouse-crm && /usr/bin/php8.4 cron.php > /dev/null 2>&1'
-if crontab -l -u deploy 2>/dev/null | grep -q 'cron.php'; then
-    log "Reminder: ensure deploy user cron uses php8.4 explicitly:"
-    echo "  $CRON_LINE"
-fi
-
-log "Done. PHP 8.4 active (CLI + FPM). Run rebuild from deploy path if Espo is installed."
+log "Done. Single PHP ${TARGET_MM} for FPM + CLI + cron. Rebuild Espo if installed: cd ${DEPLOY_PATH} && php command.php rebuild"
