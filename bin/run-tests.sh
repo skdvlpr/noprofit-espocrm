@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run canonical Espo test suite (PHPStan + PHPUnit).
-# Integration tests use db_test via tests/integration/config.php (not the dev/prod DB).
+# Integration tests use isolated db_test via TEST_DATABASE_* (never dev/prod DB).
 #
 # @see https://docs.espocrm.com/development/tests/
 set -euo pipefail
@@ -52,4 +52,7 @@ fi
 
 run vendor/bin/phpstan analyse -c phpstan.neon
 run vendor/bin/phpunit tests/unit "$@"
+
+# shellcheck source=lib/test-database-env.sh
+source "$ROOT_DIR/bin/lib/test-database-env.sh"
 run vendor/bin/phpunit tests/integration "$@"

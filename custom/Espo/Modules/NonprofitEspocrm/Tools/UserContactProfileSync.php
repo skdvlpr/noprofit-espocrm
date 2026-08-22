@@ -247,7 +247,7 @@ class UserContactProfileSync
                     $value = round((float) $user->get('weeklyHours') * 4.33, 1);
                 }
 
-                $contact->set($contactField, $value);
+                $this->setContactField($contact, $contactField, $value);
             }
         }
 
@@ -258,9 +258,18 @@ class UserContactProfileSync
                 }
 
                 $contactField = self::FIELD_MAP[$field] ?? $field;
-                $contact->set($contactField, $user->get($field));
+                $this->setContactField($contact, $contactField, $user->get($field));
             }
         }
+    }
+
+    private function setContactField(Entity $contact, string $contactField, mixed $value): void
+    {
+        if ($contactField === 'taxCode') {
+            $value = ItalianTaxCodeNormalizer::normalize($value);
+        }
+
+        $contact->set($contactField, $value);
     }
 
     /**

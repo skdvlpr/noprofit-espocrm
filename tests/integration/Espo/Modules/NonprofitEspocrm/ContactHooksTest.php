@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace tests\integration\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Core\FieldSanitize\SanitizeManager;
 use Espo\Entities\User;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
@@ -113,6 +114,18 @@ class ContactHooksTest extends SafehouseBaseTestCase
         $em->saveEntity($contact);
 
         $this->assertTrue($contact->hasId());
-        $this->assertSame('RSSMRA85T10A562S', strtoupper((string) $contact->get('taxCode')));
+        $this->assertSame('RSSMRA85T10A562S', $contact->get('taxCode'));
+    }
+
+    public function testContactTaxCodeSanitizerUppercasesLowercaseInput(): void
+    {
+        $data = (object) [
+            'taxCode' => 'rssmra85t10a562s',
+        ];
+
+        $manager = $this->getInjectableFactory()->create(SanitizeManager::class);
+        $manager->process('Contact', $data);
+
+        $this->assertSame('RSSMRA85T10A562S', $data->taxCode);
     }
 }

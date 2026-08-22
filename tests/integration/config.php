@@ -1,18 +1,15 @@
 <?php
-return array (
-  'database' => 
-  array (
-    'driver' => 'pdo_mysql',
-    'host' => 'db',
-    'port' => '',
-    'charset' => 'utf8mb4',
-    'dbname' => 'db_test',
-    'user' => 'db',
-    'password' => 'db',
-  ),
-  'version' => '10.0.3',
-  'lastModifiedTime' => 1777526190,
-  'defaultCurrency' => 'EUR',
-  'baseCurrency' => 'EUR',
-  'currencyList' => ['EUR'],
-);
+
+require __DIR__.'/assert-test-database-env.php';
+
+$config = require __DIR__.'/config-env.php';
+
+$applicationDir = dirname(__DIR__, 2).'/application';
+
+return array_merge($config, [
+    'version' => '10.0.3',
+    'lastModifiedTime' => is_dir($applicationDir) ? (int) filemtime($applicationDir) : 0,
+    'defaultCurrency' => 'EUR',
+    'baseCurrency' => 'EUR',
+    'currencyList' => ['EUR'],
+]);

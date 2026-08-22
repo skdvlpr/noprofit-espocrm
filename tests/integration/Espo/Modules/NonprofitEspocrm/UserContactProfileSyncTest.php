@@ -50,6 +50,36 @@ class UserContactProfileSyncTest extends SafehouseBaseTestCase
         $this->assertSame(34.6, (float) $user->get('monthlyHours'));
     }
 
+    public function testUserTaxCodeSyncUppercasesLowercaseInputOnContact(): void
+    {
+        $em = $this->getEntityManager();
+        $memberRole = $em->getRDBRepository('Role')->where(['name' => 'Member'])->findOne();
+        if ($memberRole === null) {
+            $this->markTestSkipped('Member role not provisioned in test database.');
+        }
+
+        $user = $em->getNewEntity('User');
+        $user->set([
+            'userName' => 'phpunit_cf_' . bin2hex(random_bytes(2)),
+            'firstName' => 'PHPUnit',
+            'lastName' => 'TaxCode',
+            'type' => 'regular',
+            'isActive' => true,
+            'taxCode' => 'rssmra85t10a562s',
+            'emailAddress' => 'phpunit.cf.' . bin2hex(random_bytes(2)) . '@example.com',
+            'rolesIds' => [$memberRole->getId()],
+            'rolesNames' => (object) [$memberRole->getId() => 'Member'],
+        ]);
+        $em->saveEntity($user);
+
+        $contact = $em->getRDBRepository('Contact')
+            ->where(['linkedUserId' => $user->getId()])
+            ->findOne();
+
+        $this->assertNotNull($contact);
+        $this->assertSame('RSSMRA85T10A562S', $contact->get('taxCode'));
+    }
+
     public function testUserDeleteInactivatesLinkedContact(): void
     {
         $em = $this->getEntityManager();

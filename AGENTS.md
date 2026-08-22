@@ -1300,7 +1300,15 @@ Per [EspoCRM Tests](https://docs.espocrm.com/development/tests/) layout (paths/c
 | **Local full suite** | DDEV | `ddev exec bash bin/run-tests.sh` | All of the above |
 | **CI** | `.github/workflows/ci.yml` job `test` | ephemeral MariaDB `db_test` | Gate before deploy |
 
-**Integration tests never use dev/prod CRM data.** Fresh Espo under `build/test` via `tests/integration/config.php` → **`db_test`**. Locally: `bin/test-build.sh`. CI: MariaDB service. Nothing on production.
+**Integration tests never use dev/prod CRM data.** Fresh Espo under `build/test` via `tests/integration/config.php` → isolated **`db_test`**. Credentials come **only** from `TEST_DATABASE_*` env vars — no host/user fallbacks in PHP.
+
+| Environment | How `TEST_DATABASE_*` is set |
+| ------------- | ------------------------------ |
+| **GitHub Actions** | Job `env` in `.github/workflows/ci.yml` (ephemeral MariaDB service) |
+| **DDEV** | `bin/lib/test-database-env.sh` reads `DDEV_DATABASE_*` and sets `TEST_DATABASE_NAME=db_test` |
+| **Anywhere else** | Must export `TEST_DATABASE_*` explicitly — `assert-test-database-env.php` fails closed |
+
+Locally: `ddev exec bash bin/run-tests.sh` (sources `test-database-env.sh` before integration PHPUnit). CI: MariaDB service env only. Nothing on production.
 
 **Deploy gate:** push → CI `test` → only then `deploy`.
 
@@ -1328,6 +1336,22 @@ Coverage target: **all custom modules** under `custom/Espo/Modules/` (NonprofitE
 4. CI must be green before Done / deploy.
 
 **Naming:** `{Feature}Test.php`, e.g. `tests/integration/Espo/Modules/NonprofitEspocrm/FundraisingProgressTest.php`.
+
+### TEST-003 — Never fix tests instead of fixing behavior (TOTAL BAN)
+
+**Forbidden without fixing root cause:**
+
+- Changing test data/assertions so a failing test passes while production behavior stays wrong
+  (e.g. switching a unit test CF to uppercase only, without adding sanitizer/normalization)
+- Deleting or skipping tests that caught a real bug
+- Weakening assertions (e.g. replacing a strict stored-value check with a looser one) to greenwash CI
+
+**Required when a test exposes wrong behavior:**
+
+1. Fix implementation (sanitizer, hook, sync, client view — whatever matches acceptance criteria)
+2. Keep or extend tests that lock the **correct** behavior (including edge cases that motivated the fix)
+3. Unit tests may still use lowercase input to prove validation accepts normalized input;
+   integration tests MUST assert canonical stored value (uppercase CF in DB)
 
 **Honest gap (tracking):** suite now covers the majority of custom PHP (validators, shift planning service flows, Prima Nota hooks, WorkflowEngine services/actions, GoogleIntegration pure helpers + hooks/metadata, BugTracker hooks, reporting stats, food parcel, web push, jobs smoke, rebuild registration, Aurora themes). Remaining gaps are mostly **live Google OAuth/API** paths and a few heavy export/mail side-effects — those stay as `bin/smoke-*.php` until mocked. New custom code must still land with PHPUnit before merge.
 

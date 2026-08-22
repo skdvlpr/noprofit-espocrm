@@ -44,6 +44,9 @@
             "maxLength": 16,
             "trim": true,
             "isPersonalData": true,
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\StringUpperCase"
+            ],
             "validatorClassNameList": [
                 "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\TaxCode\\ItalianFiscalCode"
             ]

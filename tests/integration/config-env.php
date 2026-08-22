@@ -6,6 +6,8 @@
  * @see https://docs.espocrm.com/development/tests/
  */
 
+require __DIR__.'/assert-test-database-env.php';
+
 return [
     'database' => [
         'platform' => getenv('TEST_DATABASE_PLATFORM') ?: 'Mysql',
