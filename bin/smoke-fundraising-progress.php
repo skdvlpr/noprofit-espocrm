@@ -41,7 +41,8 @@ $pn = $em->getNewEntity('PrimaNota');
 $pn->set([
     'description' => 'Smoke donation',
     'entryType' => 'Income',
-    'amount' => 1255.22,
+    'amountGross' => 1255.22,
+    'commissionAmount' => 0,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $opp->getId(),
 ]);
@@ -74,7 +75,8 @@ $pn2 = $em->getNewEntity('PrimaNota');
 $pn2->set([
     'description' => 'Smoke closed won',
     'entryType' => 'Income',
-    'amount' => 500,
+    'amountGross' => 500,
+    'commissionAmount' => 0,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $oppClosed->getId(),
 ]);
@@ -88,7 +90,8 @@ $pnExpense = $em->getNewEntity('PrimaNota');
 $pnExpense->set([
     'description' => 'Smoke expense',
     'entryType' => 'Expense',
-    'amount' => 300,
+    'amountGross' => 300,
+    'commissionAmount' => 0,
     'transactionDate' => date('Y-m-d'),
     'financingId' => $opp->getId(),
 ]);
