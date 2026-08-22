@@ -1302,8 +1302,31 @@ Per [EspoCRM Tests](https://docs.espocrm.com/development/tests/):
 **Deploy gate:** push to `main` → CI `test` (PHPStan + PHPUnit) → only then `deploy` to production. Prod server does not run tests and does not need a test database.
 
 - **`vendor/bin/phpunit`** / **`vendor/bin/phpstan`** at project root (root `composer.json`).
-- **`bin/smoke-*.php` kept** for ad-hoc local probes.
+- **`bin/smoke-*.php` kept** for ad-hoc local probes only; they do **not** replace PHPUnit.
 - **Never** run tests/smokes on production (`refuse-production.php`).
+
+### TEST-002 — Mandatory tests for every new feature (REQUIRED)
+
+**Every change that adds or materially alters backend behaviour MUST include PHPUnit tests** before merge, following [EspoCRM Tests](https://docs.espocrm.com/development/tests/). This is not optional and is enforced by GitHub CI (`ci.yml` job `test`).
+
+| What you changed | Where to add tests | Base class / style |
+| ---------------- | ------------------ | ------------------ |
+| Pure PHP (formatters, date ranges, cron builders, validators) | `tests/unit/Espo/Modules/{Module}/` | `PHPUnit\Framework\TestCase` |
+| Metadata, Installer, ORM entities, hooks, workflows, integrations | `tests/integration/Espo/Modules/{Module}/` | extend `tests\integration\Espo\Support\SafehouseBaseTestCase` |
+| Core compatibility (Espo version, module registration) | `tests/unit/Espo/Core/` or `tests/integration/Espo/Core/` | as appropriate |
+
+**Workflow for agents and humans:**
+
+1. Implement the feature in `custom/Espo/Modules/…`.
+2. Add or extend PHPUnit tests covering the acceptance criteria (happy path + one meaningful edge case when cheap).
+3. Run **`ddev exec bash bin/run-tests.sh`** locally — must be green before push.
+4. Push to `main` or open PR — CI re-runs the same suite on ephemeral `db_test`.
+5. Do **not** mark a Notion task Done until CI is green (or PR is ready with passing checks).
+
+**Naming:** `{Feature}Test.php` under the module namespace, e.g. `tests/integration/Espo/Modules/NonprofitEspocrm/FundraisingProgressTest.php`.
+
+**When smokes still help:** keep `bin/smoke-*.php` for manual DDEV probes (REST catalog, Google OAuth, long lifecycle scripts). When a smoke covers stable behaviour, **port its assertions into PHPUnit** and leave the smoke as optional local tooling.
+
 **Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-*.php`, applied `bin/migrate-*.php`, `bin/export-*-config.php`, `bin/import-*-config.php`, `bin/export-integration-settings.php`, `bin/import-integration-settings.php`, `Tools/Migration/*`, `bin/test-gcal-full-lifecycle.php`, `bin/cleanup-gcal-e2e.php`, `bin/oneshot-*`, `bin/print-prima-nota-*.php`, `bin/set-prima-nota-opening-cash.php`, `bin/qa-run-stripe-status-sim.sh`, `bin/smoke-activity-offer.php`, `bin/smoke-role-acl-lastname.php`, `bin/cleanup-test-api-users.php`, `Tools\RoleSetup`, rebuild `ProvisionRoleAcl`. Future role/migration work = ephemeral `_tmp-oneshot-*.php` + self-delete only.
 
 **Epic 7 smokes (local):**

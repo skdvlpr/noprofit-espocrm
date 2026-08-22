@@ -8,21 +8,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# shellcheck source=lib/read-espo-version.sh
+source "$ROOT_DIR/bin/lib/read-espo-version.sh"
+
 if [[ -f /.dockerenv ]] || [[ -n "${DDEV_PROJECT:-}" ]]; then
     IN_DDEV=1
 else
     IN_DDEV=0
 fi
-
-run_php() {
-    if [[ "$IN_DDEV" -eq 1 ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
-        php "$@"
-    elif command -v ddev >/dev/null 2>&1 && ddev describe >/dev/null 2>&1; then
-        ddev exec php "$@"
-    else
-        php "$@"
-    fi
-}
 
 run_composer() {
     if [[ "$IN_DDEV" -eq 1 ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
@@ -56,7 +49,7 @@ FLUSH PRIVILEGES;
     fi
 }
 
-VERSION="$(run_php command.php version | tr -d '\r\n')"
+VERSION="$(read_espo_version)"
 BUILD_NAME="EspoCRM-${VERSION}"
 BUILD_DIR="$ROOT_DIR/build/${BUILD_NAME}"
 

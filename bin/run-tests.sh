@@ -8,6 +8,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# shellcheck source=lib/read-espo-version.sh
+source "$ROOT_DIR/bin/lib/read-espo-version.sh"
+
 if [[ -f /.dockerenv ]] || [[ -n "${DDEV_PROJECT:-}" ]]; then
     IN_DDEV=1
 else
@@ -34,7 +37,7 @@ run_local() {
     fi
 }
 
-VERSION="$(run php command.php version | tr -d '\r\n')"
+VERSION="$(read_espo_version)"
 BUILD_DIR="build/EspoCRM-${VERSION}"
 
 if [[ ! -f "${BUILD_DIR}/bootstrap.php" ]]; then
