@@ -1329,7 +1329,7 @@ Coverage target: **all custom modules** under `custom/Espo/Modules/` (NonprofitE
 
 **Naming:** `{Feature}Test.php`, e.g. `tests/integration/Espo/Modules/NonprofitEspocrm/FundraisingProgressTest.php`.
 
-**Honest gap:** the suite is **not yet complete** for every custom hook/job/ACL path. Expanding coverage of remaining custom surfaces is mandatory ongoing work — new features must not widen the gap.
+**Honest gap (tracking):** suite now covers the majority of custom PHP (validators, shift planning service flows, Prima Nota hooks, WorkflowEngine services/actions, GoogleIntegration pure helpers + hooks/metadata, BugTracker hooks, reporting stats, food parcel, web push, jobs smoke, rebuild registration, Aurora themes). Remaining gaps are mostly **live Google OAuth/API** paths and a few heavy export/mail side-effects — those stay as `bin/smoke-*.php` until mocked. New custom code must still land with PHPUnit before merge.
 
 **Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-*.php`, applied `bin/migrate-*.php`, `bin/export-*-config.php`, `bin/import-*-config.php`, `bin/export-integration-settings.php`, `bin/import-integration-settings.php`, `Tools/Migration/*`, `bin/test-gcal-full-lifecycle.php`, `bin/cleanup-gcal-e2e.php`, `bin/oneshot-*`, `bin/print-prima-nota-*.php`, `bin/set-prima-nota-opening-cash.php`, `bin/qa-run-stripe-status-sim.sh`, `bin/smoke-activity-offer.php`, `bin/smoke-role-acl-lastname.php`, `bin/cleanup-test-api-users.php`, `Tools\RoleSetup`, rebuild `ProvisionRoleAcl`. Future role/migration work = ephemeral `_tmp-oneshot-*.php` + self-delete only.
 

@@ -74,6 +74,19 @@ ensure_test_database
 echo "Installing composer dependencies (including dev: phpunit, phpstan)..."
 run_composer install --no-interaction --no-progress
 
+TEST_INSTALL_DIR="$ROOT_DIR/build/test"
+echo "Syncing integration test install: ${TEST_INSTALL_DIR}"
+rm -rf "$TEST_INSTALL_DIR"
+cp -r "$BUILD_DIR" "$TEST_INSTALL_DIR"
+mkdir -p "$TEST_INSTALL_DIR/data/cache" "$TEST_INSTALL_DIR/data/upload" "$TEST_INSTALL_DIR/data/logs"
+chmod -R a+rwX "$TEST_INSTALL_DIR/data" 2>/dev/null || true
+
+APP_MTIME="$(stat -c %Y "${BUILD_DIR}/application" 2>/dev/null || stat -f %m "${BUILD_DIR}/application")"
+CONFIG_PHP="$ROOT_DIR/tests/integration/config.php"
+if [[ -f "$CONFIG_PHP" ]] && [[ -n "$APP_MTIME" ]]; then
+    sed -i "s/'lastModifiedTime' => [0-9]*/'lastModifiedTime' => ${APP_MTIME}/" "$CONFIG_PHP"
+fi
+
 echo ""
 echo "Done. Canonical commands:"
 echo "  vendor/bin/phpunit tests/unit"
