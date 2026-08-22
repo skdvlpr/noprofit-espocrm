@@ -1,0 +1,14 @@
+parameters:
+    level: 5
+    inferPrivatePropertyTypeFromConstructor: true
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - custom/Espo/Modules
+    reportUnmatchedIgnoredErrors: false
+    excludePaths:
+        analyse:
+            - custom/Espo/Modules/*/vendor/*
+            - custom/Espo/Modules/*/libs/*/vendor/*
+
+includes:
+    - phpstan-baseline.neon

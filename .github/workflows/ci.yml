@@ -1,0 +1,134 @@
+name: CI
+
+# PHPUnit + PHPStan on GitHub-hosted runner with an ephemeral MySQL (db_test).
+# Deploy to production runs only after tests pass (main only).
+#
+# @see https://docs.espocrm.com/development/tests/
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-nonprofit-espocrm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: db_test
+          MYSQL_USER: espo_test
+          MYSQL_PASSWORD: espo_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      TEST_DATABASE_HOST: 127.0.0.1
+      TEST_DATABASE_PORT: 3306
+      TEST_DATABASE_NAME: db_test
+      TEST_DATABASE_USER: espo_test
+      TEST_DATABASE_PASSWORD: espo_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, dom, curl, zip, gd, exif, pdo_mysql, iconv
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Build test snapshot (grunt test equivalent)
+        run: bash bin/test-build.sh
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse -c phpstan.neon
+
+      - name: PHPUnit (unit)
+        run: vendor/bin/phpunit tests/unit
+
+      - name: PHPUnit (integration on db_test)
+        run: vendor/bin/phpunit tests/integration
+
+  deploy:
+    needs: [test]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${DEPLOY_SSH_PORT:-22}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync repository to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+          DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE }}
+        run: |
+          set -euo pipefail
+          DELETE_FLAG=""
+          if [ "${DEPLOY_RSYNC_DELETE:-0}" = "1" ]; then
+            DELETE_FLAG="--delete --delete-excluded"
+          fi
+          rsync -rlptz --human-readable $DELETE_FLAG \
+            -e "ssh -p ${DEPLOY_SSH_PORT:-22} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            --exclude-from=deploy/rsync-excludes.txt \
+            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+      - name: Post-deploy (rebuild only if already installed)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_SSH_PORT:-22}" -i ~/.ssh/deploy_key \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" "DEPLOY_PATH='${DEPLOY_PATH}' bash -se" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          if [ -f data/config.php ]; then
+            echo "Espo is installed — rebuild + clear cache only."
+            echo "NOTE: do not run bin/*.php provisioning scripts on production (refuse-production policy)."
+            php command.php rebuild || php rebuild.php || true
+          else
+            echo "Espo is NOT installed yet."
+            echo "Finish setup in the browser: https://crm.safehouse.community/install/"
+          fi
+          REMOTE

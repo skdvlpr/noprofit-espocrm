@@ -1285,6 +1285,25 @@ All of the following are **local DDEV / CI only**. They include `refuse-producti
 | `bin/lib/refuse-production.php` | Hard prod block for all bin PHP |
 | `bin/lib/ephemeral-oneshot.php` | Self-delete helper for disposable oneshots |
 
+### TEST-001 — Canonical PHPUnit / PHPStan (Espo docs)
+
+Per [EspoCRM Tests](https://docs.espocrm.com/development/tests/):
+
+| Layer | Path | Command |
+| ----- | ---- | ------- |
+| **Unit** | `tests/unit/` | `vendor/bin/phpunit tests/unit` |
+| **Integration** | `tests/integration/` | `vendor/bin/phpunit tests/integration` |
+| **Static analysis** | `custom/Espo/Modules/` + `phpstan.neon` | `vendor/bin/phpstan analyse -c phpstan.neon` |
+| **Local full suite** | DDEV | `ddev exec bash bin/run-tests.sh` |
+| **CI (GitHub Actions)** | ephemeral MariaDB `db_test` on ubuntu-latest | workflow `.github/workflows/ci.yml` job `test` |
+
+**Integration tests never use dev/prod CRM data.** Each class installs a fresh Espo under `build/test` using `tests/integration/config.php` → **`db_test`**. Locally: `ddev exec bash bin/test-build.sh` creates `db_test` in DDEV. In CI: GitHub Actions **MariaDB service** creates `db_test` automatically — nothing to configure on production.
+
+**Deploy gate:** push to `main` → CI `test` (PHPStan + PHPUnit) → only then `deploy` to production. Prod server does not run tests and does not need a test database.
+
+- **`vendor/bin/phpunit`** / **`vendor/bin/phpstan`** at project root (root `composer.json`).
+- **`bin/smoke-*.php` kept** for ad-hoc local probes.
+- **Never** run tests/smokes on production (`refuse-production.php`).
 **Removed on purpose (do not recreate as long-lived CLIs):** `bin/setup-roles.php`, `bin/setup-production-access.php`, `bin/provision-production.php`, `bin/seed-*.php`, applied `bin/migrate-*.php`, `bin/export-*-config.php`, `bin/import-*-config.php`, `bin/export-integration-settings.php`, `bin/import-integration-settings.php`, `Tools/Migration/*`, `bin/test-gcal-full-lifecycle.php`, `bin/cleanup-gcal-e2e.php`, `bin/oneshot-*`, `bin/print-prima-nota-*.php`, `bin/set-prima-nota-opening-cash.php`, `bin/qa-run-stripe-status-sim.sh`, `bin/smoke-activity-offer.php`, `bin/smoke-role-acl-lastname.php`, `bin/cleanup-test-api-users.php`, `Tools\RoleSetup`, rebuild `ProvisionRoleAcl`. Future role/migration work = ephemeral `_tmp-oneshot-*.php` + self-delete only.
 
 **Epic 7 smokes (local):**

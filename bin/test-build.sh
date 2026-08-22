@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Prepare canonical Espo integration test build (grunt test equivalent).
+# Creates build/EspoCRM-{version}/ snapshot and ensures db_test exists (DDEV only).
+#
+# @see https://docs.espocrm.com/development/tests/
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+if [[ -f /.dockerenv ]] || [[ -n "${DDEV_PROJECT:-}" ]]; then
+    IN_DDEV=1
+else
+    IN_DDEV=0
+fi
+
+run_php() {
+    if [[ "$IN_DDEV" -eq 1 ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+        php "$@"
+    elif command -v ddev >/dev/null 2>&1 && ddev describe >/dev/null 2>&1; then
+        ddev exec php "$@"
+    else
+        php "$@"
+    fi
+}
+
+run_composer() {
+    if [[ "$IN_DDEV" -eq 1 ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+        composer "$@"
+    elif command -v ddev >/dev/null 2>&1 && ddev describe >/dev/null 2>&1; then
+        ddev composer "$@"
+    else
+        composer "$@"
+    fi
+}
+
+ensure_test_database() {
+    if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+        echo "CI: using GitHub Actions MySQL service (database from workflow env)."
+        return 0
+    fi
+
+    local sql="
+CREATE DATABASE IF NOT EXISTS db_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON db_test.* TO 'db'@'%';
+FLUSH PRIVILEGES;
+"
+
+    if [[ "$IN_DDEV" -eq 1 ]]; then
+        mysql -uroot -proot -h db -e "$sql"
+    elif command -v ddev >/dev/null 2>&1 && ddev describe >/dev/null 2>&1; then
+        ddev mysql -e "$sql"
+    else
+        echo "ERROR: DDEV is required to provision db_test locally." >&2
+        exit 1
+    fi
+}
+
+VERSION="$(run_php command.php version | tr -d '\r\n')"
+BUILD_NAME="EspoCRM-${VERSION}"
+BUILD_DIR="$ROOT_DIR/build/${BUILD_NAME}"
+
+echo "Espo version: ${VERSION}"
+echo "Building test snapshot: ${BUILD_DIR}"
+
+mkdir -p "$ROOT_DIR/build"
+rm -rf "$BUILD_DIR"
+
+rsync -a \
+    --exclude 'build/' \
+    --exclude 'data/' \
+    --exclude '.git/' \
+    --exclude 'node_modules/' \
+    --exclude '.phpunit.cache/' \
+    --exclude '.ddev/' \
+    "$ROOT_DIR/" "$BUILD_DIR/"
+
+echo "Ensuring integration test database db_test exists..."
+ensure_test_database
+
+echo "Installing composer dependencies (including dev: phpunit, phpstan)..."
+run_composer install --no-interaction --no-progress
+
+echo ""
+echo "Done. Canonical commands:"
+echo "  vendor/bin/phpunit tests/unit"
+echo "  vendor/bin/phpunit tests/integration"
+echo "  vendor/bin/phpstan analyse -c phpstan.neon"
+echo "  bash bin/run-tests.sh"

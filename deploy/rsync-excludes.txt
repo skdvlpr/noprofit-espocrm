@@ -16,6 +16,7 @@
 
 # Local-only maintenance CLIs (never ship smokes/seeds/migrations to prod)
 bin/smoke-*.php
+bin/run-tests.sh
 bin/seed-*.php
 bin/migrate-*.php
 bin/test-*.php
@@ -49,6 +50,10 @@ bin/lib/mailpit-smtp-for-smoke.php
 # Build / dev artifacts
 /dist/
 /build/
+/tests/
+/phpunit.xml
+/phpstan.neon
+/phpstan-baseline.neon
 /node_modules/
 *.log
 *.sql

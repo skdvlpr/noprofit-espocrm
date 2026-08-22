@@ -1,0 +1,715 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/BugTracker/Hooks/BugReport/AfterSaveCleanupScreenshots.php
+
+		-
+			message: '#^Constant Espo\\Modules\\BugTracker\\Hooks\\BugReport\\BeforeSavePrepare\:\:REPORTER_ALLOWED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/BugTracker/Hooks/BugReport/BeforeSavePrepare.php
+
+		-
+			message: '#^Method Espo\\Modules\\BugTracker\\Tools\\Installer\:\:ensureEmailTemplate\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: custom/Espo/Modules/BugTracker/Tools/Installer.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:setLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: custom/Espo/Modules/GoogleIntegration/Hooks/Common/PerDateGoogleCalendarBeforeSave.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Hooks/Common/PerDateGoogleCalendarBeforeSave.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Hooks/ExternalAccount/CalendarSyncMode.php
+
+		-
+			message: '#^Parameter \#2 \$actorOverride of method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\EventPusher\:\:pushSharedTargetsIfRequested\(\) expects Espo\\Entities\\User\|null, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Jobs/PushGoogleCalendarEntity.php
+
+		-
+			message: '#^Parameter \#2 \$pushUserOverride of method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\EventPusher\:\:pushIfRequested\(\) expects Espo\\Entities\\User\|null, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Jobs/PushGoogleCalendarEntity.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/Api/GetTemplateForForm.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getValueObject\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarDisplayDateResolver.php
+
+		-
+			message: '#^Property Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\CalendarProvisioner\:\:\$log is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarProvisioner.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:isActive\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Espo\\Core\\ApplicationUser\:\:setUser\(\) expects Espo\\Entities\\User, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\CalendarSyncRunner\:\:syncCrmToGoogle\(\) expects Espo\\Entities\\User, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\CalendarSyncRunner\:\:syncGoogleToCrm\(\) expects Espo\\Entities\\User, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
+
+		-
+			message: '#^Method Espo\\ORM\\Repository\\RDBRepository\<Espo\\ORM\\Entity\>\:\:find\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CrmDateSourceEventFetcher.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<\(int\|string\)\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/DateSourceEntityTypesReader.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Cannot unset offset ''colorId'' on array\{summary\: string, description\: string, start\: mixed, end\: mixed, reminders\: array\{useDefault\: bool, overrides\: array\<int, array\{method\: string, minutes\: int\}\>\}, extendedProperties\: array\{private\: array\{espocrmEntityType\: string, espocrmEntityId\: non\-empty\-string, espocrmSourceDateType\: string, espocrmUserId\: non\-empty\-string\}\}, location\?\: string, visibility\?\: ''default''\|''private''\|''public'', \.\.\.\}\.$#'
+			identifier: unset.offset
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Method Espo\\Core\\Acl\:\:checkEntityEdit\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\EventPusher\:\:getAllowedSourceDateTypes\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\EventPusher\:\:toDateOnlyValue\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php
+
+		-
+			message: '#^Method Espo\\Core\\Acl\:\:checkEntityEdit\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\EventRemover\:\:resolveGoogleClient\(\) expects Espo\\Entities\\User, Espo\\ORM\\Entity given\.$#'
+			identifier: argument.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventRemover.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\GoogleCalendarCapableEntities\:\:googleCalendarDetailPanelRows\(\) should return array\<int, array\<string, mixed\>\> but returns array\<int, list\<array\<string, bool\|string\>\|bool\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarCapableEntities.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\GoogleCalendarCapableEntities\:\:sharedOptionsEn\(\) should return array\<string, array\<string, string\>\> but returns array\<string, array\<int\|string, string\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarCapableEntities.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\GoogleCalendarCapableEntities\:\:sharedOptionsIt\(\) should return array\<string, array\<string, string\>\> but returns array\<string, array\<int\|string, string\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarCapableEntities.php
+
+		-
+			message: '#^Method Espo\\Modules\\GoogleIntegration\\Tools\\Calendar\\GoogleCalendarCapableEntities\:\:sharedOptionsRu\(\) should return array\<string, array\<string, string\>\> but returns array\<string, array\<int\|string, string\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarCapableEntities.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:loadLinkMultipleField\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEntityLifecycle.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEntityLifecycle.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarEntityLifecycle.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarExportGuard.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/GoogleCalendarExportGuard.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/ManagerCalendarShare.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/ManagerCalendarShare.php
+
+		-
+			message: '#^Call to function is_string\(\) with ''Call''\|''Meeting''\|''Opportunity''\|''Task'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Installer.php
+
+		-
+			message: '#^Offset ''targetEntityType'' on array\{name\: ''Call — default'', targetEntityType\: ''Call'', summaryTemplate\: ''\{\{name\}\}'', descriptionTemplate\: "\{\{name\}\}\\n\\n\{…", reminderMode\: ''none'', transparency\: ''opaque''\}\|array\{name\: ''Meeting — default'', targetEntityType\: ''Meeting'', summaryTemplate\: ''\{\{name\}\}'', descriptionTemplate\: "\{\{name\}\}\\n\\n\{…", reminderMode\: ''none'', transparency\: ''opaque''\}\|array\{name\: ''Opportunity —…'', targetEntityType\: ''Opportunity'', summaryTemplate\: ''\{\{name\}\}'', descriptionTemplate\: ''\{\{name\}\} \| \{…'', reminderMode\: ''none'', transparency\: ''opaque''\}\|array\{name\: ''Task — default'', targetEntityType\: ''Task'', summaryTemplate\: ''\{\{name\}\}'', descriptionTemplate\: "\{\{name\}\}\\n\\n\{…", reminderMode\: ''none'', transparency\: ''opaque''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Installer.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''Call''\|''Meeting''\|''Opportunity''\|''Task'' and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Installer.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Espo\\ORM\\EntityCollection\|Espo\\ORM\\SthCollection and array\{\} will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/GoogleIntegration/Tools/Installer.php
+
+		-
+			message: '#^Call to function is_string\(\) with non\-falsy\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: custom/Espo/Modules/NonprofitEspocrm/Controllers/ActivityOffer.php
+
+		-
+			message: '#^Call to function is_string\(\) with non\-falsy\-string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Controllers/ActivityOfferSlot.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 2
+			path: custom/Espo/Modules/NonprofitEspocrm/Controllers/PrimaNota.php
+
+		-
+			message: '#^Argument of an invalid type stdClass supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Core/Utils/Metadata/AdditionalBuilder/DefaultAssignedUser.php
+
+		-
+			message: '#^Argument of an invalid type stdClass supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Core/Utils/Metadata/AdditionalBuilder/QuickViewDefaultNavigation.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Hooks/Contact/SyncFoodParcelRegistrations.php
+
+		-
+			message: '#^Call to function is_string\(\) with ''Opportunity'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Calendar/SafehouseGoogleCalendarProvisioner.php
+
+		-
+			message: '#^Offset ''targetEntityType'' on array\{name\: ''Grants & Funding —…'', targetEntityType\: ''Opportunity'', summaryTemplate\: ''\{\{name\}\}'', descriptionTemplate\: ''Grants & Funding\: \{…'', reminderMode\: ''none'', transparency\: ''opaque'', colorId\: ''10''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Calendar/SafehouseGoogleCalendarProvisioner.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''Opportunity'' and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Calendar/SafehouseGoogleCalendarProvisioner.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getAttributeParam\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/EmailTemplate/TemplatePlaceholderHelper.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getRelationParam\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/EmailTemplate/TemplatePlaceholderHelper.php
+
+		-
+			message: '#^Method Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\NamedExport\:\:setParams\(\) should return Espo\\Modules\\NonprofitEspocrm\\Tools\\Export\\NamedExport but returns Espo\\Tools\\Export\\Export\.$#'
+			identifier: return.type
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Export/NamedExport.php
+
+		-
+			message: '#^PHPDoc tag @extends has invalid value \(ExportCollection\)\: Unexpected token "\\n ", expected ''\<'' at offset 590 on line 11$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Export/Support/BufferedExportCollection.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\FoodParcel\\FoodParcelPdfService\:\:\$acl is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/FoodParcel/FoodParcelPdfService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\FoodParcel\\FoodParcelPdfService\:\:\$config is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/FoodParcel/FoodParcelPdfService.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/InviteResponseService.php
+
+		-
+			message: '#^Dead catch \- RuntimeException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/PrimaNota/StripeBulkPullService.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/Api/GetAssociationMealCountTotals.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/Api/GetInterventionTotals.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/Api/GetMealCountTotals.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/Api/GetPrimaNotaTotals.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftChangeNotifyService.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:loadLinkMultipleField\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftChangeNotifyService.php
+
+		-
+			message: '#^Method Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftChangeNotifyService\:\:saveInviteAllowStatus\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftChangeNotifyService.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:DAY_OFFSET is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:SLOT_COVERED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:SLOT_PUBLISHED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:STATUS_CLOSED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:STATUS_COMPLETED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\AvailabilityWorkflow\:\:TERMINAL_SLOT_STATUSES is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Offset ''comment'' on array\{status\: mixed, comment\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/PlanLifecycleManager.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\PlanLifecycleManager\:\:DAY_OFFSET is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/PlanLifecycleManager.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\PlanLifecycleManager\:\:INVITE_AVAILABLE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/PlanLifecycleManager.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\PlanLifecycleManager\:\:INVITE_CANCELLED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/PlanLifecycleManager.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\PlanLifecycleManager\:\:INVITE_DECLINED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/PlanLifecycleManager.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:INVITE_DECLINED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:SLOT_COVERED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:SLOT_PUBLISHED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:STATUS_COLLECTING is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:STATUS_CONFIRMED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:STATUS_DRAFT is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:STATUS_PLANNED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:STATUS_UPDATED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\ShiftPlanningSupport\:\:TERMINAL_SLOT_STATUSES is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^PHPDoc tag @return with type array\<string, string\> is incompatible with native type bool\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:INVITE_ASSIGNED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:INVITE_AVAILABLE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:INVITE_CANCELLED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:INVITE_CONFIRMED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:INVITE_DECLINED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:SLOT_COVERED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:SLOT_PUBLISHED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:STATUS_CLOSED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:STATUS_COMPLETED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:STATUS_CONFIRMED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:STATUS_PLANNED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:STATUS_UPDATED is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Constant Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanning\\WeekSlotSynchronizer\:\:TERMINAL_SLOT_STATUSES is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/WeekSlotSynchronizer.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningInstaller.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Espo\\Modules\\NonprofitEspocrm\\Tools\\BadRequest\|Espo\\Modules\\NonprofitEspocrm\\Tools\\Forbidden\|Espo\\Modules\\NonprofitEspocrm\\Tools\\NotFound is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 14
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Espo\\Modules\\NonprofitEspocrm\\Tools\\Forbidden\|Espo\\Modules\\NonprofitEspocrm\\Tools\\NotFound is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 4
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$acl is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$entityManager is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$language is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$shiftChangeNotifyService is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$shiftCoverageSyncService is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$shiftEmailService is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Property Espo\\Modules\\NonprofitEspocrm\\Tools\\ShiftPlanningService\:\:\$user is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getLinkMultipleIdList\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/UserContactProfileSync.php
+
+		-
+			message: '#^Offset ''birthDate''\|''birthPlace''\|''birthProvince''\|''endDate''\|''extra''\|''isOccasional''\|''monthlyHours''\|''startDate''\|''taxCode''\|''weeklyHours'' on array\{memberNotes\: ''notes''\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: custom/Espo/Modules/NonprofitEspocrm/Tools/UserContactProfileSync.php
+
+		-
+			message: '#^Access to an undefined property Espo\\Modules\\WorkflowEngine\\Controllers\\WorkflowDefinition\:\:\$entityManager\.$#'
+			identifier: property.notFound
+			count: 2
+			path: custom/Espo/Modules/WorkflowEngine/Controllers/WorkflowDefinition.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getAttributeParam\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/WorkflowEngine/Services/TemplateRenderer.php
+
+		-
+			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getRelationParam\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: custom/Espo/Modules/WorkflowEngine/Services/TemplateRenderer.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<mixed, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: custom/Espo/Modules/WorkflowEngine/Services/ValueResolver.php
