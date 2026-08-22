@@ -59,7 +59,8 @@ abstract class SafehouseBaseTestCase extends BaseTestCase
 
     /**
      * Google calendar export fields are injected via metadata only for entity types with
-     * active CalendarDateSource rows. Post-install may fail on a cold db_test install.
+     * active CalendarDateSource rows. Post-install may fail on a cold db_test install, or
+     * stop after seeding rows but before the metadata rebuild that exposes the fields.
      */
     private function ensureGoogleCalendarDateSources(): void
     {
@@ -74,45 +75,53 @@ abstract class SafehouseBaseTestCase extends BaseTestCase
             return;
         }
 
+        if ($metadata->get(['entityDefs', 'Meeting', 'fields', 'saveToGoogleCalendar'])) {
+            return;
+        }
+
         $hasActive = $em->getRDBRepository('CalendarDateSource')
             ->where(['deleted' => false, 'isActive' => true])
             ->count() > 0;
 
-        if ($hasActive) {
-            return;
-        }
+        if (!$hasActive) {
+            foreach (\Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateSourceDefaults::sources() as $source) {
+                $targetEntityType = $source['targetEntityType'] ?? '';
 
-        foreach (\Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateSourceDefaults::sources() as $source) {
-            $targetEntityType = $source['targetEntityType'] ?? '';
+                if (
+                    !is_string($targetEntityType)
+                    || $targetEntityType === ''
+                    || !$metadata->get(['scopes', $targetEntityType, 'entity'])
+                ) {
+                    continue;
+                }
 
-            if (
-                !is_string($targetEntityType)
-                || $targetEntityType === ''
-                || !$metadata->get(['scopes', $targetEntityType, 'entity'])
-            ) {
-                continue;
+                $existing = $em->getRDBRepository('CalendarDateSource')
+                    ->where([
+                        'targetEntityType' => $targetEntityType,
+                        'sourceDateType' => $source['sourceDateType'],
+                        'deleted' => false,
+                    ])
+                    ->findOne();
+
+                if ($existing !== null) {
+                    continue;
+                }
+
+                $em->saveEntity($em->createEntity('CalendarDateSource', array_merge([
+                    'isActive' => true,
+                    'calendarViewEnabled' => true,
+                ], $source)));
             }
-
-            $existing = $em->getRDBRepository('CalendarDateSource')
-                ->where([
-                    'targetEntityType' => $targetEntityType,
-                    'sourceDateType' => $source['sourceDateType'],
-                    'deleted' => false,
-                ])
-                ->findOne();
-
-            if ($existing !== null) {
-                continue;
-            }
-
-            $em->saveEntity($em->createEntity('CalendarDateSource', array_merge([
-                'isActive' => true,
-                'calendarViewEnabled' => true,
-            ], $source)));
         }
 
         (new \Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceEntityTypesReader())
             ->writeCacheFromDatabase();
+
+        try {
+            $this->getDataManager()->rebuild();
+        } catch (\Throwable) {
+            // Rebuild can fail on a partial install; metadata init below is still attempted.
+        }
 
         $metadata->init(true);
     }
