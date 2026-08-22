@@ -154,13 +154,13 @@ class DateSourceEntityTypesReader
 
         $cwd = getcwd();
 
-        if (is_string($cwd) && $cwd !== '') {
+        if ($cwd !== false) {
             $candidates[] = rtrim(str_replace('\\', '/', $cwd), '/');
         }
 
         $envRoot = getenv('ESPOCRM_INSTALL_ROOT');
 
-        if (is_string($envRoot) && $envRoot !== '') {
+        if ($envRoot !== false && $envRoot !== '') {
             $candidates[] = rtrim(str_replace('\\', '/', $envRoot), '/');
         }
 
