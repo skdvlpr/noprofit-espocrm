@@ -588,6 +588,24 @@ $ok(
     is_dir(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect')
         || is_file(__DIR__ . '/../client/custom/modules/nonprofit-espocrm/res/img/kb-google-connect/00-admin-integrazioni.jpg')
 );
+echo "\nOAuth reconnect token preservation\n";
+
+$authHandlerSource = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/OAuth/AuthorizationCodeHandler.php'
+) ?: '';
+$googleClientSource = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Core/ExternalAccount/Clients/Google.php'
+) ?: '';
+
+$ok(
+    'AuthorizationCodeHandler does not clear refreshToken during reconnect',
+    !str_contains($authHandlerSource, "clear('refreshToken')")
+);
+$ok(
+    'Google OAuth client only returns non-empty refreshToken',
+    str_contains($googleClientSource, 'RefreshToken::fromAuthorizationResult')
+        && !str_contains($googleClientSource, "\$data['refreshToken'] = \$result['refresh_token'] ?? null;")
+);
 $ok('Dead admin template-modal view removed', !is_file(__DIR__ . '/../client/custom/modules/google-integration/src/views/admin/integrations/template-modal.js'));
 $eventSettingsView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-opportunity-event-settings.js') ?: '';
 $templateLinkView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/google-calendar-template-link.js') ?: '';
