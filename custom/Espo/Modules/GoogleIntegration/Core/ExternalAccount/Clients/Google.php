@@ -6,6 +6,7 @@ use Espo\Core\Exceptions\Error;
 use Espo\Core\ExternalAccount\Clients\Google as BaseGoogle;
 use Espo\Core\ExternalAccount\OAuth2\Client;
 use Espo\Core\Utils\Json;
+use Espo\Modules\GoogleIntegration\Tools\OAuth\RefreshToken;
 use Throwable;
 
 /**
@@ -30,7 +31,7 @@ class Google extends BaseGoogle
      *   accessToken: ?string,
      *   tokenType: ?string,
      *   expiresAt: ?string,
-     *   refreshToken: ?string,
+     *   refreshToken?: string,
      * }
      */
     public function getAccessTokenFromAuthorizationCode(string $code)
@@ -63,7 +64,12 @@ class Google extends BaseGoogle
         $result = $response['result'];
 
         $data = $this->getAccessTokenDataFromResponseResult($result);
-        $data['refreshToken'] = $result['refresh_token'] ?? null;
+
+        $refreshToken = RefreshToken::fromAuthorizationResult($result);
+
+        if ($refreshToken !== null) {
+            $data['refreshToken'] = $refreshToken;
+        }
 
         if (empty($data['accessToken'])) {
             $this->logTokenExchangeFailure($response);
