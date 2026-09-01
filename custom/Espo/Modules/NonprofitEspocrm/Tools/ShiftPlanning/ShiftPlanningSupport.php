@@ -189,10 +189,24 @@ class ShiftPlanningSupport
     }
 
     /**
-     * Open shifts for selective pack resend (not Cancelled / Completed).
+     * Shifts volunteers can still answer on (same filter as availabilityGrid).
+     * Covered stays respondable so withdraw / re-request are not silent no-ops
+     * after autoAssign flips Published → Covered. Auto-assign stays Published-only.
      *
      * @return Entity[]
      */
+    public function getRespondableSlots(string $offerId): array
+    {
+        return array_values(array_filter(
+            $this->getSlots($offerId),
+            static fn (Entity $slot): bool => in_array(
+                (string) $slot->get('status'),
+                ['Published', 'Covered'],
+                true
+            )
+        ));
+    }
+
     /**
      * Open shifts for selective pack resend (not Cancelled / Completed).
      *
@@ -200,14 +214,7 @@ class ShiftPlanningSupport
      */
     public function getResendableSlots(string $offerId): array
     {
-        return array_values(array_filter(
-            $this->getSlots($offerId),
-            static fn (Entity $slot): bool => !in_array(
-                (string) $slot->get('status'),
-                ['Cancelled', 'Completed'],
-                true
-            )
-        ));
+        return $this->getRespondableSlots($offerId);
     }
 
     /**
