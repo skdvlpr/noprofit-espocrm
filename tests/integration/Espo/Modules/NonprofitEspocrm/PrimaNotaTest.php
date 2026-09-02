@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace tests\integration\Espo\Modules\NonprofitEspocrm;
 
-use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\ApplicationUser;
+use Espo\Core\InjectableFactory;
+use Espo\Entities\User;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
+use Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota\ProtectStripeSourcedFields;
 use Espo\ORM\Repository\Option\SaveOption;
+use Espo\ORM\Repository\Option\SaveOptions;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
 /**
@@ -352,7 +356,7 @@ class PrimaNotaTest extends SafehouseBaseTestCase
         $this->assertSame('C', $saved->get('modelDClassification'));
     }
 
-    public function testIncompleteStripeIngestAllowsOneTimeBackfill(): void
+    public function testIncompleteStripeIngestAllowsSystemBackfill(): void
     {
         $em = $this->getEntityManager();
         $marker = $this->uniqueMarker();
@@ -394,6 +398,77 @@ class PrimaNotaTest extends SafehouseBaseTestCase
         $this->assertBadRequest(function () use ($em, $saved): void {
             $entity = $em->getEntityById('PrimaNota', $saved->getId());
             $entity->set('commissionAmount', 1.0);
+            $em->saveEntity($entity);
+        }, 'Stripe', 'stripeSourcedReadOnly');
+    }
+
+    public function testIncompleteStripeIngestBlocksInteractiveMoneyEdit(): void
+    {
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+
+        $row = $em->getNewEntity('PrimaNota');
+        $row->set([
+            'description' => 'PHPUnit Stripe incomplete interactive',
+            'entryType' => 'Income',
+            'internalClassification' => 'Donation',
+            'donationPaymentProvider' => 'Stripe',
+            'donationPaymentReference' => 'PHPUNIT-INCOMPLETE-UI-' . $marker,
+            'amountGross' => 5.0,
+            'amountGrossCurrency' => 'EUR',
+            'commissionAmount' => 0,
+            'commissionAmountCurrency' => 'EUR',
+            'amount' => 5.0,
+            'amountCurrency' => 'EUR',
+            'transactionDate' => date('Y-m-d'),
+        ]);
+        $em->saveEntity($row, [SaveOption::SKIP_ALL => true]);
+
+        $admin = $this->getAdminUser();
+        $this->assertFalse($admin->isApi());
+        $this->assertFalse($admin->isSystem());
+        $this->assertNotSame(User::TYPE_API, $admin->get('type'));
+        $this->assertNotSame(User::TYPE_SYSTEM, $admin->get('type'));
+
+        $this->getContainer()->getByClass(ApplicationUser::class)->setUser($admin);
+
+        /** @var ProtectStripeSourcedFields $hook */
+        $hook = $this->getContainer()
+            ->getByClass(InjectableFactory::class)
+            ->create(ProtectStripeSourcedFields::class);
+
+        $entity = $em->getEntityById('PrimaNota', $row->getId());
+        $entity->set('amountGross', 9999.0);
+        $entity->set('amountGrossCurrency', 'EUR');
+
+        $this->assertBadRequest(function () use ($hook, $entity): void {
+            $hook->beforeSave($entity, SaveOptions::fromAssoc([]));
+        }, 'Stripe', 'stripeSourcedReadOnly');
+    }
+
+    public function testGapFillDoesNotAllowEmptyToValueMoneyWrite(): void
+    {
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+
+        $row = $em->getNewEntity('PrimaNota');
+        $row->set([
+            'description' => 'PHPUnit Stripe gap-fill money',
+            'entryType' => 'Income',
+            'internalClassification' => 'Donation',
+            'donationPaymentProvider' => 'Stripe',
+            'donationPaymentReference' => 'PHPUNIT-GAP-MONEY-' . $marker,
+            'amount' => 0,
+            'amountCurrency' => 'EUR',
+            'transactionDate' => date('Y-m-d'),
+            'stripeChargeId' => 'ch_phpunit_gap_money',
+        ]);
+        $em->saveEntity($row, [SaveOption::SKIP_ALL => true]);
+
+        $this->assertBadRequest(function () use ($em, $row): void {
+            $entity = $em->getEntityById('PrimaNota', $row->getId());
+            $entity->set('amountGross', 42.0);
+            $entity->set('amountGrossCurrency', 'EUR');
             $em->saveEntity($entity);
         }, 'Stripe', 'stripeSourcedReadOnly');
     }

@@ -20,12 +20,13 @@ use Espo\ORM\Repository\Option\SaveOptions;
  * Trusted site/API sync users (config safehouseStripeSyncUserNames / Ids) may
  * overwrite Stripe-sourced attrs so webhook + «Aggiorna da Stripe» keep CRM in sync.
  *
- * Incomplete ingest window: if stripeChargeId is still empty, allow one-time
- * backfill of Stripe-sourced attributes (thank-you raced ahead of BalanceTransaction).
+ * Incomplete ingest window: if stripeChargeId is still empty, allow settlement /
+ * enrichment backfill only for API or system actors (website webhook / CLI).
+ * Interactive users stay fully locked — the incomplete race must not reopen the ledger.
  *
- * Gap fill: even after charge id is set, allow writing a Stripe-sourced attribute
- * only when the fetched (DB) value is empty and the incoming value is non-empty
- * (covers email-type / partial backfill gaps without reopening money fields).
+ * Gap fill: even after charge id is set, allow writing a non-money Stripe-sourced
+ * attribute only when the fetched (DB) value is empty and the incoming value is
+ * non-empty (covers email/enrichment gaps without reopening money or paymentStatus).
  *
  * System retries: SaveOption::SKIP_ALL.
  */
@@ -98,6 +99,47 @@ class ProtectStripeSourcedFields implements BeforeSave
         'stripePayoutPaidAt',
     ];
 
+    /**
+     * Never gap-fill money / status / identity lock columns.
+     *
+     * @var list<string>
+     */
+    private const NO_GAP_FILL_ATTRIBUTES = [
+        'amount',
+        'amountCurrency',
+        'amountGross',
+        'amountGrossCurrency',
+        'commissionAmount',
+        'commissionAmountCurrency',
+        'commissionPercent',
+        'amountIn',
+        'amountInCurrency',
+        'amountOut',
+        'amountOutCurrency',
+        'entryType',
+        'transactionDate',
+        'internalClassification',
+        'donationPaymentProvider',
+        'donationPaymentReference',
+        'paymentStatus',
+        'financingId',
+        'subjectPartyId',
+        'subjectPartyType',
+        'beneficiaryPartyId',
+        'beneficiaryPartyType',
+        'createSubjectAccount',
+        'createSubjectContact',
+        'createBeneficiaryAccount',
+        'createBeneficiaryContact',
+        'stripeChargeId',
+        'stripeBalanceTransactionId',
+        'stripeCustomerId',
+        'stripeSubscriptionId',
+        'stripeInvoiceId',
+        'stripePayoutId',
+        'stripePayoutPaidAt',
+    ];
+
     public function __construct(
         Language $language,
         private User $user,
@@ -124,8 +166,19 @@ class ProtectStripeSourcedFields implements BeforeSave
             return;
         }
 
-        // Incomplete Stripe ingest (no charge id yet) — allow settlement/enrichment backfill.
+        // Incomplete Stripe ingest (no charge id yet) — webhook/system settlement only.
         if ($this->isIncompleteStripeIngest($entity)) {
+            if ($this->actorMaySettleIncompleteIngest()) {
+                return;
+            }
+
+            // Interactive users: hard-lock every Stripe-sourced attr (no gap-fill escape).
+            foreach (self::STRIPE_SOURCED_ATTRIBUTES as $attribute) {
+                if ($entity->isAttributeChanged($attribute)) {
+                    throw new BadRequest($this->msg('stripeSourcedReadOnly'));
+                }
+            }
+
             return;
         }
 
@@ -140,6 +193,12 @@ class ProtectStripeSourcedFields implements BeforeSave
 
             throw new BadRequest($this->msg('stripeSourcedReadOnly'));
         }
+    }
+
+    private function actorMaySettleIncompleteIngest(): bool
+    {
+        // Website API user (type=api) or CLI/system jobs. Interactive staff stay locked.
+        return $this->user->isApi() || $this->user->isSystem();
     }
 
     private function isTrustedStripeSyncUser(): bool
@@ -183,10 +242,15 @@ class ProtectStripeSourcedFields implements BeforeSave
 
     /**
      * Allow one-way fill of empty Stripe-sourced attrs (e.g. emails dropped by
-     * field-type quirks on an earlier partial backfill). Never overwrite a set value.
+     * field-type quirks on an earlier partial backfill). Never overwrite a set
+     * value and never gap-fill money / status / identity lock columns.
      */
     private function isEmptyToValueFill(Entity $entity, string $attribute): bool
     {
+        if (in_array($attribute, self::NO_GAP_FILL_ATTRIBUTES, true)) {
+            return false;
+        }
+
         $fetched = $entity->getFetched($attribute);
         if (!$this->isEmptyAttributeValue($fetched)) {
             return false;
