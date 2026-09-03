@@ -73,6 +73,8 @@
     },
     "messages": {
         "removeRecordConfirmationContactOnly": "This contact is linked to a user. Only the Contact will be deleted — the User account will remain.",
-        "removeSelectedRecordsConfirmationContactOnly": "At least one selected contact is linked to a user. Only Contact records will be deleted — linked User accounts will remain."
+        "removeSelectedRecordsConfirmationContactOnly": "At least one selected contact is linked to a user. Only Contact records will be deleted — linked User accounts will remain.",
+        "cannotLinkContactToOtherUser": "You cannot link this contact to another user.",
+        "cannotLinkContactToPortalUser": "You cannot link this contact to a portal user."
     }
 }
