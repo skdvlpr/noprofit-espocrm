@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace tests\integration\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Core\ApplicationUser;
 use Espo\Core\FieldSanitize\SanitizeManager;
+use Espo\Core\HookManager;
+use Espo\Core\InjectableFactory;
 use Espo\Entities\User;
+use Espo\Modules\NonprofitEspocrm\Hooks\Contact\ProtectLinkedUser;
+use Espo\ORM\Repository\Option\SaveOption;
+use Espo\ORM\Repository\Option\SaveOptions;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
 /**
- * Contact hooks: SyncIsUser, SyncOccasionalToUser, Italian fiscal code validation.
+ * Contact hooks: SyncIsUser, SyncOccasionalToUser, ProtectLinkedUser, Italian fiscal code.
  */
 class ContactHooksTest extends SafehouseBaseTestCase
 {
@@ -127,5 +133,135 @@ class ContactHooksTest extends SafehouseBaseTestCase
         $manager->process('Contact', $data);
 
         $this->assertSame('RSSMRA85T10A562S', $data->taxCode);
+    }
+
+    public function testProtectLinkedUserBlocksRegularActorBindingAnotherUser(): void
+    {
+        $volunteer = $this->createRegularUser('bindvol');
+        $victim = $this->createRegularUser('bindvictim');
+
+        $hook = $this->protectLinkedUserHook($volunteer);
+        $contact = $this->getEntityManager()->getNewEntity('Contact');
+        $contact->set([
+            'firstName' => 'Bind',
+            'lastName' => 'Attack',
+            'linkedUserId' => $victim->getId(),
+            'assignedUserId' => $volunteer->getId(),
+        ]);
+
+        $this->assertForbidden(
+            fn () => $hook->beforeSave($contact, SaveOptions::fromAssoc([]))
+        );
+    }
+
+    public function testProtectLinkedUserAllowsSelfLinkAndUnlink(): void
+    {
+        $volunteer = $this->createRegularUser('selfvol');
+        $hook = $this->protectLinkedUserHook($volunteer);
+
+        $self = $this->getEntityManager()->getNewEntity('Contact');
+        $self->set([
+            'firstName' => 'Self',
+            'lastName' => 'Link',
+            'linkedUserId' => $volunteer->getId(),
+        ]);
+        $hook->beforeSave($self, SaveOptions::fromAssoc([]));
+
+        $unlink = $this->getEntityManager()->getNewEntity('Contact');
+        $unlink->set([
+            'firstName' => 'Un',
+            'lastName' => 'Link',
+        ]);
+        $hook->beforeSave($unlink, SaveOptions::fromAssoc([]));
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function testProtectLinkedUserBlocksRegularActorBindingPortalUser(): void
+    {
+        $volunteer = $this->createRegularUser('portalvol');
+        $portal = $this->createUser([
+            'userName' => 'phpunit_portal_' . $this->uniqueMarker(),
+            'firstName' => 'PHPUnit',
+            'lastName' => 'Portal',
+            'type' => 'portal',
+            'isActive' => true,
+        ], null, true);
+
+        $hook = $this->protectLinkedUserHook($volunteer);
+        $contact = $this->getEntityManager()->getNewEntity('Contact');
+        $contact->set([
+            'firstName' => 'Portal',
+            'lastName' => 'Bind',
+            'portalUserId' => $portal->getId(),
+        ]);
+
+        $this->assertForbidden(
+            fn () => $hook->beforeSave($contact, SaveOptions::fromAssoc([]))
+        );
+    }
+
+    public function testProtectLinkedUserSkipAllStillAllowsForeignBind(): void
+    {
+        $volunteer = $this->createRegularUser('skipvol');
+        $victim = $this->createRegularUser('skipvictim');
+        $hook = $this->protectLinkedUserHook($volunteer);
+
+        $contact = $this->getEntityManager()->getNewEntity('Contact');
+        $contact->set([
+            'firstName' => 'Skip',
+            'lastName' => 'All',
+            'linkedUserId' => $victim->getId(),
+        ]);
+        $hook->beforeSave($contact, SaveOptions::fromAssoc([SaveOption::SKIP_ALL => true]));
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function testProtectLinkedUserSaveAsRegularUserRejectsForeignBind(): void
+    {
+        $volunteer = $this->createRegularUser('savevol');
+        $victim = $this->createRegularUser('savevictim');
+
+        $this->getContainer()->getByClass(ApplicationUser::class)->setUser($volunteer);
+        $this->resetHookInstances();
+
+        $em = $this->getEntityManager();
+        $contact = $em->getNewEntity('Contact');
+        $contact->set([
+            'firstName' => 'Save',
+            'lastName' => 'Attack',
+            'linkedUserId' => $victim->getId(),
+            'assignedUserId' => $volunteer->getId(),
+        ]);
+
+        $this->assertForbidden(fn () => $em->saveEntity($contact));
+    }
+
+    private function createRegularUser(string $prefix): User
+    {
+        return $this->createUser([
+            'userName' => 'phpunit_' . $prefix . '_' . $this->uniqueMarker(),
+            'firstName' => 'PHPUnit',
+            'lastName' => ucfirst($prefix),
+            'type' => 'regular',
+            'isActive' => true,
+        ]);
+    }
+
+    private function protectLinkedUserHook(User $user): ProtectLinkedUser
+    {
+        $factory = $this->getContainer()->getByClass(InjectableFactory::class);
+
+        return $factory->createWith(ProtectLinkedUser::class, [
+            'user' => $user,
+        ]);
+    }
+
+    private function resetHookInstances(): void
+    {
+        $hookManager = $this->getContainer()->getByClass(HookManager::class);
+        $prop = new \ReflectionProperty($hookManager, 'hooks');
+        $prop->setValue($hookManager, []);
     }
 }

@@ -28,3 +28,4 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `004-constitution-v1.2.0-ddev-caddy.md` | Constitution XVIII local↔prod (DDEV/Caddy) |
 | `005-implement-compliance-audit.md` | Implement audit + report |
 | `010-compliance-audit-report.md` | **Canonical compliance audit report** |
+| `011-protect-linked-user.md` | ProtectLinkedUser identity-bind guard |
