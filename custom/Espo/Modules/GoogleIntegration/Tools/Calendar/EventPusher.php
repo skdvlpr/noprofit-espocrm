@@ -107,6 +107,9 @@ class EventPusher
                     . $entity->getEntityType() . ' ' . $entity->getId()
                 );
 
+                // Dates cleared / all selected sources empty: still drop stale Google events.
+                $this->removeStaleDateSourceLinksIfNeeded($entity, $tokenUser, []);
+
                 return;
             }
 
@@ -134,9 +137,7 @@ class EventPusher
                 $syncedDateTypes[] = $item['sourceDateType'];
             }
 
-            if ($this->hasCalendarDateSources($entity->getEntityType())) {
-                $this->eventRemover->removeStaleDateSourceLinks($entity, $tokenUser, $syncedDateTypes);
-            }
+            $this->removeStaleDateSourceLinksIfNeeded($entity, $tokenUser, $syncedDateTypes);
         } finally {
             $this->pushUserOverride = $previousOverride;
             $this->sharedWriteActive = $previousShared;
@@ -388,6 +389,21 @@ class EventPusher
     private function hasCalendarDateSources(string $entityType): bool
     {
         return $this->dateSourceProvider->getActiveSourcesForEntityType($entityType) !== [];
+    }
+
+    /**
+     * @param list<string> $syncedDateTypes
+     */
+    private function removeStaleDateSourceLinksIfNeeded(
+        Entity $entity,
+        User $tokenUser,
+        array $syncedDateTypes
+    ): void {
+        if (!$this->hasCalendarDateSources($entity->getEntityType())) {
+            return;
+        }
+
+        $this->eventRemover->removeStaleDateSourceLinks($entity, $tokenUser, $syncedDateTypes);
     }
 
     /**
