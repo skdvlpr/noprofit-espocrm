@@ -5,7 +5,10 @@ namespace Espo\Modules\NonprofitEspocrm\Hooks\PrimaNota;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Name\Field;
+use Espo\Core\ORM\Repository\Option\SaveOption as CoreSaveOption;
 use Espo\Core\Utils\Language;
+use Espo\Entities\EmailAddress;
+use Espo\Entities\PhoneNumber;
 use Espo\Modules\Crm\Entities\Account;
 use Espo\Modules\Crm\Entities\Contact;
 use Espo\ORM\Entity;
@@ -13,6 +16,8 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Name\Attribute;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
+use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 
 /**
  * Syncs payment-subject and beneficiary names from linkParent fields
@@ -111,17 +116,41 @@ class SubjectParty implements BeforeSave
     private function findByEmailOrPhone(string $entityType, string $email, string $phone): ?Entity
     {
         if ($email !== '') {
-            $byEmail = $this->entityManager
-                ->getRDBRepository($entityType)
-                ->where(['emailAddress' => $email])
-                ->findOne();
+            $emailRepo = $this->entityManager->getRDBRepository(EmailAddress::ENTITY_TYPE);
 
-            if ($byEmail) {
-                return $byEmail;
+            if ($emailRepo instanceof EmailAddressRepository) {
+                $byEmail = $emailRepo->getEntityByAddress($email, $entityType);
+
+                if ($byEmail) {
+                    return $byEmail;
+                }
+            } else {
+                $byEmail = $this->entityManager
+                    ->getRDBRepository($entityType)
+                    ->where(['emailAddress' => $email])
+                    ->findOne();
+
+                if ($byEmail) {
+                    return $byEmail;
+                }
             }
         }
 
         if ($phone !== '') {
+            $phoneRepo = $this->entityManager->getRDBRepository(PhoneNumber::ENTITY_TYPE);
+
+            if ($phoneRepo instanceof PhoneNumberRepository) {
+                $phoneEntity = $phoneRepo->getByNumber($phone);
+
+                if ($phoneEntity) {
+                    $byPhone = $phoneRepo->getEntityByPhoneNumberId($phoneEntity->getId(), $entityType);
+
+                    if ($byPhone) {
+                        return $byPhone;
+                    }
+                }
+            }
+
             $byPhone = $this->entityManager
                 ->getRDBRepository($entityType)
                 ->where(['phoneNumber' => $phone])
@@ -151,21 +180,43 @@ class SubjectParty implements BeforeSave
     {
         $changed = false;
 
-        $existingEmail = trim((string) ($party->get('emailAddress') ?? ''));
-        if ($existingEmail === '' && $email !== '') {
+        if ($email !== '' && !$this->partyHasEmail($party)) {
             $party->set('emailAddress', $email);
             $changed = true;
         }
 
-        $existingPhone = trim((string) ($party->get('phoneNumber') ?? ''));
-        if ($existingPhone === '' && $phone !== '') {
+        if ($phone !== '' && !$this->partyHasPhone($party)) {
             $party->set('phoneNumber', $phone);
             $changed = true;
         }
 
         if ($changed) {
-            $this->entityManager->saveEntity($party, [SaveOption::SKIP_ALL => true]);
+            // email/phone are non-storable; FieldProcessing afterSave savers must run.
+            // SKIP_ALL skips those hooks and silently drops the channels.
+            $this->entityManager->saveEntity($party, [CoreSaveOption::SILENT => true]);
         }
+    }
+
+    private function partyHasEmail(Entity $party): bool
+    {
+        $repo = $this->entityManager->getRDBRepository(EmailAddress::ENTITY_TYPE);
+
+        if ($repo instanceof EmailAddressRepository) {
+            return $repo->getEmailAddressData($party) !== [];
+        }
+
+        return trim((string) ($party->get('emailAddress') ?? '')) !== '';
+    }
+
+    private function partyHasPhone(Entity $party): bool
+    {
+        $repo = $this->entityManager->getRDBRepository(PhoneNumber::ENTITY_TYPE);
+
+        if ($repo instanceof PhoneNumberRepository) {
+            return $repo->getPhoneNumberData($party) !== [];
+        }
+
+        return trim((string) ($party->get('phoneNumber') ?? '')) !== '';
     }
 
     private function createAndLinkAccount(Entity $entity, string $prefix, string $partyName, string $email, string $phone): void

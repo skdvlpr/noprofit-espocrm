@@ -179,6 +179,40 @@ $ok(
         && $createdContactParty->get('phoneNumber') === '+390555502222'
 );
 
+$phoneOnlyContact = $em->getNewEntity(Contact::ENTITY_TYPE);
+$phoneOnlyContact->set([
+    'firstName' => 'Phone',
+    'lastName' => 'Only',
+    'phoneNumber' => '+390555509999',
+]);
+$em->saveEntity($phoneOnlyContact);
+
+$phoneMatch = $em->getNewEntity('PrimaNota');
+$phoneMatch->set([
+    'description' => 'Smoke phone-match email backfill',
+    'entryType' => 'Income',
+    'amountGross' => 13.5,
+    'amountGrossCurrency' => 'EUR',
+    'transactionDate' => date('Y-m-d'),
+    'subjectName' => 'Phone Only',
+    'subjectEmailAddress' => 'phone-only-backfill@example.com',
+    'subjectPhoneNumber' => '+390555509999',
+    'createSubjectContact' => true,
+]);
+$em->saveEntity($phoneMatch);
+$phoneOnlyFresh = $em->getEntityById(Contact::ENTITY_TYPE, (string) $phoneOnlyContact->getId());
+$ok(
+    'phone-match reuses existing contact',
+    $phoneMatch->get('subjectPartyId') === $phoneOnlyContact->getId(),
+    (string) $phoneMatch->get('subjectPartyId')
+);
+$ok(
+    'phone-match backfills email on existing contact',
+    $phoneOnlyFresh !== null
+        && $phoneOnlyFresh->get('emailAddress') === 'phone-only-backfill@example.com'
+        && $phoneOnlyFresh->get('phoneNumber') === '+390555509999'
+);
+
 $manual = $em->getNewEntity('PrimaNota');
 $manual->set([
     'description' => 'Smoke manual subject',
@@ -349,6 +383,7 @@ $rows = [
     $linkedContact,
     $createdAccount,
     $createdContact,
+    $phoneMatch,
     $manual,
     $linkedBeneficiaryAccount,
     $linkedBeneficiaryContact,
@@ -377,6 +412,7 @@ foreach ($createdParties as $party) {
 
 $em->removeEntity($beneficiaryContact);
 $em->removeEntity($beneficiaryAccount);
+$em->removeEntity($phoneOnlyContact);
 $em->removeEntity($contact);
 $em->removeEntity($account);
 
