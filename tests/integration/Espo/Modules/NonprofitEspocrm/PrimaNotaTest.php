@@ -179,6 +179,82 @@ class PrimaNotaTest extends SafehouseBaseTestCase
         $this->assertSame('anna-' . $marker . '@example.com', $party->get('emailAddress'));
     }
 
+    public function testSubjectPartyPhoneMatchBackfillsEmailOnExistingContact(): void
+    {
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+        $phone = '+39' . str_pad((string) (crc32($marker) % 1000000000), 9, '0', STR_PAD_LEFT);
+
+        $contact = $em->getNewEntity(Contact::ENTITY_TYPE);
+        $contact->set([
+            'firstName' => 'Phone',
+            'lastName' => 'Only ' . $marker,
+            'phoneNumber' => $phone,
+        ]);
+        $em->saveEntity($contact);
+
+        $this->assertSame($phone, $contact->get('phoneNumber'));
+        $this->assertSame('', trim((string) ($contact->get('emailAddress') ?? '')));
+
+        $row = $em->getNewEntity('PrimaNota');
+        $row->set([
+            'description' => 'PHPUnit phone-match email backfill',
+            'entryType' => 'Income',
+            'amountGross' => 15,
+            'amountGrossCurrency' => 'EUR',
+            'transactionDate' => date('Y-m-d'),
+            'subjectName' => 'Phone Only ' . $marker,
+            'subjectEmailAddress' => 'phone-backfill-' . $marker . '@example.com',
+            'subjectPhoneNumber' => $phone,
+            'createSubjectContact' => true,
+        ]);
+        $em->saveEntity($row);
+
+        $this->assertSame($contact->getId(), $row->get('subjectPartyId'));
+
+        $fresh = $em->getEntityById(Contact::ENTITY_TYPE, $contact->getId());
+        $this->assertNotNull($fresh);
+        $this->assertSame('phone-backfill-' . $marker . '@example.com', $fresh->get('emailAddress'));
+        $this->assertSame($phone, $fresh->get('phoneNumber'));
+    }
+
+    public function testSubjectPartyPhoneMatchDoesNotOverwriteExistingEmail(): void
+    {
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+        $phone = '+39' . str_pad((string) ((crc32($marker) + 1) % 1000000000), 9, '0', STR_PAD_LEFT);
+        $existingEmail = 'keep-' . $marker . '@example.com';
+
+        $contact = $em->getNewEntity(Contact::ENTITY_TYPE);
+        $contact->set([
+            'firstName' => 'Keep',
+            'lastName' => 'Email ' . $marker,
+            'emailAddress' => $existingEmail,
+            'phoneNumber' => $phone,
+        ]);
+        $em->saveEntity($contact);
+
+        $row = $em->getNewEntity('PrimaNota');
+        $row->set([
+            'description' => 'PHPUnit phone-match keep email',
+            'entryType' => 'Income',
+            'amountGross' => 16,
+            'amountGrossCurrency' => 'EUR',
+            'transactionDate' => date('Y-m-d'),
+            'subjectName' => 'Keep Email ' . $marker,
+            'subjectEmailAddress' => 'overwrite-' . $marker . '@example.com',
+            'subjectPhoneNumber' => $phone,
+            'createSubjectContact' => true,
+        ]);
+        $em->saveEntity($row);
+
+        $this->assertSame($contact->getId(), $row->get('subjectPartyId'));
+
+        $fresh = $em->getEntityById(Contact::ENTITY_TYPE, $contact->getId());
+        $this->assertNotNull($fresh);
+        $this->assertSame($existingEmail, $fresh->get('emailAddress'));
+    }
+
     public function testSubjectPartyPreservesManualNameWithoutLink(): void
     {
         $em = $this->getEntityManager();
