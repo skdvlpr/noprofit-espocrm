@@ -75,6 +75,65 @@ class ReportingStatsTest extends SafehouseBaseTestCase
         $this->assertArrayHasKey('managementBalance', $totals);
     }
 
+    public function testPrimaNotaStatsExcludeDonorPocketAndCash(): void
+    {
+        $em = $this->getEntityManager();
+        $factory = $this->getContainer()->getByClass(InjectableFactory::class);
+        $provider = $factory->create(PrimaNotaStatsProvider::class);
+
+        $pocket = $em->getNewEntity('PrimaNota');
+        $pocket->set([
+            'description' => 'PHPUnit donor pocket ' . bin2hex(random_bytes(2)),
+            'entryType' => 'Expense',
+            'internalClassification' => 'Supplies',
+            'donationPaymentProvider' => 'DonorPocket',
+            'amountGross' => 61.56,
+            'amountGrossCurrency' => 'EUR',
+            'commissionAmount' => 0.0,
+            'paymentStatus' => 'Inviato',
+            'transactionDate' => date('Y-m-d'),
+        ]);
+        $em->saveEntity($pocket);
+
+        $pocketTotals = $provider->getTotals(null, ['id' => $pocket->getId()]);
+        $this->assertEqualsWithDelta(0.0, (float) ($pocketTotals['amountOut'] ?? 0.0), 0.001);
+        $this->assertEqualsWithDelta(0.0, (float) ($pocketTotals['amountIn'] ?? 0.0), 0.001);
+
+        $digital = $em->getNewEntity('PrimaNota');
+        $digital->set([
+            'description' => 'PHPUnit digital counted ' . bin2hex(random_bytes(2)),
+            'entryType' => 'Income',
+            'internalClassification' => 'Other',
+            'donationPaymentProvider' => 'BankTransfer',
+            'amountGross' => 12.0,
+            'amountGrossCurrency' => 'EUR',
+            'commissionAmount' => 0.0,
+            'paymentStatus' => 'Inviato',
+            'transactionDate' => date('Y-m-d'),
+        ]);
+        $em->saveEntity($digital);
+
+        $digitalTotals = $provider->getTotals(null, ['id' => $digital->getId()]);
+        $this->assertEqualsWithDelta(12.0, (float) ($digitalTotals['amountIn'] ?? 0.0), 0.01);
+
+        $cash = $em->getNewEntity('PrimaNota');
+        $cash->set([
+            'description' => 'PHPUnit cash excluded ' . bin2hex(random_bytes(2)),
+            'entryType' => 'Income',
+            'internalClassification' => 'Other',
+            'donationPaymentProvider' => 'Cash',
+            'amountGross' => 99.0,
+            'amountGrossCurrency' => 'EUR',
+            'commissionAmount' => 0.0,
+            'paymentStatus' => 'Inviato',
+            'transactionDate' => date('Y-m-d'),
+        ]);
+        $em->saveEntity($cash);
+
+        $cashTotals = $provider->getTotals(null, ['id' => $cash->getId()]);
+        $this->assertEqualsWithDelta(0.0, (float) ($cashTotals['amountIn'] ?? 0.0), 0.001);
+    }
+
     public function testInterventionStatsProviderTotals(): void
     {
         $em = $this->getEntityManager();

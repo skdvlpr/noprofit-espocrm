@@ -249,9 +249,64 @@ class PrimaNotaTest extends SafehouseBaseTestCase
         $row = $em->getEntityById('PrimaNota', $row->getId());
 
         $this->assertBadRequest(function () use ($em, $row): void {
-            $row->set('donationPaymentProvider', 'Cash');
+            $row->set('donationPaymentProvider', 'Stripe');
             $em->saveEntity($row);
         }, 'cannot be changed', 'non può essere modificata', 'platformImmutable');
+    }
+
+    public function testFormulaSetsExcludeFromDigitalReportsFromPlatform(): void
+    {
+        $em = $this->getEntityManager();
+
+        $pocket = $this->newPrimaNotaManual([
+            'entryType' => 'Expense',
+            'internalClassification' => 'Supplies',
+            'donationPaymentProvider' => 'DonorPocket',
+            'donationPaymentReference' => null,
+            'paymentStatus' => 'Inviato',
+            'amountGross' => 40.0,
+        ]);
+        $em->saveEntity($pocket);
+        $this->assertTrue((bool) $pocket->get('excludeFromDigitalReports'));
+
+        $cash = $this->newPrimaNotaManual([
+            'donationPaymentProvider' => 'Cash',
+            'paymentStatus' => 'Inviato',
+        ]);
+        $em->saveEntity($cash);
+        $this->assertTrue((bool) $cash->get('excludeFromDigitalReports'));
+
+        $bank = $this->newPrimaNotaManual([
+            'donationPaymentProvider' => 'BankTransfer',
+            'paymentStatus' => 'Inviato',
+        ]);
+        $em->saveEntity($bank);
+        $this->assertFalse((bool) $bank->get('excludeFromDigitalReports'));
+    }
+
+    public function testProtectDonationPaymentProviderAllowsNonStripePlatformChange(): void
+    {
+        $em = $this->getEntityManager();
+
+        $row = $this->newPrimaNotaManual([
+            'donationPaymentProvider' => 'BankTransfer',
+        ]);
+        $em->saveEntity($row);
+
+        $row = $em->getEntityById('PrimaNota', $row->getId());
+        $row->set('donationPaymentProvider', 'DonorPocket');
+        $em->saveEntity($row);
+
+        $saved = $em->getEntityById('PrimaNota', $row->getId());
+        $this->assertSame('DonorPocket', $saved->get('donationPaymentProvider'));
+        $this->assertTrue((bool) $saved->get('excludeFromDigitalReports'));
+
+        $saved->set('donationPaymentProvider', 'BankTransfer');
+        $em->saveEntity($saved);
+
+        $again = $em->getEntityById('PrimaNota', $saved->getId());
+        $this->assertSame('BankTransfer', $again->get('donationPaymentProvider'));
+        $this->assertFalse((bool) $again->get('excludeFromDigitalReports'));
     }
 
     public function testProtectStripeSourcedFieldsBlocksInteractiveMoneyEdit(): void

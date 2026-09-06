@@ -406,8 +406,9 @@
                 "readOnly": {
                     "conditionGroup": [
                         {
-                            "type": "isTrue",
-                            "attribute": "id"
+                            "type": "equals",
+                            "attribute": "donationPaymentProvider",
+                            "value": "Stripe"
                         }
                     ]
                 }

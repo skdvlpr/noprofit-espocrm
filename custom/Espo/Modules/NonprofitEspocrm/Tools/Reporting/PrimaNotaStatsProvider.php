@@ -21,9 +21,10 @@ class PrimaNotaStatsProvider
     public const CONFIG_OPENING_CASH_AS_OF = 'primaNotaOpeningCashAsOf';
 
     /**
-     * Income / expense totals: Inviato (plus legacy null status), never Contanti.
-     * Cancelled / Refunded / Disputed / Problematic / Planned are excluded.
-     * Cash (donationPaymentProvider) is excluded from all reporting totals/balances.
+     * Income / expense totals: Inviato (plus legacy null status), never excluded
+     * from digital reports. Cancelled / Refunded / Disputed / Problematic / Planned
+     * are excluded. Cash and DonorPocket set excludeFromDigitalReports at save;
+     * aggregations must not special-case platform names.
      *
      * @return array<string, mixed>
      */
@@ -44,7 +45,7 @@ class PrimaNotaStatsProvider
 
     /**
      * Planned forecast rows (Stripe awaiting payout / manual forecasts).
-     * Contanti excluded (same as income totals).
+     * Rows with excludeFromDigitalReports stay out (same as realised totals).
      *
      * @return array<string, mixed>
      */
@@ -108,8 +109,8 @@ class PrimaNotaStatsProvider
     }
 
     /**
-     * Digital / non-Contanti ledger (exclude donationPaymentProvider = Cash).
-     * Includes Stripe, BankTransfer, Other, card POS, null, etc. as one digital balance.
+     * Digital / organisation-account ledger: omit rows flagged
+     * excludeFromDigitalReports. Do not filter by payment-platform names.
      *
      * @return array<string, mixed>
      */
@@ -117,14 +118,14 @@ class PrimaNotaStatsProvider
     {
         return [
             'OR' => [
-                ['donationPaymentProvider!=' => 'Cash'],
-                ['donationPaymentProvider' => null],
+                ['excludeFromDigitalReports!=' => true],
+                ['excludeFromDigitalReports' => null],
             ],
         ];
     }
 
     /**
-     * Opening + cumulative digital Inviato net through today (Contanti excluded).
+     * Opening + cumulative digital Inviato net through today (excluded rows omitted).
      *
      * Config:
      * - primaNotaOpeningCashBalance (float, default 0)

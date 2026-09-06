@@ -133,11 +133,20 @@
                 "FivePerMille",
                 "BankTransfer",
                 "Cash",
+                "DonorPocket",
                 "Other"
             ],
             "default": "Other",
             "view": "nonprofit-espocrm:views/fields/donation-payment-provider",
-            "audited": true
+            "audited": true,
+            "tooltip": true
+        },
+        "excludeFromDigitalReports": {
+            "type": "bool",
+            "default": false,
+            "readOnly": true,
+            "audited": true,
+            "tooltip": true
         },
         "donationPaymentReference": {
             "type": "varchar",

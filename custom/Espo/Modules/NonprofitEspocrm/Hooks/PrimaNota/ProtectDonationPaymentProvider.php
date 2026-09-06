@@ -11,8 +11,9 @@ use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * - Platform cannot change after create (UI + API).
- * - Manual UI cannot set Stripe on create (website ingest uses type=api).
+ * - Stripe cannot be set on manual create (website ingest uses type=api).
+ * - Stripe platform cannot change after create (UI + API).
+ * - Non-Stripe platforms may change (e.g. BankTransfer ↔ DonorPocket) so exclude-from-reports can follow Formula.
  */
 class ProtectDonationPaymentProvider implements BeforeSave
 {
@@ -44,7 +45,11 @@ class ProtectDonationPaymentProvider implements BeforeSave
         }
 
         if ($entity->isAttributeChanged('donationPaymentProvider')) {
-            throw new BadRequest($this->msg('platformImmutable'));
+            $fetched = trim((string) ($entity->getFetched('donationPaymentProvider') ?? ''));
+
+            if ($this->isStripe($fetched) || $this->isStripe($provider)) {
+                throw new BadRequest($this->msg('platformImmutable'));
+            }
         }
     }
 

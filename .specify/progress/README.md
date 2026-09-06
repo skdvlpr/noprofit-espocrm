@@ -28,3 +28,7 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `004-constitution-v1.2.0-ddev-caddy.md` | Constitution XVIII local↔prod (DDEV/Caddy) |
 | `005-implement-compliance-audit.md` | Implement audit + report |
 | `010-compliance-audit-report.md` | **Canonical compliance audit report** |
+| `006-specify-prima-nota-off-books.md` | Specify `002-prima-nota-off-books` |
+| `007-plan-prima-nota-off-books.md` | Plan Phase 0–1 for off-books Prima Nota |
+| `008-tasks-prima-nota-off-books.md` | Tasks T001–T019 for off-books Prima Nota |
+| `009-implement-prima-nota-off-books.md` | Implement off-books Prima Nota (T016 prod pending deploy) |

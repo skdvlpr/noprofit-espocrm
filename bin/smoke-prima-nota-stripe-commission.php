@@ -69,6 +69,11 @@ $ok('provider options include Stripe', in_array('Stripe', $providerOptions, true
 $ok('provider options include SatispayDirect', in_array('SatispayDirect', $providerOptions, true));
 $ok('provider options include GoFundMe', in_array('GoFundMe', $providerOptions, true));
 $ok('provider options include FivePerMille', in_array('FivePerMille', $providerOptions, true));
+$ok('provider options include DonorPocket', in_array('DonorPocket', $providerOptions, true));
+$ok(
+    'excludeFromDigitalReports bool',
+    $metadata->get(['entityDefs', 'PrimaNota', 'fields', 'excludeFromDigitalReports', 'type']) === 'bool'
+);
 $itMessages = json_decode(
     (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Resources/i18n/it_IT/PrimaNota.json'),
     true
@@ -506,12 +511,30 @@ try {
     $em->saveEntity($other);
     $created[] = $other;
     $other = $em->getEntityById('PrimaNota', $other->getId());
-    $other->set('donationPaymentProvider', 'Cash');
+    $other->set('donationPaymentProvider', 'Stripe');
     $em->saveEntity($other);
 } catch (BadRequest $e) {
     $platformChangeBlocked = $isBadRequestMsg($e->getMessage(), 'cannot be changed', 'non può essere modificata', 'platformImmutable');
 }
-$ok('platform change after create → BadRequest', $platformChangeBlocked);
+$ok('Stripe platform change after create → BadRequest', $platformChangeBlocked);
+
+$nonStripePlatformChangeAllowed = false;
+try {
+    $retag = $manualBase('donorpocket');
+    $retag->set('donationPaymentProvider', 'BankTransfer');
+    $em->saveEntity($retag);
+    $created[] = $retag;
+    $retag = $em->getEntityById('PrimaNota', $retag->getId());
+    $retag->set('donationPaymentProvider', 'DonorPocket');
+    $em->saveEntity($retag);
+    $retag = $em->getEntityById('PrimaNota', $retag->getId());
+    $nonStripePlatformChangeAllowed =
+        $retag->get('donationPaymentProvider') === 'DonorPocket'
+        && (bool) $retag->get('excludeFromDigitalReports') === true;
+} catch (BadRequest $e) {
+    $nonStripePlatformChangeAllowed = false;
+}
+$ok('BankTransfer → DonorPocket allowed and excludes from digital reports', $nonStripePlatformChangeAllowed);
 
 $stripeMoneyBlocked = false;
 try {

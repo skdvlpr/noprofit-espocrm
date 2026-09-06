@@ -28,6 +28,7 @@
         "plannedBalance": "Forecast balance",
         "internalClassification": "Internal classification",
         "donationPaymentProvider": "Payment platform",
+        "excludeFromDigitalReports": "Exclude from digital reports",
         "donationPaymentReference": "Order reference",
         "donationDonorCategory": "Donor type",
         "donationComment": "Donor comment",
@@ -84,7 +85,9 @@
         "commissionAmount": "Fee in currency. Changing this recalculates %. Empty = 0. Cannot exceed gross.",
         "commissionPercent": "Fee as %. Changing this recalculates fee €. Empty = 0.",
         "transactionDate": "Required for manual entries. Not auto-filled with today. Stripe donations use the payment date from the website.",
-        "paymentStatus": "Inviato = counted in cash/totals (manual entries and Stripe after bank payout). Pianificato = Stripe charge settled but not yet paid out to the bank. Refunded/Disputed/Cancelled/Problematic = excluded from totals."
+        "paymentStatus": "Inviato = counted in cash/totals (manual entries and Stripe after bank payout). Pianificato = Stripe charge settled but not yet paid out to the bank. Refunded/Disputed/Cancelled/Problematic = excluded from totals.",
+        "donationPaymentProvider": "Donor's own pocket or account = paid by a person or their account, not the organisation digital/bank channel. Cash and this option automatically exclude the row from digital reports.",
+        "excludeFromDigitalReports": "The row stays visible in the list. When on, it is omitted from Saldo digitale and dashlet/period money totals (organisation digital/bank channel only)."
     },
     "messages": {
         "stripeSourcedReadOnly": "This ledger entry comes from Stripe. Stripe-sourced fields (including payment status) are read-only; you can change assigned user, teams, and Model D classification. Use Refresh from Stripe to update payment status.",
@@ -167,6 +170,7 @@
             "FivePerMille": "5 x 1000",
             "BankTransfer": "Bank transfer",
             "Cash": "Cash",
+            "DonorPocket": "Donor's own pocket or account",
             "Other": "Other"
         },
         "modelDClassification": {

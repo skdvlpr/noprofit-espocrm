@@ -22,6 +22,7 @@
     "internalClassification",
     "financing",
     "donationPaymentProvider",
+    "excludeFromDigitalReports",
     "donationPaymentReference",
     "donationDonorCategory",
     "donationFrequency",

@@ -69,7 +69,11 @@
             ],
             [
                 {"name": "donationPaymentProvider"},
-                {"name": "donationPaymentReference"}
+                {"name": "excludeFromDigitalReports"}
+            ],
+            [
+                {"name": "donationPaymentReference"},
+                false
             ],
             [
                 {"name": "donationDonorCategory"},

@@ -28,6 +28,7 @@
         "plannedBalance": "Previsione saldo",
         "internalClassification": "Classificazione interna",
         "donationPaymentProvider": "Piattaforma pagamento",
+        "excludeFromDigitalReports": "Escludi dai report digitali",
         "donationPaymentReference": "Riferimento ordine",
         "donationDonorCategory": "Tipo donatore",
         "donationComment": "Commento donatore",
@@ -84,7 +85,9 @@
         "commissionAmount": "Commissione in valuta. Se la cambi, la % si ricalcola. Vuoto = 0. Non puo' superare il lordo.",
         "commissionPercent": "Commissione in %. Se la cambi, l'importo commissione si ricalcola. Vuoto = 0.",
         "transactionDate": "Obbligatoria per i movimenti manuali. Non viene compilata automaticamente con oggi. Per le donazioni Stripe usa la data del pagamento dal sito.",
-        "paymentStatus": "Inviato = conteggiato nei totali/cassa (inserimenti manuali e Stripe dopo accredito in banca). Pianificato = pagamento Stripe riuscito ma non ancora versato sul conto. Rimborsato/Contestato/Annullato/Problematico = esclusi dai totali."
+        "paymentStatus": "Inviato = conteggiato nei totali/cassa (inserimenti manuali e Stripe dopo accredito in banca). Pianificato = pagamento Stripe riuscito ma non ancora versato sul conto. Rimborsato/Contestato/Annullato/Problematico = esclusi dai totali.",
+        "donationPaymentProvider": "Dalla tasca o c/c donatore = pagato da una persona o dal suo conto, non dal canale digitale/banca dell'organizzazione. Contanti e questa opzione impostano automaticamente l'esclusione dai report digitali.",
+        "excludeFromDigitalReports": "Il movimento resta visibile in elenco. Se attivo, non entra in Saldo digitale e nei totali dei dashlet (solo soldi sul canale digitale/banca dell'organizzazione)."
     },
     "messages": {
         "stripeSourcedReadOnly": "Questo movimento proviene da Stripe. I campi provenienti da Stripe (incluso lo stato pagamento) sono in sola lettura; puoi modificare assegnatario, team e classificazione modello D. Usa Aggiorna da Stripe per aggiornare lo stato pagamento.",
@@ -167,6 +170,7 @@
             "FivePerMille": "5 x 1000",
             "BankTransfer": "Bonifico bancario",
             "Cash": "Contanti",
+            "DonorPocket": "Dalla tasca o c/c donatore",
             "Other": "Altro"
         },
         "modelDClassification": {
