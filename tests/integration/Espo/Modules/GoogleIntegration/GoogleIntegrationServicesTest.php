@@ -10,6 +10,7 @@ use Espo\Core\Utils\Util;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDateTimeResolver;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarDisplayDateResolver;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\CalendarProvisioner;
+use Espo\Modules\GoogleIntegration\Tools\Calendar\CrmDateSourceEventFetcher;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\DateSourceProvider;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\GoogleCalendarExportGuard;
 use Espo\Modules\GoogleIntegration\Tools\Calendar\SyncMode;
@@ -272,5 +273,105 @@ class GoogleIntegrationServicesTest extends SafehouseBaseTestCase
         );
         $this->assertSame($appTz, $range['start']['timeZone']);
         $this->assertSame($appTz, $range['end']['timeZone']);
+    }
+
+    public function testCrmDateSourceFetcherHonorsAclAndDateRange(): void
+    {
+        if (!class_exists(CrmDateSourceEventFetcher::class)) {
+            $this->markTestSkipped('GoogleIntegration module not installed.');
+        }
+
+        $em = $this->getEntityManager();
+        $source = $em->getRDBRepository('CalendarDateSource')
+            ->where([
+                'targetEntityType' => 'Opportunity',
+                'dateField' => 'closeDate',
+                'isActive' => true,
+                'calendarViewEnabled' => true,
+                'deleted' => false,
+            ])
+            ->findOne();
+
+        if ($source === null) {
+            $this->markTestSkipped('Opportunity closeDate calendar view source not seeded.');
+        }
+
+        $marker = substr(Util::generateId(), 0, 8);
+        $inRange = date('Y-m-d');
+        $outOfRange = date('Y-m-d', strtotime('-2 years'));
+
+        $viewer = $this->createUser([
+            'userName' => 'phpunit_cds_' . $marker,
+            'firstName' => 'PHPUnit',
+            'lastName' => 'CdsViewer',
+            'type' => 'regular',
+            'isActive' => true,
+        ], [
+            'name' => 'phpunit_cds_role_' . $marker,
+            'data' => [
+                'Calendar' => [
+                    'read' => 'yes',
+                    'edit' => 'no',
+                ],
+                'Opportunity' => [
+                    'create' => 'no',
+                    'read' => 'own',
+                    'edit' => 'own',
+                    'delete' => 'no',
+                    'stream' => 'no',
+                ],
+            ],
+        ]);
+
+        $foreign = $this->createUser([
+            'userName' => 'phpunit_cds_other_' . $marker,
+            'firstName' => 'PHPUnit',
+            'lastName' => 'CdsOther',
+            'type' => 'regular',
+            'isActive' => true,
+        ]);
+
+        $ownVisible = $em->getNewEntity('Opportunity');
+        $ownVisible->set([
+            'name' => 'PHPUnit CDS own in-range ' . $marker,
+            'closeDate' => $inRange,
+            'amount' => 100,
+            'amountCurrency' => 'EUR',
+            'assignedUserId' => $viewer->getId(),
+        ]);
+        $em->saveEntity($ownVisible);
+
+        $ownHidden = $em->getNewEntity('Opportunity');
+        $ownHidden->set([
+            'name' => 'PHPUnit CDS own out-of-range ' . $marker,
+            'closeDate' => $outOfRange,
+            'amount' => 100,
+            'amountCurrency' => 'EUR',
+            'assignedUserId' => $viewer->getId(),
+        ]);
+        $em->saveEntity($ownHidden);
+
+        $foreignVisible = $em->getNewEntity('Opportunity');
+        $foreignVisible->set([
+            'name' => 'PHPUnit CDS foreign in-range ' . $marker,
+            'closeDate' => $inRange,
+            'amount' => 100,
+            'amountCurrency' => 'EUR',
+            'assignedUserId' => $foreign->getId(),
+        ]);
+        $em->saveEntity($foreignVisible);
+
+        $this->authenticate($viewer->get('userName'));
+
+        $fetcher = $this->getContainer()
+            ->getByClass(InjectableFactory::class)
+            ->create(CrmDateSourceEventFetcher::class);
+
+        $events = $fetcher->fetch($inRange . ' 00:00:00', $inRange . ' 23:59:59', ['Opportunity']);
+        $ids = array_map(static fn ($event): string => $event->getId(), $events);
+
+        $this->assertContains($ownVisible->getId(), $ids);
+        $this->assertNotContains($ownHidden->getId(), $ids);
+        $this->assertNotContains($foreignVisible->getId(), $ids);
     }
 }
