@@ -258,6 +258,15 @@ try {
         is_readable('client/custom/modules/nonprofit-espocrm/src/views/export/modals/export.js')
     );
 
+    $resolverSrc = (string) file_get_contents(
+        'custom/Espo/Modules/NonprofitEspocrm/Tools/Reporting/EmailRecipientResolver.php'
+    );
+    $ok(
+        'EmailRecipientResolver enforces record-level read before resolving email',
+        str_contains($resolverSrc, 'checkEntityRead($entity)')
+        && str_contains($resolverSrc, 'checkField($entityType, $emailField)')
+    );
+
     // Account (non-reporting): email export must send, never download-only path.
     try {
         $exporter = $injectableFactory->create(ReportingEmailExporter::class);
