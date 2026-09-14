@@ -181,6 +181,51 @@ class BugTrackerTest extends SafehouseBaseTestCase
     }
 
     #[NoTransaction]
+    public function testClosedCleanupDoesNotDestroyForeignAttachments(): void
+    {
+        if (!class_exists(\Espo\Modules\BugTracker\Tools\Installer::class)) {
+            $this->markTestSkipped('BugTracker module not installed.');
+        }
+
+        $em = $this->getEntityManager();
+
+        $foreign = $em->getRDBRepositoryByClass(Attachment::class)->getNew();
+        $foreign->set([
+            'name' => 'phpunit-foreign-document.png',
+            'type' => 'image/png',
+            'size' => 32,
+            'role' => Attachment::ROLE_ATTACHMENT,
+            'field' => 'documents',
+            'relatedType' => 'Document',
+            'parentType' => 'Document',
+            'parentId' => 'phpunit-foreign-parent',
+        ]);
+        $em->saveEntity($foreign);
+        $foreignId = $foreign->getId();
+
+        $bug = $em->getNewEntity('BugReport');
+        $bug->set([
+            'description' => 'Foreign screenshot id must be ignored.',
+            'pageUrl' => 'https://example.test/foreign-shot',
+            'pageTitle' => 'Foreign',
+            'status' => 'Closed',
+            'screenshotsIds' => [$foreignId],
+        ]);
+        $em->saveEntity($bug);
+
+        $foreignAfter = $em->getEntityById(Attachment::ENTITY_TYPE, $foreignId);
+        $this->assertNotNull($foreignAfter);
+        $this->assertSame('Document', $foreignAfter->get('parentType'));
+        $this->assertSame('phpunit-foreign-parent', $foreignAfter->get('parentId'));
+        $this->assertSame('documents', $foreignAfter->get('field'));
+        $this->assertNotContains($foreignId, $bug->getLinkMultipleIdList('screenshots') ?: []);
+
+        $em->removeEntity($bug);
+        $this->assertNotNull($em->getEntityById(Attachment::ENTITY_TYPE, $foreignId));
+        $em->removeEntity($foreignAfter);
+    }
+
+    #[NoTransaction]
     public function testBugReportMailerResolvesAndRunsCreateCloseFlow(): void
     {
         if (!class_exists(\Espo\Modules\BugTracker\Tools\Installer::class)) {
