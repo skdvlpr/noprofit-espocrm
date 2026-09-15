@@ -133,6 +133,18 @@ $closedTpl = $em->getRDBRepositoryByClass(EmailTemplate::class)
 $check('seeded new-report template', $newTpl !== null);
 $check('seeded closed template', $closedTpl !== null);
 
+$mailerSrc = (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/BugTracker/Tools/BugReportMailer.php');
+$htmlHelperSrc = (string) file_get_contents(__DIR__ . '/../custom/Espo/Modules/BugTracker/Tools/BugReportEmailHtml.php');
+$check(
+    'mailer HTML-escapes template fields',
+    str_contains($mailerSrc, 'BugReportEmailHtml::copyForTemplate')
+);
+$check(
+    'email HTML helper uses htmlspecialchars',
+    str_contains($htmlHelperSrc, 'htmlspecialchars')
+    && str_contains($htmlHelperSrc, "'description'")
+);
+
 $roles = $em->getRDBRepositoryByClass(Role::class)->find();
 $roleWithAcl = 0;
 foreach ($roles as $role) {

@@ -127,13 +127,15 @@ class BugReportMailer
                 return;
             }
 
+            $safeReport = BugReportEmailHtml::copyForTemplate($this->entityManager, $bugReport);
+
             $emailData = $this->emailTemplateProcessor->process(
                 $template,
                 EmailTemplateParams::create()->withApplyAcl(false),
                 EmailTemplateData::create()
-                    ->withParent($bugReport)
+                    ->withParent($safeReport)
                     ->withEntityHash([
-                        $bugReport->getEntityType() => $bugReport,
+                        $safeReport->getEntityType() => $safeReport,
                     ])
             );
 
