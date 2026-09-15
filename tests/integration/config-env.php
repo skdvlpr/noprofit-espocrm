@@ -3,7 +3,7 @@
 /**
  * Environment-driven integration test config (Espo upstream default).
  *
- * @see https://docs.espocrm.com/development/tests/
+ * @see https://github.com/espocrm/documentation/blob/master/docs/development/tests.md
  */
 
 require __DIR__.'/assert-test-database-env.php';

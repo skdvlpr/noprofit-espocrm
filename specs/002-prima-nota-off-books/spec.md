@@ -116,11 +116,11 @@ The two August 2026 Metro purchases paid by Mauro Latona (€61.56) and Clotilde
 
 ## Documentation Citations *(constitution IV)*
 
-| Topic | Local | Online | Why this choice |
-|-------|-------|--------|-----------------|
-| Enum + Boolean fields | `~/safehouse/espocrm-documentation/docs/administration/fields.md` | https://docs.espocrm.com/administration/fields/ | Native field types; no custom entity |
-| Entity Manager / Formula | `~/safehouse/espocrm-documentation/docs/administration/entity-manager.md`, `formula.md` | https://docs.espocrm.com/administration/entity-manager/, https://docs.espocrm.com/administration/formula/ | Auto-set exclude from platform without a new API |
-| Dynamic Logic (labels/visibility if needed) | `~/safehouse/espocrm-documentation/docs/administration/dynamic-logic.md` | https://docs.espocrm.com/administration/dynamic-logic/ | Keep the form understandable |
-| Extensions only | `~/safehouse/espocrm-documentation/docs/development/modules.md` | https://docs.espocrm.com/development/modules/ | Changes stay in the nonprofit extension |
+| Topic | Cite (GitHub) | Why this choice |
+|-------|---------------|-----------------|
+| Enum + Boolean fields | https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md | Native field types; no custom entity |
+| Entity Manager / Formula | https://github.com/espocrm/documentation/blob/master/docs/administration/entity-manager.md , https://github.com/espocrm/documentation/blob/master/docs/administration/formula.md | Auto-set exclude from platform without a new API |
+| Dynamic Logic (labels/visibility if needed) | https://github.com/espocrm/documentation/blob/master/docs/administration/dynamic-logic.md | Keep the form understandable |
+| Extensions only | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md | Changes stay in the nonprofit extension |
 
 **Why this shape:** Today digital totals already treat Contanti as a **channel**, not as “fake Cancelled”. A dedicated platform names the real-world case; a single exclude flag is what reporting must read so a future module cannot “forget OutOfPocket in a where-clause”.

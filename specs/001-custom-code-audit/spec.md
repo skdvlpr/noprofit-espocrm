@@ -169,7 +169,7 @@ and explicitly point to likely follow-on specs when relevant.
   agent can continue after context loss.
 - **FR-012**: Before deep Espo API/metadata review, the auditor MUST refresh or
   confirm freshness of the local Espo documentation clone per constitution
-  duty, and cite local + online sources for non-obvious judgments.
+  duty, and cite GitHub blob URLs (constitution I) for non-obvious judgments.
 - **FR-013**: Any local PHP / Espo CLI / rebuild / metadata probe for this
   feature MUST run via **DDEV** (`ddev exec …`). Host PHP outside DDEV is
   forbidden for project work. The report MUST note that production is served
@@ -227,22 +227,22 @@ and explicitly point to likely follow-on specs when relevant.
 
 ## Documentation Citations *(constitution IV)*
 
-Non-obvious audit judgments MUST cite both local and online sources, including
-at minimum:
+Non-obvious audit judgments MUST cite GitHub blob URLs (constitution I/IV).
+Open the matching file under the constitution Read root this turn. At minimum:
 
-| Topic | Local | Online |
-|-------|-------|--------|
-| Modules layout | `~/safehouse/espocrm-documentation/docs/development/modules.md` | https://docs.espocrm.com/development/modules/ |
-| Extension packages | `~/safehouse/espocrm-documentation/docs/development/extension-packages.md` | https://docs.espocrm.com/development/extension-packages/ |
-| Extensions admin | `~/safehouse/espocrm-documentation/docs/administration/extensions.md` | https://docs.espocrm.com/administration/extensions/ |
-| Coding practices | `~/safehouse/espocrm-documentation/docs/development/coding-practices.md` | https://docs.espocrm.com/development/coding-practices/ |
-| Hooks | `~/safehouse/espocrm-documentation/docs/development/hooks.md` | https://docs.espocrm.com/development/hooks/ |
-| ACL | `~/safehouse/espocrm-documentation/docs/development/acl.md` | https://docs.espocrm.com/development/acl/ |
-| Roles | `~/safehouse/espocrm-documentation/docs/administration/roles-management.md` | https://docs.espocrm.com/administration/roles-management/ |
-| App Secrets | `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md` | https://docs.espocrm.com/administration/app-secrets/ |
-| Entity Manager | `~/safehouse/espocrm-documentation/docs/administration/entity-manager.md` | https://docs.espocrm.com/administration/entity-manager/ |
-| Metadata | `~/safehouse/espocrm-documentation/docs/development/metadata.md` | https://docs.espocrm.com/development/metadata/ |
-| Tests | `~/safehouse/espocrm-documentation/docs/development/tests.md` | https://docs.espocrm.com/development/tests/ |
+| Topic | Cite (GitHub) |
+|-------|---------------|
+| Modules layout | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md |
+| Extension packages | https://github.com/espocrm/documentation/blob/master/docs/development/extension-packages.md |
+| Extensions admin | https://github.com/espocrm/documentation/blob/master/docs/administration/extensions.md |
+| Coding practices | https://github.com/espocrm/documentation/blob/master/docs/development/coding-practices.md |
+| Hooks | https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md |
+| ACL | https://github.com/espocrm/documentation/blob/master/docs/development/acl.md |
+| Roles | https://github.com/espocrm/documentation/blob/master/docs/administration/roles-management.md |
+| App Secrets | https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md |
+| Entity Manager | https://github.com/espocrm/documentation/blob/master/docs/administration/entity-manager.md |
+| Metadata | https://github.com/espocrm/documentation/blob/master/docs/development/metadata.md |
+| Tests | https://github.com/espocrm/documentation/blob/master/docs/development/tests.md |
 
 **Why this shape:** The feature is an audit/proposal, not a product UI change;
 doc-backed severity and native-first judgments are the acceptance surface.

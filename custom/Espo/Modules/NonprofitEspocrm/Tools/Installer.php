@@ -502,7 +502,7 @@ class Installer
      * Merge Safehouse-required entity types into Admin → Notifications
      * assignment entity list (Preferences checklists read this config).
      * Espo core default is Meeting/Call/Email only — Task is not included
-     * unless configured: https://docs.espocrm.com/development/metadata/notification-defs/
+     * unless configured: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/notification-defs.md
      */
     private function provisionAssignmentNotificationEntityList(Config $config, ConfigWriter $configWriter): void
     {

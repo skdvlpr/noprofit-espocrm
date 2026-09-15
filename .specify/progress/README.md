@@ -32,3 +32,5 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `007-plan-prima-nota-off-books.md` | Plan Phase 0–1 for off-books Prima Nota |
 | `008-tasks-prima-nota-off-books.md` | Tasks T001–T019 for off-books Prima Nota |
 | `009-implement-prima-nota-off-books.md` | Implement off-books Prima Nota (T016 prod pending deploy) |
+| `011-prod-tag-metro-off-books.md` | Prod PUT two Metro PrimaNota rows after CI deploy |
+| `012-docs-cite-github-and-constitution-v1.3.md` | Constitution v1.3.0 + GitHub Espo doc cites |

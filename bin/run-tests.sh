@@ -2,7 +2,7 @@
 # Run canonical Espo test suite (PHPStan + PHPUnit).
 # Integration tests use isolated db_test via TEST_DATABASE_* (never dev/prod DB).
 #
-# @see https://docs.espocrm.com/development/tests/
+# @see https://github.com/espocrm/documentation/blob/master/docs/development/tests.md
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

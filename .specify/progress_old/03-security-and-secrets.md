@@ -22,5 +22,6 @@
 
 ## Preferred store
 
-Administration → App Secrets — https://docs.espocrm.com/administration/app-secrets/
-Local: `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md`
+Administration → App Secrets —
+https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md
+(Read the matching file under the constitution Espo docs clone.)

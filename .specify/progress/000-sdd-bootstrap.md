@@ -13,7 +13,10 @@
 
 ## Docs pull
 
-- Local clone: `~/safehouse/espocrm-documentation`
+- Local clone (at ratification): `~/safehouse/espocrm-documentation`
+- **Superseded 2026-09-15:** constitution Read root is
+  `/home/skoksharov/espocrm-documentation`; committed cites are GitHub
+  `blob/master` (not `docs.espocrm.com`).
 - Remote: `https://github.com/espocrm/documentation/`
 - `git pull --ff-only`: already up to date
 - HEAD: `ab2a5ee338be141ffe0d1b2c29ba742432bba089` (2026-08-31, Update index.md)
@@ -46,7 +49,8 @@
 ## Verification
 
 - Constitution: no unresolved `[PLACEHOLDER]` tokens; version 1.0.0; dates ISO.
-- Espo doc citations use local paths + docs.espocrm.com URLs.
+- Espo doc citations at ratification used local paths + docs.espocrm.com URLs
+  (superseded 2026-09-15: GitHub blob/master).
 - Scope Guard: no application/feature churn.
 
 ## Blockers

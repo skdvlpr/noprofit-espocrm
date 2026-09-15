@@ -99,8 +99,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Standalone GoogleIntegration ZIP cannot resolve AMD views on stock Espo; calendar template UI breaks |
 | Evidence | `client/custom/modules/google-integration/src/views/fields/google-calendar-description-template.js`; `…/google-calendar-opportunity-event-settings.js`; `bin/build-google-integration.sh` |
 | Expectation | Module JS must resolve within own module path; extensions must not hard-depend on vertical CRM for “universal” packages |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/modules.md` |
-| Citation (online) | https://docs.espocrm.com/development/modules/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md |
 | Action type | rewrite |
 | Backlog rank | 1 |
 
@@ -114,8 +113,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Standalone WorkflowEngine email-action modal fails without NonprofitEspocrm |
 | Evidence | `client/custom/modules/workflow-engine/src/views/modals/edit-action.js` |
 | Expectation | Same as F-001; package claimed standalone |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/modules.md` |
-| Citation (online) | https://docs.espocrm.com/development/modules/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md |
 | Action type | rewrite |
 | Backlog rank | 2 |
 
@@ -129,8 +127,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Sensitive key at rest in plaintext config on server (git-excluded) |
 | Evidence | `custom/Espo/Modules/NonprofitEspocrm/Tools/WebPush/WebPushService.php` (`webPushVapidPrivateKey`) |
 | Expectation | Sensitive values prefer Administration → App Secrets |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md` |
-| Citation (online) | https://docs.espocrm.com/administration/app-secrets/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md |
 | Action type | migrate-secret |
 | Backlog rank | 3 |
 
@@ -144,8 +141,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Bearer token to donation site stored in plaintext config |
 | Evidence | `Tools/PrimaNota/StripeRefreshService.php`, `StripeBulkPullService.php` |
 | Expectation | App Secrets |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md` |
-| Citation (online) | https://docs.espocrm.com/administration/app-secrets/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md |
 | Action type | migrate-secret |
 | Backlog rank | 4 |
 
@@ -159,8 +155,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Card last4, billing emails/phones, Stripe customer ids exportable; no field-level locks in module metadata |
 | Evidence | PrimaNota fields / scopes; no `Resources/metadata/entityAcl/PrimaNota.json` |
 | Expectation | Least privilege via Roles + field-level / entityAcl |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/administration/roles-management.md`; `docs/development/acl.md` |
-| Citation (online) | https://docs.espocrm.com/administration/roles-management/; https://docs.espocrm.com/development/acl/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/roles-management.md ; https://github.com/espocrm/documentation/blob/master/docs/development/acl.md |
 | Action type | fix |
 | Backlog rank | 5 |
 
@@ -174,8 +169,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Suite ZIP validates on Espo 9.3.x while bundling modules requiring ≥10 |
 | Evidence | `NonprofitEspocrm/manifest.json` vs `WorkflowEngine/manifest.json` / `BugTracker/manifest.json`; `bin/build.sh` |
 | Expectation | Extension Manager validates top-level manifest only |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/extension-packages.md` |
-| Citation (online) | https://docs.espocrm.com/development/extension-packages/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/extension-packages.md |
 | Action type | fix |
 | Backlog rank | 6 |
 
@@ -189,8 +183,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Per-invite afterSave reloads invite collections 3× per slot to count |
 | Evidence | `Tools/ShiftCoverageSyncService.php`; `Hooks/ActivityInvite/SyncSlotCoverage.php` |
 | Expectation | Prefer DB `count`/aggregates over hydrating collections |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/orm.md` |
-| Citation (online) | https://docs.espocrm.com/development/orm/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/orm.md |
 | Action type | fix |
 | Backlog rank | 7 |
 
@@ -204,8 +197,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Common afterSave queries definitions on every entity save |
 | Evidence | `Hooks/Common/WorkflowTrigger.php`; `Services/WorkflowRunner.php` |
 | Expectation | Hooks should avoid repeated unbounded work; cache per request |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/hooks.md` |
-| Citation (online) | https://docs.espocrm.com/development/hooks/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md |
 | Action type | fix |
 | Backlog rank | 8 |
 
@@ -219,8 +211,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Unbounded Contact find + save loop in afterRemove |
 | Evidence | `Hooks/User/InactivateLinkedContacts.php` |
 | Expectation | Use sth/limit/mass update or job |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/orm.md` |
-| Citation (online) | https://docs.espocrm.com/development/orm/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/orm.md |
 | Action type | fix |
 | Backlog rank | 9 |
 
@@ -234,8 +225,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Per-team N+1 user loads; multiple unbounded finds |
 | Evidence | `Tools/ShiftPlanning/ShiftPlanningSupport.php` (+ related services) |
 | Expectation | limit/sth/id-only selects |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/orm.md` |
-| Citation (online) | https://docs.espocrm.com/development/orm/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/orm.md |
 | Action type | fix |
 | Backlog rank | 10 |
 
@@ -249,8 +239,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Assets outside `client/custom/modules/{hyphen}/` |
 | Evidence | `client/custom/css/safehouse-aurora/`; theme metadata JSON |
 | Expectation | Document intentional exception vs modules.md frontend layout |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/modules.md` |
-| Citation (online) | https://docs.espocrm.com/development/modules/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md |
 | Action type | accept-risk |
 | Backlog rank | 11 |
 
@@ -264,8 +253,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Config may point at missing theme if Themes not installed |
 | Evidence | `Tools/Installer.php` `provisionDefaultTheme` |
 | Expectation | Detect sibling module before writing theme config |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/modules.md` |
-| Citation (online) | https://docs.espocrm.com/development/modules/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md |
 | Action type | fix |
 | Backlog rank | 12 |
 
@@ -279,8 +267,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | No custom code uses AppSecret/SecretProvider today |
 | Evidence | Repo scan — only core AppSecret |
 | Expectation | Prefer App Secrets for sensitive values |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md` |
-| Citation (online) | https://docs.espocrm.com/administration/app-secrets/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md |
 | Action type | open-follow-on-spec |
 | Backlog rank | 13 |
 
@@ -294,8 +281,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Large smoke/builder surface; deferred hygiene |
 | Evidence | ~33 `bin/smoke-*.php`; 6 `bin/build*.sh`; `dist/` ZIPs present |
 | Expectation | Proper tests long-term; builders gitignore policy (constitution IX/XIV) |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/tests.md` |
-| Citation (online) | https://docs.espocrm.com/development/tests/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/tests.md |
 | Action type | open-follow-on-spec |
 | Backlog rank | 14 |
 
@@ -309,8 +295,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Full provider error bodies may hit logs |
 | Evidence | `GoogleIntegration/Core/ExternalAccount/Clients/Google.php` `logTokenExchangeFailure` |
 | Expectation | Minimize sensitive material in logs |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/development/acl.md` |
-| Citation (online) | https://docs.espocrm.com/development/acl/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/development/acl.md |
 | Action type | fix |
 | Backlog rank | 15 |
 
@@ -324,8 +309,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Impact | Cannot prove least-privilege without Role rows |
 | Evidence | Roles live in DB; static code only |
 | Expectation | Confirm Roles after RoleSetup removal |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/administration/roles-management.md` |
-| Citation (online) | https://docs.espocrm.com/administration/roles-management/ |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/roles-management.md |
 | Action type | blocked-needs-prod |
 | Backlog rank | — (partially probed on DDEV: AppSecret=0, Roles exist; fieldData matrix still open) |
 

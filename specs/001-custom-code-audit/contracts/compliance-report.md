@@ -25,7 +25,7 @@
 ## Non-negotiable rules
 
 - Never include raw secret values (research R5).
-- Every Critical/High finding MUST include local + online citation (SC-003).
+- Every Critical/High finding MUST include a GitHub blob citation (SC-003).
 - No remediation code patches presented as “done” for this feature (FR-009).
 
 ## Acceptance probe

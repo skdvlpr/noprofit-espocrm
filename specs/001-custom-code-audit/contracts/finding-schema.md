@@ -16,8 +16,7 @@
 | Impact | {plain language} |
 | Evidence | `{path or area}` (no secret values) |
 | Expectation | {what docs/constitution require} |
-| Citation (local) | `~/safehouse/espocrm-documentation/docs/...` |
-| Citation (online) | https://docs.espocrm.com/... |
+| Citation | https://github.com/espocrm/documentation/blob/master/docs/... |
 | Action type | fix \| migrate-secret \| rewrite \| accept-risk \| open-follow-on-spec \| blocked-needs-prod |
 | Backlog rank | {n or —} |
 ```

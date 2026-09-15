@@ -14,8 +14,8 @@ and the project constitution. Deliverable is an English report + ranked
 remediation backlog under `.specify/progress/` (and optional copies under this
 `specs/` folder)—**not** mass code remediations. Methodology: full inventory +
 risk-based deep dives (secrets, ACL/PII, extension boundaries, native-first
-anti-patterns, obvious performance risks), with mandatory local+online doc
-citations.
+anti-patterns, obvious performance risks), with mandatory GitHub blob
+citations (constitution I).
 
 ## Technical Context
 
@@ -23,10 +23,9 @@ citations.
 filesystem inventory, and **mandatory DDEV** PHP/Espo probes
 (`ddev exec php …` / rebuild). No host PHP. No new application language.
 
-**Primary Dependencies**: DDEV (required local runtime); local Espo docs clone
-(`~/safehouse/espocrm-documentation`, remote
-https://github.com/espocrm/documentation/); online
-https://docs.espocrm.com/; project constitution
+**Primary Dependencies**: DDEV (required local runtime); Espo docs clone
+(constitution Read root; remote https://github.com/espocrm/documentation/;
+cite `blob/master` in artifacts); project constitution
 `.specify/memory/constitution.md`; existing trees under
 `custom/Espo/Modules/` and `client/custom/modules/`.
 
@@ -68,7 +67,7 @@ line.
 | I Official-docs / native-first | Audit criteria and citations from Espo docs | PASS — citation table in research + contracts |
 | II Extensions only | Audit does not edit `application/`; remediations stay extension-scoped | PASS |
 | III One active spec | This feature is the sole active track; sibling specs only if user authorizes specify-ahead | PASS |
-| IV Doc-backed planning | This plan cites local + online docs | PASS |
+| IV Doc-backed planning | This plan cites GitHub blob docs | PASS |
 | V Docs beat whim | Spec already bounds “report not fix” | PASS |
 | VI Secrets / PII | Report lists locations/kinds; never pastes secret values | PASS |
 | VII Safe deploy | No prod apply; prod = Caddy+auto SSL (context only) | PASS |

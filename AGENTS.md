@@ -12,16 +12,16 @@
 | Source | Path / URL |
 |--------|------------|
 | Constitution | `.specify/memory/constitution.md` |
-| Espo docs (offline) | `~/safehouse/espocrm-documentation` (pull weekly / before Espo API work) |
-| Espo docs (online) | https://docs.espocrm.com/ |
-| Docs source repo | https://github.com/espocrm/documentation/ |
+| Espo docs (read) | `/home/skoksharov/espocrm-documentation` (`~/espocrm-documentation`) — constitution Principle I |
+| Espo docs (cite in git) | `https://github.com/espocrm/documentation/blob/master` + same relative path (folders: `/tree/master/`) |
 | Progress (current) | `.specify/progress/` |
 | Progress (legacy archive) | `.specify/progress_old/` |
 
 ## User preferences
 
 - Chat language: **Russian**. Artifacts (specs, progress, constitution, code comments): **English**.
-- Ask before `git commit`, `git push`, PR creation, or CI/CD workflow edits.
+- **Git — strict:** NEVER `git push` (or force-push, or PR that pushes) unless the user explicitly asked to push in that message. **Ask before every `git commit`** — even when the user asked for other work; only commit when they said “commit” / “закоммить” or confirmed yes. “Commit without push” = commit only, never push in the same step.
+- Ask before PR creation or CI/CD workflow edits.
 - No production CLI / deploy / migration apply without explicit approval for that exact action.
 - **Local PHP / Espo / Laravel-like work: DDEV only** (`ddev exec …`) — not optional; do not use host PHP for project commands.
 - **Production**: Caddy with automatic SSL (e.g. `crm.safehouse.community`); never treat prod as the local runtime.

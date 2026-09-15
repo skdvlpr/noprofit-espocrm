@@ -19,13 +19,12 @@ A single ranked compliance issue.
 | impact | string | Plain-language business/security impact |
 | evidence | string | Path(s) or area; no secret values |
 | expectation | string | What official docs/constitution require |
-| citation_local | string | Path under `~/safehouse/espocrm-documentation/...` |
-| citation_online | string | `https://docs.espocrm.com/...` URL |
+| citation | string | GitHub blob URL under `https://github.com/espocrm/documentation/blob/master/docs/` |
 | action_type | enum | `fix` \| `migrate-secret` \| `rewrite` \| `accept-risk` \| `open-follow-on-spec` \| `blocked-needs-prod` |
 | backlog_rank | int \| null | Position in ordered remediation backlog (1 = next) |
 | notes | string | Optional methodology / limits |
 
-**Validation**: Critical/High MUST have both citations and impact (SC-003).  
+**Validation**: Critical/High MUST have a GitHub blob citation and impact (SC-003).  
 **Transitions**: draft → included-in-report → (later) mapped-to-spec (outside this feature).
 
 ## ModuleSummary

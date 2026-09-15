@@ -2,7 +2,7 @@
 # Prepare canonical Espo integration test build (grunt test equivalent).
 # Creates build/EspoCRM-{version}/ snapshot and ensures db_test exists (DDEV only).
 #
-# @see https://docs.espocrm.com/development/tests/
+# @see https://github.com/espocrm/documentation/blob/master/docs/development/tests.md
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

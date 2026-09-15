@@ -83,7 +83,7 @@ description: "Task list for Prima Nota off-books / donor-pocket"
 **Independent Test**: GET both ids; platform DonorPocket; exclude true; still in list.
 
 - [x] T015 [US3] Adjust hook/PHPUnit so Other→DonorPocket (and DonorPocket→BankTransfer) is allowed; Stripe change still blocked in `tests/integration/Espo/Modules/NonprofitEspocrm/PrimaNotaTest.php` — complexity 5
-- [ ] T016 [US3] After CI deploy to `crm.safehouse.community`, verify Metadata then PUT the two ids per `specs/002-prima-nota-off-books/contracts/rest-prima-nota.md` (API user; no secrets in git) — complexity 6
+- [x] T016 [US3] After CI deploy to `crm.safehouse.community`, verify Metadata then PUT the two ids per `specs/002-prima-nota-off-books/contracts/rest-prima-nota.md` (API user; no secrets in git) — complexity 6
 
 **Checkpoint**: SC-002 measurable on prod
 

@@ -5,7 +5,7 @@
 
 ## Docs freshness
 
-- **Decision**: Pull `~/safehouse/espocrm-documentation` before plan (constitution freshness duty).
+- **Decision**: Pull the constitution Espo docs clone before plan (freshness duty).
 - **Evidence**: Fast-forward to `764af58c` (2026-09-05), remote https://github.com/espocrm/documentation/.
 - **Alternatives**: Online-only — fallback only.
 
@@ -13,7 +13,7 @@
 
 - **Decision**: Add enum option **`DonorPocket`** on existing `donationPaymentProvider`. Add bool **`excludeFromDigitalReports`**, `default: false`, `readOnly: true`, `audited: true`.
 - **Rationale**: Spec hybrid. Enum is for people; bool is the reporting contract (FR-009). Read-only so staff cannot fight Formula (v1: no independent override). Boolean + Enum are native field types.
-- **Citations**: local `~/safehouse/espocrm-documentation/docs/administration/fields.md` + https://docs.espocrm.com/administration/fields/; entityDefs `~/safehouse/espocrm-documentation/docs/development/metadata/entity-defs.md` + https://docs.espocrm.com/development/metadata/entity-defs/. Docs note: a new field default is applied by the DB to **existing** rows.
+- **Citations**: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md ; https://github.com/espocrm/documentation/blob/master/docs/development/metadata/entity-defs.md . Docs note: a new field default is applied by the DB to **existing** rows.
 - **Alternatives considered**: New entity — rejected (same movement). Include-in-reports default true — rejected (spec: exclude, not include). Staff-editable checkbox — rejected (spec v1 auto-only).
 
 ## R2 — Auto-set exclude via Formula
@@ -29,7 +29,7 @@
   ```
 
 - **Rationale**: Constitution I — Formula before-save is the native place (entity-manager “Before-save custom script”). Operators `||`, `==`, `if/else` are documented.
-- **Citations**: `~/safehouse/espocrm-documentation/docs/administration/formula.md` + https://docs.espocrm.com/administration/formula/; entity-manager https://docs.espocrm.com/administration/entity-manager/.
+- **Citations**: https://github.com/espocrm/documentation/blob/master/docs/administration/formula.md ; https://github.com/espocrm/documentation/blob/master/docs/administration/entity-manager.md .
 - **Alternatives**: PHP hook duplicating Formula — extra surface. Workflow — not needed for always-on save rule.
 
 ## R3 — Digital totals filter
@@ -42,7 +42,7 @@
 
 - **Decision**: Rebuild action `BackfillPrimaNotaDigitalExclude` updates `PrimaNota` where provider is `Cash` or `DonorPocket` and exclude is not true. Registered in `metadata/app/rebuild.json`. Runs on every rebuild (idempotent). Uses ORM `UpdateBuilder` (no per-row hooks/Formula).
 - **Rationale**: Formula does not run on existing rows. Default `false` would otherwise make Cash **start counting**. Production CI already runs `php command.php rebuild` after rsync.
-- **Citations**: rebuild/commands `~/safehouse/espocrm-documentation/docs/administration/commands.md` + https://docs.espocrm.com/administration/commands/; rebuild actions already used in this module (`BumpAppTimestamp`, etc.).
+- **Citations**: https://github.com/espocrm/documentation/blob/master/docs/administration/commands.md ; rebuild actions already used in this module (`BumpAppTimestamp`, etc.).
 - **Alternatives**: One-shot SSH SQL — not repeatable. API mass-update of all Cash — unnecessary if rebuild runs.
 
 ## R5 — Platform immutability vs retag

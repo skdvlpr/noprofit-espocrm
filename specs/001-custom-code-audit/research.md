@@ -5,12 +5,14 @@
 
 ## Docs freshness (FR-012)
 
-- **Decision**: Confirm local docs at start of implement; pull if >7 days stale.
-- **Evidence (plan time)**: `~/safehouse/espocrm-documentation` HEAD
+- **Decision**: Confirm local docs at start of implement; pull if >7 days stale
+  (constitution Read root; cite GitHub blob/master in artifacts).
+- **Evidence (plan time)**: docs clone HEAD
   `ab2a5ee338be141ffe0d1b2c29ba742432bba089` (2026-08-31), remote
   `https://github.com/espocrm/documentation/`, already up to date after fetch.
 - **Rationale**: Constitution freshness duty + FR-012.
-- **Alternatives**: Online-only — rejected as primary; used as fallback if pull fails.
+- **Alternatives**: Website-only (`docs.espocrm.com`) — rejected as citation
+  source; GitHub blob is the committed cite.
 
 ## R1 — Deliverable medium
 
@@ -48,21 +50,21 @@
 
 ## R4 — Official expectations (citation anchors)
 
-Judgments MUST cite local + online (constitution IV). Primary anchors:
+Judgments MUST cite GitHub blob URLs (constitution I/IV). Primary anchors:
 
-| Topic | Local | Online | Why |
-|-------|-------|--------|-----|
-| Modules | `~/safehouse/espocrm-documentation/docs/development/modules.md` | https://docs.espocrm.com/development/modules/ | Backend/frontend paths, order |
-| Extension packages | `.../development/extension-packages.md` | https://docs.espocrm.com/development/extension-packages/ | ZIP layout, scripts |
-| Extensions admin | `.../administration/extensions.md` | https://docs.espocrm.com/administration/extensions/ | Install/upgrade behaviour |
-| Coding practices | `.../development/coding-practices.md` | https://docs.espocrm.com/development/coding-practices/ | Namespace / Tools vs Controllers |
-| Hooks | `.../development/hooks.md` | https://docs.espocrm.com/development/hooks/ | When hooks are appropriate |
-| ACL | `.../development/acl.md` | https://docs.espocrm.com/development/acl/ | Server-side checks |
-| Roles | `.../administration/roles-management.md` | https://docs.espocrm.com/administration/roles-management/ | Least privilege |
-| App Secrets | `.../administration/app-secrets.md` | https://docs.espocrm.com/administration/app-secrets/ | Secret store |
-| Entity Manager | `.../administration/entity-manager.md` | https://docs.espocrm.com/administration/entity-manager/ | Fields/layouts native path |
-| Metadata | `.../development/metadata.md` | https://docs.espocrm.com/development/metadata/ | Metadata expectations |
-| Tests | `.../development/tests.md` | https://docs.espocrm.com/development/tests/ | Cross-ref only (hygiene spec later) |
+| Topic | Cite (GitHub) | Why |
+|-------|---------------|-----|
+| Modules | https://github.com/espocrm/documentation/blob/master/docs/development/modules.md | Backend/frontend paths, order |
+| Extension packages | https://github.com/espocrm/documentation/blob/master/docs/development/extension-packages.md | ZIP layout, scripts |
+| Extensions admin | https://github.com/espocrm/documentation/blob/master/docs/administration/extensions.md | Install/upgrade behaviour |
+| Coding practices | https://github.com/espocrm/documentation/blob/master/docs/development/coding-practices.md | Namespace / Tools vs Controllers |
+| Hooks | https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md | When hooks are appropriate |
+| ACL | https://github.com/espocrm/documentation/blob/master/docs/development/acl.md | Server-side checks |
+| Roles | https://github.com/espocrm/documentation/blob/master/docs/administration/roles-management.md | Least privilege |
+| App Secrets | https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md | Secret store |
+| Entity Manager | https://github.com/espocrm/documentation/blob/master/docs/administration/entity-manager.md | Fields/layouts native path |
+| Metadata | https://github.com/espocrm/documentation/blob/master/docs/development/metadata.md | Metadata expectations |
+| Tests | https://github.com/espocrm/documentation/blob/master/docs/development/tests.md | Cross-ref only (hygiene spec later) |
 
 ## R5 — Secrets reporting hygiene
 

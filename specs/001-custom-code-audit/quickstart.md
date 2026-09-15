@@ -8,15 +8,16 @@
 - Repo root: `nonprofit-espocrm`
 - **DDEV installed and project started** (`ddev start`) — mandatory for any PHP/Espo CLI
 - Spec artifacts present under `specs/001-custom-code-audit/`
-- Local Espo docs: `~/safehouse/espocrm-documentation` (pull if stale)
+- Espo docs: constitution Read root; cite GitHub `blob/master` in artifacts
 - Constitution: `.specify/memory/constitution.md`
 - Know prod context: **Caddy + automatic SSL** (do not probe without approval)
 
 ## Setup (docs freshness)
 
+Pull the constitution Read-root clone if stale (command in constitution
+Documentation & Stack). Record SHA:
+
 ```bash
-cd ~/safehouse/espocrm-documentation
-git fetch origin && git pull --ff-only
 git log -1 --format='%H %ci'
 ```
 
@@ -47,7 +48,7 @@ Do **not** run production SSH or paste secrets into files. Do **not** use host P
 |-------|----------|
 | SC-001 | Five module summaries present |
 | SC-002 | Rank 1 backlog item is an obvious next specify title |
-| SC-003 | Every Critical/High has local + online citation + impact |
+| SC-003 | Every Critical/High has GitHub blob citation + impact |
 | SC-004 | Security & secrets section complete or explicit none-found |
 | SC-005 | ≥10 backlog rows (or all findings) are specify-titled |
 | SC-007 | Methodology lists DDEV for PHP steps; notes Caddy+SSL prod |

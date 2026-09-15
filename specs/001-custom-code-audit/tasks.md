@@ -18,7 +18,7 @@
 
 **Purpose**: Docs freshness, DDEV readiness, report skeleton
 
-- [x] T001 Confirm Espo docs clone freshness and record SHA in `.specify/progress/010-compliance-audit-report.md` metadata (`cd ~/safehouse/espocrm-documentation && git pull --ff-only`)
+- [x] T001 Confirm Espo docs clone freshness and record SHA in `.specify/progress/010-compliance-audit-report.md` metadata (constitution Read-root pull)
 - [x] T002 Ensure DDEV is running for this repo (`ddev describe` / `ddev start`) — block PHP work if DDEV unavailable
 - [x] T003 Create report skeleton at `.specify/progress/010-compliance-audit-report.md` matching `specs/001-custom-code-audit/contracts/compliance-report.md` section order
 - [x] T004 [P] Add optional index link file `specs/001-custom-code-audit/REPORT.md` pointing to the canonical progress report
@@ -51,8 +51,8 @@
 ### Implementation for User Story 2
 
 - [x] T011 [P] [US2] Scan modules for secret-like config/keys/OAuth/Stripe/VAPID patterns (paths/kinds only) under `custom/Espo/Modules/` and `client/custom/modules/`
-- [x] T012 [P] [US2] Review Integration/ExternalAccount/App Secret usage vs `~/safehouse/espocrm-documentation/docs/administration/app-secrets.md` and https://docs.espocrm.com/administration/app-secrets/
-- [x] T013 [P] [US2] Sample PII entity field ACL / Roles expectations using docs `roles-management.md` + `acl.md` (local + online citations)
+- [x] T012 [P] [US2] Review Integration/ExternalAccount/App Secret usage vs https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md
+- [x] T013 [P] [US2] Sample PII entity field ACL / Roles expectations using docs `roles-management.md` + `acl.md` (GitHub blob citations)
 - [x] T014 [US2] Optional DDEV metadata probe only if static review insufficient: `ddev exec php …` (never host PHP; never prod)
 - [x] T015 [US2] Write Security & secrets section + SecretLocationCandidate rows into `.specify/progress/010-compliance-audit-report.md`
 - [x] T016 [US2] Create Critical/High `ComplianceFinding` entries (F-*) with dual citations per finding-schema
@@ -73,7 +73,7 @@
 - [x] T018 [P] [US3] Analyze GoogleIntegration for stock-Espo vs Nonprofit hard refs under `custom/Espo/Modules/GoogleIntegration/` and `client/custom/modules/google-integration/`
 - [x] T019 [P] [US3] Analyze WorkflowEngine, BugTracker, SafehouseAuroraThemes coupling similarly under their module paths
 - [x] T020 [US3] Write Extension map section into `.specify/progress/010-compliance-audit-report.md` with coupling enum + evidence
-- [x] T021 [US3] Add extension-boundary findings (F-*) citing `modules.md` / `extension-packages.md` (local + online)
+- [x] T021 [US3] Add extension-boundary findings (F-*) citing `modules.md` / `extension-packages.md` (GitHub blob citations)
 
 **Checkpoint**: US3 complete — coupling classifications present for all five modules
 

@@ -3,7 +3,7 @@ name: CI
 # PHPUnit + PHPStan on GitHub-hosted runner with an ephemeral MySQL (db_test).
 # Deploy to production runs only after tests pass (main only).
 #
-# @see https://docs.espocrm.com/development/tests/
+# @see https://github.com/espocrm/documentation/blob/master/docs/development/tests.md
 
 on:
   push:

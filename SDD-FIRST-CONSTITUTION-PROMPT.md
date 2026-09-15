@@ -1,5 +1,11 @@
 # SDD bootstrap — first constitution session
 
+> **Superseded 2026-09-15:** Current law is `.specify/memory/constitution.md`
+> v1.3.0. **Read** `/home/skoksharov/espocrm-documentation`. **Cite**
+> `https://github.com/espocrm/documentation/blob/master` + the same relative
+> path. MUST NOT cite `https://docs.espocrm.com` in git. This file is the
+> original 2026-08-31 bootstrap prompt (historical).
+
 **How to run (human):** open this repository as the Cursor workspace root (`nonprofit-espocrm`, not the parent `safehouse` monorepo). Start Agent, run `/speckit-constitution`, then attach or paste this entire file as the argument / follow-up context.
 
 **Language:** chat with the user in **Russian**. Write constitution, progress archives, specs, code comments, and any remaining `AGENTS.md` content in **English**.
@@ -18,10 +24,10 @@ Move `nonprofit-espocrm` into Spec-Driven Development (Spec Kit). The durable so
 | Progress (ongoing) | `.specify/progress/` | Handoff logs replacing Notion |
 | Progress (legacy) | `.specify/progress_old/` | One-time critical extract from past Notion / chat history |
 | Slim AGENTS | `AGENTS.md` | User prefs + “always SDD” only — written **as if the old rulebook never existed** |
-| Espo docs (offline) | `~/safehouse/espocrm-documentation` | Primary technical reference while coding/planning |
-| Espo docs (online) | https://docs.espocrm.com/ and source repo https://github.com/espocrm/documentation/ | Canonical when local clone missing/stale |
+| Espo docs (offline) | `/home/skoksharov/espocrm-documentation` | Primary technical reference while coding/planning |
+| Espo docs (cite in git) | `https://github.com/espocrm/documentation/blob/master` + same relative path | Committed citations; do not use docs.espocrm.com |
 
-Do **not** copy the old `AGENTS.md` bible into the constitution. Re-think principles against **official EspoCRM documentation**. Prefer short principles + **mandatory doc citations** (local file paths with section anchors where possible, plus online URLs).
+Do **not** copy the old `AGENTS.md` bible into the constitution. Re-think principles against **official EspoCRM documentation**. Prefer short principles + **mandatory GitHub blob citations** (open the local clone this turn).
 
 ---
 
@@ -29,7 +35,7 @@ Do **not** copy the old `AGENTS.md` bible into the constitution. Re-think princi
 
 1. Spec Kit constitution skill / template behaviour (`.specify/templates/constitution-template.md`, `.cursor/skills/speckit-constitution/SKILL.md`).
 2. **Local Espo documentation clone (REQUIRED):**  
-   `~/safehouse/espocrm-documentation`  
+   `/home/skoksharov/espocrm-documentation`  
    (clone of [espocrm/documentation](https://github.com/espocrm/documentation/); MkDocs tree under `docs/`).  
    At minimum open and use as citations:
    - `docs/development/modules.md`
@@ -41,7 +47,7 @@ Do **not** copy the old `AGENTS.md` bible into the constitution. Re-think princi
    - `docs/administration/entity-manager.md`, `docs/administration/roles-management.md`
    - `docs/administration/commands.md` (rebuild / extension CLI)
    - Any other pages needed for security, API, formula, upgrades
-3. If a local page is missing or the clone is unavailable: fetch the matching page from https://docs.espocrm.com/ and/or browse https://github.com/espocrm/documentation/.
+3. If a local page is missing or the clone is unavailable: STOP and ask the owner. Do not scrape `docs.espocrm.com`. GitHub blob URLs are for **citations**, not a substitute for opening the local file.
 4. Skim current `AGENTS.md` **only as a source of user preferences and hard-won Safehouse constraints** — then discard structure, silly examples, Notion rituals, and anything that contradicts official docs.
 5. Read current CI: `.github/workflows/ci.yml`, `.github/workflows/prod-provision-oneshot.yml` (and any other workflows). Note secrets handling, deploy gates, what ships to prod.
 6. Inventory custom modules under `custom/Espo/Modules/` (names only + purpose) for constitution scope — **full code audit is the next spec**, not this session’s implementation work. Record high-level risks in progress notes if obvious.
@@ -62,12 +68,12 @@ Do **not** copy the old `AGENTS.md` bible into the constitution. Re-think princi
 
 ### Espo documentation freshness (ongoing duty — encode in constitution)
 
-- Canonical offline tree: `~/safehouse/espocrm-documentation` (git remote must remain `https://github.com/espocrm/documentation/`).
+- Canonical offline tree: `/home/skoksharov/espocrm-documentation` (git remote must remain `https://github.com/espocrm/documentation/`).
 - **At least once per calendar week** (and at the start of any session that touches Espo APIs/metadata/extensions if the last pull is older than ~7 days):  
-  `cd ~/safehouse/espocrm-documentation && git fetch origin && git pull --ff-only`  
-  If pull fails, report why; fall back to online docs; do not silently use stale local pages when online is available.
-- Prefer citing **both**: local path (e.g. `~/safehouse/espocrm-documentation/docs/development/modules.md`) **and** the matching https://docs.espocrm.com/… URL.
-- During `/speckit-constitution`, `/speckit-specify`, and `/speckit-plan`, the agent **must** consult local docs first, else online, for every stack/framework/library decision — and **cite those sources in the artifact** with a short rationale (not “because we always did”).
+  `cd /home/skoksharov/espocrm-documentation && git fetch origin && git pull --ff-only`  
+  If pull fails, report why; still read the local clone; do not silently switch to the website.
+- Cite GitHub `blob/master` + the same relative path in committed artifacts. MUST NOT cite `https://docs.espocrm.com`. MUST NOT commit home paths except the constitution Read-root / catalog.
+- During `/speckit-constitution`, `/speckit-specify`, and `/speckit-plan`, the agent **must** open local docs this turn for every stack/framework/library decision — and **cite GitHub** in the artifact with a short rationale (not “because we always did”).
 
 ---
 
@@ -94,7 +100,7 @@ Produce a **laconic** constitution (aim: readable in one sitting; not a second A
    If a request contradicts the constitution or official docs: **refuse**, explain why, propose compliant alternatives. If the user insists: implement only with a **safe rollback path** (branch, reversible migration, no silent prod damage) and record the exception in `.specify/progress/`.
 
 6. **Security, secrets, PII**  
-   No secrets in git, logs, issues, or extension ZIPs. Prefer Espo **App Secrets** (Admin) — cite `docs/administration/app-secrets.md` / https://docs.espocrm.com/administration/app-secrets/. Personal data in CRM must follow least privilege (Roles / field-level security per docs). Plan migration of misplaced secrets into App Secrets. Analyze leak paths (CI logs, smoke scripts, debug, backups).
+   No secrets in git, logs, issues, or extension ZIPs. Prefer Espo **App Secrets** (Admin) — cite https://github.com/espocrm/documentation/blob/master/docs/administration/app-secrets.md. Personal data in CRM must follow least privilege (Roles / field-level security per docs). Plan migration of misplaced secrets into App Secrets. Analyze leak paths (CI logs, smoke scripts, debug, backups).
 
 7. **Safe online deploy (including AI-assisted)**  
    Production already runs a version of this tree — treat prod as live. Define a **repeatable safe deploy** story: what may be built/committed, what must never reach prod (smokes, oneshots, local config), how extensions are built/tested before ship, how rebuild/cache runs, how DB/schema changes require **migration plans** and explicit user approval before server apply. Review current GitHub Actions for secret exposure and unsafe deploy; constitution must require a consistent safe workflow. **Do not change CI/CD files in this session** — note gaps in progress and defer a dedicated spec if changes are needed.
@@ -146,7 +152,7 @@ Replace the huge rulebook with a **minimal** file that assumes the constitution 
 
 - Pointer: read `.specify/memory/constitution.md` first; never leave SDD.
 - User preferences (safe ones): Russian chat; English artifacts; ask before commit/push/CI changes; one spec at a time; Auto + subagents for hard work; etc.
-- Where to find docs (local path + GitHub docs repo + docs.espocrm.com).
+- Where to find docs (Read clone in constitution Principle I; cite GitHub blob/master).
 - Where to find progress (`.specify/progress/`, archive `.specify/progress_old/`).
 - Explicit: Espo behavioural detail lives in **official documentation**, not in AGENTS.
 
@@ -183,7 +189,7 @@ Do **not** execute these now; list them for the user with suggested Spec Kit com
 
 ## Quality bar for this session
 
-- Constitution cites **local** `~/safehouse/espocrm-documentation/docs/...` paths and **online** https://docs.espocrm.com/... (and notes https://github.com/espocrm/documentation/ for pulls).
+- Constitution **reads** `/home/skoksharov/espocrm-documentation/docs/...` and **cites** `https://github.com/espocrm/documentation/blob/master` + the same relative path.
 - Native-first and extensions-only are unmistakable.
 - Security / App Secrets / PII / safe deploy / git gates / SDD lock-in / one-spec / model routing are present without essay-length paste.
 - `AGENTS.md` is short and preference-oriented.
