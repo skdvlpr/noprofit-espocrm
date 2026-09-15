@@ -8,6 +8,7 @@ use DateTimeZone;
 use Espo\Core\ApplicationUser;
 use Espo\Core\ExternalAccount\ClientManager;
 use Espo\Core\Utils\Log;
+use Espo\Core\Utils\Metadata;
 use Espo\Entities\User;
 use Espo\Modules\GoogleIntegration\Core\ExternalAccount\Clients\Google as GoogleClient;
 use Espo\Modules\GoogleIntegration\Tools\ExternalAccount\IdParser;
@@ -29,7 +30,12 @@ class CalendarSyncRunner
     private const LOOKBACK_DAYS = 30;
     private const LOOKAHEAD_DAYS = 365;
 
-    /** @var list<string> */
+    /**
+     * Activity-type preference for Google→CRM date pull. Intersected with live
+     * metadata scopes; missing types are skipped (not a closed-only catalog).
+     *
+     * @var list<string>
+     */
     private const PULL_ENTITY_TYPES = ['Meeting', 'Call', 'Task'];
 
     public function __construct(
@@ -39,7 +45,8 @@ class CalendarSyncRunner
         private AllowedEntityTypesProvider $allowedEntityTypesProvider,
         private EventPusher $eventPusher,
         private ApplicationUser $applicationUser,
-        private Log $log
+        private Log $log,
+        private Metadata $metadata
     ) {}
 
     public function run(): void
@@ -206,7 +213,7 @@ class CalendarSyncRunner
             $entityType === ''
             || $entityId === ''
             || $userId !== $user->getId()
-            || !in_array($entityType, self::PULL_ENTITY_TYPES, true)
+            || !$this->isPullEntityType($entityType)
         ) {
             return false;
         }
@@ -238,6 +245,19 @@ class CalendarSyncRunner
         $this->entityManager->saveEntity($entity);
 
         return true;
+    }
+
+    /**
+     * Pull preference list ∩ live entity scopes. Skip types this Espo instance
+     * does not have (FR-007 / entity-catalog contract).
+     */
+    private function isPullEntityType(string $entityType): bool
+    {
+        if (!in_array($entityType, self::PULL_ENTITY_TYPES, true)) {
+            return false;
+        }
+
+        return $this->metadata->get(['scopes', $entityType, 'entity']) === true;
     }
 
     /**

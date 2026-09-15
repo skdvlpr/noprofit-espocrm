@@ -11,9 +11,8 @@ use Espo\Modules\NonprofitEspocrm\Tools\Installer;
  *
  *   1. NonprofitEspocrm (navbar, Safehouse defaults, shift planning, …)
  *   2. GoogleIntegration (when present in the package)
- *   3. WorkflowEngine (when present)
- *   4. BugTracker (when present)
- *   5. SafehouseAuroraThemes (when present)
+ *   3. BugTracker (when present)
+ *   4. SafehouseAuroraThemes (when present)
  *
  * Roles / teams are NOT auto-provisioned — Administration → Roles only.
  */
@@ -28,7 +27,6 @@ class AfterInstall
 
         $siblingInstallers = [
             \Espo\Modules\GoogleIntegration\Tools\Installer::class,
-            \Espo\Modules\WorkflowEngine\Tools\Installer::class,
             \Espo\Modules\BugTracker\Tools\Installer::class,
             \Espo\Modules\SafehouseAuroraThemes\Tools\Installer::class,
         ];

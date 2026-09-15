@@ -17,7 +17,6 @@ class CoreCompatibilityTest extends SafehouseBaseTestCase
     private const EXPECTED_MODULES = [
         'NonprofitEspocrm',
         'GoogleIntegration',
-        'WorkflowEngine',
         'SafehouseAuroraThemes',
         'BugTracker',
     ];
@@ -29,7 +28,6 @@ class CoreCompatibilityTest extends SafehouseBaseTestCase
         'ActivityOffer',
         'ActivityInvite',
         'BugReport',
-        'WorkflowDefinition',
         'CalendarDateSource',
         'CalendarTemplate',
         'MealCount',
@@ -74,7 +72,6 @@ class CoreCompatibilityTest extends SafehouseBaseTestCase
             'FoodParcelRegistration',
             'ActivityOffer',
             'BugReport',
-            'WorkflowDefinition',
             'MealCount',
         ] as $type) {
             $entity = $em->getNewEntity($type);

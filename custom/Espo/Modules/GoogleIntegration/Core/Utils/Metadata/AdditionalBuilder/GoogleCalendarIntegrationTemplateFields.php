@@ -9,7 +9,10 @@ use stdClass;
 
 /**
  * Adds per-entity description template fields to the Google Calendar integration
- * for every active CalendarDateSource target (and core export entities).
+ * for every active CalendarDateSource target whose scope is a live entity.
+ *
+ * Catalog is metadata + date sources, not a closed Meeting/Call/Task/Opportunity list.
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/scopes.md
  */
 class GoogleCalendarIntegrationTemplateFields implements AdditionalBuilder
 {
@@ -17,17 +20,12 @@ class GoogleCalendarIntegrationTemplateFields implements AdditionalBuilder
 
     private const DEFAULT_TEMPLATE = "{{name}}\n\nEspoCRM: {{espocrmUrl}}";
 
-    /** @var list<string> */
-    private const CORE_ENTITY_TYPES = [
-        'Meeting',
-        'Call',
-        'Task',
-        'Opportunity',
-    ];
-
     public function build(stdClass $data): void
     {
-        $entityTypes = $this->collectEntityTypes();
+        $entityTypes = self::filterLiveEntityTypes(
+            (new DateSourceEntityTypesReader())->readActiveTargetEntityTypes(),
+            $data
+        );
 
         if ($entityTypes === []) {
             return;
@@ -57,17 +55,24 @@ class GoogleCalendarIntegrationTemplateFields implements AdditionalBuilder
     }
 
     /**
+     * Keep types that exist as live entity scopes on this instance.
+     *
+     * @param list<string> $candidates
      * @return list<string>
      */
-    private function collectEntityTypes(): array
+    public static function filterLiveEntityTypes(array $candidates, stdClass $data): array
     {
         $entityTypes = [];
 
-        foreach (self::CORE_ENTITY_TYPES as $entityType) {
-            $entityTypes[$entityType] = true;
-        }
+        foreach ($candidates as $entityType) {
+            if (!is_string($entityType) || $entityType === '') {
+                continue;
+            }
 
-        foreach ((new DateSourceEntityTypesReader())->readActiveTargetEntityTypes() as $entityType) {
+            if (!self::isLiveEntityScope($data, $entityType)) {
+                continue;
+            }
+
             $entityTypes[$entityType] = true;
         }
 
@@ -75,5 +80,20 @@ class GoogleCalendarIntegrationTemplateFields implements AdditionalBuilder
         sort($list);
 
         return $list;
+    }
+
+    private static function isLiveEntityScope(stdClass $data, string $entityType): bool
+    {
+        if (!isset($data->scopes) || !is_object($data->scopes)) {
+            return false;
+        }
+
+        $scope = $data->scopes->$entityType ?? null;
+
+        if (!is_object($scope)) {
+            return false;
+        }
+
+        return ($scope->entity ?? false) === true;
     }
 }

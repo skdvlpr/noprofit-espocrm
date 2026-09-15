@@ -1,26 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.1 → 1.3.0
+- Version change: 1.3.0 → 1.4.0
 - Modified principles:
-  - I. Official-docs supremacy & Native-first — read local clone
-    `~/espocrm-documentation`; cite GitHub blob/master (not docs.espocrm.com)
-  - III. Spec-Driven Development — parent-adjacent NNN.K amendments; owner
-    UAT before the next main feature
-  - IV. Doc-backed planning — GitHub cites in committed artifacts
-  - V. Constitution & docs beat user whim — ask on doubt; do not guess
-  - VI. Security — GitHub ACL/App Secrets cites; live REST must not leak keys
-  - VII. Safe online deploy — keep existing CI rsync (not ZIP-only)
-  - X. Rebuild — GitHub commands cite
-  - XIV. Tests — keep DDEV PHPUnit for behaviour-changing custom PHP; add
-    “no stupid tests / no coverage % gate / propose in tasks”
-  - XV. Agents & models — owner launch-or-replace gate for advanced models
-  - XVII. User communication — owner UAT chat script in Russian
-  - XVIII. Stack lock — PHP 8.4, MariaDB, DDEV nginx-fpm; no FrankenPHP
-  - Documentation & Stack — replaced docs.espocrm.com catalog with Read/Cite map
-- Added sections / principles:
-  - XIX. Native functional UI fields
-  - XX. Live instance REST (explore-espo-endpoints)
-  - Locked Decisions (nonprofit F-* subset; no LearnHouse / GM queue)
+  - II. Extensions only — autonomous modules; entity catalogs from Metadata
+    (gm-edu Native First, minus LMS/queue)
+- Added sections / principles: none (Locked Decision F-EXT-UNIVERSAL)
 - Removed sections: none
 - Follow-up TODOs: none
 -->
@@ -115,8 +99,26 @@ Layout (cite GitHub; read local clone):
 
 If behaviour needs NonprofitEspocrm: detect that module and branch; otherwise
 behave correctly on stock Espo. Treat core and arbitrary custom entities the
-same unless a documented capability check exists. Minimize cross-extension
-coupling; required coupling MUST be documented with a clean dependency strategy.
+same unless a documented capability check exists.
+
+**Autonomous extensions (F-EXT-UNIVERSAL):** every custom extension MUST
+discover entity types at runtime from official Metadata (`scopes` where
+`entity === true`, plus `entityDefs` / ORM defs). MUST NOT hardcode a closed
+list of CRM types as the only supported set. Optional seeds for stock types
+(Meeting, Call, Task, Opportunity, …) MAY run only when that scope exists.
+Unknown or future entity types MUST work when they have the needed field
+kinds (for example a date field for calendar export) without a code change
+to that extension. MUST NOT require another custom extension to load UI or
+run jobs. Missing peer → skip or hide, MUST NOT fatal. Soft detection
+(`class_exists`, metadata key, readable layout file) is allowed. MUST NOT
+bind one extension’s catalog to another ZIP. Cite:
+
+- https://github.com/espocrm/documentation/blob/master/docs/development/metadata.md
+- https://github.com/espocrm/documentation/blob/master/docs/development/metadata/scopes.md
+- https://github.com/espocrm/documentation/blob/master/docs/development/orm.md
+
+Minimize cross-extension coupling; required coupling MUST be documented with
+a clean dependency strategy.
 
 Hook short-names MUST be unique per entity type. Duplicate module names,
 namespaces, entity types, AMD prefixes, and SaveOption flags across our
@@ -549,8 +551,9 @@ Inside this repo: `.cursor/skills/speckit-*/SKILL.md`, `.specify/templates/`,
 | Caddy | https://caddyserver.com/docs/ |
 
 **In-scope custom modules:** NonprofitEspocrm, GoogleIntegration,
-WorkflowEngine, BugTracker, SafehouseAuroraThemes — under
-`custom/Espo/Modules/` (+ matching `client/custom/modules/` where applicable).
+BugTracker, SafehouseAuroraThemes — under `custom/Espo/Modules/` (+ matching
+`client/custom/modules/` where applicable). WorkflowEngine is **out of this
+product** (see active spec `003-google-standalone`).
 
 **Slim agent prefs:** `AGENTS.md` points here; it MUST NOT duplicate this
 constitution or Espo tutorials.
@@ -569,6 +572,7 @@ Closed. MUST NOT reopen as questions.
 | F-LIVE-ESPO-REST | Live records via explore-espo-endpoints; keys from MCP/env only; prod REST needs explicit approval |
 | F-UI-NATIVE-FIELDS | Strongest native Espo field type from fields.md this turn |
 | F-CROSS-REPO | Write only this git root; MUST NOT edit the Espo docs clone |
+| F-EXT-UNIVERSAL | Extensions are autonomous: entity lists from Metadata at runtime; optional seeds only if the scope exists; no hard depend on another custom extension; missing peer MUST NOT fatal |
 | F-AGENTS-MD | `AGENTS.md` is rails only; product law = this constitution |
 | F-I18N | UI: IT primary, EN secondary; keep existing `ru_RU`; chat/UAT in Russian |
 | F-GDPR | Operational Espo export/delete in scope; legal DPA is not code — STOP |
@@ -617,4 +621,4 @@ a second AGENTS bible.
 Dependent Spec Kit templates and commands read this file at runtime and MUST
 NOT be edited by the constitution command.
 
-**Version**: 1.3.0 | **Ratified**: 2026-08-31 | **Last Amended**: 2026-09-15
+**Version**: 1.4.0 | **Ratified**: 2026-08-31 | **Last Amended**: 2026-09-15

@@ -35,3 +35,5 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `011-prod-tag-metro-off-books.md` | Prod PUT two Metro PrimaNota rows after CI deploy |
 | `012-docs-cite-github-and-constitution-v1.3.md` | Constitution v1.3.0 + GitHub Espo doc cites |
 | `013-close-001-specify-f001.md` | SC-006 close + specify `003-decouple-google-client` |
+| `014-google-standalone-specify-plan.md` | Rewrite 003 Google standalone; retire WF; constitution v1.4.0 |
+| `015-google-standalone-implement.md` | Implement 003: Google AMD standalone, delete WF from this product |

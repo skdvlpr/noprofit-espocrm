@@ -60,13 +60,11 @@ copy_frontend() {
 
 copy_module "custom/Espo/Modules/NonprofitEspocrm"
 copy_module "custom/Espo/Modules/GoogleIntegration"
-copy_module "custom/Espo/Modules/WorkflowEngine"
 copy_module "custom/Espo/Modules/SafehouseAuroraThemes"
 copy_module "custom/Espo/Modules/BugTracker"
 
 copy_frontend "client/custom/modules/nonprofit-espocrm"
 copy_frontend "client/custom/modules/google-integration"
-copy_frontend "client/custom/modules/workflow-engine"
 copy_frontend "client/custom/modules/bug-tracker"
 
 THEME_CSS_PATH="client/custom/css/safehouse-aurora"
@@ -133,5 +131,5 @@ with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
 print(output)
 PY
 
-echo "Built $OUTPUT (suite: NonprofitEspocrm + GoogleIntegration + WorkflowEngine + themes + BugTracker)"
-echo "Standalone extractable builds remain: bin/build-google-integration.sh, bin/build-workflow-engine.sh, bin/build-bug-tracker.sh, bin/build-safehouse-aurora-themes.sh"
+echo "Built $OUTPUT (suite: NonprofitEspocrm + GoogleIntegration + themes + BugTracker)"
+echo "Standalone extractable builds remain: bin/build-google-integration.sh, bin/build-bug-tracker.sh, bin/build-safehouse-aurora-themes.sh"

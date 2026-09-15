@@ -18,7 +18,6 @@ class AfterInstall
 
         $siblingInstallers = [
             \Espo\Modules\GoogleIntegration\Tools\Installer::class,
-            \Espo\Modules\WorkflowEngine\Tools\Installer::class,
             \Espo\Modules\BugTracker\Tools\Installer::class,
             \Espo\Modules\SafehouseAuroraThemes\Tools\Installer::class,
         ];

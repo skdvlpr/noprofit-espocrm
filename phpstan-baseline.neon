@@ -689,27 +689,3 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: custom/Espo/Modules/NonprofitEspocrm/Tools/UserContactProfileSync.php
-
-		-
-			message: '#^Access to an undefined property Espo\\Modules\\WorkflowEngine\\Controllers\\WorkflowDefinition\:\:\$entityManager\.$#'
-			identifier: property.notFound
-			count: 2
-			path: custom/Espo/Modules/WorkflowEngine/Controllers/WorkflowDefinition.php
-
-		-
-			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getAttributeParam\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: custom/Espo/Modules/WorkflowEngine/Services/TemplateRenderer.php
-
-		-
-			message: '#^Call to an undefined method Espo\\ORM\\Entity\:\:getRelationParam\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: custom/Espo/Modules/WorkflowEngine/Services/TemplateRenderer.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<mixed, mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: custom/Espo/Modules/WorkflowEngine/Services/ValueResolver.php

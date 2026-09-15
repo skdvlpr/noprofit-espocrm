@@ -48,7 +48,8 @@
         "xlsxIncludeTotals": "Include totals row"
     },
     "messages": {
-        "insertFieldHelp": "Insert a field placeholder as {{field}} or {{link.field}}. Helpers: {{recordUrl}}, {{users}} (names), etc."
+        "insertFieldHelp": "Insert a field placeholder as {{field}} or {{link.field}}. Helpers: {{recordUrl}}, {{users}} (names), etc.",
+        "selectTargetEntityTypeFirst": "Select a target entity type first."
     },
     "labels": {
         "templateVarRecordUrl": "Record URL (CRM link)",

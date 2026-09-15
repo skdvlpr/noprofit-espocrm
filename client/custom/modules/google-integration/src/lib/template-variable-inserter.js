@@ -1,11 +1,10 @@
 /***
  * Native Segnaposti-style field inserter for Htmlizer templates ({{field}}).
- * NonprofitEspocrm-owned. GoogleIntegration ships its own copy under
- * google-integration:lib/template-variable-inserter.
+ * GoogleIntegration-owned copy so calendar screens load on stock Espo.
  *
  * Includes computed helpers (recordUrl) and relation name-lists (participants etc.).
  */
-define('nonprofit-espocrm:lib/template-variable-inserter', ['ui/select'], function (Select) {
+define('google-integration:lib/template-variable-inserter', ['ui/select'], function (Select) {
 
     const EXCLUDED_FIELD_TYPES = [
         'link', 'linkMultiple', 'linkParent', 'file', 'image', 'attachmentMultiple',
@@ -295,12 +294,16 @@ define('nonprofit-espocrm:lib/template-variable-inserter', ['ui/select'], functi
     function render(options) {
         const $container = options.$container;
         const entityType = options.entityType;
-        const $helper = $('<div class="nonprofit-template-variable-inserter">')
+        const $helper = $('<div class="google-template-variable-inserter">')
             .css({marginTop: '8px'});
 
         if (!entityType) {
             $('<div class="small text-muted">')
-                .text(options.emptyHint || options.translate('selectTargetEntityTypeFirst', 'messages', 'Global'))
+                .text(options.emptyHint || options.translate(
+                    'googleCalendarSelectTargetEntityFirst',
+                    'labels',
+                    'CalendarDateSource'
+                ))
                 .appendTo($helper);
             $container.append($helper);
 

@@ -50,7 +50,8 @@
         "xlsxIncludeTotals": "Includi riga Totali"
     },
     "messages": {
-        "insertFieldHelp": "Inserisci un segnaposto campo come {{field}} o {{link.field}}. Helper: {{recordUrl}}, {{users}} (nomi), ecc."
+        "insertFieldHelp": "Inserisci un segnaposto campo come {{field}} o {{link.field}}. Helper: {{recordUrl}}, {{users}} (nomi), ecc.",
+        "selectTargetEntityTypeFirst": "Seleziona prima il tipo di entità di destinazione."
     },
     "labels": {
         "templateVarRecordUrl": "URL del record (link CRM)",

@@ -139,7 +139,6 @@ ZIPs are built **only on local/CI** via `bin/build*.sh` → `dist/*.zip`.
 | `google-integration-v*.zip` | `GoogleCalendarDrive` | Google OAuth2, Calendar/Drive |
 | `nonprofit-espocrm-v*.zip` | `NonprofitEspocrm` | Nonprofit CRM — **includes bundled `SafehouseAuroraThemes` + CSS/fonts** |
 | `bug-tracker-v*.zip` | `BugTracker` | Optional bug report FAB |
-| `workflow-engine-v*.zip` | `WorkflowEngine` | Optional admin workflows |
 | `safehouse-aurora-themes-v*.zip` | `SafehouseAuroraThemes` | Themes only (stock Espo **without** NonprofitEspocrm) |
 
 ### Production / full Safehouse stack
@@ -148,7 +147,7 @@ Install order, then **Rebuild** after each ZIP:
 
 1. `google-integration-v*.zip`
 2. `nonprofit-espocrm-v*.zip`
-3. (optional) `bug-tracker-v*.zip` / `workflow-engine-v*.zip`
+3. (optional) `bug-tracker-v*.zip`
 
 Do **not** install `safehouse-aurora-themes-v*.zip` on the same instance as NonprofitEspocrm
 (themes already bundled).

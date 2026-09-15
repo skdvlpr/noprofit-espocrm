@@ -64,7 +64,7 @@ define('nonprofit-espocrm:views/fields/template-text', [
                 metadata: this.getMetadata(),
                 language: this.getLanguage(),
                 translate: (key, category, scope) => this.translate(key, category, scope),
-                emptyHint: this.translate('selectTargetEntityTypeFirst', 'messages', 'WorkflowDefinition'),
+                emptyHint: this.translate('selectTargetEntityTypeFirst', 'messages', 'Global'),
                 onInsert: token => {
                     Inserter.insertToken(this.$el, token, this.model, this.name);
                     this.trigger('change');

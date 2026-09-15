@@ -212,6 +212,10 @@ class Installer
         $entityManager->saveEntity($entity);
     }
 
+    /**
+     * Optional convenience seeds (Meeting/Call/Task/Opportunity/Campaign). Apply
+     * only when that type is a live entity scope with a real date field (FR-007).
+     */
     private function ensureDefaultDateSources(EntityManager $entityManager, Metadata $metadata): void
     {
         $repo = $entityManager->getRDBRepository('CalendarDateSource');

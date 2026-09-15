@@ -1,7 +1,7 @@
 define('google-integration:views/fields/google-calendar-description-template', [
     'exports',
     'views/fields/text',
-    'nonprofit-espocrm:lib/template-variable-inserter',
+    'google-integration:lib/template-variable-inserter',
 ], function (_exports, _text, Inserter) {
     'use strict';
 
@@ -101,6 +101,7 @@ define('google-integration:views/fields/google-calendar-description-template', [
         }
 
         renderVariablePicker() {
+            this.$el.find('.google-template-variable-inserter').remove();
             this.$el.find('.nonprofit-template-variable-inserter').remove();
             this.$el.find('.google-calendar-template-variable-helper').remove();
 

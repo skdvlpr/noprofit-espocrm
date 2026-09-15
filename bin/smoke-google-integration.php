@@ -524,18 +524,61 @@ $templateView = file_get_contents(__DIR__ . '/../client/custom/modules/google-in
 $entityTypeView = file_get_contents(__DIR__ . '/../client/custom/modules/google-integration/src/views/fields/calendar-config-entity-type.js') ?: '';
 $ok('Opportunity per-date template selector is not raw ID input', !str_contains($perDateView, 'CalendarTemplate ID') && str_contains($perDateView, 'data-role="calendarTemplateId"'));
 $ok(
-    'Variable picker uses shared template inserter (or Google panel)',
-    (
-        str_contains($perDateView, 'nonprofit-espocrm:lib/template-variable-inserter')
-        || str_contains($perDateView, 'google-integration:lib/google-calendar-variable-panel')
-    ) && (
-        str_contains($templateView, 'nonprofit-espocrm:lib/template-variable-inserter')
-        || str_contains($templateView, 'google-integration:lib/google-calendar-variable-panel')
-    )
+    'Google UI does not AMD-require nonprofit-espocrm',
+    !str_contains($perDateView, 'nonprofit-espocrm:')
+    && !str_contains($templateView, 'nonprofit-espocrm:')
+    && !str_contains($entityTypeView, 'nonprofit-espocrm:')
+);
+$ok(
+    'Variable picker uses Google-owned template inserter',
+    str_contains($perDateView, 'google-integration:lib/template-variable-inserter')
+    && str_contains($templateView, 'google-integration:lib/template-variable-inserter')
 );
 $inserterJs = file_get_contents(
-    __DIR__ . '/../client/custom/modules/nonprofit-espocrm/src/lib/template-variable-inserter.js'
+    __DIR__ . '/../client/custom/modules/google-integration/src/lib/template-variable-inserter.js'
 ) ?: '';
+$ok(
+    'Google template-variable-inserter exists and offers recordUrl helper',
+    is_file(__DIR__ . '/../client/custom/modules/google-integration/src/lib/template-variable-inserter.js')
+    && str_contains($inserterJs, "'recordUrl'")
+    && str_contains($inserterJs, "define('google-integration:lib/template-variable-inserter'")
+);
+$ok(
+    'WorkflowEngine is not shipped in this product',
+    !is_dir(__DIR__ . '/../custom/Espo/Modules/WorkflowEngine')
+    && !is_dir(__DIR__ . '/../client/custom/modules/workflow-engine')
+);
+$templateFieldsPhp = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Core/Utils/Metadata/AdditionalBuilder/GoogleCalendarIntegrationTemplateFields.php'
+) ?: '';
+$ok(
+    'Google template fields catalog is metadata-scoped, not CORE_ENTITY_TYPES',
+    !str_contains($templateFieldsPhp, 'CORE_ENTITY_TYPES')
+    && str_contains($templateFieldsPhp, 'filterLiveEntityTypes')
+);
+$syncRunnerPhp = file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php'
+) ?: '';
+$ok(
+    'Google pull preference list is intersected with metadata scopes',
+    str_contains($syncRunnerPhp, 'PULL_ENTITY_TYPES')
+    && str_contains($syncRunnerPhp, "['scopes', \$entityType, 'entity']")
+);
+$giClientRoot = realpath(__DIR__ . '/../client/custom/modules/google-integration');
+$giNonprofitAmdHits = [];
+if (is_string($giClientRoot)) {
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($giClientRoot));
+    foreach ($iterator as $file) {
+        if (!$file->isFile() || $file->getExtension() !== 'js') {
+            continue;
+        }
+        $contents = file_get_contents($file->getPathname()) ?: '';
+        if (str_contains($contents, 'nonprofit-espocrm:')) {
+            $giNonprofitAmdHits[] = $file->getPathname();
+        }
+    }
+}
+$ok('google-integration JS tree has zero nonprofit-espocrm AMD prefixes', $giNonprofitAmdHits === []);
 $eventPusherPhp = file_get_contents(
     __DIR__ . '/../custom/Espo/Modules/GoogleIntegration/Tools/Calendar/EventPusher.php'
 ) ?: '';

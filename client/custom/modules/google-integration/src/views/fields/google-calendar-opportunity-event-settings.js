@@ -2,7 +2,7 @@ define('google-integration:views/fields/google-calendar-opportunity-event-settin
     'exports',
     'views/fields/base',
     'ui/select',
-    'nonprofit-espocrm:lib/template-variable-inserter',
+    'google-integration:lib/template-variable-inserter',
     'google-integration:lib/google-calendar-color-swatch',
 ], function (_exports, _base, _select, Inserter, ColorSwatch) {
     'use strict';
