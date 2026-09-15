@@ -8,7 +8,12 @@ use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\InjectableFactory;
 use Espo\Core\Utils\Config\ConfigWriter;
 use Espo\Entities\Attachment;
+use Espo\Entities\EmailTemplate;
+use Espo\Modules\BugTracker\Tools\BugReportEmailHtml;
 use Espo\Modules\BugTracker\Tools\BugReportMailer;
+use Espo\Tools\EmailTemplate\Data as EmailTemplateData;
+use Espo\Tools\EmailTemplate\Params as EmailTemplateParams;
+use Espo\Tools\EmailTemplate\Processor as EmailTemplateProcessor;
 use integration\Core\NoTransaction;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
@@ -214,5 +219,71 @@ class BugTrackerTest extends SafehouseBaseTestCase
         $mailer->notifyReporterClosed($bug);
 
         $this->assertSame('Closed', $bug->get('status'));
+    }
+
+    #[NoTransaction]
+    public function testHtmlTemplateEscapesReporterDescription(): void
+    {
+        if (!class_exists(\Espo\Modules\BugTracker\Tools\Installer::class)) {
+            $this->markTestSkipped('BugTracker module not installed.');
+        }
+
+        $em = $this->getEntityManager();
+        $payload = '<p>CRM admin action required.</p>'
+            . '<p><a href="https://evil.example/login">Re-authenticate here</a></p>';
+
+        $bug = $em->getNewEntity('BugReport');
+        $bug->set([
+            'description' => $payload,
+            'pageUrl' => 'https://crm.example.test/#BugReport',
+            'pageTitle' => '<img src=x onerror=alert(1)>',
+            'status' => 'New',
+        ]);
+        $em->saveEntity($bug);
+
+        $this->assertSame($payload, (string) $bug->get('description'));
+
+        $template = $em->getNewEntity(EmailTemplate::ENTITY_TYPE);
+        $template->set([
+            'name' => 'BugTracker html-escape phpunit ' . $bug->getId(),
+            'subject' => 'New bug report: {BugReport.name}',
+            'body' => '<p>{BugReport.description}</p>'
+                . '<p>Page: <a href="{BugReport.pageUrl}">{BugReport.pageUrl}</a></p>'
+                . '<p>{BugReport.pageTitle}</p>',
+            'isHtml' => true,
+            'oneOff' => false,
+            'status' => EmailTemplate::STATUS_ACTIVE,
+        ]);
+        $em->saveEntity($template, ['skipAll' => true, 'silent' => true]);
+
+        $factory = $this->getContainer()->getByClass(InjectableFactory::class);
+        /** @var EmailTemplateProcessor $processor */
+        $processor = $factory->create(EmailTemplateProcessor::class);
+
+        $rawBody = $processor->process(
+            $template,
+            EmailTemplateParams::create()->withApplyAcl(false),
+            EmailTemplateData::create()
+                ->withParent($bug)
+                ->withEntityHash([$bug->getEntityType() => $bug])
+        )->getBody();
+
+        $this->assertStringContainsString('<a href="https://evil.example/login">', $rawBody);
+
+        $safe = BugReportEmailHtml::copyForTemplate($em, $bug);
+        $escapedBody = $processor->process(
+            $template,
+            EmailTemplateParams::create()->withApplyAcl(false),
+            EmailTemplateData::create()
+                ->withParent($safe)
+                ->withEntityHash([$safe->getEntityType() => $safe])
+        )->getBody();
+
+        $this->assertStringNotContainsString('<a href="https://evil.example/login">', $escapedBody);
+        $this->assertStringContainsString('&lt;a href=&quot;https://evil.example/login&quot;&gt;', $escapedBody);
+        $this->assertStringNotContainsString('<img src=x', $escapedBody);
+        $this->assertStringContainsString('&lt;img src=x', $escapedBody);
+        $this->assertSame($payload, (string) $bug->get('description'));
+        $this->assertSame('<img src=x onerror=alert(1)>', (string) $bug->get('pageTitle'));
     }
 }
