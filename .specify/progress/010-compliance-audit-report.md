@@ -311,7 +311,7 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 | Expectation | Confirm Roles after RoleSetup removal |
 | Citation | https://github.com/espocrm/documentation/blob/master/docs/administration/roles-management.md |
 | Action type | blocked-needs-prod |
-| Backlog rank | — (partially probed on DDEV: AppSecret=0, Roles exist; fieldData matrix still open) |
+| Backlog rank | — (owner deferred 2026-09-15: resume later; do not lose. DDEV: AppSecret=0, Roles exist; fieldData matrix still open) |
 
 ## Ranked remediation backlog
 
@@ -341,6 +341,6 @@ Standalone theme metadata; assets under `client/custom/css/safehouse-aurora/` (d
 
 ## Owner acceptance (SC-006)
 
-- [ ] User confirms this report is sufficient to drive the next remediation priority.
-
-**Suggested first specify after acceptance:** backlog rank 1 (F-001).
+- [x] User confirms this report is sufficient to drive the next remediation priority.
+  Recorded 2026-09-15: proceed in backlog order; first specify = rank 1 (F-001).
+  F-016 postponed (remember; not a 001 blocker).

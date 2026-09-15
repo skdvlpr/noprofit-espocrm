@@ -34,3 +34,4 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `009-implement-prima-nota-off-books.md` | Implement off-books Prima Nota (T016 prod pending deploy) |
 | `011-prod-tag-metro-off-books.md` | Prod PUT two Metro PrimaNota rows after CI deploy |
 | `012-docs-cite-github-and-constitution-v1.3.md` | Constitution v1.3.0 + GitHub Espo doc cites |
+| `013-close-001-specify-f001.md` | SC-006 close + specify `003-decouple-google-client` |

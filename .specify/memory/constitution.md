@@ -22,8 +22,7 @@ Sync Impact Report
   - XX. Live instance REST (explore-espo-endpoints)
   - Locked Decisions (nonprofit F-* subset; no LearnHouse / GM queue)
 - Removed sections: none
-- Follow-up TODOs:
-  - Owner still owes SC-006 on `001-custom-code-audit`
+- Follow-up TODOs: none
 -->
 
 # Nonprofit EspoCRM Constitution
