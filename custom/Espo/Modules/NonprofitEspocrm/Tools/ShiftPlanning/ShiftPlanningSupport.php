@@ -16,6 +16,7 @@ use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\DateTime as DateTimeUtil;
+use Espo\Modules\NonprofitEspocrm\Hooks\ActivityInvite\ProtectInviteMutation;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftCoverageSyncService;
@@ -567,6 +568,7 @@ class ShiftPlanningSupport
     public function saveEntityAllowStatus(Entity $entity, array $options = []): void
     {
         $options[StatusGuard::SKIP_OPTION] = true;
+        $options[ProtectInviteMutation::SAVE_OPTION] = true;
         $this->entityManager->saveEntity($entity, $options);
     }
 
