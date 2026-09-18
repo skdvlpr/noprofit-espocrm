@@ -4,15 +4,21 @@ declare(strict_types=1);
 
 namespace tests\integration\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Core\FieldProcessing\Loader\Params as LoaderParams;
+use Espo\Core\FieldValidation\FieldValidationManager;
+use Espo\Modules\NonprofitEspocrm\Classes\FieldProcessing\User\ContactProfileLoader;
 use Espo\ORM\Repository\Option\SaveOption;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
 /**
- * User ↔ Contact profile sync hooks (converted from bin/smoke-contact-occasional.php).
+ * User profile is a Contact reflection; Member User-first still auto-creates Contact.
+ *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/record-defs.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
  */
 class UserContactProfileSyncTest extends SafehouseBaseTestCase
 {
-    public function testVolunteerRoleCreatesLinkedContactWithSyncedFields(): void
+    public function testContactCompetencesReflectOnUserWithoutCopyBack(): void
     {
         $em = $this->getEntityManager();
         $volunteerRole = $em->getRDBRepository('Role')->where(['name' => 'Volunteer'])->findOne();
@@ -28,9 +34,6 @@ class UserContactProfileSyncTest extends SafehouseBaseTestCase
             'lastName' => 'Volunteer',
             'type' => 'regular',
             'isActive' => true,
-            'isOccasional' => true,
-            'startDate' => $startDate,
-            'weeklyHours' => 8,
             'emailAddress' => 'phpunit.vol.' . bin2hex(random_bytes(2)) . '@example.com',
             'rolesIds' => [$volunteerRole->getId()],
             'rolesNames' => (object) [$volunteerRole->getId() => 'Volunteer'],
@@ -38,19 +41,42 @@ class UserContactProfileSyncTest extends SafehouseBaseTestCase
         $em->saveEntity($user);
 
         $this->assertTrue((bool) $user->get('hasVolunteerRole'));
+        $this->assertNull(
+            $em->getRDBRepository('Contact')->where(['linkedUserId' => $user->getId()])->findOne()
+        );
 
-        $contact = $em->getRDBRepository('Contact')
-            ->where(['linkedUserId' => $user->getId()])
-            ->findOne();
+        $contact = $em->getNewEntity('Contact');
+        $contact->set([
+            'firstName' => 'PHPUnit',
+            'lastName' => 'Volunteer',
+            'contactType' => 'Volunteer',
+            'linkedUserId' => $user->getId(),
+            'isOccasional' => true,
+            'startDate' => $startDate,
+            'weeklyHours' => 8,
+            'activityCompetences' => ['Reception'],
+        ]);
+        $em->saveEntity($contact);
 
-        $this->assertNotNull($contact);
-        $this->assertSame('Volunteer', $contact->get('contactType'));
-        $this->assertTrue((bool) $contact->get('isOccasional'));
-        $this->assertSame($startDate, $contact->get('startDate'));
-        $this->assertSame(34.6, (float) $user->get('monthlyHours'));
+        $userFresh = $em->getEntityById('User', $user->getId());
+        $this->assertNotNull($userFresh);
+        $this->loader()->process($userFresh, LoaderParams::create());
+
+        $this->assertTrue((bool) $userFresh->get('isOccasional'));
+        $this->assertSame($startDate, $userFresh->get('startDate'));
+        $this->assertSame(['Reception'], $userFresh->get('activityCompetences'));
+
+        $userFresh->set('activityCompetences', ['Cleaning']);
+        $userFresh->set('isOccasional', false);
+        $em->saveEntity($userFresh);
+
+        $contactFresh = $em->getEntityById('Contact', $contact->getId());
+        $this->assertNotNull($contactFresh);
+        $this->assertSame(['Reception'], $contactFresh->get('activityCompetences'));
+        $this->assertTrue((bool) $contactFresh->get('isOccasional'));
     }
 
-    public function testUserTaxCodeSyncUppercasesLowercaseInputOnContact(): void
+    public function testMemberAutoCreateDoesNotCopyTaxCodeFromUser(): void
     {
         $em = $this->getEntityManager();
         $memberRole = $em->getRDBRepository('Role')->where(['name' => 'Member'])->findOne();
@@ -77,7 +103,53 @@ class UserContactProfileSyncTest extends SafehouseBaseTestCase
             ->findOne();
 
         $this->assertNotNull($contact);
-        $this->assertSame('RSSMRA85T10A562S', $contact->get('taxCode'));
+        $this->assertSame('MemberContact', $contact->get('contactType'));
+        $this->assertTrue(
+            $contact->get('taxCode') === null || $contact->get('taxCode') === '',
+            'User taxCode must not be copied onto Contact'
+        );
+
+        $contact->set('taxCode', 'RSSMRA85T10A562S');
+        $em->saveEntity($contact);
+
+        $userFresh = $em->getEntityById('User', $user->getId());
+        $this->assertNotNull($userFresh);
+        $this->loader()->process($userFresh, LoaderParams::create());
+        $this->assertSame('RSSMRA85T10A562S', $userFresh->get('taxCode'));
+    }
+
+    public function testDuplicateUserEmailFailsValidation(): void
+    {
+        $em = $this->getEntityManager();
+        $email = 'phpunit.dup.' . bin2hex(random_bytes(2)) . '@example.com';
+
+        $first = $em->getNewEntity('User');
+        $first->set([
+            'userName' => 'phpunit_dup1_' . bin2hex(random_bytes(2)),
+            'firstName' => 'PHPUnit',
+            'lastName' => 'DupOne',
+            'type' => 'regular',
+            'isActive' => true,
+            'emailAddress' => $email,
+        ]);
+        $em->saveEntity($first);
+
+        $second = $em->getNewEntity('User');
+        $second->set([
+            'userName' => 'phpunit_dup2_' . bin2hex(random_bytes(2)),
+            'firstName' => 'PHPUnit',
+            'lastName' => 'DupTwo',
+            'type' => 'regular',
+            'isActive' => true,
+            'emailAddress' => $email,
+        ]);
+
+        $manager = $this->getContainer()
+            ->getByClass(\Espo\Core\InjectableFactory::class)
+            ->create(FieldValidationManager::class);
+
+        $this->expectException(\Espo\Core\FieldValidation\Exceptions\ValidationError::class);
+        $manager->process($second, (object) ['emailAddress' => $email]);
     }
 
     public function testUserDeleteInactivatesLinkedContact(): void
@@ -113,5 +185,10 @@ class UserContactProfileSyncTest extends SafehouseBaseTestCase
         $fresh = $em->getEntityById('Contact', $contactId);
         $this->assertNotNull($fresh);
         $this->assertSame('Inactive', $fresh->get('personnelStatus'));
+    }
+
+    private function loader(): ContactProfileLoader
+    {
+        return $this->getInjectableFactory()->create(ContactProfileLoader::class);
     }
 }

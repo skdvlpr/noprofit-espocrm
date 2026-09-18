@@ -18,6 +18,7 @@
         "label": "Volunteer / Employee",
         "rows": [
             [{"name": "startDate"}, {"name": "endDate"}],
+            [{"name": "activityCompetences"}, false],
             [{"name": "isOccasional"}, {"name": "contractType"}],
             [{"name": "weeklyHours"}, {"name": "monthlyHours"}],
             [{"name": "extra", "fullWidth": true}]

@@ -3,6 +3,9 @@
     "iconClass": "fas fa-id-badge",
     "recordViews": {
         "detail": "nonprofit-espocrm:views/contact/record/detail",
+        "edit": "nonprofit-espocrm:views/contact/record/edit",
+        "editSmall": "nonprofit-espocrm:views/contact/record/edit-small",
+        "editQuick": "nonprofit-espocrm:views/contact/record/edit-small",
         "list": "nonprofit-espocrm:views/contact/record/list"
     },
     "styleMap": {
@@ -141,6 +144,32 @@
                             "type": "in",
                             "attribute": "contactType",
                             "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "activityCompetences": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        }
+                    ]
+                }
+            },
+            "createCrmUser": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "in",
+                            "attribute": "contactType",
+                            "value": ["Volunteer", "Employee"]
+                        },
+                        {
+                            "type": "isEmpty",
+                            "attribute": "linkedUserId"
                         }
                     ]
                 }

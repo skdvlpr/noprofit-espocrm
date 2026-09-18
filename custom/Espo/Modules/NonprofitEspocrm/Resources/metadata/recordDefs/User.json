@@ -1,5 +1,7 @@
 {
     "readLoaderClassNameList": [
+        "__APPEND__",
         "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldProcessing\\User\\ContactProfileLoader"
-    ]
+    ],
+    "duplicateWhereBuilderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\DuplicateWhereBuilders\\User"
 }

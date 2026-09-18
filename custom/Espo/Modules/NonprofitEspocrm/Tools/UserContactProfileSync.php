@@ -7,8 +7,11 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOption;
 
 /**
- * Sync User volunteering / member / employee profile fields ↔ linked Contact.
- * Contact is source of truth after save; User form fields are staging mirrors.
+ * Load User volunteering / member / employee fields from linked Contact.
+ * Contact is the stored source of truth; User fields are a read-only reflection.
+ *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/orm.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/users-management.md
  */
 class UserContactProfileSync
 {
@@ -40,11 +43,7 @@ class UserContactProfileSync
         'birthDate',
         'birthPlace',
         'birthProvince',
-    ];
-
-    /** User attribute → Contact attribute (when names differ). */
-    private const FIELD_MAP = [
-        'memberNotes' => 'notes',
+        'activityCompetences',
     ];
 
     public function __construct(
@@ -128,13 +127,27 @@ class UserContactProfileSync
         }
 
         foreach (array_unique(array_merge(self::VOLUNTEER_FIELDS, self::MEMBER_FIELDS)) as $field) {
-            $contactField = self::FIELD_MAP[$field] ?? $field;
+            $contactField = self::mapContactField($field);
 
             if (!$contact->hasAttribute($contactField) && !$contact->has($contactField)) {
                 continue;
             }
 
             $user->set($field, $contact->get($contactField));
+        }
+
+        $user->set('linkedContactId', $contact->getId());
+        $name = trim((string) ($contact->get('name') ?? ''));
+
+        if ($name === '') {
+            $name = trim(
+                trim((string) ($contact->get('firstName') ?? '')) . ' ' .
+                trim((string) ($contact->get('lastName') ?? ''))
+            );
+        }
+
+        if ($name !== '') {
+            $user->set('linkedContactName', $name);
         }
     }
 
@@ -145,6 +158,10 @@ class UserContactProfileSync
         $hasEmployee = $flags['hasEmployeeRole'];
         $hasMember = $flags['hasMemberRole'];
 
+        if ($this->linkFromSourceContact($user)) {
+            return;
+        }
+
         if (!$hasVolunteer && !$hasEmployee && !$hasMember) {
             return;
         }
@@ -154,13 +171,17 @@ class UserContactProfileSync
 
         foreach ($contacts as $contact) {
             $found = true;
-            $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasEmployee, $hasMember);
+            $this->writeProfileToContact($contact, $hasVolunteer, $hasEmployee, $hasMember);
             $this->entityManager->saveEntity($contact, [
                 SaveOption::SKIP_ALL => true,
             ]);
         }
 
         if ($found) {
+            return;
+        }
+
+        if (!self::mayAutoCreateContact($hasVolunteer, $hasEmployee, $hasMember)) {
             return;
         }
 
@@ -184,8 +205,52 @@ class UserContactProfileSync
             $contact->set('phoneNumber', $phone);
         }
 
-        $this->writeProfileToContact($user, $contact, $hasVolunteer, $hasEmployee, $hasMember);
+        $this->writeProfileToContact($contact, $hasVolunteer, $hasEmployee, $hasMember);
         $this->entityManager->saveEntity($contact);
+    }
+
+    /**
+     * Volunteer/Employee person records start on Contact. Member User-first
+     * Contact create may remain until a later spec.
+     */
+    public static function mayAutoCreateContact(
+        bool $hasVolunteer,
+        bool $hasEmployee,
+        bool $hasMember
+    ): bool {
+        if ($hasVolunteer || $hasEmployee) {
+            return false;
+        }
+
+        return $hasMember;
+    }
+
+    /**
+     * Link an existing Contact after Contact-first User create.
+     * MUST NOT create a Contact and MUST NOT steal Assigned User.
+     *
+     * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/acl.md
+     */
+    public function linkFromSourceContact(Entity $user): bool
+    {
+        $sourceId = trim((string) ($user->get('sourceContactId') ?? ''));
+
+        if ($sourceId === '') {
+            return false;
+        }
+
+        $contact = $this->entityManager->getEntityById('Contact', $sourceId);
+
+        if (!$contact) {
+            return false;
+        }
+
+        $contact->set('linkedUserId', $user->getId());
+        $this->entityManager->saveEntity($contact, [
+            SaveOption::SKIP_ALL => true,
+        ]);
+
+        return true;
     }
 
     private function resolveContactType(bool $hasVolunteer, bool $hasEmployee, bool $hasMember): string
@@ -205,8 +270,11 @@ class UserContactProfileSync
         return 'Other';
     }
 
+    /**
+     * Contact type may follow User roles. Personnel profile fields stay on
+     * Contact; User is a read-only reflection (ContactProfileLoader).
+     */
     private function writeProfileToContact(
-        Entity $user,
         Entity $contact,
         bool $hasVolunteer,
         bool $hasEmployee,
@@ -217,59 +285,18 @@ class UserContactProfileSync
 
         if ($type === '') {
             $contact->set('contactType', $desired);
-            $type = $desired;
         } elseif ($hasVolunteer && in_array($type, ['MemberContact', 'Employee'], true)) {
             $contact->set('contactType', 'Volunteer');
-            $type = 'Volunteer';
         } elseif ($hasEmployee && !$hasVolunteer && $type === 'MemberContact') {
             $contact->set('contactType', 'Employee');
-            $type = 'Employee';
         } elseif ($hasMember && !$hasVolunteer && !$hasEmployee && $type !== 'MemberContact') {
             $contact->set('contactType', 'MemberContact');
-            $type = 'MemberContact';
-        }
-
-        if ($hasVolunteer || $hasEmployee || in_array($type, ['Volunteer', 'Employee'], true)) {
-            foreach (self::VOLUNTEER_FIELDS as $field) {
-                if (!$user->has($field)) {
-                    continue;
-                }
-
-                // Occasional flag is Volunteer-only.
-                if ($field === 'isOccasional' && !$hasVolunteer && $type !== 'Volunteer') {
-                    continue;
-                }
-
-                $contactField = self::FIELD_MAP[$field] ?? $field;
-                $value = $user->get($field);
-
-                if ($field === 'monthlyHours' && $user->get('weeklyHours') !== null && $user->get('weeklyHours') !== '') {
-                    $value = round((float) $user->get('weeklyHours') * 4.33, 1);
-                }
-
-                $this->setContactField($contact, $contactField, $value);
-            }
-        }
-
-        if ($hasMember || $type === 'MemberContact') {
-            foreach (self::MEMBER_FIELDS as $field) {
-                if (!$user->has($field)) {
-                    continue;
-                }
-
-                $contactField = self::FIELD_MAP[$field] ?? $field;
-                $this->setContactField($contact, $contactField, $user->get($field));
-            }
         }
     }
 
-    private function setContactField(Entity $contact, string $contactField, mixed $value): void
+    private static function mapContactField(string $userField): string
     {
-        if ($contactField === 'taxCode') {
-            $value = ItalianTaxCodeNormalizer::normalize($value);
-        }
-
-        $contact->set($contactField, $value);
+        return $userField === 'memberNotes' ? 'notes' : $userField;
     }
 
     /**

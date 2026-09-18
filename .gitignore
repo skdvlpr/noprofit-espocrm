@@ -66,6 +66,7 @@
 .env
 .env.*
 *.sql
+*.sql.gz
 *.sqlite
 *.bak
 *.backup

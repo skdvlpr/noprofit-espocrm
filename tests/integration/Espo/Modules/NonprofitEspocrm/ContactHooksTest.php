@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace tests\integration\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Core\FieldProcessing\Loader\Params as LoaderParams;
 use Espo\Core\FieldSanitize\SanitizeManager;
 use Espo\Entities\User;
+use Espo\Modules\NonprofitEspocrm\Classes\FieldProcessing\User\ContactProfileLoader;
 use tests\integration\Espo\Support\SafehouseBaseTestCase;
 
 /**
@@ -59,7 +61,6 @@ class ContactHooksTest extends SafehouseBaseTestCase
             'emailAddress' => 'occ-' . $marker . '@example.com',
             'isActive' => true,
             'type' => 'regular',
-            'isOccasional' => false,
         ]);
         $em->saveEntity($user);
 
@@ -67,12 +68,20 @@ class ContactHooksTest extends SafehouseBaseTestCase
         $contact->set([
             'firstName' => 'PHPUnit',
             'lastName' => 'OccMirror',
+            'contactType' => 'Volunteer',
             'linkedUserId' => $user->getId(),
             'isOccasional' => true,
         ]);
         $em->saveEntity($contact);
 
         $userFresh = $em->getEntityById(User::ENTITY_TYPE, $user->getId());
+        $this->assertNotNull($userFresh);
+
+        $loader = $this->getContainer()
+            ->getByClass(\Espo\Core\InjectableFactory::class)
+            ->create(ContactProfileLoader::class);
+        $loader->process($userFresh, LoaderParams::create());
+
         $this->assertTrue((bool) $userFresh->get('isOccasional'));
     }
 

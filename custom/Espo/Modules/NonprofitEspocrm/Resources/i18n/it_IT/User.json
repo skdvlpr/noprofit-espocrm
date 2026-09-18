@@ -14,7 +14,8 @@
         "leaveDate": "Data di uscita",
         "positionsHeld": "Cariche ricoperte",
         "memberNotes": "Note",
-        "activityCompetences": "Competenze attività"
+        "activityCompetences": "Competenze attività",
+        "linkedContact": "Contatto"
     },
     "labels": {
         "Volunteering": "Volontariato",
@@ -30,8 +31,11 @@
         }
     },
     "tooltips": {
-        "isOccasional": "Volontario occasionale (senza impegno settimanale regolare). Sincronizzato con il Contatto collegato.",
-        "monthlyHours": "Ore mensili approssimative (settimanali × 4,33).",
-        "activityCompetences": "Categorie di turno per cui il volontario è abilitato. Vuoto = tutte le categorie."
+        "isOccasional": "Mostrato dal Contatto collegato (sola lettura). Modificare il Contatto per cambiarlo.",
+        "monthlyHours": "Mostrato dal Contatto collegato (sola lettura).",
+        "activityCompetences": "Mostrate dal Contatto collegato (sola lettura). Vuoto sul Contatto = tutte le categorie."
+    },
+    "messages": {
+        "fieldNotUniqueAmongUsers": "Questa email è già usata da un altro utente CRM."
     }
 }

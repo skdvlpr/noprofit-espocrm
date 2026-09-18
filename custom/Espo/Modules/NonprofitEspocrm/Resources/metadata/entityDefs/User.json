@@ -32,20 +32,25 @@
         },
         "isOccasional": {
             "type": "bool",
+            "notStorable": true,
+            "readOnly": true,
             "default": false,
             "tooltip": true
         },
         "startDate": {
             "type": "date",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "endDate": {
             "type": "date",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "weeklyHours": {
             "type": "float",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "monthlyHours": {
             "type": "float",
@@ -55,13 +60,15 @@
         },
         "extra": {
             "type": "text",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "taxCode": {
             "type": "varchar",
             "maxLength": 16,
             "trim": true,
             "notStorable": true,
+            "readOnly": true,
             "validatorClassNameList": [
                 "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\TaxCode\\ItalianFiscalCode"
             ]
@@ -69,23 +76,28 @@
         "birthDate": {
             "type": "date",
             "notStorable": true,
+            "readOnly": true,
             "isPersonalData": true
         },
         "birthPlace": {
             "type": "varchar",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "joinDate": {
             "type": "date",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "leaveDate": {
             "type": "date",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "positionsHeld": {
             "type": "multiEnum",
             "notStorable": true,
+            "readOnly": true,
             "options": [
                 "President",
                 "VicePresident",
@@ -104,16 +116,35 @@
         },
         "memberNotes": {
             "type": "wysiwyg",
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
         },
         "birthProvince": {
             "type": "varchar",
             "maxLength": 8,
             "trim": true,
-            "notStorable": true
+            "notStorable": true,
+            "readOnly": true
+        },
+        "sourceContactId": {
+            "type": "varchar",
+            "maxLength": 24,
+            "notStorable": true,
+            "layoutDetailDisabled": true,
+            "layoutListDisabled": true,
+            "layoutMassUpdateDisabled": true,
+            "layoutFiltersDisabled": true
+        },
+        "linkedContact": {
+            "type": "link",
+            "notStorable": true,
+            "readOnly": true,
+            "entity": "Contact"
         },
         "activityCompetences": {
             "type": "multiEnum",
+            "notStorable": true,
+            "readOnly": true,
             "translation": "ActivityOfferSlot.options.category",
             "options": [
                 "MealPreparation",
@@ -136,9 +167,20 @@
                 "OnCallAvailability"
             ],
             "tooltip": true
+        },
+        "emailAddress": {
+            "validatorClassNameList": [
+                "__APPEND__",
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\User\\EmailAddress\\UniqueAmongUsers"
+            ]
         }
     },
     "links": {
+        "linkedContact": {
+            "type": "belongsTo",
+            "entity": "Contact",
+            "noJoin": true
+        },
         "linkedContacts": {
             "type": "hasMany",
             "entity": "Contact",

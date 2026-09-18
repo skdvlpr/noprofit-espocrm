@@ -23,6 +23,7 @@ define('nonprofit-espocrm:views/user/record/role-profile-mixin', [], function ()
 
             this.model.set({
                 hasVolunteerRole: names.includes('Volunteer'),
+                hasEmployeeRole: names.includes('Employee'),
                 hasMemberRole: names.includes('Member'),
             }, {ui: true});
         },

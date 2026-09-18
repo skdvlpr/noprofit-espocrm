@@ -31,6 +31,7 @@ class ShiftPlanningService
         private ShiftEmailService $shiftEmailService,
         private ShiftChangeNotifyService $shiftChangeNotifyService,
         private ShiftCoverageSyncService $shiftCoverageSyncService,
+        ContactActivityCompetences $contactActivityCompetences,
     ) {
         // Collaborators must share this instance's User/Acl so createWith(['user' => …])
         // (volunteer-as-actor smokes/controllers) reaches saveAvailability / grid filters.
@@ -42,6 +43,7 @@ class ShiftPlanningService
             $shiftEmailService,
             $shiftChangeNotifyService,
             $shiftCoverageSyncService,
+            $contactActivityCompetences,
         );
 
         $this->weekSlots = new WeekSlotSynchronizer($support);

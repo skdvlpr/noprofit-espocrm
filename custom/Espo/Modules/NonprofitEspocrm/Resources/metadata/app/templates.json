@@ -1,6 +1,10 @@
 {
-    "reminderPush": {
-        "scopeList": ["Meeting", "Call", "Task"],
+    "accessInfo": {
+        "scope": "User",
+        "module": "NonprofitEspocrm"
+    },
+    "passwordChangeLink": {
+        "scope": "User",
         "module": "NonprofitEspocrm"
     }
 }

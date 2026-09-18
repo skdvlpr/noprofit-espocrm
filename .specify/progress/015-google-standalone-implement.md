@@ -48,3 +48,10 @@
 1. Owner UAT Pass/Fail/Skip.
 2. Ask before commit (constitution VIII).
 3. After UAT: next audit rank F-003 App Secrets (F-002 cancelled).
+
+## Update 2026-09-15 — UAT deferred
+
+Owner: run 003 closing tests **after 004** (Contact-first CRM user) is
+closed. Checklist still all `[ ]`. Not accepted. Reminder lives in
+`specs/003-google-standalone/checklists/owner-user-tests.md` (Deferred
+banner) and progress `017-plan-contact-first-crm-user.md`.

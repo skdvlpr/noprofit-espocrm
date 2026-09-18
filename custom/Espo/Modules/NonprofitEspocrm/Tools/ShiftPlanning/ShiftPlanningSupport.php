@@ -20,6 +20,7 @@ use Espo\Modules\NonprofitEspocrm\Tools\ShiftEmailService;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftChangeNotifyService;
 use Espo\Modules\NonprofitEspocrm\Tools\ShiftCoverageSyncService;
 use Espo\Modules\NonprofitEspocrm\Tools\StatusGuard;
+use Espo\Modules\NonprofitEspocrm\Tools\ContactActivityCompetences;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -72,6 +73,7 @@ class ShiftPlanningSupport
         private ShiftEmailService $shiftEmailService,
         private ShiftChangeNotifyService $shiftChangeNotifyService,
         private ShiftCoverageSyncService $shiftCoverageSyncService,
+        private ContactActivityCompetences $contactActivityCompetences,
     ) {}
 
     public function entityManager(): EntityManager
@@ -336,18 +338,9 @@ class ShiftPlanningSupport
     /**
      * @return string[]
      */
-    /**
-     * @return string[]
-     */
     public function getUserCompetences(User $user): array
     {
-        $value = $user->get('activityCompetences');
-
-        if (!is_array($value)) {
-            return [];
-        }
-
-        return array_values(array_filter($value, 'is_string'));
+        return $this->contactActivityCompetences->listForUser($user);
     }
 
     /**

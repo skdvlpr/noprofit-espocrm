@@ -11,6 +11,9 @@ use Espo\ORM\Repository\Option\SaveOption;
 /**
  * When a User is deleted, linked Contacts become Inactive (Contact itself stays).
  *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
+ * (afterRemove)
+ *
  * @implements AfterRemove<\Espo\Entities\User>
  */
 class InactivateLinkedContacts implements AfterRemove

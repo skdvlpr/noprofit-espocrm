@@ -81,6 +81,7 @@ class ShiftPlanningInstaller
         $this->migrateSlotStatusesPublishedCovered($container);
         $this->normalizeInviteOfferLinks($container);
         $this->ensureUserCompetencesLayout($container, $injectableFactory);
+        $this->ensureContactCompetencesLayout($container, $injectableFactory);
         $this->ensureEmailTemplates($container);
         $this->ensureCompletePastSlotsScheduling($container);
         $this->ensureReconcileFullyStaffedScheduling($container);
@@ -587,6 +588,84 @@ class ShiftPlanningInstaller
         } catch (\Throwable $e) {
             $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
                 'NonprofitEspocrm User layout provisioning skipped: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Ensure Contact volunteer panel includes activityCompetences.
+     * MUST NOT add a storable User competence column.
+     */
+    public function ensureContactCompetencesLayout(
+        Container $container,
+        InjectableFactory $injectableFactory
+    ): void {
+        try {
+            /** @var \Espo\Tools\LayoutManager\LayoutManager $layoutManager */
+            $layoutManager = $injectableFactory->create(
+                \Espo\Tools\LayoutManager\LayoutManager::class
+            );
+
+            $raw = $layoutManager->get('Contact', 'detail');
+
+            if ($raw === null || $raw === '') {
+                throw new \RuntimeException('Contact detail layout is empty');
+            }
+
+            if (str_contains($raw, 'activityCompetences')) {
+                return;
+            }
+
+            $layout = json_decode($raw);
+
+            if (!is_array($layout)) {
+                throw new \RuntimeException('Contact detail layout JSON is not an array');
+            }
+
+            $injected = false;
+
+            foreach ($layout as $panelIndex => $panel) {
+                $panelObj = is_array($panel) ? (object) $panel : $panel;
+
+                if (!is_object($panelObj) || ($panelObj->name ?? '') !== 'personnelVolunteerEmployee') {
+                    continue;
+                }
+
+                if (!isset($panelObj->rows) || !is_array($panelObj->rows)) {
+                    continue;
+                }
+
+                array_unshift($panelObj->rows, [
+                    (object) ['name' => 'activityCompetences'],
+                    false,
+                ]);
+                $layout[$panelIndex] = $panelObj;
+                $injected = true;
+                break;
+            }
+
+            if (!$injected) {
+                $layout[] = (object) [
+                    'name' => 'personnelVolunteerEmployee',
+                    'label' => 'Volunteer / Employee',
+                    'rows' => [
+                        [
+                            (object) ['name' => 'activityCompetences'],
+                            false,
+                        ],
+                    ],
+                ];
+            }
+
+            $layoutManager->set($layout, 'Contact', 'detail');
+            $layoutManager->save();
+
+            /** @var \Espo\Core\DataManager $dataManager */
+            $dataManager = $container->getByClass(DataManager::class);
+            $dataManager->updateCacheTimestamp();
+        } catch (\Throwable $e) {
+            $container->getByClass(\Espo\Core\Utils\Log::class)->warning(
+                'NonprofitEspocrm Contact competence layout provisioning skipped: ' . $e->getMessage()
             );
         }
     }

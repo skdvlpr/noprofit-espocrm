@@ -7,6 +7,9 @@ use Espo\ORM\Query\SelectBuilder;
 
 /**
  * Regular volunteers + employees (excludes occasional volunteers).
+ * NULL isOccasional is treated as regular (same as Volunteers filter).
+ *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/select-defs.md
  */
 class VolunteersEmployees implements Filter
 {
@@ -17,7 +20,10 @@ class VolunteersEmployees implements Filter
                 ['contactType' => 'Employee'],
                 [
                     'contactType' => 'Volunteer',
-                    'isOccasional!=' => true,
+                    'OR' => [
+                        ['isOccasional' => false],
+                        ['isOccasional' => null],
+                    ],
                 ],
             ],
         ]);

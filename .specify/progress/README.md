@@ -37,3 +37,16 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `013-close-001-specify-f001.md` | SC-006 close + specify `003-decouple-google-client` |
 | `014-google-standalone-specify-plan.md` | Rewrite 003 Google standalone; retire WF; constitution v1.4.0 |
 | `015-google-standalone-implement.md` | Implement 003: Google AMD standalone, delete WF from this product |
+| `016-specify-contact-first-crm-user.md` | Specify-ahead 004 contact-first volunteer User |
+| `017-plan-contact-first-crm-user.md` | Plan 004: linkedUser identity, Contact competences, User mirrors |
+| `018-tasks-contact-first-crm-user.md` | Tasks T001–T029 for 004 (local DDEV; wipe/prod skipped) |
+| `019-implement-contact-first-crm-user.md` | Implement 004: prod dump → DDEV, copy, notStorable; prod apply Skip |
+| `020-specify-repair-create-crm-user.md` | Specify 004.1: repair create-User + side panel, access email, sync |
+| `021-plan-repair-create-crm-user.md` | Plan 004.1: drawer, sendAccessInfo, channel sync |
+| `022-tasks-repair-create-crm-user.md` | Tasks T001–T027 for 004.1 (local DDEV; prod/mail Skip) |
+| `023-implement-repair-create-crm-user.md` | Implement 004.1: drawer, sendAccessInfo, channel sync; dual-close after Pass |
+| `024-specify-create-user-review.md` | Specify 004.2: review modal, unique email, Contact mirror |
+| `025-implement-create-user-review.md` | Implement 004.2 on DDEV; custom/ only; owner UAT V1–V10 |
+| `026-uat-repair-create-user-review.md` | 004.2 UAT repair: layout, modal copy, cron, filters, CID logo |
+| `027-access-info-logo-gmail-cid.md` | Access-info logo: Htmlizer-safe CID for Gmail |
+| `028-prod-transfer-004-family.md` | Commit/push 004 family; compare models; prod copy + drop leftover tables |

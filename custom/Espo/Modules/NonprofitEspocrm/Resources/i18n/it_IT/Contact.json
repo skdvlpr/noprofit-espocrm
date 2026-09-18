@@ -20,7 +20,9 @@
         "joinDate": "Data di ingresso",
         "leaveDate": "Data di uscita",
         "positionsHeld": "Cariche ricoperte",
-        "notes": "Note"
+        "notes": "Note",
+        "activityCompetences": "Competenze attività",
+        "createCrmUser": "Crea utente CRM"
     },
     "links": {
         "opportunities": "Fondi e Finanziamenti",
@@ -69,9 +71,16 @@
         "linkedUser": "Utente Espo regolare (non portale), opzionale. Indipendente dall'utente portale.",
         "monthlyHours": "Ore mensili approssimative (settimanali × 4,33).",
         "isOccasional": "Volontario occasionale (senza impegno settimanale regolare).",
-        "birthProvince": "Provincia di nascita (come nel registro soci/volontari)."
+        "birthProvince": "Provincia di nascita (come nel registro soci/volontari).",
+        "activityCompetences": "Categorie di turno per cui il volontario è abilitato. Vuoto = tutte le categorie.",
+        "createCrmUser": "Dopo Salva si apre un pannello per controllare login, ruolo e invito. Deselezionare per salvare la persona senza accesso."
+    },
+    "labels": {
+        "sendPasswordCreateLink": "Invia all'utente un'email con un link per creare una password"
     },
     "messages": {
+        "createCrmUserFailed": "Il contatto è stato salvato, ma l'utente CRM non è stato creato: {error}",
+        "createCrmUserNeedsEmail": "Aggiungere un'email prima di creare l'utente CRM (serve per il link di impostazione password).",
         "removeRecordConfirmationContactOnly": "Questo contatto è collegato a un utente. Verrà eliminato solo il Contatto — l'account Utente resterà.",
         "removeSelectedRecordsConfirmationContactOnly": "Almeno un contatto selezionato è collegato a un utente. Verranno eliminati solo i Contatti — gli account Utente collegati resteranno."
     }

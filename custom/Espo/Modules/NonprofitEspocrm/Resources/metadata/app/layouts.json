@@ -16,6 +16,9 @@
         "detailSmall": {
             "module": "NonprofitEspocrm"
         },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        },
         "list": {
             "module": "NonprofitEspocrm"
         },

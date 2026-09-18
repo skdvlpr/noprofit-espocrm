@@ -14,7 +14,8 @@
         "leaveDate": "Leave date",
         "positionsHeld": "Positions held",
         "memberNotes": "Notes",
-        "activityCompetences": "Activity competences"
+        "activityCompetences": "Activity competences",
+        "linkedContact": "Contact"
     },
     "labels": {
         "Volunteering": "Volunteering",
@@ -30,8 +31,11 @@
         }
     },
     "tooltips": {
-        "isOccasional": "Occasional volunteer (not a regular weekly commitment). Synced to the linked Contact.",
-        "monthlyHours": "Approximate monthly hours (weekly × 4.33).",
-        "activityCompetences": "Shift categories the volunteer is qualified for. Empty = all categories."
+        "isOccasional": "Shown from the linked Contact (read-only). Edit the Contact to change it.",
+        "monthlyHours": "Shown from the linked Contact (read-only).",
+        "activityCompetences": "Shown from the linked Contact (read-only). Empty on Contact = all categories."
+    },
+    "messages": {
+        "fieldNotUniqueAmongUsers": "This email is already used by another CRM user."
     }
 }

@@ -8,7 +8,11 @@ use Espo\Modules\NonprofitEspocrm\Tools\UserContactProfileSync;
 use Espo\ORM\Entity;
 
 /**
- * Populate User volunteering/member staging fields from linked Contact.
+ * Populate User volunteering/member fields from linked Contact (read-only
+ * reflection, not a stored copy).
+ *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/record-defs.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
  *
  * @implements Loader<\Espo\Entities\User>
  */

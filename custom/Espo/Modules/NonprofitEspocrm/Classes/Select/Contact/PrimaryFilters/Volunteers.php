@@ -7,6 +7,9 @@ use Espo\ORM\Query\SelectBuilder;
 
 /**
  * Regular (non-occasional) volunteers.
+ * `isOccasional != true` would drop SQL NULL rows from older dumps.
+ *
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/select-defs.md
  */
 class Volunteers implements Filter
 {
@@ -14,7 +17,10 @@ class Volunteers implements Filter
     {
         $queryBuilder->where([
             'contactType' => 'Volunteer',
-            'isOccasional!=' => true,
+            'OR' => [
+                ['isOccasional' => false],
+                ['isOccasional' => null],
+            ],
         ]);
     }
 }

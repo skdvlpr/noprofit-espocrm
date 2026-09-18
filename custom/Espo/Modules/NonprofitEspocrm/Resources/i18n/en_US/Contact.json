@@ -20,7 +20,9 @@
         "joinDate": "Join date",
         "leaveDate": "Leave date",
         "positionsHeld": "Positions held",
-        "notes": "Notes"
+        "notes": "Notes",
+        "activityCompetences": "Activity competences",
+        "createCrmUser": "Create CRM user"
     },
     "links": {
         "opportunities": "Grants & Funding",
@@ -69,9 +71,16 @@
         "linkedUser": "Optional regular (non-portal) Espo user. Independent from portal user.",
         "monthlyHours": "Approximate monthly hours (weekly × 4.33).",
         "isOccasional": "Occasional volunteer (not a regular weekly commitment).",
-        "birthProvince": "Province of birth (as in the members/volunteers registry)."
+        "birthProvince": "Province of birth (as in the members/volunteers registry).",
+        "activityCompetences": "Shift categories the volunteer is qualified for. Empty = all categories.",
+        "createCrmUser": "After you save, a side panel lets you check the login (username, role, invite link). Uncheck to save the person without a login."
+    },
+    "labels": {
+        "sendPasswordCreateLink": "Send the user an email with a link to create a password"
     },
     "messages": {
+        "createCrmUserFailed": "The contact was saved, but the CRM user was not created: {error}",
+        "createCrmUserNeedsEmail": "Add an email before creating a CRM user (needed for the password-setup link).",
         "removeRecordConfirmationContactOnly": "This contact is linked to a user. Only the Contact will be deleted — the User account will remain.",
         "removeSelectedRecordsConfirmationContactOnly": "At least one selected contact is linked to a user. Only Contact records will be deleted — linked User accounts will remain."
     }

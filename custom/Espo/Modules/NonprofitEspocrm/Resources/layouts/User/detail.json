@@ -4,6 +4,7 @@
         "rows": [
             [{"name": "userName"}, false],
             [{"name": "name"}, {"name": "title"}],
+            [{"name": "linkedContact"}, false],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
             [{"name": "gender"}, false]
         ]
