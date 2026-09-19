@@ -10,9 +10,11 @@ use Espo\ORM\Entity;
 
 /**
  * Hard unique email among Users (not skippable duplicate dialog).
+ * Record-API only; Hooks/User/EnforceUniqueEmail covers EntityManager saves.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/orm.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
  *
  * @implements Validator<Entity>
  */

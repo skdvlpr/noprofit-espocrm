@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace tests\unit\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Core\Exceptions\Conflict;
 use Espo\Modules\NonprofitEspocrm\Tools\UserContactProfileSync;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityCollection;
@@ -52,6 +53,7 @@ class UserContactProfileSyncTest extends TestCase
 
         $user = $this->createMock(Entity::class);
         $user->method('getId')->willReturn('user-1');
+        $user->method('isNew')->willReturn(true);
         $user->method('get')->willReturnCallback(
             static fn (string $field): mixed => match ($field) {
                 'type' => 'regular',
@@ -107,6 +109,7 @@ class UserContactProfileSyncTest extends TestCase
 
         $user = $this->createMock(Entity::class);
         $user->method('getId')->willReturn('user-3');
+        $user->method('isNew')->willReturn(true);
         $user->method('get')->willReturnCallback(
             static fn (string $field): mixed => $field === 'sourceContactId' ? 'contact-3' : null
         );
@@ -115,6 +118,47 @@ class UserContactProfileSyncTest extends TestCase
         $this->assertTrue($sync->linkFromSourceContact($user));
         $this->assertSame('user-3', $setFields['linkedUserId'] ?? null);
         $this->assertArrayNotHasKey('assignedUserId', $setFields);
+    }
+
+    public function testSourceContactIdIgnoredOnExistingUser(): void
+    {
+        $em = $this->createMock(EntityManager::class);
+        $em->expects($this->never())->method('getEntityById');
+        $em->expects($this->never())->method('saveEntity');
+
+        $user = $this->createMock(Entity::class);
+        $user->method('getId')->willReturn('user-existing');
+        $user->method('isNew')->willReturn(false);
+        $user->method('get')->willReturnCallback(
+            static fn (string $field): mixed => $field === 'sourceContactId' ? 'contact-victim' : null
+        );
+
+        $sync = new UserContactProfileSync($em);
+        $this->assertFalse($sync->linkFromSourceContact($user));
+    }
+
+    public function testLinkFromSourceContactRejectsAlreadyLinkedContact(): void
+    {
+        $contact = $this->createMock(Entity::class);
+        $contact->method('get')->willReturnCallback(
+            static fn (string $field): mixed => $field === 'linkedUserId' ? 'user-other' : null
+        );
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('Contact', 'contact-taken')->willReturn($contact);
+        $em->expects($this->never())->method('saveEntity');
+
+        $user = $this->createMock(Entity::class);
+        $user->method('getId')->willReturn('user-new');
+        $user->method('isNew')->willReturn(true);
+        $user->method('get')->willReturnCallback(
+            static fn (string $field): mixed => $field === 'sourceContactId' ? 'contact-taken' : null
+        );
+
+        $sync = new UserContactProfileSync($em);
+
+        $this->expectException(Conflict::class);
+        $sync->linkFromSourceContact($user);
     }
 
     public function testSyncFromUserDoesNotCopyCompetencesOntoContact(): void

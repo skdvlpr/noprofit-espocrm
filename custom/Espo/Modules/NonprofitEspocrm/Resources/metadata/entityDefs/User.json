@@ -133,7 +133,8 @@
             "layoutDetailDisabled": true,
             "layoutListDisabled": true,
             "layoutMassUpdateDisabled": true,
-            "layoutFiltersDisabled": true
+            "layoutFiltersDisabled": true,
+            "readOnlyAfterCreate": true
         },
         "linkedContact": {
             "type": "link",
