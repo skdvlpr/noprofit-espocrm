@@ -2,6 +2,7 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Tools;
 
+use Espo\Core\Exceptions\Conflict;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOption;
@@ -227,12 +228,20 @@ class UserContactProfileSync
 
     /**
      * Link an existing Contact after Contact-first User create.
+     * MUST NOT run on update (sourceContactId is a create handshake).
+     * MUST NOT steal a Contact already linked to another User.
      * MUST NOT create a Contact and MUST NOT steal Assigned User.
      *
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/acl.md
+     * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
      */
     public function linkFromSourceContact(Entity $user): bool
     {
+        // afterSave still sees isNew(); setAsNotNew runs after afterSave.
+        if (!$user->isNew()) {
+            return false;
+        }
+
         $sourceId = trim((string) ($user->get('sourceContactId') ?? ''));
 
         if ($sourceId === '') {
@@ -243,6 +252,13 @@ class UserContactProfileSync
 
         if (!$contact) {
             return false;
+        }
+
+        $existing = trim((string) ($contact->get('linkedUserId') ?? ''));
+        $userId = (string) $user->getId();
+
+        if ($existing !== '' && $existing !== $userId) {
+            throw new Conflict('This contact is already linked to another CRM user.');
         }
 
         $contact->set('linkedUserId', $user->getId());
