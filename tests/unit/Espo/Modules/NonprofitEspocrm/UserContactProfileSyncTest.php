@@ -174,6 +174,7 @@ class UserContactProfileSyncTest extends TestCase
         $contact->method('has')->willReturn(true);
         $contact->method('get')->willReturnCallback(
             static fn (string $field): mixed => match ($field) {
+                'joinDate' => '2020-01-15',
                 'activityCompetences' => ['Reception'],
                 'isOccasional' => true,
                 'name' => 'Ada Volunteer',
@@ -206,6 +207,7 @@ class UserContactProfileSyncTest extends TestCase
         $sync->loadFromContact($user);
 
         $this->assertSame(['Reception'], $setFields['activityCompetences'] ?? null);
+        $this->assertSame('2020-01-15', $setFields['joinDate'] ?? null);
         $this->assertTrue((bool) ($setFields['isOccasional'] ?? false));
         $this->assertSame('contact-4', $setFields['linkedContactId'] ?? null);
         $this->assertSame('Ada Volunteer', $setFields['linkedContactName'] ?? null);

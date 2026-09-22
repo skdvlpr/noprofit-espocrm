@@ -1,0 +1,33 @@
+{
+    "fields": {
+        "opportunityAmount": "Сумма гранта/финансирования",
+        "createdOpportunity": "Гранты и финансирование",
+        "contactType": "Тип",
+        "taxCode": "Код налогоплательщика",
+        "birthDate": "Дата рождения",
+        "isOccasional": "Разовый",
+        "birthProvince": "Провинция рождения",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "weeklyHours": "Часов в неделю",
+        "monthlyHours": "Часов в месяц",
+        "extra": "Дополнительно",
+        "activityCompetences": "Компетенции",
+        "birthPlace": "Место рождения",
+        "joinDate": "Дата вступления",
+        "leaveDate": "Дата выхода",
+        "positionsHeld": "Должности",
+        "notes": "Заметки"
+    },
+    "links": {
+        "createdOpportunity": "Гранты и финансирование"
+    },
+    "options": {
+        "contactType": {
+            "Volunteer": "Волонтёр",
+            "Employee": "Сотрудник",
+            "MemberContact": "Ассоциат",
+            "Other": "Общий"
+        }
+    }
+}

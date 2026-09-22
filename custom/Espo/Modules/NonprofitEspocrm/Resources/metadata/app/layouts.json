@@ -13,6 +13,9 @@
         "detail": {
             "module": "NonprofitEspocrm"
         },
+        "detailConvert": {
+            "module": "NonprofitEspocrm"
+        },
         "detailSmall": {
             "module": "NonprofitEspocrm"
         },
@@ -35,6 +38,17 @@
             "module": "NonprofitEspocrm"
         },
         "bottomPanelsDetail": {
+            "module": "NonprofitEspocrm"
+        }
+    },
+    "Lead": {
+        "detail": {
+            "module": "NonprofitEspocrm"
+        },
+        "edit": {
+            "module": "NonprofitEspocrm"
+        },
+        "detailSmall": {
             "module": "NonprofitEspocrm"
         }
     },

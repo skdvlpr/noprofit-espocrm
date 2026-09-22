@@ -1,16 +1,20 @@
-define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], function (Dep) {
+define('nonprofit-espocrm:views/contact/record/edit', [
+    'views/record/edit',
+    'nonprofit-espocrm:helpers/contact-type-set',
+], function (Dep, ContactTypeSet) {
 
     /**
      * Contact-first CRM user: Crea utente CRM on create only. Save opens a
      * review dialog-record; confirm POSTs Contact then User. Checkbox MUST
-     * NOT open the panel.
+     * NOT open the panel. Multi-type: Volunteer+Member / Employee+Member.
      *
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/modal.md
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/custom-views.md
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/users-management.md
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/passwords.md
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/acl.md
-     * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/terms-and-naming.md
+     * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
+     * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/view.md
      */
     return Dep.extend({
 
@@ -31,49 +35,18 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
                 this.syncLinkedUserPickerVisibility();
             });
 
-            this.listenTo(this.model, 'change:contactType', () => {
-                this.syncLinkedUserPickerVisibility();
-            });
-
-            this.once('after:render', () => {
-                this.restrictPersonnelTypeOptions();
+            ContactTypeSet.attachToRecordView(this, function () {
                 this.syncCreateCrmUserFieldVisibility();
                 this.syncLinkedUserPickerVisibility();
             });
         },
 
-        isPersonnelType() {
-            const type = this.model.get('contactType');
-
-            return type === 'Volunteer' || type === 'Employee';
+        contactTypeList() {
+            return ContactTypeSet.list(this.model.get('contactType'));
         },
 
-        restrictPersonnelTypeOptions() {
-            if (this.getUser().isAdmin()) {
-                return;
-            }
-
-            if (!this.model.isNew()) {
-                return;
-            }
-
-            const fieldView = this.getFieldView('contactType');
-
-            if (!fieldView) {
-                return;
-            }
-
-            const current = fieldView.params && fieldView.params.options ?
-                fieldView.params.options :
-                [];
-            const options = current.filter(value => value !== 'Volunteer' && value !== 'Employee');
-
-            if (typeof fieldView.setOptionList === 'function') {
-                fieldView.setOptionList(options);
-            }
-            else if (fieldView.params) {
-                fieldView.params.options = options;
-            }
+        wantsCrmUser() {
+            return ContactTypeSet.wantsCrmUser(this.contactTypeList());
         },
 
         syncCreateCrmUserFieldVisibility() {
@@ -83,16 +56,20 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
                 return;
             }
 
-            if (this.isPersonnelType()) {
+            if (this.wantsCrmUser()) {
                 this.showField('createCrmUser');
+
+                return;
             }
+
+            this.hideField('createCrmUser');
         },
 
         syncLinkedUserPickerVisibility() {
             if (
                 this.model.isNew() &&
                 this.model.get('createCrmUser') &&
-                this.isPersonnelType()
+                this.wantsCrmUser()
             ) {
                 this.hideField('linkedUser');
                 this.model.set({
@@ -129,6 +106,9 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
                 'birthPlace',
                 'birthProvince',
                 'activityCompetences',
+                'joinDate',
+                'leaveDate',
+                'positionsHeld',
             ].forEach(field => {
                 const value = this.model.get(field);
 
@@ -151,7 +131,7 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
                 return false;
             }
 
-            if (!this.isPersonnelType()) {
+            if (!this.wantsCrmUser()) {
                 return false;
             }
 
@@ -187,61 +167,47 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
             });
         },
 
-        fetchPersonnelRoleId() {
-            const wanted = this.model.get('contactType') === 'Employee' ? 'Employee' : 'Volunteer';
+        fetchMatchingRoles() {
+            const wanted = ContactTypeSet.roleNames(this.contactTypeList());
 
             return Espo.Ajax.getRequest('Role', {
-                maxSize: 50,
+                maxSize: 200,
                 select: 'id,name',
             }).then(response => {
                 const list = (response && response.list) ? response.list : [];
-                const hit = list.find(row => row.name === wanted);
+                const rolesIds = [];
+                const rolesNames = {};
 
-                return hit ? hit.id : null;
+                wanted.forEach(name => {
+                    const hit = list.find(row => row.name === name);
+
+                    if (hit) {
+                        rolesIds.push(hit.id);
+                        rolesNames[hit.id] = name;
+                    }
+                });
+
+                return {rolesIds: rolesIds, rolesNames: rolesNames};
             });
         },
 
+        releaseCreateCrmUserReview() {
+            ContactTypeSet.dropCreateCrmUserReview(this);
+            this._openingCrmUserReview = false;
+        },
+
         openCreateCrmUserReview() {
-            if (this.getView('createCrmUser') || this._openingCrmUserReview) {
-                return Promise.resolve();
-            }
-
-            this._openingCrmUserReview = true;
-
-            return this.fetchPersonnelRoleId()
-                .catch(() => null)
-                .then(roleId => {
+            return this.fetchMatchingRoles()
+                .catch(() => ({rolesIds: [], rolesNames: {}}))
+                .then(roles => {
                 const attributes = this.buildUserAttributes();
 
-                if (roleId && (!attributes.rolesIds || !attributes.rolesIds.length)) {
-                    attributes.rolesIds = [roleId];
-                    attributes.rolesNames = attributes.rolesNames || {};
-                    attributes.rolesNames[roleId] = this.model.get('contactType') === 'Employee' ?
-                        'Employee' : 'Volunteer';
+                if (roles.rolesIds && roles.rolesIds.length && (!attributes.rolesIds || !attributes.rolesIds.length)) {
+                    attributes.rolesIds = roles.rolesIds;
+                    attributes.rolesNames = Object.assign({}, attributes.rolesNames || {}, roles.rolesNames);
                 }
 
-                return new Promise(resolve => {
-                    this.createView('createCrmUser', 'nonprofit-espocrm:views/modals/create-crm-user', {
-                        scope: 'User',
-                        attributes: attributes,
-                        fullFormDisabled: true,
-                        headerText: this.translate('Create User', 'labels', 'User'),
-                        onConfirm: confirmed => {
-                            this._crmUserDraft = confirmed;
-                            this._crmUserReviewConfirmed = true;
-                            this._openingCrmUserReview = false;
-                            resolve('confirmed');
-                        },
-                        onCancel: () => {
-                            this._crmUserDraft = null;
-                            this._crmUserReviewConfirmed = false;
-                            this._openingCrmUserReview = false;
-                            resolve('cancelled');
-                        },
-                    }, view => {
-                        view.render();
-                    });
-                });
+                return ContactTypeSet.presentCreateCrmUserReview(this, attributes);
             });
         },
 
@@ -341,7 +307,9 @@ define('nonprofit-espocrm:views/contact/record/edit', ['views/record/edit'], fun
 
                 return this.openCreateCrmUserReview().then(result => {
                     if (result !== 'confirmed') {
-                        return Promise.resolve();
+                        this.lastSaveCancelReason = 'cancel';
+
+                        return Promise.reject('cancel');
                     }
 
                     options.skipNotModifiedWarning = true;

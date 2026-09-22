@@ -1,0 +1,159 @@
+{
+    "fields": {
+        "contactType": {
+            "type": "multiEnum",
+            "options": [
+                "Volunteer",
+                "Employee",
+                "MemberContact",
+                "Other"
+            ],
+            "maxCount": 2,
+            "displayAsLabel": true,
+            "allowCustomOptions": false,
+            "audited": true,
+            "style": {
+                "Volunteer": "success",
+                "Employee": "warning",
+                "MemberContact": "success",
+                "Other": "default"
+            },
+            "validatorClassNameList": [
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\ContactType\\LegalCombination"
+            ]
+        },
+        "taxCode": {
+            "type": "varchar",
+            "maxLength": 16,
+            "trim": true,
+            "isPersonalData": true,
+            "layoutAvailabilityList": [],
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\StringUpperCase"
+            ]
+        },
+        "birthDate": {
+            "type": "date",
+            "isPersonalData": true,
+            "layoutAvailabilityList": []
+        },
+        "personnelStatus": {
+            "type": "enum",
+            "options": ["Active", "Inactive"],
+            "default": "Active",
+            "displayAsLabel": true,
+            "labelType": "state",
+            "layoutAvailabilityList": [],
+            "style": {
+                "Active": "success",
+                "Inactive": "danger"
+            }
+        },
+        "isOccasional": {
+            "type": "bool",
+            "default": false,
+            "tooltip": true,
+            "layoutAvailabilityList": []
+        },
+        "birthProvince": {
+            "type": "varchar",
+            "maxLength": 8,
+            "trim": true,
+            "tooltip": true,
+            "isPersonalData": true,
+            "layoutAvailabilityList": []
+        },
+        "startDate": {
+            "type": "date",
+            "layoutAvailabilityList": []
+        },
+        "endDate": {
+            "type": "date",
+            "layoutAvailabilityList": []
+        },
+        "contractType": {
+            "type": "enum",
+            "options": ["", "Permanent", "FixedTerm", "Freelance", "Other"],
+            "layoutAvailabilityList": [],
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
+        "weeklyHours": {
+            "type": "float",
+            "layoutAvailabilityList": []
+        },
+        "monthlyHours": {
+            "type": "float",
+            "readOnly": true,
+            "tooltip": true,
+            "layoutAvailabilityList": []
+        },
+        "extra": {
+            "type": "text",
+            "layoutAvailabilityList": []
+        },
+        "activityCompetences": {
+            "type": "multiEnum",
+            "translation": "ActivityOfferSlot.options.category",
+            "options": [
+                "MealPreparation",
+                "MealDistribution",
+                "Administrative",
+                "LegalDesk",
+                "DigitalDesk",
+                "Reception",
+                "ListeningDesk",
+                "MarketCollection",
+                "Cleaning",
+                "NightReceptionManagement",
+                "ProjectDevelopment",
+                "GrantsAndFundingManagement",
+                "Fundraising",
+                "EventOrganization",
+                "Secretariat",
+                "ServicesAndSupport",
+                "Activities",
+                "OnCallAvailability"
+            ],
+            "tooltip": true,
+            "layoutAvailabilityList": []
+        },
+        "birthPlace": {
+            "type": "varchar",
+            "isPersonalData": true,
+            "layoutAvailabilityList": []
+        },
+        "joinDate": {
+            "type": "date",
+            "layoutAvailabilityList": []
+        },
+        "leaveDate": {
+            "type": "date",
+            "layoutAvailabilityList": []
+        },
+        "positionsHeld": {
+            "type": "multiEnum",
+            "options": [
+                "President",
+                "VicePresident",
+                "Councilor",
+                "Treasurer",
+                "Founder"
+            ],
+            "displayAsLabel": true,
+            "layoutAvailabilityList": [],
+            "style": {
+                "President": "danger",
+                "VicePresident": "warning",
+                "Councilor": "info",
+                "Treasurer": "success",
+                "Founder": "primary"
+            }
+        },
+        "notes": {
+            "type": "wysiwyg",
+            "layoutAvailabilityList": []
+        }
+    }
+}

@@ -3,6 +3,7 @@
 namespace Espo\Modules\NonprofitEspocrm\Classes\Select\Contact\PrimaryFilters;
 
 use Espo\Core\Select\Primary\Filter;
+use Espo\Modules\NonprofitEspocrm\Tools\ContactTypeSet;
 use Espo\ORM\Query\SelectBuilder;
 
 /**
@@ -17,14 +18,16 @@ class VolunteersEmployees implements Filter
     {
         $queryBuilder->where([
             'OR' => [
-                ['contactType' => 'Employee'],
-                [
-                    'contactType' => 'Volunteer',
-                    'OR' => [
-                        ['isOccasional' => false],
-                        ['isOccasional' => null],
-                    ],
-                ],
+                ContactTypeSet::containsWhere('Contact', ContactTypeSet::OPTION_EMPLOYEE),
+                array_merge(
+                    ContactTypeSet::containsWhere('Contact', ContactTypeSet::OPTION_VOLUNTEER),
+                    [
+                        'OR' => [
+                            ['isOccasional' => false],
+                            ['isOccasional' => null],
+                        ],
+                    ]
+                ),
             ],
         ]);
     }

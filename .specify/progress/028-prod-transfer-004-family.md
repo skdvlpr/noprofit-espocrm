@@ -22,13 +22,13 @@ until this transfer finishes.
 
 ## Data-model compare (before deploy)
 
-Table lists are **identical** (166 names each). Differences are columns
+Table lists were **identical** (166 names each). Differences were columns
 and leftover unused tables, not missing product tables.
 
 | Item | DDEV (after 004) | Prod (before 004) |
 |------|------------------|-------------------|
 | `contact.activity_competences` | present; 15 nonempty | **missing** |
-| `user.activity_competences` leftover | present; 11 nonempty | present; **11 nonempty** |
+| `user.activity_competences` leftover | present; 11 nonempty | present; **11 nonempty** (9 live `deleted=0`) |
 | `user.is_occasional` leftover | present | present |
 | Other User personnel fields | notStorable / dropped | same |
 | Contact personnel fields | present | present |
@@ -37,14 +37,34 @@ and leftover unused tables, not missing product tables.
 | `workflow_condition_state` | 1 row | 1 row |
 | `g_cal_smoke_*` | present | present, **0 rows**, no metadata in tree |
 
-Copy on prod must use leftover User column; MUST NOT create Contacts/Users.
+Copy on prod uses leftover User column; MUST NOT create Contacts/Users.
+
+## Applied 2026-09-18
+
+- Commit `f2c81de` pushed to `main` (also shipped unpushed 003 Google/WF-removal commits).
+- CI `35375408359`: test 8m39s + deploy 43s **success** (soft rebuild in post-deploy).
+- Backup: `/home/deploy/backups/espocrm-pre-004-20260918T173638Z.sql.gz` (32M).
+- After deploy: `contact.activity_competences` existed; User leftover column kept; counts still 44 / 29 / 20.
+- Dry-run then apply `php command.php copyUserActivityCompetences --apply`: **copied=9**, skippedNoContact=2, skippedNotPersonnel=3, skippedEmpty=5. Nine Volunteer lists **MATCH** User leftovers. No new Contact/User rows.
+- Rsync **without delete** had left `custom/Espo/Modules/WorkflowEngine` + `client/custom/modules/workflow-engine` on the server. Removed those dirs; inactivated `WorkflowEngineRunScheduledWorkflows`. Google/push jobs left **Active**.
+- Dropped unused tables: `workflow_definition`, `workflow_condition_state`, `g_cal_smoke_all_day`, `g_cal_smoke_date_time`, `g_cal_smoke_twin_date`. Soft rebuild after module removal. **No `--hard`.** Leftover `user.activity_competences` column still present (optional later hard rebuild).
 
 ## Verification
 
-- Local unit PHPUnit + PHPStan before push (see this file after CI).
-- CI: `.github/workflows/ci.yml` test then rsync on `main`.
-- Post-deploy already runs **soft** `php command.php rebuild` (must not
-  `--hard` before `copyUserActivityCompetences --apply`).
+- Local: PHPStan OK; unit PHPUnit 164 tests / 349 assertions.
+- CI: PHPStan + unit + integration + rsync deploy green.
+- Prod: contact=44, user=29, 9 nonempty Contact competence lists, WF tables gone.
+
+## Blockers
+
+- None for this transfer. 004.3 (Contact multi-role / Associato volunteer-like flow) not started.
+- Optional later: owner-named `rebuild --hard` to drop leftover User columns; enable `DEPLOY_RSYNC_DELETE` if leftover files must prune automatically (ask first).
+
+## Next steps
+
+1. Owner: confirm volunteers on `crm.safehouse.community` still have competences on Contact.
+2. `/speckit-specify` 004.3 when owner is ready (multi Contact types, Associato = volunteer flow, merge duplicate fields, mirror to User).
+3. Do not dual-close 004–004.2 beyond existing DDEV UAT unless owner wants a prod Pass.
 
 ## Blockers
 

@@ -1,0 +1,11 @@
+{
+    "controller": "nonprofit-espocrm:controllers/lead",
+    "views": {
+        "convert": "nonprofit-espocrm:views/lead/convert"
+    },
+    "recordViews": {
+        "edit": "nonprofit-espocrm:views/lead/record/edit",
+        "editSmall": "nonprofit-espocrm:views/lead/record/edit-small",
+        "editQuick": "nonprofit-espocrm:views/lead/record/edit-small"
+    }
+}

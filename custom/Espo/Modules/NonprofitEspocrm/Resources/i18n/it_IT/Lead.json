@@ -3,9 +3,35 @@
         "opportunityAmount": "Importo Fondo/Finanziamento",
         "opportunityAmountConverted": "Importo Fondo/Finanziamento (convertito)",
         "opportunityAmountCurrency": "Valuta importo Fondo/Finanziamento",
-        "createdOpportunity": "Fondi e Finanziamenti"
+        "createdOpportunity": "Fondi e Finanziamenti",
+        "contactType": "Tipo",
+        "taxCode": "Codice Fiscale",
+        "birthDate": "Data di nascita",
+        "personnelStatus": "Stato",
+        "isOccasional": "Occasionale",
+        "birthProvince": "Prov. di nascita",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "contractType": "Tipo contratto",
+        "weeklyHours": "Ore settimanali",
+        "monthlyHours": "Ore mensili",
+        "extra": "Extra",
+        "activityCompetences": "Competenze attività",
+        "birthPlace": "Luogo di nascita",
+        "joinDate": "Data di ingresso",
+        "leaveDate": "Data di uscita",
+        "positionsHeld": "Cariche ricoperte",
+        "notes": "Note"
     },
     "links": {
         "createdOpportunity": "Fondi e Finanziamenti"
+    },
+    "options": {
+        "contactType": {
+            "Volunteer": "Volontario",
+            "Employee": "Dipendente",
+            "MemberContact": "Associato",
+            "Other": "Generico"
+        }
     }
 }

@@ -50,3 +50,6 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `026-uat-repair-create-user-review.md` | 004.2 UAT repair: layout, modal copy, cron, filters, CID logo |
 | `027-access-info-logo-gmail-cid.md` | Access-info logo: Htmlizer-safe CID for Gmail |
 | `028-prod-transfer-004-family.md` | Commit/push 004 family; compare models; prod copy + drop leftover tables |
+| `029-specify-contact-types-lead-convert.md` | Specify 004.3: Contact multi-type + Lead convert with CRM user |
+| `030-plan-contact-types-lead-convert.md` | Plan 004.3: multiEnum, native convert, hard Contact email unique |
+| `031-tasks-contact-types-lead-convert.md` | Tasks T001–T039 for 004.3 (complexity 8/10) |

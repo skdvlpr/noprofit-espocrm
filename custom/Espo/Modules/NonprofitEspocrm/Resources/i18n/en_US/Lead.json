@@ -3,9 +3,35 @@
         "opportunityAmount": "Grant/funding amount",
         "opportunityAmountConverted": "Grant/funding amount (converted)",
         "opportunityAmountCurrency": "Grant/funding amount currency",
-        "createdOpportunity": "Grants & Funding"
+        "createdOpportunity": "Grants & Funding",
+        "contactType": "Type",
+        "taxCode": "Fiscal Code",
+        "birthDate": "Date of birth",
+        "personnelStatus": "Status",
+        "isOccasional": "Occasional",
+        "birthProvince": "Birth province",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "contractType": "Contract type",
+        "weeklyHours": "Weekly hours",
+        "monthlyHours": "Monthly hours",
+        "extra": "Extra",
+        "activityCompetences": "Activity competences",
+        "birthPlace": "Birth place",
+        "joinDate": "Join date",
+        "leaveDate": "Leave date",
+        "positionsHeld": "Positions held",
+        "notes": "Notes"
     },
     "links": {
         "createdOpportunity": "Grants & Funding"
+    },
+    "options": {
+        "contactType": {
+            "Volunteer": "Volunteer",
+            "Employee": "Employee",
+            "MemberContact": "Member",
+            "Other": "Generic"
+        }
     }
 }

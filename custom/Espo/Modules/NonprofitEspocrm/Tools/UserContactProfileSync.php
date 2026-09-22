@@ -192,7 +192,7 @@ class UserContactProfileSync
             'personnelStatus' => 'Active',
             'linkedUserId' => $user->getId(),
             'assignedUserId' => $user->getId(),
-            'contactType' => $this->resolveContactType($hasVolunteer, $hasEmployee, $hasMember),
+            'contactType' => $this->resolveContactTypeList($hasVolunteer, $hasEmployee, $hasMember),
         ]);
 
         $email = $user->get('emailAddress');
@@ -253,26 +253,33 @@ class UserContactProfileSync
         return true;
     }
 
-    private function resolveContactType(bool $hasVolunteer, bool $hasEmployee, bool $hasMember): string
+    /**
+     * @return list<string>
+     */
+    private function resolveContactTypeList(bool $hasVolunteer, bool $hasEmployee, bool $hasMember): array
     {
-        if ($hasVolunteer) {
-            return 'Volunteer';
-        }
+        $types = [];
 
-        if ($hasEmployee) {
-            return 'Employee';
+        if ($hasVolunteer) {
+            $types[] = ContactTypeSet::OPTION_VOLUNTEER;
+        } elseif ($hasEmployee) {
+            $types[] = ContactTypeSet::OPTION_EMPLOYEE;
         }
 
         if ($hasMember) {
-            return 'MemberContact';
+            $types[] = ContactTypeSet::OPTION_MEMBER;
         }
 
-        return 'Other';
+        if ($types === []) {
+            return [ContactTypeSet::OPTION_OTHER];
+        }
+
+        return $types;
     }
 
     /**
-     * Contact type may follow User roles. Personnel profile fields stay on
-     * Contact; User is a read-only reflection (ContactProfileLoader).
+     * Contact type may follow User roles without wiping Volunteer+Member.
+     * Personnel profile fields stay on Contact; User is a read-only reflection.
      */
     private function writeProfileToContact(
         Entity $contact,
@@ -280,17 +287,37 @@ class UserContactProfileSync
         bool $hasEmployee,
         bool $hasMember
     ): void {
-        $type = trim((string) ($contact->get('contactType') ?? ''));
-        $desired = $this->resolveContactType($hasVolunteer, $hasEmployee, $hasMember);
+        $current = ContactTypeSet::normalize($contact->get('contactType'));
+        $desired = $this->resolveContactTypeList($hasVolunteer, $hasEmployee, $hasMember);
 
-        if ($type === '') {
+        if ($current === []) {
             $contact->set('contactType', $desired);
-        } elseif ($hasVolunteer && in_array($type, ['MemberContact', 'Employee'], true)) {
-            $contact->set('contactType', 'Volunteer');
-        } elseif ($hasEmployee && !$hasVolunteer && $type === 'MemberContact') {
-            $contact->set('contactType', 'Employee');
-        } elseif ($hasMember && !$hasVolunteer && !$hasEmployee && $type !== 'MemberContact') {
-            $contact->set('contactType', 'MemberContact');
+
+            return;
+        }
+
+        if (count($current) > 1 && ContactTypeSet::isLegal($current)) {
+            $merged = array_values(array_unique(array_merge($current, $desired)));
+
+            if (ContactTypeSet::isLegal($merged) && $merged !== $current) {
+                $contact->set('contactType', $merged);
+            }
+
+            return;
+        }
+
+        $merged = array_values(array_unique(array_merge($current, $desired)));
+
+        if (ContactTypeSet::isLegal($merged)) {
+            if ($merged !== $current) {
+                $contact->set('contactType', $merged);
+            }
+
+            return;
+        }
+
+        if (ContactTypeSet::isLegal($desired)) {
+            $contact->set('contactType', $desired);
         }
     }
 

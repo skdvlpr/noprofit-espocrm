@@ -8,6 +8,7 @@
             [{"name": "relatedRecord", "fullWidth": true}],
             [{"name": "emailAddress", "fullWidth": true}],
             [{"name": "phoneNumber", "fullWidth": true}],
+            [{"name": "taxCode"}, {"name": "birthDate"}],
             [{"name": "address", "fullWidth": true}],
             [{"name": "description", "fullWidth": true}]
         ]

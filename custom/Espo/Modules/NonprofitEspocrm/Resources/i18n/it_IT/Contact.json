@@ -79,6 +79,9 @@
         "sendPasswordCreateLink": "Invia all'utente un'email con un link per creare una password"
     },
     "messages": {
+        "fieldNotUniqueAmongContacts": "Questa email è già usata da un altro contatto.",
+        "fieldNotLegalCombination": "Questi tipi di contatto non si possono combinare. Coppie ammesse: Volontario + Associato, oppure Dipendente + Associato.",
+        "illegalContactTypeCombination": "Questi tipi di contatto non si possono combinare. Coppie ammesse: Volontario + Associato, oppure Dipendente + Associato.",
         "createCrmUserFailed": "Il contatto è stato salvato, ma l'utente CRM non è stato creato: {error}",
         "createCrmUserNeedsEmail": "Aggiungere un'email prima di creare l'utente CRM (serve per il link di impostazione password).",
         "removeRecordConfirmationContactOnly": "Questo contatto è collegato a un utente. Verrà eliminato solo il Contatto — l'account Utente resterà.",

@@ -8,6 +8,11 @@
         "editQuick": "nonprofit-espocrm:views/contact/record/edit-small",
         "list": "nonprofit-espocrm:views/contact/record/list"
     },
+    "additionalLayouts": {
+        "detailConvert": {
+            "type": "detail"
+        }
+    },
     "styleMap": {
         "contactType": {
             "HelpSeeker": "primary",
@@ -51,9 +56,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -61,11 +68,7 @@
             "personnelMember": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             }
@@ -74,11 +77,7 @@
             "isOccasional": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "Volunteer"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "Volunteer"}
                     ]
                 }
             },
@@ -86,9 +85,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -97,9 +98,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -107,11 +110,7 @@
             "contractType": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "Employee"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "Employee"}
                     ]
                 }
             },
@@ -119,9 +118,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -130,9 +131,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -141,9 +144,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -152,9 +157,11 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"}
+                            ]
                         }
                     ]
                 }
@@ -163,9 +170,12 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"},
+                                {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                            ]
                         },
                         {
                             "type": "isEmpty",
@@ -178,9 +188,12 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee", "MemberContact"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"},
+                                {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                            ]
                         }
                     ]
                 }
@@ -189,9 +202,12 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee", "MemberContact"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"},
+                                {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                            ]
                         }
                     ]
                 }
@@ -199,55 +215,35 @@
             "joinDate": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             },
             "leaveDate": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             },
             "positionsHeld": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             },
             "notes": {
                 "visible": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             },
             "taxCode": {
                 "required": {
                     "conditionGroup": [
-                        {
-                            "type": "equals",
-                            "attribute": "contactType",
-                            "value": "MemberContact"
-                        }
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
                     ]
                 }
             },
@@ -255,9 +251,12 @@
                 "required": {
                     "conditionGroup": [
                         {
-                            "type": "in",
-                            "attribute": "contactType",
-                            "value": ["Volunteer", "Employee", "MemberContact"]
+                            "type": "or",
+                            "value": [
+                                {"type": "has", "attribute": "contactType", "value": "Volunteer"},
+                                {"type": "has", "attribute": "contactType", "value": "Employee"},
+                                {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                            ]
                         }
                     ]
                 }

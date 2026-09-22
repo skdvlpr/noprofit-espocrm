@@ -4,6 +4,11 @@
         "listed": true,
         "allowedFlags": ["apply"]
     },
+    "copyContactTypeEnumToMulti": {
+        "className": "Espo\\Modules\\NonprofitEspocrm\\Classes\\ConsoleCommands\\CopyContactTypeEnumToMulti",
+        "listed": true,
+        "allowedFlags": ["apply"]
+    },
     "sendAccessInfoUser": {
         "className": "Espo\\Modules\\NonprofitEspocrm\\Classes\\ConsoleCommands\\SendAccessInfoUser",
         "listed": false

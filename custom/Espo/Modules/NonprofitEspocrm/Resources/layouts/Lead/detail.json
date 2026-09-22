@@ -1,0 +1,21 @@
+[
+    {
+        "label": "Overview",
+        "rows": [
+            [{"name": "name"}, {"name": "accountName"}],
+            [{"name": "contactType"}, {"name": "status"}],
+            [{"name": "emailAddress"}, {"name": "phoneNumber"}],
+            [{"name": "title"}, {"name": "website"}],
+            [{"name": "address"}, false]
+        ]
+    },
+    {
+        "label": "Details",
+        "rows": [
+            [{"name": "source"}, {"name": "campaign"}],
+            [{"name": "opportunityAmount"}, false],
+            [{"name": "industry"}, false],
+            [{"name": "description", "fullWidth": true}]
+        ]
+    }
+]

@@ -6,7 +6,9 @@
             [{"name": "name"}, {"name": "title"}],
             [{"name": "linkedContact"}, false],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
-            [{"name": "gender"}, false]
+            [{"name": "gender"}, false],
+            [{"name": "taxCode"}, {"name": "birthDate"}],
+            [{"name": "birthPlace"}, {"name": "birthProvince"}]
         ]
     },
     {
@@ -16,8 +18,6 @@
             [{"name": "activityCompetences"}, {"name": "isOccasional"}],
             [{"name": "startDate"}, {"name": "endDate"}],
             [{"name": "weeklyHours"}, {"name": "monthlyHours"}],
-            [{"name": "taxCode"}, {"name": "birthDate"}],
-            [{"name": "birthPlace"}, {"name": "birthProvince"}],
             [{"name": "extra", "fullWidth": true}]
         ]
     },
@@ -25,8 +25,6 @@
         "name": "memberProfile",
         "label": "Member",
         "rows": [
-            [{"name": "taxCode"}, {"name": "birthDate"}],
-            [{"name": "birthPlace"}, {"name": "birthProvince"}],
             [{"name": "joinDate"}, {"name": "leaveDate"}],
             [{"name": "positionsHeld", "fullWidth": true}],
             [{"name": "memberNotes", "fullWidth": true}]

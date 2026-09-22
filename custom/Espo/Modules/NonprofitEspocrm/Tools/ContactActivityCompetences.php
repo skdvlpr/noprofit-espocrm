@@ -36,9 +36,9 @@ class ContactActivityCompetences
         return array_values(array_filter($value, 'is_string'));
     }
 
-    public static function isPersonnelType(?string $type): bool
+    public static function isPersonnelType(mixed $type): bool
     {
-        return in_array((string) $type, self::PERSONNEL_TYPES, true);
+        return ContactTypeSet::hasPersonnel(ContactTypeSet::normalize($type));
     }
 
     /**
@@ -114,7 +114,7 @@ class ContactActivityCompetences
         foreach ($contacts as $contact) {
             $sawAny = true;
 
-            if (!self::isPersonnelType((string) ($contact->get('contactType') ?? ''))) {
+            if (!self::isPersonnelType($contact->get('contactType'))) {
                 continue;
             }
 
@@ -164,7 +164,7 @@ class ContactActivityCompetences
         $fallback = null;
 
         foreach ($this->findLinkedContacts($userId) as $contact) {
-            if (self::isPersonnelType((string) ($contact->get('contactType') ?? ''))) {
+            if (self::isPersonnelType($contact->get('contactType'))) {
                 return $contact;
             }
 

@@ -103,9 +103,9 @@ class ContactUserChannelSync
 
     private function isPersonnelContact(Entity $contact): bool
     {
-        $type = (string) ($contact->get('contactType') ?? '');
-
-        return $type === 'Volunteer' || $type === 'Employee';
+        return ContactTypeSet::hasPersonnel(
+            ContactTypeSet::normalize($contact->get('contactType'))
+        );
     }
 
     private function isSyncableUser(?Entity $user): bool

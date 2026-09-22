@@ -7,6 +7,7 @@ namespace tests\unit\Espo\Modules\NonprofitEspocrm;
 use Espo\Core\ApplicationState;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Modules\NonprofitEspocrm\Hooks\Contact\RestrictPersonnelTypeToAdmin;
+use Espo\Modules\NonprofitEspocrm\Tools\PersonnelTypeRestriction;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 use PHPUnit\Framework\TestCase;
@@ -20,33 +21,33 @@ class RestrictPersonnelTypeToAdminTest extends TestCase
 {
     public function testAdminMayCreateVolunteer(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: true, admin: true));
-        $hook->beforeSave($this->contact('Volunteer', isNew: true), SaveOptions::fromAssoc([]));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: true)));
+        $hook->beforeSave($this->contact(['Volunteer'], isNew: true), SaveOptions::fromAssoc([]));
 
         $this->addToAssertionCount(1);
     }
 
     public function testNonAdminCannotCreateEmployee(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: true, admin: false));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: false)));
 
         $this->expectException(Forbidden::class);
-        $hook->beforeSave($this->contact('Employee', isNew: true), SaveOptions::fromAssoc([]));
+        $hook->beforeSave($this->contact(['Employee'], isNew: true), SaveOptions::fromAssoc([]));
     }
 
     public function testNonAdminMayCreateHelpSeeker(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: true, admin: false));
-        $hook->beforeSave($this->contact('HelpSeeker', isNew: true), SaveOptions::fromAssoc([]));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: false)));
+        $hook->beforeSave($this->contact(['HelpSeeker'], isNew: true), SaveOptions::fromAssoc([]));
 
         $this->addToAssertionCount(1);
     }
 
     public function testNonAdminMayKeepExistingVolunteer(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: true, admin: false));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: false)));
         $hook->beforeSave(
-            $this->contact('Volunteer', isNew: false, typeChanged: false),
+            $this->contact(['Volunteer'], isNew: false, typeChanged: false),
             SaveOptions::fromAssoc([])
         );
 
@@ -55,19 +56,40 @@ class RestrictPersonnelTypeToAdminTest extends TestCase
 
     public function testNonAdminCannotChangeTypeToVolunteer(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: true, admin: false));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: false)));
 
         $this->expectException(Forbidden::class);
         $hook->beforeSave(
-            $this->contact('Volunteer', isNew: false, typeChanged: true),
+            $this->contact(
+                ['Volunteer'],
+                isNew: false,
+                typeChanged: true,
+                fetched: ['HelpSeeker']
+            ),
             SaveOptions::fromAssoc([])
         );
     }
 
+    public function testNonAdminMayAddMemberOnExistingVolunteer(): void
+    {
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: true, admin: false)));
+        $hook->beforeSave(
+            $this->contact(
+                ['Volunteer', 'MemberContact'],
+                isNew: false,
+                typeChanged: true,
+                fetched: ['Volunteer']
+            ),
+            SaveOptions::fromAssoc([])
+        );
+
+        $this->addToAssertionCount(1);
+    }
+
     public function testUnloggedSystemMayCreateVolunteer(): void
     {
-        $hook = new RestrictPersonnelTypeToAdmin($this->state(logged: false, admin: false));
-        $hook->beforeSave($this->contact('Volunteer', isNew: true), SaveOptions::fromAssoc([]));
+        $hook = new RestrictPersonnelTypeToAdmin(new PersonnelTypeRestriction($this->state(logged: false, admin: false)));
+        $hook->beforeSave($this->contact(['Volunteer'], isNew: true), SaveOptions::fromAssoc([]));
 
         $this->addToAssertionCount(1);
     }
@@ -81,11 +103,28 @@ class RestrictPersonnelTypeToAdminTest extends TestCase
         return $state;
     }
 
-    private function contact(string $type, bool $isNew, bool $typeChanged = false): Entity
-    {
+    /**
+     * @param list<string> $type
+     * @param list<string>|null $fetched
+     */
+    private function contact(
+        array $type,
+        bool $isNew,
+        bool $typeChanged = false,
+        ?array $fetched = null
+    ): Entity {
         $entity = $this->createMock(Entity::class);
         $entity->method('get')->willReturnCallback(
             static fn (string $field): mixed => $field === 'contactType' ? $type : null
+        );
+        $entity->method('getFetched')->willReturnCallback(
+            static function (string $field) use ($fetched, $type): mixed {
+                if ($field !== 'contactType') {
+                    return null;
+                }
+
+                return $fetched ?? $type;
+            }
         );
         $entity->method('isNew')->willReturn($isNew);
         $entity->method('isAttributeChanged')->willReturnCallback(

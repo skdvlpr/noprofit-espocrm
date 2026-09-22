@@ -4,9 +4,8 @@
             "required": false
         },
         "contactType": {
-            "type": "enum",
+            "type": "multiEnum",
             "options": [
-                "",
                 "HelpSeeker",
                 "Colleague",
                 "Volunteer",
@@ -15,9 +14,28 @@
                 "AssociationRepresentative",
                 "Other"
             ],
-            "default": "",
-            "isSorted": true,
-            "audited": true
+            "maxCount": 2,
+            "displayAsLabel": true,
+            "allowCustomOptions": false,
+            "audited": true,
+            "style": {
+                "HelpSeeker": "primary",
+                "Colleague": "info",
+                "Volunteer": "success",
+                "Employee": "warning",
+                "MemberContact": "success",
+                "AssociationRepresentative": "warning",
+                "Other": "default"
+            },
+            "validatorClassNameList": [
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\ContactType\\LegalCombination"
+            ]
+        },
+        "emailAddress": {
+            "validatorClassNameList": [
+                "__APPEND__",
+                "Espo\\Modules\\NonprofitEspocrm\\Classes\\FieldValidators\\Contact\\EmailAddress\\UniqueAmongContacts"
+            ]
         },
         "relatedRecord": {
             "type": "link",
@@ -97,7 +115,10 @@
         },
         "contractType": {
             "type": "enum",
-            "options": ["Permanent", "FixedTerm", "Freelance", "Other"]
+            "options": ["", "Permanent", "FixedTerm", "Freelance", "Other"],
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
         },
         "weeklyHours": {
             "type": "float"
@@ -219,9 +240,6 @@
         }
     },
     "indexes": {
-        "contactType": {
-            "columns": ["contactType", "deleted"]
-        },
         "migratedFrom": {
             "columns": ["migratedFromEntityType", "migratedFromEntityId", "deleted"]
         },

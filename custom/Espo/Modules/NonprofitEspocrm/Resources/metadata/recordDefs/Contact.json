@@ -1,0 +1,4 @@
+{
+    "duplicateWhereBuilderClassName": "Espo\\Modules\\NonprofitEspocrm\\Classes\\DuplicateWhereBuilders\\Contact",
+    "updateDuplicateCheck": true
+}
