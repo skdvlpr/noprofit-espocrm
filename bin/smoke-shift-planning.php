@@ -25,6 +25,8 @@ require __DIR__ . '/lib/refuse-production.php';
 include __DIR__ . '/../bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Core\Exceptions\Forbidden;
+use Espo\Modules\NonprofitEspocrm\Hooks\ActivityInvite\ProtectInviteMutation;
 
 $app = new Application();
 $app->setupSystemUser();
@@ -110,6 +112,35 @@ if ($volunteerRole) {
     ok(($roleData['ActivityOfferSlot']['read'] ?? null) === 'all', 'Volunteer role: ActivityOfferSlot read=all');
     ok(($roleData['ActivityInvite']['read'] ?? null) === 'own', 'Volunteer role: ActivityInvite read=own');
 }
+
+$inviteAclDefs = $metadata->get(['aclDefs', 'ActivityInvite']) ?? [];
+ok(($inviteAclDefs['create'] ?? null) === 'no', 'aclDefs ActivityInvite create=no');
+
+$inviteFieldDefs = $metadata->get(['entityDefs', 'ActivityInvite', 'fields']) ?? [];
+foreach (['task', 'user', 'activityOfferSlot', 'status'] as $field) {
+    ok(!empty($inviteFieldDefs[$field]['readOnly']), "ActivityInvite.$field is readOnly");
+}
+
+ok(class_exists(ProtectInviteMutation::class), 'ProtectInviteMutation hook class loadable');
+
+$inviteResponseSrc = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/InviteResponseService.php'
+);
+ok(
+    str_contains($inviteResponseSrc, 'This availability has not been assigned.'),
+    'InviteResponseService rejects Accept before assignment'
+);
+ok(
+    str_contains($inviteResponseSrc, 'ProtectInviteMutation::SAVE_OPTION'),
+    'InviteResponseService passes invite service save option'
+);
+$supportSrc = (string) file_get_contents(
+    __DIR__ . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php'
+);
+ok(
+    str_contains($supportSrc, 'ProtectInviteMutation::SAVE_OPTION'),
+    'ShiftPlanningSupport passes invite service save option'
+);
 
 $tabConfig = $container->getByClass(\Espo\Core\Utils\Config::class);
 $tabWriter = $injectableFactory->create(\Espo\Core\Utils\Config\ConfigWriter::class);
@@ -746,6 +777,86 @@ $r3 = $declare($volunteers[2], [
     $slots['Cleaning']->getId(),
 ]);
 ok($r3['availableCount'] === 1, 'competence filter: vol3 only MealPreparation accepted');
+
+// --- privilege escalation guards (ActivityInvite → Task.collaborators) ----------
+
+$victimTask = $em->getNewEntity('Task');
+$victimTask->set([
+    'name' => 'Smoke victim task',
+    'status' => 'Not Started',
+    'assignedUserId' => $volunteers[0]->getId(),
+]);
+$em->saveEntity($victimTask, ['skipAll' => true, 'silent' => true]);
+
+$ownedInvite = $em->getRDBRepository('ActivityInvite')->where([
+    'userId' => $volunteers[0]->getId(),
+    'activityOfferId' => $offer->getId(),
+    'status' => 'Available',
+])->findOne();
+ok($ownedInvite !== null, 'volunteer owns an Available invite after saveAvailability');
+
+$blockedTaskHijack = false;
+if ($ownedInvite) {
+    try {
+        $ownedInvite->set('taskId', $victimTask->getId());
+        $em->saveEntity($ownedInvite);
+    } catch (Forbidden $e) {
+        $blockedTaskHijack = true;
+        $ownedInvite->set('taskId', $ownedInvite->getFetched('taskId'));
+    }
+}
+ok($blockedTaskHijack, 'blocked ActivityInvite.taskId hijack outside service');
+
+$blockedCreate = false;
+$rogueInvite = $em->getNewEntity('ActivityInvite');
+$rogueInvite->set([
+    'name' => 'Rogue self-invite',
+    'taskId' => $victimTask->getId(),
+    'userId' => $volunteers[0]->getId(),
+    'status' => 'Available',
+]);
+try {
+    $em->saveEntity($rogueInvite);
+} catch (Forbidden $e) {
+    $blockedCreate = true;
+}
+ok($blockedCreate, 'blocked direct ActivityInvite create outside service');
+
+if ($ownedInvite) {
+    $ownedInvite = $em->getEntityById('ActivityInvite', $ownedInvite->getId());
+    $ownedInvite->set('taskId', $victimTask->getId());
+    $em->saveEntity($ownedInvite, ['skipAll' => true, 'silent' => true]);
+
+    $blockedAccept = false;
+    $respondService = $injectableFactory->createWith(
+        \Espo\Modules\NonprofitEspocrm\Tools\InviteResponseService::class,
+        ['user' => $volunteers[0]]
+    );
+    try {
+        $respondService->accept($ownedInvite->getId());
+    } catch (Forbidden $e) {
+        $blockedAccept = true;
+    }
+    ok($blockedAccept, 'blocked Accept from Available (unassigned) invite');
+
+    $victimTask = $em->getEntityById('Task', $victimTask->getId());
+    $victimTask->loadLinkMultipleField('collaborators');
+    ok(
+        !in_array($volunteers[0]->getId(), $victimTask->getLinkMultipleIdList('collaborators'), true),
+        'rogue Accept did not add collaborator'
+    );
+
+    $ownedInvite = $em->getEntityById('ActivityInvite', $ownedInvite->getId());
+    $ownedInvite->set('taskId', null);
+    $ownedInvite->set('status', 'Available');
+    $em->saveEntity($ownedInvite, [
+        'skipAll' => true,
+        'silent' => true,
+        ProtectInviteMutation::SAVE_OPTION => true,
+    ]);
+}
+
+$em->removeEntity($em->getEntityById('Task', $victimTask->getId()), ['skipAll' => true, 'silent' => true]);
 
 $grid = $injectableFactory->createWith(
     \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class,
