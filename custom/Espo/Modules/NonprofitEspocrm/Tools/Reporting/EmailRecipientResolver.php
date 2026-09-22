@@ -69,6 +69,20 @@ class EmailRecipientResolver
             throw new BadRequest('Email recipient record was not found.');
         }
 
+        // Scope-level check above is not enough: getEntityById loads the
+        // primary email via the ORM email join. Without record + field ACL,
+        // a team/own Contact user can resolve another record's address by id
+        // through POST .../reporting/email-export (emailDelivery source=record).
+        if (!$this->acl->checkEntityRead($entity)) {
+            throw new Forbidden();
+        }
+
+        $emailField = $this->resolveEmailField($entityType);
+
+        if ($emailField !== null && !$this->acl->checkField($entityType, $emailField)) {
+            throw new Forbidden();
+        }
+
         $email = $this->extractPrimaryEmail($entity);
 
         if ($email === null || $email === '') {
@@ -80,10 +94,19 @@ class EmailRecipientResolver
 
     private function hasEmailField(string $entityType): bool
     {
+        return $this->resolveEmailField($entityType) !== null;
+    }
+
+    private function resolveEmailField(string $entityType): ?string
+    {
         $fields = $this->metadata->get(['entityDefs', $entityType, 'fields'], []);
 
         if (!is_array($fields)) {
-            return false;
+            return null;
+        }
+
+        if (isset($fields['emailAddress']) && is_array($fields['emailAddress'])) {
+            return 'emailAddress';
         }
 
         foreach ($fields as $name => $defs) {
@@ -91,14 +114,12 @@ class EmailRecipientResolver
                 continue;
             }
 
-            $type = $defs['type'] ?? null;
-
-            if ($type === 'email' || $name === 'emailAddress') {
-                return true;
+            if (($defs['type'] ?? null) === 'email') {
+                return is_string($name) ? $name : null;
             }
         }
 
-        return false;
+        return null;
     }
 
     private function extractPrimaryEmail(Entity $entity): ?string
