@@ -14,6 +14,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
 /**
  * When a bug is closed, permanently remove screenshot attachments (DB + disk).
  *
+ * Only attachments already owned by this BugReport (`parentType`/`parentId`/`field`)
+ * are deleted — never arbitrary IDs from the request payload.
+ *
  * @implements AfterSave<Entity>
  */
 class AfterSaveCleanupScreenshots implements AfterSave
@@ -46,30 +49,26 @@ class AfterSaveCleanupScreenshots implements AfterSave
 
     private function purgeScreenshots(Entity $entity): void
     {
-        $idList = $entity->getLinkMultipleIdList(self::FIELD);
+        $entityId = $entity->getId();
 
-        if ($idList === []) {
-            // Also query by parent in case Ids were already empty in memory.
-            $attachments = $this->entityManager
-                ->getRDBRepositoryByClass(Attachment::class)
-                ->where([
-                    'parentType' => $entity->getEntityType(),
-                    'parentId' => $entity->getId(),
-                    'field' => self::FIELD,
-                ])
-                ->find();
+        if (!is_string($entityId) || $entityId === '') {
+            return;
+        }
 
-            foreach ($attachments as $attachment) {
-                $this->entityManager->removeEntity($attachment);
-            }
-        } else {
-            foreach ($idList as $id) {
-                $attachment = $this->entityManager->getEntityById(Attachment::ENTITY_TYPE, $id);
+        // Always scope by parent ownership. Blind delete-by-id lets a caller
+        // reparent any readable Attachment onto this BugReport (Espo LinkCheck
+        // only requires READ) and then destroy the original file on close.
+        $attachments = $this->entityManager
+            ->getRDBRepositoryByClass(Attachment::class)
+            ->where([
+                'parentType' => $entity->getEntityType(),
+                'parentId' => $entityId,
+                'field' => self::FIELD,
+            ])
+            ->find();
 
-                if ($attachment) {
-                    $this->entityManager->removeEntity($attachment);
-                }
-            }
+        foreach ($attachments as $attachment) {
+            $this->entityManager->removeEntity($attachment);
         }
 
         $entity->set(self::FIELD . 'Ids', []);

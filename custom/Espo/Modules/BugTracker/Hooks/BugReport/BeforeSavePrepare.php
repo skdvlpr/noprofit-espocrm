@@ -8,8 +8,10 @@ use Espo\Core\Acl;
 use Espo\Core\Acl\Table;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Hook\Hook\BeforeSave;
+use Espo\Core\ORM\EntityManager;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Config;
+use Espo\Entities\Attachment;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
@@ -19,6 +21,7 @@ use Espo\ORM\Repository\Option\SaveOptions;
  * After create: reporters may edit description + screenshots only;
  * managers (edit level all / admin) may also change status + assignee.
  * name / pageUrl / pageTitle are never editable after auto-fill.
+ * Reject foreign Attachment IDs on screenshots (prevent steal+destroy on close).
  *
  * @implements BeforeSave<Entity>
  */
@@ -27,6 +30,7 @@ class BeforeSavePrepare implements BeforeSave
     public static int $order = 5;
 
     private const ENTITY_LABEL = 'BugReport';
+    private const SCREENSHOTS_FIELD = 'screenshots';
 
     /** @var list<string> */
     private const ALWAYS_LOCKED = [
@@ -54,6 +58,7 @@ class BeforeSavePrepare implements BeforeSave
         private Config $config,
         private User $user,
         private Acl $acl,
+        private EntityManager $entityManager,
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
@@ -69,11 +74,89 @@ class BeforeSavePrepare implements BeforeSave
         if ($entity->isNew()) {
             $entity->set('name', $this->buildStandardName());
             $this->applyDefaultAssignee($entity);
+            $this->filterScreenshotIds($entity);
 
             return;
         }
 
+        $this->filterScreenshotIds($entity);
         $this->enforceEditableFields($entity);
+    }
+
+    /**
+     * Keep only Attachments that are pending uploads for this BugReport.screenshots
+     * field, or already parented to this record. Runs before FieldProcessing so
+     * foreign IDs are never reparented onto the bug (and later wiped on Closed).
+     */
+    private function filterScreenshotIds(Entity $entity): void
+    {
+        $idsAttribute = self::SCREENSHOTS_FIELD . 'Ids';
+
+        if (!$entity->has($idsAttribute) || !$entity->isAttributeChanged($idsAttribute)) {
+            return;
+        }
+
+        /** @var mixed $rawIds */
+        $rawIds = $entity->get($idsAttribute);
+
+        if (!is_array($rawIds)) {
+            return;
+        }
+
+        $allowed = [];
+
+        foreach ($rawIds as $id) {
+            if (!is_string($id) || $id === '') {
+                continue;
+            }
+
+            $attachment = $this->entityManager->getEntityById(Attachment::ENTITY_TYPE, $id);
+
+            if (
+                $attachment instanceof Attachment &&
+                $this->isAllowedScreenshotAttachment($entity, $attachment)
+            ) {
+                $allowed[] = $id;
+            }
+        }
+
+        $entity->set($idsAttribute, array_values(array_unique($allowed)));
+    }
+
+    private function isAllowedScreenshotAttachment(Entity $bugReport, Attachment $attachment): bool
+    {
+        if ((string) $attachment->get('field') !== self::SCREENSHOTS_FIELD) {
+            return false;
+        }
+
+        $bugId = $bugReport->getId();
+        $parentType = $attachment->get('parentType');
+        $parentId = $attachment->get('parentId');
+        $relatedType = $attachment->get('relatedType');
+        $relatedId = $attachment->get('relatedId');
+
+        if (
+            $parentType === 'BugReport' &&
+            is_string($bugId) &&
+            $bugId !== '' &&
+            $parentId === $bugId
+        ) {
+            return true;
+        }
+
+        if (is_string($parentId) && $parentId !== '') {
+            return false;
+        }
+
+        if ($relatedType !== 'BugReport') {
+            return false;
+        }
+
+        if (is_string($relatedId) && $relatedId !== '') {
+            return is_string($bugId) && $bugId !== '' && $relatedId === $bugId;
+        }
+
+        return true;
     }
 
     private function enforceEditableFields(Entity $entity): void
