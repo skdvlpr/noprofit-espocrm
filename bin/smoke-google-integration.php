@@ -664,6 +664,10 @@ $ok('template-form route exists', in_array('/GoogleIntegration/calendar/template
 $calendarView = file_get_contents('custom/Espo/Modules/GoogleIntegration/Resources/metadata/clientDefs/Calendar.json') ?: '';
 $ok('Calendar view override metadata exists', str_contains($calendarView, 'google-integration:views/calendar/calendar'));
 $ok('CRM date-source calendar route exists', in_array('/GoogleIntegration/calendar/crm-events', $routePaths, true));
+$ok(
+    'CRM date-source fetcher applies ACL/date query via clone',
+    str_contains($crmFetcher, 'clone($query)') && !str_contains($crmFetcher, '->find($query)')
+);
 
 foreach ([
     'Meeting:main',

@@ -111,7 +111,8 @@ class CrmDateSourceEventFetcher
 
         $collection = $this->entityManager
             ->getRDBRepository($entityType)
-            ->find($query);
+            ->clone($query)
+            ->find();
 
         $eventList = [];
 

@@ -97,12 +97,6 @@ parameters:
 			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CalendarSyncRunner.php
 
 		-
-			message: '#^Method Espo\\ORM\\Repository\\RDBRepository\<Espo\\ORM\\Entity\>\:\:find\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: custom/Espo/Modules/GoogleIntegration/Tools/Calendar/CrmDateSourceEventFetcher.php
-
-		-
 			message: '#^Parameter \#1 \$array \(list\<\(int\|string\)\>\) of array_values is already a list, call has no effect\.$#'
 			identifier: arrayValues.list
 			count: 1
