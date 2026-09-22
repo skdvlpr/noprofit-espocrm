@@ -805,6 +805,53 @@ foreach (['MealPreparation', 'MealDistribution', 'Cleaning'] as $cat) {
         "autoAssign flips $cat slot Published → Covered"
     );
 }
+
+$coveredAssigned = $em->getRDBRepository('ActivityInvite')->where([
+    'activityOfferSlotId' => $slots['Cleaning']->getId(),
+    'status' => 'Assigned',
+])->findOne();
+if ($coveredAssigned) {
+    $withdrawUser = $em->getEntityById('User', (string) $coveredAssigned->get('userId'));
+    $withdrawService = $injectableFactory->createWith(
+        \Espo\Modules\NonprofitEspocrm\Tools\ShiftPlanningService::class,
+        ['user' => $withdrawUser]
+    );
+    $keptIds = [];
+    foreach ($em->getRDBRepository('ActivityInvite')->where([
+        'activityOfferId' => $offer->getId(),
+        'userId' => $withdrawUser->getId(),
+        'status' => ['Available', 'Assigned', 'Confirmed'],
+    ])->find() as $keepInvite) {
+        $keepSlotId = (string) $keepInvite->get('activityOfferSlotId');
+        if ($keepSlotId !== '' && $keepSlotId !== $slots['Cleaning']->getId()) {
+            $keptIds[] = $keepSlotId;
+        }
+    }
+    $withdrawRes = $withdrawService->saveAvailability($offer->getId(), $keptIds);
+    $cleaningAfter = $em->getEntityById('ActivityInvite', $coveredAssigned->getId());
+    ok(
+        $cleaningAfter === null || $cleaningAfter->get('status') === 'Declined',
+        'saveAvailability withdraws Assigned invite on Covered slot'
+    );
+    ok(($withdrawRes['withdrawnCount'] ?? 0) >= 1, 'Covered-slot withdraw increments withdrawnCount');
+    $cleaningAfter?->set('status', 'Assigned');
+    if ($cleaningAfter) {
+        $em->saveEntity($cleaningAfter, [
+            \Espo\Modules\NonprofitEspocrm\Tools\StatusGuard::SKIP_OPTION => true,
+            'silent' => true,
+        ]);
+    }
+} else {
+    ok(false, 'saveAvailability withdraws Assigned invite on Covered slot (no Assigned invite)');
+    ok(false, 'Covered-slot withdraw increments withdrawnCount');
+}
+
+try {
+    $rerequest = $adminService->requestAvailability($offer->getId());
+    ok(($rerequest['slotCount'] ?? 0) >= 1, 'requestAvailability accepts a fully Covered plan');
+} catch (\Throwable $e) {
+    ok(false, 'requestAvailability accepts a fully Covered plan (' . $e->getMessage() . ')');
+}
 $cov2 = $adminService->coverage($offer->getId());
 $assignedNames = [];
 foreach ($cov2['slots'] as $row) {
@@ -1209,6 +1256,17 @@ $planningSrc = (string) file_get_contents(__DIR__
     . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanningService.php');
 $availabilityWorkflowSrc = (string) file_get_contents(__DIR__
     . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/AvailabilityWorkflow.php');
+$supportSrc = (string) file_get_contents(__DIR__
+    . '/../custom/Espo/Modules/NonprofitEspocrm/Tools/ShiftPlanning/ShiftPlanningSupport.php');
+ok(
+    str_contains($supportSrc, 'function getRespondableSlots')
+        && str_contains($availabilityWorkflowSrc, 'getRespondableSlots'),
+    'saveAvailability / requestAvailability use getRespondableSlots (Published+Covered)'
+);
+ok(
+    substr_count($availabilityWorkflowSrc, 'getPublishedSlots(') === 0,
+    'AvailabilityWorkflow no longer filters volunteer write paths to Published-only'
+);
 ok(
     str_contains($planningSrc, "'changed'") || str_contains($availabilityWorkflowSrc, "'changed'"),
     'availabilityGrid exposes changed slot flag'

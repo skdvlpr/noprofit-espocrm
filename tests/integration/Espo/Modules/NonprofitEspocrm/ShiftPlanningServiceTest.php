@@ -225,6 +225,112 @@ class ShiftPlanningServiceTest extends SafehouseBaseTestCase
         $this->assertNotNull($offerAfter);
     }
 
+    public function testSaveAvailabilityWithdrawsFromCoveredSlot(): void
+    {
+        $factory = $this->getContainer()->getByClass(InjectableFactory::class);
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+
+        $volunteer = $this->createShiftVolunteer(1, $marker);
+
+        $offer = $em->getNewEntity('ActivityOffer');
+        $offer->set([
+            'name' => 'PHPUnit Covered Withdraw ' . $marker,
+            'weekStart' => '2026-09-07',
+            'status' => 'Draft',
+            'inviteeUsersIds' => [$volunteer->getId()],
+        ]);
+        $em->saveEntity($offer, ['silent' => true]);
+
+        $slot = $em->getNewEntity('ActivityOfferSlot');
+        $slot->set([
+            'activityOfferId' => $offer->getId(),
+            'category' => 'MealPreparation',
+            'dateStart' => '2026-09-07 10:00:00',
+            'dateEnd' => '2026-09-07 13:00:00',
+            'requiredCount' => 1,
+            'name' => 'Covered withdraw ' . $marker,
+            'status' => 'Published',
+        ]);
+        $em->saveEntity($slot, [StatusGuard::SKIP_OPTION => true, 'silent' => true]);
+        $slotId = $slot->getId();
+
+        /** @var ShiftPlanningService $adminService */
+        $adminService = $factory->create(ShiftPlanningService::class);
+        $adminService->requestAvailability($offer->getId());
+
+        $volService = $factory->createWith(ShiftPlanningService::class, ['user' => $volunteer]);
+        $volService->saveAvailability($offer->getId(), [$slotId]);
+
+        $invite = $em->getRDBRepository('ActivityInvite')
+            ->where([
+                'activityOfferId' => $offer->getId(),
+                'activityOfferSlotId' => $slotId,
+                'userId' => $volunteer->getId(),
+            ])
+            ->findOne();
+        $this->assertNotNull($invite);
+        $this->assertSame('Available', $invite->get('status'));
+
+        $slot = $em->getEntityById('ActivityOfferSlot', $slotId);
+        $slot->set('status', 'Covered');
+        $em->saveEntity($slot, [StatusGuard::SKIP_OPTION => true, 'silent' => true]);
+
+        $result = $volService->saveAvailability($offer->getId(), []);
+
+        $inviteAfter = $em->getRDBRepository('ActivityInvite')
+            ->where([
+                'activityOfferId' => $offer->getId(),
+                'activityOfferSlotId' => $slotId,
+                'userId' => $volunteer->getId(),
+            ])
+            ->findOne();
+
+        $this->assertNull(
+            $inviteAfter,
+            'Withdraw of an Available invite on a Covered slot must delete the invite'
+        );
+        $this->assertSame(0, $result['withdrawnCount']);
+    }
+
+    public function testRequestAvailabilityAllowsFullyCoveredPlan(): void
+    {
+        $factory = $this->getContainer()->getByClass(InjectableFactory::class);
+        $em = $this->getEntityManager();
+        $marker = $this->uniqueMarker();
+
+        $volunteer = $this->createShiftVolunteer(1, $marker);
+
+        $offer = $em->getNewEntity('ActivityOffer');
+        $offer->set([
+            'name' => 'PHPUnit Covered Rerequest ' . $marker,
+            'weekStart' => '2026-09-07',
+            'status' => 'Draft',
+            'inviteeUsersIds' => [$volunteer->getId()],
+        ]);
+        $em->saveEntity($offer, ['silent' => true]);
+
+        $slot = $em->getNewEntity('ActivityOfferSlot');
+        $slot->set([
+            'activityOfferId' => $offer->getId(),
+            'category' => 'Cleaning',
+            'dateStart' => '2026-09-07 14:00:00',
+            'dateEnd' => '2026-09-07 16:00:00',
+            'requiredCount' => 1,
+            'name' => 'Covered rerequest ' . $marker,
+            'status' => 'Covered',
+        ]);
+        $em->saveEntity($slot, [StatusGuard::SKIP_OPTION => true, 'silent' => true]);
+
+        /** @var ShiftPlanningService $service */
+        $service = $factory->create(ShiftPlanningService::class);
+        $result = $service->requestAvailability($offer->getId());
+
+        $this->assertSame(1, $result['slotCount']);
+        $offer = $em->getEntityById('ActivityOffer', $offer->getId());
+        $this->assertSame('CollectingAvailability', $offer->get('status'));
+    }
+
     public function testScheduledJobsRunWithoutCrash(): void
     {
         $factory = $this->getContainer()->getByClass(InjectableFactory::class);

@@ -94,10 +94,12 @@ class AvailabilityWorkflow
             );
         }
 
-        $slots = $this->support->getPublishedSlots($offerId);
+        $slots = $this->support->getRespondableSlots($offerId);
 
         if ($slots === []) {
-            throw new BadRequest("Publish at least one shift (status Published) before requesting availability.");
+            throw new BadRequest(
+                "Publish at least one open shift (Published or Covered) before requesting availability."
+            );
         }
 
         $changedOnly = $this->support->shiftChangeNotifyService()->getPendingChangedSlotIds($offerId);
@@ -470,7 +472,7 @@ class AvailabilityWorkflow
         $availableCount = 0;
         $withdrawnCount = 0;
 
-        foreach ($this->support->getPublishedSlots($offerId) as $slot) {
+        foreach ($this->support->getRespondableSlots($offerId) as $slot) {
             $slotId = $slot->getId();
             $category = (string) ($slot->get('category') ?? '');
             $isChecked = isset($checked[$slotId]);
