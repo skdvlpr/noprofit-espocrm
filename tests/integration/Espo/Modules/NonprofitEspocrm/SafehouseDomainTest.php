@@ -20,7 +20,7 @@ class SafehouseDomainTest extends SafehouseBaseTestCase
         $ve->set([
             'firstName' => 'Test',
             'lastName' => 'Active',
-            'contactType' => 'Employee',
+            'contactType' => ['Employee'],
             'contractType' => 'Permanent',
             'startDate' => date('Y-m-d', strtotime('-30 days')),
             'endDate' => date('Y-m-d', strtotime('+30 days')),
@@ -35,7 +35,7 @@ class SafehouseDomainTest extends SafehouseBaseTestCase
         $ve2->set([
             'firstName' => 'Test',
             'lastName' => 'Expired',
-            'contactType' => 'Volunteer',
+            'contactType' => ['Volunteer'],
             'startDate' => date('Y-m-d', strtotime('-60 days')),
             'endDate' => date('Y-m-d', strtotime('-1 days')),
             'weeklyHours' => 8,
@@ -48,7 +48,7 @@ class SafehouseDomainTest extends SafehouseBaseTestCase
         $mb->set([
             'firstName' => 'Test',
             'lastName' => 'Member',
-            'contactType' => 'MemberContact',
+            'contactType' => ['MemberContact'],
             'joinDate' => date('Y-m-d', strtotime('-365 days')),
         ]);
         $em->saveEntity($mb);
