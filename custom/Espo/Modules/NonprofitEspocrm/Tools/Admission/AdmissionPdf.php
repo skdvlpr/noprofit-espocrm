@@ -201,6 +201,11 @@ class AdmissionPdf
         ]);
     }
 
+    public function provisionTemplate(): void
+    {
+        $this->ensureTemplate();
+    }
+
     private function ensureTemplate(): Template
     {
         $body = self::templateBody();
