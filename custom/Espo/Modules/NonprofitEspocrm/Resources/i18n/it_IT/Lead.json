@@ -21,7 +21,14 @@
         "joinDate": "Data di ingresso",
         "leaveDate": "Data di uscita",
         "positionsHeld": "Cariche ricoperte",
-        "notes": "Note"
+        "notes": "Note",
+        "admissionBoardDate": "Domanda esaminata nella seduta del",
+        "admissionOutcome": "Esito",
+        "memberBookNumber": "Annotazione nel Libro Soci al N.",
+        "admissionFeePaid": "Quota versata",
+        "admissionReceiptNumber": "Ricevuta/Tessera N.",
+        "admissionForm": "Domanda di ammissione",
+        "newsletterConsent": "Newsletter"
     },
     "links": {
         "createdOpportunity": "Fondi e Finanziamenti"
@@ -32,6 +39,22 @@
             "Employee": "Dipendente",
             "MemberContact": "Associato",
             "Other": "Generico"
+        },
+        "admissionOutcome": {
+            "Approved": "Approvata",
+            "Rejected": "Respinta"
+        },
+        "admissionFeePaid": {
+            "Yes": "Sì",
+            "No": "No"
+        },
+        "newsletterConsent": {
+            "Yes": "Acconsento",
+            "No": "Non acconsento"
         }
+    },
+    "labels": {
+        "pdfPreview": "Anteprima PDF",
+        "openPdfPreview": "Apri PDF"
     }
 }

@@ -21,7 +21,14 @@
         "joinDate": "Join date",
         "leaveDate": "Leave date",
         "positionsHeld": "Positions held",
-        "notes": "Notes"
+        "notes": "Notes",
+        "admissionBoardDate": "Board meeting date",
+        "admissionOutcome": "Decision",
+        "memberBookNumber": "Members' book no.",
+        "admissionFeePaid": "Fee paid",
+        "admissionReceiptNumber": "Receipt / card no.",
+        "admissionForm": "Admission form",
+        "newsletterConsent": "Newsletter"
     },
     "links": {
         "createdOpportunity": "Grants & Funding"
@@ -32,6 +39,22 @@
             "Employee": "Employee",
             "MemberContact": "Member",
             "Other": "Generic"
+        },
+        "admissionOutcome": {
+            "Approved": "Approved",
+            "Rejected": "Rejected"
+        },
+        "admissionFeePaid": {
+            "Yes": "Yes",
+            "No": "No"
+        },
+        "newsletterConsent": {
+            "Yes": "I consent",
+            "No": "I do not consent"
         }
+    },
+    "labels": {
+        "pdfPreview": "PDF preview",
+        "openPdfPreview": "Open PDF"
     }
 }

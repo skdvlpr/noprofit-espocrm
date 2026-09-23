@@ -1,0 +1,94 @@
+<div style="font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111;">
+  <h1 style="text-align: center; font-size: 16px; margin: 0 0 6px;">DOMANDA DI AMMISSIONE A SOCIO</h1>
+  <p style="text-align: center; font-size: 10px; margin: 0 0 12px;">
+    SAFE HOUSE ETS • Codice Fiscale: 96629270586 • Iscrizione RUNTS: Rep. n. 156768<br>
+    Sede Legale: Via Delleani 26, 00042 Anzio (RM) • Sede Operativa: Torino (Piemonte)
+  </p>
+
+  <p style="font-weight: bold; margin: 0 0 4px;">1. DATI ANAGRAFICI DEL RICHIEDENTE</p>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px; width: 28%;">Il/La sottoscritto/a:</td>
+      <td style="border: 1px solid #222; padding: 4px;" colspan="3">{{applicantName}}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px;">Nato/a a:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{birthPlace}}</td>
+      <td style="border: 1px solid #222; padding: 4px; width: 12%;">Prov:</td>
+      <td style="border: 1px solid #222; padding: 4px; width: 18%;">{{birthProvince}}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px;">Data di nascita:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{birthDateIt}}</td>
+      <td style="border: 1px solid #222; padding: 4px;">C.F.:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{taxCode}}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px;">Residente a:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{addressCity}}</td>
+      <td style="border: 1px solid #222; padding: 4px;">Prov:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{addressState}}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px;">Indirizzo:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{addressStreet}}</td>
+      <td style="border: 1px solid #222; padding: 4px;">CAP:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{addressPostalCode}}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 4px;">Telefono/Cell.:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{phoneNumber}}</td>
+      <td style="border: 1px solid #222; padding: 4px;">E-mail:</td>
+      <td style="border: 1px solid #222; padding: 4px;">{{emailAddress}}</td>
+    </tr>
+  </table>
+
+  <p style="font-weight: bold; margin: 0 0 4px;">2. CHIEDE DI ESSERE AMMESSO/A QUALORA SOCIO DI SAFE HOUSE ETS</p>
+  <p style="margin: 0 0 4px;">A tal fine, consapevole delle responsabilità e dei doveri derivanti dall'appartenenza all'Associazione, dichiara sotto la propria responsabilità:</p>
+  <ul style="margin: 0 0 12px;">
+    <li>Di condividere le finalità istituzionali, la mission e i valori dell'Associazione SAFE HOUSE ETS;</li>
+    <li>Di aver preso visione e di accettare integralmente lo Statuto e gli eventuali Regolamenti interni dell'Associazione;</li>
+    <li>Di impegnarsi al versamento della quota associativa annuale nei termini e con le modalità stabilite dal Consiglio Direttivo.</li>
+  </ul>
+
+  <p style="font-weight: bold; margin: 0 0 4px;">3. INFORMATIVA E CONSENSO PRIVACY (Art. 13-14 Reg. UE 2016/679 - GDPR)</p>
+  <p style="margin: 0 0 6px;">I dati personali forniti saranno trattati da Safe House ETS esclusivamente per la gestione del rapporto associativo, l'adempimento degli obblighi di legge e il perseguimento dei fini statutari.</p>
+  <p style="border: 1px solid #222; padding: 6px; margin: 0 0 4px;">
+    [{{newsletterYesMark}}] ACCONSENTO
+    &nbsp;&nbsp;
+    [{{newsletterNoMark}}] NON ACCONSENTO
+  </p>
+  <p style="margin: 0 0 10px;">al trattamento dei propri dati per l'invio di comunicazioni informative, newsletter e materiale di aggiornamento sulle attività dell'Associazione.</p>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px;">
+    <tr>
+      <td style="border: 1px solid #222; padding: 8px; width: 50%;">Data: ____ / ____ / ________</td>
+      <td style="border: 1px solid #222; padding: 8px;">Firma del Richiedente: ___________________________</td>
+    </tr>
+  </table>
+
+  <p style="font-weight: bold; margin: 0 0 4px;">RISERVATO AL CONSIGLIO DIRETTIVO DI SAFE HOUSE ETS</p>
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="border: 1px solid #222; padding: 6px; width: 55%;">Domanda esaminata nella seduta del: {{boardDateIt}}</td>
+      <td style="border: 1px solid #222; padding: 6px;">
+        Esito:
+        [{{outcomeApprovedMark}}] Approvata
+        &nbsp;
+        [{{outcomeRejectedMark}}] Respinta
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 6px;">Annotazione nel Libro Soci al N.: {{memberBookNumber}}</td>
+      <td style="border: 1px solid #222; padding: 6px;">
+        Quota versata:
+        [{{feeYesMark}}] Sì
+        &nbsp;
+        [{{feeNoMark}}] No
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #222; padding: 10px;">Firma del Presidente (Matteo Grossi): ___________________________</td>
+      <td style="border: 1px solid #222; padding: 10px;">Ricevuta/Tessera N.: {{admissionReceiptNumber}}</td>
+    </tr>
+  </table>
+</div>

@@ -194,6 +194,11 @@
         "notes": {
             "type": "wysiwyg"
         },
+        "admissionForm": {
+            "type": "file",
+            "accept": [".pdf"],
+            "sourceList": []
+        },
         "migratedFromEntityType": {
             "type": "varchar",
             "maxLength": 64,

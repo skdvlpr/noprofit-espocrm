@@ -7,5 +7,50 @@
         "edit": "nonprofit-espocrm:views/lead/record/edit",
         "editSmall": "nonprofit-espocrm:views/lead/record/edit-small",
         "editQuick": "nonprofit-espocrm:views/lead/record/edit-small"
+    },
+    "dynamicLogic": {
+        "fields": {
+            "newsletterConsent": {
+                "visible": {
+                    "conditionGroup": [
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                    ]
+                }
+            }
+        },
+        "panels": {
+            "admissionBoard": {
+                "visible": {
+                    "conditionGroup": [
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                    ]
+                }
+            },
+            "pdfPreview": {
+                "visible": {
+                    "conditionGroup": [
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                    ]
+                }
+            }
+        }
+    },
+    "bottomPanels": {
+        "detail": [
+            {
+                "name": "pdfPreview",
+                "label": "pdfPreview",
+                "view": "nonprofit-espocrm:views/lead/panels/pdf-preview",
+                "order": 1
+            }
+        ],
+        "edit": [
+            {
+                "name": "pdfPreview",
+                "label": "pdfPreview",
+                "view": "nonprofit-espocrm:views/lead/panels/pdf-preview",
+                "order": 1
+            }
+        ]
     }
 }

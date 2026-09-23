@@ -17,7 +17,14 @@
         "joinDate": "Дата вступления",
         "leaveDate": "Дата выхода",
         "positionsHeld": "Должности",
-        "notes": "Заметки"
+        "notes": "Заметки",
+        "admissionBoardDate": "Дата заседания совета",
+        "admissionOutcome": "Решение",
+        "memberBookNumber": "Номер в книге членов",
+        "admissionFeePaid": "Взнос оплачен",
+        "admissionReceiptNumber": "Номер квитанции / карты",
+        "admissionForm": "Заявление о приёме",
+        "newsletterConsent": "Рассылка"
     },
     "links": {
         "createdOpportunity": "Гранты и финансирование"
@@ -28,6 +35,22 @@
             "Employee": "Сотрудник",
             "MemberContact": "Ассоциат",
             "Other": "Общий"
+        },
+        "admissionOutcome": {
+            "Approved": "Одобрено",
+            "Rejected": "Отклонено"
+        },
+        "admissionFeePaid": {
+            "Yes": "Да",
+            "No": "Нет"
+        },
+        "newsletterConsent": {
+            "Yes": "Согласен",
+            "No": "Не согласен"
         }
+    },
+    "labels": {
+        "pdfPreview": "Просмотр PDF",
+        "openPdfPreview": "Открыть PDF"
     }
 }

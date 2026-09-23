@@ -24,18 +24,16 @@
         },
         "taxCode": {
             "type": "varchar",
-            "maxLength": 16,
+            "maxLength": 32,
             "trim": true,
             "isPersonalData": true,
-            "layoutAvailabilityList": [],
             "sanitizerClassNameList": [
                 "Espo\\Classes\\FieldSanitizers\\StringUpperCase"
             ]
         },
         "birthDate": {
             "type": "date",
-            "isPersonalData": true,
-            "layoutAvailabilityList": []
+            "isPersonalData": true
         },
         "personnelStatus": {
             "type": "enum",
@@ -60,8 +58,7 @@
             "maxLength": 8,
             "trim": true,
             "tooltip": true,
-            "isPersonalData": true,
-            "layoutAvailabilityList": []
+            "isPersonalData": true
         },
         "startDate": {
             "type": "date",
@@ -121,8 +118,7 @@
         },
         "birthPlace": {
             "type": "varchar",
-            "isPersonalData": true,
-            "layoutAvailabilityList": []
+            "isPersonalData": true
         },
         "joinDate": {
             "type": "date",
@@ -154,6 +150,60 @@
         "notes": {
             "type": "wysiwyg",
             "layoutAvailabilityList": []
+        },
+        "admissionBoardDate": {
+            "type": "date"
+        },
+        "admissionOutcome": {
+            "type": "enum",
+            "options": ["", "Approved", "Rejected"],
+            "displayAsLabel": true,
+            "style": {
+                "Approved": "success",
+                "Rejected": "danger"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
+        "memberBookNumber": {
+            "type": "varchar",
+            "maxLength": 64,
+            "trim": true
+        },
+        "admissionFeePaid": {
+            "type": "enum",
+            "options": ["", "Yes", "No"],
+            "displayAsLabel": true,
+            "style": {
+                "Yes": "success",
+                "No": "danger"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
+        "admissionReceiptNumber": {
+            "type": "varchar",
+            "maxLength": 64,
+            "trim": true
+        },
+        "admissionForm": {
+            "type": "file",
+            "accept": [".pdf"],
+            "sourceList": []
+        },
+        "newsletterConsent": {
+            "type": "enum",
+            "options": ["", "Yes", "No"],
+            "displayAsLabel": true,
+            "style": {
+                "Yes": "success",
+                "No": "default"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
         }
     }
 }

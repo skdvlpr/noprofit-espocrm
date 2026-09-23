@@ -4,9 +4,21 @@
         "rows": [
             [{"name": "name"}, {"name": "accountName"}],
             [{"name": "contactType"}, {"name": "status"}],
+            [{"name": "taxCode"}, {"name": "birthDate"}],
+            [{"name": "birthPlace"}, {"name": "birthProvince"}],
             [{"name": "emailAddress"}, {"name": "phoneNumber"}],
             [{"name": "title"}, {"name": "website"}],
             [{"name": "address"}, false]
+        ]
+    },
+    {
+        "name": "admissionBoard",
+        "label": "Consiglio Direttivo",
+        "rows": [
+            [{"name": "newsletterConsent"}, {"name": "admissionOutcome"}],
+            [{"name": "admissionBoardDate"}, false],
+            [{"name": "memberBookNumber"}, {"name": "admissionFeePaid"}],
+            [{"name": "admissionReceiptNumber"}, false]
         ]
     },
     {

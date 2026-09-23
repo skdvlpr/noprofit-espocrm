@@ -20,6 +20,7 @@
         "leaveDate": "Дата выхода",
         "positionsHeld": "Должности",
         "notes": "Заметки",
+        "admissionForm": "Заявление о приёме",
         "activityCompetences": "Компетенции",
         "createCrmUser": "Создать пользователя CRM"
     },
