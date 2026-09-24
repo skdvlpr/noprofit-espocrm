@@ -56,6 +56,18 @@ class ContactTypeEnumToMultiTest extends TestCase
         );
     }
 
+    public function testRebuildCopiesLeftoverEnumValues(): void
+    {
+        $path = dirname(__DIR__, 5) . '/custom/Espo/Modules/NonprofitEspocrm/Resources/metadata/app/rebuild.json';
+        $decoded = json_decode((string) file_get_contents($path), true);
+
+        $this->assertIsArray($decoded);
+        $this->assertContains(
+            'Espo\\Modules\\NonprofitEspocrm\\Core\\Rebuild\\BackfillContactTypeEnumToMulti',
+            $decoded['actionClassNameList']
+        );
+    }
+
     public function testBrokenJsonLookingStringIsTreatedAsPlainKey(): void
     {
         $this->assertSame(
