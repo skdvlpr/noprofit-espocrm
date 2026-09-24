@@ -169,7 +169,7 @@ class AdmissionPdf
         ]);
 
         if (is_string($previousId) && $previousId !== '' && $previousId !== $attachment->getId()) {
-            $this->removeAttachment($previousId);
+            $this->removeAttachment($previousId, $leadId);
         }
     }
 
@@ -184,15 +184,30 @@ class AdmissionPdf
         ]);
 
         if ($deleteAttachment && is_string($fileId) && $fileId !== '') {
-            $this->removeAttachment($fileId);
+            $this->removeAttachment($fileId, (string) $lead->getId());
         }
     }
 
-    private function removeAttachment(string $id): void
+    /**
+     * Only the PDF this Lead owns. A client-supplied id must not be deleted
+     * even if it was stored on the field.
+     */
+    private function removeAttachment(string $id, string $leadId): void
     {
+        if ($leadId === '') {
+            return;
+        }
+
         $attachment = $this->entityManager->getEntityById(Attachment::ENTITY_TYPE, $id);
 
         if ($attachment === null) {
+            return;
+        }
+
+        $relatedType = $attachment->get('relatedType');
+        $relatedId = $attachment->get('relatedId');
+
+        if ($relatedType !== 'Lead' || (string) $relatedId !== $leadId) {
             return;
         }
 

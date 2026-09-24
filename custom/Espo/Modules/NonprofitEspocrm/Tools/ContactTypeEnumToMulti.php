@@ -2,11 +2,15 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Tools;
 
+use Espo\Core\ORM\Entity as CoreEntity;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\Utils\Util;
+use Espo\Entities\ArrayValue;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
+use Espo\Repositories\ArrayValue as ArrayValueRepository;
 use PDO;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -17,7 +21,9 @@ use Throwable;
  * varchar as JSON and returns null. This helper reads the leftover raw column
  * via the entity-type → table mapping (no hardcoded table names), wraps the
  * string into a one-item list and saves through the ORM so the MultiEnum
- * field-processing saver populates ArrayValue rows.
+ * field-processing saver populates ArrayValue rows. Rebuild disables hooks,
+ * so the copy also writes those rows itself. Production deploy is rsync +
+ * rebuild and does not run the console command.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/orm.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/commands.md
@@ -165,6 +171,16 @@ class ContactTypeEnumToMulti
         $classified = self::classify($value);
 
         if ($classified['state'] === self::STATE_ARRAY) {
+            if ($apply && is_array($contact->get(self::FIELD))) {
+                try {
+                    if ($this->filterRowsMissing($contact)) {
+                        $this->persistFilterRows($contact);
+                    }
+                } catch (Throwable) {
+                    return self::RESULT_FAILED;
+                }
+            }
+
             return self::RESULT_ALREADY_ARRAY;
         }
 
@@ -186,16 +202,65 @@ class ContactTypeEnumToMulti
 
             // No SKIP_ALL: it skips afterSave, and the ArrayValue rows are
             // written by the core Common FieldProcessing afterSave hook
-            // (MultiEnum saver). SILENT only drops stream notes,
-            // notifications and webhooks.
+            // (MultiEnum saver) when hooks are enabled. SILENT only drops
+            // stream notes, notifications and webhooks.
+            // DataManager::rebuild() disables the hook manager before rebuild
+            // actions, so the hook does not run on the production path.
             $this->entityManager->saveEntity($contact, [
                 SaveOption::SILENT => true,
             ]);
+            $this->persistFilterRows($contact);
         } catch (Throwable) {
             return self::RESULT_FAILED;
         }
 
         return self::RESULT_COPIED;
+    }
+
+    /**
+     * Volunteer/Employee lists filter through ArrayValue, not the JSON column.
+     * Idempotent: existing rows for the same values are left in place.
+     * Refuses a non-array attribute value so a null ORM read cannot wipe rows.
+     */
+    private function persistFilterRows(Entity $contact): void
+    {
+        if (!$contact instanceof CoreEntity) {
+            throw new RuntimeException('Contact is not a core entity.');
+        }
+
+        $value = $contact->get(self::FIELD);
+
+        if (!is_array($value)) {
+            throw new RuntimeException('contactType is not a list.');
+        }
+
+        $repository = $this->entityManager->getRepository(ArrayValue::ENTITY_TYPE);
+
+        if (!$repository instanceof ArrayValueRepository) {
+            throw new RuntimeException('ArrayValue repository is missing.');
+        }
+
+        $repository->storeEntityAttribute($contact, self::FIELD);
+    }
+
+    private function filterRowsMissing(Entity $contact): bool
+    {
+        $value = $contact->get(self::FIELD);
+
+        if (!is_array($value) || $value === []) {
+            return false;
+        }
+
+        $count = $this->entityManager
+            ->getRDBRepository(ArrayValue::ENTITY_TYPE)
+            ->where([
+                'entityType' => self::ENTITY_TYPE,
+                'entityId' => $contact->getId(),
+                'attribute' => self::FIELD,
+            ])
+            ->count();
+
+        return $count === 0;
     }
 
     /**
