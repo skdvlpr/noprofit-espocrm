@@ -10,6 +10,7 @@ use Espo\ORM\Entity;
 
 /**
  * Hard unique email among Contacts (not skippable duplicate dialog).
+ * Record-API only; Hooks/Contact/EnforceUniqueEmail covers EntityManager saves.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/entity-defs.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/duplicate-check.md
