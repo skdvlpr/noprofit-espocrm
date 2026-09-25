@@ -8,9 +8,11 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOption;
 
 /**
- * Fill empty Contact board fields and admission file from the converted Lead.
+ * Fill empty Contact board fields from the converted Lead.
+ * Do not copy admissionForm (PDF is on demand).
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/commands.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/metadata/app-rebuild.md
  *
  * @noinspection PhpUnused
  */

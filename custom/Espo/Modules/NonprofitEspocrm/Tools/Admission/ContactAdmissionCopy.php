@@ -5,7 +5,8 @@ namespace Espo\Modules\NonprofitEspocrm\Tools\Admission;
 use Espo\ORM\Entity;
 
 /**
- * Copy empty Contact board fields and admission file from a converted Lead.
+ * Copy empty Contact board fields from a converted Lead. Never copy
+ * the admission file (PDF is built on demand).
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md
@@ -62,13 +63,6 @@ class ContactAdmissionCopy
             }
         }
 
-        $contactFile = $contact->get('admissionFormId');
-        $leadFile = $lead->get('admissionFormId');
-
-        if (self::isEmpty($contactFile) && !self::isEmpty($leadFile)) {
-            $out[] = 'admissionForm';
-        }
-
         return $out;
     }
 
@@ -85,13 +79,6 @@ class ContactAdmissionCopy
         }
 
         foreach ($fields as $field) {
-            if ($field === 'admissionForm') {
-                $contact->set('admissionFormId', $lead->get('admissionFormId'));
-                $contact->set('admissionFormName', $lead->get('admissionFormName'));
-
-                continue;
-            }
-
             $contact->set($field, $lead->get($field));
         }
 

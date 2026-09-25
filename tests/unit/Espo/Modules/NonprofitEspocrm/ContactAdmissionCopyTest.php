@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace tests\unit\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Modules\NonprofitEspocrm\Tools\Admission\AdmissionPdfPlan;
 use Espo\Modules\NonprofitEspocrm\Tools\Admission\ContactAdmissionCopy;
 use Espo\ORM\Entity;
 use PHPUnit\Framework\TestCase;
@@ -43,7 +44,7 @@ class ContactAdmissionCopyTest extends TestCase
         $this->assertFalse(ContactAdmissionCopy::shouldCopy($lead, $contact));
     }
 
-    public function testCopiesEmptyBoardAndFile(): void
+    public function testCopiesEmptyBoardNotFile(): void
     {
         $lead = $this->entity([
             'status' => 'Converted',
@@ -59,10 +60,14 @@ class ContactAdmissionCopyTest extends TestCase
             'contactType' => ['MemberContact'],
         ]);
 
+        $this->assertSame(
+            ['admissionOutcome', 'newsletterConsent'],
+            ContactAdmissionCopy::fieldsToCopy($lead, $contact)
+        );
         $this->assertTrue(ContactAdmissionCopy::apply($lead, $contact));
         $this->assertSame('Approved', $contact->get('admissionOutcome'));
         $this->assertSame('Yes', $contact->get('newsletterConsent'));
-        $this->assertSame('file-1', $contact->get('admissionFormId'));
+        $this->assertNull($contact->get('admissionFormId'));
     }
 
     public function testDoesNotOverwriteFilledContact(): void
@@ -84,6 +89,13 @@ class ContactAdmissionCopyTest extends TestCase
         $this->assertFalse(ContactAdmissionCopy::apply($lead, $contact));
         $this->assertSame('Rejected', $contact->get('admissionOutcome'));
         $this->assertSame('contact-file', $contact->get('admissionFormId'));
+    }
+
+    public function testLeftoverFilesMustClearOnConvert(): void
+    {
+        $this->assertTrue(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, true, false));
+        $this->assertTrue(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, false, true));
+        $this->assertFalse(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, false, false));
     }
 
     /**

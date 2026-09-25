@@ -14,9 +14,10 @@ use Espo\ORM\EntityManager;
 use Espo\Core\Acl;
 
 /**
- * Inline admission PDF for the Lead preview panel, same idea as the food-parcel preview.
+ * Inline admission PDF for the Lead preview panel. Built on demand.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/api.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/acl.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md
  */
 class GetLeadAdmissionPdf implements Action
@@ -43,6 +44,10 @@ class GetLeadAdmissionPdf implements Action
 
         if (!$this->acl->checkEntityRead($lead)) {
             throw new Forbidden();
+        }
+
+        if (!AdmissionPdf::isAssociato($lead->get('contactType'))) {
+            throw new NotFound();
         }
 
         $pdf = $this->admissionPdf->render($lead);

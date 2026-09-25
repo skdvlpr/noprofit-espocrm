@@ -16,31 +16,29 @@ use PHPUnit\Framework\TestCase;
  */
 class AdmissionPdfPlanTest extends TestCase
 {
-    public function testVolunteerDoesNotGenerate(): void
+    public function testNeverStoresOnSave(): void
     {
         $this->assertFalse(AdmissionPdfPlan::shouldGenerate(false, true, true, false));
-    }
-
-    public function testNewAssociatoGenerates(): void
-    {
-        $this->assertTrue(AdmissionPdfPlan::shouldGenerate(true, true, false, false));
-    }
-
-    public function testUnchangedAssociatoWithFileDoesNotRegenerate(): void
-    {
+        $this->assertFalse(AdmissionPdfPlan::shouldGenerate(true, true, false, false));
+        $this->assertFalse(AdmissionPdfPlan::shouldGenerate(true, false, true, false));
+        $this->assertFalse(AdmissionPdfPlan::shouldGenerate(true, false, false, false));
         $this->assertFalse(AdmissionPdfPlan::shouldGenerate(true, false, false, true));
     }
 
-    public function testConvertedAssociatoWithoutFileStillGenerates(): void
+    public function testHasStoredFile(): void
     {
-        $this->assertTrue(AdmissionPdfPlan::shouldGenerate(true, false, false, false));
+        $this->assertTrue(AdmissionPdfPlan::hasStoredFile('att-1'));
+        $this->assertFalse(AdmissionPdfPlan::hasStoredFile(''));
+        $this->assertFalse(AdmissionPdfPlan::hasStoredFile(null));
     }
 
-    public function testReleaseOnlyWhenBothAssociato(): void
+    public function testClearOnConvertWhenEitherSideHasFile(): void
     {
-        $this->assertTrue(AdmissionPdfPlan::shouldRelease(true, true, true, true));
-        $this->assertFalse(AdmissionPdfPlan::shouldRelease(true, true, false, true));
-        $this->assertFalse(AdmissionPdfPlan::shouldRelease(false, true, true, true));
+        $this->assertTrue(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, true, false));
+        $this->assertTrue(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, false, true));
+        $this->assertFalse(AdmissionPdfPlan::shouldClearOnConvert(true, true, true, false, false));
+        $this->assertFalse(AdmissionPdfPlan::shouldClearOnConvert(true, true, false, true, true));
+        $this->assertFalse(AdmissionPdfPlan::shouldClearOnConvert(false, true, true, true, true));
     }
 
     public function testDownloadNameUsesNameAndBirth(): void
@@ -71,5 +69,6 @@ class AdmissionPdfPlanTest extends TestCase
     {
         $this->assertTrue(AdmissionPdfPlan::shouldDrop(false, false, true));
         $this->assertFalse(AdmissionPdfPlan::shouldDrop(true, false, true));
+        $this->assertFalse(AdmissionPdfPlan::shouldDrop(false, false, false));
     }
 }

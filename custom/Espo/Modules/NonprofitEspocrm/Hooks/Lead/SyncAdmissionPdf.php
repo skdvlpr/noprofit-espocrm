@@ -9,7 +9,8 @@ use Espo\ORM\Repository\Option\SaveContext;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Build or release the Associato admission PDF after the Lead is stored.
+ * Wipe leftover stored admission files after Lead save. Do not generate
+ * or store a PDF (view/download renders on demand).
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md

@@ -2,8 +2,6 @@
 
 namespace Espo\Modules\NonprofitEspocrm\Tools\Admission;
 
-use Espo\Core\Field\LinkParent;
-use Espo\Core\FileStorage\Manager as FileStorageManager;
 use Espo\Core\InjectableFactory;
 use Espo\Entities\Attachment;
 use Espo\Entities\Template;
@@ -17,89 +15,49 @@ use Espo\Tools\Pdf\Service as PdfService;
 use RuntimeException;
 
 /**
- * One admission PDF on an Associato Lead, then release it onto the Contact.
+ * Stream the Associato admission form at view/download time. Do not
+ * store an Attachment. Formula ext\pdf\generate is rejected because it
+ * always returns an attachment id (writes to disk).
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/formula/ext.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/sales-management.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
  */
 class AdmissionPdf
 {
     public const TEMPLATE_NAME = 'Domanda di ammissione a socio';
 
-    /** @var list<string> */
-    private const PRINTED_FIELDS = [
-        'firstName',
-        'lastName',
-        'emailAddress',
-        'phoneNumber',
-        'addressStreet',
-        'addressCity',
-        'addressState',
-        'addressPostalCode',
-        'taxCode',
-        'birthDate',
-        'birthPlace',
-        'birthProvince',
-        'description',
-        'contactType',
-        'admissionBoardDate',
-        'admissionOutcome',
-        'memberBookNumber',
-        'admissionFeePaid',
-        'admissionReceiptNumber',
-        'newsletterConsent',
-    ];
+    public const TEMPLATE_NAME_CONTACT = 'Domanda di ammissione a socio (Contact)';
 
     public function __construct(
         private EntityManager $entityManager,
         private InjectableFactory $injectableFactory,
-        private FileStorageManager $fileStorageManager,
     ) {}
 
     public function sync(Entity $lead, SaveOptions $options, bool $isNew): void
-    {
-        if ($options->get(AdmissionPdfPlan::SKIP_OPTION)) {
+    {        if ($options->get(AdmissionPdfPlan::SKIP_OPTION)) {
             return;
         }
 
         $leadAssociato = self::isAssociato($lead->get('contactType'));
         $converted = $lead->get('status') === 'Converted';
-        $hasFile = is_string($lead->get('admissionFormId')) && $lead->get('admissionFormId') !== '';
+        $leadHasFile = AdmissionPdfPlan::hasStoredFile($lead->get('admissionFormId'));
 
-        if (AdmissionPdfPlan::shouldDrop($leadAssociato, $converted, $hasFile)) {
-            $this->clearLeadFile($lead, true);
+        if (AdmissionPdfPlan::shouldDrop($leadAssociato, $converted, $leadHasFile)) {
+            $this->clearFile($lead, true);
 
             return;
         }
 
-        $printedChanged = false;
-
-        foreach (self::PRINTED_FIELDS as $field) {
-            if ($lead->isAttributeChanged($field)) {
-                $printedChanged = true;
-
-                break;
-            }
+        if (!$converted || !$leadAssociato) {
+            return;
         }
 
-        if (AdmissionPdfPlan::shouldGenerate($leadAssociato, $isNew, $printedChanged, $hasFile)) {
-            $this->generate($lead);
-        }
-
-        if ($converted && $leadAssociato) {
-            $fresh = $this->entityManager->getEntityById('Lead', (string) $lead->getId()) ?? $lead;
-            $this->mirrorToContact($fresh);
-        }
-    }
-
-    private function mirrorToContact(Entity $lead): void
-    {
         $contactId = $lead->get('createdContactId');
-        $leadFileId = $lead->get('admissionFormId');
 
-        if (!is_string($contactId) || $contactId === '' || !is_string($leadFileId) || $leadFileId === '') {
+        if (!is_string($contactId) || $contactId === '') {
             return;
         }
 
@@ -109,28 +67,30 @@ class AdmissionPdf
             return;
         }
 
-        // Native convert already copies the file onto the contact. Do not
-        // replace that copy, and do not clear the lead file.
-        $contactFileId = $contact->get('admissionFormId');
+        $contactHasFile = AdmissionPdfPlan::hasStoredFile($contact->get('admissionFormId'));
 
-        if (is_string($contactFileId) && $contactFileId !== '') {
+        if (!AdmissionPdfPlan::shouldClearOnConvert(
+            true,
+            true,
+            true,
+            $leadHasFile,
+            $contactHasFile,
+        )) {
             return;
         }
 
-        $contact->set('admissionFormId', $leadFileId);
-        $contact->set('admissionFormName', $lead->get('admissionFormName'));
-        $this->entityManager->saveEntity($contact, [
-            SaveOption::SKIP_ALL => true,
-        ]);
+        $this->clearFile($lead, true);
+        $this->clearFile($contact, true);
     }
 
-    public function render(Entity $lead): string
+    public function render(Entity $record): string
     {
-        $template = $this->ensureTemplate();
+        $entityType = $record->getEntityType();
+        $template = $this->ensureTemplate($entityType);
         $service = $this->injectableFactory->create(PdfService::class);
         $result = $service->generate(
-            entityType: 'Lead',
-            id: (string) $lead->getId(),
+            entityType: $entityType,
+            id: (string) $record->getId(),
             templateId: (string) $template->getId(),
             params: Params::create()->withAcl(false),
         );
@@ -138,57 +98,27 @@ class AdmissionPdf
         return $result->getString();
     }
 
-    private function generate(Entity $lead): void
+    public function stripStoredForm(Entity $entity): void
     {
-        $template = $this->ensureTemplate();
-        $leadId = (string) $lead->getId();
-
-        $service = $this->injectableFactory->create(PdfService::class);
-        $result = $service->generate(
-            entityType: 'Lead',
-            id: $leadId,
-            templateId: (string) $template->getId(),
-            params: Params::create()->withAcl(false),
-        );
-
-        $previousId = $lead->get('admissionFormId');
-        $fileName = self::downloadName($lead);
-
-        $attachment = $this->entityManager->getRDBRepositoryByClass(Attachment::class)->getNew();
-        $attachment
-            ->setName($fileName)
-            ->setType('application/pdf')
-            ->setSize($result->getLength())
-            ->setRelated(LinkParent::create('Lead', $leadId))
-            ->setRole(Attachment::ROLE_ATTACHMENT);
-
-        $this->entityManager->saveEntity($attachment);
-        $this->fileStorageManager->putStream($attachment, $result->getStream());
-
-        $lead->set('admissionFormId', $attachment->getId());
-        $lead->set('admissionFormName', $fileName);
-        $this->entityManager->saveEntity($lead, [
-            SaveOption::SKIP_ALL => true,
-            AdmissionPdfPlan::SKIP_OPTION => true,
-        ]);
-
-        if (is_string($previousId) && $previousId !== '' && $previousId !== $attachment->getId()) {
-            $this->removeAttachment($previousId);
+        if (!AdmissionPdfPlan::hasStoredFile($entity->get('admissionFormId'))) {
+            return;
         }
+
+        $this->clearFile($entity, true);
     }
 
-    private function clearLeadFile(Entity $lead, bool $deleteAttachment): void
+    private function clearFile(Entity $entity, bool $deleteAttachment): void
     {
-        $fileId = $lead->get('admissionFormId');
-        $lead->set('admissionFormId', null);
-        $lead->set('admissionFormName', null);
-        $this->entityManager->saveEntity($lead, [
+        $fileId = $entity->get('admissionFormId');
+        $entity->set('admissionFormId', null);
+        $entity->set('admissionFormName', null);
+        $this->entityManager->saveEntity($entity, [
             SaveOption::SKIP_ALL => true,
             AdmissionPdfPlan::SKIP_OPTION => true,
         ]);
 
-        if ($deleteAttachment && is_string($fileId) && $fileId !== '') {
-            $this->removeAttachment($fileId);
+        if ($deleteAttachment && AdmissionPdfPlan::hasStoredFile($fileId)) {
+            $this->removeAttachment((string) $fileId);
         }
     }
 
@@ -207,17 +137,23 @@ class AdmissionPdf
 
     public function provisionTemplate(): void
     {
-        $this->ensureTemplate();
+        $this->ensureTemplate('Lead');
+        $this->ensureTemplate('Contact');
     }
 
-    private function ensureTemplate(): Template
+    private function ensureTemplate(string $entityType = 'Lead'): Template
     {
+        if ($entityType !== 'Lead' && $entityType !== 'Contact') {
+            throw new RuntimeException("Admission PDF is only for Lead or Contact.");
+        }
+
+        $name = $entityType === 'Contact' ? self::TEMPLATE_NAME_CONTACT : self::TEMPLATE_NAME;
         $body = self::templateBody();
         $existing = $this->entityManager
             ->getRDBRepository(Template::ENTITY_TYPE)
             ->where([
-                'name' => self::TEMPLATE_NAME,
-                'entityType' => 'Lead',
+                'name' => $name,
+                'entityType' => $entityType,
             ])
             ->findOne();
 
@@ -228,8 +164,8 @@ class AdmissionPdf
                 throw new RuntimeException("Could not create the admission PDF template.");
             }
 
-            $created->set('name', self::TEMPLATE_NAME);
-            $created->set('entityType', 'Lead');
+            $created->set('name', $name);
+            $created->set('entityType', $entityType);
             $existing = $created;
         }
 

@@ -10,23 +10,22 @@ use Espo\Core\Api\ResponseComposer;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
-use Espo\Core\FileStorage\Manager as FileStorageManager;
-use Espo\Entities\Attachment;
 use Espo\Modules\NonprofitEspocrm\Tools\Admission\AdmissionPdf;
 use Espo\ORM\EntityManager;
 
 /**
- * Inline admission PDF stored on the Contact. The Lead preview still renders
- * from the lead; this route reads the file convert copied onto the contact.
+ * Inline admission PDF for the Contact preview. Built on demand from
+ * the contact fields. MUST NOT read or write admissionForm.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/api.md
+ * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/acl.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md
  */
 class GetContactAdmissionPdf implements Action
 {
     public function __construct(
+        private AdmissionPdf $admissionPdf,
         private EntityManager $entityManager,
-        private FileStorageManager $fileStorageManager,
         private Acl $acl,
     ) {}
 
@@ -48,19 +47,12 @@ class GetContactAdmissionPdf implements Action
             throw new Forbidden();
         }
 
-        $fileId = $contact->get('admissionFormId');
-
-        if (!is_string($fileId) || $fileId === '') {
+        if (!AdmissionPdf::isAssociato($contact->get('contactType'))) {
             throw new NotFound();
         }
 
-        $attachment = $this->entityManager->getEntityById(Attachment::ENTITY_TYPE, $fileId);
-
-        if (!$attachment instanceof Attachment) {
-            throw new NotFound();
-        }
-
-        $filename = $attachment->getName() ?: AdmissionPdf::downloadName($contact);
+        $pdf = $this->admissionPdf->render($contact);
+        $filename = AdmissionPdf::downloadName($contact);
 
         return ResponseComposer::empty()
             ->setHeader('Content-Type', 'application/pdf')
@@ -68,6 +60,6 @@ class GetContactAdmissionPdf implements Action
                 'Content-Disposition',
                 'inline; filename="' . str_replace('"', '', $filename) . '"'
             )
-            ->writeBody($this->fileStorageManager->getContents($attachment));
+            ->writeBody($pdf);
     }
 }

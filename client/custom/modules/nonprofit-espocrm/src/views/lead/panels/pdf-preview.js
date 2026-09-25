@@ -2,6 +2,7 @@ define('nonprofit-espocrm:views/lead/panels/pdf-preview', ['views/record/panels/
 
     /**
      * Same preview chrome as the food-parcel registration PDF panel.
+     * Hits a live GET (cache-bust query). Does not read a stored file id.
      *
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/custom-views.md
      * Cite: https://github.com/espocrm/documentation/blob/master/docs/user-guide/printing-to-pdf.md

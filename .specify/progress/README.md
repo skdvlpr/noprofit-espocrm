@@ -53,3 +53,5 @@ Append-only English logs for agent handoff. Replaces Notion executor logs.
 | `029-specify-contact-types-lead-convert.md` | Specify 004.3: Contact multi-type + Lead convert with CRM user |
 | `030-plan-contact-types-lead-convert.md` | Plan 004.3: multiEnum, native convert, hard Contact email unique |
 | `031-tasks-contact-types-lead-convert.md` | Tasks T001–T039 for 004.3 (complexity 8/10) |
+| `054-specify-plan-tasks-on-demand-pdf.md` | Specify+plan+tasks `005.3` live admission PDF, no store |
+| `055-implement-on-demand-admission-pdf.md` | Implement `005.3` live PDF, no store; UAT open |

@@ -1,0 +1,5 @@
+{
+    "dataLoaderClassNameList": [
+        "Espo\\Modules\\NonprofitEspocrm\\Classes\\Pdf\\AdmissionNewsletterLoader"
+    ]
+}
