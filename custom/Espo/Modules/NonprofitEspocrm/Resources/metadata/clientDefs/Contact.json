@@ -35,6 +35,24 @@
             "Founder": "primary"
         }
     },
+    "bottomPanels": {
+        "detail": [
+            {
+                "name": "pdfPreview",
+                "label": "pdfPreview",
+                "view": "nonprofit-espocrm:views/lead/panels/pdf-preview",
+                "order": 1
+            }
+        ],
+        "edit": [
+            {
+                "name": "pdfPreview",
+                "label": "pdfPreview",
+                "view": "nonprofit-espocrm:views/lead/panels/pdf-preview",
+                "order": 1
+            }
+        ]
+    },
     "filterList": [
         "portalUsers",
         {
@@ -66,6 +84,20 @@
                 }
             },
             "personnelMember": {
+                "visible": {
+                    "conditionGroup": [
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                    ]
+                }
+            },
+            "admissionBoard": {
+                "visible": {
+                    "conditionGroup": [
+                        {"type": "has", "attribute": "contactType", "value": "MemberContact"}
+                    ]
+                }
+            },
+            "pdfPreview": {
                 "visible": {
                     "conditionGroup": [
                         {"type": "has", "attribute": "contactType", "value": "MemberContact"}

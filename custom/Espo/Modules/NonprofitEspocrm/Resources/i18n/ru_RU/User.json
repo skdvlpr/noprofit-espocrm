@@ -19,7 +19,9 @@
     },
     "labels": {
         "Volunteering": "Волонтёрство",
-        "Member": "Ассоциат"
+        "Member": "Член",
+        "volunteeringProfile": "Волонтёрство",
+        "memberProfile": "Член"
     },
     "options": {
         "positionsHeld": {

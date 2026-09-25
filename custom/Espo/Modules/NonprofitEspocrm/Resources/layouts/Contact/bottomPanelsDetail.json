@@ -1,22 +1,25 @@
 {
-    "opportunities": {
+    "pdfPreview": {
         "index": 0
     },
-    "cases": {
+    "opportunities": {
         "index": 1
     },
-    "targetLists": {
+    "cases": {
         "index": 2
     },
+    "targetLists": {
+        "index": 3
+    },
     "_tabBreak_relatedPayments": {
-        "index": 3,
+        "index": 4,
         "tabBreak": true,
         "tabLabel": "Pagamenti correlati"
     },
     "relatedPayments": {
-        "index": 4
+        "index": 5
     },
     "relatedPaymentsAsBeneficiary": {
-        "index": 5
+        "index": 6
     }
 }

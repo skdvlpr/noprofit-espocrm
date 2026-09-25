@@ -19,7 +19,9 @@
     },
     "labels": {
         "Volunteering": "Volunteering",
-        "Member": "Member"
+        "Member": "Member",
+        "volunteeringProfile": "Volunteering",
+        "memberProfile": "Member"
     },
     "options": {
         "positionsHeld": {

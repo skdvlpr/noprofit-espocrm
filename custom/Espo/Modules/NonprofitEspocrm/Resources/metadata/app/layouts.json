@@ -39,6 +39,9 @@
         },
         "bottomPanelsDetail": {
             "module": "NonprofitEspocrm"
+        },
+        "bottomPanelsEdit": {
+            "module": "NonprofitEspocrm"
         }
     },
     "Lead": {

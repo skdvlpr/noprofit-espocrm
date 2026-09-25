@@ -19,7 +19,9 @@
     },
     "labels": {
         "Volunteering": "Volontariato",
-        "Member": "Associato"
+        "Member": "Associato",
+        "volunteeringProfile": "Volontariato",
+        "memberProfile": "Associato"
     },
     "options": {
         "positionsHeld": {

@@ -61,6 +61,12 @@ class AdmissionPdfPlanTest extends TestCase
         );
     }
 
+    public function testConvertedLeadIsNotDropped(): void
+    {
+        $this->assertFalse(AdmissionPdfPlan::shouldDrop(true, true, true));
+        $this->assertFalse(AdmissionPdfPlan::shouldDrop(false, true, true));
+    }
+
     public function testDropWhenTypeLeavesAssociato(): void
     {
         $this->assertTrue(AdmissionPdfPlan::shouldDrop(false, false, true));

@@ -32,7 +32,7 @@ define('nonprofit-espocrm:views/lead/panels/pdf-preview', ['views/record/panels/
         data() {
             return {
                 refreshLabel: this.translate('Refresh', 'labels', 'Global'),
-                openLabel: this.translate('openPdfPreview', 'labels', 'Lead'),
+                openLabel: this.translate('openPdfPreview', 'labels', this.model.entityType),
             };
         },
 
@@ -69,8 +69,12 @@ define('nonprofit-espocrm:views/lead/panels/pdf-preview', ['views/record/panels/
         getPdfUrl() {
             const siteUrl = (this.getConfig().get('siteUrl') || window.location.origin).replace(/\/$/, '');
 
+            const scope = this.model.entityType === 'Contact' ? 'contact' : 'lead';
+
             return siteUrl
-                + '/api/v1/NonprofitEspocrm/lead/'
+                + '/api/v1/NonprofitEspocrm/'
+                + scope
+                + '/'
                 + encodeURIComponent(this.model.id)
                 + '/admission-pdf';
         },

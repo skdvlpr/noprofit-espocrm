@@ -50,6 +50,11 @@
         "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Admission\\Api\\GetLeadAdmissionPdf"
     },
     {
+        "route": "/NonprofitEspocrm/contact/:id/admission-pdf",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\Admission\\Api\\GetContactAdmissionPdf"
+    },
+    {
         "route": "/NonprofitEspocrm/food-parcel-registration/:id/pdf",
         "method": "get",
         "actionClassName": "Espo\\Modules\\NonprofitEspocrm\\Tools\\FoodParcel\\Api\\GetFoodParcelRegistrationPdf"

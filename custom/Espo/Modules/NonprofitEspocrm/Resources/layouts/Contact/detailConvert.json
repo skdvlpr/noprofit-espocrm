@@ -31,5 +31,15 @@
             [{"name": "positionsHeld", "fullWidth": true}],
             [{"name": "notes", "fullWidth": true}]
         ]
+    },
+    {
+        "name": "admissionBoard",
+        "label": "Consiglio Direttivo",
+        "rows": [
+            [{"name": "newsletterConsent"}, {"name": "admissionOutcome"}],
+            [{"name": "admissionBoardDate"}, false],
+            [{"name": "memberBookNumber"}, {"name": "admissionFeePaid"}],
+            [{"name": "admissionReceiptNumber"}, false]
+        ]
     }
 ]

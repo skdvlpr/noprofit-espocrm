@@ -21,6 +21,12 @@
         "positionsHeld": "Должности",
         "notes": "Заметки",
         "admissionForm": "Заявление о приёме",
+        "admissionBoardDate": "Дата заседания совета",
+        "admissionOutcome": "Решение",
+        "memberBookNumber": "Номер в книге членов",
+        "admissionFeePaid": "Взнос оплачен",
+        "admissionReceiptNumber": "Номер квитанции",
+        "newsletterConsent": "Рассылка",
         "activityCompetences": "Компетенции",
         "createCrmUser": "Создать пользователя CRM"
     },
@@ -42,6 +48,18 @@
         "personnelStatus": {
             "Active": "Активен",
             "Inactive": "Неактивен"
+        },
+        "admissionOutcome": {
+            "Approved": "Одобрено",
+            "Rejected": "Отклонено"
+        },
+        "admissionFeePaid": {
+            "Yes": "Да",
+            "No": "Нет"
+        },
+        "newsletterConsent": {
+            "Yes": "Согласен",
+            "No": "Не согласен"
         },
         "positionsHeld": {
             "President": "Президент",
@@ -67,7 +85,13 @@
         "birthProvince": "Провинция рождения (как в реестре associati/volontari)."
     },
     "labels": {
-        "sendPasswordCreateLink": "Отправить пользователю письмо со ссылкой для создания пароля"
+        "sendPasswordCreateLink": "Отправить пользователю письмо со ссылкой для создания пароля",
+        "Volunteer / Employee": "Волонтёр / Сотрудник",
+        "Member": "Член",
+        "personnelVolunteerEmployee": "Волонтёр / Сотрудник",
+        "personnelMember": "Член",
+        "pdfPreview": "Просмотр PDF",
+        "openPdfPreview": "Открыть PDF"
     },
     "messages": {
         "fieldNotUniqueAmongContacts": "Этот email уже используется другим контактом.",

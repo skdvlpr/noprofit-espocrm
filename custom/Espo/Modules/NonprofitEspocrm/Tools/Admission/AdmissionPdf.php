@@ -109,7 +109,11 @@ class AdmissionPdf
             return;
         }
 
-        if ($contact->get('admissionFormId') === $leadFileId) {
+        // Native convert already copies the file onto the contact. Do not
+        // replace that copy, and do not clear the lead file.
+        $contactFileId = $contact->get('admissionFormId');
+
+        if (is_string($contactFileId) && $contactFileId !== '') {
             return;
         }
 

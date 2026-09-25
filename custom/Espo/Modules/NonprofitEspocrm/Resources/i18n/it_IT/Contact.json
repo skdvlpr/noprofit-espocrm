@@ -22,6 +22,12 @@
         "positionsHeld": "Cariche ricoperte",
         "notes": "Note",
         "admissionForm": "Domanda di ammissione",
+        "admissionBoardDate": "Domanda esaminata nella seduta del",
+        "admissionOutcome": "Esito",
+        "memberBookNumber": "Annotazione nel Libro Soci al N.",
+        "admissionFeePaid": "Quota versata",
+        "admissionReceiptNumber": "Ricevuta/Tessera N.",
+        "newsletterConsent": "Newsletter",
         "activityCompetences": "Competenze attività",
         "createCrmUser": "Crea utente CRM"
     },
@@ -52,6 +58,18 @@
             "Freelance": "Freelance",
             "Other": "Altro"
         },
+        "admissionOutcome": {
+            "Approved": "Approvata",
+            "Rejected": "Respinta"
+        },
+        "admissionFeePaid": {
+            "Yes": "Sì",
+            "No": "No"
+        },
+        "newsletterConsent": {
+            "Yes": "Acconsento",
+            "No": "Non acconsento"
+        },
         "positionsHeld": {
             "President": "Presidente",
             "VicePresident": "Vicepresidente",
@@ -77,7 +95,13 @@
         "createCrmUser": "Dopo Salva si apre un pannello per controllare login, ruolo e invito. Deselezionare per salvare la persona senza accesso."
     },
     "labels": {
-        "sendPasswordCreateLink": "Invia all'utente un'email con un link per creare una password"
+        "sendPasswordCreateLink": "Invia all'utente un'email con un link per creare una password",
+        "Volunteer / Employee": "Volontario / Dipendente",
+        "Member": "Associato",
+        "personnelVolunteerEmployee": "Volontario / Dipendente",
+        "personnelMember": "Associato",
+        "pdfPreview": "Anteprima PDF",
+        "openPdfPreview": "Apri PDF"
     },
     "messages": {
         "fieldNotUniqueAmongContacts": "Questa email è già usata da un altro contatto.",

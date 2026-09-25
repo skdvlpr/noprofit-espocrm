@@ -194,6 +194,55 @@
         "notes": {
             "type": "wysiwyg"
         },
+        "admissionBoardDate": {
+            "type": "date"
+        },
+        "admissionOutcome": {
+            "type": "enum",
+            "options": ["", "Approved", "Rejected"],
+            "displayAsLabel": true,
+            "style": {
+                "Approved": "success",
+                "Rejected": "danger"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
+        "memberBookNumber": {
+            "type": "varchar",
+            "maxLength": 64,
+            "trim": true
+        },
+        "admissionFeePaid": {
+            "type": "enum",
+            "options": ["", "Yes", "No"],
+            "displayAsLabel": true,
+            "style": {
+                "Yes": "success",
+                "No": "danger"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
+        "admissionReceiptNumber": {
+            "type": "varchar",
+            "maxLength": 64,
+            "trim": true
+        },
+        "newsletterConsent": {
+            "type": "enum",
+            "options": ["", "Yes", "No"],
+            "displayAsLabel": true,
+            "style": {
+                "Yes": "success",
+                "No": "default"
+            },
+            "sanitizerClassNameList": [
+                "Espo\\Classes\\FieldSanitizers\\EmptyStringToNull"
+            ]
+        },
         "admissionForm": {
             "type": "file",
             "accept": [".pdf"],
