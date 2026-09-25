@@ -107,6 +107,93 @@ class ContactUserChannelSyncTest extends TestCase
         $this->sync($em)->afterUserSave($user, SaveOptions::fromAssoc([]));
     }
 
+    public function testAssociatoContactEmailSetCopiedToUser(): void
+    {
+        $contactEmails = [
+            (object) [
+                'emailAddress' => 'socio@example.com',
+                'primary' => true,
+                'optOut' => false,
+                'invalid' => false,
+            ],
+            (object) [
+                'emailAddress' => 'socio.alt@example.com',
+                'primary' => false,
+                'optOut' => false,
+                'invalid' => false,
+            ],
+        ];
+
+        $contact = $this->entity([
+            'contactType' => 'MemberContact',
+            'linkedUserId' => 'user-1',
+            'emailAddressData' => $contactEmails,
+            'phoneNumberData' => [],
+            'emailAddress' => 'socio@example.com',
+            'phoneNumber' => null,
+        ], changed: ['emailAddressData']);
+
+        $user = $this->entity([
+            'type' => 'regular',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+        ]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('User', 'user-1')->willReturn($user);
+        $em->expects($this->once())->method('saveEntity')->with(
+            $user,
+            $this->callback(static function (array $options): bool {
+                return !empty($options[ContactUserChannelSync::SKIP_OPTION]);
+            })
+        );
+
+        $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+    }
+
+    public function testEmptyContactEmailDoesNotWipeUserEmails(): void
+    {
+        $userEmails = [
+            (object) [
+                'emailAddress' => 'keep@example.com',
+                'primary' => true,
+                'optOut' => false,
+                'invalid' => false,
+            ],
+        ];
+
+        $contact = $this->entity([
+            'contactType' => 'Volunteer',
+            'linkedUserId' => 'user-1',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => null,
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ], changed: ['emailAddressData']);
+
+        $user = $this->entity([
+            'type' => 'regular',
+            'emailAddressData' => $userEmails,
+            'phoneNumberData' => [],
+            'emailAddress' => 'keep@example.com',
+            'phoneNumber' => null,
+            'salutation' => null,
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('User', 'user-1')->willReturn($user);
+        $em->expects($this->never())->method('saveEntity');
+
+        $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+    }
+
     public function testHelpSeekerNeverWritesUser(): void
     {
         $contact = $this->entity([
@@ -144,6 +231,117 @@ class ContactUserChannelSyncTest extends TestCase
             $contact,
             SaveOptions::fromAssoc([ContactUserChannelSync::SKIP_OPTION => true])
         );
+    }
+
+    public function testAssociatoContactFirstNameCopiedToUser(): void
+    {
+        $contact = $this->entity([
+            'contactType' => 'MemberContact',
+            'linkedUserId' => 'user-1',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => 'Ms.',
+            'firstName' => 'Rossella',
+            'lastName' => 'Fagioli',
+        ], changed: ['firstName']);
+
+        $user = $this->entity([
+            'type' => 'regular',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => 'Ms.',
+            'firstName' => 'Old',
+            'lastName' => 'Fagioli',
+        ]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('User', 'user-1')->willReturn($user);
+        $em->expects($this->once())->method('saveEntity')->with(
+            $user,
+            $this->callback(static function (array $options): bool {
+                return !empty($options[ContactUserChannelSync::SKIP_OPTION]);
+            })
+        );
+
+        $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+    }
+
+    public function testUserLastNameCopiedToAssociatoContact(): void
+    {
+        $user = $this->entity([
+            'type' => 'regular',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => null,
+            'firstName' => 'Rosa',
+            'lastName' => 'Newname',
+        ], id: 'user-3', changed: ['lastName']);
+
+        $contact = $this->entity([
+            'contactType' => 'MemberContact',
+            'linkedUserId' => 'user-3',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => null,
+            'firstName' => 'Rosa',
+            'lastName' => 'Oldname',
+        ]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getRDBRepository')->with('Contact')->willReturn($this->contactLookup($contact));
+        $em->expects($this->once())->method('saveEntity')->with(
+            $contact,
+            $this->callback(static function (array $options): bool {
+                return !empty($options[ContactUserChannelSync::SKIP_OPTION]);
+            })
+        );
+
+        $this->sync($em)->afterUserSave($user, SaveOptions::fromAssoc([]));
+    }
+
+    public function testSalutationCopiedToUser(): void
+    {
+        $contact = $this->entity([
+            'contactType' => ['Volunteer', 'MemberContact'],
+            'linkedUserId' => 'user-1',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => 'Dr.',
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ], changed: ['salutation']);
+
+        $user = $this->entity([
+            'type' => 'regular',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutation' => null,
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('User', 'user-1')->willReturn($user);
+        $em->expects($this->once())->method('saveEntity')->with(
+            $user,
+            $this->callback(static function (array $options): bool {
+                return !empty($options[ContactUserChannelSync::SKIP_OPTION]);
+            })
+        );
+
+        $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
     }
 
     public function testUnlinkedContactIsNoOp(): void

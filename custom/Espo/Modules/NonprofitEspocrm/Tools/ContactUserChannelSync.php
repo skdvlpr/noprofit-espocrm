@@ -11,8 +11,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
 use stdClass;
 
 /**
- * Copy full emailAddressData / phoneNumberData between linked Volunteer or
- * Employee Contact and User. MUST NOT create records or touch assignedUserId.
+ * Copy name (prefix, first, last) and full email/phone sets between a
+ * linked Volunteer, Employee, or Associato Contact and User.
+ * MUST NOT create records or touch assignedUserId / userName.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/orm.md
@@ -22,6 +23,9 @@ use stdClass;
 class ContactUserChannelSync
 {
     public const SKIP_OPTION = 'nonprofitSkipContactUserChannelSync';
+
+    /** @var list<string> */
+    private const NAME_FIELDS = ['salutation', 'firstName', 'lastName'];
 
     public function __construct(
         private EntityManager $entityManager
@@ -33,7 +37,7 @@ class ContactUserChannelSync
             return;
         }
 
-        if (!$this->isPersonnelContact($contact)) {
+        if (!$this->isCrmUserContact($contact)) {
             return;
         }
 
@@ -43,7 +47,7 @@ class ContactUserChannelSync
             return;
         }
 
-        if (!$this->channelAttributesChanged($contact)) {
+        if (!$this->identityAttributesChanged($contact)) {
             return;
         }
 
@@ -66,7 +70,7 @@ class ContactUserChannelSync
             return;
         }
 
-        if (!$this->channelAttributesChanged($user)) {
+        if (!$this->identityAttributesChanged($user)) {
             return;
         }
 
@@ -85,7 +89,7 @@ class ContactUserChannelSync
             return;
         }
 
-        if (!$this->isPersonnelContact($contact)) {
+        if (!$this->isCrmUserContact($contact)) {
             return;
         }
 
@@ -101,9 +105,9 @@ class ContactUserChannelSync
         return (bool) $options->get(self::SKIP_OPTION);
     }
 
-    private function isPersonnelContact(Entity $contact): bool
+    private function isCrmUserContact(Entity $contact): bool
     {
-        return ContactTypeSet::hasPersonnel(
+        return ContactTypeSet::wantsCrmUser(
             ContactTypeSet::normalize($contact->get('contactType'))
         );
     }
@@ -119,36 +123,73 @@ class ContactUserChannelSync
         return !in_array($type, ['portal', 'system', 'api'], true);
     }
 
-    private function channelAttributesChanged(Entity $entity): bool
+    private function identityAttributesChanged(Entity $entity): bool
     {
         if ($entity->isNew()) {
             return true;
         }
 
-        return $entity->isAttributeChanged('emailAddressData')
+        if (
+            $entity->isAttributeChanged('emailAddressData')
             || $entity->isAttributeChanged('phoneNumberData')
             || $entity->isAttributeChanged('emailAddress')
-            || $entity->isAttributeChanged('phoneNumber');
+            || $entity->isAttributeChanged('phoneNumber')
+        ) {
+            return true;
+        }
+
+        foreach (self::NAME_FIELDS as $field) {
+            if ($entity->isAttributeChanged($field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function copyIfDifferent(Entity $source, Entity $target): void
     {
+        $dirty = false;
         $sourceEmails = $this->readEmailSet($source);
         $sourcePhones = $this->readPhoneSet($source);
 
         if (
-            $this->emailFingerprint($sourceEmails) === $this->emailFingerprint($this->readEmailSet($target))
-            && $this->phoneFingerprint($sourcePhones) === $this->phoneFingerprint($this->readPhoneSet($target))
+            $sourceEmails !== []
+            && $this->emailFingerprint($sourceEmails) !== $this->emailFingerprint($this->readEmailSet($target))
         ) {
-            return;
+            $target->set('emailAddressData', $sourceEmails);
+            $dirty = true;
         }
 
-        $target->set('emailAddressData', $sourceEmails);
-        $target->set('phoneNumberData', $sourcePhones);
+        if ($this->phoneFingerprint($sourcePhones) !== $this->phoneFingerprint($this->readPhoneSet($target))) {
+            $target->set('phoneNumberData', $sourcePhones);
+            $dirty = true;
+        }
+
+        foreach (self::NAME_FIELDS as $field) {
+            $from = $this->nameValue($source, $field);
+            $to = $this->nameValue($target, $field);
+
+            if ($from === $to) {
+                continue;
+            }
+
+            $target->set($field, $from === '' ? null : $from);
+            $dirty = true;
+        }
+
+        if (!$dirty) {
+            return;
+        }
 
         $this->entityManager->saveEntity($target, [
             self::SKIP_OPTION => true,
         ]);
+    }
+
+    private function nameValue(Entity $entity, string $field): string
+    {
+        return trim((string) ($entity->get($field) ?? ''));
     }
 
     /**

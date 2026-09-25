@@ -22,7 +22,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Confirm feature dir `specs/007.1-restore-channel-sync`. Do not edit `application/`. Do not implement `006`. PDF/convert stay closed. [C1] Auto. test: no — inventory.
+- [x] T001 Confirm feature dir `specs/007.1-restore-channel-sync`. Do not edit `application/`. Do not implement `006`. PDF/convert stay closed. [C1] Auto. test: no — inventory.
 
 ## Phase 2: Foundational
 
@@ -30,7 +30,7 @@
 
 **Checkpoint**: `wantsCrmUser` is the type filter. No user-story code yet.
 
-- [ ] T002 Confirm `ContactTypeSet::wantsCrmUser` in `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactTypeSet.php` includes Volunteer, Employee, and MemberContact. Do not add a second helper. [C2] Auto. test: no — already covered by existing type-set tests; this is a read.
+- [x] T002 Confirm `ContactTypeSet::wantsCrmUser` in `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactTypeSet.php` includes Volunteer, Employee, and MemberContact. Do not add a second helper. [C2] Auto. test: no — already covered by existing type-set tests; this is a read.
 
 ## Phase 3: User Story 1 — Emails and phones both ways (P1) 🎯 MVP
 
@@ -42,11 +42,11 @@
 
 > Write tests FIRST. They MUST fail before T004.
 
-- [ ] T003 [US1] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato (`MemberContact`) contact email set copies to User; empty contact email set does not call `saveEntity` to wipe User emails; Volunteer still copies (existing); Help-seeker still never writes; skip option still no-op. Cite tests.md. [C4] Auto. test: yes — this file. Bug it would catch: Associato still skipped, or empty set clears login email.
+- [x] T003 [US1] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato (`MemberContact`) contact email set copies to User; empty contact email set does not call `saveEntity` to wipe User emails; Volunteer still copies (existing); Help-seeker still never writes; skip option still no-op. Cite tests.md. [C4] Auto. test: yes — this file. Bug it would catch: Associato still skipped, or empty set clears login email.
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` use `ContactTypeSet::wantsCrmUser` instead of `hasPersonnel`. If source email set is empty, do not overwrite counterpart emails; still copy phones when phones differ. Keep `nonprofitSkipContactUserChannelSync`. Cite fields.md and hooks.md. [C5] Auto. test: yes — T003. Why Auto: one existing Tool, eligibility + empty-email guard.
+- [x] T004 [US1] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` use `ContactTypeSet::wantsCrmUser` instead of `hasPersonnel`. If source email set is empty, do not overwrite counterpart emails; still copy phones when phones differ. Keep `nonprofitSkipContactUserChannelSync`. Cite fields.md and hooks.md. [C5] Auto. test: yes — T003. Why Auto: one existing Tool, eligibility + empty-email guard.
 
 **Checkpoint**: Channel copy works for Associato. Names still drift until US2.
 
@@ -60,21 +60,21 @@
 
 > Write tests FIRST. They MUST fail before T006. Same file as T003 — do not run in parallel with T003/T004.
 
-- [ ] T005 [US2] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato contact `firstName` change copies to User; User `lastName` change copies to Contact; `salutation` copies; unlinked contact does not save a User. [C4] Auto. test: yes — this file. Bug it would catch: name still omitted from identity copy.
+- [x] T005 [US2] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato contact `firstName` change copies to User; User `lastName` change copies to Contact; `salutation` copies; unlinked contact does not save a User. [C4] Auto. test: yes — this file. Bug it would catch: name still omitted from identity copy.
 
 ### Implementation for User Story 2
 
-- [ ] T006 [US2] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` copy `salutation`, `firstName`, `lastName` when they differ. Treat them as changed attributes alongside channels. Do not copy `middleName`, `userName`, or `assignedUserId`. Cite entity personName / fields.md. [C5] Auto. test: yes — T005. Why Auto: same Tool as T004.
+- [x] T006 [US2] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` copy `salutation`, `firstName`, `lastName` when they differ. Treat them as changed attributes alongside channels. Do not copy `middleName`, `userName`, or `assignedUserId`. Cite entity personName / fields.md. [C5] Auto. test: yes — T005. Why Auto: same Tool as T004.
 
-- [ ] T007 [P] [US2] Update class/hook comments in `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php`, `custom/Espo/Modules/NonprofitEspocrm/Hooks/Contact/SyncLinkedUserChannels.php`, and `custom/Espo/Modules/NonprofitEspocrm/Hooks/User/SyncLinkedContactChannels.php` so they say Volunteer/Employee/Associato and name+channels. [C1] Auto. test: no — comments.
+- [x] T007 [P] [US2] Update class/hook comments in `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php`, `custom/Espo/Modules/NonprofitEspocrm/Hooks/Contact/SyncLinkedUserChannels.php`, and `custom/Espo/Modules/NonprofitEspocrm/Hooks/User/SyncLinkedContactChannels.php` so they say Volunteer/Employee/Associato and name+channels. [C1] Auto. test: no — comments.
 
 **Checkpoint**: Identity (name + all emails + all phones) matches both ways.
 
 ## Phase 5: Polish
 
-- [ ] T008 [P] Write `specs/007.1-restore-channel-sync/checklists/owner-user-tests.md` from `quickstart.md` (Rossella: second email/phone, name both ways, empty contact email leaves user email, shared pair email succeeds). [C2] Auto. test: no — owner UAT script.
-- [ ] T009 `ddev exec vendor/bin/phpunit tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`, PHPStan on the Tool, `ddev exec php command.php rebuild`. Inactivate Google Calendar Sync, Overlay, and Send Push Reminders if rebuild reactivated them (ORM, no table-name SQL). [C3] Auto. test: no — the tests are T003/T005.
-- [ ] T010 Append `.specify/progress/` implement handoff. Do not commit, push, or apply production unless the owner asks in that turn. [C1] Auto. test: no.
+- [x] T008 [P] Write `specs/007.1-restore-channel-sync/checklists/owner-user-tests.md` from `quickstart.md` (Rossella: second email/phone, name both ways, empty contact email leaves user email, shared pair email succeeds). [C2] Auto. test: no — owner UAT script.
+- [x] T009 `ddev exec vendor/bin/phpunit tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`, PHPStan on the Tool, `ddev exec php command.php rebuild`. Inactivate Google Calendar Sync, Overlay, and Send Push Reminders if rebuild reactivated them (ORM, no table-name SQL). [C3] Auto. test: no — the tests are T003/T005.
+- [x] T010 Append `.specify/progress/` implement handoff. Do not commit, push, or apply production unless the owner asks in that turn. [C1] Auto. test: no.
 
 ## Dependencies
 

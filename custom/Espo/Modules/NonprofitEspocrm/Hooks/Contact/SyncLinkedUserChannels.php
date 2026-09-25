@@ -10,7 +10,8 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Copy Volunteer/Employee Contact email and phone sets to the linked User.
+ * Copy Volunteer/Employee/Associato Contact name and email/phone sets
+ * to the linked User.
  *
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/development/hooks.md
  * Cite: https://github.com/espocrm/documentation/blob/master/docs/administration/fields.md
