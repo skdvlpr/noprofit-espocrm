@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace tests\unit\Espo\Modules\NonprofitEspocrm;
 
+use Espo\Entities\EmailAddress;
+use Espo\Entities\PhoneNumber;
 use Espo\Modules\NonprofitEspocrm\Tools\ContactUserChannelSync;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\RDBRepository;
 use Espo\ORM\Repository\RDBSelectBuilder;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
+use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -171,7 +175,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => null,
+            'salutationName' => null,
             'firstName' => 'Ada',
             'lastName' => 'Lovelace',
         ], changed: ['emailAddressData']);
@@ -182,7 +186,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => 'keep@example.com',
             'phoneNumber' => null,
-            'salutation' => null,
+            'salutationName' => null,
             'firstName' => 'Ada',
             'lastName' => 'Lovelace',
         ]);
@@ -242,7 +246,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => 'Ms.',
+            'salutationName' => 'Ms.',
             'firstName' => 'Rossella',
             'lastName' => 'Fagioli',
         ], changed: ['firstName']);
@@ -253,7 +257,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => 'Ms.',
+            'salutationName' => 'Ms.',
             'firstName' => 'Old',
             'lastName' => 'Fagioli',
         ]);
@@ -278,7 +282,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => null,
+            'salutationName' => null,
             'firstName' => 'Rosa',
             'lastName' => 'Newname',
         ], id: 'user-3', changed: ['lastName']);
@@ -290,7 +294,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => null,
+            'salutationName' => null,
             'firstName' => 'Rosa',
             'lastName' => 'Oldname',
         ]);
@@ -316,10 +320,10 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => 'Dr.',
+            'salutationName' => 'Dr.',
             'firstName' => 'Ada',
             'lastName' => 'Lovelace',
-        ], changed: ['salutation']);
+        ], changed: ['salutationName']);
 
         $user = $this->entity([
             'type' => 'regular',
@@ -327,7 +331,7 @@ class ContactUserChannelSyncTest extends TestCase
             'phoneNumberData' => [],
             'emailAddress' => null,
             'phoneNumber' => null,
-            'salutation' => null,
+            'salutationName' => null,
             'firstName' => 'Ada',
             'lastName' => 'Lovelace',
         ]);
@@ -342,6 +346,62 @@ class ContactUserChannelSyncTest extends TestCase
         );
 
         $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+    }
+
+    public function testEmptyContactPhonesClearStoredUserPhones(): void
+    {
+        $contact = $this->entity([
+            'contactType' => 'MemberContact',
+            'linkedUserId' => 'user-1',
+            'emailAddressData' => [],
+            'phoneNumberData' => [],
+            'emailAddress' => 'ada@example.com',
+            'phoneNumber' => '+390111',
+            'salutationName' => null,
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ], changed: ['phoneNumberData']);
+
+        $user = $this->stateful([
+            'type' => 'regular',
+            'emailAddress' => null,
+            'phoneNumber' => null,
+            'salutationName' => null,
+            'firstName' => 'Ada',
+            'lastName' => 'Lovelace',
+        ]);
+
+        $phoneRepo = $this->createMock(PhoneNumberRepository::class);
+        $phoneRepo->method('getPhoneNumberData')->willReturn([
+            (object) [
+                'phoneNumber' => '+390111',
+                'type' => 'Mobile',
+                'primary' => true,
+                'optOut' => false,
+                'invalid' => false,
+            ],
+        ]);
+        $emailRepo = $this->createMock(EmailAddressRepository::class);
+        $emailRepo->method('getEmailAddressData')->willReturn([]);
+
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getEntityById')->with('User', 'user-1')->willReturn($user);
+        $em->method('getRepository')->willReturnCallback(
+            static function (string $entityType) use ($phoneRepo, $emailRepo): EmailAddressRepository|PhoneNumberRepository {
+                return $entityType === PhoneNumber::ENTITY_TYPE ? $phoneRepo : $emailRepo;
+            }
+        );
+        $em->expects($this->once())->method('saveEntity')->with(
+            $user,
+            $this->callback(static function (array $options): bool {
+                return !empty($options[ContactUserChannelSync::SKIP_OPTION]);
+            })
+        );
+
+        $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+
+        $this->assertSame([], $user->get('phoneNumberData'));
+        $this->assertNull($user->get('emailAddressData'));
     }
 
     public function testUnlinkedContactIsNoOp(): void
@@ -360,6 +420,35 @@ class ContactUserChannelSyncTest extends TestCase
         $em->expects($this->never())->method('saveEntity');
 
         $this->sync($em)->afterContactSave($contact, SaveOptions::fromAssoc([]));
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     * @param list<string> $changed
+     */
+    private function stateful(array $values, array $changed = [], string $id = 'id-1'): Entity
+    {
+        $store = $values;
+        $entity = $this->createMock(Entity::class);
+        $entity->method('getId')->willReturn($id);
+        $entity->method('isNew')->willReturn(false);
+        $entity->method('isAttributeChanged')->willReturnCallback(
+            static fn (string $name): bool => in_array($name, $changed, true)
+        );
+        $entity->method('get')->willReturnCallback(
+            static function (string $field) use (&$store): mixed {
+                return $store[$field] ?? null;
+            }
+        );
+        $entity->method('set')->willReturnCallback(
+            function (string $name, mixed $value) use (&$store, $entity): Entity {
+                $store[$name] = $value;
+
+                return $entity;
+            }
+        );
+
+        return $entity;
     }
 
     /**

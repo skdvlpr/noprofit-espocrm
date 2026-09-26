@@ -26,7 +26,7 @@ Local PHP **DDEV only**.
 
 **Primary Dependencies**: Existing `ContactUserChannelSync`, Contact and
 User `afterSave` hooks, `ContactTypeSet::wantsCrmUser`, native Email and
-Phone field sets, personName attributes `salutation` / `firstName` /
+Phone field sets, personName attributes `salutationName` / `firstName` /
 `lastName`. Existing UniqueAmongContacts / UniqueAmongUsers validators.
 No new Composer libraries.
 

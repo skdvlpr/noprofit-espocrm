@@ -44,7 +44,7 @@ never written.
 ## Decision: Copy prefix, first name, last name in the same Tool
 
 **Decision**: When either side of a linked pair is saved, also copy
-`salutation`, `firstName`, `lastName` if they differ. Do not copy
+`salutationName`, `firstName`, `lastName` if they differ. Do not copy
 `middleName`, `userName`, or `assignedUserId`. Trigger when those
 attributes change, not only when channels change.
 

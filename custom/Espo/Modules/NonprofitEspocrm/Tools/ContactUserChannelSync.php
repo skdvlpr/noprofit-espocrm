@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Espo\Modules\NonprofitEspocrm\Tools;
 
+use Espo\Entities\EmailAddress;
+use Espo\Entities\PhoneNumber;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOption;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Repositories\EmailAddress as EmailAddressRepository;
+use Espo\Repositories\PhoneNumber as PhoneNumberRepository;
 use stdClass;
 
 /**
@@ -24,8 +28,13 @@ class ContactUserChannelSync
 {
     public const SKIP_OPTION = 'nonprofitSkipContactUserChannelSync';
 
-    /** @var list<string> */
-    private const NAME_FIELDS = ['salutation', 'firstName', 'lastName'];
+    /**
+     * Person-name parts. The prefix attribute is salutationName
+     * (salutation + field name), not salutation.
+     *
+     * @var list<string>
+     */
+    private const NAME_FIELDS = ['salutationName', 'firstName', 'lastName'];
 
     public function __construct(
         private EntityManager $entityManager
@@ -152,16 +161,18 @@ class ContactUserChannelSync
         $dirty = false;
         $sourceEmails = $this->readEmailSet($source);
         $sourcePhones = $this->readPhoneSet($source);
+        $targetEmails = $this->readEmailSet($target);
+        $targetPhones = $this->readPhoneSet($target);
 
         if (
             $sourceEmails !== []
-            && $this->emailFingerprint($sourceEmails) !== $this->emailFingerprint($this->readEmailSet($target))
+            && $this->emailFingerprint($sourceEmails) !== $this->emailFingerprint($targetEmails)
         ) {
             $target->set('emailAddressData', $sourceEmails);
             $dirty = true;
         }
 
-        if ($this->phoneFingerprint($sourcePhones) !== $this->phoneFingerprint($this->readPhoneSet($target))) {
+        if ($this->phoneFingerprint($sourcePhones) !== $this->phoneFingerprint($targetPhones)) {
             $target->set('phoneNumberData', $sourcePhones);
             $dirty = true;
         }
@@ -197,18 +208,16 @@ class ContactUserChannelSync
      */
     private function readEmailSet(Entity $entity): array
     {
-        $rows = $this->normalizeRows($entity->get('emailAddressData'));
-        $out = [];
+        $raw = $entity->get('emailAddressData');
+        $explicit = is_array($raw);
 
-        foreach ($rows as $row) {
-            $normalized = $this->normalizeEmailRow($row);
-
-            if ($normalized) {
-                $out[] = $normalized;
-            }
+        if (!$explicit) {
+            $raw = $this->loadEmailRows($entity);
         }
 
-        if ($out !== []) {
+        $out = $this->emailRowsFrom($raw);
+
+        if ($out !== [] || $explicit) {
             return $out;
         }
 
@@ -226,18 +235,16 @@ class ContactUserChannelSync
      */
     private function readPhoneSet(Entity $entity): array
     {
-        $rows = $this->normalizeRows($entity->get('phoneNumberData'));
-        $out = [];
+        $raw = $entity->get('phoneNumberData');
+        $explicit = is_array($raw);
 
-        foreach ($rows as $row) {
-            $normalized = $this->normalizePhoneRow($row);
-
-            if ($normalized) {
-                $out[] = $normalized;
-            }
+        if (!$explicit) {
+            $raw = $this->loadPhoneRows($entity);
         }
 
-        if ($out !== []) {
+        $out = $this->phoneRowsFrom($raw);
+
+        if ($out !== [] || $explicit) {
             return $out;
         }
 
@@ -248,6 +255,78 @@ class ContactUserChannelSync
         }
 
         return [$this->phoneRow($primary, true, '')];
+    }
+
+    /**
+     * @return list<stdClass>
+     */
+    private function emailRowsFrom(mixed $raw): array
+    {
+        $out = [];
+
+        foreach ($this->normalizeRows($raw) as $row) {
+            $normalized = $this->normalizeEmailRow($row);
+
+            if ($normalized) {
+                $out[] = $normalized;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<stdClass>
+     */
+    private function phoneRowsFrom(mixed $raw): array
+    {
+        $out = [];
+
+        foreach ($this->normalizeRows($raw) as $row) {
+            $normalized = $this->normalizePhoneRow($row);
+
+            if ($normalized) {
+                $out[] = $normalized;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * getEntityById / findOne do not run the email or phone field loaders.
+     * An unloaded set is null, which compared equal to a real empty set and
+     * skipped the write. A later name save then copied the stale numbers back.
+     *
+     * @return list<stdClass>
+     */
+    private function loadEmailRows(Entity $entity): array
+    {
+        $repository = $this->entityManager->getRepository(EmailAddress::ENTITY_TYPE);
+
+        if (!$repository instanceof EmailAddressRepository) {
+            return [];
+        }
+
+        $rows = $repository->getEmailAddressData($entity);
+
+        return is_array($rows) ? $rows : [];
+    }
+
+    /**
+     * @return list<stdClass>
+     */
+    private function loadPhoneRows(Entity $entity): array
+    {
+        $repository = $this->entityManager->getRepository(PhoneNumber::ENTITY_TYPE);
+
+        if (!$repository instanceof PhoneNumberRepository) {
+            return [];
+        }
+
+        $rows = $repository->getPhoneNumberData($entity);
+
+        return is_array($rows) ? $rows : [];
     }
 
     /**

@@ -60,11 +60,11 @@
 
 > Write tests FIRST. They MUST fail before T006. Same file as T003 — do not run in parallel with T003/T004.
 
-- [x] T005 [US2] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato contact `firstName` change copies to User; User `lastName` change copies to Contact; `salutation` copies; unlinked contact does not save a User. [C4] Auto. test: yes — this file. Bug it would catch: name still omitted from identity copy.
+- [x] T005 [US2] Extend `tests/unit/Espo/Modules/NonprofitEspocrm/ContactUserChannelSyncTest.php`: Associato contact `firstName` change copies to User; User `lastName` change copies to Contact; `salutationName` copies; unlinked contact does not save a User. [C4] Auto. test: yes — this file. Bug it would catch: name still omitted from identity copy.
 
 ### Implementation for User Story 2
 
-- [x] T006 [US2] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` copy `salutation`, `firstName`, `lastName` when they differ. Treat them as changed attributes alongside channels. Do not copy `middleName`, `userName`, or `assignedUserId`. Cite entity personName / fields.md. [C5] Auto. test: yes — T005. Why Auto: same Tool as T004.
+- [x] T006 [US2] In `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php` copy `salutationName`, `firstName`, `lastName` when they differ. Treat them as changed attributes alongside channels. Do not copy `middleName`, `userName`, or `assignedUserId`. Cite entity personName / fields.md. [C5] Auto. test: yes — T005. Why Auto: same Tool as T004.
 
 - [x] T007 [P] [US2] Update class/hook comments in `custom/Espo/Modules/NonprofitEspocrm/Tools/ContactUserChannelSync.php`, `custom/Espo/Modules/NonprofitEspocrm/Hooks/Contact/SyncLinkedUserChannels.php`, and `custom/Espo/Modules/NonprofitEspocrm/Hooks/User/SyncLinkedContactChannels.php` so they say Volunteer/Employee/Associato and name+channels. [C1] Auto. test: no — comments.
 
