@@ -25,7 +25,7 @@ Help-seeker, unlinked, portal/system/api User: no-op.
 
 Copy the **full** email set and **full** phone set (004.1), plus:
 
-- `salutation` (prefix)
+- `salutationName` (prefix)
 - `firstName`
 - `lastName`
 

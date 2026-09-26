@@ -17,7 +17,7 @@ No new entity types. No new fields. No migration.
 | `linkedUserId` | Counterpart. Empty: no-op |
 | `emailAddress` + `emailAddressData` | Full set: address, primary, opted-out, invalid |
 | `phoneNumber` + `phoneNumberData` | Full set: number, type, primary, opted-out, invalid |
-| `salutation`, `firstName`, `lastName` | Copied both ways |
+| `salutationName`, `firstName`, `lastName` | Copied both ways |
 | `assignedUserId` | Ownership. MUST NOT change |
 | Board / PDF / hours / competences | Out of this copy |
 
@@ -28,7 +28,7 @@ No new entity types. No new fields. No migration.
 | `type` | portal / system / api: never written |
 | `emailAddress` + `emailAddressData` | Same set as Contact |
 | `phoneNumber` + `phoneNumberData` | Same set as Contact |
-| `salutation`, `firstName`, `lastName` | Same as Contact |
+| `salutationName`, `firstName`, `lastName` | Same as Contact |
 | `userName` | MUST NOT copy |
 | Volunteer/member profile fields | Stay `UserContactProfileSync` / loader. Not this Tool |
 
